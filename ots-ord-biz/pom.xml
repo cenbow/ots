@@ -6,9 +6,7 @@
 		<artifactId>ots-all-parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<groupId>com.mk</groupId>
 	<artifactId>ots-ord-biz</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>ots-ord-biz</name>
 	<url>http://maven.apache.org</url>
 	<properties>
@@ -16,10 +14,9 @@
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
-			<scope>test</scope>
+			<groupId>com.mk</groupId>
+			<artifactId>ots-ord-face</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

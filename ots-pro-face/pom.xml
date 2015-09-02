@@ -7,9 +7,7 @@
     <artifactId>ots-all-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <groupId>com.mk</groupId>
   <artifactId>ots-pro-face</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <name>ots-pro-face</name>
   <url>http://maven.apache.org</url>
   <properties>
