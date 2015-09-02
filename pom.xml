@@ -698,10 +698,10 @@
 		<module>ots-rs-biz</module>
 		<module>ots-od-biz</module>
 		<module>ots-ord-face</module>
-    <module>ots-pay-face</module>
-    <module>ots-pay-biz</module>
-    <module>ots-pro-face</module>
-    <module>ots-pro-biz</module>
-    <module>ots-web</module>
-  </modules>
+		<module>ots-pay-face</module>
+		<module>ots-pay-biz</module>
+		<module>ots-pro-face</module>
+		<module>ots-pro-biz</module>
+		<module>ots-web</module>
+	</modules>
 </project>
