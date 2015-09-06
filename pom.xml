@@ -694,6 +694,7 @@
 		</plugins>
 	</build>
 	<modules>
+		<module>ots-commons</module>
 		<module>ots-rs-face</module>
 		<module>ots-rs-biz</module>
 		<module>ots-ord-biz</module>

@@ -19,5 +19,10 @@
   		<artifactId>ots-pay-face</artifactId>
   		<version>0.0.1-SNAPSHOT</version>
   	</dependency>
+  	<dependency>
+  		<groupId>com.mk</groupId>
+  		<artifactId>ots-commons</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  	</dependency>
   </dependencies>
 </project>

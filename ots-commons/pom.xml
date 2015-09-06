@@ -7,22 +7,10 @@
     <artifactId>ots-all-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>ots-pro-biz</artifactId>
-  <name>ots-pro-biz</name>
+  <artifactId>ots-commons</artifactId>
+  <name>ots-commons</name>
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  <dependencies>
-  	<dependency>
-  		<groupId>com.mk</groupId>
-  		<artifactId>ots-pro-face</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>com.mk</groupId>
-  		<artifactId>ots-commons</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
-  	</dependency>
-  </dependencies>
 </project>
