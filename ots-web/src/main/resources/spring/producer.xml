@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:int-kafka="http://www.springframework.org/schema/integration/kafka"
+	xmlns:int="http://www.springframework.org/schema/integration" xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+	http://www.springframework.org/schema/integration/kafka http://www.springframework.org/schema/integration/kafka/spring-integration-kafka.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+
+	<int:publish-subscribe-channel id="inputToKafka" />
+
+	<int-kafka:outbound-channel-adapter id="kafkaOutboundChannelAdapter" kafka-producer-context-ref="kafkaProducerContext" auto-startup="true" order="1" channel="inputToKafka" />
+	<int-kafka:producer-context id="kafkaProducerContext" producer-properties="producerProps">
+		<int-kafka:producer-configurations>
+			<int-kafka:producer-configuration broker-list="127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094" topic="testTopic1" key-class-type="java.lang.String" key-encoder="encoder"
+				value-class-type="java.lang.String" value-encoder="encoder" partitioner="partitioner" />
+			<int-kafka:producer-configuration broker-list="127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094" topic="testTopic2" key-class-type="java.lang.String" key-encoder="encoder"
+				value-class-type="java.lang.String" value-encoder="encoder" partitioner="partitioner" />
+			<int-kafka:producer-configuration broker-list="127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094" topic="testTopic3" key-class-type="java.lang.String" key-encoder="encoder"
+				value-class-type="java.lang.String" value-encoder="encoder" partitioner="partitioner" />
+			<int-kafka:producer-configuration broker-list="127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094" topic="testTopic4" key-class-type="java.lang.String" key-encoder="encoder"
+				value-class-type="java.lang.String" value-encoder="encoder" partitioner="partitioner" />
+			<int-kafka:producer-configuration broker-list="127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094" topic="testTopic5" key-class-type="java.lang.String" key-encoder="encoder"
+				value-class-type="java.lang.String" value-encoder="encoder" partitioner="partitioner" />
+		</int-kafka:producer-configurations>
+	</int-kafka:producer-context>
+
+	<util:properties id="producerProps">
+		<prop key="queue.buffering.max.ms">500</prop>
+		<prop key="topic.metadata.refresh.interval.ms">3600000</prop>
+		<prop key="queue.buffering.max.messages">10000</prop>
+		<prop key="retry.backoff.ms">100</prop>
+		<prop key="message.send.max.retries">2</prop>
+		<prop key="send.buffer.bytes">5242880</prop>
+		<prop key="socket.request.max.bytes">104857600</prop>
+		<prop key="socket.receive.buffer.bytes">1048576</prop>
+		<prop key="socket.send.buffer.bytes">1048576</prop>
+		<prop key="request.required.acks">1</prop>
+	</util:properties>
+
+	<bean id="encoder" class="org.springframework.integration.kafka.serializer.common.StringEncoder" />
+
+	<bean id="partitioner" class="org.springframework.integration.kafka.support.DefaultPartitioner" />
+
+	<task:executor id="taskExecutor" pool-size="5" keep-alive="120" queue-capacity="500" />
+
+</beans>

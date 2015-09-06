@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.TBusinesszoneMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.hotel.model.TBusinesszoneModel" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="dis" property="dis" jdbcType="BIGINT" />
+    <result column="businessZoneType" property="businesszonetype" jdbcType="BIGINT" />
+    <result column="fatherid" property="fatherid" jdbcType="BIGINT" />
+    <result column="cityid" property="cityid" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, name, dis, businessZoneType, fatherid, cityid
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_businesszone
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_businesszone
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.hotel.model.TBusinesszoneModel" >
+    insert into t_businesszone (id, name, dis, 
+      businessZoneType, fatherid, cityid
+      )
+    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{dis,jdbcType=BIGINT}, 
+      #{businesszonetype,jdbcType=BIGINT}, #{fatherid,jdbcType=BIGINT}, #{cityid,jdbcType=BIGINT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.hotel.model.TBusinesszoneModel" >
+    insert into t_businesszone
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="dis != null" >
+        dis,
+      </if>
+      <if test="businesszonetype != null" >
+        businessZoneType,
+      </if>
+      <if test="fatherid != null" >
+        fatherid,
+      </if>
+      <if test="cityid != null" >
+        cityid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="dis != null" >
+        #{dis,jdbcType=BIGINT},
+      </if>
+      <if test="businesszonetype != null" >
+        #{businesszonetype,jdbcType=BIGINT},
+      </if>
+      <if test="fatherid != null" >
+        #{fatherid,jdbcType=BIGINT},
+      </if>
+      <if test="cityid != null" >
+        #{cityid,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.hotel.model.TBusinesszoneModel" >
+    update t_businesszone
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="dis != null" >
+        dis = #{dis,jdbcType=BIGINT},
+      </if>
+      <if test="businesszonetype != null" >
+        businessZoneType = #{businesszonetype,jdbcType=BIGINT},
+      </if>
+      <if test="fatherid != null" >
+        fatherid = #{fatherid,jdbcType=BIGINT},
+      </if>
+      <if test="cityid != null" >
+        cityid = #{cityid,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.hotel.model.TBusinesszoneModel" >
+    update t_businesszone
+    set name = #{name,jdbcType=VARCHAR},
+      dis = #{dis,jdbcType=BIGINT},
+      businessZoneType = #{businesszonetype,jdbcType=BIGINT},
+      fatherid = #{fatherid,jdbcType=BIGINT},
+      cityid = #{cityid,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByHotelid" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select b.id,b.name,b.dis,b.businesszonetype,b.fatherid,b.cityid,c.name as businesszontypename   
+    from t_hotelbussinesszone a  
+	left join t_businesszone b on a.businesszoneid=b.id 
+	left join t_businesszonetype c on b.businessZoneType=c.id where hotelid=#{hotelid}
+  </select>
+</mapper>

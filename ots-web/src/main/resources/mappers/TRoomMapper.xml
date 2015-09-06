@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.TRoomMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.hotel.model.TRoomModel" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="roomtypeid" property="roomtypeid" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="pms" property="pms" jdbcType="VARCHAR" />
+    <result column="islock" property="islock" jdbcType="CHAR" />
+    <result column="floor" property="floor" jdbcType="VARCHAR" />
+    <result column="score" property="score" jdbcType="DECIMAL" />
+    <result column="isWindow" property="isWindow" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, roomtypeid, name, pms, islock, floor, score
+  </sql>
+  
+  <select id="findList" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+	  	SELECT
+			a.id,
+			a.roomtypeid,
+			a.NAME,
+			a.pms,
+			a.islock,
+			a.floor,
+			a.score,
+			b.isWindow
+		FROM
+			t_room a
+		LEFT JOIN t_room_setting b ON a.roomtypeid = b.roomTypeId
+		AND a.NAME = b.roomNo
+		WHERE
+			a.roomtypeid = #{roomtypeid}
+		ORDER BY
+			a.NAME ASC
+  </select>
+  
+  <select id="findRoomsByHotelId" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_room where roomtypeid in( select id from t_roomtype where thotelid=#{hotelId}) 
+ </select>
+   
+   <insert id="saveTRoom" parameterType="com.mk.ots.hotel.model.TRoomModel" 
+   			useGeneratedKeys="true" keyProperty="id">
+   		insert into t_room (roomtypeid, name, pms, islock) values ( #{roomtypeid}, #{name}, #{pms}, 0 )
+   </insert>
+   
+   <delete id="delRoomByRoomTypeId" parameterType="java.lang.Long">
+   		delete from t_room where roomtypeid=#{roomTypeId,jdbcType=BIGINT}
+   </delete>
+   
+   <update id="updateRoom" parameterType="com.mk.ots.hotel.model.TRoomModel">
+   		update t_room set name=#{name} where id=#{id}
+   </update>
+   
+   <delete id="delRoomById" parameterType="java.lang.Long">
+   		delete from t_room where id=#{id}
+   </delete>
+  <select id="selectByPms" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_room
+    where pms = #{pms} and roomtypeid in(select id from t_roomtype where ehotelid=#{hotelid})
+    
+  </select>
+   
+</mapper>

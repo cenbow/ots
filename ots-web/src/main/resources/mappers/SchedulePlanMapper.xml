@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.framework.schedule.model.SchedulePlan">
+  <resultMap id="BaseResultMap" type="com.mk.framework.schedule.model.SchedulePlan">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="startdate" jdbcType="DATE" property="startdate" />
+    <result column="enddate" jdbcType="DATE" property="enddate" />
+    <result column="script" jdbcType="VARCHAR" property="script" />
+    <result column="expression" jdbcType="VARCHAR" property="expression" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="active" jdbcType="CHAR" property="active" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, name, startdate, enddate, script, expression, type, active
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from sy_schedule
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+   <select id="find" parameterType="com.mk.framework.schedule.model.SchedulePlan" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from sy_schedule
+    where 1=1
+      <if test="name != null">
+        and name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="startdate != null">
+        and  startdate = #{startdate,jdbcType=DATE},
+      </if>
+      <if test="enddate != null">
+        and  enddate = #{enddate,jdbcType=DATE},
+      </if>
+      <if test="script != null">
+       and  script = #{script,jdbcType=VARCHAR},
+      </if>
+      <if test="expression != null">
+       and  expression = #{expression,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        and type = #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="active != null">
+        and active = #{active,jdbcType=CHAR},
+      </if>
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from sy_schedule
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.framework.schedule.model.SchedulePlan">
+    insert into sy_schedule (id, name, startdate, 
+      enddate, script, expression, 
+      type, active)
+    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{startdate,jdbcType=DATE}, 
+      #{enddate,jdbcType=DATE}, #{script,jdbcType=VARCHAR}, #{expression,jdbcType=VARCHAR}, 
+      #{type,jdbcType=VARCHAR}, #{active,jdbcType=CHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.framework.schedule.model.SchedulePlan">
+    insert into sy_schedule
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="startdate != null">
+        startdate,
+      </if>
+      <if test="enddate != null">
+        enddate,
+      </if>
+      <if test="script != null">
+        script,
+      </if>
+      <if test="expression != null">
+        expression,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+      <if test="active != null">
+        active,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="startdate != null">
+        #{startdate,jdbcType=DATE},
+      </if>
+      <if test="enddate != null">
+        #{enddate,jdbcType=DATE},
+      </if>
+      <if test="script != null">
+        #{script,jdbcType=VARCHAR},
+      </if>
+      <if test="expression != null">
+        #{expression,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="active != null">
+        #{active,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.framework.schedule.model.SchedulePlan">
+    update sy_schedule
+    <set>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="startdate != null">
+        startdate = #{startdate,jdbcType=DATE},
+      </if>
+      <if test="enddate != null">
+        enddate = #{enddate,jdbcType=DATE},
+      </if>
+      <if test="script != null">
+        script = #{script,jdbcType=VARCHAR},
+      </if>
+      <if test="expression != null">
+        expression = #{expression,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        type = #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="active != null">
+        active = #{active,jdbcType=CHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.framework.schedule.model.SchedulePlan">
+    update sy_schedule
+    set name = #{name,jdbcType=VARCHAR},
+      startdate = #{startdate,jdbcType=DATE},
+      enddate = #{enddate,jdbcType=DATE},
+      script = #{script,jdbcType=VARCHAR},
+      expression = #{expression,jdbcType=VARCHAR},
+      type = #{type,jdbcType=VARCHAR},
+      active = #{active,jdbcType=CHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

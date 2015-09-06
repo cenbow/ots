@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.member.model.BAppUpdate" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.member.model.BAppUpdate" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="appupdate" property="appupdate" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, appupdate
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />  
+    from b_app_update
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+   <select id="selectAllRecord" resultMap="BaseResultMap" parameterType="java.util.Map"  >
+    select 
+    <include refid="Base_Column_List" />  
+    from b_app_update
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from b_app_update
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.member.model.BAppUpdate" >
+    insert into b_app_update (id, appupdate)
+    values (#{id,jdbcType=BIGINT}, #{appupdate,jdbcType=CHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.member.model.BAppUpdate" >
+    insert into b_app_update
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="update != null" >
+        appupdate,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="appupdate != null" >
+        #{appupdate,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.member.model.BAppUpdate" >
+    update b_app_update
+    <set >
+      <if test="appupdate != null" >
+        appupdate = #{appupdate,jdbcType=CHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.member.model.BAppUpdate" >
+    update b_app_update
+    set appupdate = #{appupdate,jdbcType=CHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

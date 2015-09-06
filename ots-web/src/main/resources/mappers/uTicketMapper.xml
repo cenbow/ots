@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.ticket.model.UTicket">
+  <resultMap id="BaseResultMap" type="com.mk.ots.ticket.model.UTicket" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="mid" property="mid" jdbcType="BIGINT" />
+    <result column="promotionid" property="promotionid" jdbcType="BIGINT" />
+    <result column="usetime" property="usetime" jdbcType="TIMESTAMP" />
+    <result column="otaorderid" property="otaorderid" jdbcType="BIGINT" />
+    <result column="activityid" property="activityid" jdbcType="BIGINT" />
+    <result column="promotiontime" property="promotiontime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="promotionmethod" property="promotionmethod" jdbcType="INTEGER" />
+    <association property="promotion" autoMapping="true" javaType="com.mk.ots.promo.model.BPromotion" column="promotionid" select="findPromotionById">
+	</association>
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    id, mid, usetime, status, promotionid, otaorderid, promotiontime, activityid, promotionmethod
+  </sql>
+  
+	<insert id="insert" parameterType="com.mk.ots.ticket.model.UTicket" useGeneratedKeys="true" keyProperty="id">
+		insert into u_ticket 
+			(
+				mid, usetime, status, promotionid,otaorderid ,promotiontime, activityid, promotionmethod
+			)
+		values
+			(
+			   #{mid}, #{usetime}, #{status}, #{promotionid}, #{otaorderid}, #{promotiontime}, #{activityid}, #{promotionmethod}
+			)
+	</insert>
+	
+	<select id="findUTicket" resultMap="BaseResultMap"  parameterType="java.util.Map">
+		select 
+		<include refid="Base_Column_List" /> 
+		from u_ticket 
+		where mid = #{mid} and status = #{status}
+	</select>
+	
+	<select id="findUTicketByPromoIdAndMid" resultMap="BaseResultMap"  parameterType="java.util.Map">
+		select 
+		<include refid="Base_Column_List" /> 
+		from u_ticket 
+		where mid = #{mid} and promotionid = #{promotionid}
+	</select>
+	
+	<select id="findUTicketByMid" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select a.* from 
+			(
+				select * from u_ticket where mid = #{mid}
+				<if test="status != null" >
+			        and status = #{status}
+			    </if>
+			) a , 
+			b_promotion b 
+		where a.promotionid = b.id
+	</select>
+	
+	<select id="findUTicketByMidAndActiveid" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select a.* from 
+			(
+				select * from u_ticket where mid = #{mid}
+			) a , 
+			b_promotion b 
+		where a.promotionid = b.id and b.activitiesid = #{activeid}
+	</select>
+	<!-- 20150702 add by zhangyajun  -->
+	<select id="findUTicketByMidAndActiveidReturnUTicket" resultType="com.mk.ots.ticket.model.UTicket" parameterType="java.util.Map">
+		SELECT u.* FROM u_ticket u WHERE  u.mid = #{mid}  AND u.activityid = #{activityid}   
+	</select>
+	
+	<select id="findPromotionById" resultType="com.mk.ots.promo.model.BPromotion" parameterType="java.util.Map">
+		select * from b_promotion where id = #{id}
+	</select>
+	
+	<select id="findUTicketByPromotionAndMid" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select a.* from 
+			(select * from u_ticket where mid = #{mid} and promotionid in 
+				(
+					<foreach item="guard" index="index" collection="promotionids" separator=","> 
+						#{guard} 
+                    </foreach>  
+				) 
+			) a
+		left join b_promotion b
+			on a.promotionid = b.id and b.isticket = 'T'
+	</select>
+	
+	<select id="findUTicketByPromotionType" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select a.* from 
+			(select * from u_ticket where mid = #{mid}) a,
+		    b_promotion b
+		where a.promotionid = b.id and b.isticket = 'T'  and b.type = #{promotiontype}
+	</select>
+	
+	<select id="isCheckTodayHotelRoom" resultType="long" parameterType="java.util.Map">
+		select  count(a.id) from 
+			(select * from b_otaorder where hotelid = #{hotelid} and  to_days(begintime) = to_days(now()) and spreaduser is not null) a,
+			b_otaroomorder b
+		where a.id = b.OtaOrderId and b.roomid = #{roomid}
+	</select>
+	
+	<select id="isCheckTodayUser" resultType="long" parameterType="java.util.Map">
+		select count(id) from b_otaorder where mid = #{mid} and  to_days(begintime) = to_days(now()) and spreaduser is not null
+	</select>
+	
+	<select id="isCheckMonthHotel" resultType="long" parameterType="java.util.Map">
+		select count(id) from b_otaorder where mid = #{mid} and hotelid = #{hotelid} and DATE_FORMAT(begintime, '%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m') and spreaduser is not null
+	</select>
+	
+	<!-- 一个手机号一天切客一次: 当天六点到隔日12点后算当日 -->
+	<select id="isCheckNumToday" resultType="long" parameterType="java.util.Map">
+		select count(distinct a.id) as checknum from 
+				(select * from b_otaorder 
+					where orderstatus != 510 and orderstatus != 511 and orderstatus != 512 and orderstatus != 513 
+						  and mid = #{mid} and spreaduser is not null and createtime between #{startdate} and #{enddate}
+				) a,
+				b_promotion_price b,
+				(select id from b_promotion where type = 2)  c
+			where a.id = b.otaorderid and b.promotion = c.id
+	</select>
+ 
+	<!-- 一个手机号每月每店切客4次 -->
+	<select id="isCheckNumMonth" resultType="long" parameterType="java.util.Map">
+			select count(distinct a.id) as checknum from 
+				(select id from b_otaorder 
+					where orderstatus != 510 and orderstatus != 511 and orderstatus != 512 and orderstatus != 513   
+						  and mid = #{mid} and hotelid = #{hotelid} and spreaduser is not null
+						  and createtime between #{startdate} and #{enddate}
+				) a,
+				b_promotion_price b,
+				(select id from b_promotion where type = 2)  c
+			where a.id = b.otaorderid and b.promotion = c.id 
+	</select>	
+	
+	<!-- 十五天以前完成订单行为的用户id\订单数量以及领券情况列表 -->
+	<select id="queryCurMonthUTicketNumAndOrderNum" resultType="java.util.Map">
+		select distinct a.mid, ifnull(a.ordernum,0) ordernum, ifnull(b.ticketnum,0) ticketnum from 
+			(
+				select a.mid,b.ordernum from 
+					(select mid from b_otaorder where orderstatus = 200  and date(createtime) = DATE_SUB(CURDATE(), INTERVAL 15 DAY) ) a,
+					(select mid,count(id) ordernum  from b_otaorder where orderstatus = 200 and date(createtime) >= DATE_SUB(CURDATE(), INTERVAL 15 DAY) group by mid having count(id) > 0) b
+				where a.mid = b.mid
+			) a
+			left join 
+				(
+						select a.mid,count(a.promotionid) as ticketnum from 
+							u_ticket a,
+							(select id from b_promotion where type = 1 and isinstance = 'F'  and DATE_FORMAT(createtime, '%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m')) b
+					    where a.promotionid = b.id group by a.mid
+				) b 
+			on a.mid = b.mid
+	</select> 
+	
+	<!-- 一个月内打开APP次数超过2次（含2次）且未领过常规券的用户列表 -->
+	<select id="queryActiveMemberRuleList" resultType="java.lang.Long">
+		select t.mid from (
+			select a.mid, ifnull(a.num,0) as appstatusnum, ifnull(ticketnum, 0) as ticketnum  from 
+				(
+					select mid, count(id) as num from 
+							u_appstatus 
+					where mid is not null <![CDATA[ and date(createtime) >= DATE_SUB(CURDATE(), INTERVAL 15 DAY)  group by mid having count(id) >= 2 ]]>
+				) a   
+			left join
+				(
+					select a.mid,count(a.promotionid) as ticketnum from 
+							u_ticket a,
+							(select id from b_promotion where type = 1 and isinstance = 'F'  and DATE_FORMAT(createtime, '%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m')) b
+				    where a.promotionid = b.id group by a.mid
+				) b 
+			on a.mid = b.mid 
+	   ) t where t.ticketnum = 0
+	</select>	
+	
+	<!-- 15天内打开APP次数不超过1次且未卸载APP，且未领过常规券的用户 -->
+	<select id="queryUnActiveMemberRuleList" resultType="java.lang.Long">
+		select t.mid from (
+			select a.mid, ifnull(a.num,0) as appstatusnum, ifnull(ticketnum, 0) as ticketnum  from 
+				(
+					select mid, count(id) as num from 
+							u_appstatus 
+					where mid is not null <![CDATA[ and date(createtime) >= DATE_SUB(CURDATE(), INTERVAL 15 DAY)  group by mid having count(id) <= 1 ]]>
+				) a   
+			left join
+				(
+					select a.mid,count(a.promotionid) as ticketnum from 
+							u_ticket a,
+							(select id from b_promotion where type = 1 and isinstance = 'F'  and DATE_FORMAT(createtime, '%Y%m') = DATE_FORMAT(CURDATE(), '%Y%m')) b
+				    where a.promotionid = b.id group by a.mid
+				) b 
+			on a.mid = b.mid 
+	   ) t where t.ticketnum = 0
+	</select>
+	
+	<select id="findByPromotionId" resultMap="BaseResultMap">
+		select * from u_ticket where promotionid = #{promotionid}
+	</select>
+	
+	<select id="findByPromotionIdAndOrderId" resultType="long">
+		select count(*) from p_pay a
+		left join b_otaorder b
+		on a.orderid = b.id
+		inner join u_useticket_record c
+		on a.id = c.payid
+		where a.orderid = #{orderid} and promotionid = #{promotionid}
+	</select>
+	
+	<select id="countByMidAndActiveId" resultType="long">
+		select count(a.id) from u_ticket a , b_promotion b where a.promotionid = b.id and a.mid = #{mid} and b.activitiesid = #{activeid}
+	</select>
+	
+	<select id="countByMidAndActiveIdAndTime" resultType="long" parameterType="java.util.Map">
+		select count(a.id) from (select * from u_ticket where mid = #{mid}) a , (select * from b_promotion where activitiesid = #{activeid} and createtime between #{starttime}  and #{endtime} ) b where a.promotionid = b.id 
+	</select>
+	
+	<update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.ticket.model.UTicket" >
+    update u_ticket
+    <set >
+      <if test="mid != null" >
+        mid = #{mid,jdbcType=BIGINT},
+      </if>
+       usetime = #{usetime,jdbcType=TIMESTAMP},
+       otaorderid = #{otaorderid,jdbcType=BIGINT},
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="promotionid != null" >
+        promotionid = #{promotionid,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <select id="findUTicketsByOrderIdAndMid" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	 select b.* from 
+		(select * from b_promotion_price where otaorderid = #{otaorderid}) a,
+		(select * from u_ticket where mid = #{mid} and status = 1) b
+	 where a.promotion = b.promotionid
+  </select>
+  
+  <update id="updateUTicketAvailable" parameterType="java.util.Map">
+  		update u_ticket a, (select * from b_promotion_price where otaorderid = #{otaorderid}) b set a.status = 2 ,pmsorderID=null where a.promotionid = b.promotion
+  </update>
+  
+  <update id="updateByMidAndPromotionId" parameterType="com.mk.ots.ticket.model.UTicket" >
+    update u_ticket
+    <set >
+       usetime = #{usetime,jdbcType=TIMESTAMP},
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="otaorderid != null" >
+        otaorderid = #{otaorderid,jdbcType=BIGINT},
+      </if>
+    </set>
+    where mid = #{mid,jdbcType=BIGINT} and promotionid = #{promotionid,jdbcType=BIGINT}
+  </update>
+  
+  <select id="findMaxAndMinUTicketId" resultType="java.util.HashMap" parameterType="map" >
+		SELECT
+			IFNULL(MAX(u.mid), 0) AS max,
+			IFNULL(MIN(u.mid), 0) AS min
+		FROM
+			u_ticket u
+		WHERE
+			u.`status` = 2
+		AND DATEDIFF(now(), u.promotiontime) > 30
+		AND u.activityid = #{activeid}
+  </select>
+  
+  <select id="findUTicketList" resultMap="BaseResultMap" parameterType="map" >
+    select 
+    <include refid="Base_Column_List" />
+	FROM u_ticket u
+		WHERE
+			u.`status` = 2
+		AND DATEDIFF(now(), u.promotiontime) > 30
+		AND u.activityid = #{activeid}
+        and u.mid > #{begin}
+        order by  u.id asc 
+        limit  #{limit}
+  </select>
+  
+  <select id="getHandGetPromotionCount" resultType="long" parameterType="java.util.Map">
+ 	 select count(id) from u_ticket where mid = #{mid} and (promotionmethod = 2 or promotionmethod = 3) and (status = 1 or status = 2)
+  </select>
+  
+  <select id="getNotActivePromotionCount" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	 select  
+  	 	<include refid="Base_Column_List" />
+  	 from u_ticket where mid = #{mid} and status = 3 and promotionmethod = 3
+  </select>
+  
+  <update id="activatePromotion" parameterType="java.util.Map">
+  	 update u_ticket set status = 2 where mid = #{mid} and promotionid = #{promotionid} and status = 3 and promotionmethod = 3
+  </update>
+  
+  <select id="checkOrderUsedTicket" parameterType="com.mk.ots.ticket.model.UTicket" resultType="long">
+  	 select  count(1)
+  	 from u_ticket where mid = #{mid} and status = 1 and otaorderid = #{otaorderid}
+  </select>
+
+    <select id="findUnactiveUTicket" resultType="com.mk.ots.ticket.model.UTicket" parameterType="java.util.Map">
+        SELECT u.* FROM u_ticket u WHERE  u.mid = #{mid}  AND u.activityid = #{activityid} and u.status!=#{status} limit 1
+    </select>
+</mapper>

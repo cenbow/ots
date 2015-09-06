@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.CityMapper" >
+
+  <resultMap id="TCityMap" type="com.mk.ots.hotel.bean.TCity" >
+    <id column="cityid" property="cityid" />
+    <result column="Code" property="code" />
+    <result column="CityName" property="cityname" />
+    <result column="ProID" property="proid" />
+    <result column="CitySort" property="citysort" />
+    <result column="latitude" property="latitude" />
+    <result column="longitude" property="longitude" />
+    <result column="simplename" property="simplename" />
+    <result column="ishotcity" property="ishotcity" />
+    <result column="range" property="range"  />
+    <result column="isSelect" property="isSelect" />
+    <result column="querycityname" property="querycityname" />
+  </resultMap>
+  
+  <select id="getSelectCity" resultMap="TCityMap">
+	SELECT
+		c.querycityname,
+		c. CODE,
+		c.CityName,
+		c.simplename,
+		c.ishotcity,
+		c.latitude,
+		c.longitude,
+		c.RANGE
+	FROM
+		t_city c
+	WHERE
+		c.isSelect = 'T'
+  </select>
+ 
+ 
+</mapper>

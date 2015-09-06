@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.activity.model.BActiveChannel" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.activity.model.BActiveChannel" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="activeid" property="activeid" jdbcType="BIGINT" />
+    <result column="channelid" property="channelid" jdbcType="BIGINT" />
+    <result column="channelname" property="channelname" jdbcType="VARCHAR" />
+    <result column="promotionid" property="promotionid" jdbcType="BIGINT" />
+    <result column="expiration" property="expiration" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, activeid, channelid, channelname, promotionid, expiration
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from b_active_channel
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from b_active_channel
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.activity.model.BActiveChannel" useGeneratedKeys="true" keyProperty="id">
+    insert into b_active_channel (activeid, channelid, 
+      channelname, promotionid, expiration
+      )
+    values (#{activeid,jdbcType=BIGINT}, #{channelid,jdbcType=BIGINT}, 
+      #{channelname,jdbcType=VARCHAR}, #{promotionid,jdbcType=BIGINT}, #{expiration,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.activity.model.BActiveChannel" useGeneratedKeys="true" keyProperty="id">
+    insert into b_active_channel
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="activeid != null" >
+        activeid,
+      </if>
+      <if test="channelid != null" >
+        channelid,
+      </if>
+      <if test="channelname != null" >
+        channelname,
+      </if>
+      <if test="promotionid != null" >
+        promotionid,
+      </if>
+      <if test="expiration != null" >
+        expiration,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="activeid != null" >
+        #{activeid,jdbcType=BIGINT},
+      </if>
+      <if test="channelid != null" >
+        #{channelid,jdbcType=BIGINT},
+      </if>
+      <if test="channelname != null" >
+        #{channelname,jdbcType=VARCHAR},
+      </if>
+      <if test="promotionid != null" >
+        #{promotionid,jdbcType=BIGINT},
+      </if>
+      <if test="expiration != null" >
+        #{expiration,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.activity.model.BActiveChannel" >
+    update b_active_channel
+    <set >
+      <if test="activeid != null" >
+        activeid = #{activeid,jdbcType=BIGINT},
+      </if>
+      <if test="channelid != null" >
+        channelid = #{channelid,jdbcType=BIGINT},
+      </if>
+      <if test="channelname != null" >
+        channelname = #{channelname,jdbcType=VARCHAR},
+      </if>
+      <if test="promotionid != null" >
+        promotionid = #{promotionid,jdbcType=BIGINT},
+      </if>
+      <if test="expiration != null" >
+        expiration = #{expiration,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.activity.model.BActiveChannel" >
+    update b_active_channel
+    set activeid = #{activeid,jdbcType=BIGINT},
+      channelid = #{channelid,jdbcType=BIGINT},
+      channelname = #{channelname,jdbcType=VARCHAR},
+      promotionid = #{promotionid,jdbcType=BIGINT},
+      expiration = #{expiration,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <select id="findActiveChannel" parameterType="java.util.Map" resultMap="BaseResultMap">
+	select 
+    	<include refid="Base_Column_List" />
+    from b_active_channel
+    where activeid = #{activeid} and channelid = #{channelid}
+  </select>
+  
+</mapper>

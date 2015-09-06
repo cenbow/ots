@@ -1,0 +1,39 @@
+@charset "utf-8";
+/* CSS Document */
+
+body { font-size:12px; height:100%; overflow-x:hidden; width:100%}
+
+html, body, div, span, applet, object, iframe, caption, tbody, tfoot, thead, th, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var,     
+h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code,     
+dl, dt, dd, ol, ul, li, fieldset, form, label, legend {    
+ vertical-align: baseline;    
+ font-family: inherit;    
+ font-weight: inherit;    
+ font-style: inherit;    
+ outline: 0;    
+ padding: 0;    
+ margin: 0;    
+ border: 0;
+ word-break:break-all;
+ word-wrap:break-word;
+ }    
+
+ol, ul,li {    
+ list-style: none;    
+ }
+
+.clear{content: "."; display: block; height: 0px; line-height:0px; visibility:hidden; clear:both}
+ 
+ 
+/*login*/
+.login_form{margin-top:40px; padding-left:80px}
+	.login_form p{clear:both; margin-top:5px; overflow:hidden; height:30px}
+	.login_form label{width:50px; display:block; float:left}}
+.login_forminput{width:143px; height:29px; background:url(../images/indexbg.png) no-repeat right -100px; border:none; float:left}
+.login_formbutton{background:url(../images/indexbg.png) no-repeat right -150px; width:64px; height:25px; border:none; cursor:pointer}
+.login_bodybg{width:1003px; height:613px; background:url(../images/loginbg.jpg) no-repeat; position:absolute; left:50%; top:50px; margin-left:-501px; z-index:1}
+.login_formbg{background:url(../images/loginformbg.png) no-repeat; position:absolute; z-index:9; width:413px; height:231px; left: 50%; margin-left:-206px; top: 290px;}
+.login_bottomtxt{position:absolute; z-index:9; color:#9ed1fd; text-align:center; width:100%; top:550px}
+.login_logo2{position:absolute; z-index:2; left:50%; margin-left:-350px; margin-top:80px}
+.login_bg2{width:100%; height:141px; background:url(../images/repeatx.png) repeat-x 0 -300px;  position:absolute; z-index:1; top:310px}
+

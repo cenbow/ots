@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.TFacilityMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.hotel.model.TFacilityModel" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="facName" property="facname" jdbcType="VARCHAR" />
+    <result column="facType" property="factype" jdbcType="INTEGER" />
+    <result column="binding" property="binding" jdbcType="CHAR" />
+    <result column="facSort" property="facsort" jdbcType="INTEGER" />
+    <result column="visible" property="visible" jdbcType="CHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, facName, facType, binding, facSort, visible
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_facility
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_facility
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.hotel.model.TFacilityModel" >
+    insert into t_facility (id, facName, facType, 
+      binding, facSort, visible
+      )
+    values (#{id,jdbcType=BIGINT}, #{facname,jdbcType=VARCHAR}, #{factype,jdbcType=INTEGER}, 
+      #{binding,jdbcType=CHAR}, #{facsort,jdbcType=INTEGER}, #{visible,jdbcType=CHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.hotel.model.TFacilityModel" >
+    insert into t_facility
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="facname != null" >
+        facName,
+      </if>
+      <if test="factype != null" >
+        facType,
+      </if>
+      <if test="binding != null" >
+        binding,
+      </if>
+      <if test="facsort != null" >
+        facSort,
+      </if>
+      <if test="visible != null" >
+        visible,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="facname != null" >
+        #{facname,jdbcType=VARCHAR},
+      </if>
+      <if test="factype != null" >
+        #{factype,jdbcType=INTEGER},
+      </if>
+      <if test="binding != null" >
+        #{binding,jdbcType=CHAR},
+      </if>
+      <if test="facsort != null" >
+        #{facsort,jdbcType=INTEGER},
+      </if>
+      <if test="visible != null" >
+        #{visible,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.hotel.model.TFacilityModel" >
+    update t_facility
+    <set >
+      <if test="facname != null" >
+        facName = #{facname,jdbcType=VARCHAR},
+      </if>
+      <if test="factype != null" >
+        facType = #{factype,jdbcType=INTEGER},
+      </if>
+      <if test="binding != null" >
+        binding = #{binding,jdbcType=CHAR},
+      </if>
+      <if test="facsort != null" >
+        facSort = #{facsort,jdbcType=INTEGER},
+      </if>
+      <if test="visible != null" >
+        visible = #{visible,jdbcType=CHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.hotel.model.TFacilityModel" >
+    update t_facility
+    set facName = #{facname,jdbcType=VARCHAR},
+      facType = #{factype,jdbcType=INTEGER},
+      binding = #{binding,jdbcType=CHAR},
+      facSort = #{facsort,jdbcType=INTEGER},
+      visible = #{visible,jdbcType=CHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <select id="findByIds" resultMap="BaseResultMap" >
+  	 select 
+    <include refid="Base_Column_List" />
+    from t_facility   where id in 
+    <foreach item="ids" index="index" collection="array" open="(" separator="," close=")">  
+    #{ids}
+    </foreach> 
+  </select>
+  <select id="findByHotelid" resultMap="BaseResultMap" >
+		SELECT
+			<include refid = "Base_Column_List" />
+		FROM
+			t_facility
+		WHERE
+			id IN (
+				SELECT
+					facid
+				FROM
+					t_hotel_facility
+				WHERE
+					hotelid = #{hotelid})
+		AND visible = 'T'; 
+  </select>
+  <select id="findByRoomtypeId" resultMap="BaseResultMap" >
+		SELECT DISTINCT
+			b.id,
+			b.facName,
+			b.facType,
+			b.binding,
+			b.facSort,
+			b.visible
+		FROM
+			t_roomtype_facility a
+		INNER JOIN t_facility b ON a.facid = b.id
+		WHERE
+			a.roomtypeid = #{roomtypeid}
+		AND b.visible = 'T'
+  </select>
+  
+</mapper>

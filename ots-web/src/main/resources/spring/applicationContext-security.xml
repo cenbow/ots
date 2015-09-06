@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security" xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+        
+	<http pattern="/**" entry-point-ref="restAuthenticationEntryPoint" use-expressions="true" auto-config="false" create-session="stateless">
+		<intercept-url pattern="/**" access="permitAll" />
+	</http>
+
+
+	<beans:bean class="com.mk.ots.security.web.authentication.RestAuthenticationEntryPoint" id="restAuthenticationEntryPoint"></beans:bean>
+
+	<beans:bean class="com.mk.ots.security.web.authentication.AuthenticationTokenProcessingFilter" id="authenticationTokenProcessingFilter">
+		<beans:constructor-arg type="java.lang.String">
+			<beans:value>/app/**</beans:value>
+		</beans:constructor-arg>
+	</beans:bean>
+
+	<!-- Configure Authentication mechanism -->
+	<authentication-manager alias="authenticationManager">
+		<!-- SHA-256 values can be produced using 'echo -n your_desired_password | sha256sum' (using normal *nix environments) -->
+		<authentication-provider user-service-ref="userdetailservice">
+			<password-encoder hash="plaintext" />
+		</authentication-provider>
+	</authentication-manager>
+
+	<beans:bean name="md5PasswordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder">
+	</beans:bean>
+
+	<beans:bean id="userdetailservice" class="com.mk.ots.security.web.UserDetailsServiceImpl">
+	</beans:bean>
+
+	<beans:bean class="org.springframework.security.core.context.SecurityContextHolder" factory-method="getContextHolderStrategy" />
+
+
+	<beans:bean id="failureHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+		<beans:property name="defaultFailureUrl" value="/login?login_error=t" />
+	</beans:bean>
+
+	<beans:bean id="successHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+		<beans:property name="alwaysUseDefaultTargetUrl" value="true" />
+		<beans:property name="defaultTargetUrl" value="/main/index" />
+	</beans:bean>
+
+	<beans:bean id="http403EntryPoint" class="com.mk.ots.security.web.authentication.Http403ForbiddenEntryPoint">
+	</beans:bean>
+
+</beans:beans>

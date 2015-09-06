@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.ticket.model.BPrizeStock" >
+<resultMap id="BaseResultMap" type="com.mk.ots.ticket.model.BPrizeStock" >
+    <result column="id" property="id" jdbcType="BIGINT" />
+    <result column="prizeid" property="prizeid" jdbcType="BIGINT" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="begintime" property="begintime" jdbcType="TIMESTAMP" />
+    <result column="endtime" property="endtime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="merchantid" property="merchantid" jdbcType="BIGINT" />
+    <result column="activeid" property="activeid" jdbcType="BIGINT" />
+  </resultMap>
+  <resultMap id="BaseBPrizeAndUPrizeRecordResultMap" type="com.mk.ots.ticket.model.BPrizeStock" >
+    <result column="id" property="id" jdbcType="BIGINT" />
+    <result column="prizeid" property="prizeid" jdbcType="BIGINT" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="begintime" property="begintime" jdbcType="TIMESTAMP" />
+    <result column="endtime" property="endtime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <result column="merchantid" property="merchantid" jdbcType="BIGINT" />
+    <result column="activeid" property="activeid" jdbcType="BIGINT" />
+    <association property="bPrize" autoMapping="true" javaType="com.mk.ots.ticket.model.BPrize" column="prizeid" select="findBPrizeById">
+	</association>
+  </resultMap>
+  <insert id="insert" parameterType="com.mk.ots.ticket.model.BPrizeStock" >
+    insert into b_prize_stock (id, prizeid, code, 
+      name, begintime, endtime, 
+      status, merchantid, activeid
+      )
+    values (#{id,jdbcType=BIGINT}, #{prizeid,jdbcType=BIGINT}, #{code,jdbcType=VARCHAR}, 
+      #{name,jdbcType=VARCHAR}, #{begintime,jdbcType=TIMESTAMP}, #{endtime,jdbcType=TIMESTAMP}, 
+      #{status,jdbcType=CHAR}, #{merchantid,jdbcType=BIGINT}, #{activeid,jdbcType=BIGINT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.ticket.model.BPrizeStock" >
+    insert into b_prize_stock
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="prizeid != null" >
+        prizeid,
+      </if>
+      <if test="code != null" >
+        code,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="begintime != null" >
+        begintime,
+      </if>
+      <if test="endtime != null" >
+        endtime,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="merchantid != null" >
+        merchantid,
+      </if>
+      <if test="activeid != null" >
+        activeid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="prizeid != null" >
+        #{prizeid,jdbcType=BIGINT},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="begintime != null" >
+        #{begintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null" >
+        #{endtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=CHAR},
+      </if>
+      <if test="merchantid != null" >
+        #{merchantid,jdbcType=BIGINT},
+      </if>
+      <if test="activeid != null" >
+        #{activeid,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+   <select id="findBPrizeStockById" resultMap="BaseBPrizeAndUPrizeRecordResultMap"  parameterType="java.util.Map">
+  select * from b_prize_stock where id=#{id,jdbcType=BIGINT}
+  </select>
+  <select id="findBPrizeStockByMerchantid" resultMap="BaseResultMap"  parameterType="java.util.Map">
+  select * from b_prize_stock where prizeid=#{prizeid,jdbcType=BIGINT} and activeid =#{activeid,jdbcType=BIGINT} and status=0 LIMIT 1
+  </select>
+   <select id="findBPrizeById" resultType="com.mk.ots.ticket.model.BPrize"  parameterType="java.util.Map">
+  select * from b_prize where id=#{id,jdbcType=BIGINT}
+  </select>
+  
+  <select id="findStockCountByPrizeID" resultType="long"  parameterType="java.util.Map">
+  select count(1) from b_prize_stock where prizeid=#{prizeid,jdbcType=BIGINT} and status=#{status,jdbcType=BIGINT}
+  </select>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.ticket.model.BPrizeStock">
+  	update b_prize_stock
+      <set >
+      <if test="prizeid != null" >
+        prizeid=#{prizeid,jdbcType=BIGINT},
+      </if>
+      <if test="code != null" >
+        code=#{code,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        name=#{name,jdbcType=VARCHAR},
+      </if>
+      <if test="begintime != null" >
+        begintime=#{begintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null" >
+        endtime=#{endtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null" >
+        status= #{status,jdbcType=CHAR},
+      </if>
+      <if test="merchantid != null" >
+        merchantid=#{merchantid,jdbcType=BIGINT},
+      </if>
+      <if test="activeid != null" >
+        activeid=#{activeid,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+</mapper>

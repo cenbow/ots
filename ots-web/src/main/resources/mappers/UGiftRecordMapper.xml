@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.ticket.model.UGiftRecord" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.ticket.model.UGiftRecord" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="mid" property="mid" jdbcType="BIGINT" />
+    <result column="activeid" property="activeid" jdbcType="BIGINT" />
+    <result column="createtime" property="createtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, mid, activeid, createtime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from u_gift_record
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from u_gift_record
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.ticket.model.UGiftRecord" useGeneratedKeys="true" keyProperty="id">
+    insert into u_gift_record (id, mid, activeid, 
+      createtime)
+    values (#{id,jdbcType=BIGINT}, #{mid,jdbcType=BIGINT}, #{activeid,jdbcType=BIGINT}, 
+      #{createtime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.ticket.model.UGiftRecord" >
+    insert into u_gift_record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="mid != null" >
+        mid,
+      </if>
+      <if test="activeid != null" >
+        activeid,
+      </if>
+      <if test="createtime != null" >
+        createtime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="mid != null" >
+        #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="activeid != null" >
+        #{activeid,jdbcType=BIGINT},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.ticket.model.UGiftRecord" >
+    update u_gift_record
+    <set >
+      <if test="mid != null" >
+        mid = #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="activeid != null" >
+        activeid = #{activeid,jdbcType=BIGINT},
+      </if>
+      <if test="createtime != null" >
+        createtime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.ticket.model.UGiftRecord" >
+    update u_gift_record
+    set mid = #{mid,jdbcType=BIGINT},
+      activeid = #{activeid,jdbcType=BIGINT},
+      createtime = #{createtime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+   <select id="getRecordNumToday" resultType="long" parameterType="java.util.Map">
+		select count(id) from u_gift_record where mid = #{mid} and activeid = #{activeid} and DATE_FORMAT(createtime,'%Y%m%d') = DATE_FORMAT(now(),'%Y%m%d')
+   </select>
+	
+   <select id="getTotalRecordNum" resultType="long" parameterType="java.util.Map">
+		select count(id) from u_gift_record where mid = #{mid} and activeid = #{activeid} and createtime between #{starttime} and #{endtime}
+   </select>
+</mapper>

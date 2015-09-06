@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.ticket.model.UPrizeRecord" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.ticket.model.UPrizeRecord" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="mid" property="mid" jdbcType="BIGINT" />
+    <result column="prizeid" property="prizeid" jdbcType="BIGINT" />
+    <result column="prizeinfo" property="prizeinfo" jdbcType="VARCHAR" />
+    <result column="ostype" property="ostype" jdbcType="BIGINT" />
+    <result column="prizetype" property="prizetype" jdbcType="BIGINT" />
+    <result column="activeid" property="activeid" jdbcType="BIGINT" />
+    <result column="createtime" property="createtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <resultMap id="BPrizeAndBaseResultMap" type="com.mk.ots.ticket.model.UPrizeRecord" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="mid" property="mid" jdbcType="BIGINT" />
+    <result column="prizeid" property="prizeid" jdbcType="BIGINT" />
+    <result column="prizeinfo" property="prizeinfo" jdbcType="VARCHAR" />
+    <result column="ostype" property="ostype" jdbcType="BIGINT" />
+    <result column="prizetype" property="prizetype" jdbcType="BIGINT" />
+    <result column="activeid" property="activeid" jdbcType="BIGINT" />
+    <result column="createtime" property="createtime" jdbcType="TIMESTAMP" />
+    <association property="bPrize" autoMapping="true" javaType="com.mk.ots.ticket.model.BPrize" column="prizeid" select="findBPrizeById">
+	</association>
+  </resultMap>
+ <resultMap id="BPromotionAndBaseResultMap" type="com.mk.ots.ticket.model.UPrizeRecord" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="mid" property="mid" jdbcType="BIGINT" />
+    <result column="prizeid" property="prizeid" jdbcType="BIGINT" />
+    <result column="prizeinfo" property="prizeinfo" jdbcType="VARCHAR" />
+    <result column="ostype" property="ostype" jdbcType="BIGINT" />
+    <result column="prizetype" property="prizetype" jdbcType="BIGINT" />
+    <result column="activeid" property="activeid" jdbcType="BIGINT" />
+    <result column="createtime" property="createtime" jdbcType="TIMESTAMP" />
+	 <association property="bPromotion" autoMapping="true" javaType="com.mk.ots.promo.model.BPromotion" column="prizeinfo" select="findBPromotionById">
+	</association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, mid, prizeid, prizeinfo, ostype, activeid, createtime,prizetype
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from u_prize_record
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+    <select id="findMaterialCountByMidAndAct" resultType="long" parameterType="java.lang.Long" >
+    select count(1)
+    from u_prize_record
+    where MID = #{mid}  and activeid = #{activeid} and prizetype=#{type}
+  </select>
+    <select id="selectCountByMidAndActiveIdAndOstypeAndTime" resultType="long"  parameterType="java.util.Map">
+    
+  SELECT  count(1) FROM u_prize_record 
+        WHERE MID = #{mid}  and activeid = #{activeid} 
+        <if test="ostype != null " >
+        
+        and ostype in (
+                    <foreach item="guard" index="index" collection="ostype" separator=","> 
+						#{guard} 
+                    </foreach>
+                    )
+        
+        </if>
+         <if test="createtime != null " >
+          AND createtime >= #{createtime}
+        </if> 
+        
+  </select>
+  
+    <select id="queryMyHistoryNotMiKePrize" resultMap="BPrizeAndBaseResultMap" parameterType="java.util.Map" >
+	    select * from u_prize_record where  MID = #{mid}  and activeid = #{activeid} and prizetype !=#{type}
+    </select>
+   <select id="queryMyHistoryMiKePrize" resultMap="BPromotionAndBaseResultMap" parameterType="java.util.Map" >
+	    select * from u_prize_record where  MID = #{mid}  and activeid = #{activeid} and prizetype =#{type}
+  </select>
+   <select id="findBPrizeById" resultType="com.mk.ots.ticket.model.BPrize"  parameterType="java.util.Map">
+  select * from b_prize where id=#{id,jdbcType=BIGINT}
+  </select>
+  <select id="findBPromotionById" resultType="com.mk.ots.promo.model.BPromotion"  parameterType="java.util.Map">
+     select * from b_promotion where id=#{promotionid,jdbcType=BIGINT} 
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from u_prize_record
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.ticket.model.UPrizeRecord" useGeneratedKeys="true" keyProperty="id">
+    insert into u_prize_record (id, mid, prizeid, 
+      prizeinfo, ostype, activeid, 
+      createtime,prizetype)
+    values (#{id,jdbcType=BIGINT}, #{mid,jdbcType=BIGINT}, #{prizeid,jdbcType=BIGINT}, 
+      #{prizeinfo,jdbcType=VARCHAR}, #{ostype,jdbcType=BIGINT}, #{activeid,jdbcType=BIGINT}, 
+      #{createtime,jdbcType=TIMESTAMP}, #{prizetype,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.ticket.model.UPrizeRecord" >
+    insert into u_prize_record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="mid != null" >
+        mid,
+      </if>
+      <if test="prizeid != null" >
+        prizeid,
+      </if>
+      <if test="prizeinfo != null" >
+        prizeinfo,
+      </if>
+      <if test="ostype != null" >
+        ostype,
+      </if>
+      <if test="activeid != null" >
+        activeid,
+      </if>
+      <if test="createtime != null" >
+        createtime,
+      </if>
+      <if test="prizetype != null" >
+        prizetype,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="mid != null" >
+        #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="prizeid != null" >
+        #{prizeid,jdbcType=BIGINT},
+      </if>
+      <if test="prizeinfo != null" >
+        #{prizeinfo,jdbcType=VARCHAR},
+      </if>
+      <if test="ostype != null" >
+        #{ostype,jdbcType=BIGINT},
+      </if>
+      <if test="activeid != null" >
+        #{activeid,jdbcType=BIGINT},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+       <if test="prizetype != null" >
+        #{prizetype,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.ticket.model.UPrizeRecord" >
+    update u_prize_record
+    <set >
+      <if test="mid != null" >
+        mid = #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="prizeid != null" >
+        prizeid = #{prizeid,jdbcType=BIGINT},
+      </if>
+      <if test="prizeinfo != null" >
+        prizeinfo = #{prizeinfo,jdbcType=VARCHAR},
+      </if>
+      <if test="ostype != null" >
+        ostype = #{ostype,jdbcType=BIGINT},
+      </if>
+      <if test="activeid != null" >
+        activeid = #{activeid,jdbcType=BIGINT},
+      </if>
+      <if test="createtime != null" >
+        createtime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="prizetype != null" >
+        prizetype = #{prizetype,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.ticket.model.UPrizeRecord" >
+    update u_prize_record
+    set mid = #{mid,jdbcType=BIGINT},
+      prizeid = #{prizeid,jdbcType=BIGINT},
+      prizeinfo = #{prizeinfo,jdbcType=VARCHAR},
+      ostype = #{ostype,jdbcType=BIGINT},
+      activeid = #{activeid,jdbcType=BIGINT},
+      createtime = #{createtime,jdbcType=TIMESTAMP},
+      prizetype = #{prizetype,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

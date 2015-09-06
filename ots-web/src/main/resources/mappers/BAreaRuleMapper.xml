@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.rule.model.BAreaRuleMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.rule.model.BAreaRule" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="rulecode" property="rulecode" jdbcType="INTEGER" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="createby" property="createby" jdbcType="INTEGER" />
+    <result column="updateby" property="updateby" jdbcType="INTEGER" />
+    <result column="createtime" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, rulecode, description, createby, updateby, createtime, updatetime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from b_area_rule
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from b_area_rule
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.rule.model.BAreaRule" >
+    insert into b_area_rule (id, rulecode, description, 
+      createby, updateby, createtime, 
+      updatetime)
+    values (#{id,jdbcType=BIGINT}, #{rulecode,jdbcType=INTEGER}, #{description,jdbcType=VARCHAR}, 
+      #{createby,jdbcType=INTEGER}, #{updateby,jdbcType=INTEGER}, #{createtime,jdbcType=TIMESTAMP}, 
+      #{updatetime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.rule.model.BAreaRule" >
+    insert into b_area_rule
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="rulecode != null" >
+        rulecode,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+      <if test="createby != null" >
+        createby,
+      </if>
+      <if test="updateby != null" >
+        updateby,
+      </if>
+      <if test="createtime != null" >
+        createtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="rulecode != null" >
+        #{rulecode,jdbcType=INTEGER},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="createby != null" >
+        #{createby,jdbcType=INTEGER},
+      </if>
+      <if test="updateby != null" >
+        #{updateby,jdbcType=INTEGER},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.rule.model.BAreaRule" >
+    update b_area_rule
+    <set >
+      <if test="rulecode != null" >
+        rulecode = #{rulecode,jdbcType=INTEGER},
+      </if>
+      <if test="description != null" >
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="createby != null" >
+        createby = #{createby,jdbcType=INTEGER},
+      </if>
+      <if test="updateby != null" >
+        updateby = #{updateby,jdbcType=INTEGER},
+      </if>
+      <if test="createtime != null" >
+        createtime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.rule.model.BAreaRule" >
+    update b_area_rule
+    set rulecode = #{rulecode,jdbcType=INTEGER},
+      description = #{description,jdbcType=VARCHAR},
+      createby = #{createby,jdbcType=INTEGER},
+      updateby = #{updateby,jdbcType=INTEGER},
+      createtime = #{createtime,jdbcType=TIMESTAMP},
+      updatetime = #{updatetime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

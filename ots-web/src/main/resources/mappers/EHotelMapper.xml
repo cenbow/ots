@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.EHotelMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.hotel.model.EHotelModel" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="hotelName" property="hotelname" jdbcType="VARCHAR" />
+    <result column="hotelContactName" property="hotelcontactname" jdbcType="VARCHAR" />
+    <result column="regTime" property="regtime" jdbcType="TIMESTAMP" />
+    <result column="disId" property="disid" jdbcType="INTEGER" />
+    <result column="detailAddr" property="detailaddr" jdbcType="VARCHAR" />
+    <result column="longitude" property="longitude" jdbcType="DECIMAL" />
+    <result column="latitude" property="latitude" jdbcType="DECIMAL" />
+    <result column="openTime" property="opentime" jdbcType="TIMESTAMP" />
+    <result column="repairTime" property="repairtime" jdbcType="TIMESTAMP" />
+    <result column="roomNum" property="roomnum" jdbcType="INTEGER" />
+    <result column="businessLicenseFront" property="businesslicensefront" jdbcType="VARCHAR" />
+    <result column="businessLicenseBack" property="businesslicenseback" jdbcType="VARCHAR" />
+    <result column="pms" property="pms" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="INTEGER" />
+    <result column="visible" property="visible" jdbcType="CHAR" />
+    <result column="reason" property="reason" jdbcType="VARCHAR" />
+    <result column="reasonTime" property="reasontime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updatetime" jdbcType="TIMESTAMP" />
+    <result column="priceState" property="pricestate" jdbcType="INTEGER" />
+    <result column="priceReason" property="pricereason" jdbcType="VARCHAR" />
+    <result column="pmsStatus" property="pmsstatus" jdbcType="INTEGER" />
+    <result column="pmsUser" property="pmsuser" jdbcType="VARCHAR" />
+    <result column="idCardFront" property="idcardfront" jdbcType="VARCHAR" />
+    <result column="idCardBack" property="idcardback" jdbcType="VARCHAR" />
+    <result column="retentionTime" property="retentiontime" jdbcType="CHAR" />
+    <result column="defaultLeaveTime" property="defaultleavetime" jdbcType="CHAR" />
+    <result column="hotelphone" property="hotelphone" jdbcType="VARCHAR" />
+    <result column="isNewPms" property="isnewpms" jdbcType="CHAR" />
+    <result column="introduction" property="introduction" jdbcType="LONGVARCHAR" />
+    <result column="traffic" property="traffic" jdbcType="LONGVARCHAR" />
+    <result column="hotelpic" property="hotelpic" jdbcType="LONGVARCHAR" />
+    <result column="peripheral" property="peripheral" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, hotelName, hotelContactName, regTime, disId, detailAddr, longitude, latitude, 
+    openTime, repairTime, roomNum, businessLicenseFront, businessLicenseBack, pms, state, 
+    visible, reason, reasonTime, updateTime, priceState, priceReason, pmsStatus, pmsUser, 
+    idCardFront, idCardBack, retentionTime, defaultLeaveTime, hotelphone, isNewPms
+  </sql>
+  <sql id="Blob_Column_List" >
+    introduction, traffic, hotelpic, peripheral
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from e_hotel
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <select id="selectByPms" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from e_hotel
+    where pms = #{pms}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from e_hotel
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insertSelective" parameterType="com.mk.ots.hotel.model.EHotelModel" >
+    insert into e_hotel
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="hotelname != null" >
+        hotelName,
+      </if>
+      <if test="hotelcontactname != null" >
+        hotelContactName,
+      </if>
+      <if test="regtime != null" >
+        regTime,
+      </if>
+      <if test="disid != null" >
+        disId,
+      </if>
+      <if test="detailaddr != null" >
+        detailAddr,
+      </if>
+      <if test="longitude != null" >
+        longitude,
+      </if>
+      <if test="latitude != null" >
+        latitude,
+      </if>
+      <if test="opentime != null" >
+        openTime,
+      </if>
+      <if test="repairtime != null" >
+        repairTime,
+      </if>
+      <if test="roomnum != null" >
+        roomNum,
+      </if>
+      <if test="businesslicensefront != null" >
+        businessLicenseFront,
+      </if>
+      <if test="businesslicenseback != null" >
+        businessLicenseBack,
+      </if>
+      <if test="pms != null" >
+        pms,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="visible != null" >
+        visible,
+      </if>
+      <if test="reason != null" >
+        reason,
+      </if>
+      <if test="reasontime != null" >
+        reasonTime,
+      </if>
+      <if test="updatetime != null" >
+        updateTime,
+      </if>
+      <if test="pricestate != null" >
+        priceState,
+      </if>
+      <if test="pricereason != null" >
+        priceReason,
+      </if>
+      <if test="pmsstatus != null" >
+        pmsStatus,
+      </if>
+      <if test="pmsuser != null" >
+        pmsUser,
+      </if>
+      <if test="idcardfront != null" >
+        idCardFront,
+      </if>
+      <if test="idcardback != null" >
+        idCardBack,
+      </if>
+      <if test="retentiontime != null" >
+        retentionTime,
+      </if>
+      <if test="defaultleavetime != null" >
+        defaultLeaveTime,
+      </if>
+      <if test="hotelphone != null" >
+        hotelphone,
+      </if>
+      <if test="isnewpms != null" >
+        isNewPms,
+      </if>
+      <if test="introduction != null" >
+        introduction,
+      </if>
+      <if test="traffic != null" >
+        traffic,
+      </if>
+      <if test="hotelpic != null" >
+        hotelpic,
+      </if>
+      <if test="peripheral != null" >
+        peripheral,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="hotelname != null" >
+        #{hotelname,jdbcType=VARCHAR},
+      </if>
+      <if test="hotelcontactname != null" >
+        #{hotelcontactname,jdbcType=VARCHAR},
+      </if>
+      <if test="regtime != null" >
+        #{regtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="disid != null" >
+        #{disid,jdbcType=INTEGER},
+      </if>
+      <if test="detailaddr != null" >
+        #{detailaddr,jdbcType=VARCHAR},
+      </if>
+      <if test="longitude != null" >
+        #{longitude,jdbcType=DECIMAL},
+      </if>
+      <if test="latitude != null" >
+        #{latitude,jdbcType=DECIMAL},
+      </if>
+      <if test="opentime != null" >
+        #{opentime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="repairtime != null" >
+        #{repairtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="roomnum != null" >
+        #{roomnum,jdbcType=INTEGER},
+      </if>
+      <if test="businesslicensefront != null" >
+        #{businesslicensefront,jdbcType=VARCHAR},
+      </if>
+      <if test="businesslicenseback != null" >
+        #{businesslicenseback,jdbcType=VARCHAR},
+      </if>
+      <if test="pms != null" >
+        #{pms,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=INTEGER},
+      </if>
+      <if test="visible != null" >
+        #{visible,jdbcType=CHAR},
+      </if>
+      <if test="reason != null" >
+        #{reason,jdbcType=VARCHAR},
+      </if>
+      <if test="reasontime != null" >
+        #{reasontime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pricestate != null" >
+        #{pricestate,jdbcType=INTEGER},
+      </if>
+      <if test="pricereason != null" >
+        #{pricereason,jdbcType=VARCHAR},
+      </if>
+      <if test="pmsstatus != null" >
+        #{pmsstatus,jdbcType=INTEGER},
+      </if>
+      <if test="pmsuser != null" >
+        #{pmsuser,jdbcType=VARCHAR},
+      </if>
+      <if test="idcardfront != null" >
+        #{idcardfront,jdbcType=VARCHAR},
+      </if>
+      <if test="idcardback != null" >
+        #{idcardback,jdbcType=VARCHAR},
+      </if>
+      <if test="retentiontime != null" >
+        #{retentiontime,jdbcType=CHAR},
+      </if>
+      <if test="defaultleavetime != null" >
+        #{defaultleavetime,jdbcType=CHAR},
+      </if>
+      <if test="hotelphone != null" >
+        #{hotelphone,jdbcType=VARCHAR},
+      </if>
+      <if test="isnewpms != null" >
+        #{isnewpms,jdbcType=CHAR},
+      </if>
+      <if test="introduction != null" >
+        #{introduction,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="traffic != null" >
+        #{traffic,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="hotelpic != null" >
+        #{hotelpic,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="peripheral != null" >
+        #{peripheral,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.hotel.model.EHotelModel" >
+    update e_hotel
+    <set >
+      <if test="hotelname != null" >
+        hotelName = #{hotelname,jdbcType=VARCHAR},
+      </if>
+      <if test="hotelcontactname != null" >
+        hotelContactName = #{hotelcontactname,jdbcType=VARCHAR},
+      </if>
+      <if test="regtime != null" >
+        regTime = #{regtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="disid != null" >
+        disId = #{disid,jdbcType=INTEGER},
+      </if>
+      <if test="detailaddr != null" >
+        detailAddr = #{detailaddr,jdbcType=VARCHAR},
+      </if>
+      <if test="longitude != null" >
+        longitude = #{longitude,jdbcType=DECIMAL},
+      </if>
+      <if test="latitude != null" >
+        latitude = #{latitude,jdbcType=DECIMAL},
+      </if>
+      <if test="opentime != null" >
+        openTime = #{opentime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="repairtime != null" >
+        repairTime = #{repairtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="roomnum != null" >
+        roomNum = #{roomnum,jdbcType=INTEGER},
+      </if>
+      <if test="businesslicensefront != null" >
+        businessLicenseFront = #{businesslicensefront,jdbcType=VARCHAR},
+      </if>
+      <if test="businesslicenseback != null" >
+        businessLicenseBack = #{businesslicenseback,jdbcType=VARCHAR},
+      </if>
+      <if test="pms != null" >
+        pms = #{pms,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=INTEGER},
+      </if>
+      <if test="visible != null" >
+        visible = #{visible,jdbcType=CHAR},
+      </if>
+      <if test="reason != null" >
+        reason = #{reason,jdbcType=VARCHAR},
+      </if>
+      <if test="reasontime != null" >
+        reasonTime = #{reasontime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updateTime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pricestate != null" >
+        priceState = #{pricestate,jdbcType=INTEGER},
+      </if>
+      <if test="pricereason != null" >
+        priceReason = #{pricereason,jdbcType=VARCHAR},
+      </if>
+      <if test="pmsstatus != null" >
+        pmsStatus = #{pmsstatus,jdbcType=INTEGER},
+      </if>
+      <if test="pmsuser != null" >
+        pmsUser = #{pmsuser,jdbcType=VARCHAR},
+      </if>
+      <if test="idcardfront != null" >
+        idCardFront = #{idcardfront,jdbcType=VARCHAR},
+      </if>
+      <if test="idcardback != null" >
+        idCardBack = #{idcardback,jdbcType=VARCHAR},
+      </if>
+      <if test="retentiontime != null" >
+        retentionTime = #{retentiontime,jdbcType=CHAR},
+      </if>
+      <if test="defaultleavetime != null" >
+        defaultLeaveTime = #{defaultleavetime,jdbcType=CHAR},
+      </if>
+      <if test="hotelphone != null" >
+        hotelphone = #{hotelphone,jdbcType=VARCHAR},
+      </if>
+      <if test="isnewpms != null" >
+        isNewPms = #{isnewpms,jdbcType=CHAR},
+      </if>
+      <if test="introduction != null" >
+        introduction = #{introduction,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="traffic != null" >
+        traffic = #{traffic,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="hotelpic != null" >
+        hotelpic = #{hotelpic,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="peripheral != null" >
+        peripheral = #{peripheral,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

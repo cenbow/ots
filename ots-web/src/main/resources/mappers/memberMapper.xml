@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.member.model.UMember">
+	<resultMap id="BaseResultMap" type="com.mk.ots.member.model.UMember">
+	    <id column="mid" jdbcType="BIGINT" property="mid" />
+	    <result column="loginName" jdbcType="VARCHAR" property="loginname" />
+	    <result column="password" jdbcType="CHAR" property="password" />
+	    <result column="passwordTime" jdbcType="TIMESTAMP" property="passwordtime" />
+	    <result column="payPassword" jdbcType="CHAR" property="paypassword" />
+	    <result column="name" jdbcType="VARCHAR" property="name" />
+	    <result column="sex" jdbcType="CHAR" property="sex" />
+	    <result column="birthdayYear" jdbcType="INTEGER" property="birthdayyear" />
+	    <result column="avatar" jdbcType="VARCHAR" property="avatar" />
+	    <result column="occupation" jdbcType="VARCHAR" property="occupation" />
+	    <result column="disId" jdbcType="BIGINT" property="disid" />
+	    <result column="company" jdbcType="VARCHAR" property="company" />
+	    <result column="school" jdbcType="VARCHAR" property="school" />
+	    <result column="birthland" jdbcType="VARCHAR" property="birthland" />
+	    <result column="selfIntroduction" jdbcType="VARCHAR" property="selfintroduction" />
+	    <result column="affectiveState" jdbcType="INTEGER" property="affectivestate" />
+	    <result column="interests" jdbcType="VARCHAR" property="interests" />
+	    <result column="cardtype" jdbcType="VARCHAR" property="cardtype" />
+	    <result column="Idcard" jdbcType="VARCHAR" property="idcard" />
+	    <result column="Idcardapplytime" jdbcType="TIMESTAMP" property="idcardapplytime" />
+	    <result column="source" jdbcType="VARCHAR" property="source" />
+	    <result column="regcode" jdbcType="VARCHAR" property="regcode" />
+	    <result column="cardorg" jdbcType="VARCHAR" property="cardorg" />
+	    <result column="score1" jdbcType="DECIMAL" property="score1" />
+	    <result column="score2" jdbcType="DECIMAL" property="score2" />
+	    <result column="score3" jdbcType="DECIMAL" property="score3" />
+	    <result column="level" jdbcType="BIGINT" property="level" />
+	    <result column="address" jdbcType="VARCHAR" property="address" />
+	    <result column="signature" jdbcType="VARCHAR" property="signature" />
+	    <result column="longitude" jdbcType="DECIMAL" property="longitude" />
+	    <result column="latitude" jdbcType="DECIMAL" property="latitude" />
+	    <result column="lastpostime" jdbcType="BIGINT" property="lastpostime" />
+	    <result column="footprint" jdbcType="INTEGER" property="footprint" />
+	    <result column="version" jdbcType="BIGINT" property="version" />
+	    <result column="enable" jdbcType="CHAR" property="enable" />
+	    <result column="createtime" jdbcType="TIMESTAMP" property="createtime" />
+	    <result column="givescore3" jdbcType="DECIMAL" property="givescore3" />
+	    <result column="openid" jdbcType="VARCHAR" property="openid" />
+	    <result column="email" jdbcType="LONGVARCHAR" property="email" />
+	    <result column="phone" jdbcType="LONGVARCHAR" property="phone" />
+	    <result column="cpName" jdbcType="LONGVARCHAR" property="cpname" />
+	    <result column="birthday" jdbcType="LONGVARCHAR" property="birthday" />
+	    <result column="phonePic" jdbcType="LONGVARCHAR" property="phonepic" />
+	    <result column="personPic" jdbcType="LONGVARCHAR" property="personpic" />
+	    <result column="channelid" jdbcType="VARCHAR" property="channelid" />
+	    <result column="devicetype" jdbcType="VARCHAR" property="devicetype" />
+	    <result column="marketsource" jdbcType="VARCHAR" property="marketsource" />
+	    <result column="appversion" jdbcType="VARCHAR" property="appversion" />
+	    <result column="ostype" jdbcType="VARCHAR" property="ostype" />
+	    <result column="regostype" jdbcType="VARCHAR" property="regostype" />
+	    <result column="osver" jdbcType="VARCHAR" property="osver" />
+	    <result column="weixinname" jdbcType="VARCHAR" property="weixinname" />
+	    <result column="comefrom" jdbcType="VARCHAR" property="comefrom" />
+	    <result column="comefromtype" jdbcType="VARCHAR" property="comefromtype" />
+   		<result column="hotelid" jdbcType="BIGINT" property="hotelid" />
+   		<result column="unionid" property="unionid" jdbcType="VARCHAR" />
+	  </resultMap>
+	  
+	  <sql id="Base_Column_List">
+    mid, loginName, password, passwordTime, payPassword, name, sex, birthdayYear, avatar, 
+    occupation, disId, company, school, birthland, selfIntroduction, affectiveState, 
+    interests, cardtype, Idcard, Idcardapplytime, source, regcode, cardorg, score1, score2, 
+    score3, level, address, signature, longitude, latitude, lastpostime, footprint, version, 
+    enable, createtime, givescore3, openid, channelid, devicetype, marketsource, appversion, 
+    ostype, osver, weixinname, comefrom, comefromtype, hotelid, unionid, regostype
+  	 </sql>
+
+	<select id="findMemberByLoginName" resultType="com.mk.ots.member.model.UMember" parameterType="java.util.Map">
+		select * from u_member where loginname = #{loginname} 
+		<if test="enable != null">
+			and enable = #{enable}
+		</if>
+	</select>
+	
+	<select id="findPushMember" resultType="com.mk.ots.member.model.UMember" parameterType="java.util.Map">
+		select * from u_member where 1=1 and channelid is not null and ostype is not null
+		<if test="phone != null">
+			and phone = #{phone}
+		</if>
+	</select>
+	<select id="findBindMemberByGroupid" resultType="com.mk.ots.member.model.UMember" parameterType="java.util.Map" >
+	    select u.* from bms_active_user_bind b left join u_member u on b.member_id=u.mid
+	    where b.group_id = #{groupid,jdbcType=VARCHAR} and u.channelid is not null and u.ostype is not null
+  	</select>
+	
+	<select id="findMemberById" resultType="com.mk.ots.member.model.UMember" parameterType="java.util.Map">
+		select * from u_member where mid = #{mid} 
+		<if test="enable != null">
+			and enable = #{enable}
+		</if>
+	</select>
+	
+	<select id="findMemberByUnionid" resultType="com.mk.ots.member.model.UMember" parameterType="java.util.Map">
+		select * from u_member where unionid = #{unionid}
+		<if test="enable != null">
+			and enable = #{enable}
+		</if>
+	</select>
+	
+	<select id="findMemberByPhoneAndUnionid" resultType="com.mk.ots.member.model.UMember" parameterType="java.util.Map">
+		select * from u_member where unionid = #{unionid} and phone = #{phone}
+	</select>
+	
+	<select id="countLoginPsdVerifyName" resultType="long" parameterType="java.util.Map">
+		select count(*) from u_member where mid = #{mid} and name = #{name}
+	</select>
+	
+	<update id="updateBaseInfo" parameterType="java.util.Map">
+		update u_member set name=#{name}, sex=#{sex}, birthday=#{birthday} where mid = #{mid}
+	</update>
+	
+	<update id="updatePhoneNum" parameterType="java.util.Map">
+		update u_member set phone=#{phonenum} where mid = #{mid}
+	</update>
+	
+	<update id="updatePayPwd" parameterType="java.util.Map">
+		update u_member set paypassword=#{newpwd} where mid = #{mid}
+	</update>
+	
+	<update id="updateUnionidAndName" parameterType="java.util.Map">
+		update u_member set name=#{name}, unionid=#{unionid} where mid = #{mid}
+	</update>
+	
+	<insert id="insert" parameterType="com.mk.ots.member.model.UMember" useGeneratedKeys="true" keyProperty="mid">
+    insert into u_member
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="loginname != null">
+        loginName,
+      </if>
+      <if test="password != null">
+        password,
+      </if>
+      <if test="passwordtime != null">
+        passwordTime,
+      </if>
+      <if test="paypassword != null">
+        payPassword,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="sex != null">
+        sex,
+      </if>
+      <if test="birthdayyear != null">
+        birthdayYear,
+      </if>
+      <if test="avatar != null">
+        avatar,
+      </if>
+      <if test="occupation != null">
+        occupation,
+      </if>
+      <if test="disid != null">
+        disId,
+      </if>
+      <if test="company != null">
+        company,
+      </if>
+      <if test="school != null">
+        school,
+      </if>
+      <if test="birthland != null">
+        birthland,
+      </if>
+      <if test="selfintroduction != null">
+        selfIntroduction,
+      </if>
+      <if test="affectivestate != null">
+        affectiveState,
+      </if>
+      <if test="interests != null">
+        interests,
+      </if>
+      <if test="cardtype != null">
+        cardtype,
+      </if>
+      <if test="idcard != null">
+        Idcard,
+      </if>
+      <if test="idcardapplytime != null">
+        Idcardapplytime,
+      </if>
+      <if test="source != null">
+        source,
+      </if>
+      <if test="regcode != null">
+        regcode,
+      </if>
+      <if test="cardorg != null">
+        cardorg,
+      </if>
+      <if test="score1 != null">
+        score1,
+      </if>
+      <if test="score2 != null">
+        score2,
+      </if>
+      <if test="score3 != null">
+        score3,
+      </if>
+      <if test="level != null">
+        level,
+      </if>
+      <if test="address != null">
+        address,
+      </if>
+      <if test="signature != null">
+        signature,
+      </if>
+      <if test="longitude != null">
+        longitude,
+      </if>
+      <if test="latitude != null">
+        latitude,
+      </if>
+      <if test="lastpostime != null">
+        lastpostime,
+      </if>
+      <if test="footprint != null">
+        footprint,
+      </if>
+      <if test="version != null">
+        version,
+      </if>
+      <if test="enable != null">
+        enable,
+      </if>
+      <if test="createtime != null">
+        createtime,
+      </if>
+      <if test="givescore3 != null">
+        givescore3,
+      </if>
+      <if test="openid != null">
+        openid,
+      </if>
+      <if test="channelid != null">
+        channelid,
+      </if>
+      <if test="devicetype != null">
+        devicetype,
+      </if>
+      <if test="marketsource != null">
+        marketsource,
+      </if>
+      <if test="appversion != null">
+        appversion,
+      </if>
+      <if test="ostype != null">
+        ostype,
+      </if>
+      <if test="osver != null">
+        osver,
+      </if>
+      <if test="weixinname != null">
+        weixinname,
+      </if>
+      <if test="comefrom != null">
+        comefrom,
+      </if>
+      <if test="email != null">
+        email,
+      </if>
+      <if test="phone != null">
+        phone,
+      </if>
+      <if test="cpname != null">
+        cpName,
+      </if>
+      <if test="birthday != null">
+        birthday,
+      </if>
+      <if test="phonepic != null">
+        phonePic,
+      </if>
+      <if test="personpic != null">
+        personPic,
+      </if>
+      <if test="comefromtype != null">
+        comefromtype,
+      </if>
+      <if test="hotelid != null">
+        hotelid,
+      </if>
+       <if test="unionid != null">
+        unionid,
+      </if>
+       <if test="regostype != null">
+        regostype,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="loginname != null">
+        #{loginname,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=CHAR},
+      </if>
+      <if test="passwordtime != null">
+        #{passwordtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="paypassword != null">
+        #{paypassword,jdbcType=CHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        #{sex,jdbcType=CHAR},
+      </if>
+      <if test="birthdayyear != null">
+        #{birthdayyear,jdbcType=INTEGER},
+      </if>
+      <if test="avatar != null">
+        #{avatar,jdbcType=VARCHAR},
+      </if>
+      <if test="occupation != null">
+        #{occupation,jdbcType=VARCHAR},
+      </if>
+      <if test="disid != null">
+        #{disid,jdbcType=BIGINT},
+      </if>
+      <if test="company != null">
+        #{company,jdbcType=VARCHAR},
+      </if>
+      <if test="school != null">
+        #{school,jdbcType=VARCHAR},
+      </if>
+      <if test="birthland != null">
+        #{birthland,jdbcType=VARCHAR},
+      </if>
+      <if test="selfintroduction != null">
+        #{selfintroduction,jdbcType=VARCHAR},
+      </if>
+      <if test="affectivestate != null">
+        #{affectivestate,jdbcType=INTEGER},
+      </if>
+      <if test="interests != null">
+        #{interests,jdbcType=VARCHAR},
+      </if>
+      <if test="cardtype != null">
+        #{cardtype,jdbcType=VARCHAR},
+      </if>
+      <if test="idcard != null">
+        #{idcard,jdbcType=VARCHAR},
+      </if>
+      <if test="idcardapplytime != null">
+        #{idcardapplytime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="source != null">
+        #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="regcode != null">
+        #{regcode,jdbcType=VARCHAR},
+      </if>
+      <if test="cardorg != null">
+        #{cardorg,jdbcType=VARCHAR},
+      </if>
+      <if test="score1 != null">
+        #{score1,jdbcType=DECIMAL},
+      </if>
+      <if test="score2 != null">
+        #{score2,jdbcType=DECIMAL},
+      </if>
+      <if test="score3 != null">
+        #{score3,jdbcType=DECIMAL},
+      </if>
+      <if test="level != null">
+        #{level,jdbcType=BIGINT},
+      </if>
+      <if test="address != null">
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="signature != null">
+        #{signature,jdbcType=VARCHAR},
+      </if>
+      <if test="longitude != null">
+        #{longitude,jdbcType=DECIMAL},
+      </if>
+      <if test="latitude != null">
+        #{latitude,jdbcType=DECIMAL},
+      </if>
+      <if test="lastpostime != null">
+        #{lastpostime,jdbcType=BIGINT},
+      </if>
+      <if test="footprint != null">
+        #{footprint,jdbcType=INTEGER},
+      </if>
+      <if test="version != null">
+        #{version,jdbcType=BIGINT},
+      </if>
+      <if test="enable != null">
+        #{enable,jdbcType=CHAR},
+      </if>
+      <if test="createtime != null">
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="givescore3 != null">
+        #{givescore3,jdbcType=DECIMAL},
+      </if>
+      <if test="openid != null">
+        #{openid,jdbcType=VARCHAR},
+      </if>
+      <if test="channelid != null">
+        #{channelid,jdbcType=VARCHAR},
+      </if>
+      <if test="devicetype != null">
+        #{devicetype,jdbcType=VARCHAR},
+      </if>
+      <if test="marketsource != null">
+        #{marketsource,jdbcType=VARCHAR},
+      </if>
+      <if test="appversion != null">
+        #{appversion,jdbcType=VARCHAR},
+      </if>
+      <if test="ostype != null">
+        #{ostype,jdbcType=VARCHAR},
+      </if>
+      <if test="osver != null">
+        #{osver,jdbcType=VARCHAR},
+      </if>
+      <if test="weixinname != null">
+        #{weixinname,jdbcType=VARCHAR},
+      </if>
+      <if test="comefrom != null">
+        #{comefrom,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        #{email,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="phone != null">
+        #{phone,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="cpname != null">
+        #{cpname,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="birthday != null">
+        #{birthday,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="phonepic != null">
+        #{phonepic,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="personpic != null">
+        #{personpic,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="comefromtype != null">
+        #{comefromtype,jdbcType=VARCHAR},
+      </if>
+      <if test="hotelid != null">
+        #{hotelid,jdbcType=BIGINT},
+      </if>
+       <if test="unionid != null">
+        #{unionid,jdbcType=VARCHAR},
+      </if>
+        <if test="regostype != null">
+        #{regostype,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.member.model.UMember">
+    update u_member
+    <set>
+      <if test="loginname != null">
+        loginName = #{loginname,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        password = #{password,jdbcType=CHAR},
+      </if>
+      <if test="passwordtime != null">
+        passwordTime = #{passwordtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="paypassword != null">
+        payPassword = #{paypassword,jdbcType=CHAR},
+      </if>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        sex = #{sex,jdbcType=CHAR},
+      </if>
+      <if test="birthdayyear != null">
+        birthdayYear = #{birthdayyear,jdbcType=INTEGER},
+      </if>
+      <if test="avatar != null">
+        avatar = #{avatar,jdbcType=VARCHAR},
+      </if>
+      <if test="occupation != null">
+        occupation = #{occupation,jdbcType=VARCHAR},
+      </if>
+      <if test="disid != null">
+        disId = #{disid,jdbcType=BIGINT},
+      </if>
+      <if test="company != null">
+        company = #{company,jdbcType=VARCHAR},
+      </if>
+      <if test="school != null">
+        school = #{school,jdbcType=VARCHAR},
+      </if>
+      <if test="birthland != null">
+        birthland = #{birthland,jdbcType=VARCHAR},
+      </if>
+      <if test="selfintroduction != null">
+        selfIntroduction = #{selfintroduction,jdbcType=VARCHAR},
+      </if>
+      <if test="affectivestate != null">
+        affectiveState = #{affectivestate,jdbcType=INTEGER},
+      </if>
+      <if test="interests != null">
+        interests = #{interests,jdbcType=VARCHAR},
+      </if>
+      <if test="cardtype != null">
+        cardtype = #{cardtype,jdbcType=VARCHAR},
+      </if>
+      <if test="idcard != null">
+        Idcard = #{idcard,jdbcType=VARCHAR},
+      </if>
+      <if test="idcardapplytime != null">
+        Idcardapplytime = #{idcardapplytime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="source != null">
+        source = #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="regcode != null">
+        regcode = #{regcode,jdbcType=VARCHAR},
+      </if>
+      <if test="cardorg != null">
+        cardorg = #{cardorg,jdbcType=VARCHAR},
+      </if>
+      <if test="score1 != null">
+        score1 = #{score1,jdbcType=DECIMAL},
+      </if>
+      <if test="score2 != null">
+        score2 = #{score2,jdbcType=DECIMAL},
+      </if>
+      <if test="score3 != null">
+        score3 = #{score3,jdbcType=DECIMAL},
+      </if>
+      <if test="level != null">
+        level = #{level,jdbcType=BIGINT},
+      </if>
+      <if test="address != null">
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="signature != null">
+        signature = #{signature,jdbcType=VARCHAR},
+      </if>
+      <if test="longitude != null">
+        longitude = #{longitude,jdbcType=DECIMAL},
+      </if>
+      <if test="latitude != null">
+        latitude = #{latitude,jdbcType=DECIMAL},
+      </if>
+      <if test="lastpostime != null">
+        lastpostime = #{lastpostime,jdbcType=BIGINT},
+      </if>
+      <if test="footprint != null">
+        footprint = #{footprint,jdbcType=INTEGER},
+      </if>
+      <if test="version != null">
+        version = #{version,jdbcType=BIGINT},
+      </if>
+      <if test="enable != null">
+        enable = #{enable,jdbcType=CHAR},
+      </if>
+      <if test="createtime != null">
+        createtime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="givescore3 != null">
+        givescore3 = #{givescore3,jdbcType=DECIMAL},
+      </if>
+      <if test="openid != null">
+        openid = #{openid,jdbcType=VARCHAR},
+      </if>
+      <if test="channelid != null">
+        channelid = #{channelid,jdbcType=VARCHAR},
+      </if>
+      <if test="devicetype != null">
+        devicetype = #{devicetype,jdbcType=VARCHAR},
+      </if>
+      <if test="marketsource != null">
+        marketsource = #{marketsource,jdbcType=VARCHAR},
+      </if>
+      <if test="appversion != null">
+        appversion = #{appversion,jdbcType=VARCHAR},
+      </if>
+      <if test="ostype != null">
+        ostype = #{ostype,jdbcType=VARCHAR},
+      </if>
+      <if test="osver != null">
+        osver = #{osver,jdbcType=VARCHAR},
+      </if>
+      <if test="weixinname != null">
+        weixinname = #{weixinname,jdbcType=VARCHAR},
+      </if>
+      <if test="comefrom != null">
+        comefrom = #{comefrom,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        email = #{email,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="phone != null">
+        phone = #{phone,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="cpname != null">
+        cpName = #{cpname,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="birthday != null">
+        birthday = #{birthday,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="phonepic != null">
+        phonePic = #{phonepic,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="personpic != null">
+        personPic = #{personpic,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="mid != null">
+        mid = #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="comefromtype != null">
+        comefromtype = #{comefromtype,jdbcType=VARCHAR},
+      </if>
+      <if test="hotelid != null">
+        hotelid = #{hotelid,jdbcType=BIGINT},
+      </if>
+      <if test="unionid != null">
+        unionid = #{unionid,jdbcType=VARCHAR},
+      </if>
+       <if test="regostype != null">
+        regostype = #{regostype,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where mid = #{mid,jdbcType=BIGINT}
+  </update>
+</mapper>

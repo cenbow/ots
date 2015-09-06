@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.order.bean.UUseTicketRecord" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.order.bean.UUseTicketRecord" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="usetime" property="usetime" jdbcType="TIMESTAMP" />
+    <result column="tid" property="tid" jdbcType="BIGINT" />
+    <result column="payid" property="payid" jdbcType="BIGINT" />
+    <result column="return" property="return" jdbcType="CHAR" />
+    <result column="mid" property="mid" jdbcType="BIGINT" />
+    <result column="cost" property="cost" jdbcType="DECIMAL" />
+    <result column="promotionid" property="promotionid" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, usetime, tid, payid, `return`, mid, cost, promotionid
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from u_useticket_record
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from u_useticket_record
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  
+  <delete id="deleteByPayidAndMid" parameterType="java.util.Map" >
+    delete from u_useticket_record
+    where  payid = #{payid,jdbcType=BIGINT}
+      and  mid = #{mid,jdbcType=BIGINT}
+       <if test="tid != null" >
+          and  tid = #{tid,jdbcType=BIGINT}
+      </if>
+      <if test="promotionid != null" >
+         and  promotionid = #{promotionid,jdbcType=BIGINT}
+      </if>
+  </delete>
+  
+  <insert id="insert" parameterType="com.mk.ots.order.bean.UUseTicketRecord"  useGeneratedKeys="true" keyProperty="id" >
+    insert into u_useticket_record (usetime, tid, 
+      payid, `return`, mid, cost, 
+      promotionid)
+    values (#{usetime,jdbcType=TIMESTAMP}, #{tid,jdbcType=BIGINT}, 
+      #{payid,jdbcType=BIGINT}, #{isreturn,jdbcType=CHAR}, #{mid,jdbcType=BIGINT}, #{cost,jdbcType=DECIMAL}, 
+      #{promotionid,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.order.bean.UUseTicketRecord" useGeneratedKeys="true" keyProperty="id">
+    insert into u_useticket_record
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="usetime != null" >
+        usetime,
+      </if>
+      <if test="tid != null" >
+        tid,
+      </if>
+      <if test="payid != null" >
+        payid,
+      </if>
+      <if test="return != null" >
+        `return`,
+      </if>
+      <if test="mid != null" >
+        mid,
+      </if>
+      <if test="cost != null" >
+        cost,
+      </if>
+      <if test="promotionid != null" >
+        promotionid,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="usetime != null" >
+        #{usetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="tid != null" >
+        #{tid,jdbcType=BIGINT},
+      </if>
+      <if test="payid != null" >
+        #{payid,jdbcType=BIGINT},
+      </if>
+      <if test="return != null" >
+        #{isreturn,jdbcType=CHAR},
+      </if>
+      <if test="mid != null" >
+        #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="cost != null" >
+        #{cost,jdbcType=DECIMAL},
+      </if>
+      <if test="promotionid != null" >
+        #{promotionid,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.order.bean.UUseTicketRecord" >
+    update u_useticket_record
+    <set >
+      <if test="usetime != null" >
+        usetime = #{usetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="tid != null" >
+        tid = #{tid,jdbcType=BIGINT},
+      </if>
+      <if test="payid != null" >
+        payid = #{payid,jdbcType=BIGINT},
+      </if>
+      <if test="return != null" >
+        `return` = #{isreturn,jdbcType=CHAR},
+      </if>
+      <if test="mid != null" >
+        mid = #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="cost != null" >
+        cost = #{cost,jdbcType=DECIMAL},
+      </if>
+      <if test="promotionid != null" >
+        promotionid = #{promotionid,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.order.bean.UUseTicketRecord" >
+    update u_useticket_record
+    set usetime = #{usetime,jdbcType=TIMESTAMP},
+      tid = #{tid,jdbcType=BIGINT},
+      payid = #{payid,jdbcType=BIGINT},
+      `return` = #{isreturn,jdbcType=CHAR},
+      mid = #{mid,jdbcType=BIGINT},
+      cost = #{cost,jdbcType=DECIMAL},
+      promotionid = #{promotionid,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>
