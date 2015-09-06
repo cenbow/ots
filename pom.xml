@@ -695,8 +695,8 @@
 	</build>
 	<modules>
 		<module>ots-commons</module>
-		<module>ots-rs-face</module>
-		<module>ots-rs-biz</module>
+		<module>ots-fun-face</module>
+		<module>ots-fun-biz</module>
 		<module>ots-ord-biz</module>
 		<module>ots-ord-face</module>
 		<module>ots-pay-face</module>

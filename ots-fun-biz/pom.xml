@@ -6,8 +6,8 @@
 		<artifactId>ots-all-parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>ots-rs-biz</artifactId>
-	<name>ots-rs-biz</name>
+	<artifactId>ots-fun-biz</artifactId>
+	<name>ots-fun-biz</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -15,7 +15,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.mk</groupId>
-			<artifactId>ots-rs-face</artifactId>
+			<artifactId>ots-fun-face</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
