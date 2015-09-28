@@ -763,6 +763,46 @@
 		</dependency>
 
 
+		<dependency>
+			<groupId>com.mk</groupId>
+			<artifactId>ots-fun-face</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mk</groupId>
+			<artifactId>ots-fun-biz</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mk</groupId>
+			<artifactId>ots-ord-face</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mk</groupId>
+			<artifactId>ots-ord-biz</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mk</groupId>
+			<artifactId>ots-pay-face</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mk</groupId>
+			<artifactId>ots-pay-biz</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mk</groupId>
+			<artifactId>ots-pro-face</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mk</groupId>
+			<artifactId>ots-pro-biz</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>ots</finalName>
