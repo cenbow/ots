@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.TRecommendpositionMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.recommend.model.TRecommendposition" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="PositionCode" property="positioncode" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="deleted" property="deleted" jdbcType="CHAR" />
+    <result column="updateTime" property="updatetime" jdbcType="TIMESTAMP" />
+    <result column="createTime" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="positionName" property="positionname" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, PositionCode, description, deleted, updateTime, createTime, positionName
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_recommendposition
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_recommendposition
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.recommend.model.TRecommendposition" >
+    insert into t_recommendposition (id, PositionCode, description, 
+      deleted, updateTime, createTime, 
+      positionName)
+    values (#{id,jdbcType=INTEGER}, #{positioncode,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, 
+      #{deleted,jdbcType=CHAR}, #{updatetime,jdbcType=TIMESTAMP}, #{createtime,jdbcType=TIMESTAMP}, 
+      #{positionname,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.recommend.model.TRecommendposition" >
+    insert into t_recommendposition
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="positioncode != null" >
+        PositionCode,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+      <if test="deleted != null" >
+        deleted,
+      </if>
+      <if test="updatetime != null" >
+        updateTime,
+      </if>
+      <if test="createtime != null" >
+        createTime,
+      </if>
+      <if test="positionname != null" >
+        positionName,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="positioncode != null" >
+        #{positioncode,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="deleted != null" >
+        #{deleted,jdbcType=CHAR},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="positionname != null" >
+        #{positionname,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.recommend.model.TRecommendposition" >
+    update t_recommendposition
+    <set >
+      <if test="positioncode != null" >
+        PositionCode = #{positioncode,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="deleted != null" >
+        deleted = #{deleted,jdbcType=CHAR},
+      </if>
+      <if test="updatetime != null" >
+        updateTime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createtime != null" >
+        createTime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="positionname != null" >
+        positionName = #{positionname,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.recommend.model.TRecommendposition" >
+    update t_recommendposition
+    set PositionCode = #{positioncode,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
+      deleted = #{deleted,jdbcType=CHAR},
+      updateTime = #{updatetime,jdbcType=TIMESTAMP},
+      createTime = #{createtime,jdbcType=TIMESTAMP},
+      positionName = #{positionname,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.CashBackMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.hotel.model.CashBackModel" >
+    <id column="ID" property="id" jdbcType="BIGINT" />
+    <result column="ROLE_ID" property="roleId" jdbcType="BIGINT" />
+    <result column="HOTEL_ID" property="hotelId" jdbcType="BIGINT" />
+    <result column="ROOM_TYPE_ID" property="roomTypeId" jdbcType="BIGINT" />
+    <result column="RETURN_PRICE" property="returnPrice" jdbcType="DECIMAL" />
+    <result column="RETURN_DATE" property="returnDate" jdbcType="DATE" />
+    <result column="STATE" property="state" jdbcType="CHAR" />
+    <result column="UPDATE_DATE" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="UPDATE_BY" property="updateBy" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, ROLE_ID, HOTEL_ID, ROOM_TYPE_ID, RETURN_PRICE, RETURN_DATE, STATE, UPDATE_DATE, 
+    UPDATE_BY
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from pc_return_price
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from pc_return_price
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.hotel.model.CashBackModel" >
+    insert into pc_return_price (ID, ROLE_ID, HOTEL_ID, 
+      ROOM_TYPE_ID, RETURN_PRICE, RETURN_DATE, 
+      STATE, UPDATE_DATE, UPDATE_BY
+      )
+    values (#{id,jdbcType=BIGINT}, #{roleId,jdbcType=BIGINT}, #{hotelId,jdbcType=BIGINT}, 
+      #{roomTypeId,jdbcType=BIGINT}, #{returnPrice,jdbcType=DECIMAL}, #{returnDate,jdbcType=DATE}, 
+      #{state,jdbcType=CHAR}, #{updateDate,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.hotel.model.CashBackModel" >
+    insert into pc_return_price
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="roleId != null" >
+        ROLE_ID,
+      </if>
+      <if test="hotelId != null" >
+        HOTEL_ID,
+      </if>
+      <if test="roomTypeId != null" >
+        ROOM_TYPE_ID,
+      </if>
+      <if test="returnPrice != null" >
+        RETURN_PRICE,
+      </if>
+      <if test="returnDate != null" >
+        RETURN_DATE,
+      </if>
+      <if test="state != null" >
+        STATE,
+      </if>
+      <if test="updateDate != null" >
+        UPDATE_DATE,
+      </if>
+      <if test="updateBy != null" >
+        UPDATE_BY,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="roleId != null" >
+        #{roleId,jdbcType=BIGINT},
+      </if>
+      <if test="hotelId != null" >
+        #{hotelId,jdbcType=BIGINT},
+      </if>
+      <if test="roomTypeId != null" >
+        #{roomTypeId,jdbcType=BIGINT},
+      </if>
+      <if test="returnPrice != null" >
+        #{returnPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="returnDate != null" >
+        #{returnDate,jdbcType=DATE},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=CHAR},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        #{updateBy,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.hotel.model.CashBackModel" >
+    update pc_return_price
+    <set >
+      <if test="roleId != null" >
+        ROLE_ID = #{roleId,jdbcType=BIGINT},
+      </if>
+      <if test="hotelId != null" >
+        HOTEL_ID = #{hotelId,jdbcType=BIGINT},
+      </if>
+      <if test="roomTypeId != null" >
+        ROOM_TYPE_ID = #{roomTypeId,jdbcType=BIGINT},
+      </if>
+      <if test="returnPrice != null" >
+        RETURN_PRICE = #{returnPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="returnDate != null" >
+        RETURN_DATE = #{returnDate,jdbcType=DATE},
+      </if>
+      <if test="state != null" >
+        STATE = #{state,jdbcType=CHAR},
+      </if>
+      <if test="updateDate != null" >
+        UPDATE_DATE = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        UPDATE_BY = #{updateBy,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.hotel.model.CashBackModel" >
+    update pc_return_price
+    set ROLE_ID = #{roleId,jdbcType=BIGINT},
+      HOTEL_ID = #{hotelId,jdbcType=BIGINT},
+      ROOM_TYPE_ID = #{roomTypeId,jdbcType=BIGINT},
+      RETURN_PRICE = #{returnPrice,jdbcType=DECIMAL},
+      RETURN_DATE = #{returnDate,jdbcType=DATE},
+      STATE = #{state,jdbcType=CHAR},
+      UPDATE_DATE = #{updateDate,jdbcType=TIMESTAMP},
+      UPDATE_BY = #{updateBy,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <select id="findCashBack" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from pc_return_price where state=1    
+    	<if test="hotelid != null" >
+         	and hotel_id=#{hotelid}
+      	</if>
+      	<if test="roomtypeid != null" >
+         	and ROOM_TYPE_ID=#{roomtypeid}
+      	</if>
+      	<if test="begindate != null and enddate != null" >
+         	and return_date between #{begindate} and #{enddate}
+      	</if>
+     order by room_type_id, return_date
+  </select>
+</mapper>

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.BOrderBusinessLogMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.order.model.BOrderBusinessLog" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="orderId" property="orderid" jdbcType="BIGINT" />
+    <result column="orderStatus" property="orderstatus" jdbcType="INTEGER" />
+    <result column="oldOrderStatus" property="oldorderstatus" jdbcType="INTEGER" />
+    <result column="operateUser" property="operateuser" jdbcType="VARCHAR" />
+    <result column="bussinessCode" property="bussinesscode" jdbcType="VARCHAR" />
+    <result column="businessParams" property="businessparams" jdbcType="VARCHAR" />
+    <result column="businessDesc" property="businessdesc" jdbcType="VARCHAR" />
+    <result column="businessException" property="businessexception" jdbcType="VARCHAR" />
+    <result column="createTime" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="operateName" property="operatename" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, orderId, orderStatus, oldOrderStatus, operateUser, bussinessCode, businessParams, 
+    businessDesc, businessException, createTime, operateName
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from b_orderbusiness_log
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectByOrderId" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from b_orderbusiness_log
+    where orderId = #{orderId,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from b_orderbusiness_log
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.order.model.BOrderBusinessLog" >
+    insert into b_orderbusiness_log (id, orderId, orderStatus, 
+      oldOrderStatus, operateUser, bussinessCode, 
+      businessParams, businessDesc, businessException, 
+      createTime, operateName)
+    values (#{id,jdbcType=BIGINT}, #{orderid,jdbcType=BIGINT}, #{orderstatus,jdbcType=INTEGER}, 
+      #{oldorderstatus,jdbcType=INTEGER}, #{operateuser,jdbcType=VARCHAR}, #{bussinesscode,jdbcType=VARCHAR}, 
+      #{businessparams,jdbcType=VARCHAR}, #{businessdesc,jdbcType=VARCHAR}, #{businessexception,jdbcType=VARCHAR}, 
+      #{createtime,jdbcType=TIMESTAMP}, #{operatename,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.order.model.BOrderBusinessLog" >
+    insert into b_orderbusiness_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="orderid != null" >
+        orderId,
+      </if>
+      <if test="orderstatus != null" >
+        orderStatus,
+      </if>
+      <if test="oldorderstatus != null" >
+        oldOrderStatus,
+      </if>
+      <if test="operateuser != null" >
+        operateUser,
+      </if>
+      <if test="bussinesscode != null" >
+        bussinessCode,
+      </if>
+      <if test="businessparams != null" >
+        businessParams,
+      </if>
+      <if test="businessdesc != null" >
+        businessDesc,
+      </if>
+      <if test="businessexception != null" >
+        businessException,
+      </if>
+      <if test="createtime != null" >
+        createTime,
+      </if>
+      <if test="operatename != null" >
+        operateName,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="orderid != null" >
+        #{orderid,jdbcType=BIGINT},
+      </if>
+      <if test="orderstatus != null" >
+        #{orderstatus,jdbcType=INTEGER},
+      </if>
+      <if test="oldorderstatus != null" >
+        #{oldorderstatus,jdbcType=INTEGER},
+      </if>
+      <if test="operateuser != null" >
+        #{operateuser,jdbcType=VARCHAR},
+      </if>
+      <if test="bussinesscode != null" >
+        #{bussinesscode,jdbcType=VARCHAR},
+      </if>
+      <if test="businessparams != null" >
+        #{businessparams,jdbcType=VARCHAR},
+      </if>
+      <if test="businessdesc != null" >
+        #{businessdesc,jdbcType=VARCHAR},
+      </if>
+      <if test="businessexception != null" >
+        #{businessexception,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="operatename != null" >
+        #{operatename,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.order.model.BOrderBusinessLog" >
+    update b_orderbusiness_log
+    <set >
+      <if test="orderid != null" >
+        orderId = #{orderid,jdbcType=BIGINT},
+      </if>
+      <if test="orderstatus != null" >
+        orderStatus = #{orderstatus,jdbcType=INTEGER},
+      </if>
+      <if test="oldorderstatus != null" >
+        oldOrderStatus = #{oldorderstatus,jdbcType=INTEGER},
+      </if>
+      <if test="operateuser != null" >
+        operateUser = #{operateuser,jdbcType=VARCHAR},
+      </if>
+      <if test="bussinesscode != null" >
+        bussinessCode = #{bussinesscode,jdbcType=VARCHAR},
+      </if>
+      <if test="businessparams != null" >
+        businessParams = #{businessparams,jdbcType=VARCHAR},
+      </if>
+      <if test="businessdesc != null" >
+        businessDesc = #{businessdesc,jdbcType=VARCHAR},
+      </if>
+      <if test="businessexception != null" >
+        businessException = #{businessexception,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        createTime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="operatename != null" >
+        operateName = #{operatename,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.order.model.BOrderBusinessLog" >
+    update b_orderbusiness_log
+    set orderId = #{orderid,jdbcType=BIGINT},
+      orderStatus = #{orderstatus,jdbcType=INTEGER},
+      oldOrderStatus = #{oldorderstatus,jdbcType=INTEGER},
+      operateUser = #{operateuser,jdbcType=VARCHAR},
+      bussinessCode = #{bussinesscode,jdbcType=VARCHAR},
+      businessParams = #{businessparams,jdbcType=VARCHAR},
+      businessDesc = #{businessdesc,jdbcType=VARCHAR},
+      businessException = #{businessexception,jdbcType=VARCHAR},
+      createTime = #{createtime,jdbcType=TIMESTAMP},
+      operateName = #{operatename,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

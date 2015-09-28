@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.promo.model.BPromotion" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.promo.model.BPromotion" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="Createtime" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="Begintime" property="begintime" jdbcType="TIMESTAMP" />
+    <result column="Endtime" property="endtime" jdbcType="TIMESTAMP" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="isticket" property="isticket" jdbcType="CHAR" />
+    <result column="num" property="num" jdbcType="INTEGER" />
+    <result column="classname" property="classname" jdbcType="VARCHAR" />
+    <result column="isota" property="isota" jdbcType="CHAR" />
+    <result column="otapre" property="otapre" jdbcType="DECIMAL" />
+    <result column="activitiesid" property="activitiesid" jdbcType="BIGINT" />
+    <result column="pic" property="pic" jdbcType="VARCHAR" />
+    <result column="version" property="version" jdbcType="BIGINT" />
+    <result column="info" property="info" jdbcType="LONGVARCHAR" />
+    <result column="note" property="note" jdbcType="LONGVARCHAR" />
+    <result column="isinstance" property="isinstance" jdbcType="CHAR" />
+    <result column="weight" property="weight" jdbcType="BIGINT" />
+    <!-- add by zyj 20150617  start -->
+    <result column="totalnum" property="totalnum" jdbcType="BIGINT" />
+    <result column="plannum" property="plannum" jdbcType="BIGINT" />
+    <result column="protype" property="protype" jdbcType="INTEGER" />
+    <result column="onlineprice" property="onlineprice" jdbcType="DECIMAL" />
+    <result column="offlineprice" property="offlineprice" jdbcType="DECIMAL" />
+    <!-- add by zyj 20150617  end -->
+    <result column="expiretype" property="expiretype" jdbcType="INTEGER" />
+    <result column="expiredaynum" property="expiredaynum" jdbcType="INTEGER" />
+    <result column="effectivetype" property="effectivetype" jdbcType="INTEGER" />
+    <result column="platformtype" property="platformtype" jdbcType="INTEGER" />
+    <result column="sourcecdkey" property="sourcecdkey" jdbcType="VARCHAR" />
+    <result column="channelid" property="channelid" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, name, Createtime, Begintime, Endtime, type, isticket, num, classname, isota, 
+    otapre, activitiesid, pic, version, isinstance, weight,
+    totalnum,plannum,protype,onlineprice,offlineprice, expiretype, expiredaynum, 
+    effectivetype,platformtype,sourcecdkey,channelid,description
+  </sql>
+  <sql id="Blob_Column_List" >
+    info, note
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from b_promotion
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from b_promotion
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.promo.model.BPromotion" useGeneratedKeys="true" keyProperty="id">
+    insert into b_promotion (name, Createtime, 
+      Begintime, Endtime, type, 
+      isticket, num, classname, 
+      isota, otapre, activitiesid, 
+      pic, version, info, 
+      note, isinstance, weight,
+      totalnum,plannum,protype,onlineprice,offlineprice, expiretype, expiredaynum, 
+      effectivetype,platformtype,sourcecdkey,channelid,description)
+    values ( #{name,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, 
+      #{begintime,jdbcType=TIMESTAMP}, #{endtime,jdbcType=TIMESTAMP}, #{type,jdbcType=INTEGER}, 
+      #{isticket,jdbcType=CHAR}, #{num,jdbcType=INTEGER}, #{classname,jdbcType=VARCHAR}, 
+      #{isota,jdbcType=CHAR}, #{otapre,jdbcType=DECIMAL}, #{activitiesid,jdbcType=BIGINT}, 
+      #{pic,jdbcType=VARCHAR}, #{version,jdbcType=BIGINT}, #{info,jdbcType=LONGVARCHAR}, 
+      #{note,jdbcType=LONGVARCHAR}, #{isinstance,jdbcType=CHAR}, #{weight,jdbcType=BIGINT},
+      #{totalnum,jdbcType=BIGINT}, #{plannum,jdbcType=BIGINT},#{protype,jdbcType=INTEGER},
+      #{onlineprice,jdbcType=DECIMAL},#{offlineprice,jdbcType=DECIMAL},
+      #{expiretype,jdbcType=INTEGER},#{expiredaynum,jdbcType=INTEGER},#{effectivetype,jdbcType=INTEGER},
+      #{platformtype,jdbcType=INTEGER}, #{sourcecdkey,jdbcType=VARCHAR}, #{channelid,jdbcType=BIGINT},
+      #{description,jdbcType=VARCHAR}
+      
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.promo.model.BPromotion" >
+    insert into b_promotion
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+      <if test="createtime != null" >
+        Createtime,
+      </if>
+      <if test="begintime != null" >
+        Begintime,
+      </if>
+      <if test="endtime != null" >
+        Endtime,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="isticket != null" >
+        isticket,
+      </if>
+      <if test="num != null" >
+        num,
+      </if>
+      <if test="classname != null" >
+        classname,
+      </if>
+      <if test="isota != null" >
+        isota,
+      </if>
+      <if test="otapre != null" >
+        otapre,
+      </if>
+      <if test="activitiesid != null" >
+        activitiesid,
+      </if>
+      <if test="pic != null" >
+        pic,
+      </if>
+      <if test="version != null" >
+        version,
+      </if>
+      <if test="info != null" >
+        info,
+      </if>
+      <if test="note != null" >
+        note,
+      </if>
+       <if test="isinstance != null" >
+        isinstance,
+      </if>
+       <if test="weight != null" >
+        weight,
+      </if>
+       <!-- add by zyj 20150618 start -->
+       <if test="totalnum != null" > 
+      	totalnum ,
+      </if>
+       <if test="plannum != null" >
+      	plannum ,
+      </if>
+       <if test="protype != null" >
+      	protype ,
+      </if>
+       <if test="onlineprice != null" >
+      	onlineprice ,
+      </if>
+       <if test="offlineprice != null" >
+      	offlineprice ,
+      </if>
+       <!-- add by zyj 20150618 end -->
+      <if test="expiretype != null" >
+      	expiretype ,
+      </if>
+       <if test="expiredaynum != null" >
+      	expiredaynum ,
+      </if>
+      <if test="effectivetype != null" >
+      	effectivetype ,
+      </if>
+      <if test="platformtype != null" >
+      	platformtype ,
+      </if>
+      <if test="sourcecdkey != null" >
+      	sourcecdkey ,
+      </if>
+      <if test="channelid != null" >
+      	channelid ,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="begintime != null" >
+        #{begintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null" >
+        #{endtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="isticket != null" >
+        #{isticket,jdbcType=CHAR},
+      </if>
+      <if test="num != null" >
+        #{num,jdbcType=INTEGER},
+      </if>
+      <if test="classname != null" >
+        #{classname,jdbcType=VARCHAR},
+      </if>
+      <if test="isota != null" >
+        #{isota,jdbcType=CHAR},
+      </if>
+      <if test="otapre != null" >
+        #{otapre,jdbcType=DECIMAL},
+      </if>
+      <if test="activitiesid != null" >
+        #{activitiesid,jdbcType=BIGINT},
+      </if>
+      <if test="pic != null" >
+        #{pic,jdbcType=VARCHAR},
+      </if>
+      <if test="version != null" >
+        #{version,jdbcType=BIGINT},
+      </if>
+      <if test="info != null" >
+        #{info,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="note != null" >
+        #{note,jdbcType=LONGVARCHAR},
+      </if>
+       <if test="isinstance != null" >
+        #{isinstance,jdbcType=CHAR},
+      </if>
+      <if test="weight != null" >
+        #{weight,jdbcType=BIGINT},
+      </if>
+        <!-- add by zyj 20150618 start -->
+       <if test="totalnum != null" > 
+      	#{totalnum,jdbcType=BIGINT},
+      </if>
+       <if test="plannum != null" >
+      	#{plannum,jdbcType=BIGINT},
+      </if>
+       <if test="protype != null" >
+        #{protype,jdbcType=INTEGER},
+      </if>
+       <if test="onlineprice != null" >
+      	#{onlineprice,jdbcType=DECIMAL},
+      </if>
+       <if test="offlineprice != null" >
+      	#{offlineprice,jdbcType=DECIMAL},
+      </if>
+       <!-- add by zyj 20150618 end -->
+        <if test="expiretype != null" >
+      	#{expiretype,jdbcType=INTEGER},
+      </if>
+       <if test="expiredaynum != null" >
+      	#{expiredaynum,jdbcType=INTEGER},
+      </if>
+       <if test="effectivetype != null" >
+      	#{effectivetype,jdbcType=INTEGER},
+      </if>
+       <if test="platformtype != null" >
+      	#{platformtype,jdbcType=INTEGER},
+      </if>
+       <if test="sourcecdkey != null" >
+      	#{sourcecdkey,jdbcType=VARCHAR},
+      </if>
+       <if test="channelid != null" >
+      	#{channelid,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.promo.model.BPromotion" >
+    update b_promotion
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        Createtime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="begintime != null" >
+        Begintime = #{begintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null" >
+        Endtime = #{endtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="isticket != null" >
+        isticket = #{isticket,jdbcType=CHAR},
+      </if>
+      <if test="num != null" >
+        num = #{num,jdbcType=INTEGER},
+      </if>
+      <if test="classname != null" >
+        classname = #{classname,jdbcType=VARCHAR},
+      </if>
+      <if test="isota != null" >
+        isota = #{isota,jdbcType=CHAR},
+      </if>
+      <if test="otapre != null" >
+        otapre = #{otapre,jdbcType=DECIMAL},
+      </if>
+      <if test="activitiesid != null" >
+        activitiesid = #{activitiesid,jdbcType=BIGINT},
+      </if>
+      <if test="pic != null" >
+        pic = #{pic,jdbcType=VARCHAR},
+      </if>
+      <if test="version != null" >
+        version = #{version,jdbcType=BIGINT},
+      </if>
+      <if test="info != null" >
+        info = #{info,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="note != null" >
+        note = #{note,jdbcType=LONGVARCHAR},
+      </if>
+       <if test="isinstance != null" >
+       isinstance  = #{isinstance,jdbcType=CHAR},
+      </if>
+      <if test="weight != null" >
+      	weight  = #{weight,jdbcType=BIGINT},
+      </if>
+      <!-- add by zyj 20150617 start -->
+       <if test="totalnum != null" > 
+      	totalnum  = #{totalnum,jdbcType=BIGINT},
+      </if>
+       <if test="plannum != null" >
+      	plannum  = #{plannum,jdbcType=BIGINT},
+      </if>
+       <if test="protype != null" >
+      	protype  = #{protype,jdbcType=INTEGER},
+      </if>
+       <if test="onlineprice != null" >
+      	onlineprice  = #{onlineprice,jdbcType=DECIMAL},
+      </if>
+       <if test="offlineprice != null" >
+      	offlineprice  = #{offlineprice,jdbcType=DECIMAL},
+      </if>
+       <!-- add by zyj 20150617 end -->
+      <if test="expiretype != null" >
+      	expiretype  = #{expiretype,jdbcType=INTEGER},
+      </if>
+      <if test="expiredaynum != null" >
+      	expiredaynum  = #{expiredaynum,jdbcType=INTEGER},
+      </if>
+      <if test="effectivetype != null" >
+      	effectivetype  = #{effectivetype,jdbcType=INTEGER},
+      </if>
+      <if test="platformtype != null" >
+      	platformtype  = #{platformtype,jdbcType=INTEGER},
+      </if>
+       <if test="sourcecdkey != null" >
+      	sourcecdkey  = #{sourcecdkey,jdbcType=VARCHAR},
+      </if>
+       <if test="channelid != null" >
+      	channelid  = #{channelid,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.promo.model.BPromotion" >
+    update b_promotion 
+    set name = #{name,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
+      Createtime = #{createtime,jdbcType=TIMESTAMP},
+      Begintime = #{begintime,jdbcType=TIMESTAMP},
+      Endtime = #{endtime,jdbcType=TIMESTAMP},
+      type = #{type,jdbcType=INTEGER},
+      isticket = #{isticket,jdbcType=CHAR},
+      num = #{num,jdbcType=INTEGER},
+      classname = #{classname,jdbcType=VARCHAR},
+      isota = #{isota,jdbcType=CHAR},
+      otapre = #{otapre,jdbcType=DECIMAL},
+      activitiesid = #{activitiesid,jdbcType=BIGINT},
+      pic = #{pic,jdbcType=VARCHAR},
+      version = #{version,jdbcType=BIGINT},
+      info = #{info,jdbcType=LONGVARCHAR},
+      note = #{note,jdbcType=LONGVARCHAR},
+      isinstance  = #{isinstance,jdbcType=CHAR},
+      weight  = #{weight,jdbcType=BIGINT},
+      <!-- add by zyj 20150617  start -->
+      totalnum  = #{totalnum,jdbcType=BIGINT},
+      plannum   = #{plannum,jdbcType=BIGINT},
+      protype   = #{protype,jdbcType=INTEGER},
+      onlineprice  = #{onlineprice,jdbcType=DECIMAL},
+      offlineprice = #{offlineprice,jdbcType=DECIMAL},
+      <!-- add by zyj 20150617  end -->
+      expiretype  = #{expiretype,jdbcType=INTEGER},
+      expiredaynum = #{expiredaynum,jdbcType=INTEGER},
+      effectivetype = #{effectivetype,jdbcType=INTEGER},
+      platformtype = #{platformtype,jdbcType=INTEGER},
+      sourcecdkey = #{sourcecdkey,jdbcType=VARCHAR},
+      channelid =  #{channelid,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="findByPromotionType" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+  	 select 
+   		 <include refid="Base_Column_List" />
+   		 ,
+   		 <include refid="Blob_Column_List" />
+    from b_promotion
+  	  where  type = #{promotiontype}
+  </select>
+  
+   <select id="findByActiveId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+  	 select 
+   		 <include refid="Base_Column_List" />
+   		 ,
+   		 <include refid="Blob_Column_List" />
+    from b_promotion
+  	  where  activitiesid = #{activeid} and type != 2 and type != 3 and isinstance = 'T'
+  </select>
+  
+  <select id="queryAllOrderQikePromotions" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	select c.* from 
+		(
+			select id as otaorderid from 
+				b_otaorder 
+			where mid = #{mid} and orderstatus != 510 and orderstatus != 511 and orderstatus != 512 and orderstatus != 513 and spreaduser is not null 
+			<if test="otaorderid != null" >
+		      and id = #{otaorderid,jdbcType=LONGVARCHAR}
+		    </if>
+		) a,
+		b_promotion_price b,
+		(select * from b_promotion where isinstance = 'T' and type = 2) c
+	where a.otaorderid = b.otaorderid and b.promotion = c.id
+  </select>
+  
+  <select id="queryYiJiaAndQiKeAndLiJianPromotionByOrderId" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	 select b.* from 
+		(select * from b_promotion_price where otaorderid = #{otaorderid}) a,
+		(select * from b_promotion where (type = 2 or type = 3 or type = 7) and isinstance = 'T') b
+	 where a.promotion = b.id
+  </select>
+  <select id="queryBPromotionByOrderId" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	 select p.* from b_promotion p join  b_promotion_price c on p.id = c.promotion 
+  	 where c.otaorderid =  #{otaorderid}
+  </select>
+  
+  <select id="queryPromotionByOrderId" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	 SELECT * FROM b_promotion WHERE id IN(
+  	 SELECT promotionid FROM u_ticket  WHERE otaorderid=#{otaorderid})
+  </select>
+
+    <select id="findFirstOrderPromotionByHardwarecode" parameterType="java.util.Map" resultMap="BaseResultMap">
+        SELECT a.*
+        FROM b_promotion a
+            JOIN u_promotion_log b
+                ON a.id = b.promotionid
+        WHERE a.type = 8 AND a.isinstance = 'F' AND b.hardwarecode = #{hardwarecode}
+    </select>
+
+</mapper>

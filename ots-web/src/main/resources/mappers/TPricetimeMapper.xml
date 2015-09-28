@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.TPricetimeMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.hotel.model.TPricetime" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="cron" property="cron" jdbcType="VARCHAR" />
+    <result column="hotelid" property="hotelid" jdbcType="BIGINT" />
+    <result column="Updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+    <result column="Begintime" property="begintime" jdbcType="TIMESTAMP" />
+    <result column="Endtime" property="endtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.mk.ots.hotel.model.TPricetimeWithBLOBs" extends="BaseResultMap" >
+    <result column="addcron" property="addcron" jdbcType="LONGVARCHAR" />
+    <result column="subcron" property="subcron" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, name, cron, hotelid, Updatetime, Begintime, Endtime
+  </sql>
+  <sql id="Blob_Column_List" >
+    addcron, subcron
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_pricetime
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="findList" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    select
+    <include refid="Base_Column_List" />
+      from t_pricetime
+        where hotelid = #{hotelid}
+  </select>
+  <select id="findTimePriceList" resultType="com.mk.ots.hotel.model.TPricetimeWithPrices">
+	select a.id, a.name, a.cron, a.hotelid, a.updatetime, a.begintime, a.endtime,
+	    b.roomtypeid,b.price,b.subprice,b.subper
+	  from t_pricetime a 
+	    left outer join t_price b on a.id=b.timeid
+	      where 1=1 
+      <if test="hotelid != null">
+          and a.hotelid = #{hotelid}
+      </if>
+      <if test="roomtypeid != null">
+            and b.roomtypeid = #{roomtypeid}
+      </if>
+	          and b.roomtypeid is not null
+  </select>
+</mapper>

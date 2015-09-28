@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.pay.model.PPayStatusErrorOrder">
+
+	<resultMap id="BaseResultMap" type="com.mk.ots.pay.model.PPayStatusErrorOrder">
+		<id column="id" property="id"/>
+		<result column="orderid" property="orderId"/>
+		<result column="orderCreateTime" property="orderCreateTime" jdbcType="TIMESTAMP"/>
+		<result column="recordCreateTime" property="recordCreateTime" jdbcType="TIMESTAMP"/>
+	</resultMap>
+	
+	<insert id="insert" parameterType="com.mk.ots.pay.model.PPayStatusErrorOrder"
+		 useGeneratedKeys="true" keyProperty="id">
+		insert into p_paystatus_error_order (
+			orderid, orderCreateTime,
+			recordCreateTime
+		)
+		values (
+			#{orderId,jdbcType=BIGINT}, #{orderCreateTime},
+			NOW()
+		)
+	</insert>
+
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from p_paystatus_error_order where orderid=#{orderId}
+	</delete>
+
+</mapper>

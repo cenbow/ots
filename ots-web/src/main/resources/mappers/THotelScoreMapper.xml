@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.THotelScoreMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.score.model.THotelScore" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="roomid" property="roomid" jdbcType="BIGINT" />
+    <result column="roomtypeid" property="roomtypeid" jdbcType="BIGINT" />
+    <result column="hotelid" property="hotelid" jdbcType="BIGINT" />
+    <result column="score" property="score" jdbcType="VARCHAR" />
+    <result column="createtime" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="orderid" property="orderid" jdbcType="BIGINT" />
+    <result column="grade" property="grade" jdbcType="DECIMAL" />
+    <result column="hotelscore" property="hotelscore" jdbcType="VARCHAR" />
+    <result column="servicescore" property="servicescore" jdbcType="VARCHAR" />
+    <result column="isreply" property="isreply" jdbcType="INTEGER" />
+    <result column="isaduit" property="isaduit" jdbcType="INTEGER" />
+    <result column="hotelscoretime" property="hotelscoretime" jdbcType="TIMESTAMP" />
+    <result column="servicescoretime" property="servicescoretime" jdbcType="TIMESTAMP" />
+    <result column="isvisible" property="isvisible" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="parentID" property="parentid" jdbcType="BIGINT" />
+    <result column="mid" property="mid" jdbcType="BIGINT" />
+    <result column="USER_CODE" property="userCode" jdbcType="VARCHAR" />
+    <result column="USER_NAME" property="userName" jdbcType="VARCHAR" />
+    <result column="isdefault" property="isdefault" jdbcType="VARCHAR" />
+    <result column="iscashbacked" property="iscashbacked" jdbcType="VARCHAR" />
+    <result column="backcashcost" property="backcashcost" jdbcType="DECIMAL" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.mk.ots.score.model.THotelScore" extends="BaseResultMap" >
+    <result column="pics" property="pics" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, roomid, roomtypeid, hotelid, score, createtime, orderid, grade, hotelscore, servicescore, 
+    isreply, isaduit, hotelscoretime, servicescoretime, isvisible, status, type, parentID, 
+    mid, USER_CODE, USER_NAME, isdefault, iscashbacked, backcashcost
+  </sql>
+  <sql id="Blob_Column_List" >
+    pics
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_hotel_score
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="findHotelScoresByHotelid"  resultType="map">
+    SELECT 
+        a.hotelid, COUNT(a.id) AS scorecount, b.s AS grade
+    FROM
+        t_hotel_score a
+            LEFT JOIN
+        t_hotel_subject b ON a.hotelid = b.hotelid
+    WHERE
+        a.hotelid = #{hotelid} AND a.type = 1 AND a.status = 4 ;
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_hotel_score
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.score.model.THotelScore" >
+    insert into t_hotel_score (id, roomid, roomtypeid, 
+      hotelid, score, createtime, 
+      orderid, grade, hotelscore, 
+      servicescore, isreply, isaduit, 
+      hotelscoretime, servicescoretime, isvisible, 
+      status, type, parentID, 
+      mid, USER_CODE, USER_NAME, 
+      isdefault, iscashbacked, backcashcost, 
+      pics)
+    values (#{id,jdbcType=BIGINT}, #{roomid,jdbcType=BIGINT}, #{roomtypeid,jdbcType=BIGINT}, 
+      #{hotelid,jdbcType=BIGINT}, #{score,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, 
+      #{orderid,jdbcType=BIGINT}, #{grade,jdbcType=DECIMAL}, #{hotelscore,jdbcType=VARCHAR}, 
+      #{servicescore,jdbcType=VARCHAR}, #{isreply,jdbcType=INTEGER}, #{isaduit,jdbcType=INTEGER}, 
+      #{hotelscoretime,jdbcType=TIMESTAMP}, #{servicescoretime,jdbcType=TIMESTAMP}, #{isvisible,jdbcType=VARCHAR}, 
+      #{status,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, #{parentid,jdbcType=BIGINT}, 
+      #{mid,jdbcType=BIGINT}, #{userCode,jdbcType=VARCHAR}, #{userName,jdbcType=VARCHAR}, 
+      #{isdefault,jdbcType=VARCHAR}, #{iscashbacked,jdbcType=VARCHAR}, #{backcashcost,jdbcType=DECIMAL}, 
+      #{pics,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.score.model.THotelScore" >
+    insert into t_hotel_score
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="roomid != null" >
+        roomid,
+      </if>
+      <if test="roomtypeid != null" >
+        roomtypeid,
+      </if>
+      <if test="hotelid != null" >
+        hotelid,
+      </if>
+      <if test="score != null" >
+        score,
+      </if>
+      <if test="createtime != null" >
+        createtime,
+      </if>
+      <if test="orderid != null" >
+        orderid,
+      </if>
+      <if test="grade != null" >
+        grade,
+      </if>
+      <if test="hotelscore != null" >
+        hotelscore,
+      </if>
+      <if test="servicescore != null" >
+        servicescore,
+      </if>
+      <if test="isreply != null" >
+        isreply,
+      </if>
+      <if test="isaduit != null" >
+        isaduit,
+      </if>
+      <if test="hotelscoretime != null" >
+        hotelscoretime,
+      </if>
+      <if test="servicescoretime != null" >
+        servicescoretime,
+      </if>
+      <if test="isvisible != null" >
+        isvisible,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="parentid != null" >
+        parentID,
+      </if>
+      <if test="mid != null" >
+        mid,
+      </if>
+      <if test="userCode != null" >
+        USER_CODE,
+      </if>
+      <if test="userName != null" >
+        USER_NAME,
+      </if>
+      <if test="isdefault != null" >
+        isdefault,
+      </if>
+      <if test="iscashbacked != null" >
+        iscashbacked,
+      </if>
+      <if test="backcashcost != null" >
+        backcashcost,
+      </if>
+      <if test="pics != null" >
+        pics,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="roomid != null" >
+        #{roomid,jdbcType=BIGINT},
+      </if>
+      <if test="roomtypeid != null" >
+        #{roomtypeid,jdbcType=BIGINT},
+      </if>
+      <if test="hotelid != null" >
+        #{hotelid,jdbcType=BIGINT},
+      </if>
+      <if test="score != null" >
+        #{score,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="orderid != null" >
+        #{orderid,jdbcType=BIGINT},
+      </if>
+      <if test="grade != null" >
+        #{grade,jdbcType=DECIMAL},
+      </if>
+      <if test="hotelscore != null" >
+        #{hotelscore,jdbcType=VARCHAR},
+      </if>
+      <if test="servicescore != null" >
+        #{servicescore,jdbcType=VARCHAR},
+      </if>
+      <if test="isreply != null" >
+        #{isreply,jdbcType=INTEGER},
+      </if>
+      <if test="isaduit != null" >
+        #{isaduit,jdbcType=INTEGER},
+      </if>
+      <if test="hotelscoretime != null" >
+        #{hotelscoretime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="servicescoretime != null" >
+        #{servicescoretime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isvisible != null" >
+        #{isvisible,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="parentid != null" >
+        #{parentid,jdbcType=BIGINT},
+      </if>
+      <if test="mid != null" >
+        #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="userCode != null" >
+        #{userCode,jdbcType=VARCHAR},
+      </if>
+      <if test="userName != null" >
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="isdefault != null" >
+        #{isdefault,jdbcType=VARCHAR},
+      </if>
+      <if test="iscashbacked != null" >
+        #{iscashbacked,jdbcType=VARCHAR},
+      </if>
+      <if test="backcashcost != null" >
+        #{backcashcost,jdbcType=DECIMAL},
+      </if>
+      <if test="pics != null" >
+        #{pics,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.score.model.THotelScore" >
+    update t_hotel_score
+    <set >
+      <if test="roomid != null" >
+        roomid = #{roomid,jdbcType=BIGINT},
+      </if>
+      <if test="roomtypeid != null" >
+        roomtypeid = #{roomtypeid,jdbcType=BIGINT},
+      </if>
+      <if test="hotelid != null" >
+        hotelid = #{hotelid,jdbcType=BIGINT},
+      </if>
+      <if test="score != null" >
+        score = #{score,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        createtime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="orderid != null" >
+        orderid = #{orderid,jdbcType=BIGINT},
+      </if>
+      <if test="grade != null" >
+        grade = #{grade,jdbcType=DECIMAL},
+      </if>
+      <if test="hotelscore != null" >
+        hotelscore = #{hotelscore,jdbcType=VARCHAR},
+      </if>
+      <if test="servicescore != null" >
+        servicescore = #{servicescore,jdbcType=VARCHAR},
+      </if>
+      <if test="isreply != null" >
+        isreply = #{isreply,jdbcType=INTEGER},
+      </if>
+      <if test="isaduit != null" >
+        isaduit = #{isaduit,jdbcType=INTEGER},
+      </if>
+      <if test="hotelscoretime != null" >
+        hotelscoretime = #{hotelscoretime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="servicescoretime != null" >
+        servicescoretime = #{servicescoretime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isvisible != null" >
+        isvisible = #{isvisible,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="parentid != null" >
+        parentID = #{parentid,jdbcType=BIGINT},
+      </if>
+      <if test="mid != null" >
+        mid = #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="userCode != null" >
+        USER_CODE = #{userCode,jdbcType=VARCHAR},
+      </if>
+      <if test="userName != null" >
+        USER_NAME = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="isdefault != null" >
+        isdefault = #{isdefault,jdbcType=VARCHAR},
+      </if>
+      <if test="iscashbacked != null" >
+        iscashbacked = #{iscashbacked,jdbcType=VARCHAR},
+      </if>
+      <if test="backcashcost != null" >
+        backcashcost = #{backcashcost,jdbcType=DECIMAL},
+      </if>
+      <if test="pics != null" >
+        pics = #{pics,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.mk.ots.score.model.THotelScore" >
+    update t_hotel_score
+    set roomid = #{roomid,jdbcType=BIGINT},
+      roomtypeid = #{roomtypeid,jdbcType=BIGINT},
+      hotelid = #{hotelid,jdbcType=BIGINT},
+      score = #{score,jdbcType=VARCHAR},
+      createtime = #{createtime,jdbcType=TIMESTAMP},
+      orderid = #{orderid,jdbcType=BIGINT},
+      grade = #{grade,jdbcType=DECIMAL},
+      hotelscore = #{hotelscore,jdbcType=VARCHAR},
+      servicescore = #{servicescore,jdbcType=VARCHAR},
+      isreply = #{isreply,jdbcType=INTEGER},
+      isaduit = #{isaduit,jdbcType=INTEGER},
+      hotelscoretime = #{hotelscoretime,jdbcType=TIMESTAMP},
+      servicescoretime = #{servicescoretime,jdbcType=TIMESTAMP},
+      isvisible = #{isvisible,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      type = #{type,jdbcType=INTEGER},
+      parentID = #{parentid,jdbcType=BIGINT},
+      mid = #{mid,jdbcType=BIGINT},
+      USER_CODE = #{userCode,jdbcType=VARCHAR},
+      USER_NAME = #{userName,jdbcType=VARCHAR},
+      isdefault = #{isdefault,jdbcType=VARCHAR},
+      iscashbacked = #{iscashbacked,jdbcType=VARCHAR},
+      backcashcost = #{backcashcost,jdbcType=DECIMAL},
+      pics = #{pics,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.score.model.THotelScore" >
+    update t_hotel_score
+    set roomid = #{roomid,jdbcType=BIGINT},
+      roomtypeid = #{roomtypeid,jdbcType=BIGINT},
+      hotelid = #{hotelid,jdbcType=BIGINT},
+      score = #{score,jdbcType=VARCHAR},
+      createtime = #{createtime,jdbcType=TIMESTAMP},
+      orderid = #{orderid,jdbcType=BIGINT},
+      grade = #{grade,jdbcType=DECIMAL},
+      hotelscore = #{hotelscore,jdbcType=VARCHAR},
+      servicescore = #{servicescore,jdbcType=VARCHAR},
+      isreply = #{isreply,jdbcType=INTEGER},
+      isaduit = #{isaduit,jdbcType=INTEGER},
+      hotelscoretime = #{hotelscoretime,jdbcType=TIMESTAMP},
+      servicescoretime = #{servicescoretime,jdbcType=TIMESTAMP},
+      isvisible = #{isvisible,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      type = #{type,jdbcType=INTEGER},
+      parentID = #{parentid,jdbcType=BIGINT},
+      mid = #{mid,jdbcType=BIGINT},
+      USER_CODE = #{userCode,jdbcType=VARCHAR},
+      USER_NAME = #{userName,jdbcType=VARCHAR},
+      isdefault = #{isdefault,jdbcType=VARCHAR},
+      iscashbacked = #{iscashbacked,jdbcType=VARCHAR},
+      backcashcost = #{backcashcost,jdbcType=DECIMAL}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

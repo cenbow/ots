@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.mapper.THotelMapper">
+  <sql id="Base_Column_List">
+    a.id, a.hotelname, a.hotelcontactname, a.regtime, a.disid, a.detailaddr, a.longitude, a.latitude, 
+    a.opentime, a.repairtime, a.roomnum, a.businesslicensefront, a.businesslicenseback, a.pms, a.visible, 
+    a.online, a.idcardfront, a.idcardback, a.retentiontime, a.defaultleavetime, a.needwait, a.hotelphone, 
+    a.isnewpms, a.introduction, a.traffic, a.hotelpic, a.peripheral, a.priority, a.rulecode, a.hoteltype,
+    a.citycode, a.provcode, a.discode, a.areacode, a.areaname
+  </sql>
+  <sql id="Base_Column_List1">
+    id,hotelname,pmsopttime,pms
+  </sql>
+  <select id="selectById" parameterType="java.lang.Long" resultType="com.mk.ots.hotel.model.THotelModel">
+    select 
+    <include refid="Base_Column_List" />
+      from t_hotel a
+        where id = #{id} limit 1
+  </select>
+  <select id="selectByPmsAndTime" parameterType="java.util.Map" resultType="com.mk.ots.hotel.model.THotelModel">
+    select 
+    <include refid="Base_Column_List1" />
+      from t_hotel 
+        where pms = #{pms} and pmsopttime  <![CDATA[<]]> ${time} limit 1
+  </select>
+  <select id="findList" parameterType="java.lang.Long" resultType="com.mk.ots.hotel.model.THotelModel">
+    select 
+    <include refid="Base_Column_List" />
+      from t_hotel a
+        where a.id is not null
+  </select>
+  
+  <select id="findHotelInfoById" parameterType="java.lang.Long" resultType="com.mk.ots.hotel.model.THotelModel">
+	select c.cityid, c.cityname, b.disname, d.proname as province,
+	<include refid="Base_Column_List" />
+      from t_hotel a
+	    left outer join t_district b on a.disid = b.id
+	      left outer join t_city c on c.cityid = b.cityid
+	      left outer join t_province d on c.proid=d.proid
+	        where a.id is not null
+      <if test="id != null">
+              and a.id = #{id} limit 1
+      </if>
+  </select>
+  <select id="findListInfo" parameterType="java.lang.Long" resultType="com.mk.ots.hotel.model.THotelModel">
+    select c.code as citycode, c.cityid, c.cityname, b.disname,
+    <include refid="Base_Column_List" />
+      from t_hotel a
+        left outer join t_district b on a.disid = b.id
+          left outer join t_city c on c.cityid = b.cityid          
+            where a.id is not null
+      <if test="id != null">
+              and a.id = #{id} limit 1
+      </if>
+  </select>
+  
+  <insert id="updateTHotel" parameterType="com.mk.ots.hotel.model.THotelModel"  >
+  		update t_hotel 
+  		<set >
+	  		<if test="roomnum != null">
+	              roomnum=#{roomnum},
+	      	</if>
+	      	<if test="online != null">
+	              online=#{online},
+	      	</if>
+	      	<if test="isnewpms != null">
+	              isnewpms=#{isnewpms},
+	      	</if>
+	      	<if test="pmsopttime != null">
+	              pmsopttime=#{pmsopttime},
+	      	</if>
+      	</set>
+  		where id=#{id};
+   </insert>
+   
+  <select id="findAllHotelIds"  resultType="java.lang.Long">
+	select id from t_hotel
+  </select>
+  <select id="findCityHotelIds"  resultType="java.lang.Long">
+    select id from t_hotel where citycode = #{citycode}
+  </select>
+  <select id="selectPicsByHotelId"  resultType="map">
+	select hotelname as name , hotelpic from t_hotel where id=#{hotelid} union
+	select b.name,pics as hotelpic from t_roomtype b left join t_roomtype_info a on a.roomtypeid=b.id where thotelid=#{hotelid};
+  </select>
+
+  <select id="getLatestOrderTime"  resultType="java.lang.String">
+    select createtime from b_otaorder WHERE hotelid = #{hotelid} ORDER BY createtime desc LIMIT 1;
+  </select>
+  
+  <select id="selectCityCodeByOrderId"  resultType="java.lang.String" parameterType="java.lang.Long">
+	select t.citycode from t_hotel t join b_otaorder b on t.id = b.HotelId where b.id = #{orderId}
+  </select>
+  
+</mapper>

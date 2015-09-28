@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.TRoomtypeInfoMapper" >
+  <sql id="Base_Column_List" >
+    a.id, a.roomtypeid, a.minarea, a.maxarea, a.bedtype, a.bedsize, a.pics
+  </sql>
+  <select id="selectByRoomtypeid" resultType="com.mk.ots.hotel.model.TRoomTypeInfoModel" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    , '' as bedtypename
+    from t_roomtype_info a
+    where a.roomtypeid = #{roomtypeid} limit 1
+  </select>
+  
+  <select id="findByRoomtypeid" resultType="com.mk.ots.hotel.model.TRoomTypeInfoModel" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,b.name as bedtypename
+    from t_roomtype_info a
+      left outer join t_bedtype b on a.bedtype = b.id
+        where a.roomtypeid = #{roomtypeid} limit 1
+  </select>
+  
+  
+  <insert id="insertSelective" parameterType="com.mk.ots.hotel.model.TRoomTypeInfoModel" >
+    insert into t_roomtype_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="roomtypeid != null" >
+        roomtypeid,
+      </if>
+      <if test="minarea != null" >
+        minarea,
+      </if>
+      <if test="maxarea != null" >
+        maxarea,
+      </if>
+      <if test="bedtype != null" >
+        bedtype,
+      </if>
+      <if test="bedsize != null" >
+        bedsize,
+      </if>
+      <if test="pics != null" >
+        pics,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="roomtypeid != null" >
+        #{roomtypeid,jdbcType=BIGINT},
+      </if>
+      <if test="minarea != null" >
+        #{minarea,jdbcType=DECIMAL},
+      </if>
+      <if test="maxarea != null" >
+        #{maxarea,jdbcType=DECIMAL},
+      </if>
+      <if test="bedtype != null" >
+        #{bedtype,jdbcType=BIGINT},
+      </if>
+      <if test="bedsize != null" >
+        #{bedsize,jdbcType=VARCHAR},
+      </if>
+      <if test="pics != null" >
+        #{pics,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  <select id="findByHotelid" resultType="com.mk.ots.hotel.model.TRoomTypeInfoModel" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />   
+    from t_roomtype_info a where roomtypeid in(select id from t_roomtype where thotelid=#{hotelid})
+  </select>
+</mapper>

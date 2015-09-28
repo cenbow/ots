@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.appstatus.model.AppStatus" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.appstatus.model.AppStatus" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="sysno" property="sysno" jdbcType="VARCHAR" />
+    <result column="mid" property="mid" jdbcType="BIGINT" />
+    <result column="phone" property="phone" jdbcType="VARCHAR" />
+    <result column="userlongitude" property="userlongitude" jdbcType="VARCHAR" />
+    <result column="userlatitude" property="userlatitude" jdbcType="VARCHAR" />
+    <result column="runningstatus" property="runningstatus" jdbcType="INTEGER" />
+    <result column="runningpage" property="runningpage" jdbcType="VARCHAR" />
+    <result column="createtime" jdbcType="TIMESTAMP" property="createtime" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, sysno, mid, phone, userlongitude, userlatitude, runningstatus, runningpage, createtime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from u_appstatus
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from u_appstatus
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.appstatus.model.AppStatus" useGeneratedKeys="true" keyProperty="id">
+    insert into u_appstatus (sysno, mid, 
+      phone, userlongitude, userlatitude, 
+      runningstatus, runningpage, createtime)
+    values (#{sysno,jdbcType=VARCHAR}, #{mid,jdbcType=BIGINT}, 
+      #{phone,jdbcType=VARCHAR}, #{userlongitude,jdbcType=VARCHAR}, #{userlatitude,jdbcType=VARCHAR}, 
+      #{runningstatus,jdbcType=INTEGER}, #{runningpage,jdbcType=VARCHAR},  #{createtime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.appstatus.model.AppStatus" >
+    insert into u_appstatus
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="sysno != null" >
+        sysno,
+      </if>
+      <if test="mid != null" >
+        mid,
+      </if>
+      <if test="phone != null" >
+        phone,
+      </if>
+      <if test="userlongitude != null" >
+        userlongitude,
+      </if>
+      <if test="userlatitude != null" >
+        userlatitude,
+      </if>
+      <if test="runningstatus != null" >
+        runningstatus,
+      </if>
+      <if test="runningpage != null" >
+        runningpage,
+      </if>
+       <if test="createtime != null">
+        createtime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="sysno != null" >
+        #{sysno,jdbcType=VARCHAR},
+      </if>
+      <if test="mid != null" >
+        #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="phone != null" >
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="userlongitude != null" >
+        #{userlongitude,jdbcType=VARCHAR},
+      </if>
+      <if test="userlatitude != null" >
+        #{userlatitude,jdbcType=VARCHAR},
+      </if>
+      <if test="runningstatus != null" >
+        #{runningstatus,jdbcType=INTEGER},
+      </if>
+      <if test="runningpage != null" >
+        #{runningpage,jdbcType=VARCHAR},
+      </if>
+       <if test="createtime != null">
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.appstatus.model.AppStatus" >
+    update u_appstatus
+    <set >
+      <if test="sysno != null" >
+        sysno = #{sysno,jdbcType=VARCHAR},
+      </if>
+      <if test="mid != null" >
+        mid = #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="phone != null" >
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="userlongitude != null" >
+        userlongitude = #{userlongitude,jdbcType=VARCHAR},
+      </if>
+      <if test="userlatitude != null" >
+        userlatitude = #{userlatitude,jdbcType=VARCHAR},
+      </if>
+      <if test="runningstatus != null" >
+        runningstatus = #{runningstatus,jdbcType=INTEGER},
+      </if>
+      <if test="runningpage != null" >
+        runningpage = #{runningpage,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.appstatus.model.AppStatus" >
+    update u_appstatus
+    set sysno = #{sysno,jdbcType=VARCHAR},
+      mid = #{mid,jdbcType=BIGINT},
+      phone = #{phone,jdbcType=VARCHAR},
+      userlongitude = #{userlongitude,jdbcType=VARCHAR},
+      userlatitude = #{userlatitude,jdbcType=VARCHAR},
+      runningstatus = #{runningstatus,jdbcType=INTEGER},
+      runningpage = #{runningpage,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <select id="findByMid" parameterType="java.util.Map" resultMap="BaseResultMap">
+  		select * from u_appstatus where mid = #{mid}
+  </select>
+</mapper>

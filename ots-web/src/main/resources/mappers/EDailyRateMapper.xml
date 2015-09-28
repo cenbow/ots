@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.EDailyRateMapper">
+
+	<resultMap id="BaseResultMap" type="com.mk.ots.hotel.bean.EDailyRate">
+		<id column="id" property="id"  />
+		<result column="ehotelid" property="ehotelid"  />
+		<result column="roomtypeid" property="roomtypeid"  />
+		<result column="day" property="day"  />
+		<result column="price" property="price"  />
+		<result column="createtime" property="createtime"  />
+		<result column="createuser" property="createuser"  />
+		<result column="updatetime" property="updatetime"  />
+		<result column="updateuser" property="updateuser"  />
+	</resultMap>
+
+
+	<select id="selectByHotelid" parameterType="java.lang.Long"
+		resultMap="BaseResultMap">
+		SELECT
+			id,
+			ehotelid,
+			roomtypeid,
+			day,
+			price,
+			createtime,
+			createuser,
+			updatetime,
+			updateuser
+			FROM
+			e_daily_rate
+		WHERE
+			ehotelid = #{hotelid}
+	</select>
+
+	<insert id="saveBatch" parameterType="java.util.List">
+		INSERT INTO e_daily_rate (
+			ehotelid,
+			roomtypeid,
+			day,
+			price,
+			createtime,
+			createuser,
+			updatetime,
+			updateuser
+		)
+		VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.ehotelid},#{item.roomtypeid},#{item.day},#{item.price},#{item.createtime},
+			#{item.createuser}, #{item.updatetime}, #{item.updateuser})
+		</foreach>
+	</insert>
+
+	<update id="updateBatch" parameterType="list">
+		update e_daily_rate
+		<trim prefix="set" suffixOverrides=",">
+			<trim prefix="price = case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					<if test="i.price != null">
+						when id = #{i.id} then #{i.price}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="updatetime = case" suffix="end,">
+				<foreach collection="list" item="i" index="index">
+					<if test="i.updatetime != null">
+						when id = #{i.id} then #{i.updatetime}
+					</if>
+				</foreach>
+			</trim>
+			<trim prefix="updateuser = case" suffix="end">
+				<foreach collection="list" item="i" index="index">
+					<if test="i.updateuser != null">
+						when id=#{i.id} then #{i.updateuser}
+					</if>
+				</foreach>
+			</trim>
+		</trim>
+		where
+		<foreach collection="list" separator="or" item="i" index="index">
+			id=#{i.id}
+		</foreach>
+	</update>
+
+</mapper>

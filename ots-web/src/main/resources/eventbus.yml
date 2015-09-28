@@ -1,0 +1,9 @@
+#config:
+#    {threadpoolnumber: 30}
+#listeners:
+#    {order_listener: com.mk.ots.order.event.EventListener,
+#    pmsqueryagain_listener: com.mk.pms.order.event.PmsQueryAgainEventListener,
+#    pmsqcalcache_listener: com.mk.pms.order.event.PmsCalCacheEventListener,
+#    pmsroomorder_listener: com.mk.pms.order.event.ChangePmsRoomOrderEventListener,
+#    sendpmspay_listener: com.mk.ots.order.event.SendPmsPayEventListener
+#    }

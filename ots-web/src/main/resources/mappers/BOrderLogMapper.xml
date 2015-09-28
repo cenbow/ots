@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.BOrderLogMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.order.model.BOrderLog" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="orderId" property="orderid" jdbcType="BIGINT" />
+    <result column="spreadUser" property="spreaduser" jdbcType="BIGINT" />
+    <result column="spreadNote" property="spreadnote" jdbcType="VARCHAR" />
+    <result column="sendLeZhu" property="sendlezhu" jdbcType="CHAR" />
+    <result column="promotion" property="promotion" jdbcType="CHAR" />
+    <result column="checkinTime" property="checkintime" jdbcType="TIMESTAMP" />
+    <result column="checkoutTime" property="checkouttime" jdbcType="TIMESTAMP" />
+    <result column="pId" property="pid" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, orderId, spreadUser, spreadNote, sendLeZhu, promotion, checkinTime, checkoutTime, 
+    pId
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from b_orderlog
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from b_orderlog
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.order.model.BOrderLog" >
+    insert into b_orderlog (id, orderId, spreadUser, 
+      spreadNote, sendLeZhu, promotion, 
+      checkinTime, checkoutTime, pId
+      )
+    values (#{id,jdbcType=INTEGER}, #{orderid,jdbcType=BIGINT}, #{spreaduser,jdbcType=BIGINT}, 
+      #{spreadnote,jdbcType=VARCHAR}, #{sendlezhu,jdbcType=CHAR}, #{promotion,jdbcType=CHAR}, 
+      #{checkintime,jdbcType=TIMESTAMP}, #{checkouttime,jdbcType=TIMESTAMP}, #{pid,jdbcType=BIGINT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.order.model.BOrderLog" >
+    insert into b_orderlog
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="orderid != null" >
+        orderId,
+      </if>
+      <if test="spreaduser != null" >
+        spreadUser,
+      </if>
+      <if test="spreadnote != null" >
+        spreadNote,
+      </if>
+      <if test="sendlezhu != null" >
+        sendLeZhu,
+      </if>
+      <if test="promotion != null" >
+        promotion,
+      </if>
+      <if test="checkintime != null" >
+        checkinTime,
+      </if>
+      <if test="checkouttime != null" >
+        checkoutTime,
+      </if>
+      <if test="pid != null" >
+        pId,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="orderid != null" >
+        #{orderid,jdbcType=BIGINT},
+      </if>
+      <if test="spreaduser != null" >
+        #{spreaduser,jdbcType=BIGINT},
+      </if>
+      <if test="spreadnote != null" >
+        #{spreadnote,jdbcType=VARCHAR},
+      </if>
+      <if test="sendlezhu != null" >
+        #{sendlezhu,jdbcType=CHAR},
+      </if>
+      <if test="promotion != null" >
+        #{promotion,jdbcType=CHAR},
+      </if>
+      <if test="checkintime != null" >
+        #{checkintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="checkouttime != null" >
+        #{checkouttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pid != null" >
+        #{pid,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.order.model.BOrderLog" >
+    update b_orderlog
+    <set >
+      <if test="orderid != null" >
+        orderId = #{orderid,jdbcType=BIGINT},
+      </if>
+      <if test="spreaduser != null" >
+        spreadUser = #{spreaduser,jdbcType=BIGINT},
+      </if>
+      <if test="spreadnote != null" >
+        spreadNote = #{spreadnote,jdbcType=VARCHAR},
+      </if>
+      <if test="sendlezhu != null" >
+        sendLeZhu = #{sendlezhu,jdbcType=CHAR},
+      </if>
+      <if test="promotion != null" >
+        promotion = #{promotion,jdbcType=CHAR},
+      </if>
+      <if test="checkintime != null" >
+        checkinTime = #{checkintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="checkouttime != null" >
+        checkoutTime = #{checkouttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pid != null" >
+        pId = #{pid,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.order.model.BOrderLog" >
+    update b_orderlog
+    set orderId = #{orderid,jdbcType=BIGINT},
+      spreadUser = #{spreaduser,jdbcType=BIGINT},
+      spreadNote = #{spreadnote,jdbcType=VARCHAR},
+      sendLeZhu = #{sendlezhu,jdbcType=CHAR},
+      promotion = #{promotion,jdbcType=CHAR},
+      checkinTime = #{checkintime,jdbcType=TIMESTAMP},
+      checkoutTime = #{checkouttime,jdbcType=TIMESTAMP},
+      pId = #{pid,jdbcType=BIGINT}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+   <update id="updateByOrderId" parameterType="com.mk.ots.order.model.BOrderLog" >
+    update b_orderlog
+    set     sendLeZhu = #{sendlezhu,jdbcType=CHAR}
+    where orderId = #{orderid,jdbcType=BIGINT}
+  </update>
+</mapper>

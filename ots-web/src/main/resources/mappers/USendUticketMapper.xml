@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.ticket.model.USendUticket" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.ticket.model.USendUticket" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="mid" property="mid" jdbcType="BIGINT" />
+    <result column="msgtype" property="msgtype" jdbcType="TINYINT" />
+    <result column="statisticinvalid" property="statisticinvalid" jdbcType="TINYINT" />
+    <result column="createtime" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, mid, msgtype, statisticinvalid, createtime, updatetime
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from u_send_uticket
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from u_send_uticket
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.ticket.model.USendUticket" >
+    insert into u_send_uticket (id, mid, msgtype, 
+      statisticinvalid, createtime, updatetime
+      )
+    values (#{id,jdbcType=BIGINT}, #{mid,jdbcType=BIGINT}, #{msgtype,jdbcType=TINYINT}, 
+      #{statisticinvalid,jdbcType=TINYINT}, #{createtime,jdbcType=TIMESTAMP}, #{updatetime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.ticket.model.USendUticket" >
+    insert into u_send_uticket
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="mid != null" >
+        mid,
+      </if>
+      <if test="msgtype != null" >
+        msgtype,
+      </if>
+      <if test="statisticinvalid != null" >
+        statisticinvalid,
+      </if>
+      <if test="createtime != null" >
+        createtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="mid != null" >
+        #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="msgtype != null" >
+        #{msgtype,jdbcType=TINYINT},
+      </if>
+      <if test="statisticinvalid != null" >
+        #{statisticinvalid,jdbcType=TINYINT},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.ticket.model.USendUticket" >
+    update u_send_uticket
+    <set >
+      <if test="mid != null" >
+        mid = #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="msgtype != null" >
+        msgtype = #{msgtype,jdbcType=TINYINT},
+      </if>
+      <if test="statisticinvalid != null" >
+        statisticinvalid = #{statisticinvalid,jdbcType=TINYINT},
+      </if>
+      <if test="createtime != null" >
+        createtime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.ticket.model.USendUticket" >
+    update u_send_uticket
+    set mid = #{mid,jdbcType=BIGINT},
+      msgtype = #{msgtype,jdbcType=TINYINT},
+      statisticinvalid = #{statisticinvalid,jdbcType=TINYINT},
+      createtime = #{createtime,jdbcType=TIMESTAMP},
+      updatetime = #{updatetime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  
+  <select id="getNeedSendCountValid" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select  <include refid="Base_Column_List" />
+    from u_send_uticket
+    where statisticinvalid = #{statisticinvalid} 
+    limit #{batDataNum}
+  </select>
+  
+  <update id="updateSendTicketInvalidByMid" parameterType="java.util.Map">
+        UPDATE u_send_uticket
+        SET statisticinvalid=#{statisticinvalid},updateTime=now()
+        WHERE mid=#{mid} and statisticinvalid=#{statisticInvalidPre, jdbcType=TINYINT}
+    </update>
+    
+  
+</mapper>

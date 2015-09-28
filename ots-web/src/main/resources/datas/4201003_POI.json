@@ -1,0 +1,568 @@
+{
+  "data": [
+    {
+      "stations": [
+        {
+          "id": 1600,
+          "name": "汉口北",
+          "longitude": 114329402,
+          "latitude": 30711589,
+          "pinyin": "hankoubei"
+        },
+        {
+          "id": 1602,
+          "name": "滠口新城",
+          "longitude": 114342405,
+          "latitude": 30684125,
+          "pinyin": "shekouxincheng"
+        },
+        {
+          "id": 1601,
+          "name": "滕子岗",
+          "longitude": 114341616,
+          "latitude": 30674755,
+          "pinyin": "tengzigang"
+        },
+        {
+          "id": 924,
+          "name": "堤角",
+          "longitude": 114338365,
+          "latitude": 30666107,
+          "pinyin": "dijiao"
+        },
+        {
+          "id": 923,
+          "name": "新荣",
+          "longitude": 114334608,
+          "latitude": 30656053,
+          "pinyin": "xinrong"
+        },
+        {
+          "id": 922,
+          "name": "丹水池",
+          "longitude": 114330112,
+          "latitude": 30643648,
+          "pinyin": "danshuichi"
+        },
+        {
+          "id": 921,
+          "name": "徐州新村",
+          "longitude": 114322977,
+          "latitude": 30631170,
+          "pinyin": "xuzhouxincun"
+        },
+        {
+          "id": 920,
+          "name": "二七路",
+          "longitude": 114318826,
+          "latitude": 30625063,
+          "pinyin": "erqilu"
+        },
+        {
+          "id": 919,
+          "name": "头道街",
+          "longitude": 114313933,
+          "latitude": 30617835,
+          "pinyin": "toudaojie"
+        },
+        {
+          "id": 918,
+          "name": "黄浦路",
+          "longitude": 114307975,
+          "latitude": 30608188,
+          "pinyin": "huangpulu"
+        },
+        {
+          "id": 917,
+          "name": "三阳路",
+          "longitude": 114301768,
+          "latitude": 30599438,
+          "pinyin": "sanyanglu"
+        },
+        {
+          "id": 916,
+          "name": "大智路",
+          "longitude": 114294921,
+          "latitude": 30592461,
+          "pinyin": "dazhilu"
+        },
+        {
+          "id": 915,
+          "name": "循礼门",
+          "longitude": 114286022,
+          "latitude": 30585194,
+          "pinyin": "xunlimen"
+        },
+        {
+          "id": 914,
+          "name": "友谊路",
+          "longitude": 114278260,
+          "latitude": 30580876,
+          "pinyin": "youyilu"
+        },
+        {
+          "id": 913,
+          "name": "利济北路",
+          "longitude": 114270060,
+          "latitude": 30577450,
+          "pinyin": "lijibeilu"
+        },
+        {
+          "id": 912,
+          "name": "崇仁路",
+          "longitude": 114261859,
+          "latitude": 30574026,
+          "pinyin": "chongrenlu"
+        },
+        {
+          "id": 911,
+          "name": "硚口路",
+          "longitude": 114250205,
+          "latitude": 30571598,
+          "pinyin": "qiaokoulu"
+        },
+        {
+          "id": 910,
+          "name": "太平洋",
+          "longitude": 114240688,
+          "latitude": 30574349,
+          "pinyin": "taipingyang"
+        },
+        {
+          "id": 909,
+          "name": "宗关",
+          "longitude": 114226281,
+          "latitude": 30580607,
+          "pinyin": "zongguan"
+        },
+        {
+          "id": 908,
+          "name": "汉西一路",
+          "longitude": 114218985,
+          "latitude": 30585412,
+          "pinyin": "hanxiyilu"
+        },
+        {
+          "id": 907,
+          "name": "古田四路",
+          "longitude": 114211810,
+          "latitude": 30589151,
+          "pinyin": "gutiansilu"
+        },
+        {
+          "id": 906,
+          "name": "古田三路",
+          "longitude": 114204786,
+          "latitude": 30593366,
+          "pinyin": "gutiansanlu"
+        },
+        {
+          "id": 905,
+          "name": "古田二路",
+          "longitude": 114196565,
+          "latitude": 30597603,
+          "pinyin": "gutianerlu"
+        },
+        {
+          "id": 904,
+          "name": "古田一路",
+          "longitude": 114182688,
+          "latitude": 30604649,
+          "pinyin": "gutianyilu"
+        },
+        {
+          "id": 903,
+          "name": "舵落口",
+          "longitude": 114170037,
+          "latitude": 30609767,
+          "pinyin": "duoluokou"
+        },
+        {
+          "id": 1599,
+          "name": "竹叶海",
+          "longitude": 114163868,
+          "latitude": 30615064,
+          "pinyin": "zhuyehai"
+        },
+        {
+          "id": 902,
+          "name": "额头湾",
+          "longitude": 114153841,
+          "latitude": 30618653,
+          "pinyin": "etouwan"
+        },
+        {
+          "id": 901,
+          "name": "五环大道",
+          "longitude": 114138389,
+          "latitude": 30617775,
+          "pinyin": "wuhuandadao"
+        },
+        {
+          "id": 900,
+          "name": "东吴大道",
+          "longitude": 114128636,
+          "latitude": 30624910,
+          "pinyin": "dongwudadao"
+        }
+      ],
+      "name": "1号线",
+      "lineId": 60
+    },
+    {
+      "stations": [
+        {
+          "id": 925,
+          "name": "金银潭",
+          "longitude": 114243340,
+          "latitude": 30650656,
+          "pinyin": "jinyintan"
+        },
+        {
+          "id": 926,
+          "name": "常青花园",
+          "longitude": 114242420,
+          "latitude": 30640826,
+          "pinyin": "changqinghuayuan"
+        },
+        {
+          "id": 927,
+          "name": "长港路",
+          "longitude": 114248819,
+          "latitude": 30627430,
+          "pinyin": "changganglu"
+        },
+        {
+          "id": 928,
+          "name": "汉口火车站",
+          "longitude": 114254884,
+          "latitude": 30615732,
+          "pinyin": "hankouhuochezhan"
+        },
+        {
+          "id": 929,
+          "name": "范湖",
+          "longitude": 114260206,
+          "latitude": 30605958,
+          "pinyin": "fanhu"
+        },
+        {
+          "id": 930,
+          "name": "王家墩东",
+          "longitude": 114263111,
+          "latitude": 30593815,
+          "pinyin": "wangjiadundong"
+        },
+        {
+          "id": 931,
+          "name": "青年路",
+          "longitude": 114264757,
+          "latitude": 30585762,
+          "pinyin": "qingnianlu"
+        },
+        {
+          "id": 932,
+          "name": "中山公园",
+          "longitude": 114272845,
+          "latitude": 30581962,
+          "pinyin": "zhongshangongyuan"
+        },
+        {
+          "id": 933,
+          "name": "循礼门",
+          "longitude": 114286022,
+          "latitude": 30585194,
+          "pinyin": "xunlimen"
+        },
+        {
+          "id": 934,
+          "name": "江汉路",
+          "longitude": 114292304,
+          "latitude": 30579631,
+          "pinyin": "jianghanlu"
+        },
+        {
+          "id": 935,
+          "name": "积玉桥",
+          "longitude": 114308658,
+          "latitude": 30561242,
+          "pinyin": "jiyuqiao"
+        },
+        {
+          "id": 936,
+          "name": "螃蟹岬",
+          "longitude": 114317401,
+          "latitude": 30553345,
+          "pinyin": "pangxiejia"
+        },
+        {
+          "id": 937,
+          "name": "小龟山",
+          "longitude": 114326535,
+          "latitude": 30551124,
+          "pinyin": "xiaoguishan"
+        },
+        {
+          "id": 938,
+          "name": "洪山广场",
+          "longitude": 114336264,
+          "latitude": 30544860,
+          "pinyin": "hongshanguangchang"
+        },
+        {
+          "id": 939,
+          "name": "中南路",
+          "longitude": 114333149,
+          "latitude": 30537677,
+          "pinyin": "zhongnanlu"
+        },
+        {
+          "id": 940,
+          "name": "宝通寺",
+          "longitude": 114341214,
+          "latitude": 30530363,
+          "pinyin": "baotongsi"
+        },
+        {
+          "id": 941,
+          "name": "街道口",
+          "longitude": 114353423,
+          "latitude": 30526619,
+          "pinyin": "jiedaokou"
+        },
+        {
+          "id": 942,
+          "name": "广埠屯",
+          "longitude": 114364522,
+          "latitude": 30522201,
+          "pinyin": "guangbutun"
+        },
+        {
+          "id": 943,
+          "name": "虎泉",
+          "longitude": 114370563,
+          "latitude": 30512257,
+          "pinyin": "huquan"
+        },
+        {
+          "id": 944,
+          "name": "杨家湾",
+          "longitude": 114382875,
+          "latitude": 30505150,
+          "pinyin": "yangjiawan"
+        },
+        {
+          "id": 945,
+          "name": "光谷广场",
+          "longitude": 114397864,
+          "latitude": 30505906,
+          "pinyin": "guangguguangchang"
+        }
+      ],
+      "name": "2号线",
+      "lineId": 61
+    },
+    {
+      "stations": [
+        {
+          "id": 1400,
+          "name": "武汉火车站",
+          "longitude": 114425552,
+          "latitude": 30607472,
+          "pinyin": "wuhanhuochezhan"
+        },
+        {
+          "id": 1399,
+          "name": "杨春湖",
+          "longitude": 114416351,
+          "latitude": 30605469,
+          "pinyin": "yangchunhu"
+        },
+        {
+          "id": 1398,
+          "name": "工业四路",
+          "longitude": 114404802,
+          "latitude": 30607930,
+          "pinyin": "gongyesilu"
+        },
+        {
+          "id": 1397,
+          "name": "仁和路",
+          "longitude": 114389261,
+          "latitude": 30605325,
+          "pinyin": "renhelu"
+        },
+        {
+          "id": 1396,
+          "name": "园林路",
+          "longitude": 114377541,
+          "latitude": 30600250,
+          "pinyin": "yuanlinlu"
+        },
+        {
+          "id": 1395,
+          "name": "罗家港",
+          "longitude": 114371651,
+          "latitude": 30592702,
+          "pinyin": "luojiagang"
+        },
+        {
+          "id": 1394,
+          "name": "铁机路",
+          "longitude": 114368954,
+          "latitude": 30583928,
+          "pinyin": "tiejilu"
+        },
+        {
+          "id": 1393,
+          "name": "岳家嘴",
+          "longitude": 114362205,
+          "latitude": 30577050,
+          "pinyin": "yuejiazui"
+        },
+        {
+          "id": 1392,
+          "name": "东亭",
+          "longitude": 114355937,
+          "latitude": 30570089,
+          "pinyin": "dongting"
+        },
+        {
+          "id": 1391,
+          "name": "青鱼嘴",
+          "longitude": 114349884,
+          "latitude": 30563720,
+          "pinyin": "qingyuzui"
+        },
+        {
+          "id": 1390,
+          "name": "楚河汉街",
+          "longitude": 114341311,
+          "latitude": 30553877,
+          "pinyin": "chuhehanjie"
+        },
+        {
+          "id": 1389,
+          "name": "洪山广场",
+          "longitude": 114336381,
+          "latitude": 30544992,
+          "pinyin": "hongshanguangchang"
+        },
+        {
+          "id": 1388,
+          "name": "中南路",
+          "longitude": 114333089,
+          "latitude": 30537783,
+          "pinyin": "zhongnanlu"
+        },
+        {
+          "id": 1387,
+          "name": "梅苑小区",
+          "longitude": 114325896,
+          "latitude": 30530950,
+          "pinyin": "meiyuanxiaoqu"
+        },
+        {
+          "id": 1386,
+          "name": "武昌火车站",
+          "longitude": 114316341,
+          "latitude": 30530675,
+          "pinyin": "wuchanghuochezhan"
+        },
+        {
+          "id": 1611,
+          "name": "首义路",
+          "longitude": 114308661,
+          "latitude": 30533611,
+          "pinyin": "shouyilu"
+        },
+        {
+          "id": 1614,
+          "name": "复兴路",
+          "longitude": 114301429,
+          "latitude": 30534302,
+          "pinyin": "fuxinglu"
+        },
+        {
+          "id": 1605,
+          "name": "拦江路",
+          "longitude": 114269012,
+          "latitude": 30542917,
+          "pinyin": "lanjianglu"
+        },
+        {
+          "id": 1603,
+          "name": "钟家村",
+          "longitude": 114266198,
+          "latitude": 30549314,
+          "pinyin": "zhongjiacun"
+        },
+        {
+          "id": 1615,
+          "name": "汉阳火车站",
+          "longitude": 114252865,
+          "latitude": 30551433,
+          "pinyin": "hanyanghuochezhan"
+        },
+        {
+          "id": 1613,
+          "name": "五里墩",
+          "longitude": 114241655,
+          "latitude": 30553767,
+          "pinyin": "wulidun"
+        },
+        {
+          "id": 1609,
+          "name": "七里庙",
+          "longitude": 114231156,
+          "latitude": 30556696,
+          "pinyin": "qilimiao"
+        },
+        {
+          "id": 1612,
+          "name": "十里铺",
+          "longitude": 114219358,
+          "latitude": 30559343,
+          "pinyin": "shilipu"
+        },
+        {
+          "id": 1610,
+          "name": "王家湾",
+          "longitude": 114210291,
+          "latitude": 30562142,
+          "pinyin": "wangjiawan"
+        },
+        {
+          "id": 1606,
+          "name": "玉龙路",
+          "longitude": 114201467,
+          "latitude": 30564643,
+          "pinyin": "yulonglu"
+        },
+        {
+          "id": 1607,
+          "name": "永安堂",
+          "longitude": 114189201,
+          "latitude": 30566573,
+          "pinyin": "yongantang"
+        },
+        {
+          "id": 1608,
+          "name": "孟家铺",
+          "longitude": 114173894,
+          "latitude": 30564768,
+          "pinyin": "mengjiapu"
+        },
+        {
+          "id": 1604,
+          "name": "黄金口",
+          "longitude": 114144635,
+          "latitude": 30564050,
+          "pinyin": "huangjinkou"
+        }
+      ],
+      "name": "4号线",
+      "lineId": 72
+    }
+  ]
+}

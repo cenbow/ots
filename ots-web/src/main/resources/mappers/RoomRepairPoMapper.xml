@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.RoomRepairPoMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.pms.room.bean.RoomRepairPo" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="hotelId" property="hotelid" jdbcType="BIGINT" />
+    <result column="repairId" property="repairid" jdbcType="VARCHAR" />
+    <result column="roomid" property="roomid" jdbcType="BIGINT" />
+    <result column="Begintime" property="begintime" jdbcType="TIMESTAMP" />
+    <result column="Endtime" property="endtime" jdbcType="TIMESTAMP" />
+    <result column="roomTypeId" property="roomtypeid" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, hotelId, repairId, roomid, Begintime, Endtime, roomTypeId
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.mk.pms.room.bean.RoomRepairPoExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_room_repair
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_room_repair
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_room_repair
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.mk.pms.room.bean.RoomRepairPoExample" >
+    delete from t_room_repair
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.mk.pms.room.bean.RoomRepairPo" >
+    insert into t_room_repair (id, hotelId, repairId, 
+      roomid, Begintime, Endtime, 
+      roomTypeId)
+    values (#{id,jdbcType=BIGINT}, #{hotelid,jdbcType=BIGINT}, #{repairid,jdbcType=VARCHAR}, 
+      #{roomid,jdbcType=BIGINT}, #{begintime,jdbcType=TIMESTAMP}, #{endtime,jdbcType=TIMESTAMP}, 
+      #{roomtypeid,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.pms.room.bean.RoomRepairPo" >
+    insert into t_room_repair
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="hotelid != null" >
+        hotelId,
+      </if>
+      <if test="repairid != null" >
+        repairId,
+      </if>
+      <if test="roomid != null" >
+        roomid,
+      </if>
+      <if test="begintime != null" >
+        Begintime,
+      </if>
+      <if test="endtime != null" >
+        Endtime,
+      </if>
+      <if test="roomtypeid != null" >
+        roomTypeId,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="hotelid != null" >
+        #{hotelid,jdbcType=BIGINT},
+      </if>
+      <if test="repairid != null" >
+        #{repairid,jdbcType=VARCHAR},
+      </if>
+      <if test="roomid != null" >
+        #{roomid,jdbcType=BIGINT},
+      </if>
+      <if test="begintime != null" >
+        #{begintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null" >
+        #{endtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="roomtypeid != null" >
+        #{roomtypeid,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.mk.pms.room.bean.RoomRepairPoExample" resultType="java.lang.Integer" >
+    select count(*) from t_room_repair
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_room_repair
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.hotelid != null" >
+        hotelId = #{record.hotelid,jdbcType=BIGINT},
+      </if>
+      <if test="record.repairid != null" >
+        repairId = #{record.repairid,jdbcType=VARCHAR},
+      </if>
+      <if test="record.roomid != null" >
+        roomid = #{record.roomid,jdbcType=BIGINT},
+      </if>
+      <if test="record.begintime != null" >
+        Begintime = #{record.begintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.endtime != null" >
+        Endtime = #{record.endtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.roomtypeid != null" >
+        roomTypeId = #{record.roomtypeid,jdbcType=BIGINT},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_room_repair
+    set id = #{record.id,jdbcType=BIGINT},
+      hotelId = #{record.hotelid,jdbcType=BIGINT},
+      repairId = #{record.repairid,jdbcType=VARCHAR},
+      roomid = #{record.roomid,jdbcType=BIGINT},
+      Begintime = #{record.begintime,jdbcType=TIMESTAMP},
+      Endtime = #{record.endtime,jdbcType=TIMESTAMP},
+      roomTypeId = #{record.roomtypeid,jdbcType=BIGINT}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.pms.room.bean.RoomRepairPo" >
+    update t_room_repair
+    <set >
+      <if test="hotelid != null" >
+        hotelId = #{hotelid,jdbcType=BIGINT},
+      </if>
+      <if test="repairid != null" >
+        repairId = #{repairid,jdbcType=VARCHAR},
+      </if>
+      <if test="roomid != null" >
+        roomid = #{roomid,jdbcType=BIGINT},
+      </if>
+      <if test="begintime != null" >
+        Begintime = #{begintime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null" >
+        Endtime = #{endtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="roomtypeid != null" >
+        roomTypeId = #{roomtypeid,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.pms.room.bean.RoomRepairPo" >
+    update t_room_repair
+    set hotelId = #{hotelid,jdbcType=BIGINT},
+      repairId = #{repairid,jdbcType=VARCHAR},
+      roomid = #{roomid,jdbcType=BIGINT},
+      Begintime = #{begintime,jdbcType=TIMESTAMP},
+      Endtime = #{endtime,jdbcType=TIMESTAMP},
+      roomTypeId = #{roomtypeid,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

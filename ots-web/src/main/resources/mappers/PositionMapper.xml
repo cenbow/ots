@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.PositionMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.search.model.PositionModel" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="pname" property="pname" jdbcType="VARCHAR" />
+    <result column="ptype" property="ptype" jdbcType="VARCHAR" />
+    <result column="coordinates" property="coordinates" jdbcType="VARCHAR" />
+    <result column="ptxt" property="ptxt" jdbcType="VARCHAR" />
+    <result column="citycode" property="citycode" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, pname, ptype, coordinates, ptxt, citycode
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from s_position
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from s_position
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.search.model.PositionModel" >
+    insert into s_position (id, pname, ptype, 
+      coordinates, ptxt)
+    values (#{id,jdbcType=BIGINT}, #{pname,jdbcType=VARCHAR}, #{ptype,jdbcType=VARCHAR}, 
+      #{coordinates,jdbcType=VARCHAR}, #{ptxt,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.search.model.PositionModel" >
+    insert into s_position
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="pname != null" >
+        pname,
+      </if>
+      <if test="ptype != null" >
+        ptype,
+      </if>
+      <if test="coordinates != null" >
+        coordinates,
+      </if>
+      <if test="ptxt != null" >
+        ptxt,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="pname != null" >
+        #{pname,jdbcType=VARCHAR},
+      </if>
+      <if test="ptype != null" >
+        #{ptype,jdbcType=VARCHAR},
+      </if>
+      <if test="coordinates != null" >
+        #{coordinates,jdbcType=VARCHAR},
+      </if>
+      <if test="ptxt != null" >
+        #{ptxt,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.search.model.PositionModel" >
+    update s_position
+    <set >
+      <if test="pname != null" >
+        pname = #{pname,jdbcType=VARCHAR},
+      </if>
+      <if test="ptype != null" >
+        ptype = #{ptype,jdbcType=VARCHAR},
+      </if>
+      <if test="coordinates != null" >
+        coordinates = #{coordinates,jdbcType=VARCHAR},
+      </if>
+      <if test="ptxt != null" >
+        ptxt = #{ptxt,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.search.model.PositionModel" >
+    update s_position
+    set pname = #{pname,jdbcType=VARCHAR},
+      ptype = #{ptype,jdbcType=VARCHAR},
+      coordinates = #{coordinates,jdbcType=VARCHAR},
+      ptxt = #{ptxt,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+   <select id="findByCitycodeAndType" resultMap="BaseResultMap" >
+    select 
+    <include refid="Base_Column_List" />
+    from s_position
+    <where>
+		<if test=" citycode!=null and citycode!=''">
+		   citycode = #{citycode}
+		</if>
+	    <if test="ptype != null and ptype!=''">
+	    	and ptype = #{ptype}
+	    </if>
+    </where>
+  </select>
+  
+</mapper>

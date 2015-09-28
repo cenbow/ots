@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.BedTypeMapper" >
+
+  <resultMap id="TBedTypeMap" type="com.mk.ots.hotel.bean.TBedType" >
+    <id column="id" property="id" />
+    <result column="name" property="name" />
+    <result column="visible" property="visible" />
+  </resultMap>
+  
+  <select id="getRoombedtype" resultMap="TBedTypeMap">
+	SELECT
+		id,name
+	FROM
+		t_bedtype
+	WHERE (id = 1 or id = 2) and visible = 'T';
+  </select>
+  <select id="selectBedtypesByHotelId"  resultType="map">
+	select a.id,a.thotelid,b.bedtype
+	  from t_roomtype a
+	    left outer join t_roomtype_info b on a.id=b.roomtypeid
+	        where a.thotelid=#{hotelid};
+  </select> 
+ 
+</mapper>

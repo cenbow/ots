@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.ticket.model.BHotelStat">
+  <resultMap id="BaseResultMap" type="com.mk.ots.ticket.model.BHotelStat" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="mid" property="mid" jdbcType="BIGINT" />
+    <result column="hotelId" property="hotelId" jdbcType="BIGINT" />
+    <result column="statisticInvalid" property="statisticInvalid" jdbcType="TINYINT" />
+    <result column="otaorderid" property="otaOrderId" jdbcType="BIGINT" />
+    <result column="activityid" property="activityid" jdbcType="BIGINT" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="isDelete" property="isDelete" jdbcType="CHAR"  />
+    <result column="roomTypeId" property="roomTypeId" jdbcType="BIGINT"  />
+    <result column="roomNo" property="roomNo" jdbcType="VARCHAR"  />
+    <result column="roomTypeName" property="roomTypeName" jdbcType="VARCHAR"  />
+  </resultMap>
+  
+  <sql id="Base_Column_List1">
+    h.id,h.hotelname, h.visible,h.isnewpms, 
+    h.online, h.hotelpic,a.roomTypeId,a.roomno,a.roomTypeName,a.createTime,h.citycode
+  </sql>
+  
+	<insert id="insert" parameterType="com.mk.ots.ticket.model.BHotelStat" useGeneratedKeys="true" keyProperty="id">
+		insert into b_hotel_stat
+			(
+				mid, hotelId, statisticInvalid, otaorderid, createTime, updateTime,isDelete,roomTypeId,roomno,roomTypeName
+			)
+		values
+			(
+			   #{mid}, #{hotelId}, #{statisticInvalid}, #{otaOrderId}, #{createTime,jdbcType=TIMESTAMP}, now(),'F',#{roomTypeId},#{roomNo},#{roomTypeName}
+			)
+	</insert>
+
+    <select id="getBHotelStatByOtaorderid" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT id,mid,hotelId,statisticInvalid,otaorderid
+        from b_hotel_stat
+        WHERE otaorderid=#{otaorderid, jdbcType=BIGINT}
+    </select>
+
+    <select id="getCountValid" resultType="long" parameterType="java.util.Map">
+        SELECT mid
+        from b_hotel_stat
+        WHERE statisticInvalid=#{statisticInvalid}
+        group by mid
+        HAVING count(distinct hotelId)>=#{liveHotelNum}
+        limit #{batDataNum}
+    </select>
+    <update id="updateInvalidByMid" parameterType="java.util.Map">
+        UPDATE b_hotel_stat
+        SET statisticInvalid=#{statisticInvalid},updateTime=now()
+        WHERE mid=#{mid} and statisticInvalid=#{statisticInvalidPre, jdbcType=TINYINT}
+    </update>
+    
+    
+    <!-- jianghe add begin-->
+    <!-- 查询已住酒店次数 -->
+    <select id="queryHistoryHotelsCount" resultType="long" parameterType="java.util.Map">
+			SELECT
+				count(DISTINCT a.hotelId ) AS count
+			FROM
+				b_hotel_stat   a
+			JOIN t_hotel h ON a.hotelId = h.id
+			AND h.visible = 'T'
+			AND h.online = 'T'
+			AND a.mid = ( select mid from u_token where accesstoken = #{token} )
+			AND a.isDelete = 'F'
+			<!-- <if test="code != null" >
+			left outer join t_district b on h.disid = b.id
+	      		left outer join t_city c on c.cityid = b.cityid where c.code=#{code}
+      		</if> -->
+    </select>
+    <!-- 查询已住酒店列表 -->
+    <select id="queryHistoryHotels" resultType="com.mk.ots.hotel.model.THotelModel" parameterType="java.util.Map">
+		select 
+		<include refid="Base_Column_List1" /> 
+		from 
+		(select id,
+				mid,
+				hotelId,
+				otaorderid,
+				createTime,
+				isDelete,
+				roomTypeId,
+				roomno,
+				roomTypeName from b_hotel_stat where updateTime in(
+		SELECT
+				max(updateTime)
+			FROM
+				b_hotel_stat
+			WHERE
+				mid = ( select mid from u_token where accesstoken = #{token} )
+			AND isDelete = 'F'
+			GROUP BY
+				hotelId  ) and mid = ( select mid from u_token where accesstoken = #{token} )
+				) a join t_hotel h on a.hotelId=h.id and h.visible='T' and h.online='T' ORDER BY a.createTime DESC
+				<!-- <if test="code != null" >
+				left outer join t_district b on h.disid = b.id
+			      left outer join t_city c on c.cityid = b.cityid where c.code=#{code}
+			    </if> -->
+			    limit ${start} , ${limit}
+    </select>
+    
+    <update id="deleteHotelStats" parameterType="java.util.Map">
+        UPDATE b_hotel_stat
+        SET isDelete='T'
+        WHERE mid = ( select mid from u_token where accesstoken = #{token} ) and hotelId=#{hotelid}
+    </update>
+    <!-- jianghe add end-->
+    
+	
+</mapper>

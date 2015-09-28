@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+
+	<bean id="schedulerFactory" lazy-init="false" autowire="no" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="dataSource" ref="masterDataSource"></property>
+		<property name="applicationContextSchedulerContextKey" value="applicationContext" />
+		<property name="quartzProperties">
+			<props>
+				<prop key="org.quartz.scheduler.instanceName">TMS_INF_SCHEDULER</prop>
+				<prop key="org.quartz.scheduler.instanceId">AUTO</prop>
+				<prop key="org.quartz.jobStore.misfireThreshold">300000</prop>
+				<prop key="org.quartz.jobStore.class">org.quartz.impl.jdbcjobstore.JobStoreTX</prop>
+				<prop key="org.quartz.jobStore.driverDelegateClass">org.quartz.impl.jdbcjobstore.StdJDBCDelegate</prop>
+				<prop key="org.quartz.jobStore.tablePrefix">QRTZ_</prop>
+				<prop key="org.quartz.jobStore.maxMisfiresToHandleAtATime">20</prop>
+				<prop key="org.quartz.jobStore.isClustered">true</prop>
+				<prop key="org.quartz.threadPool.threadCount">20</prop>
+				<prop key="org.quartz.scheduler.skipUpdateCheck">TRUE</prop>
+				<!-- <prop key="org.quartz.plugin.triggHistory.class">org.quartz.plugins.history.LoggingJobHistoryPlugin</prop> -->
+			</props>
+		</property>
+		<property name="triggers">
+			<list>
+				<ref bean="homeDataTrigger" />
+				<ref bean="billDetailTrigger" />
+				<ref bean="cancelOrderTrigger" />
+				<ref bean="scoreTrigger"/>
+				<ref bean="lockRoomInAt12PMTrigger"/>
+				<!-- 酒店结算调度 -->
+				<ref bean="billOrdersTrigger"/>
+				<ref bean="billConfirmTrigger"/>
+				<ref bean="pushMessageTrigger"/>
+				<ref bean="dealUnsynedOrderTrigger"/>
+				<!-- 房量调度 -->
+				<ref bean="roomCensusTrigger"/>
+				<ref bean="roomCensusBackUpTrigger"/>
+				<ref bean="monthlySalesTrigger"/>
+				<!-- 自动重发乐住币 -->
+				<ref bean="autoSendLeZhuTrigger"/>
+				<!-- 用户关怀推送 -->
+				<ref bean="orderPushMessTrigger"/>
+				<ref bean="SendCouponsTrigger"/>
+                <!--<ref bean="SendLiveThreeCouponsTrigger" />-->
+				<!-- B规则：查询创建时间大于15分钟的订单 -->
+				<ref bean="orderCreatetimegt15Trigger"/>
+				<ref bean="paySendMsgTrigger"/>
+				<!-- 每日刷新ES眯客价 -->
+                <ref bean="refreshEsMikePriceTrigger"/>
+                <ref bean="confirmedPayingOrderTrigger"/>
+                <ref bean="payStatusErrorOrderTrigger"/>
+			</list>
+		</property>
+	</bean>
+
+	<!-- cancelOrder -->
+	<bean id="cancelOrderTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="cancelOrderJobDetail" />
+		<property name="cronExpression" value="0 */1 * * * ?" />
+	</bean>
+
+	<bean id="cancelOrderJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="cancelOrderJob" />
+		<property name="jobClassName" value="com.mk.ots.job.CancelOrderJob" />
+	</bean>
+
+	<!-- 首页数据 早上7点 -->
+	<bean id="homeDataTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="homeDataJobDetail" />
+		<property name="cronExpression" value="0 0 7 * * ?" />
+	</bean>
+	<bean id="homeDataJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="homeDataJob" />
+		<property name="jobClassName" value="com.mk.ots.job.HomePageQuartzJob" />
+	</bean>
+	<!-- 酒店流水 早上7:30 -->
+	<bean id="billDetailTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="billDetailJobDetail" />
+		<property name="cronExpression" value="0 30 7 * * ?" />
+	</bean>
+	<bean id="billDetailJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="billDetailJob" />
+		<property name="jobClassName" value="com.mk.ots.job.BillDetailQuartzJob" />
+	</bean>
+	
+	<!-- 评分批处理-->
+	<bean id="scoreTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="scoreJobDetail" />
+		<property name="cronExpression" value="0 0 3,14 * * ?" />
+	</bean>
+	<bean id="scoreJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="scoreJob" />
+		<property name="jobClassName" value="com.mk.ots.job.ScoreQuartzJob" />
+	</bean>
+	<!-- 预离未离住客房间置为锁定状态  (过了12点，应该锁房) -->
+	<bean id="lockRoomInAt12PMTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="lockRoomInAt12PMJobDetail" />
+		<property name="cronExpression" value="0 0 12 * * ?" />
+	</bean>
+	<bean id="lockRoomInAt12PMJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="lockRoomInAt12PMJob" />
+		<property name="jobClassName" value="com.mk.ots.job.LockRoomSatusInAt12PMQuartzJob" />
+	</bean>
+	<!-- 每晚的4点10分开始 酒店结算的订单数据-->
+	<bean id="billOrdersTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="billOrdersJobDetail" />
+		<property name="cronExpression" value="0 10 4 * * ?" />
+	</bean>
+	<bean id="billOrdersJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="billOrderJob" />
+		<property name="jobClassName" value="com.mk.ots.job.BillOrdersJob" />
+	</bean>
+	<!-- 每月的1号6点1分执行 酒店结算的审核数据 -->
+	<bean id="billConfirmTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="billConfirmJobDetail" />
+		<property name="cronExpression" value="0 1 6 1 * ?" />
+	</bean>
+	<bean id="billConfirmJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="billConfirmJob" />
+		<property name="jobClassName" value="com.mk.ots.job.BillConfirmCheckJob" />
+	</bean>
+	<!-- 每天3:00 15:00推送15元券消息 -->
+	<bean id="pushMessageTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="pushMessageJobDetail" />
+		<property name="cronExpression" value="0 0 3/12 * * ? 2050" />
+	</bean>
+	<bean id="pushMessageJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="pushMessageJob" />
+		<property name="jobClassName" value="com.mk.ots.job.PushMessageJob" />
+	</bean>
+	<!-- 每2分钟执行一次，从redis队列中取出已处理客单数据，反查 -->
+	<bean id="dealUnsynedOrderTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="dealUnsynedOrderJobDetail" />
+		<property name="cronExpression" value="0 0/2 * * * ?" />
+	</bean>
+	<bean id="dealUnsynedOrderJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="dealUnsynedOrderJob" />
+		<property name="jobClassName" value="com.mk.ots.job.DealUnsynedOrderJob" />
+	</bean>
+	<!-- 每30分钟执行一次，房量调度 -->
+	<bean id="roomCensusTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="roomCensusJobDetail" />
+		<property name="cronExpression" value="0 0/30 * * * ?" />
+	</bean>
+	<bean id="roomCensusJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="roomCensusJob" />
+		<property name="jobClassName" value="com.mk.ots.job.RoomCensusJob" />
+	</bean>
+	<!-- 每天00:15执行一次，删除并备份48小时之前房量数据调度 -->
+	<bean id="roomCensusBackUpTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="roomCensusBackUpJobDetail" />
+		<property name="cronExpression" value="0 15 0 * * ?" />
+	</bean>
+	<bean id="orderPushMessJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="orderPushMess"></property>
+		<property name="jobClassName" value="com.mk.ots.job.OrderPushMessageJob"></property>
+	</bean>
+	
+	<!-- 每天00:05执行一次，缓存酒店月销量纪录  显示近30天内的销量数据(不包含current date) -->
+	<bean id="monthlySalesTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="monthlySalesJobDetail" />
+		<property name="cronExpression" value="0 5 0 * * ?" />
+	</bean>
+	<bean id="monthlySalesJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="monthlySalesJob"></property>
+		<property name="jobClassName" value="com.mk.ots.job.LoadMonthlySalesJob"></property>
+	</bean>
+	
+	
+	<!-- 用户关怀推送 -->
+	<bean id="orderPushMessTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"> 
+		<property name="jobDetail" ref="orderPushMessJobDetail" />
+		<property name="cronExpression" value="0 0/1 * * * ?" />
+	</bean>
+	<bean id="roomCensusBackUpJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="roomCensusBackUpJob" />
+		<property name="jobClassName" value="com.mk.ots.job.RoomCensusBackUpJob" />
+	</bean>
+    
+	<!--  每5分钟执行一次，自动重发下发失败的乐住币 -->
+	<bean id="autoSendLeZhuTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="autoSendLeZhuJobDetail" />
+		<property name="cronExpression" value="30 0/5 * * * ?" />
+	</bean>
+
+	<bean id="autoSendLeZhuJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="autoSendLeZhuJob" />
+		<property name="jobClassName" value="com.mk.ots.job.AutoSendLeZhuJob" />
+	</bean>
+	
+	<!-- 每天10:00:01给用户推送优惠券信息 -->
+	<bean id="SendCouponsTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="SendCouponsJobDetail" />
+		<property name="cronExpression" value="1 0 10 * * ? " />
+	</bean>
+	<bean id="SendCouponsJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="SendCouponsJob" />
+		<property name="jobClassName" value="com.mk.ots.job.SendCouponsJob" />
+	</bean>
+
+    <!-- 每天10:01:00给用户推送住三送一活动的优惠券信息 -->
+	<!-- <bean id="SendLiveThreeCouponsTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+            <property name="jobDetail" ref="SendCouponsJobDetail" />
+            <property name="cronExpression" value="0 1 10 * * ? 2050" />
+        </bean>
+        <bean id="SendLiveThreeCouponsJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+            <property name="name" value="SendCouponsJob" />
+            <property name="jobClassName" value="com.mk.ots.job.SendLiveThreeCouponsJob" />
+        </bean>-->
+	
+	<!-- B规则：每分钟执行一次，取上1分钟内，有优惠券的，当前时间大于创建时间15分钟的订单的集合 -->
+	<bean id="orderCreatetimegt15Trigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="orderCreatetimegt15JobDetail" />
+		<property name="cronExpression" value="0 0/1 * * * ?" />
+	</bean>
+	<bean id="orderCreatetimegt15JobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="orderCreatetimegt15Job" />
+		<property name="jobClassName" value="com.mk.ots.job.OrderCreatetimegt15Job" />
+	</bean>
+
+	<!-- 预付订单给酒店老板发送短信 -->
+	<bean id="paySendMsgTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="paySendMsgJobDetail" />
+		<property name="cronExpression" value="0 0/1 * * * ?" />
+	</bean>
+
+	<bean id="paySendMsgJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="paySendMsgJob" />
+		<property name="jobClassName" value="com.mk.ots.job.PaySendMsgJob" />
+	</bean>
+	
+
+	<!-- 每日凌晨00:01刷新ES眯客价 -->
+	<bean id="refreshEsMikePriceTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="refreshEsMikePriceJobDetail" />
+		<property name="cronExpression" value="0 1 0 * * ?" />
+	</bean>
+	<bean id="refreshEsMikePriceJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="refreshEsMikePriceJob" />
+		<property name="jobClassName" value="com.mk.ots.job.RefreshEsMikePriceJob" />
+	</bean>
+	
+	<!-- 处理已确认支付中订单 -->
+	<bean id="confirmedPayingOrderTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="confirmedPayingOrderJobDetail" />
+		<property name="cronExpression" value="0 */10 * * * ?" />
+	</bean>
+
+	<bean id="confirmedPayingOrderJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="confirmedPayingOrderJob" />
+		<property name="jobClassName" value="com.mk.ots.job.ProcessConfirmedPayingOrderJob" />
+	</bean>
+	
+	<!-- 处理支付状态异常订单 -->
+	<bean id="payStatusErrorOrderTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="payStatusErrorOrderJobDetail" />
+		<property name="cronExpression" value="0 */10 * * * ?" />
+	</bean>
+
+	<bean id="payStatusErrorOrderJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="payStatusErrorOrderJob" />
+		<property name="jobClassName" value="com.mk.ots.job.ProcessPayStatusErrorJob" />
+	</bean>
+	
+</beans>

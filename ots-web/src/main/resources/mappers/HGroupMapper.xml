@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.pay.model.HGroup" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.pay.model.HGroup" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="regphone" property="regphone" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select  a.id as id,  a.regphone as regphone, a.name as name
+    from h_group  a,h_group_hotel b 
+    where a.id=b.groupid  
+     and  b.hotelid=#{hotelid,jdbcType=BIGINT}
+  </select>
+ 
+ 
+</mapper>

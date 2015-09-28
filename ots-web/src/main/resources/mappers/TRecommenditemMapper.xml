@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.TRecommenditemMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.recommend.model.TRecommenditem" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="positionId" property="positionid" jdbcType="BIGINT" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="subTitle" property="subtitle" jdbcType="VARCHAR" />
+    <result column="imageUrl" property="imageurl" jdbcType="VARCHAR" />
+    <result column="link" property="link" jdbcType="VARCHAR" />
+    <result column="viewType" property="viewtype" jdbcType="INTEGER" />
+    <result column="createTime" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="sort" property="sort" jdbcType="INTEGER" />
+    <result column="deleted" property="deleted" jdbcType="CHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="startTime" property="starttime" jdbcType="TIMESTAMP" />
+    <result column="endTime" property="endtime" jdbcType="TIMESTAMP" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="detailid" property="detailid" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, positionId, title, subTitle, imageUrl, link, viewType, createTime, sort, deleted, 
+    status, startTime, endTime, description,detailid
+  </sql>
+   <sql id="Plus_Column_List" >
+    t.id, t.positionId, t.title, t.subTitle, t.imageUrl, t.link, t.viewType, t.createTime, t.sort, t.deleted, 
+    t.status, t.startTime, t.endTime, t.description,t.detailid
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_recommenditem
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_recommenditem
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.recommend.model.TRecommenditem" >
+    insert into t_recommenditem (id, positionId, title, 
+      subTitle, imageUrl, link, 
+      viewType, createTime, sort, 
+      deleted, status, startTime, 
+      endTime, description)
+    values (#{id,jdbcType=BIGINT}, #{positionid,jdbcType=BIGINT}, #{title,jdbcType=VARCHAR}, 
+      #{subtitle,jdbcType=VARCHAR}, #{imageurl,jdbcType=VARCHAR}, #{link,jdbcType=VARCHAR}, 
+      #{viewtype,jdbcType=INTEGER}, #{createtime,jdbcType=TIMESTAMP}, #{sort,jdbcType=INTEGER}, 
+      #{deleted,jdbcType=CHAR}, #{status,jdbcType=INTEGER}, #{starttime,jdbcType=TIMESTAMP}, 
+      #{endtime,jdbcType=TIMESTAMP}, #{description,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.recommend.model.TRecommenditem" >
+    insert into t_recommenditem
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="positionid != null" >
+        positionId,
+      </if>
+      <if test="title != null" >
+        title,
+      </if>
+      <if test="subtitle != null" >
+        subTitle,
+      </if>
+      <if test="imageurl != null" >
+        imageUrl,
+      </if>
+      <if test="link != null" >
+        link,
+      </if>
+      <if test="viewtype != null" >
+        viewType,
+      </if>
+      <if test="createtime != null" >
+        createTime,
+      </if>
+      <if test="sort != null" >
+        sort,
+      </if>
+      <if test="deleted != null" >
+        deleted,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="starttime != null" >
+        startTime,
+      </if>
+      <if test="endtime != null" >
+        endTime,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="positionid != null" >
+        #{positionid,jdbcType=BIGINT},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="subtitle != null" >
+        #{subtitle,jdbcType=VARCHAR},
+      </if>
+      <if test="imageurl != null" >
+        #{imageurl,jdbcType=VARCHAR},
+      </if>
+      <if test="link != null" >
+        #{link,jdbcType=VARCHAR},
+      </if>
+      <if test="viewtype != null" >
+        #{viewtype,jdbcType=INTEGER},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sort != null" >
+        #{sort,jdbcType=INTEGER},
+      </if>
+      <if test="deleted != null" >
+        #{deleted,jdbcType=CHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="starttime != null" >
+        #{starttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null" >
+        #{endtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.recommend.model.TRecommenditem" >
+    update t_recommenditem
+    <set >
+      <if test="positionid != null" >
+        positionId = #{positionid,jdbcType=BIGINT},
+      </if>
+      <if test="title != null" >
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="subtitle != null" >
+        subTitle = #{subtitle,jdbcType=VARCHAR},
+      </if>
+      <if test="imageurl != null" >
+        imageUrl = #{imageurl,jdbcType=VARCHAR},
+      </if>
+      <if test="link != null" >
+        link = #{link,jdbcType=VARCHAR},
+      </if>
+      <if test="viewtype != null" >
+        viewType = #{viewtype,jdbcType=INTEGER},
+      </if>
+      <if test="createtime != null" >
+        createTime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sort != null" >
+        sort = #{sort,jdbcType=INTEGER},
+      </if>
+      <if test="deleted != null" >
+        deleted = #{deleted,jdbcType=CHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="starttime != null" >
+        startTime = #{starttime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endtime != null" >
+        endTime = #{endtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="description != null" >
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.recommend.model.TRecommenditem" >
+    update t_recommenditem
+    set positionId = #{positionid,jdbcType=BIGINT},
+      title = #{title,jdbcType=VARCHAR},
+      subTitle = #{subtitle,jdbcType=VARCHAR},
+      imageUrl = #{imageurl,jdbcType=VARCHAR},
+      link = #{link,jdbcType=VARCHAR},
+      viewType = #{viewtype,jdbcType=INTEGER},
+      createTime = #{createtime,jdbcType=TIMESTAMP},
+      sort = #{sort,jdbcType=INTEGER},
+      deleted = #{deleted,jdbcType=CHAR},
+      status = #{status,jdbcType=INTEGER},
+      startTime = #{starttime,jdbcType=TIMESTAMP},
+      endTime = #{endtime,jdbcType=TIMESTAMP},
+      description = #{description,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  
+   <select id="queryRecommendItem" resultMap="BaseResultMap" parameterType="map" >
+	     select 
+	    <include refid="Plus_Column_List" />
+			FROM
+				t_recommenditem t join t_recommendposition p on t.positionid=p.id
+			WHERE
+				t.deleted = 'F' /* 没有删除*/
+			AND t.`status` = 3 /* 发布中 */
+			and p.positioncode  =#{position}
+			and p.deleted = 'F' /* 没有删除*/
+			ORDER BY
+				t.sort DESC,t.createTime DESC;
+  </select>
+     <select id="queryRecommendItemLimit5" resultMap="BaseResultMap" parameterType="map" >
+	     select 
+	    <include refid="Plus_Column_List" />
+			FROM
+				t_recommenditem t join t_recommendposition p on t.positionid=p.id
+			WHERE
+				t.deleted = 'F' /* 没有删除*/
+			AND t.`status` = 3 /* 发布中 */
+			and p.positioncode  =#{position}
+			and p.deleted = 'F' /* 没有删除*/
+			ORDER BY
+				t.sort DESC,t.createTime DESC LIMIT 5;
+  </select>
+</mapper>

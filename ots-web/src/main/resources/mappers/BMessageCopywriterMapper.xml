@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.BMessageCopywriterMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.message.model.BMessageCopywriter" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="copywriter_type" property="copywriterType" jdbcType="SMALLINT" />
+    <result column="copywriter" property="copywriter" jdbcType="VARCHAR" />
+    <result column="msg_type" property="msgType" jdbcType="SMALLINT" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="enabled" property="enabled" jdbcType="SMALLINT" />
+    <result column="createtime" property="createtime" jdbcType="TIMESTAMP" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+    <result column="createby" property="createby" jdbcType="VARCHAR" />
+    <result column="updateby" property="updateby" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, copywriter_type, copywriter, msg_type, enabled, createtime, updatetime, createby, 
+    updateby,url,title
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from b_message_copywriter
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from b_message_copywriter
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.message.model.BMessageCopywriter" >
+    insert into b_message_copywriter (id, copywriter_type, copywriter, 
+      msg_type, enabled, createtime, 
+      updatetime, createby, updateby
+      )
+    values (#{id,jdbcType=BIGINT}, #{copywriterType,jdbcType=SMALLINT}, #{copywriter,jdbcType=VARCHAR}, 
+      #{msgType,jdbcType=SMALLINT}, #{enabled,jdbcType=SMALLINT}, #{createtime,jdbcType=TIMESTAMP}, 
+      #{updatetime,jdbcType=TIMESTAMP}, #{createby,jdbcType=VARCHAR}, #{updateby,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.message.model.BMessageCopywriter" >
+    insert into b_message_copywriter
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="copywriterType != null" >
+        copywriter_type,
+      </if>
+      <if test="copywriter != null" >
+        copywriter,
+      </if>
+      <if test="msgType != null" >
+        msg_type,
+      </if>
+      <if test="enabled != null" >
+        enabled,
+      </if>
+      <if test="createtime != null" >
+        createtime,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+      <if test="createby != null" >
+        createby,
+      </if>
+      <if test="updateby != null" >
+        updateby,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="copywriterType != null" >
+        #{copywriterType,jdbcType=SMALLINT},
+      </if>
+      <if test="copywriter != null" >
+        #{copywriter,jdbcType=VARCHAR},
+      </if>
+      <if test="msgType != null" >
+        #{msgType,jdbcType=SMALLINT},
+      </if>
+      <if test="enabled != null" >
+        #{enabled,jdbcType=SMALLINT},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createby != null" >
+        #{createby,jdbcType=VARCHAR},
+      </if>
+      <if test="updateby != null" >
+        #{updateby,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.message.model.BMessageCopywriter" >
+    update b_message_copywriter
+    <set >
+      <if test="copywriterType != null" >
+        copywriter_type = #{copywriterType,jdbcType=SMALLINT},
+      </if>
+      <if test="copywriter != null" >
+        copywriter = #{copywriter,jdbcType=VARCHAR},
+      </if>
+      <if test="msgType != null" >
+        msg_type = #{msgType,jdbcType=SMALLINT},
+      </if>
+      <if test="enabled != null" >
+        enabled = #{enabled,jdbcType=SMALLINT},
+      </if>
+      <if test="createtime != null" >
+        createtime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createby != null" >
+        createby = #{createby,jdbcType=VARCHAR},
+      </if>
+      <if test="updateby != null" >
+        updateby = #{updateby,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.message.model.BMessageCopywriter" >
+    update b_message_copywriter
+    set copywriter_type = #{copywriterType,jdbcType=SMALLINT},
+      copywriter = #{copywriter,jdbcType=VARCHAR},
+      msg_type = #{msgType,jdbcType=SMALLINT},
+      enabled = #{enabled,jdbcType=SMALLINT},
+      createtime = #{createtime,jdbcType=TIMESTAMP},
+      updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      createby = #{createby,jdbcType=VARCHAR},
+      updateby = #{updateby,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByType" resultMap="BaseResultMap" parameterType="com.mk.ots.message.model.BMessageCopywriter" >
+    select 
+    <include refid="Base_Column_List" />
+    from b_message_copywriter
+    where copywriter_type = #{copywriterType,jdbcType=BIGINT} and msg_type = #{msgType,jdbcType=SMALLINT}
+  </select>
+  
+  
+</mapper>

@@ -1,0 +1,68 @@
+# 大同市  抓取数据sql
+delete  from s_areainfo where citycode=140200;
+/****************************** 输出行政区SQL脚本: 开始 ***********************************/
+insert into s_areainfo (areaid, areaname, pinyin, lat, lng, citycode, discode) values (2268,'灵丘县','lingqiuxian',39.442406,114.23435,'140200','');
+        insert into s_areainfo (areaid, areaname, pinyin, lat, lng, citycode, discode) values (2269,'浑源县','hunyuanxian',39.693407,113.699475,'140200','');
+        insert into s_areainfo (areaid, areaname, pinyin, lat, lng, citycode, discode) values (2270,'左云县','zuoyunxian',40.013442,112.703008,'140200','');
+        insert into s_areainfo (areaid, areaname, pinyin, lat, lng, citycode, discode) values (2271,'大同县','datongxian',40.040295,113.61244,'140200','');
+        insert into s_areainfo (areaid, areaname, pinyin, lat, lng, citycode, discode) values (2264,'新荣区','xinrongqu',40.255866,113.140005,'140200','');
+        insert into s_areainfo (areaid, areaname, pinyin, lat, lng, citycode, discode) values (2265,'阳高县','yanggaoxian',40.36106,113.748945,'140200','');
+        insert into s_areainfo (areaid, areaname, pinyin, lat, lng, citycode, discode) values (2266,'天镇县','tianzhenxian',40.420237,114.090867,'140200','');
+        insert into s_areainfo (areaid, areaname, pinyin, lat, lng, citycode, discode) values (2267,'广灵县','guanglingxian',39.760281,114.282758,'140200','');
+        insert into s_areainfo (areaid, areaname, pinyin, lat, lng, citycode, discode) values (2261,'城区','chengqu',40.075667,113.298027,'140200','');
+        insert into s_areainfo (areaid, areaname, pinyin, lat, lng, citycode, discode) values (2262,'矿区','kuangqu',40.015136,113.168821,'140200','');
+        insert into s_areainfo (areaid, areaname, pinyin, lat, lng, citycode, discode) values (2263,'南郊区','nanjiaoqu',40.005405,113.149693,'140200','');
+        /****************************** 输出行政区SQL脚本: 结束 ***********************************/
+        /****************************** 输出景点SQL脚本: 开始 ***********************************/
+	delete  from s_landmark where citycode=140200;
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20385,'左云汽车站','zuoyunqichezhan',2,40.021787,112.713931,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20384,'左云县人民医院','zuoyunxianrenminyiyuan',6,40.014084,112.713627,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20387,'新万人商厦','xinwanrenshangsha',1,39.763545,114.28041,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20386,'东山森林公园','dongshansenlingongyuan',5,40.018182,112.730979,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20389,'广灵汽车站','guanglingqichezhan',2,39.75936,114.262391,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20388,'广灵县人民医院','guanglingxianrenminyiyuan',6,39.765838,114.28421,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20391,'新荣汽车站','xinrongqichezhan',2,40.255127,113.143531,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20390,'广灵县中医院','guanglingxianzhongyiyuan',6,39.758676,114.273927,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20393,'新世纪商厦','xinshijishangsha',1,40.258735,113.141323,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20392,'新荣区人民医院','xinrongqurenminyiyuan',6,40.257553,113.135098,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20395,'红旗商场','hongqishangchang',1,39.439465,114.236845,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20394,'灵丘县人民医院','lingqiuxianrenminyiyuan',6,39.44186,114.237881,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20397,'唐河公园','tanghegongyuan',5,39.432558,114.234567,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (3045,'大同大学','datongdaxue',7,40.093761,113.349968,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (3044,'大同煤炭职业技术学院','datongmeitanzhiyejishuxueyuan',7,40.023719,113.1839,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20398,'灵丘火车站','lingqiuhuochezhan',2,39.461777,114.222498,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20349,'大同县人民医院','datongxianrenminyiyuan',6,40.039834,113.616191,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20402,'新平旺汽车站','xinpingwangqichezhan',2,40.032447,113.172044,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20404,'同煤集团总医院','tongmeijituanzongyiyuan',6,40.039071,113.168432,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20345,'大同市第四人民医院','datongshidisirenminyiyuan',6,40.065562,113.303432,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20347,'大同县汽车客运站','datongxianqichekeyunzhan',2,40.04263,113.608649,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20407,'平旺火车站','pingwanghuochezhan',2,40.069209,113.218569,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20346,'儿童公园','ertonggongyuan',5,40.079867,113.286013,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20341,'友谊医院','youyiyiyuan',6,40.008277,113.149379,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20409,'浑源民康医院','hunyuanminkangyiyuan',6,39.705187,113.696425,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20340,'口泉火车站','kouquanhuochezhan',2,40.013043,113.144281,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20343,'大同火车站','datonghuochezhan',2,40.119902,113.302324,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20411,'浑源汽车站','hunyuanqichezhan',2,39.684312,113.687466,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20342,'中国雕塑博物馆','zhongguodiaosubowuguan',5,40.101721,113.302359,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (9610,'云冈石窟','yungangshiku',5,40.111345,113.13589,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20339,'府西商厦','fuxishangsha',1,40.005926,113.148403,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20415,'阳高县人民医院','yanggaoxianrenminyiyuan',6,40.344687,113.755694,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20338,'口泉公园','kouquangongyuan',5,40.003118,113.14536,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20420,'阳高汽车客运站','yanggaoqichekeyunzhan',2,40.354539,113.731453,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20358,'鸿雁万众商厦','hongyanwanzhongshangsha',1,40.420788,114.090119,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20357,'天镇县中医院','tianzhenxianzhongyiyuan',6,40.418881,114.090132,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20417,'阳高火车站','yanggaohuochezhan',2,40.36514,113.739539,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20361,'天镇县医院','tianzhenxianyiyuan',6,40.423829,114.094203,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20364,'洋河生态公园','yangheshengtaigongyuan',5,40.430899,114.090928,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20424,'新华亿购物','xinhuayigouwu',1,40.36395,113.756555,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (186,'大同站','datongzhan',2,40.119902,113.302324,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (24497,'大同市第一人民医院','datongshidiyirenminyiyuan',6,40.075857,113.347572,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (24499,'大同市第三人民医院','datongshidisanrenminyiyuan',6,40.07535,113.288136,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (24498,'大同市第二医院','datongshidieryiyuan',6,40.101087,113.288854,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (24501,'大同市第七人民医院','datongshidiqirenminyiyuan',6,39.99526,113.474121,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (10742,'大同云冈机场','datongyungangjichang',2,40.057883,113.486886,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (10743,'大同东王庄机场','datongdongwangzhuangjichang',2,40.040514,113.398296,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (24507,'大同市中医院','datongshizhongyiyuan',6,40.101569,113.33691,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (15283,'矿务局恒安新区','kuangwujuhenganxinqu',5,40.018077,113.213988,'140200','');
+        insert into s_landmark (landmarkid, landmarkname, pinyin, ltype, lat, lng, citycode, discode) values (20383,'云盛商城','yunshengshangcheng',1,40.010241,112.707102,'140200','');
+        /****************************** 输出景点SQL脚本: 结束 ***********************************/

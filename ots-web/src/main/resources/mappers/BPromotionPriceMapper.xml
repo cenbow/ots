@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.promo.model.BPromotionPrice">
+    <resultMap id="BaseResultMap" type="com.mk.ots.promo.model.BPromotionPrice">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="promotion" property="promotion" jdbcType="BIGINT" javaType="java.lang.Long"/>
+        <result column="price" property="price" jdbcType="DECIMAL"/>
+        <result column="offlineprice" property="offlineprice" jdbcType="DECIMAL"/>
+        <result column="otaorderid" property="otaorderid" jdbcType="BIGINT"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, promotion, price, offlineprice, otaorderid
+  </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from b_promotion_price
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from b_promotion_price
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+    <insert id="insert" parameterType="com.mk.ots.promo.model.BPromotionPrice" useGeneratedKeys="true" keyProperty="id">
+    insert into b_promotion_price (id, promotion, price, 
+      offlineprice, otaorderid)
+    values (#{id,jdbcType=BIGINT}, #{promotion,jdbcType=BIGINT}, #{price,jdbcType=DECIMAL}, 
+      #{offlineprice,jdbcType=DECIMAL}, #{otaorderid,jdbcType=BIGINT})
+  </insert>
+    <insert id="insertSelective" parameterType="com.mk.ots.promo.model.BPromotionPrice">
+        insert into b_promotion_price
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="promotion != null">
+                promotion,
+            </if>
+            <if test="price != null">
+                price,
+            </if>
+            <if test="offlineprice != null">
+                offlineprice,
+            </if>
+            <if test="otaorderid != null">
+                otaorderid,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="promotion != null">
+                #{promotion,jdbcType=BIGINT},
+            </if>
+            <if test="price != null">
+                #{price,jdbcType=DECIMAL},
+            </if>
+            <if test="offlineprice != null">
+                #{offlineprice,jdbcType=DECIMAL},
+            </if>
+            <if test="otaorderid != null">
+                #{otaorderid,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.promo.model.BPromotionPrice">
+        update b_promotion_price
+        <set>
+            <if test="promotion != null">
+                promotion = #{promotion,jdbcType=BIGINT},
+            </if>
+            <if test="price != null">
+                price = #{price,jdbcType=DECIMAL},
+            </if>
+            <if test="offlineprice != null">
+                offlineprice = #{offlineprice,jdbcType=DECIMAL},
+            </if>
+            <if test="otaorderid != null">
+                otaorderid = #{otaorderid,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.mk.ots.promo.model.BPromotionPrice">
+    update b_promotion_price
+    set promotion = #{promotion,jdbcType=BIGINT},
+      price = #{price,jdbcType=DECIMAL},
+      offlineprice = #{offlineprice,jdbcType=DECIMAL},
+      otaorderid = #{otaorderid,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+    <select id="findBPromotionPriceByOrderAndPType" resultMap="BaseResultMap" parameterType="java.util.Map">
+  	select a.* from 
+  		(select * from b_promotion_price where otaorderid = #{orderid}) a,
+		(select id from b_promotion where type = #{type}) b 
+	where a.promotion = b.id
+  </select>
+
+    <delete id="deleteByOrderidAndPromotionId" parameterType="java.util.Map">
+  	  delete from b_promotion_price where otaorderid = #{otaorderid} and promotion = #{promotionid}
+    </delete>
+
+    <select id="findPromotionPricesByOrderIdAndPromoId" resultMap="BaseResultMap" parameterType="java.util.Map">
+  		 select * from b_promotion_price where otaorderid = #{orderid} and promotion = #{promotionid}
+ 	</select>
+
+    <select id="findPromotionPricesByOrderId" resultMap="BaseResultMap" parameterType="java.util.Map">
+  		 select t.* from b_promotion p , b_promotion_price t where p.id = t.promotion and t.otaorderid = #{orderid}
+ 	</select>
+    <select id="queryBPromotionPricesByPromId" resultMap="BaseResultMap" parameterType="java.util.Map">
+  		 select t.* from b_promotion p , b_promotion_price t where p.id = t.promotion and t.promotion = #{promotionid}
+ 	</select>
+
+    <select id="findUserPromotionPricesByOrderId" resultMap="BaseResultMap" parameterType="java.util.Map">
+        select t.* from b_promotion p
+        join b_promotion_price t
+            on p.id = t.promotion
+        where  t.promotion !=3 and t.promotion !=4 and t.otaorderid = #{orderid}
+    </select>
+</mapper>

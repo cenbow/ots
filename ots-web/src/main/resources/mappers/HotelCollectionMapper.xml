@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.HotelCollectionMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.hotel.bean.HotelCollection" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="hotelid" property="hotelid" jdbcType="BIGINT" />
+    <result column="mid" property="mid" jdbcType="BIGINT" />
+    <result column="collecttime" property="collecttime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, hotelid, mid, collecttime
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.mk.ots.hotel.bean.HotelCollectionExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from b_hotel_collection
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from b_hotel_collection
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from b_hotel_collection
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.mk.ots.hotel.bean.HotelCollectionExample" >
+    delete from b_hotel_collection
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.hotel.bean.HotelCollection" >
+    insert into b_hotel_collection (id, hotelid, mid, 
+      collecttime)
+    values (#{id,jdbcType=BIGINT}, #{hotelid,jdbcType=BIGINT}, #{mid,jdbcType=BIGINT}, 
+      #{collecttime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.hotel.bean.HotelCollection" >
+    insert into b_hotel_collection
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="hotelid != null" >
+        hotelid,
+      </if>
+      <if test="mid != null" >
+        mid,
+      </if>
+      <if test="collecttime != null" >
+        collecttime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="hotelid != null" >
+        #{hotelid,jdbcType=BIGINT},
+      </if>
+      <if test="mid != null" >
+        #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="collecttime != null" >
+        #{collecttime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.mk.ots.hotel.bean.HotelCollectionExample" resultType="java.lang.Integer" >
+    select count(*) from b_hotel_collection
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update b_hotel_collection
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.hotelid != null" >
+        hotelid = #{record.hotelid,jdbcType=BIGINT},
+      </if>
+      <if test="record.mid != null" >
+        mid = #{record.mid,jdbcType=BIGINT},
+      </if>
+      <if test="record.collecttime != null" >
+        collecttime = #{record.collecttime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update b_hotel_collection
+    set id = #{record.id,jdbcType=BIGINT},
+      hotelid = #{record.hotelid,jdbcType=BIGINT},
+      mid = #{record.mid,jdbcType=BIGINT},
+      collecttime = #{record.collecttime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.hotel.bean.HotelCollection" >
+    update b_hotel_collection
+    <set >
+      <if test="hotelid != null" >
+        hotelid = #{hotelid,jdbcType=BIGINT},
+      </if>
+      <if test="mid != null" >
+        mid = #{mid,jdbcType=BIGINT},
+      </if>
+      <if test="collecttime != null" >
+        collecttime = #{collecttime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.hotel.bean.HotelCollection" >
+    update b_hotel_collection
+    set hotelid = #{hotelid,jdbcType=BIGINT},
+      mid = #{mid,jdbcType=BIGINT},
+      collecttime = #{collecttime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <!-- 查询已收藏酒店列表 -->
+    <select id="querylist" resultType="com.mk.ots.hotel.bean.HotelCollection" parameterType="java.util.Map">
+		SELECT
+			a.id,
+			a.hotelid,
+			a.mid,
+			a.collecttime
+		FROM
+			b_hotel_collection a join t_hotel b on a.hotelId=b.id and b.visible='T' and b.online='T'
+		WHERE
+			a.mid = (
+				SELECT
+					mid
+				FROM
+					u_token
+				WHERE
+					accesstoken = #{token}
+			)
+		ORDER BY
+			a.collecttime DESC
+		LIMIT ${start} , ${limit}
+    </select>
+    
+    <!-- 查询已收藏酒店总数 -->
+    <select id="queryCount" resultType="java.lang.Integer">
+    	SELECT 
+    		count(*) as hotelcount 			
+		FROM
+			b_hotel_collection a join t_hotel b on a.hotelId=b.id and b.visible='T' and b.online='T'
+		WHERE
+			a.mid = (
+				SELECT
+					mid
+				FROM
+					u_token
+				WHERE
+					accesstoken = #{token}
+			)
+    </select>
+</mapper>

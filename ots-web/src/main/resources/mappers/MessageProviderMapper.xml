@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.message.model.MessageProvider" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.message.model.MessageProvider" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="providername" property="providername" jdbcType="VARCHAR" />
+    <result column="weight" property="weight" jdbcType="BIGINT" />
+    <result column="providerclass" property="providerclass" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <select id="queryAllMessageProviders" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select * from u_message_provider 
+      <if test="ExceptProvider != null" >
+        where  providerclass not like  "%"#{ExceptProvider,jdbcType=VARCHAR}"%" 
+      </if>
+  </select>
+</mapper>
