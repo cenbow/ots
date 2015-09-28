@@ -1,1 +1,0 @@
-ALTER TABLE b_orderbusiness_log ADD COLUMN operateName VARCHAR(100) COMMENT '操作人姓名';
