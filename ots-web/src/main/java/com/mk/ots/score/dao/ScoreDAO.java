@@ -32,7 +32,7 @@ public class ScoreDAO {
 	public boolean insert(final List cList, final List sList,final String orderid) {
 		boolean succeed = Db.tx(new IAtom() {
 			public boolean run() throws SQLException {
-				String cSql = "insert into t_hotel_score (roomid,roomtypeid,hotelid,score,pics,grade,createtime,orderid,mid) values(?,?,?,?,?,?,NOW(),?,?)";
+				String cSql = "insert into t_hotel_score (roomid,roomtypeid,hotelid,score,pics,grade,isdefault,createtime,orderid,mid) values(?,?,?,?,?,?,?,NOW(),?,?)";
 				int count = Db.update(cSql, cList.toArray());
 				int cc = 0;
 				int size = sList.size();
@@ -59,7 +59,7 @@ public class ScoreDAO {
 		final boolean isExists = isExistsGrade(orderid);
 		boolean succeed = Db.tx(new IAtom() {
 			public boolean run() throws SQLException {
-				String cSql = "update t_hotel_score set roomid=? , roomtypeid=? , hotelid=? , score=? ,pics=?,grade=?, createtime=now() where orderid=?";
+				String cSql = "update t_hotel_score set roomid=? , roomtypeid=? , hotelid=? , score=? ,pics=?,grade=?, isdefault=?, createtime=now() where orderid=?";
 				int count = Db.update(cSql, cList.toArray());
 				int cc = 0;
 				int size = sList.size();
@@ -144,8 +144,10 @@ public class ScoreDAO {
 		    List<Object> params = new ArrayList<Object>();
 		    params.add(hotelid);
 		    sql.append("select a.hotelid,count(*) as scorecount, b.s as grade from  t_hotel_score a left join t_hotel_subject b on a.hotelid=b.hotelid where a.hotelid=? and a.type=1 ");
-				//4:待回复，5:已经回复
-			sql.append(" and ( a.status=4 or a.status=5 ) ");
+		    //20150923 产品讨论，只展示状态为4的记录
+			sql.append(" and a.status=4 ");//4:待回复
+		    //4:待回复，5:已经回复
+			//sql.append(" and ( a.status=4 or a.status=5 ) ");
 		    
 		    logger.info("findScoreSByHotelid method sql is：\n {}", sql.toString());
 		    logger.info("sql parameter hotelid value is: {} ", params.toString());
@@ -173,8 +175,11 @@ public class ScoreDAO {
 		params.add(roomtypeid);
 		StringBuffer sql = new StringBuffer();
 		sql.append(" select hotelid,roomtypeid,sum(grade)/count(*) as grades,count(*) as itemc from t_hotel_score where hotelid=? and roomtypeid=? and type=1 ");
+		
+		//20150923 产品讨论，只展示状态为4的记录
+		sql.append(" and status=4 ");//4:待回复
 		//2015-08-21修改为只显示已审核，已经回复的评价 
-		sql.append(" and ( status=4 or status=5 )");//4:待回复，5:已经回复
+		//sql.append(" and ( status=4 or status=5 )");//4:待回复，5:已经回复
 		/*
 		if(mid != null){
 		    	sql.append(" and (( status=4 or status=5 ) or mid=? )" );//4:待回复，5:已经回复
@@ -215,7 +220,9 @@ public class ScoreDAO {
 		String sql = "insert into t_subject_c_his(subjectid,c,createdate) " 
 				+ "select a.subjectid,sum(a.grade)/count(*) as av,now() from t_hotel_score b "
 				+ " inner join  t_hotel_subject_mx a  on a.orderid=b.orderid " 
-				+ " where (b.status=4 or b.status=5) and b.type=1 " 
+				//20150923 产品讨论，只展示状态为4的记录
+				+ " where b.status=4  and b.type=1 " 
+				//+ " where (b.status=4 or b.status=5) and b.type=1 " 
 				+	" group by a.subjectid ";
 		int count = Db.update(sql);
 		logger.info("评分-->计算平均分:sql{}", sql);
@@ -233,7 +240,10 @@ public class ScoreDAO {
 				+ "( select s.subjectid,s.subjectname,s.mno as m,s.weightfunction,a.hotelid,h.id as cid,h.c,a.av as r,a.citem as n from t_subject s "
 				+ "left join (select * from t_subject_c_his where createdate=(select max(createdate) from t_subject_c_his)) h on s.subjectid= h.subjectid "
 				+ "left join (select hotelid,subjectid,sum(grade)/count(id) as av,count(id) as citem from t_hotel_subject_mx "
-				+ " where  orderid in ( select b.orderid from t_hotel_score b where  (b.status=4 or b.status=5) and type=1 ) "
+				+ " where  orderid in ( select b.orderid from t_hotel_score b where "
+				//20150923 产品讨论，只展示状态为4的记录
+				+ " b.status=4 and type=1 ) "
+				//+ " (b.status=4 or b.status=5) and type=1 ) "
 				+ " group by hotelid,subjectid) a on s.subjectid=a.subjectid) pr "
 				+ "order by hotelid,subjectid";
 		int count =Db.update(sql);
@@ -313,7 +323,7 @@ public class ScoreDAO {
 	public List<Bean> findScoreMx2(String hotelid,String roomtypeid,
 			String roomid,String maxgrade,String mingrade,
 			String subjectid,String orderby,String startdateday,
-			String enddateday,String starttime,String endtime,int page,int limit, int type, Long mid) {
+			String enddateday,String starttime,String endtime,int page,int limit, int type, Long mid, String gradetype) {
 		StringBuffer sqlBuffer = new StringBuffer();
 		sqlBuffer.append("select a.id,a.hotelid,a.roomtypeid,a.roomid,a.score,a.createtime,a.pics,a.orderid,a.grade,a.hotelscore,a.hotelscoretime,a.servicescore,a.servicescoretime,a.isreply,a.isaduit,a.isvisible,a.status,a.type,a.mid ");
 		sqlBuffer.append(" from t_hotel_score a where ");
@@ -326,15 +336,10 @@ public class ScoreDAO {
 		String statusWhere ="";
 		switch( type){
 		case 1:
+			//20150923 产品讨论，只展示状态为4的记录
+			sqlBuffer.append(" and a.status=4 ");//4:待回复
 			//2015-08-21修改为只显示已审核，已经回复的评价 
-			statusWhere = " and ( a.status=4 or a.status=5 )";//4:待回复，5:已经回复
-			/*
-			if(mid != null){
-				statusWhere = " and (( a.status=4 or a.status=5 ) or (mid=? and status!=3) )";//4:待回复，5:已经回复
-				paramsList.add(mid);
-			}else{
-				statusWhere = " and ( a.status=4 or a.status=5 )";//4:待回复，5:已经回复
-			}*/
+			//statusWhere = " and ( a.status=4 or a.status=5 )";//4:待回复，5:已经回复
 			break;
 		case 2:
 			statusWhere = " and a.status=6 ";
@@ -352,13 +357,20 @@ public class ScoreDAO {
 			sqlBuffer.append( " and a.hotelid=? ");
 			paramsList.add(hotelid);
 		}
-		if(StringUtils.isNotBlank(maxgrade)){
-			sqlBuffer.append( " and a.grade<=? ");
-			paramsList.add(maxgrade);
-		}
-		if(StringUtils.isNotBlank(mingrade)){
-			sqlBuffer.append( " and a.grade>=?");
-			paramsList.add(mingrade);
+		//眯客3.0
+		//好：G，中：M,  差：B， 全部：A
+		//B:<2分，M:>=2且<3，G:>=3
+		if(StringUtils.isNotBlank(gradetype)){
+			this.settingGradeType(gradetype, sqlBuffer, paramsList);
+		}else{
+			if(StringUtils.isNotBlank(maxgrade)){
+				sqlBuffer.append( " and a.grade<=? ");
+				paramsList.add(maxgrade);
+			}
+			if(StringUtils.isNotBlank(mingrade)){
+				sqlBuffer.append( " and a.grade>=?");
+				paramsList.add(mingrade);
+			}
 		}
 		if(StringUtils.isNotBlank(startdateday)){
 			sqlBuffer.append( " and a.createtime >=? ");
@@ -400,8 +412,8 @@ public class ScoreDAO {
 		for(int i=0;i<groups.length;i++){
 			String group= groups[i];
 			String[] grades= group.split("-");
-			int min= Integer.parseInt(grades[0]);
-			int max= Integer.parseInt(grades[1]);
+			Double min= Double.parseDouble(grades[0]);
+			Double max= Double.parseDouble(grades[1]);
 			
 			params.add(hotelid);
 			params.add(min);
@@ -421,14 +433,17 @@ public class ScoreDAO {
 				params.add(enddate);
 			}
 			
+			//20150923 产品讨论，只展示状态为4的记录
+			sqlBuffer.append(" and status=4 ");//4:待回复
+			/*
 			if(mid != null){
 				//2015-08-21修改为只显示已审核，已经回复的评价 
-				sqlBuffer.append(" and ( status=4 or status=5 )");//4:待回复，5:已经回复
+				//sqlBuffer.append(" and ( status=4 or status=5 )");//4:待回复，5:已经回复				
 				//sqlBuffer.append(" and (( status=4 or status=5 ) or mid=? )");//4:待回复，5:已经回复
 				//params.add(mid);
 			}else{
 				sqlBuffer.append(" and ( status=4 or status=5 )");//4:待回复，5:已经回复
-			}
+			}*/
 		}
 		return  Db.find(sqlBuffer.toString(),params.toArray());
 	}
@@ -436,21 +451,16 @@ public class ScoreDAO {
 	public long findScoreMxCount(String hotelid, String roomtypeid,
 			String roomid, String maxgrade, String mingrade, String subjectid,
 			String orderby, String startdateday, String enddateday,
-			String starttime, String endtime, Long mid) {
+			String starttime, String endtime, Long mid, String gradetype) {
 		StringBuffer sqlBuffer = new StringBuffer();
 		sqlBuffer.append("select count(*)   from t_hotel_score a  where ");
 		//sqlBuffer.append( " left join t_hotel_subject s on a.hotelid=s.hotelid where");
 		List paramsList= new ArrayList();
 
+		//20150923 产品讨论，只展示状态为4的记录
+		sqlBuffer.append(" type=1 and a.status=4 ");//4:待回复
 		//2015-08-21修改为只显示已审核，已经回复的评价 
-		sqlBuffer.append(" type=1 and (a.status=4 or a.status=5)");
-		/*
-		if(mid!=null){
-			sqlBuffer.append(" type=1 and (( a.status=4 or a.status=5 ) or mid=? )");//4:待回复，5:已经回复
-			paramsList.add(mid);
-		}else{
-			sqlBuffer.append(" type=1 and (a.status=4 or a.status=5)");
-		}*/
+		//sqlBuffer.append(" type=1 and (a.status=4 or a.status=5)");
 
 		if(StringUtils.isNotBlank(roomid)){
 			sqlBuffer.append( " and a.roomid=? ");
@@ -462,13 +472,20 @@ public class ScoreDAO {
 			sqlBuffer.append( " and a.hotelid=? ");
 			paramsList.add(hotelid);
 		}
-		if(StringUtils.isNotBlank(maxgrade)){
-			sqlBuffer.append( " and a.grade<=? ");
-			paramsList.add(maxgrade);
-		}
-		if(StringUtils.isNotBlank(mingrade)){
-			sqlBuffer.append( " and a.grade>=?");
-			paramsList.add(mingrade);
+		//眯客3.0
+		//好：G，中：M,  差：B， 全部：A
+		//B:<2分，M:>=2且<3，G:>=3
+		if(StringUtils.isNotBlank(gradetype)){
+			this.settingGradeType(gradetype, sqlBuffer, paramsList);
+		}else{
+			if(StringUtils.isNotBlank(maxgrade)){
+				sqlBuffer.append( " and a.grade<=? ");
+				paramsList.add(maxgrade);
+			}
+			if(StringUtils.isNotBlank(mingrade)){
+				sqlBuffer.append( " and a.grade>=?");
+				paramsList.add(mingrade);
+			}
 		}
 		if(StringUtils.isNotBlank(startdateday)){
 			sqlBuffer.append( " and a.createtime >=? ");
@@ -503,4 +520,61 @@ public class ScoreDAO {
 		return Db.find(sql, midList.toArray());
 	}
 	
+	/**
+	 * 组装评分分类
+	 * 眯客3.0
+	 * 好：G，中：M,  差：B， 全部：A
+	 * B:<2分，M:>=2且<3，G:>=3
+	 * @param gradetype
+	 * @param sqlBuffer
+	 * @param paramsList
+	 */
+	private void settingGradeType(String gradetype, StringBuffer sqlBuffer, List paramsList){
+		if(gradetype.equals("G")){
+			sqlBuffer.append( " and a.grade>=? ");
+			paramsList.add("3");
+		}
+		if(gradetype.equals("M")){
+			sqlBuffer.append( " and a.grade>=? ");
+			paramsList.add("2");
+			sqlBuffer.append( " and a.grade<? ");
+			paramsList.add("3");
+		}
+		if( gradetype.equals("B")){
+			sqlBuffer.append( " and a.grade<? ");
+			paramsList.add("2");
+		}
+	}
+
+	public List<Bean> findScoreGroupByGrade(String hotelid, String gradetype, String startdate, String enddate) {
+		String[] gradetypes= gradetype.split(",");
+		StringBuffer sqlBuffer = new StringBuffer();
+		List params = new ArrayList();
+		for(int i=0;i<gradetypes.length;i++){
+			String gt= gradetypes[i];
+			
+			params.add(hotelid);
+			if(i>0){
+				sqlBuffer.append(" union ");
+			}
+			sqlBuffer.append("select '");
+			sqlBuffer.append(gt);
+			sqlBuffer.append("' as scoregroup,count(*) as scorecount from t_hotel_score a where  hotelid=? and type=1 ");
+			this.settingGradeType(gt, sqlBuffer, params);
+			
+			if(StringUtils.isNotBlank(startdate)){
+				sqlBuffer.append(" and createtime>= ? ");
+				params.add(startdate);
+			}
+			if( StringUtils.isNotBlank(enddate)){
+				sqlBuffer.append(" and createtime<= ? ");
+				params.add(enddate);
+			}
+			//20150923 产品讨论，只展示状态为4的记录
+			sqlBuffer.append(" and status=4 ");//4:待回复
+			//2015-08-21修改为只显示已审核，已经回复的评价 
+			//sqlBuffer.append(" and ( status=4 or status=5 )");//4:待回复，5:已经回复
+		}
+		return  Db.find(sqlBuffer.toString(),params.toArray());
+	}
 }

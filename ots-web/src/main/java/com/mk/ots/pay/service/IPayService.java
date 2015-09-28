@@ -17,6 +17,7 @@ import com.mk.ots.common.enums.RuleEnum;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.pay.model.PMSCancelParam;
 import com.mk.ots.pay.model.PPay;
+import com.mk.ots.pay.model.PPayStatusErrorOrder;
 import com.mk.ots.pay.model.PPayTask;
 import com.mk.ots.pay.model.PmsError;
 
@@ -58,23 +59,23 @@ public interface IPayService {
 	 */
 	public Long countOrderByOrderSts(Long orderId, OtaOrderStatusEnum sts);
 
-	/**
-	 * 获取优惠券数量
-	 * 
-	 * @param mid
-	 * @param id
-	 * @return
-	 */
-	public Long countTicketsByMember(Long mid, Long promoId);
+//	/**
+//	 * 获取优惠券数量
+//	 * 
+//	 * @param mid
+//	 * @param id
+//	 * @return
+//	 */
+//	public Long countTicketsByMember(Long mid, Long promoId);
 
-	/**
-	 * 获取订单对应的优惠券数量
-	 * 
-	 * @param promoId
-	 * @param orderId
-	 * @return
-	 */
-	public Long countOrderTicket(Long promoId, Long orderId);
+//	/**
+//	 * 获取订单对应的优惠券数量
+//	 * 
+//	 * @param promoId
+//	 * @param orderId
+//	 * @return
+//	 */
+//	public Long countOrderTicket(Long promoId, Long orderId);
 
 
 	/**
@@ -141,9 +142,14 @@ public interface IPayService {
 	/**
 	 * 查询订单付款情况
 	 */
-	public String findPay(String orderid);
+	public String serviceFindPay(String orderid);
 
-	public String readAutoSend(String payid);
+	/**
+	 * 【HMS】查询订单付款情况
+	 */
+	public String hmsFindPay(Long orderid);
+
+	
 	/**
 	 * 给p_orderlog 加切客收益
 	 */
@@ -168,4 +174,20 @@ public interface IPayService {
 	public Long insertPayTask(PPayTask task);
 	
 	public int updatePayTask(PayTaskStatusEnum status, List<PPayTask> tasks);
+	
+	public boolean modifyPayStatus(Long orderid,Integer payStatus,String opertorName);
+	
+	/**
+	 *根据orderid得到用户实际掏的钱
+	 * @param orderid
+	 */
+	public BigDecimal payMoney(Long  orderid);
+	public void checkPayStatusWhenIn(OtaOrder order);
+	
+	public Long insertPayStatusError(PPayStatusErrorOrder order);
+	
+	public boolean deletePayStatusError(Long orderId);
+	
+	//批量退款
+	public String refundBatchPay(String orderid);
 }

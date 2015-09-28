@@ -203,4 +203,8 @@ public class Constant {
      * 住三送一活动券，A、B规则都适用
      */
     public static final long LIVE_THREE_ACTIVE=17L;
+    /**
+     * 新手优惠券
+     */
+    public static final long ACTIVE_NEW_USER=1L;
 }

@@ -24,4 +24,7 @@ public class CheckInUserDAO {
 	public List<OtaCheckInUser> findOtaCheckInUserList(Long roomOrderId){
 		return OtaCheckInUser.dao.find("select * from b_CheckinUser where OtaRoomOrderId = ?", roomOrderId);
 	}
+	public List<OtaCheckInUser>findOtaCheckInUserListByMid(Long mid){
+		return OtaCheckInUser.dao.find("SELECT  * from b_checkinuser where mid=? and Phone is not null and name !='' GROUP BY NAME", mid);
+	}
 }

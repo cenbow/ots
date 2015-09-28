@@ -52,6 +52,7 @@ public class BPromotion extends BizModel<BPromotion> {
 	private Long id;
 
     private String name;
+    private String description;
 
     private Date createtime;
 
@@ -337,6 +338,16 @@ public class BPromotion extends BizModel<BPromotion> {
 
 	public void setPlatformtype(Integer platformtype) {
 		this.platformtype = platformtype;
+	}
+
+	
+	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	@Override

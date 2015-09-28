@@ -44,6 +44,17 @@ public class Configure {
 	private static String test_certLocalPath =    "wx_test_wechat/apiclient_cert.p12";
 	
 	
+	
+	// 测试APP支付
+	private static String test_app_weixin_key = "IAYG8HpT1f4tosODIryb2BqKSqxIod2S";
+	// 微信分配的公众号ID（开通公众号之后可以获取到） wx83cc02790df41a2b
+	private static String test_app_weixin_appID = "wxaa293708da616cb0";
+	// 微信支付分配的商户号ID（开通公众号的微信支付功能之后可以获取到）
+	private static String test_app_weixin_mchID = "1262028301";
+	// HTTPS证书的本地路径 （wechat 公共帐号用）
+	private static String test_app_weixin_certLocalPath =    "test_wx_app/apiclient_cert.p12";
+	
+	
 	//HTTPS证书密码，默认密码等于商户号MCHID
 	private static String certPassword = "";
 	//受理模式下给子商户分配的子商户号
@@ -135,6 +146,8 @@ public class Configure {
 			return app_weixin_key;
 		}else if(type.getId().intValue()==WxType.wechat.getId().intValue()){
 			return wechat_key;
+		}else if(type.getId().intValue()==WxType.test_app.getId().intValue()){
+			return test_app_weixin_key;
 		}else{
 			return test_wechat_key;
 		}
@@ -146,6 +159,8 @@ public class Configure {
 			return app_weixin_appID;
 		}else if(type.getId().intValue()==WxType.wechat.getId().intValue()){
 			return wechat_appID;
+		}else if(type.getId().intValue()==WxType.test_app.getId().intValue()){
+			return test_app_weixin_appID;
 		}else{
 			return test_wechat_appID;
 		}
@@ -156,6 +171,8 @@ public class Configure {
 			return app_weixin_mchID;
 		}else if(type.getId().intValue()==WxType.wechat.getId().intValue()){
 			return wechat_mchID;
+		}else if(type.getId().intValue()==WxType.test_app.getId().intValue()){
+			return test_app_weixin_mchID;
 		}else{
 			return test_wechat_mchID;
 		}
@@ -168,6 +185,8 @@ public class Configure {
 			return app_certLocalPath;
 		}else if(type.getId().intValue()==WxType.wechat.getId().intValue()){
 			return wechat_certLocalPath;
+		}else if(type.getId().intValue()==WxType.test_app.getId().intValue()){
+			return test_app_weixin_certLocalPath;
 		}else{
 			return test_certLocalPath;
 		}

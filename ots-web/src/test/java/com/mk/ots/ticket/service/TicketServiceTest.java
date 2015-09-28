@@ -1,7 +1,7 @@
 package com.mk.ots.ticket.service;
 
-import java.util.List;
-
+import com.mk.ots.promo.service.IPromoService;
+import com.mk.ots.ticket.model.BPrizeInfo;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,9 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.mk.ots.order.bean.OtaOrder;
-import com.mk.ots.promo.service.IPromoService;
-import com.mk.ots.ticket.model.BPrizeInfo;
+import java.util.List;
 
 /**
  * Created by jjh on 15/7/31.
@@ -56,7 +54,7 @@ public class TicketServiceTest extends AbstractJUnit4SpringContextTests {
     @Transactional
     @Rollback(true)
     public void genTicketByActiveTest() {
-        List<BPrizeInfo> bPrizeInfos= promoService.genTicketByActive(16l, 41014l, "1");
+        List<BPrizeInfo> bPrizeInfos = promoService.tryLuckByActive(16l, 41014l, "1");
         System.out.println(bPrizeInfos.toString());
     }
 

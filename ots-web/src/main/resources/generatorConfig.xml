@@ -32,7 +32,7 @@
             targetPackage     指定生成的model生成所在的包名
             targetProject     指定在该项目下所在的路径
         -->
-        <javaModelGenerator targetPackage="com.mk.ots.aop.model" targetProject="src/main/java">
+        <javaModelGenerator targetPackage="com.mk.ots.city.model" targetProject="src/main/java">
             <!-- 是否对model添加 构造函数 -->
             <property name="constructorBased" value="false"/>
 
@@ -47,7 +47,7 @@
         </javaModelGenerator>
 
         <!--Mapper映射文件生成所在的目录 为每一个数据库的表生成对应的SqlMap文件 -->
-        <sqlMapGenerator targetPackage="com.mk.ots.aop.dao" targetProject="src/main/java">
+        <sqlMapGenerator targetPackage="com.mk.ots.city.dao" targetProject="src/main/java">
             <property name="enableSubPackages" value="false"/>
         </sqlMapGenerator>
 
@@ -82,6 +82,13 @@
                 enableCountByExample="false"
                 enableUpdateByExample="false">
          </table>-->
+
+         <table tableName="t_city_comment_config" domainObjectName="TCityCommentConfig"
+                       enableSelectByExample="false"
+                       enableDeleteByExample="false"
+                       enableCountByExample="false"
+                       enableUpdateByExample="false">
+         </table>
 
     </context>
 </generatorConfiguration>

@@ -1,10 +1,11 @@
 package com.mk.ots.pay.module.weixin.pay;
 
 import java.math.BigDecimal;
-
 import javax.servlet.http.HttpServletRequest;
-
 import com.mk.framework.exception.MyErrorEnum;
+import com.mk.ots.common.enums.PPayInfoOtherTypeEnum;
+import com.mk.ots.pay.module.query.BankPayStatusEnum;
+import com.mk.ots.pay.module.query.QueryPayPram;
 import com.mk.ots.pay.module.weixin.pay.WXPay;
 import com.mk.ots.pay.module.weixin.pay.common.Configure;
 import com.mk.ots.pay.module.weixin.pay.common.WxType;
@@ -252,26 +253,60 @@ public class Weixin {
     
     
     
+    
     /**仅仅作为查看支付情况的时候用*/
-    public static String  onlyQuery(String orderid,WxType type){
+    public static QueryPayPram  onlyQuery(String orderid,WxType type,QueryPayPram pram){
     	logger.info("订单号："+orderid+"支付金额查询");
     	ScanPayQueryResData  pqr=queryGetScanPayQueryResData("", orderid+"", type);
     	if(pqr==null){
     		return null;
     	}else{
     		logger.info("退款查询结果 ScanPayQueryResData==={}",pqr.toString());
-    		String rs=null;
     		if(pqr.getReturn_code()!=null && pqr.getReturn_code().equals("SUCCESS")){
     			if(pqr.getResult_code()!=null && pqr.getResult_code().equals("SUCCESS")){
     				if(pqr.getReturn_msg()!=null && pqr.getReturn_msg().equals("OK")){
-    					System.out.println(pqr.toString());
+//    					System.out.println(pqr.toString());
     					
     					if(pqr.getTrade_state()==null ){
-    						rs="去{"+type.getName()+"}查询到结果，但结果有误，不能作为支付凭证。";
+
     					}else if( pqr.getTrade_state().equals("SUCCESS")){
-    						rs="去{"+type.getName()+"}查询到结果，状态是【已支付】，支付金额:"+f2Y(pqr.getTotal_fee())+"【元】，能作为支付凭证。";
-    					}else if( pqr.getTrade_state().equals("REFUND")){
-    						rs="去{"+type.getName()+"}查询到结果，状态是【已退款】，退款金额:"+f2Y(pqr.getTotal_fee())+"【元】，能作为退款凭证。";
+
+    						        pram.setSuccess(true);
+    						        pram.setPrice(f2Y(pqr.getTotal_fee()));
+    						        if(type==WxType.app){
+    						        	 pram.setBanktype(PPayInfoOtherTypeEnum.wxpay);
+    						        }else if(type==WxType.wechat){
+    						        	 pram.setBanktype(PPayInfoOtherTypeEnum.wechatpay);
+    						        }else{
+    						        	logger.info("订单："+pram.getOrderid()+"是测试公众帐号");
+    						        	pram.setBanktype(PPayInfoOtherTypeEnum.wechatpay);
+    						        }
+    						        pram.setPaystatus(BankPayStatusEnum.success);
+    						        pram.setBankno(pqr.getTransaction_id());
+    						        
+//	    						   if(isService){
+//	    							   rs="去{"+type.getName()+"}查询到结果，状态是【已支付】，金额:"+f2Y(pqr.getTotal_fee())+"元，能作为支付凭证。";
+//									}else{
+//										rs="【已支付】，金额:"+f2Y(pqr.getTotal_fee())+"元";
+//									}
+    							}else if( pqr.getTrade_state().equals("REFUND")){
+    								pram.setSuccess(true);
+    						        pram.setPrice(f2Y(pqr.getTotal_fee()));
+    						        if(type==WxType.app){
+	   						        	 pram.setBanktype(PPayInfoOtherTypeEnum.wxpay);
+	   						        }else if(type==WxType.wechat){
+	   						        	 pram.setBanktype(PPayInfoOtherTypeEnum.wechatpay);
+	   						        }else{
+	   						        	logger.info("订单："+pram.getOrderid()+"是测试公众帐号");
+	   						        	pram.setBanktype(PPayInfoOtherTypeEnum.wechatpay);
+	   						        }
+    						        pram.setPaystatus(BankPayStatusEnum.refund);
+    						        pram.setBankno(pqr.getTransaction_id());
+//    								if(isService){
+//    									rs="去{"+type.getName()+"}查询到结果，状态是【已退款】，金额:"+f2Y(pqr.getTotal_fee())+"【元】，能作为退款凭证。";
+//       								}else{
+//       									rs="【已退款】，金额:"+f2Y(pqr.getTotal_fee())+"元";
+//       								}
 //    					}else if( pqr.getTrade_state().equals("NOTPAY")){
 //    						rs="去{"+type.getName()+"}查询到结果，状态是【未付款】，能作为没有付款凭证。";
 //    					}else{
@@ -281,13 +316,14 @@ public class Weixin {
         		}
     		}
     		logger.info("查询支付状况 结束，方法执行完 weixinpayid=={}", orderid);
-    		return rs;
+    		return pram;
     	}
     }
      
+     
     /**分转换为元*/
     private static BigDecimal f2Y(String p){
-    	return new BigDecimal(p).divide(new BigDecimal(100));
+    	return new BigDecimal(p).divide(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
     }
     
     

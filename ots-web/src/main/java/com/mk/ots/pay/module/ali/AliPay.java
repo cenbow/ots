@@ -12,6 +12,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.mk.ots.pay.model.PPayInfo;
+import com.mk.ots.pay.module.query.QueryPayPram;
 
 /**
  * futao.xiao
@@ -136,7 +137,7 @@ public class AliPay {
  * @param price    【单位是分】支付的金额， 会全部退回
  * @return  支付宝退款ID
  */
-public static String onlyQuery(String orderid){
+public static QueryPayPram onlyQuery(String orderid,QueryPayPram pram){
 	String s=null;
 	Map<String, String> sPara =new HashMap<String, String>();
 	sPara.put("service", AlipayConfig.aliPayQuery);
@@ -148,9 +149,9 @@ public static String onlyQuery(String orderid){
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 	System.out.println(s);
-	s=AliPayUtil.onlyQuery(orderid,s);
-	return s;
+	return AliPayUtil.onlyQuery(orderid,s,pram);
 }
     
 	

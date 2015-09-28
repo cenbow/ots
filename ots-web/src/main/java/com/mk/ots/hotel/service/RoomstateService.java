@@ -1,23 +1,5 @@
 package com.mk.ots.hotel.service;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import redis.clients.jedis.Jedis;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.google.common.collect.Lists;
@@ -25,32 +7,14 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mk.framework.AppUtils;
-import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.util.SerializeUtil;
 import com.mk.orm.kit.JsonKit;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.hotel.model.TFacilityModel;
-import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.model.THotelModel;
-import com.mk.ots.hotel.model.TPricetimeWithPrices;
-import com.mk.ots.hotel.model.TRoomModel;
-import com.mk.ots.hotel.model.TRoomRepairModel;
-import com.mk.ots.hotel.model.TRoomTypeInfoModel;
-import com.mk.ots.hotel.model.TRoomTypeModel;
-import com.mk.ots.hotel.model.TRoomTypeWithBasePrice;
+import com.mk.ots.hotel.model.*;
 import com.mk.ots.manager.OtsCacheManager;
-import com.mk.ots.mapper.PmsRoomOrderMapper;
-import com.mk.ots.mapper.RoomCensusMapper;
-import com.mk.ots.mapper.RoomLockPoMapper;
-import com.mk.ots.mapper.TFacilityMapper;
-import com.mk.ots.mapper.THotelMapper;
-import com.mk.ots.mapper.TPricetimeMapper;
-import com.mk.ots.mapper.TRoomMapper;
-import com.mk.ots.mapper.TRoomRepairMapper;
-import com.mk.ots.mapper.TRoomTypeMapper;
-import com.mk.ots.mapper.TRoomtypeInfoMapper;
+import com.mk.ots.mapper.*;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.OtaRoomOrder;
 import com.mk.ots.order.model.PmsRoomOrderModel;
@@ -62,6 +26,15 @@ import com.mk.pms.myenum.PmsRoomOrderStatusEnum;
 import com.mk.pms.room.bean.RoomLockJsonBean;
 import com.mk.pms.room.bean.RoomLockPo;
 import com.mk.pms.room.service.PmsRoomService;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * 房态服务类(git测试5)
@@ -140,6 +113,12 @@ public class RoomstateService {
 	private TRoomTypeMapper tRoomTypeMapper;
 	@Autowired
 	private TFacilityMapper tFacilityMapper;
+	
+	@Autowired
+	private CashBackService cashBackService;
+	
+	@Autowired
+	private HotelPriceService hotelPriceService;
 	/**
 	 * 
 	 * @param hotelid
@@ -269,6 +248,8 @@ public class RoomstateService {
 							this.logger.info("remove roomstate cache key: {}, value: {}", key, val);
 						}
 					}
+				} else {
+					lockRoomsCache = new HashMap<String, String>();
 				}
 			}
 			// 将入参日期转换为yyyy-MM-dd hh:mm:ss格式
@@ -401,6 +382,8 @@ public class RoomstateService {
 							this.logger.info("新房态remove roomstate cache key: {}, value: {}", key, val);
 						}
 					}
+				}else{
+					lockRoomsCache = new HashMap<String, String>();
 				}
 			}
 			// 将入参日期转换为yyyy-MM-dd hh:mm:ss格式
@@ -426,9 +409,13 @@ public class RoomstateService {
 				}
 				// 处理超过中午12点，应离未离(status='IN')的预定数据
 				String etime = DateUtils.formatTime(troomRepair.getEndtime());
+				int stime = DateUtils.strTimeToSeconds(etime);
 				if ("12:00:00".equals(etime) && (troomRepair.getEndtime().getTime() <= DateUtils.getDateFromString(enddate.concat(" 12:00:00")).getTime())) {
 					// 超过中午12点、应离未离处理，锁下一天房.
 					troomRepair.setEndtime(DateUtils.addDays(troomRepair.getEndtime(), 1));
+				}else if(stime < DateUtils.SIX_TIME_SECONDS){
+					//小于6点 不锁当天
+					troomRepair.setEndtime(DateUtils.addDays(troomRepair.getEndtime(), -1));
 				}
 				// 只要查询的起始、截止日期中的任何一个日期在订单中的入住和离开时间范围之内的，该房间不可预定.
 				// 经过处理的订单入住日期
@@ -473,9 +460,11 @@ public class RoomstateService {
 						map.put("hotelid", hotelid);
 						TRoomModel tRoomModel = pmsRoomService.selectTroomByPms(map);
 						if(tRoomModel==null){
-							throw MyErrorEnum.errorParm.getMyException("未找到pms为 "+rljb.getRoomid()+" 的房间信息"); 
-						}
-						//判断应离未离
+                            //throw MyErrorEnum.errorParm.getMyException("未找到pms为 "+rljb.getRoomid()+" 的房间信息");
+                            logger.error("findBookedRoomsByHotelIdNewPms::未找到pms为 " + rljb.getRoomid() + " 的房间信息");
+                            continue;
+                        }
+                        //判断应离未离
 						//如果离店时间是前一天
 						if(pmsEndTimeStr.equals(rljb.getTime()) && PmsRoomOrderStatusEnum.IN.getId().equals(pmsstatus) && (pmsEndtime.getTime() <= DateUtils.getDateFromString(enddate.concat(" 12:00:00")).getTime())){
 							//锁下一天
@@ -657,7 +646,7 @@ public class RoomstateService {
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 			rtnMap.put(ServiceOutput.STR_MSG_TIMES, (finishTime - startTime) + "ms");
 		} catch (Exception e) {
-			this.logger.error("OTS lock room error: {}", e.getMessage());
+			this.logger.error("OTS unlock room error: {}", e.getMessage());
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
@@ -863,28 +852,36 @@ public class RoomstateService {
 
 			// 从redis缓存中查询已锁的房态
 			Map<String, String> lockRoomsCache = new HashMap<String, String>();
-			THotel hotel = hotelService.readonlyTHotel(hotelid);
-			String isNewPms= hotel.getStr("isNewPms");
-			
-			if ("T".equals(isNewPms)) {//新pms
+			////THotel hotel = hotelService.readonlyTHotel(hotelid);
+            // 查酒店信息
+            THotelModel thotelModel = thotelMapper.selectById(hotelid);
+            if (thotelModel == null) {
+                logger.error("hotel: {} already delete from t_hotel.", hotelid);
+                return respEntityList;
+            }
+            String isNewPms = thotelModel.getIsnewpms();
+			////String isNewPms= hotel.getStr("isNewPms");
+			if (Constant.STR_TRUE.equals(isNewPms)) {//新pms
 		        //加埋点
 		        Transaction t = Cat.newTransaction("RoomState", "findBookedRoomsByHotelIdNewPms-newpms-redis");
-		        t.setStatus(Transaction.SUCCESS);
 		        try {
+		        	t.setStatus(Transaction.SUCCESS);
 		        	lockRoomsCache = this.findBookedRoomsByHotelIdNewPms(hotelid, begindate, enddate);
 				} catch (Exception e) {
 					t.setStatus(e);
+					throw e;
 				} finally{
 					t.complete();
 				}
 			} else {
 				//加埋点
 				Transaction t = Cat.newTransaction("RoomState", "findBookedRoomsByHotelId-oldpms-redis");
-		        t.setStatus(Transaction.SUCCESS);
 		        try {
+		        	t.setStatus(Transaction.SUCCESS);
 		        	lockRoomsCache = this.findBookedRoomsByHotelId(hotelid, begindate, enddate);
 		        } catch (Exception e) {
 					t.setStatus(e);
+					throw e;
 				} finally{
 					t.complete();
 				}
@@ -892,14 +889,12 @@ public class RoomstateService {
 			this.logger.info("hotelid: " + hotelid + ",begindate: " + begindate + ",enddate: " + enddate);
 			this.logger.info(JsonKit.toJson(lockRoomsCache));
 			Transaction other = Cat.newTransaction("RoomState", "roomtype-sql");
-			other.setStatus(Transaction.SUCCESS);
 			// 酒店房态信息map
 			RoomstateQuerylistRespEntity respEntity = new RoomstateQuerylistRespEntity();
 
 			List<TRoomTypeModel> troomTypes = new ArrayList<TRoomTypeModel>();
 			try {
-				// 查酒店信息
-				THotelModel thotelModel = thotelMapper.selectById(hotelid);
+				other.setStatus(Transaction.SUCCESS);
 				respEntity.setHotelid(hotelid);
 				respEntity.setHotelname(thotelModel.getHotelname());
 				respEntity.setHotelrulecode(thotelModel.getRulecode());    //20150810 add
@@ -909,6 +904,7 @@ public class RoomstateService {
 				troomTypes = troomtypeMapper.findList(roomtypeid, hotelid, bednum);
 			} catch (Exception e) {
 				other.setStatus(e);
+				throw e;
 			} finally{
 				other.complete();
 			}
@@ -917,11 +913,11 @@ public class RoomstateService {
 			List<RoomstateQuerylistRespEntity.Roomtype> roomtypes = Lists.newArrayList();
 			
 			Transaction t = Cat.newTransaction("RoomState", "loopsql");
-	        t.setStatus(Transaction.SUCCESS);
-	        
-	        
 	        
 	        try {
+	        	t.setStatus(Transaction.SUCCESS);
+	        	 //返回酒店下的所有房型返现
+    	        Map<Long, Object> cashBackMap = cashBackService.getCashBackByHotelId(hotelid, begindate, enddate);
 	        	for (TRoomTypeModel troomType : troomTypes) {
 	        		// 如果按照床型查询
 	        		if (bednum != null) {
@@ -940,10 +936,14 @@ public class RoomstateService {
 	        		String[] prices = null;
 	        		Transaction priceTransaction = Cat.newTransaction("RoomState", "mikeprice-redis");
 	        		try {
-	        			prices = this.getRoomtypeMikePrices(hotelid, troomType.getId(), begindate, enddate);
+	        			if(hotelPriceService.isUseNewPrice())
+	        				prices = hotelPriceService.getRoomtypeMikePrices(hotelid, troomType.getId(), begindate, enddate);
+	        			else
+	        				prices = this.getRoomtypeMikePrices(hotelid, troomType.getId(), begindate, enddate);
 	        			priceTransaction.setStatus(Transaction.SUCCESS);
 					} catch (Exception e) {
 						priceTransaction.setStatus(e);
+						throw e;
 					} finally{
 						priceTransaction.complete();
 					}
@@ -1035,14 +1035,27 @@ public class RoomstateService {
 	        		roomtype.setInfrastructure(infrastructures); //基础设施
 	        		roomtype.setValueaddedfa(valueaddedfas); //增值设施
 	        		
+	        		//mike3.0 add 
+	        		//添加返现
+	        		String iscashback = "F";
+	        		BigDecimal cash = BigDecimal.ZERO;
+	        		Map<String, Object> rtCashBack = (Map<String, Object>) cashBackMap.get(troomType.getId());
+	        		if( rtCashBack!=null  && rtCashBack.containsKey("iscashback") && rtCashBack.containsKey("cashbackcost")){
+	        			String isback = rtCashBack.get("iscashback").toString();
+	        			iscashback = "T";
+	        			cash = new BigDecimal(rtCashBack.get("cashbackcost").toString());
+	        		}
+	        		roomtype.setCashbackcost(cash);//返现金额
+	        		roomtype.setIscashback(iscashback);// 是否返现（T/F）
 	        		/** -----------------------------------------------------*/
 	        		
 	        		// 房型下的房间
 	        		List<TRoomModel> trooms = troomMapper.findList(troomType.getId());
 	        		List<RoomstateQuerylistRespEntity.Room> rooms = Lists.newArrayList();
 	        		List<RoomstateQuerylistRespEntity.Room> tempRooms = Lists.newArrayList();
-	        		
+	        		List<RoomstateQuerylistRespEntity.Room> vcRooms5 = Lists.newArrayList();
 	        		//boolean isMatch = false;
+	        		int vcRoomCount=0;
 	        		for (TRoomModel troom : trooms) {
 	        			RoomstateQuerylistRespEntity.Room room = respEntity.new Room();
 	        			room.setRoomid(troom.getId());
@@ -1064,14 +1077,33 @@ public class RoomstateService {
 	        					roomtype.setIsfocus("T");
 	        					//isMatch = true;
 	        				}
-	        				rooms.add(room);  
+	        				rooms.add(room);
+	        				if(vcRoomCount < 5 ){
+	        					vcRooms5.add(room);
+	        					vcRoomCount++;
+	        				}
 	        			}
 	        		}
 	        		
 	        		roomtype.setVcroomnum(rooms.size());   //将售房间数加入房型(roomtype) 集合中  20150730 add
+	        		// 眯客3.0 added by chuaiqing at 2015-09-21 18:14:20
+	        		Integer vcroomnum = roomtype.getVcroomnum();
+	        		if (vcroomnum == null) {
+	        		    roomtype.setVctxt("");
+	        		} else {
+	        		    if (vcroomnum == 0) {
+	        		        roomtype.setVctxt("满房");
+	        		    } else {
+	        		        if (vcroomnum <= 3) {
+	        		            roomtype.setVctxt("仅剩" + vcroomnum + "间");
+	        		        } else {
+	        		            roomtype.setVctxt("");
+	        		        }
+	        		    }
+	        		}
 	        		
 	        		//将tempList添加至roomList之后,实现锁房集合  已预订与可预订分类排序
-	        		rooms.addAll(tempRooms);
+	        		//rooms.addAll(tempRooms);//不可预定房间
 	        		
 	        		/*if(roomno!=null && !isMatch){
 	        			//找第一个可预定的置为isselect
@@ -1082,12 +1114,14 @@ public class RoomstateService {
 	        				}
 						}
 	        		}*/
-	        		
-	        		roomtype.setRooms(rooms);
+	        		//眯客3.0 只显示<=5个可预定房间
+	        		roomtype.setRooms(vcRooms5);
+	        		//roomtype.setRooms(rooms);//所有可预定房间
 	        		roomtypes.add(roomtype);
 	        	}
 	        }catch (Exception e) {
 				t.setStatus(e);
+				throw e;
 			} finally{
 				t.complete();
 			}
@@ -1123,6 +1157,69 @@ public class RoomstateService {
 		return respEntityList;
 	}
 	
+	
+	
+	
+	/**
+	 * 
+	 * @param hotelId
+	 * @param roomTypeId
+	 * @param beginDate	格式为yyyyMMdd	
+	 * @param enDate 格式为yyyyMMdd
+	 * @return
+	 */
+	public RoomstateQuerylistRespEntity.Room findVCHotelRoom(Long hotelid, Long roomtypeid, String begindate, String enddate) {
+		// 房型下的房间
+		try {
+			// 从redis缓存中查询已锁的房态
+			Map<String, String> lockRoomsCache = new HashMap<String, String>();
+			THotel hotel = hotelService.readonlyTHotel(hotelid);
+			String isNewPms= hotel.getStr("isNewPms");
+			if ("T".equals(isNewPms)) {//新pms
+		        //加埋点
+		        Transaction t = Cat.newTransaction("VCHotelRoom", "findBookedRoomsByHotelIdNewPms-newpms-redis");
+		        t.setStatus(Transaction.SUCCESS);
+		        try {
+		        	lockRoomsCache = this.findBookedRoomsByHotelIdNewPms(hotelid, begindate, enddate);
+				} catch (Exception e) {
+					t.setStatus(e);
+				} finally{
+					t.complete();
+				}
+			} else {
+				//加埋点
+				Transaction t = Cat.newTransaction("VCHotelRoom", "findBookedRoomsByHotelId-oldpms-redis");
+		        t.setStatus(Transaction.SUCCESS);
+		        try {
+		        	lockRoomsCache = this.findBookedRoomsByHotelId(hotelid, begindate, enddate);
+		        } catch (Exception e) {
+					t.setStatus(e);
+				} finally{
+					t.complete();
+				}
+			}
+			
+			List<TRoomModel> trooms = troomMapper.findList(roomtypeid);
+			for (TRoomModel troom : trooms) {
+    			RoomstateQuerylistRespEntity.Room room = new RoomstateQuerylistRespEntity().new Room();
+    			room.setRoomid(troom.getId());
+    			room.setRoomno(troom.getName());
+    			room.setRoomname(troom.getRoomTypeName());
+    			room.setHaswindow(troom.getIsWindow() == null ? "" : troom.getIsWindow());  //TODO t_room关联t_room_setting
+    			//room.setBed(bed);
+    			// 与redis房态缓存比较：vc可用，nvc不可用
+    			this.processRoomState(room, hotelid, begindate, enddate, lockRoomsCache);
+    			
+    			if(room.getRoomstatus().equals(ROOM_STATUS_VC)) {
+    				 return room;
+    			}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+			
 	
 	/*
 	 * 价格排序规则

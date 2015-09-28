@@ -1,5 +1,7 @@
 package com.mk.ots.manager;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -125,15 +127,23 @@ public class OtsCacheManager {
 	 * @param value
 	 * @param seconds
 	 */
-	public void setExpires(String cacheName, String key, String value, int seconds) {
+	public void setExpires(String cacheName, String key, String value,
+			int seconds) {
 		// //long time = new Date().getTime();
+		Jedis jedis = this.getNewJedis();
 		try {
 			String expiresKey = cacheName.concat("~").concat(key);
-			this.getJedis().setex(expiresKey, seconds, value);
+			jedis.setex(expiresKey, seconds, value);
 			// //jedis.set(expiresKey, value);
 			// //jedis.expireAt(expiresKey, time + expires);
 		} catch (Exception e) {
-			OtsCacheManager.logger.error("OtsCacheManager setExpires method error:\n" + e.getMessage());
+			OtsCacheManager.logger
+					.error("OtsCacheManager setExpires method error:\n"
+							+ e.getMessage());
+		} finally {
+			if (jedis != null) {
+				jedis.close();
+			}
 		}
 	}
 
@@ -144,12 +154,21 @@ public class OtsCacheManager {
 	 * @param value
 	 * @param seconds
 	 */
-	public void setExpires(String cacheName, String key, Object value, int seconds) {
+	public void setExpires(String cacheName, String key, Object value,
+			int seconds) {
+		Jedis jedis = this.getNewJedis();
 		try {
 			String expiresKey = cacheName.concat("~").concat(key);
-			this.getJedis().setex(expiresKey.getBytes(), seconds, SerializeUtil.serialize(value));
+			jedis.setex(expiresKey.getBytes(), seconds,
+					SerializeUtil.serialize(value));
 		} catch (Exception e) {
-			OtsCacheManager.logger.error("OtsCacheManager setExpires method error:\n" + e.getMessage());
+			OtsCacheManager.logger
+					.error("OtsCacheManager setExpires method error:\n"
+							+ e.getMessage());
+		} finally {
+			if (jedis != null) {
+				jedis.close();
+			}
 		}
 	}
 
@@ -160,15 +179,24 @@ public class OtsCacheManager {
 	 * @return
 	 */
 	public Object getExpiresObject(String cacheName, String key) {
+
 		Object result = null;
+		Jedis jedis = this.getNewJedis();
 		try {
 			String expiresKey = cacheName.concat("~").concat(key);
-			byte[] objBytes = this.getJedis().get(expiresKey.getBytes());
+			byte[] objBytes = jedis.get(expiresKey.getBytes());
 			result = SerializeUtil.unserialize(objBytes);
 		} catch (Exception e) {
 			result = null;
+		} finally {
+			if (jedis != null) {
+				jedis.close();
+			}
+
 		}
+
 		return result;
+	
 	}
 
 	/**
@@ -179,11 +207,17 @@ public class OtsCacheManager {
 	 */
 	public Object getExpires(String cacheName, String key) {
 		String result = "";
+		Jedis jedis = this.getNewJedis();
 		try {
 			String expiresKey = cacheName.concat("~").concat(key);
-			result = this.getJedis().get(expiresKey);
+			result = jedis.get(expiresKey);
 		} catch (Exception e) {
 			result = "";
+		} finally {
+			if (jedis != null) {
+				jedis.close();
+			}
+
 		}
 		return result;
 	}
@@ -201,21 +235,37 @@ public class OtsCacheManager {
 	 * @param key
 	 *            参数：key
 	 */
-	public void remove(String cacheName, Object key) {
+	public void remove(String cacheName, String key) {
+		Jedis jedis = this.getNewJedis();
 		try {
-			this.cacheManager.getCache(cacheName).evict(key);
+			key = cacheName.concat("~").concat(key);
+			Set<String> set = jedis.keys(key);
+			String[] kk = new String[set.size()];
+			jedis.del(set.toArray(kk));
+
 		} catch (Exception e) {
-			OtsCacheManager.logger.error("OtsCacheManager remove method error:\n" + e.getMessage());
+			OtsCacheManager.logger
+					.error("OtsCacheManager remove method error:\n"
+							+ e.getMessage());
+		} finally {
+			if (jedis != null) {
+				jedis.close();
+			}
 		}
 	}
 
 	public void del(String key) {
+		Jedis jedis = getNewJedis();
 		try {
-			Set<String> set = this.getJedis().keys(key);
+			Set<String> set = this.getNewJedis().keys(key);
 			String[] kk = new String[set.size()];
-			this.getJedis().del(set.toArray(kk));
+			jedis.del(set.toArray(kk));
 		} catch (Exception e) {
-			OtsCacheManager.logger.error("OtsCacheManager del method error:\n" + e.getMessage());
+			throw e;
+		} finally {
+			if(jedis!=null){
+				jedis.close();
+			}
 		}
 	}
 
@@ -272,6 +322,35 @@ public class OtsCacheManager {
 				}
 			}
 			return false;
+		}
+		
+		public String hmset(String key,Map<String,String> map){
+			Jedis jedis = getNewJedis();
+			try {
+				jedis.hmset(key, map);
+			} catch (Exception e) {
+				throw e;
+			} finally {
+				if(jedis!=null){
+					jedis.close();
+				}
+			}
+			return "OK";
+		}
+		
+		public Map<String,String> hgetAll(String key){
+			Map<String,String> map = new HashMap<String,String>();
+			Jedis jedis = getNewJedis();
+			try {
+				map = jedis.hgetAll(key);
+			} catch (Exception e) {
+				throw e;
+			} finally {
+				if(jedis!=null){
+					jedis.close();
+				}
+			}
+			return map;
 		}
 
 	/**

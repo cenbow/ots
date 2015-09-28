@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
+import com.mk.ots.pay.module.query.QueryPayPram;
 import com.mk.ots.pay.module.weixin.pay.Weixin;
 import com.mk.ots.pay.module.weixin.pay.common.WxType;
 
@@ -154,6 +155,11 @@ public class WeChat {
 			logger.info("当前微信支付环境是测试环境.");
 
 			return WxType.test_wechat;
+		}else if (WX_TYPE.equals(WxType.test_app.name())) {
+
+			logger.info("当前微信支付环境是模拟测试公众帐号环境.");
+
+			return WxType.test_app;
 		}
 
 		logger.info("当前微信支付环境是生产环境.");
@@ -164,23 +170,16 @@ public class WeChat {
     /***
      *  仅供 【正式】订单是否支付和退款的查询
      */
-    public static String  onlyQuery(String orderid){
-    	String s=Weixin.onlyQuery(orderid, WxType.wechat);
-    	if(s!=null){
-    		s="订单号"+getOId(orderid)+" "+s;
-    	}
-    	return  s;
+    public static QueryPayPram  onlyQuery(String orderid,QueryPayPram pram){
+    	return  Weixin.onlyQuery(orderid, WxType.wechat, pram);
     }
     
     /***
      *  仅供【测试帐号】 订单是否支付和退款的查询
      */
-    public static String  onlyQueryTest(String orderid){
-    	String s=Weixin.onlyQuery(orderid, WxType.test_wechat);
-    	if(s!=null){
-    		s="订单号"+orderid+" "+s;
-    	}
-    	return  s;
+
+    public static QueryPayPram  onlyQueryTest(String orderid, QueryPayPram pram){
+    	return  Weixin.onlyQuery(orderid, WxType.test_wechat,pram);
     }
 
     private static String getOId(String orderid){

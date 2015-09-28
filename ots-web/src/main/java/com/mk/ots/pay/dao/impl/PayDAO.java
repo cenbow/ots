@@ -3,10 +3,8 @@ package com.mk.ots.pay.dao.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mk.framework.datasource.dao.mybatis.MyBatisDaoImpl;
@@ -38,12 +36,12 @@ public class PayDAO extends MyBatisDaoImpl<PPay, Long> implements IPayDAO{
 	@Autowired
 	private UTicketDao uTicketMapper;
 	
-	@Autowired
-	private POrderLogDAO orderLogDao;
+//	@Autowired
+//	private POrderLogDAO orderLogDao;
 
-	public PmsError findPmsErrorByOrderId(Long orderId) {
-		return PmsError.dao.findFirst("select e.* from pms_error e, p_pay p where e.otherid = p.id and p.orderid = ?", orderId);
-	}
+//	public PmsError findPmsErrorByOrderId(Long orderId) {
+//		return PmsError.dao.findFirst("select e.* from pms_error e, p_pay p where e.otherid = p.id and p.orderid = ?", orderId);
+//	}
 	
 	public boolean isMatchRule(){
 		//1. 
@@ -73,21 +71,21 @@ public class PayDAO extends MyBatisDaoImpl<PPay, Long> implements IPayDAO{
 		return this.findOne("findById",param);
 	}
 	
-	@Override
-	public Long countOrderByType(Long orderid, PayStatusEnum payStatus) {
-		return Db.queryLong("select count(*) from b_otaorder where  id = ? and paystatus = ?", orderid, payStatus.getId());
-	}
+//	@Override
+//	public Long countOrderByType(Long orderid, PayStatusEnum payStatus) {
+//		return Db.queryLong("select count(*) from b_otaorder where  id = ? and paystatus = ?", orderid, payStatus.getId());
+//	}
 
-	@Override
-	public boolean updateOrderStatus(Long orderid,
-			OtaOrderStatusEnum orderStatus, PayStatusEnum payStatus) {
-		return OtaOrder.dao.findById(orderid).set("orderstatus", orderStatus.getId()).set("paystatus", payStatus.getId()).update();
-	}
+//	@Override
+//	public boolean updateOrderStatus(Long orderid,
+//			OtaOrderStatusEnum orderStatus, PayStatusEnum payStatus) {
+//		return OtaOrder.dao.findById(orderid).set("orderstatus", orderStatus.getId()).set("paystatus", payStatus.getId()).update();
+//	}
 
 	
-	public POrderLog getOrderLogByPayId(Long payId) {
-		return orderLogDao.selectByPayId(payId);
-	}
+//	public POrderLog getOrderLogByPayId(Long payId) {
+//		return orderLogDao.selectByPayId(payId);
+//	}
 
 	@Override
 	public List<UUseTicketRecord> findTicketRecords(List<Long> recordIdList) {
@@ -120,19 +118,19 @@ public class PayDAO extends MyBatisDaoImpl<PPay, Long> implements IPayDAO{
 		return null;
 	}
 
-	@Override
-	public Boolean updateRoomOrderStatus(Long orderId,
-			OtaOrderStatusEnum orderStatus, PayStatusEnum payStatus) {
-		boolean flag = true;
-		List<OtaRoomOrder> list =  OtaRoomOrder.dao.find("select * from b_otaroomorder where otaorderid = ?", orderId);
-		for(OtaRoomOrder tmp : list){
-			if(!tmp.dao.set("orderstatus", orderStatus.getId()).set("paystatus", payStatus.getId()).update()){
-				flag = false;
-				break;
-			}
-		}
-		return flag;
-	}
+//	@Override
+//	public Boolean updateRoomOrderStatus(Long orderId,
+//			OtaOrderStatusEnum orderStatus, PayStatusEnum payStatus) {
+//		boolean flag = true;
+//		List<OtaRoomOrder> list =  OtaRoomOrder.dao.find("select * from b_otaroomorder where otaorderid = ?", orderId);
+//		for(OtaRoomOrder tmp : list){
+//			if(!tmp.dao.set("orderstatus", orderStatus.getId()).set("paystatus", payStatus.getId()).update()){
+//				flag = false;
+//				break;
+//			}
+//		}
+//		return flag;
+//	}
 
 	@Override
 	public List<UTicket> findTickets(List<Long> promotionNos, Long mid) {
@@ -142,42 +140,42 @@ public class PayDAO extends MyBatisDaoImpl<PPay, Long> implements IPayDAO{
 		return Lists.newArrayList();
 	}
 
-	@Override
-	public void delPromoPriceByOrderId(Long orderId) {
-		// TODO 考虑批量删除 影响缓存
-		List<BPromotionPrice> list = BPromotionPrice.dao.find("select * from b_promotion_price where otaorderid=?", orderId);
-		for (BPromotionPrice bPromotionPrice : list) {
-			bPromotionPrice.delete();
-		}
-	}
+//	@Override
+//	public void delPromoPriceByOrderId(Long orderId) {
+//		// TODO 考虑批量删除 影响缓存
+//		List<BPromotionPrice> list = BPromotionPrice.dao.find("select * from b_promotion_price where otaorderid=?", orderId);
+//		for (BPromotionPrice bPromotionPrice : list) {
+//			bPromotionPrice.delete();
+//		}
+//	}
 
-	@Override
-	public List<BPromotion> findPromotions(List<Long> promotionNos, Long orderId) {
-		String sql = "select * from b_promotion p , b_promotion_price pp where p.id = pp.promotion and p.id in(?) and p.isticket = 'F' and pp.otaorderid=?";
-		return BPromotion.dao.find(sql, getIn(promotionNos), orderId);
-	}
+//	@Override
+//	public List<BPromotion> findPromotions(List<Long> promotionNos, Long orderId) {
+//		String sql = "select * from b_promotion p , b_promotion_price pp where p.id = pp.promotion and p.id in(?) and p.isticket = 'F' and pp.otaorderid=?";
+//		return BPromotion.dao.find(sql, getIn(promotionNos), orderId);
+//	}
 
-	@Override
-	public Long countTicketsByMember(Long mid, Long promoId) {
-		String sql = "select count(1) from u_ticket t where t.mid = ? and t.promotionid = ?";
-		return Db.queryLong(sql, mid, promoId);
-	}
+//	@Override
+//	public Long countTicketsByMember(Long mid, Long promoId) {
+//		String sql = "select count(1) from u_ticket t where t.mid = ? and t.promotionid = ?";
+//		return Db.queryLong(sql, mid, promoId);
+//	}
 
-	@Override
-	public Long countOrderTicket(Long promoId, Long orderId) {
-		String sql = "select count(1) from p_pay p, b_otaorder o, u_useticket_record u where p.orderid = o.id and u.payid = p.id and o.id=? and u.promotionid = ?";
-		return Db.queryLong(sql, orderId, promoId);
-	}
+//	@Override
+//	public Long countOrderTicket(Long promoId, Long orderId) {
+//		String sql = "select count(1) from p_pay p, b_otaorder o, u_useticket_record u where p.orderid = o.id and u.payid = p.id and o.id=? and u.promotionid = ?";
+//		return Db.queryLong(sql, orderId, promoId);
+//	}
 
-	@Override
-	public List<PmsError> getPayToPmsErrorList(PmsErrorTypeEnum errorType, Long startTime) {
-		return PmsError.dao.find("select * from pms_error where type=? and time=?", errorType.getId(), startTime);
-	}
+//	@Override
+//	public List<PmsError> getPayToPmsErrorList(PmsErrorTypeEnum errorType, Long startTime) {
+//		return PmsError.dao.find("select * from pms_error where type=? and time=?", errorType.getId(), startTime);
+//	}
 	
-	@Override
-	public BPromotionPrice getPromoPrice(Long orderId, Long promotionId) {
-		return BPromotionPrice.dao.findFirst("select * from b_promotion_price where otaorderid=? and promotion=?",orderId, promotionId);
-	}
+//	@Override
+//	public BPromotionPrice getPromoPrice(Long orderId, Long promotionId) {
+//		return BPromotionPrice.dao.findFirst("select * from b_promotion_price where otaorderid=? and promotion=?",orderId, promotionId);
+//	}
 	
 	@Override
 	public void updateOrderPromos(Long orderId, Boolean isCoupon, Boolean isPromotion) {

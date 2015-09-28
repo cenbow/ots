@@ -2,7 +2,9 @@ package com.mk.ots.promo.service.impl;
 
 import com.google.common.collect.Lists;
 import com.mk.framework.exception.MyErrorEnum;
+import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.enums.PPayInfoTypeEnum;
+import com.mk.ots.common.enums.PayStatusEnum;
 import com.mk.ots.common.enums.PromotionTypeEnum;
 import com.mk.ots.common.enums.TicketStatusEnum;
 import com.mk.ots.member.model.UMember;
@@ -16,6 +18,7 @@ import com.mk.ots.promo.service.IPromotionPriceService;
 import com.mk.ots.ticket.dao.UTicketDao;
 import com.mk.ots.ticket.model.UTicket;
 import com.mk.ots.ticket.service.parse.ITicketParse;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,21 +161,29 @@ public class PromotionPriceService implements IPromotionPriceService {
 		logger.info("绑定用户优惠券>>>>>>>>>>>>>>>>>>>>>>>>>>>>>End.");
 	}
 	
+	
+	/**
+	 * 修改用户优惠券的状态
+	 */
 	@Override
-	public void updateTicketUnusedStatus(OtaOrder order){
+	public void updateTicketStatus(OtaOrder order){
 		logger.info("修改订单优惠券状态为未使用状态. order:{}", order);
-		// add by zhangyajun 20150722  
-		//加规则，如果规则是重庆规则，那么取消订单，不返回优惠券
-		 logger.info("规则编号:{}",order.getRuleCode());
-//		 if (order.getRuleCode()!=null) {
-//			 if (RuleEnum.CHONG_QIN.getId().intValue()!=order.getRuleCode().intValue()) {
-//				 extractUpdateTicketUnusedStatus(order);
-//			 }
-//		 }else {
-			 extractUpdateTicketUnusedStatus(order);
-//		 }
-			 
-		 
+		
+		//此处统一处理状态，是否退回优惠券
+		
+		//统一规则，用户支付之后不再退还优惠券,只有等待支付或者订单等待确认的时候退还优惠券
+        if (order.getPayStatus() == PayStatusEnum.waitPay.getId() 
+        		||order.getOrderStatus() < OtaOrderStatusEnum.Confirm.getId()) {
+            logger.info("OTSMessage::cancelOrderPay:取消订单,退还优惠券。" + order.getId());
+            extractUpdateTicketStatus(order,TicketStatusEnum.unused);
+            logger.info("修改订单{}的券为可用状态,执行成功.", order.getId());
+        }else{
+        	//其他规则不允许退还
+        	logger.info("OTSMessage::cancelOrderPay:取消订单,不退还优惠券。" + order.getId());
+        	extractUpdateTicketStatus(order,TicketStatusEnum.invalid);
+        	logger.info("修改订单{}的券为失效状态,执行成功.", order.getId());
+        }
+        
 		
 	}
 	/**
@@ -180,7 +191,7 @@ public class PromotionPriceService implements IPromotionPriceService {
 	 * 提取一个更新优惠券状态的独立方法
 	 * @param order
 	 */
-	public  void extractUpdateTicketUnusedStatus(OtaOrder order){
+	public  void extractUpdateTicketStatus(OtaOrder order,TicketStatusEnum ticketStatusEnum){
 		List<BPromotionPrice> bindList = iBPromotionPriceDao.findPromotionPricesByOrderId(order.getId());
 		if(bindList!=null && bindList.size()>0){
 			for(BPromotionPrice bpp: bindList){
@@ -189,7 +200,7 @@ public class PromotionPriceService implements IPromotionPriceService {
 				logger.info(">>> uticket:{}", ukt);
 				if(ukt!=null){
 					ukt.setOtaorderid(order.getId());
-					updateTicketSts(ukt, TicketStatusEnum.unused);
+					updateTicketSts(ukt, ticketStatusEnum);
 					logger.info("修改用户优惠券为未使用状态.mid:{}, tmppromoid:{}.", order.getMid(), bpp.getPromotion());
 				}
 			}
@@ -265,7 +276,7 @@ public class PromotionPriceService implements IPromotionPriceService {
 	 * @param ticket
 	 * @param statu
 	 */
-	private void updateTicketSts(UTicket ticket, TicketStatusEnum statu) {
+	public void updateTicketSts(UTicket ticket, TicketStatusEnum statu) {
 		logger.info("进入updateTicketSts(), ticket{}, statu:{}", ticket, statu);
 		if(ticket == null){
 			return;

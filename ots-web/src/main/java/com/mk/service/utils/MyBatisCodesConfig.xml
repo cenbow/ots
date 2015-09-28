@@ -32,12 +32,7 @@
 			<property name="enableSubPackages" value="true" />
 		</javaClientGenerator>
 
-		<table tableName="t_interface_roomstate_log" domainObjectName="RoomStateLog"
-                enableSelectByExample="false"
-                enableDeleteByExample="false"
-                enableCountByExample="false"
-                enableUpdateByExample="false">  
-        </table>
+		<table tableName="t_setting_mike_rate" domainObjectName="TSettingMikeRate"></table>
 
 
 	</context>

@@ -41,6 +41,13 @@ public abstract interface ITips {
     public abstract ITips setReceivers(String receiver);
     
     /**
+     * 设置接收人,中间以，分割
+     * @param receiver
+     * @return
+     */
+    public abstract ITips setMobiles(String mobiles);
+    
+    /**
      * 设置通知跳转地址
      * @param url
      * @return

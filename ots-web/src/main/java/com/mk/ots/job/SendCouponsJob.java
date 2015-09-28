@@ -218,7 +218,7 @@ public class SendCouponsJob extends QuartzJobBean {
 			lPushLog.setActiveid(this.active_b_30yuan);
 
 			// push message
-			this.iMessageService.PushMsg(phone, title, msgContent, MessageType.USER.getId(), url, this.active_b_30yuan);
+			this.iMessageService.pushMsg(phone, title, msgContent, MessageType.USER.getId(), url, this.active_b_30yuan);
 		}
 	}
 

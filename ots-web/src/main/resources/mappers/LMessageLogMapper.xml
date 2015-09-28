@@ -10,12 +10,13 @@
     <result column="source" property="source" jdbcType="VARCHAR" />
     <result column="success" property="success" jdbcType="CHAR" />
     <result column="reporttime" property="reporttime" jdbcType="VARCHAR" />
+    <result column="providername" property="providername" jdbcType="VARCHAR" />
   </resultMap>
   <resultMap id="ResultMapWithBLOBs" type="com.mk.ots.message.model.LMessageLog" extends="BaseResultMap" >
     <result column="ip" property="ip" jdbcType="LONGVARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, time, phone, message, type, source, success, reporttime
+    id, time, phone, message, type, source, success, reporttime, providername
   </sql>
   <sql id="Blob_Column_List" >
     ip
@@ -47,11 +48,12 @@
   <insert id="insert" parameterType="com.mk.ots.message.model.LMessageLog" useGeneratedKeys="true" keyProperty="id">
     insert into l_message_log (id, time, phone, 
       message, type, source, 
-      success, reporttime, ip
+      success, reporttime, ip,providername
       )
     values (#{id,jdbcType=BIGINT}, #{time,jdbcType=TIMESTAMP}, #{phone,jdbcType=VARCHAR}, 
       #{message,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{source,jdbcType=VARCHAR}, 
       #{success,jdbcType=CHAR}, #{reporttime,jdbcType=VARCHAR}, #{ip,jdbcType=LONGVARCHAR}
+      , #{providername,jdbcType=VARCHAR}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.mk.ots.message.model.LMessageLog" useGeneratedKeys="true" keyProperty="id">
@@ -84,6 +86,9 @@
       <if test="ip != null" >
         ip,
       </if>
+      <if test="providername != null" >
+        providername,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -112,6 +117,9 @@
       </if>
       <if test="ip != null" >
         #{ip,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="providername != null" >
+        #{providername,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -142,6 +150,9 @@
       <if test="ip != null" >
         ip = #{ip,jdbcType=LONGVARCHAR},
       </if>
+       <if test="providername != null" >
+        providername = #{providername,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -154,7 +165,8 @@
       source = #{source,jdbcType=VARCHAR},
       success = #{success,jdbcType=CHAR},
       reporttime = #{reporttime,jdbcType=VARCHAR},
-      ip = #{ip,jdbcType=LONGVARCHAR}
+      ip = #{ip,jdbcType=LONGVARCHAR},
+      providername = #{providername,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.mk.ots.message.model.LMessageLog" >
@@ -165,7 +177,8 @@
       type = #{type,jdbcType=INTEGER},
       source = #{source,jdbcType=VARCHAR},
       success = #{success,jdbcType=CHAR},
-      reporttime = #{reporttime,jdbcType=VARCHAR}
+      reporttime = #{reporttime,jdbcType=VARCHAR},
+      providername = #{providername,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

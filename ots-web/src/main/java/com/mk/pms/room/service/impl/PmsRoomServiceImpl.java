@@ -11,6 +11,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.mk.ots.hotel.bean.TRoomType;
+import com.mk.ots.hotel.dao.HotelDAO;
 import com.mk.ots.hotel.model.EHotelModel;
 import com.mk.ots.hotel.model.THotelModel;
 import com.mk.ots.hotel.model.TRoomModel;
@@ -45,6 +47,8 @@ public class PmsRoomServiceImpl implements PmsRoomService {
 	private THotelMapper tHotelMapper;
 	@Autowired
 	private TRoomMapper tRoomMapper;
+	@Autowired
+	private HotelDAO hotelDAO;
 	/**
 	 * @param roomPair
 	 * 保存维修记录
@@ -135,6 +139,11 @@ public class PmsRoomServiceImpl implements PmsRoomService {
 		map.put("pms", pms);
 		map.put("time", time);
 		return tHotelMapper.selectByPmsAndTime(map);
+	}
+
+	@Override
+	public TRoomType findTRoomTypeByPmsno(Long hotelId, String pmsno) {
+		return hotelDAO.findTRoomTypeByPmsno(hotelId,pmsno);
 	}
 
 }

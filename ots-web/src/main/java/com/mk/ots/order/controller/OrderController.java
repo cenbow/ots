@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
@@ -42,6 +43,7 @@ import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.hotel.model.THotel;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomTypeService;
+import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.order.bean.OtaCheckInUser;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.OtaRoomOrder;
@@ -50,9 +52,10 @@ import com.mk.ots.order.model.OtaOrderMac;
 import com.mk.ots.order.service.OrderServiceImpl;
 import com.mk.ots.order.service.OrderUtil;
 import com.mk.ots.pay.model.PPay;
-import com.mk.ots.pay.module.weixin.pay.common.Tools;
+import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.ots.pay.service.IPayService;
 import com.mk.ots.pay.service.IPriceService;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.utils.PayLockKeyUtil;
 import com.mk.ots.web.ServiceOutput;
 
@@ -74,6 +77,13 @@ public class OrderController {
 	private OrderUtil orderUtil;
 	@Autowired
 	private HotelService hotelService;
+	@Autowired
+	private RoomstateService roomstateService;
+	
+	// 全部、进行中、已完成
+	private ImmutableMap<String, String> statetypeMap = ImmutableMap.of("all", 	"110,120,140,160,180,190,200,510,514,512,513,520", 
+																		"doing","110,120,140,160,180,510", 
+																		"done",	"200,190");
 
 	/**
 	 * 创建订单
@@ -90,7 +100,7 @@ public class OrderController {
 		try {
 		    logger.info("创建订单开始 , hotelid = "+hotelId);
 			// 提取orderbean
-			OtaOrder order = this.extractOrderBean(request);
+			OtaOrder order = this.extractOrderBean(request, false);
 			// 订单转换为json
 			jsonObj = new JSONObject();
 			// 创建订单
@@ -103,6 +113,47 @@ public class OrderController {
 		}
 		
 		OrderController.logger.info("OTSMessage::OrderController::createOrder::orderService.putOrderJobIntoManager");
+		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+	
+	/**
+	 * 查询入住人
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/selectcheckinuser", method = RequestMethod.POST)
+	public ResponseEntity<JSONObject> selecteCheckinUser(HttpServletRequest request){
+		return new ResponseEntity<JSONObject>(this.orderService.getCheckInUserByMid(), HttpStatus.OK);
+	}
+	
+	/**
+	 * 创建订单
+	 * 
+	 * @param request
+	 * @returnd
+	 */
+	@RequestMapping(value = "/createByRoomType", method = RequestMethod.POST)
+	public ResponseEntity<JSONObject> createOrderByRoomType(HttpServletRequest request) {
+		OrderController.logger.info("OTSMessage::OrderController::createOrderByRoomType::准备下单");
+		
+		String hotelId = request.getParameter("hotelid");
+		JSONObject jsonObj = null;
+		try {
+			logger.info("创建订单开始 , hotelid = "+hotelId);
+			// 提取orderbean
+			OtaOrder order = this.extractOrderBean(request, true);
+			// 订单转换为json
+			jsonObj = new JSONObject();
+			// 创建订单
+			this.orderService.doCreateOrder(order, jsonObj);
+			jsonObj.put("success", true);
+			logger.info("创建订单成功,返回数据 : "+jsonObj.toJSONString());
+		} catch (Exception e) {
+			OrderController.logger.error("创建订单失败,hotelid = " + hotelId, e);
+			throw e;
+		}
+		
+		OrderController.logger.info("createOrderByRoomType::ok");
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
 
@@ -132,16 +183,68 @@ public class OrderController {
 			OrderController.logger.info("订单：" + orderId + "正在执行订单任务，无法修改");
 			throw MyErrorEnum.customError.getMyException("订单：" + orderId + "正在执行订单任务，无法修改");
 		}
+		String checkLockValue = DistributedLockUtil.tryLock(PayLockKeyUtil.genLockKey4PayCallBack(orderId), 40);
+		if (checkLockValue == null) {
+			OrderController.logger.info("订单：" + orderId + "正在执行修改订单任务，无法修改");
+			throw MyErrorEnum.customError.getMyException("订单：" + orderId + "正在执行修改订单任务，无法修改");
+		}
 
 		JSONObject jsonObj = new JSONObject();
 
-		this.orderService.doModifyOrder(request, jsonObj);
-
-		// 释放 redis锁
-		OrderController.logger.info("释放分布锁, orderId= " + orderId);
-		DistributedLockUtil.releaseLock("orderTasksLock_" + orderId, lockValue);
-
+		try {
+			this.orderService.doModifyOrder(request, jsonObj, false);
+		} catch (Exception e) {
+			throw e;
+		} finally{
+			// 释放 redis锁
+			OrderController.logger.info("释放分布锁, orderId= " + orderId);
+			DistributedLockUtil.releaseLock("orderTasksLock_" + orderId, lockValue);
+			DistributedLockUtil.releaseLock(PayLockKeyUtil.genLockKey4PayCallBack(orderId), checkLockValue);
+		}
 		OrderController.logger.info("OTSMessage::OrderController::modifyOrder::ok");
+		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+	
+	/**
+	 * 修改订单
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/modifyByRoomType", method = RequestMethod.POST)
+	public ResponseEntity<JSONObject> modifyOrderByRoomType(HttpServletRequest request) {
+		OrderController.logger.info("OTSMessage::OrderController::modifyOrderByRoomType::begin");
+		// 提取orderbean
+		if (this.orderUtil.checkNotNulls(request, new String[] { "orderid" })) {
+			throw MyErrorEnum.errorParm.getMyException("必填项为空");
+		}
+		
+		// redis锁
+		String orderId = request.getParameter("orderid");
+		if (StringUtils.isBlank(orderId)) {
+			throw MyErrorEnum.errorParm.getMyException("订单号不存在");
+		}
+		
+		OrderController.logger.info("修改订单开始,orderid = " + orderId);
+		String lockValue = DistributedLockUtil.tryLock("orderTasksLock_" + orderId, 40);
+		if (lockValue == null) {
+			OrderController.logger.info("订单：" + orderId + "正在执行订单任务，无法修改");
+			throw MyErrorEnum.customError.getMyException("订单：" + orderId + "正在执行订单任务，无法修改");
+		}
+		
+		JSONObject jsonObj = new JSONObject();
+		
+		try {
+			this.orderService.doModifyOrder(request, jsonObj, true);
+		} catch (Exception e) {
+			throw e;
+		} finally{
+			// 释放 redis锁
+			OrderController.logger.info("释放分布锁, orderId= " + orderId);
+			DistributedLockUtil.releaseLock("orderTasksLock_" + orderId, lockValue);
+		}
+		
+		OrderController.logger.info("OTSMessage::OrderController::modifyOrderByRoomType::ok");
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
 
@@ -154,6 +257,8 @@ public class OrderController {
 	@RequestMapping(value = "/cancel", method = RequestMethod.POST)
 	public ResponseEntity<JSONObject> cancelOrder(HttpServletRequest request) {
 		String orderid = request.getParameter("orderid");
+		String type = request.getParameter("type");// 用户回退取消订单
+		type = StringUtils.isBlank(type) ? "1" : type;
 
 		OrderController.logger.info("OTSMessage::取消订单cancelOrder--start{}", orderid);
 		if (StringUtils.isBlank(orderid)) {
@@ -168,7 +273,7 @@ public class OrderController {
 		// 订单转换为json
 		JSONObject jsonObj = new JSONObject();
 		try {
-			this.orderService.doCancelOrder(orderid, jsonObj);
+			this.orderService.doCancelOrder(orderid, type, jsonObj);
 		} catch (Exception e) {
 			OrderController.logger.error("取消订单失败 , orderid = " + orderid, e);
 			throw MyErrorEnum.customError.getMyException("取消订单失败");
@@ -239,6 +344,7 @@ public class OrderController {
 		String limitTemp = request.getParameter("limit");
 		String hotelIdTemp = request.getParameter("hotelid");
 		String orderstatus = request.getParameter("ordertype");
+		String statetype = request.getParameter("statetype");// 
 
 		OrderController.logger.info("OrderController::queryOrder::提取传递的参数::" + this.orderUtil.getRequestParamStrings(request).toString());
 
@@ -268,6 +374,10 @@ public class OrderController {
 			limit = Integer.parseInt(limitTemp);
 			start = (Integer.parseInt(page) - 1) * limit;
 		}
+		// 按类型查订单【全部、进行中、已完成】
+		if (StringUtils.isNotBlank(statetype) && statetypeMap.containsKey(statetype)) {
+			orderstatus = (String) statetypeMap.get(statetype);
+		}
 		List<OtaOrderStatusEnum> statusList = new ArrayList<OtaOrderStatusEnum>();
 		if (!StringUtils.isBlank(orderstatus)) {
 			String[] oss = orderstatus.split(",");
@@ -291,7 +401,7 @@ public class OrderController {
 			// 不查询 已经取消的订单 (513,511)
 			List<OtaOrderStatusEnum> notstatusList = new ArrayList<OtaOrderStatusEnum>();
 			notstatusList.add(OtaOrderStatusEnum.CancelBySystem);
-			notstatusList.add(OtaOrderStatusEnum.CancelByU_NoRefund);
+			// notstatusList.add(OtaOrderStatusEnum.CancelByU_NoRefund);
 			pageObject = this.orderService.findMyOtaOrder(hotelId, statusList, begin, end, start, limit, isscore, notstatusList);
 		}
 		boolean showRoom = false;// 显示客单
@@ -351,7 +461,7 @@ public class OrderController {
 	 * @param request
 	 * @return
 	 */
-	private OtaOrder extractOrderBean(HttpServletRequest request) {
+	private OtaOrder extractOrderBean(HttpServletRequest request, boolean createByRoomType) {
 		String hotelId = request.getParameter("hotelid");
 		String roomTypeId = request.getParameter("roomtypeid");
 		String priceType = request.getParameter("pricetype");
@@ -394,10 +504,21 @@ public class OrderController {
 		// 蓝牙的mac地址
 		String blmacaddr = request.getParameter("blmacaddr");
 		/************* 移动设备信息 ***************/
-		if (this.orderUtil.checkNotNulls(request, new String[] { "hotelid", "roomtypeid", "startdateday", "enddateday", "pricetype", "roomid", "ordertype" })) {
+		StringBuilder notNulls = new StringBuilder("hotelid,roomtypeid,startdateday,enddateday,pricetype,ordertype"); 
+		if (!createByRoomType) {
+			notNulls.append(",roomid");
+		}
+		if (this.orderUtil.checkNotNulls(request, notNulls.toString().split(","))) {
 			throw MyErrorEnum.errorParm.getMyException("必填项为空");
 		}
-
+		if (createByRoomType) {
+			// 根据房型查一个房间
+			Room room = roomstateService.findVCHotelRoom(Long.parseLong(hotelId), Long.parseLong(roomTypeId), startdateday, enddateday);
+			if (room == null) {
+				throw MyErrorEnum.customError.getMyException("很抱歉，此房型没有房间可以预定了");
+			}
+			roomId = room.getRoomid().toString();
+		}
 		StringBuffer str = this.orderUtil.getRequestParamStrings(request);
 		OrderController.logger.info("开始创建订单::提取传递的参数::" + str.toString());
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
@@ -538,7 +659,7 @@ public class OrderController {
 		}// End 客单信息
 		return order;
 	}
-
+	
 	/**
 	 * 订单数量统计
 	 * 
@@ -569,6 +690,14 @@ public class OrderController {
 				}
 
 				String orderstatus = jsonObject.getString("orderstatus");
+				String statetype = jsonObject.getString("statetype");
+				if (StringUtils.isBlank(statetype) && StringUtils.isBlank(orderstatus)) {
+					throw MyErrorEnum.errorParm.getMyException("参数:订单类型和取值范围不能同时为空！");
+				}
+				
+				if (StringUtils.isNotBlank(statetype) && statetypeMap.containsKey(statetype)) {
+					orderstatus = (String) statetypeMap.get(statetype);
+				}
 				if (StringUtils.isBlank(orderstatus)) {
 					throw MyErrorEnum.errorParm.getMyException("orderstatus参数不能为空！");
 				}
@@ -581,6 +710,8 @@ public class OrderController {
 			jsonObj.put("success", true);
 			jsonObj.put("statuscount", array);
 		} catch (Exception e) {
+			logger.info(e.getLocalizedMessage());
+			jsonObj.put("success", false);
 			jsonObj.put("errcode", "-1");
 			jsonObj.put("errmsg", "根据订单状态 查询订单数量失败！");
 		}
@@ -614,11 +745,15 @@ public class OrderController {
 		}
 
 		JSONObject jsonObj = new JSONObject();
-		this.orderService.doUpdateOrder(request, jsonObj);
-
-		// 释放 redis锁
-		OrderController.logger.info("释放分布锁, orderId= " + orderId);
-		DistributedLockUtil.releaseLock("orderTasksLock_" + orderId, lockValue);
+		try {
+			this.orderService.doUpdateOrder(request, jsonObj);
+		} catch (Exception e) {
+			throw e;
+		} finally{
+			// 释放 redis锁
+			OrderController.logger.info("释放分布锁, orderId= " + orderId);
+			DistributedLockUtil.releaseLock("orderTasksLock_" + orderId, lockValue);
+		}
 
 		OrderController.logger.info("OTSMessage::OrderController::crsModifyOrder::ok");
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
@@ -644,7 +779,7 @@ public class OrderController {
 			jsonObject.put("function", "selectsyncorder");
 			jsonObject.put("timestamp", DateUtils.formatDateTime(Calendar.getInstance().getTime()));
 			OrderController.logger.info("OrderController::sendSynRoomOrderMsg::参数：{}", jsonObject.toJSONString());
-			String theresult = Tools.dopostjson(UrlUtils.getUrl("newpms.url") + "/selectsyncorder", jsonObject.toJSONString());
+			String theresult = PayTools.dopostjson(UrlUtils.getUrl("newpms.url") + "/selectsyncorder", jsonObject.toJSONString());
 			OrderController.logger.info("OrderController::sendSynRoomOrderMsg::返回：{}", theresult);
 			JSONObject returnObject = JSON.parseObject(theresult);
 
@@ -695,6 +830,47 @@ public class OrderController {
 		this.orderService.modifyHotelPromotion(request, jsonObj);
 
 		OrderController.logger.info("OTSMessage::OrderController::reModifyHotelRule::ok");
+		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+	
+	/**
+	 * @param request
+	 * c端修改入住人
+	 */
+	@RequestMapping(value = "/modifycheckinuser", method = RequestMethod.POST)
+	public ResponseEntity<JSONObject> modifyCheckinuser(HttpServletRequest request) {
+		OrderController.logger.info("OTSMessage::OrderController::modifyCheckinuser::begin");
+		JSONObject jsonObj = new JSONObject();
+		try {
+			this.orderService.modifyCheckinuser(request, jsonObj);
+			jsonObj.put("success", true);
+		} catch (Exception e) {
+			jsonObj.put("success", false);
+			jsonObj.put("errcode", "-1");
+			jsonObj.put("errmsg", "修改订单入住人失败！");
+		}
+		OrderController.logger.info("OTSMessage::OrderController::modifyCheckinuser::end");
+		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+	/**
+	 * 订单状态跟踪
+	 * @param request
+	 */
+	@RequestMapping(value = "/selectorderstatus", method = RequestMethod.POST)
+	public ResponseEntity<JSONObject> selectOrderStatus(HttpServletRequest request) {
+		OrderController.logger.info("OrderController::selectOrderStatus::begin");
+		JSONObject jsonObj = new JSONObject();
+		try {
+			this.orderService.selectOrderStatus(request, jsonObj);
+			jsonObj.put("success", true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.info("异常了：{}", e.getLocalizedMessage());
+			jsonObj.put("errcode", "-1");
+			jsonObj.put("errmsg", "查询失败！");
+			jsonObj.put("success", false);
+		}
+		OrderController.logger.info("OrderController::selectOrderStatus::end");
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
 }

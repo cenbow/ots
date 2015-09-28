@@ -46,9 +46,19 @@ public interface THotelMapper {
      */
     public List<Long> findAllHotelIds();
     
+    /**
+     * @return
+     * 查询指定城市所有酒店id 
+     */
+    public List<Long> findCityHotelIds(String citycode);
+    
     public THotelModel selectByPms(String pms);
     
     public THotelModel selectByPmsAndTime(Map<String,Object> map);
 
 	public List<Map<String, String>> selectPicsByHotelId(Long hotelid);
+	
+	public String getLatestOrderTime(Long hotelid);
+	
+	public String selectCityCodeByOrderId(Long orderId);
 }

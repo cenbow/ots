@@ -1,6 +1,7 @@
 package com.mk.ots.message.service;
 
 import com.mk.ots.common.enums.MessageTypeEnum;
+import com.mk.ots.message.model.LMessageLog;
 import com.mk.ots.message.model.LPushLog;
 
 import java.util.Date;
@@ -17,9 +18,9 @@ public interface IMessageService {
 
 	boolean pushMsg(String phone, String title, String msgContent, String msgtype, String url);
 
-	boolean PushMsg(String phone, String title, String msgContent, String msgtype, String url, Long activeid);
+	boolean pushMsg(String phone, String title, String msgContent, String msgtype, String url, Long activeid);
 
-	boolean sendMsg(Long msgid, String phone, String msgContent, MessageTypeEnum messageTypeEnum);
+	boolean sendMsg(Long msgid, String phone, String msgContent, MessageTypeEnum messageTypeEnum, String ip);
 
 	List<LPushLog> query(LPushLog pushlog);
 
@@ -48,7 +49,7 @@ public interface IMessageService {
 	 * @param pushid     推送id
 	 * @return 成功与否?
 	 */
-	boolean PushMsgToAll(String title, String msgContent, String msgtype, String url, String pushid);
+	boolean pushMsgToAll(String title, String msgContent, String msgtype, String url, String pushid);
 
 	/**
 	 * 推送消息给指定用户组
@@ -61,7 +62,7 @@ public interface IMessageService {
 	 * @param pushid      消息id
 	 * @return 成功与否?
 	 */
-	boolean PushMsgToGroup(String usergroupid, String title, String msgContent, String msgtype, String url, String pushid);
+	boolean pushMsgToGroup(String usergroupid, String title, String msgContent, String msgtype, String url, String pushid);
 
 	/**
 	 * 修改阅读状态
@@ -93,7 +94,7 @@ public interface IMessageService {
 	 * @return 日志id
 	 */
 	Long logsms(String phone, String msgContent, MessageTypeEnum messageTypeEnum,
-				String source, String ip);
+				String source, String ip, String provider,Boolean result);
 
 	/**
 	 * 回写短信状态
@@ -102,7 +103,7 @@ public interface IMessageService {
 	 * @param reportstatus 回执状态
 	 * @param reporttime   回执时间
 	 */
-	void rewriteReport(Long msgid, boolean reportstatus, String reporttime);
+	void rewriteReport(Long msgid, boolean reportstatus, String reporttime,String provider);
 
 	/**
 	 * 根据以下参数条件查询记录数
@@ -131,4 +132,10 @@ public interface IMessageService {
 	 * @return 验证码匹配则返回：true
 	 */
 	public boolean checkVerifyCode(String phone,String code);
+	
+	LMessageLog findMsgById(Long id);
+	
+	boolean reSendMsg(Long msgid,String phone, String msgContent, MessageTypeEnum messageTypeEnum, String ip,Date sendDate,String ExceptProvider);
+	
+	public boolean sendCode(Long msgid, String phone, String msgContent, MessageTypeEnum messageTypeEnum, String ip);
 }

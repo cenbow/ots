@@ -64,7 +64,7 @@ import com.mk.ots.order.bean.PmsOrder;
 import com.mk.ots.order.bean.PmsRoomOrder;
 import com.mk.ots.order.service.OrderLogService;
 import com.mk.ots.order.service.OrderServiceImpl;
-import com.mk.ots.pay.module.weixin.pay.common.Tools;
+import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.ots.pay.service.IPayService;
 import com.mk.ots.utils.MD5Util;
 import com.mk.pms.bean.PmsCheckinUser;
@@ -1494,7 +1494,7 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 	private String doPostJson(String url, String json) {
 		JSONObject back = new JSONObject();
 		try {
-			return Tools.dopostjson(url, json);
+			return PayTools.dopostjson(url, json);
 		} catch (Exception e) {
 			PmsOrderServiceImpl.logger.info("doPostJson参数:{},{},异常:{}", url, json, e.getLocalizedMessage());
 			e.printStackTrace();

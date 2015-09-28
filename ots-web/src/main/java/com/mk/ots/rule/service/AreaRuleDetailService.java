@@ -22,7 +22,7 @@ public class AreaRuleDetailService {
 	 * @param rulecode 从枚举中得到
 	 * @return
 	 */
-	public BAreaRuleDetail queryRuleValue(String key,RuleEnum rule) {
-		return bAreaRuleDetailDAO.queryRuleValue(key, rule.getId());
+	public BAreaRuleDetail queryRuleValue(String key,RuleEnum rule, String cityCode) {
+		return bAreaRuleDetailDAO.queryRuleValue(key, rule.getId(), cityCode);
 	}
 }

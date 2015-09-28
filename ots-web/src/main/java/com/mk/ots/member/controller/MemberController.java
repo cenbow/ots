@@ -64,7 +64,7 @@ public class MemberController {
 		String msgcontent = verifyCodeService.generateMsgContent(verifyCode, VerifyEnum.REBIND);
 		
 		//3. 调用消息接口发送数据
-		messageService.sendMsg(null, phonenum,msgcontent, msgType);
+		messageService.sendMsg(null, phonenum,msgcontent, msgType, null);
 
 		//4. 组织参数返回
 		return new ResponseEntity<String>("验证码已发送", HttpStatus.OK);

@@ -1353,6 +1353,16 @@ public class DateUtils extends Object {
     public static Date addHours(Date date, int amount) {
         return add(date, Calendar.HOUR_OF_DAY, amount);
     }
+    
+    /**
+     * 为指定日期增加几秒钟
+     * @param date 指定日期
+     * @param amount 增加的数量
+     * @return 增加指定单位之间之后的Date对象
+     */
+    public static Date addSeconds(Date date, int amount) {
+        return add(date, Calendar.SECOND, amount);
+    }
 
     /**
      * 为指定日期增加几天
@@ -1510,6 +1520,18 @@ public class DateUtils extends Object {
 		} catch (Exception e) {
 		}
 		return d;
+	}
+	
+	/**
+	 * 计算两个时间的时间差
+	 * @param day1
+	 * @param day2
+	 * @return
+	 */
+	public static int diffDay(Date day1, Date day2) {
+	    long diff = day2.getTime() - day1.getTime();
+	    Long days = diff / (1000 * 60 * 60 * 24);
+	    return days.intValue();
 	}
     
 }

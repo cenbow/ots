@@ -47,7 +47,7 @@ import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.service.OrderBusinessLogService;
 import com.mk.ots.order.service.OrderService;
 import com.mk.ots.pay.module.weixin.WeChat;
-import com.mk.ots.pay.module.weixin.pay.common.Tools;
+import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.ots.pay.service.IPayService;
 import com.mk.ots.pay.service.IPriceService;
 import com.mk.ots.utils.PayLockKeyUtil;
@@ -220,11 +220,13 @@ public class PayController {
 					
 					Boolean  rb=this.payService.payresponse(orderIdNum, payid, total_fee, PPayInfoOtherTypeEnum.wxpay);
 					if (rb!=null && rb ) {
-						res = "<xml>" + "<return_code><![CDATA[SUCCESS]]></return_code>" + "<return_msg><![CDATA[OK]]></return_msg>" + "</xml>";
+						res = "<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>";
+//						res = "SUCCESS";
 					}
 				}else{
 						// 返回此信息，后面就不会再有此订单的回调
-					 res = "<xml>" + "<return_code><![CDATA[SUCCESS]]></return_code>" + "<return_msg><![CDATA[OK]]></return_msg>" + "</xml>";
+//					 res = "<xml>" + "<return_code><![CDATA[SUCCESS]]></return_code>" + "</xml>";
+					 res = "success";
 				}
 				
 				payService.insertPayCallbackLog(Long.parseLong(orderid), PayCallbackEnum.WeChat_Callback.name(), "Y", 
@@ -286,7 +288,7 @@ public class PayController {
 			throw MyErrorEnum.findOrder.getMyException("订单不存在.");
 		}
 			
-		orderService.modifyPmsOrderStatusAfterPay(order);
+		orderService.modifyOrderStsAndPayStsOnCheck(order);
 		
 		Map<String, Object> map = new HashMap<String, Object>();
 		
@@ -370,7 +372,7 @@ public class PayController {
 				}
 
 				// 去银行判断
-				String payid = WeChat.query(payno, Tools.get100price(price));
+				String payid = WeChat.query(payno, PayTools.get100price(price));
 				if (payid != null) {
 					this.logger.info("微信订单" + orderid + "支付成功！支付金额为：" + price);
 					long orderIdNum = -1l;
@@ -469,6 +471,23 @@ public class PayController {
 		Map<String, Object> map;
 		try {
 			map = payService.createPay(request, longorderId, promotionno, couponno, paytype, onlinepaytype);
+			try {
+				if (paytype.trim().equals("2")) {
+					payService.pushMsg(longorderId, "2");
+				} else if (paytype.trim().equals("1")) {
+					if (map != null) {
+
+						BigDecimal cost = (BigDecimal) map.get("onlinepay");
+
+						if (cost != null && cost.compareTo(BigDecimal.ZERO) == 0) {
+							payService.pushMsg(longorderId, "1");
+						}
+					}
+				} 
+			} catch (Throwable e) {
+				logger.error("订单:" + longorderId +"pushMsg异常!", e);
+			}
+			
 		} catch (Exception e) {
 			orderService.changeOrderStatusByPay(longorderId, OtaOrderStatusEnum.WaitPay, PayStatusEnum.waitPay, OrderTypeEnum.YF);
 			logger.info("订单号：" + longorderId +"回滚，将其置为初始状态.异常:" + e.getMessage());
@@ -652,7 +671,7 @@ public class PayController {
 		return new ResponseEntity<Map<String, Object>>(map, org.springframework.http.HttpStatus.OK);
 	}
 	
-	
+
 	/**
 	 * @param orderid 查询支付情况
 	 */
@@ -669,7 +688,7 @@ public class PayController {
 				 map.put("success",  false);
 		    	 map.put("info",  "请查询2015-07-25开始的【正式环境】订单号");
 			 }else{
-				 String rs=payService.findPay(orderid);
+				 String rs=payService.serviceFindPay(orderid);
 				 logger.info("订单号"+orderid+"查询银行付款信息，返回结果是"+rs);
 				 map.put("success",  true);
 				 map.put("data",  rs);
@@ -678,21 +697,93 @@ public class PayController {
 		return new ResponseEntity<Map<String, Object>>(map, org.springframework.http.HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/readAutoSend" , method = RequestMethod.POST)
-	public  ResponseEntity<Object>   readAutoSend(String payid) {
-		this.logger.info("readAutoSend：pmssendid"+payid+",begin");
-		String responseString=this.payService.readAutoSend(payid);
-		this.logger.info("readAutoSend：pmssendid"+payid+"end");
-		if(responseString!=null){
-			return new ResponseEntity<Object>(responseString, org.springframework.http.HttpStatus.OK);
+	/**
+	 * @param orderid HMS 查询支付情况
+	 */
+	@RequestMapping(value = "/hmsfindpay", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> querypay(String orderid) {
+		logger.info("【HMS】 订单号" + orderid + "准备去银行查询付款信息");
+		
+		String lockValue = DistributedLockUtil.tryLock(PayLockKeyUtil.genLockKey4PayCallBack(orderid), 40);
+		if (StringUtils.isNotEmpty(lockValue)) {
+			logger.info("订单：" + orderid + "获取分布锁成功,继续执行回调流程.");
+		} else {
+			logger.info("订单：" + orderid + "获取分布锁失败,返回.");
+			return null;
+		}
+		
+		Map<String, Object> map = Maps.newHashMap();
+		try {
+			if (orderid == null || orderid.trim().length() < 7 || orderid.trim().length() > 10) {
+				map.put("success", false);
+				map.put("info", "订单号有误");
+			} else {
+				Long lonOrderid = getLongOrderId(orderid);
+				if (lonOrderid < 1151576) { // 之前的订单号被加长，不能通过此方法查询
+					map.put("success", false);
+					map.put("info", "请查询2015-07-25开始的订单号");
+				} else {
+					String rs = payService.hmsFindPay(lonOrderid);
+					logger.info("【HMS】订单号" + orderid + "查询银行付款信息，返回结果是" + rs);
+					map.put("success", true);
+					map.put("data", rs);
+				}
+			} 
+		} finally {
+			
+			logger.info("订单：" + orderid + "回调流程完毕,释放分布锁.");
+
+			DistributedLockUtil.releaseLock(PayLockKeyUtil.genLockKey4PayCallBack(orderid), lockValue);
+		}
+		return new ResponseEntity<Map<String, Object>>(map, org.springframework.http.HttpStatus.OK);
+	}
+	
+	
+	@RequestMapping(value = "/modifyPayStatus" , method = RequestMethod.POST)
+	public  ResponseEntity<Object>   modifyPayStatus(String orderid,String paystatus,String operator) {
+		
+		this.logger.info("modifyPayStatus：orderid"+orderid+",payStatus:"+paystatus+",operator:"+operator+"，begin");
+		if (Strings.isNullOrEmpty(orderid)) { // 订单号 必填
+
+			this.logger.error("modifyPayStatus，订单号:"+orderid+"orderid为空：");
+			throw MyErrorEnum.errorParm.getMyException("[订单号] 不允许为空.");
+		}
+		if (Strings.isNullOrEmpty(paystatus)) { // 支付状态 必填
+
+			this.logger.error("modifyPayStatus，订单号:"+orderid+"，paystatus为空：");
+			throw MyErrorEnum.errorParm.getMyException("[支付状态] 不允许为空.");
+		}
+		if (Strings.isNullOrEmpty(operator)) { // 操作人 必填
+
+			this.logger.error("modifyPayStatus，订单号:"+orderid+"，operator为空：");
+			throw MyErrorEnum.errorParm.getMyException("[操作人] 不允许为空.");
+		}
+		this.logger.info("PayController::modifyPayStatus：orderid"+orderid+"，begin");
+		boolean flag = this.payService.modifyPayStatus(Long.parseLong(orderid), Integer.parseInt(paystatus), operator);
+		this.logger.info("PayController::modifyPayStatus：orderid"+orderid+"，end");
+		Map<String, Object>  map=new HashMap<String, Object>();
+		if(flag){
+			map.put("success", true);
+			return new ResponseEntity<Object>(map, org.springframework.http.HttpStatus.OK);
 		}else{
-			Map<String, Object>  map=new HashMap<String, Object>();
 			map.put("success", false);
-			map.put("errorcode", MyErrorEnum.cancelpaybyerrorError.getErrorCode());
-			map.put("errormsg", MyErrorEnum.cancelpaybyerrorError.getErrorMsg());
+			map.put("errorcode", MyErrorEnum.modifypaystatusbyerrorError.getErrorCode());
+			map.put("errormsg", MyErrorEnum.modifypaystatusbyerrorError.getErrorMsg());
 			return new ResponseEntity<Object>(map, org.springframework.http.HttpStatus.OK);
 		}
 	}
-	
+
+	/**
+	 * @param orderid 模拟环境批量退款情况
+	 */
+	@RequestMapping(value = "/refundpay", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> refundpay(String orderid ){
+		logger.info("入参订单号："+orderid);
+		Map<String, Object>  map = Maps.newHashMap();
+    
+		payService.refundBatchPay(orderid);
+		map.put("success",  true);
+		return new ResponseEntity<Map<String, Object>>(map, org.springframework.http.HttpStatus.OK);
+	}
 	
 }

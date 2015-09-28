@@ -1,6 +1,5 @@
 package com.mk.ots.pay.module.weixin;
 
-import com.mk.ots.pay.module.weixin.pay.common.Tools;
 
 
 public class Main {

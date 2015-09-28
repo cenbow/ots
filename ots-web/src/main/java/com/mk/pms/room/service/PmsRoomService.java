@@ -6,6 +6,7 @@ package com.mk.pms.room.service;
 import java.util.List;
 import java.util.Map;
 
+import com.mk.ots.hotel.bean.TRoomType;
 import com.mk.ots.hotel.model.EHotelModel;
 import com.mk.ots.hotel.model.THotelModel;
 import com.mk.ots.hotel.model.TRoomModel;
@@ -67,5 +68,7 @@ public interface PmsRoomService {
 	public THotelModel selectThotelByPms(String pms,Long time);
 	
 	public TRoomModel selectTroomByPms(Map<String,String> map);
+	
+	public TRoomType findTRoomTypeByPmsno(Long hotelId, String pmsno);
 	
 }

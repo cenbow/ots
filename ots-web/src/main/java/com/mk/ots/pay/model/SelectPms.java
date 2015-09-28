@@ -1,7 +1,8 @@
 package com.mk.ots.pay.model;
 
 import java.io.Serializable;
-import com.mk.ots.pay.module.weixin.pay.common.Tools;
+
+import com.mk.ots.pay.module.weixin.pay.common.PayTools;
  
 public class SelectPms implements Serializable{
 	private static final long serialVersionUID = 1L;
@@ -19,9 +20,9 @@ public class SelectPms implements Serializable{
 	
 	public SelectPms(String hotelid,String customerid) {
 		super();
-		this.uuid = Tools.getUuid();
+		this.uuid = PayTools.getUuid();
 		this.function = "selectcustomerpay";
-		this.timestamp = Tools.getTimestamp();
+		this.timestamp = PayTools.getTimestamp();
 		this.hotelid = hotelid;
 		this.customerid = customerid;
 	}

@@ -1,9 +1,10 @@
 package com.mk.ots.member.service;
 
-import java.util.Date;
+import java.util.List;
 
 import com.google.common.base.Optional;
 import com.mk.ots.member.model.UMember;
+import com.mk.ots.order.model.FirstOrderModel;
 
 
 
@@ -52,4 +53,18 @@ public interface IMemberService {
 	public abstract boolean isExistUnionid(String unionid);
 	
 	public abstract UMember findUMemberByMId(Long mid);
+
+	/**
+	 * 判断该手机号是不是存在于黑名单中
+	 * @param phone
+	 * @param type
+	 * @param name
+	 * @param errmsg
+	 */
+	public void checkPhoneIsBlack(String phone,String type,String name,String errmsg);
+	
+
+	
+	public abstract List<UMember> findUMemberByFirstOrder(FirstOrderModel fom);
+
 }

@@ -14,6 +14,8 @@ public class TicketInfo implements Serializable{
 	private Long id;				
 	//优惠券名
 	private String name; 			
+	//优惠券描述
+	private String description; 			
 	//选中,
 	@JsonSerialize(using=TFBooleanSerializer.class)
 	private boolean select; 		
@@ -37,15 +39,19 @@ public class TicketInfo implements Serializable{
 	//线上线下限制
 	private String uselimit;
 	//有效起始时间
-	@JsonFormat(pattern="yyyyMMddHHmmss", timezone = "GMT+8")
+	@JsonFormat(pattern = "yyyyMMddHHmmss",timezone="GMT+8")
 	private Date begintime; 
 	//有效终止时间
-	@JsonFormat(pattern="yyyyMMddHHmmss", timezone = "GMT+8")
+	@JsonFormat(pattern = "yyyyMMddHHmmss",timezone="GMT+8")
 	private Date endtime; 
 	
 	
 	private Long activityid ;
 	private int status;
+	/**
+	 * 状态名称
+	 */
+	private String statusname;
 	public Date getBegintime() {
 		return begintime;
 	}
@@ -151,6 +157,18 @@ public class TicketInfo implements Serializable{
 	}
 	public void setOfflinesubprice(BigDecimal offlinesubprice) {
 		this.offlinesubprice = offlinesubprice;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public String getStatusname() {
+		return statusname;
+	}
+	public void setStatusname(String statusname) {
+		this.statusname = statusname;
 	}
 	
 	

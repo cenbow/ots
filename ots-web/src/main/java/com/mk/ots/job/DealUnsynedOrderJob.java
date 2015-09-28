@@ -25,7 +25,8 @@ import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.manager.HotelPMSManager;
 import com.mk.ots.manager.OtsCacheManager;
 import com.mk.ots.order.bean.PmsRoomOrder;
-import com.mk.ots.pay.module.weixin.pay.common.Tools;
+import com.mk.ots.pay.module.weixin.pay.common.PayTools;
+import com.mk.ots.utils.Tools;
 import com.mk.pms.order.bean.SynedCustomerBean;
 import com.mk.pms.order.service.NewPmsOrderService;
 import com.mk.pms.order.service.PmsOrderService;
@@ -88,7 +89,7 @@ public class DealUnsynedOrderJob  extends QuartzJobBean {
 						ids.setLength(ids.length() - 1);
 						pmsCustomNosJson.put("customerid", ids.toString());
 						logger.info("Pms2.0DealUnsynedOrderJob::处理全量更新未同步客单传参{}{}", hotelid,pmsCustomNosJson.toString());
-						String result = Tools.dopostjson(UrlUtils.getUrl("newpms.url") + "/selectcustomerno", pmsCustomNosJson.toJSONString());
+						String result = PayTools.dopostjson(UrlUtils.getUrl("newpms.url") + "/selectcustomerno", pmsCustomNosJson.toJSONString());
 						logger.info("Pms2.0DealUnsynedOrderJob::处理全量更新未同步客单数据结果{}{}", hotelid,result);
 						JSONObject returnObject = JSONObject.parseObject(result);
 						

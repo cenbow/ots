@@ -140,7 +140,7 @@ public class PushMessageJob  extends QuartzJobBean {
 								Long count2 = iTicketService.countByMidAndActiveId(otaOrder.getMid(), activeid15);
 								if(count2==0){
 									//push message
-									iMessageService.PushMsg(phone, title, msgContent, MessageType.USER.getId(), url,activeid15);
+									iMessageService.pushMsg(phone, title, msgContent, MessageType.USER.getId(), url,activeid15);
 								}else{
 									logger.info("用户mid："+otaOrder.getMid()+"用户已经存在15元优惠券，不再发送提醒");
 								}

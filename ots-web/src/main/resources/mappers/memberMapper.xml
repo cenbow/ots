@@ -88,6 +88,28 @@
 	    select u.* from bms_active_user_bind b left join u_member u on b.member_id=u.mid
 	    where b.group_id = #{groupid,jdbcType=VARCHAR} and u.channelid is not null and u.ostype is not null
   	</select>
+  	
+  	<!-- 根据条件获取用户列表，其中 deviceid、appid还需后续修改，此处暂留，不起作用-->
+  	<select id="findUMemberByFirstOrder" resultMap="BaseResultMap" parameterType="java.util.Map" >
+	    select mid from u_member u 
+	    <where>
+			<if test="mid !=null">
+				u.mid=#{mid,jdbcType=BIGINT}
+			</if>
+			<if test="appid !=null">
+				or u.mid=#{appid,jdbcType=BIGINT}
+			</if>
+			<if test="idcard !=null">
+				or u.Idcard=#{idcard,jdbcType=VARCHAR}
+			</if>
+			<if test="phone !=null">
+				or u.phone=#{phone,jdbcType=LONGVARCHAR}
+			</if>
+			<if test="deviceid !=null">
+				or u.unionid=#{deviceid,jdbcType=VARCHAR}
+			</if>
+		</where>
+  	</select>
 	
 	<select id="findMemberById" resultType="com.mk.ots.member.model.UMember" parameterType="java.util.Map">
 		select * from u_member where mid = #{mid} 

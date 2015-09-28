@@ -17,12 +17,12 @@
   <insert id="insert" parameterType="com.mk.ots.logininfo.model.BLoginInfo" useGeneratedKeys="true" keyProperty="id">
     insert into b_logininfo (
     phone, mid, uuid,sysno, deviceimei,
-    simsn,wifimacaddr,blmacaddr,createtime
+    simsn,wifimacaddr,blmacaddr,createtime,security
     )
     values (
      #{phone,jdbcType=VARCHAR},  #{mid,jdbcType=BIGINT},      #{uuid,jdbcType=VARCHAR}, 
      #{sysno,jdbcType=VARCHAR},  #{deviceimei,jdbcType=VARCHAR}, #{simsn,jdbcType=VARCHAR},
-     #{wifimacaddr,jdbcType=VARCHAR}, #{blmacaddr,jdbcType=VARCHAR},  #{createtime,jdbcType=TIMESTAMP}
+     #{wifimacaddr,jdbcType=VARCHAR}, #{blmacaddr,jdbcType=VARCHAR},  #{createtime,jdbcType=TIMESTAMP},#{security,jdbcType=VARCHAR}
       )
   </insert>
 </mapper>

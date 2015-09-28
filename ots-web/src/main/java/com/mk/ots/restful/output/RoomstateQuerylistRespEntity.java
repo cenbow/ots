@@ -123,6 +123,12 @@ public class RoomstateQuerylistRespEntity implements Serializable {
         
         private String isfocus = "F";//再次预订用
         
+        //mike 3.0 add start
+        private String iscashback;
+        private BigDecimal cashbackcost;
+        // 房型根据可售房间数在C端显示的文本内容
+        private String vctxt;
+        // mike 3.0 add end 
         
         public String getIsfocus() {
 			return isfocus;
@@ -178,6 +184,12 @@ public class RoomstateQuerylistRespEntity implements Serializable {
 		public void setVcroomnum(Integer vcroomnum) {
 			this.vcroomnum = vcroomnum;
 		}
+        public String getVctxt() {
+            return vctxt;
+        }
+        public void setVctxt(String vctxt) {
+            this.vctxt = vctxt;
+        }
 		public BigDecimal getArea() {
 			return area;
 		}
@@ -214,11 +226,18 @@ public class RoomstateQuerylistRespEntity implements Serializable {
 		public void setValueaddedfa(List<Valueaddedfa> valueaddedfa) {
 			this.valueaddedfa = valueaddedfa;
 		}
-		
-		
-		
-		
-		
+		public String getIscashback() {
+			return iscashback;
+		}
+		public void setIscashback(String iscashback) {
+			this.iscashback = iscashback;
+		}
+		public BigDecimal getCashbackcost() {
+			return cashbackcost;
+		}
+		public void setCashbackcost(BigDecimal cashbackcost) {
+			this.cashbackcost = cashbackcost;
+		}
     }
     
     /**
@@ -380,4 +399,5 @@ public class RoomstateQuerylistRespEntity implements Serializable {
     	
     }
 
+    
 }

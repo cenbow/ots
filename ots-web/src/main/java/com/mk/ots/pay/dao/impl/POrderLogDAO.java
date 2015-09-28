@@ -1,5 +1,6 @@
 package com.mk.ots.pay.dao.impl;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 
@@ -15,7 +16,9 @@ import com.mk.ots.pay.model.POrderLog;
 public class POrderLogDAO extends MyBatisDaoImpl<POrderLog, Long> implements IPOrderLogDao{
 	
 	public POrderLog selectByPayId(Long payId){
-		return POrderLog.dao.findFirst("select * from p_orderlog where payid=?", payId);
+		Map<String, Object> param = Maps.newHashMap();
+		param.put("payid", payId);
+		return this.findOne("findPOrderLogByPay", param);
 	}
 	
 	@Override
@@ -79,4 +82,5 @@ public class POrderLogDAO extends MyBatisDaoImpl<POrderLog, Long> implements IPO
 			return false;
 		}
 	}
+	
 }

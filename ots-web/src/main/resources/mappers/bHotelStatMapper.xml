@@ -20,7 +20,7 @@
   
   <sql id="Base_Column_List1">
     h.id,h.hotelname, h.visible,h.isnewpms, 
-    h.online, h.hotelpic,a.roomTypeId,a.roomno,a.roomTypeName,a.createTime
+    h.online, h.hotelpic,a.roomTypeId,a.roomno,a.roomTypeName,a.createTime,h.citycode
   </sql>
   
 	<insert id="insert" parameterType="com.mk.ots.ticket.model.BHotelStat" useGeneratedKeys="true" keyProperty="id">
@@ -58,29 +58,15 @@
     <!-- jianghe add begin-->
     <!-- 查询已住酒店次数 -->
     <select id="queryHistoryHotelsCount" resultType="long" parameterType="java.util.Map">
-		SELECT
-			count(1) as count
-		FROM
-			(
-				SELECT
-					id,
-					mid,
-					hotelId,
-					otaorderid,
-					createTime,
-					isDelete,
-					roomTypeId,
-					roomno,
-					roomTypeName
-				FROM
-					b_hotel_stat
-				WHERE
-					mid = ( select mid from u_token where accesstoken = #{token} )
-				AND isDelete = 'F'
-				GROUP BY
-					hotelId
-			) a join t_hotel h on a.hotelId=h.id and h.visible='T' and h.online='T'
-			
+			SELECT
+				count(DISTINCT a.hotelId ) AS count
+			FROM
+				b_hotel_stat   a
+			JOIN t_hotel h ON a.hotelId = h.id
+			AND h.visible = 'T'
+			AND h.online = 'T'
+			AND a.mid = ( select mid from u_token where accesstoken = #{token} )
+			AND a.isDelete = 'F'
 			<!-- <if test="code != null" >
 			left outer join t_district b on h.disid = b.id
 	      		left outer join t_city c on c.cityid = b.cityid where c.code=#{code}
@@ -109,7 +95,7 @@
 			AND isDelete = 'F'
 			GROUP BY
 				hotelId  ) and mid = ( select mid from u_token where accesstoken = #{token} )
-				) a join t_hotel h on a.hotelId=h.id and h.visible='T' and h.online='T'
+				) a join t_hotel h on a.hotelId=h.id and h.visible='T' and h.online='T' ORDER BY a.createTime DESC
 				<!-- <if test="code != null" >
 				left outer join t_district b on h.disid = b.id
 			      left outer join t_city c on c.cityid = b.cityid where c.code=#{code}
@@ -119,7 +105,7 @@
     
     <update id="deleteHotelStats" parameterType="java.util.Map">
         UPDATE b_hotel_stat
-        SET isDelete='T',updateTime=now()
+        SET isDelete='T'
         WHERE mid = ( select mid from u_token where accesstoken = #{token} ) and hotelId=#{hotelid}
     </update>
     <!-- jianghe add end-->

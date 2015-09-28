@@ -19,4 +19,11 @@ public interface TBusinesszoneMapper {
     int updateByPrimaryKey(TBusinesszoneModel record);
     
     List<TBusinesszoneModel> selectByHotelid(Long hotelid);
+
+    /**
+     * 
+     * @param citycode
+     * @return
+     */
+	public List<TBusinesszoneModel> getBusinessZoneByCityCode(String citycode);
 }

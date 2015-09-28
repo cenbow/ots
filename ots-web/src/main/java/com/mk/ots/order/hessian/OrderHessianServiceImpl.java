@@ -52,6 +52,7 @@ public class OrderHessianServiceImpl implements OrderHessianService {
 		logger.info("OrderHessianServiceImpl::cancel::客服取消订单::参数::{}", param);
 		// 订单id
 		String orderid = String.valueOf(param.get("orderid"));
+		String memo = String.valueOf(param.get("memo"));
 		// 客服人员名称
 		String customerservicename = String.valueOf(param.get("customerservicename"));
 		HashMap data = new HashMap();
@@ -90,6 +91,8 @@ public class OrderHessianServiceImpl implements OrderHessianService {
 			if (order.getLong("orderstatus") >= OtaOrderStatusEnum.CancelByU_WaitRefund.getId().longValue()) {
 				throw MyErrorEnum.customError.getMyException("不能重复取消订单");
 			}
+			//备注
+			order.setNote(memo);
 			// 这里直接取消订单
 			this.orderService.cancelOrder(order);
 			orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.KF_CANCELORDER.getId(), "客服编号" + customerservicename, "", "");
@@ -114,6 +117,7 @@ public class OrderHessianServiceImpl implements OrderHessianService {
 	 */
 	@Override
 	public Map modify(Map param) {
+		logger.info("OrderHessianServiceImpl::modify::客服修改订单::参数::{}", param);
 		HashMap data = new HashMap();
 		// 客服人员名称
 		String customerservicename = String.valueOf(param.get("customerservicename"));
@@ -151,6 +155,7 @@ public class OrderHessianServiceImpl implements OrderHessianService {
 		} else {
 			data.put("success", false);
 		}
+		logger.info("OrderHessianServiceImpl::modify::客服修改订单::返回::{}", data);
 		return data;
 	}
 
@@ -159,6 +164,7 @@ public class OrderHessianServiceImpl implements OrderHessianService {
 	 */
 	@Override
 	public Map modifyOrderStatusAfterCancelPay(Map param) {
+		logger.info("OrderHessianServiceImpl::modifyOrderStatusAfterCancelPay::客服修改订单状态::{}", param);
 		HashMap data = new HashMap();
 		// 客服人员名称
 		String customerservicename = String.valueOf(param.get("customerservicename"));
@@ -185,6 +191,7 @@ public class OrderHessianServiceImpl implements OrderHessianService {
 		} else {
 			data.put("success", false);
 		}
+		logger.info("OrderHessianServiceImpl::modifyOrderStatusAfterCancelPay::客服修改订单状态:返回:{}", data);
 		return data;
 	}
 

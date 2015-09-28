@@ -2,6 +2,7 @@ package com.mk.ots.pay.module.ali;
 
 import java.io.StringReader;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import com.mk.framework.util.XMLUtils;
+import com.mk.ots.common.enums.PPayInfoOtherTypeEnum;
 import com.mk.ots.pay.model.PPayInfo;
+import com.mk.ots.pay.module.query.BankPayStatusEnum;
+import com.mk.ots.pay.module.query.QueryPayPram;
 
 /**
  * futao.xiao
@@ -366,8 +370,10 @@ public class AliPayUtil {
     
     
     
-    /**客服查询专用*/
-    public static String onlyQuery(String orderid,String xmlResult){
+
+	 /**客服查询专用*/
+    public static QueryPayPram  onlyQuery(String orderid,String xmlResult,QueryPayPram pram){
+
     	String rs=null;
     	try {
     		 Element root=getElement(xmlResult);
@@ -379,21 +385,68 @@ public class AliPayUtil {
         				if(root3!=null){
         					String trade_status=root3.getChildText("trade_status");
         					if(trade_status==null){
-        						rs="订单号"+orderid+"去{支付宝}查询到结果，返回结果有误，不能作为支付或者退款凭证。";;
 
+//        						if(isService){
+//        							rs="订单号"+orderid+"去{支付宝}查询到结果，返回结果有误，不能作为支付或者退款凭证。";
+//        						}else {
+//        							rs=null;
+//        						}
         					}else{
         						if(trade_status.equals("TRADE_SUCCESS")){
         							String refund_status=root3.getChildText("refund_status");
         							if(refund_status==null){
-        								rs="订单号"+orderid+"去{支付宝}查询到结果，状态是【已支付】，支付金额:"+root3.getChildText("price")+"【元】，能作为支付凭证。";;
+
+//        								if(isService){
+//        									rs="订单号"+orderid+"去{支付宝}查询到结果，状态是【已支付】，金额:"+root3.getChildText("price")+"元，能作为支付凭证。";
+//        								}else {
+//        									rs="【已支付】，金额:"+root3.getChildText("price")+"元";
+//										}
+        							    pram.setSuccess(true);
+         						        pram.setPrice(new BigDecimal(root3.getChildText("price")));
+         						        pram.setBanktype(PPayInfoOtherTypeEnum.alipay);
+         						        pram.setPaystatus(BankPayStatusEnum.success);
+         						        pram.setBankno(root3.getChildText("trade_no"));
+        								
+        								System.out.println("//////////////////////"+root3.getChildText("trade_no"));
         							}else if(refund_status.equals("REFUND_SUCCESS")){
-        								rs="订单号"+orderid+"去{支付宝}查询到结果，状态是【已退款】，支付金额:"+root3.getChildText("price")+"【元】，能作为凭证。";;
+
+        								pram.setSuccess(true);
+          						        pram.setPrice(new BigDecimal(root3.getChildText("price")));
+          						        pram.setBanktype(PPayInfoOtherTypeEnum.alipay);
+          						        pram.setPaystatus(BankPayStatusEnum.refund);
+          						        pram.setBankno(root3.getChildText("trade_no"));
+//        								if(isService){
+//        									rs="订单号"+orderid+"去{支付宝}查询到结果，状态是【已退款】，金额:"+root3.getChildText("price")+"元，能作为凭证。";
+//        								}else{
+//        									rs="【已退款】，金额:"+root3.getChildText("price")+"元";
+//        								}
         							}
         						}else  if(trade_status.equals("TRADE_CLOSED")){
-        							rs="订单号"+orderid+"去{支付宝}查询到结果，状态是【未付款超时（超时作废）】，交易金额:"+root3.getChildText("price")+"【元】，能作为未付款凭证。";;
-								}else if(trade_status.equals("TRADE_FINISHED")){
-	                    			rs="订单号"+orderid+"去{支付宝}查询到结果，状态是【已支付且不能退款】，交易金额:"+root3.getChildText("price")+"【元】，能作为支付凭证。";;
-								}
+
+		        							pram.setSuccess(true);
+		      						        pram.setPrice(new BigDecimal(root3.getChildText("price")));
+		      						        pram.setBanktype(PPayInfoOtherTypeEnum.alipay);
+		      						        pram.setPaystatus(BankPayStatusEnum.notPay);
+		      						        pram.setBankno(root3.getChildText("trade_no"));
+        							
+//		        							if(isService){
+//		        								rs="订单号"+orderid+"去{支付宝}查询到结果，状态是【未付款超时（超时作废）】，金额:"+root3.getChildText("price")+"元，能作为未付款凭证。";
+//		    								}else{
+//		    									rs=null;
+//		    								 }
+        								}else if(trade_status.equals("TRADE_FINISHED")){
+        									pram.setSuccess(true);
+		      						        pram.setPrice(new BigDecimal(root3.getChildText("price")));
+		      						        pram.setBanktype(PPayInfoOtherTypeEnum.alipay);
+		      						        pram.setPaystatus(BankPayStatusEnum.success);
+		      						        pram.setBankno(root3.getChildText("trade_no"));
+        									
+//											if(isService){
+//												rs="订单号"+orderid+"去{支付宝}查询到结果，状态是【已支付且不能退款】，金额:"+root3.getChildText("price")+"【元】，能作为支付凭证。";
+//		    								}else{
+//		    									rs="【已支付】，金额:"+root3.getChildText("price")+"元";
+//		    								}
+									}
         					}
         					
         				}
@@ -403,7 +456,8 @@ public class AliPayUtil {
 		} catch (Exception e) {
 			logger.error("支付宝查询订单出错 orderid={} ,返回的结果是：{}",orderid,xmlResult);
 		}
-    	return rs;
+    	return  pram;
     }
+	
 	
 }

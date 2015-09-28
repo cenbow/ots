@@ -117,7 +117,7 @@ public class HmsHotelController {
             rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
             rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
             rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "H端酒店上线出错.\n" + e.getMessage());
-            logger.info("H端酒店 hotelid : {} 上线出错. {}", hotelid, e.getMessage());
+            logger.error("H端酒店 hotelid : {} 上线出错. {}", hotelid, e.getMessage());
         }
         return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
     }

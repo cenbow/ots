@@ -1,15 +1,14 @@
 package com.mk.ots.promo.dao.impl;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Component;
-
 import com.google.common.collect.Maps;
 import com.mk.framework.datasource.dao.mybatis.MyBatisDaoImpl;
 import com.mk.ots.common.enums.PromotionTypeEnum;
 import com.mk.ots.promo.dao.IBPromotionDao;
 import com.mk.ots.promo.model.BPromotion;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class BPromoDAO extends MyBatisDaoImpl<BPromotion, Long> implements IBPromotionDao {
@@ -52,5 +51,29 @@ public class BPromoDAO extends MyBatisDaoImpl<BPromotion, Long> implements IBPro
 		param.put("otaorderid", otaorderid);
 		return this.find("queryYiJiaAndQiKeAndLiJianPromotionByOrderId", param);
 	}
+
+	@Override
+	public List<BPromotion> queryPromotionByOrderId(Long otaorderid) {
+		Map<String, Object> param = Maps.newHashMap();
+		param.put("otaorderid", otaorderid);
+		return this.find("queryPromotionByOrderId", param);
+	}
 	
+	/**
+	 * 根据订单id查询用户所有的优惠信息：切客券，议价券，其他优惠券
+	 */
+	@Override
+	public List<BPromotion> queryBPromotionByOrderId(Long otaorderid) {
+		Map<String, Object> param = Maps.newHashMap();
+		param.put("otaorderid", otaorderid);
+		return this.find("queryBPromotionByOrderId", param);
+	}
+	
+
+    @Override
+    public List<BPromotion> findFirstOrderPromotionByHardwarecode(String hardwarecode) {
+        Map<String, Object> param = Maps.newHashMap();
+        param.put("hardwarecode", hardwarecode);
+        return find("findFirstOrderPromotionByHardwarecode", param);
+    }
 }

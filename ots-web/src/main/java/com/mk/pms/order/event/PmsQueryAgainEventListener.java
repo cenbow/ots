@@ -1,13 +1,11 @@
 package com.mk.pms.order.event;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -15,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import cn.com.winhoo.mikeweb.ssh.Services;
 import cn.com.winhoo.pms.webout.service.bean.CustomerResult;
 import cn.com.winhoo.pms.webout.service.bean.OrderResult;
 import cn.com.winhoo.pms.webout.service.bean.ReturnObject;
@@ -27,14 +24,13 @@ import com.google.common.eventbus.Subscribe;
 import com.mk.framework.AppUtils;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.util.UrlUtils;
-import com.mk.ots.common.enums.OtaOrderFlagEnum;
 import com.mk.ots.hotel.model.THotel;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomService;
 import com.mk.ots.manager.HotelPMSManager;
 import com.mk.ots.order.bean.PmsOrder;
 import com.mk.ots.order.bean.PmsRoomOrder;
-import com.mk.ots.pay.module.weixin.pay.common.Tools;
+import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.hotel.service.PmsCheckinUserService;
 import com.mk.pms.order.service.NewPmsOrderService;
@@ -314,7 +310,7 @@ public class PmsQueryAgainEventListener {
 	private String doPostJson(String url, String json) {
 		JSONObject back = new JSONObject();
 		try {
-			return Tools.dopostjson(url, json);
+			return PayTools.dopostjson(url, json);
 		} catch (Exception e) {
 			logger.info("doPostJson参数:{},{},异常:{}", url, json, e.getLocalizedMessage());
 			e.printStackTrace();

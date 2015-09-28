@@ -11,7 +11,6 @@ import java.util.Set;
 import javax.annotation.Resource;
 
 import org.apache.commons.beanutils.BeanMap;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.keyvalue.AbstractMapEntry;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.session.SqlSession;
@@ -27,16 +26,21 @@ import com.mk.es.entities.OtsHotel;
 import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
-import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.hotel.dao.CityDAO;
+import com.mk.ots.hotel.model.EHotelModel;
 import com.mk.ots.hotel.model.THotelModel;
+import com.mk.ots.hotel.service.HotelPriceService;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomService;
 import com.mk.ots.hotel.service.RoomstateService;
+import com.mk.ots.mapper.EHotelMapper;
+import com.mk.ots.mapper.BedTypeMapper;
 import com.mk.ots.mapper.THotelMapper;
 import com.mk.ots.rpc.IHotelService;
 import com.mk.ots.web.ServiceOutput;
+import com.mk.pms.hotel.service.NewPMSHotelService;
+import com.mk.pms.order.control.PmsUtilController;
 
 @Service
 public class HmsHotelService implements IHotelService {
@@ -60,6 +64,18 @@ public class HmsHotelService implements IHotelService {
     
     @Autowired
     protected SqlSessionFactory sqlSessionFactory;
+    
+    @Autowired
+    private HotelPriceService hotelPriceService;
+    
+    @Autowired
+	private NewPMSHotelService newPMSHotelService;
+    
+    @Autowired
+    private EHotelMapper eHotelMapper;
+    
+    @Autowired
+    private BedTypeMapper bedTypeMapper;
     
     /**
      * 
@@ -100,7 +116,7 @@ public class HmsHotelService implements IHotelService {
             }
             hotel.setBusinesszone(businessZones);
             
-            hotel.setCratetime(day.getTime());
+            hotel.setCreatetime(day.getTime());
             hotel.setDetailaddr(thotelModel.getDetailaddr());
             hotel.setFlag(1);
             hotel.setGrade(BigDecimal.ZERO);
@@ -123,6 +139,7 @@ public class HmsHotelService implements IHotelService {
                 }
             } catch (Exception e) {
                 logger.error("获取酒店图片信息出错: {} ", e.getMessage());
+                throw e;
             }
             hotel.setHotelpic(pics);
             
@@ -141,6 +158,7 @@ public class HmsHotelService implements IHotelService {
                 }
             } catch (Exception e) {
                 logger.error("获取酒店设施信息出错: {} ", e.getMessage());
+                throw e;
             }
             hotel.setHotelfacility(facies);
             
@@ -153,17 +171,24 @@ public class HmsHotelService implements IHotelService {
             // H端新建酒店审核，强制刷新酒店眯客价格缓存。
             logger.info("H端新建酒店, 强制刷新眯客价格缓存: 开始");
             try {
+            	//需要废弃
                 roomstateService.updateHotelMikepricesCache(Long.valueOf(hotelid), null, true);
+            	hotelPriceService.refreshMikePrices(Long.parseLong(hotelid));
+            	
                 String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
                 String beginDate = strCurDay;
                 String endDate = strCurDay;
-                String[] prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), beginDate, endDate);
+               	String[] prices = null;
+            	if(hotelPriceService.isUseNewPrice())
+            		prices = hotelPriceService.getHotelMikePrices(Long.valueOf(hotelid), beginDate, endDate);
+            	else
+            		prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), beginDate, endDate);
                 hotel.setMaxprice(new BigDecimal(prices[0]));
                 hotel.setMinprice(new BigDecimal(prices[1]));
                 logger.info("新建酒店 Hotelid: {} 刷新眯客价格缓存成功.", hotelid);
             } catch (Exception e) {
-                logger.info("新建酒店 Hotelid: {} 刷新眯客价格缓存出错: {}", hotelid, e.getMessage());
-                e.printStackTrace();
+                logger.error("新建酒店 Hotelid: {} 刷新眯客价格缓存出错: {}", hotelid, e.getMessage());
+                throw e;
             }
             logger.info("H端新建酒店, 强制刷新眯客价格缓存: 结束");
             
@@ -193,6 +218,28 @@ public class HmsHotelService implements IHotelService {
             int hotelpicnum = hotelService.readonlyGetPicCount(Long.valueOf(hotelid));
 			hotel.setHotelpicnum(hotelpicnum);
 			
+			//mike3.0 添加 
+			// 酒店类型
+			hotel.setHoteltype(thotelModel.getHoteltype());
+			// 省份编码
+            hotel.setProvcode(thotelModel.getProvcode());
+            // 城市编码
+            hotel.setCitycode(thotelModel.getCitycode());
+            // 区县编码
+            hotel.setDiscode(thotelModel.getDiscode());
+            // 区域编码
+            hotel.setAreacode(thotelModel.getAreacode());
+            // 区域名称
+            hotel.setAreaname(thotelModel.getAreaname());
+            
+            // 区县名称
+            hotel.setHoteldisname(thotelModel.getDisname());
+            // 城市名称
+            hotel.setHotelcityname(thotelModel.getCityname());
+            // 省份名称
+            hotel.setHotelprovince(thotelModel.getProvince());
+            // 酒店电话
+            hotel.setHotelphone(thotelModel.getHotelphone());
             
             boolean sucess = this.save(hotel);
             if (sucess) {
@@ -207,7 +254,8 @@ public class HmsHotelService implements IHotelService {
             rtnMap.put("success", false);
             rtnMap.put("errcode", "-1");
             rtnMap.put("errmsg", e.getMessage());
-            logger.info("--=================  HmsHotelService addHmsHotelById method is error: {}\n ... =================--", e.getMessage());
+            logger.error("--=================  HmsHotelService addHmsHotelById method is error: {}\n ... =================--", e.getMessage());
+            throw e;
         } finally {
             if (session != null) {
                 session.close();
@@ -256,11 +304,38 @@ public class HmsHotelService implements IHotelService {
                 String startdateday = DateUtils.getStringFromDate(mikepriceDate, DateUtils.FORMATSHORTDATETIME);
                 String enddateday = startdateday;
                 // 取眯客价
-                String[] prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), startdateday, enddateday);
-                BigDecimal mikePriceValue = new BigDecimal(prices[0]);
+               	String[] prices = null;
+            	if(hotelPriceService.isUseNewPrice())
+            		prices = hotelPriceService.getHotelMikePrices(Long.valueOf(hotelid), startdateday, enddateday);
+            	else
+                	prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), startdateday, enddateday);
+            	
+            	// added begin: 没有价格眯客价设置为111.
+            	BigDecimal mikePriceValue = new BigDecimal("111");
+            	if (prices == null || prices.length == 0 || StringUtils.isBlank(prices[0])) {
+            	    mikePriceValue = new BigDecimal("111");
+            	} else {
+                    mikePriceValue = new BigDecimal(prices[0]);
+            	}
+            	if (mikePriceValue.compareTo(BigDecimal.ONE) == -1) {
+            	    mikePriceValue = new BigDecimal("111");
+            	}
+            	// added end:
+            	
                 String mikePriceKey = HotelService.MIKE_PRICE_PROP + DateUtils.getStringFromDate(mikepriceDate, DateUtils.FORMATSHORTDATETIME);
                 otsHotelMap.put(mikePriceKey, mikePriceValue);
                 logger.info("更新眯客价属性: {}, 值: {}", mikePriceKey, mikePriceValue);
+            }
+            
+            // 眯客3.0: 更新酒店床型字段
+            List<Map<String, Object>> bedtypes = bedTypeMapper.selectBedtypesByHotelId(hotelid);
+            for (Map<String, Object> bedtype : bedtypes) {
+                if (bedtype.get("bedtype") == null) {
+                    continue;
+                }
+                String field = "bedtype" + bedtype.get("bedtype");
+                otsHotelMap.put(field, 1);
+                logger.info("HMS更新酒店{}床型{}", hotelid, bedtype.get("bedtype"));
             }
 
             // save es hotel data
@@ -272,6 +347,7 @@ public class HmsHotelService implements IHotelService {
         } catch (Exception e) {
             result = false;
             logger.error("HmsHotelService save hotel is error:\n" + e.getMessage());
+            throw e;
         }
         logger.info("--=================  HmsHotelService save method end ... =================--");
         return result;
@@ -315,7 +391,7 @@ public class HmsHotelService implements IHotelService {
             }
             hotel.setBusinesszone(businessZones);
             
-            hotel.setCratetime(day.getTime());
+            hotel.setCreatetime(day.getTime());
             hotel.setDetailaddr(thotelModel.getDetailaddr());
             hotel.setFlag(1);
             hotel.setGrade(BigDecimal.ZERO);
@@ -338,6 +414,7 @@ public class HmsHotelService implements IHotelService {
                 }
             } catch (Exception e) {
                 logger.error("获取酒店图片信息出错: {} ", e.getMessage());
+                throw e;
             }
             hotel.setHotelpic(pics);
             
@@ -356,6 +433,7 @@ public class HmsHotelService implements IHotelService {
                 }
             } catch (Exception e) {
                 logger.error("获取酒店设施信息出错: {} ", e.getMessage());
+                throw e;
             }
             hotel.setHotelfacility(facies);
             
@@ -368,17 +446,24 @@ public class HmsHotelService implements IHotelService {
             // H端修改酒店审核，强制刷新酒店眯客价格缓存。
             logger.info("H端修改酒店, 强制刷新眯客价格缓存: 开始");
             try {
+            	//需要废弃
                 roomstateService.updateHotelMikepricesCache(Long.valueOf(hotelid), null, true);
+            	hotelPriceService.refreshMikePrices(Long.parseLong(hotelid));
+            	
                 String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
                 String beginDate = strCurDay;
                 String endDate = strCurDay;
-                String[] prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), beginDate, endDate);
+               	String[] prices = null;
+            	if(hotelPriceService.isUseNewPrice())
+            		prices = hotelPriceService.getHotelMikePrices(Long.valueOf(hotelid), beginDate, endDate);
+            	else
+                	prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), beginDate, endDate);
                 hotel.setMaxprice(new BigDecimal(prices[0]));
                 hotel.setMinprice(new BigDecimal(prices[1]));
                 logger.info("修改酒店 Hotelid: {} 刷新眯客价格缓存成功.", hotelid);
             } catch (Exception e) {
-                logger.info("修改酒店 Hotelid: {} 刷新眯客价格缓存出错: {}", hotelid, e.getMessage());
-                e.printStackTrace();
+                logger.error("修改酒店 Hotelid: {} 刷新眯客价格缓存出错: {}", hotelid, e.getMessage());
+                throw e;
             }
             logger.info("H端修改酒店, 强制刷新眯客价格缓存: 结束");
             
@@ -408,6 +493,29 @@ public class HmsHotelService implements IHotelService {
             int hotelpicnum= hotelService.readonlyGetPicCount(Long.valueOf(hotelid));
 			hotel.setHotelpicnum(hotelpicnum);
             
+			//mike3.0 添加 
+			// 酒店类型
+			hotel.setHoteltype(thotelModel.getHoteltype());
+			// 省份编码
+			hotel.setProvcode(thotelModel.getProvcode());
+			// 城市编码
+			hotel.setCitycode(thotelModel.getCitycode());
+			// 区县编码
+			hotel.setDiscode(thotelModel.getDiscode());
+			// 区域编码
+			hotel.setAreacode(thotelModel.getAreacode());
+			// 区域名称
+			hotel.setAreaname(thotelModel.getAreaname());
+			
+			// 区县名称
+			hotel.setHoteldisname(thotelModel.getDisname());
+			// 城市名称
+			hotel.setHotelcityname(thotelModel.getCityname());
+			// 省份名称
+			hotel.setHotelprovince(thotelModel.getProvince());
+			// 酒店电话
+			hotel.setHotelphone(thotelModel.getHotelphone());
+			
             boolean success = update(hotel);
             if (success) {
                 rtnMap.put("success", true);
@@ -420,6 +528,7 @@ public class HmsHotelService implements IHotelService {
             rtnMap.put("success", false);
             rtnMap.put("errcode", "-1");
             rtnMap.put("errmsg", e.getMessage());
+            throw e;
         } finally {
             if (session != null) {
                 session.close();
@@ -463,12 +572,40 @@ public class HmsHotelService implements IHotelService {
                 String startdateday = DateUtils.getStringFromDate(mikepriceDate, DateUtils.FORMATSHORTDATETIME);
                 String enddateday = startdateday;
                 // 取眯客价
-                String[] prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), startdateday, enddateday);
-                BigDecimal mikePriceValue = new BigDecimal(prices[0]);
+               	String[] prices = null;
+            	if(hotelPriceService.isUseNewPrice())
+            		prices = hotelPriceService.getHotelMikePrices(Long.valueOf(hotelid), startdateday, enddateday);
+            	else
+                	prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), startdateday, enddateday);
+                
+                // added begin: 没有价格眯客价设置为111.
+                BigDecimal mikePriceValue = new BigDecimal("111");
+                if (prices == null || prices.length == 0 || StringUtils.isBlank(prices[0])) {
+                    mikePriceValue = new BigDecimal("111");
+                } else {
+                    mikePriceValue = new BigDecimal(prices[0]);
+                }
+                if (mikePriceValue.compareTo(BigDecimal.ONE) == -1) {
+                    mikePriceValue = new BigDecimal("111");
+                }
+                // added end:
+                
                 String mikePriceKey = HotelService.MIKE_PRICE_PROP + DateUtils.getStringFromDate(mikepriceDate, DateUtils.FORMATSHORTDATETIME);
                 otsHotelMap.put(mikePriceKey, mikePriceValue);
                 logger.info("更新眯客价属性: {}, 值: {}", mikePriceKey, mikePriceValue);
             }
+            
+            // 眯客3.0: 更新酒店床型字段
+            List<Map<String, Object>> bedtypes = bedTypeMapper.selectBedtypesByHotelId(hotelid);
+            for (Map<String, Object> bedtype : bedtypes) {
+                if (bedtype.get("bedtype") == null) {
+                    continue;
+                }
+                String field = "bedtype" + bedtype.get("bedtype");
+                otsHotelMap.put(field, 1);
+                logger.info("HMS更新酒店{}床型{}", hotelid, bedtype.get("bedtype"));
+            }
+            
             // add es hotel data
             esProxy.signleAddDocument(otsHotelMap);
             logger.info("hotelid: "+ hotelid + " has added.");
@@ -476,6 +613,7 @@ public class HmsHotelService implements IHotelService {
         } catch (Exception e) {
             result = false;
             logger.error("HmsHotelService update method is error:\n" + e.getMessage());
+            throw e;
         }
         return result;
     }
@@ -499,16 +637,31 @@ public class HmsHotelService implements IHotelService {
             SearchHit[] searchHits = esProxy.searchHotelByHotelId(hotelid);
             for (int i = 0; i < searchHits.length; i++) {
                 SearchHit searchHit = searchHits[i];
-                // delete es hotel data
                 esProxy.deleteDocument(searchHit.getId());
                 logger.info("hotelid: "+ hotelid + " has deleted.");
             }
             logger.info("HMS hotelid: {} offline success.", hotelid);
+            
+            /*final EHotelModel eHotelModel = eHotelMapper.selectByPrimaryKey(Long.parseLong(hotelid));
+            if(eHotelModel!=null){
+            	//异步调用通知下线
+            	PmsUtilController.pool.execute(new Runnable() {
+            		@Override
+            		public void run() {
+            			String hotelPMS = eHotelModel.getPms();
+            			try {
+            				newPMSHotelService.sendOfflineMsg(hotelPMS);
+            			} catch (Exception e) {
+            				logger.error("pms下线失败:hotelPMS:{},error{}", hotelPMS, e.getMessage());
+            			}
+            		}
+            	});
+            }*/
             return true;
         } catch (Exception e) {
             logger.error("HMS hotelid: {} offline error: {} ", hotelid, e.getMessage());
+            throw e;
         }
-        return false;
     }
     
 }

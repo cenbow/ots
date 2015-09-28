@@ -9,7 +9,8 @@ public enum PromotionTypeEnum {
 	XLB(4, "新用户礼包"),
 	LLB(5, "老用户礼包"),
 	LJIAN(7, "立减优惠券"),
-	CGJ(6, "常规优惠券");
+	CGJ(6, "常规优惠券"),
+	shoudan(8, "首单优惠券");
 	
 	private final Integer id;
 	private final String name;

@@ -10,6 +10,7 @@
     <result column="floor" property="floor" jdbcType="VARCHAR" />
     <result column="score" property="score" jdbcType="DECIMAL" />
     <result column="isWindow" property="isWindow" jdbcType="CHAR" />
+    <result column="roomTypeName" property="roomTypeName" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
     id, roomtypeid, name, pms, islock, floor, score
@@ -24,7 +25,8 @@
 			a.islock,
 			a.floor,
 			a.score,
-			b.isWindow
+			b.isWindow,
+			b.roomTypeName
 		FROM
 			t_room a
 		LEFT JOIN t_room_setting b ON a.roomtypeid = b.roomTypeId

@@ -60,6 +60,8 @@ public enum MyErrorEnum {
 	notExistOrderType("-181","不存在此订单类型."),
 	orderStsNotWait("-190","订单非前台等待状态."),
 	roomNUll("-199","酒店房间已满,客官请下次再来."),
+    walletError("-140","钱包错误"),
+
 	
 	noJifenError("-201","没有足够的积分."),
 	noChuZhiError("-202","没有足够的储值."),
@@ -92,6 +94,7 @@ public enum MyErrorEnum {
 	cancelpaybyerrorError("-809","异常情况下支付取消失败."),
 	OrderCancelBySystem("-810","订单在支付过程被系统取消."),
 	alreadyPay("-811","订单已经支付成功."),
+	modifypaystatusbyerrorError("-812","修改订单支付状态失败."),
 	
 	ticketTimeUseless("-901","优惠券未在指定的有效时间内使用."),
 	ticketHotelUseless("-902","优惠券未在指定酒店内使用."),

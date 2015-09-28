@@ -15,10 +15,11 @@ public class BAreaRuleDetailDAO extends MyBatisDaoImpl<BAreaRuleDetail, Long> {
 	 * @param rulecode
 	 * @return
 	 */
-	public BAreaRuleDetail queryRuleValue(String key,Integer rulecode) {
+	public BAreaRuleDetail queryRuleValue(String key,Integer rulecode, String cityCode) {
 		Map<String,Object> param = Maps.newHashMap();
 		param.put("rulecode", rulecode);
 		param.put("rulekey", key);
+		param.put("citycode", cityCode);
 		return this.findOne("queryRuleValue", param); 
 	}
 }

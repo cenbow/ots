@@ -1,7 +1,6 @@
 package com.mk.ots.ticket.controller;
 
 import cn.com.winhoo.mikeweb.myenum.OrderTypeEnum;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -31,9 +30,7 @@ import com.mk.ots.promo.service.IPromotionPriceService;
 import com.mk.ots.ticket.model.BPrizeInfo;
 import com.mk.ots.ticket.model.TicketInfo;
 import com.mk.ots.ticket.service.*;
-
 import jodd.util.StringUtil;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.elasticsearch.common.base.Strings;
 import org.joda.time.DateTime;
@@ -200,28 +197,12 @@ public class TicketController {
 	}
 	
 	public void sortTicketInfos(List<TicketInfo> ticketInfos) {
-		if (CollectionUtils.isEmpty(ticketInfos)) {
-			return;
-		}
-		Collections.sort(ticketInfos, new Comparator<TicketInfo>() {
-			@Override
-			public int compare(TicketInfo param1, TicketInfo param2) {
-				// 可用的优惠券优先
-				if (param1.getCheck() != param2.getCheck()) {
-					return param2.getCheck().compareTo(param1.getCheck());
-				}
-				// 优惠券结束日期较早的优先 modify by tankai 逻辑修改为 按照线上优惠额倒序排序
-				//return param1.getEndtime().compareTo(param2.getEndtime());
-				
-				//优惠券信息，按照线上优惠额倒序排序
-				return param2.getSubprice().compareTo(param1.getSubprice());
-			}
-		});
+		ticketService.sortTicketInfos(ticketInfos);
 	}
 	
 	@RequestMapping("/get")
-	public ResponseEntity<Map<String, Object>> getTicketByActiveId(String token, String activeid, String recommendphone){
-		//TODO 添加入参recommendphone,待以后实现
+    public ResponseEntity<Map<String, Object>> getTicketByActiveId(String token, String activeid, String recommendphone, String hardwarecode) {
+        //TODO 添加入参recommendphone,待以后实现
 		
 		
 		//1. 参数校验
@@ -293,8 +274,8 @@ public class TicketController {
 			
 			//2. 根据不同活动领取不同优惠券
 			if(isCondition){
-				List<Long> pidList = this.iPromoService.genTicketByActive(Long.parseLong(activeid), member.getMid());
-				if(pidList!=null && pidList.size()>0){
+                List<Long> pidList = this.iPromoService.genTicketByActive(Long.parseLong(activeid), member.getMid(), hardwarecode);
+                if(pidList!=null && pidList.size()>0){
 					tickets = this.ticketService.queryMyTicketByPromotionids(member.getMid(), pidList);
 				}
 			}
@@ -470,8 +451,8 @@ public class TicketController {
 	 * @return
 	 */
 	@RequestMapping("/getbycode")
-	public ResponseEntity<Map<String, Object>> getbycode(String token, String code){
-		//1. 参数校验
+    public ResponseEntity<Map<String, Object>> getbycode(String token, String code, String hardwarecode) {
+        //1. 参数校验
 		if(Strings.isNullOrEmpty(code)){
 			throw MyErrorEnum.customError.getMyException("兑换码不允许为空.");
 		}
@@ -488,10 +469,9 @@ public class TicketController {
 				return new ResponseEntity<Map<String, Object>>(rtnMap,HttpStatus.OK);
 			}
 			//2. 兑换券
-			List<TicketInfo> ticketList = this.ticketService.exchange(member, code);
-			
-			//3. 组织数据返回
-			
+            List<TicketInfo> ticketList = this.ticketService.exchange(member, code, hardwarecode);
+
+            //3. 组织数据返回
 			rtnMap.put("success", ticketList!=null && ticketList.size()>0);
 			rtnMap.put("tickets", ticketList);
 		}finally{
@@ -591,8 +571,8 @@ public class TicketController {
 			//2. 根据不同活动领取不同优惠券
 			if(isCondition){
 				//定义：id，type
-				List<BPrizeInfo> pidList = this.iPromoService.genTicketByActive(Long.parseLong(activeid), member.getMid(),ostype);
-				if(pidList!=null && pidList.size()>0){
+                List<BPrizeInfo> pidList = this.iPromoService.tryLuckByActive(Long.parseLong(activeid), member.getMid(), ostype);
+                if(pidList!=null && pidList.size()>0){
 					logger.info("pidList.get(0):{}",pidList.get(0).toString());
 					List<Long> pidMiKeList =new ArrayList<Long>();
 					for (BPrizeInfo list : pidList) {

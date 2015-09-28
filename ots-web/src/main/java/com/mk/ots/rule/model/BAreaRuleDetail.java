@@ -16,8 +16,18 @@ public class BAreaRuleDetail {
     private Date createtime;
 
     private Date updatetime;
+    
+    private String citycode;
 
-    public Long getId() {
+	public String getCitycode() {
+		return citycode;
+	}
+
+	public void setCitycode(String citycode) {
+		this.citycode = citycode;
+	}
+
+	public Long getId() {
         return id;
     }
 

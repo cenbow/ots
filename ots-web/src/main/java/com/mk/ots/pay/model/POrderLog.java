@@ -2,20 +2,13 @@
 package com.mk.ots.pay.model;
 
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-
-import org.springframework.stereotype.Component;
-
-import com.mk.orm.DbTable;
-import com.mk.orm.plugin.bean.BizModel;
 import com.mk.ots.common.enums.PmsSendEnum;
 
-@Component
-@DbTable(name="p_orderlog", pkey="id")
-public class POrderLog extends BizModel<POrderLog>{
+public class POrderLog implements Serializable{
 	private static final long serialVersionUID = 7741008780225739397L;
-	public static final POrderLog dao = new POrderLog();
 	
 	private Long id;
 
@@ -48,6 +41,12 @@ public class POrderLog extends BizModel<POrderLog>{
     private String refundreason;
     
     private BigDecimal qiekeIncome;
+    
+    private BigDecimal  accountcost;
+    
+    private BigDecimal  realaccountcost;
+    
+    private BigDecimal  realallcost;
     
     public PmsSendEnum getPmssend() {
 		return pmssend;
@@ -177,6 +176,30 @@ public class POrderLog extends BizModel<POrderLog>{
 		this.qiekeIncome = qiekeIncome;
 	}
 
+	public BigDecimal getAccountcost() {
+		return accountcost;
+	}
+
+	public void setAccountcost(BigDecimal accountcost) {
+		this.accountcost = accountcost; 
+	}
+	
+	public BigDecimal getRealaccountcost() {
+		return realaccountcost;
+	}
+
+	public void setRealaccountcost(BigDecimal realaccountcost) {
+		this.realaccountcost = realaccountcost;
+	}
+
+	public BigDecimal getRealallcost() {
+		return realallcost;
+	}
+
+	public void setRealallcost(BigDecimal realallcost) {
+		this.realallcost = realallcost;
+	}
+
 	@Override
 	public String toString() {
 		return "POrderLog [id=" + id + ", payid=" + payid + ", allcost="
@@ -184,8 +207,13 @@ public class POrderLog extends BizModel<POrderLog>{
 				+ ", usercost=" + usercost + ", realcost=" + realcost
 				+ ", realotagive=" + realotagive + ", refund=" + refund
 				+ ", pmssend=" + pmssend + ", pmssendtime=" + pmssendtime
-				+ ", pmsrefund=" + pmsrefund + ", pmsrefundtime="
-				+ pmsrefundtime +",qiekeIncome="+qiekeIncome+ "]";
+				+ ", sendreason=" + sendreason + ", pmsrefund=" + pmsrefund
+				+ ", pmsrefundtime=" + pmsrefundtime + ", refundreason="
+				+ refundreason + ", qiekeIncome=" + qiekeIncome
+				+ ", accountcost=" + accountcost + ", realaccountcost="
+				+ realaccountcost + ", realallcost=" + realallcost + "]";
 	}
+
+	
 	
 }

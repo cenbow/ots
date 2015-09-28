@@ -1,24 +1,7 @@
 package com.mk.ots.ticket.service.impl;
 
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mk.framework.AppUtils;
@@ -28,26 +11,24 @@ import com.mk.ots.activity.dao.IUActiveCDKeyLogDao;
 import com.mk.ots.activity.model.BActiveCDKey;
 import com.mk.ots.activity.service.IBActiveChannelService;
 import com.mk.ots.appstatus.dao.IAppStatusDao;
-import com.mk.ots.common.enums.OSTypeEnum;
-import com.mk.ots.common.enums.OrderMethodEnum;
-import com.mk.ots.common.enums.OrderTypeEnum;
-import com.mk.ots.common.enums.OtaOrderStatusEnum;
-import com.mk.ots.common.enums.PrizeTypeEnum;
-import com.mk.ots.common.enums.PromotionMethodTypeEnum;
-import com.mk.ots.common.enums.StatisticInvalidTypeEnum;
-import com.mk.ots.common.enums.TicketStatusEnum;
-import com.mk.ots.common.enums.TicketUselimitEnum;
+import com.mk.ots.common.enums.*;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.hotel.model.THotelModel;
+import com.mk.ots.mapper.THotelMapper;
 import com.mk.ots.member.model.UMember;
 import com.mk.ots.member.service.IMemberService;
 import com.mk.ots.order.bean.OrderLog;
 import com.mk.ots.order.bean.OtaOrder;
+import com.mk.ots.order.bean.OtaRoomOrder;
 import com.mk.ots.order.bean.PmsRoomOrder;
 import com.mk.ots.order.dao.OtaOrderDAO;
 import com.mk.ots.order.dao.RoomOrderDAO;
 import com.mk.ots.order.model.BOtaorder;
+import com.mk.ots.order.model.FirstOrderModel;
 import com.mk.ots.order.service.OrderService;
+import com.mk.ots.pay.model.CouponParam;
+import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.ots.promo.dao.IBPromotionDao;
 import com.mk.ots.promo.dao.IBPromotionPriceDao;
 import com.mk.ots.promo.dao.IBPromotionRuleDAO;
@@ -57,16 +38,26 @@ import com.mk.ots.promo.model.BPromotionRule;
 import com.mk.ots.promo.service.IPromoService;
 import com.mk.ots.promo.service.IPromotionPriceService;
 import com.mk.ots.ticket.dao.BHotelStatDao;
+import com.mk.ots.ticket.dao.USendUTicketDao;
 import com.mk.ots.ticket.dao.UTicketDao;
-import com.mk.ots.ticket.model.BHotelStat;
-import com.mk.ots.ticket.model.BPrizeInfo;
-import com.mk.ots.ticket.model.TicketInfo;
-import com.mk.ots.ticket.model.UPrizeRecord;
-import com.mk.ots.ticket.model.UTicket;
+import com.mk.ots.ticket.model.*;
 import com.mk.ots.ticket.service.ITicketService;
 import com.mk.ots.ticket.service.IUActiveShareService;
 import com.mk.ots.ticket.service.IUPrizeRecordService;
 import com.mk.ots.ticket.service.parse.ITicketParse;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * 优惠券服务接口
@@ -88,7 +79,7 @@ public class TicketService implements ITicketService{
 	
 	@Autowired
 	private OrderService orderService;
-	
+
 	@Autowired
 	private IMemberService iMemberService;
 	
@@ -125,6 +116,11 @@ public class TicketService implements ITicketService{
     @Autowired
     private IUActiveShareService iuActiveShareService;
 
+    @Autowired
+    private THotelMapper tHotelMapper;
+
+	@Autowired
+	private USendUTicketDao uSendUTicketDao;
 	/**
      * 10+1活动券
      */
@@ -166,8 +162,8 @@ public class TicketService implements ITicketService{
 	
 	/**
 	 * 查询用户可用券(可修改订单的情况)
-	 * @param orderid
-	 * @param mid
+     * @param otaOrder
+     * @param mid
 	 * @return
 	 */
 	@Override
@@ -188,6 +184,9 @@ public class TicketService implements ITicketService{
 				logger.info("2. 查询可用优惠券: {}", myticket);
 				
 				if(CollectionUtils.isNotEmpty(myticket)){
+                    List citycodes = Lists.newArrayList();
+                    citycodes.add("310000");
+                    filterLimitArea(myticket, otaOrder, citycodes);
 //					checkBRule(myticket, otaOrder);
 					//update by tankai  去掉对B规则的酒店判断
 //					checkBRule(myticket, otaOrder);
@@ -205,7 +204,32 @@ public class TicketService implements ITicketService{
 		logger.info("getBindOrderAndAvailableTicketInfos(查询绑定券和可用券)>>>>>>>>>>>>>>>>结束.");
 		return ticketList;
 	}
-	
+
+
+
+    /**
+     * 过滤只允许某城市使用的优惠券
+     *
+     * @param myticket
+     * @param otaOrder
+     * @param citycodes
+     */
+    private void filterLimitArea(List<TicketInfo> myticket, OtaOrder otaOrder, List citycodes) {
+    	Iterator<TicketInfo> it =myticket.iterator();
+    	while (it.hasNext()) {
+    		TicketInfo info = it.next();
+    		
+    		 if (info.getType() == PromotionTypeEnum.shoudan.getId()) {
+                 THotelModel tHotelModel = tHotelMapper.findHotelInfoById(otaOrder.getHotelId());
+                 if (!citycodes.contains(tHotelModel.getCitycode())) {
+                     it.remove();
+                 }
+             }
+		}
+    }
+
+    
+
 	/**
 	 * 检验B规则
 	 */
@@ -237,9 +261,8 @@ public class TicketService implements ITicketService{
 	
 	/**
 	 * 查询用户订单历史绑定券(完成订单或不可修改订单的情况下)
-	 * @param orderid
-	 * @param mid
-	 * @return
+     * @param otaOrder
+     * @return
 	 */
 	@Override
 	public List<TicketInfo> getOrderAlreadyBindTickets(OtaOrder otaOrder) {
@@ -273,7 +296,10 @@ public class TicketService implements ITicketService{
 		if(queryList!=null && queryList.size()>0){
 			for(BPromotion tmp : queryList){
 				TicketInfo promotion2tickinfo = promotion2tickinfo(tmp.createParseBean(null));
+				promotion2tickinfo.setCheck(false);
 				promotion2tickinfo.setIsused(true);
+				promotion2tickinfo.setStatus(TicketStatusEnum.used.getId());
+				promotion2tickinfo.setStatusname(TicketStatusEnum.used.getName());
 				rtnList.add(promotion2tickinfo);
 			}
 		}
@@ -370,8 +396,8 @@ public class TicketService implements ITicketService{
 	}
 	
 	@Override
-	public List<TicketInfo> exchange(UMember member, String code){
-		List<TicketInfo> ticketList = Lists.newArrayList();
+    public List<TicketInfo> exchange(UMember member, String code, String hardwarecode) {
+        List<TicketInfo> ticketList = Lists.newArrayList();
 		//1. 检测兑换码是否有效
 		Optional<BActiveCDKey> ofkey =  this.iBActiveCDKeyDao.getBActiveCDKey(code);
 		if(ofkey.isPresent()){
@@ -393,11 +419,31 @@ public class TicketService implements ITicketService{
 							}
 						}
 					}
-					
+
+                    //region 首单优惠券兑换优惠码逻辑判断
+                    BPromotion bp = iBPromotionDao.findById(bActiveCDKey.getPromotionid());
+                    if (bp != null && PromotionTypeEnum.shoudan.equals(bp.getType())) {
+                        FirstOrderModel fom = new FirstOrderModel();
+                        fom.setMid(member.getMid());
+                        boolean isFirstOrder = orderService.isFirstOrder(fom);
+                        if (!isFirstOrder) {
+                            throw MyErrorEnum.customError.getMyException("很抱歉。您已不是首单用户,谢谢参与!");
+                        }
+                        List<UTicket> uList = this.ticketMapper.findUTicketByPromotionType(member.getMid(), com.mk.ots.common.enums.PromotionTypeEnum.shoudan);
+                        if (uList != null && uList.size() > 0) {
+                            throw MyErrorEnum.customError.getMyException("很抱歉！您已经兑换过“眯客首单优惠券”咯~请继续关注眯客其他优惠活动吧。");
+                        }
+
+                        if (!Strings.isNullOrEmpty(hardwarecode) && this.iPromoService.isGetFirstOrderPromotion(hardwarecode)) {
+                            throw MyErrorEnum.customError.getMyException("很抱歉！此手机已经兑换过“眯客首单优惠券”咯~请继续关注眯客其他优惠活动吧。");
+                        }
+                    }
+                    //endregion
+
 					boolean isPush = false;
-					List<Long> genList = this.iPromoService.genCGTicket(bActiveCDKey.getPromotionid(), member.getMid(), null, null, PromotionMethodTypeEnum.HAND,bActiveCDKey.getCode(),bActiveCDKey.getChannelid());
-					
-					//3. 兑换券
+                    List<Long> genList = this.iPromoService.genCGTicket(bActiveCDKey.getPromotionid(), member.getMid(), null, null, PromotionMethodTypeEnum.HAND, bActiveCDKey.getCode(), bActiveCDKey.getChannelid(), hardwarecode);
+
+                    //3. 兑换券
 					boolean isgen = genList!=null && genList.size()>0;
 					//修改券使用记录
 					if(isgen){
@@ -409,8 +455,8 @@ public class TicketService implements ITicketService{
 						}
 					}
 					//TODO push 消息
-					iUActiveCDKeyLogDao.log(member.getMid(),  bActiveCDKey.getActiveid(), bActiveCDKey.getChannelid(), bActiveCDKey.getPromotionid(), code, isgen, isPush);
-				}else{
+                    iUActiveCDKeyLogDao.log(member.getMid(), bActiveCDKey.getActiveid(), bActiveCDKey.getChannelid(), bActiveCDKey.getPromotionid(), code, isgen, isPush, hardwarecode);
+                }else{
 					throw MyErrorEnum.customError.getMyException("兑换码已过期.");	
 				}
 			} else {
@@ -470,6 +516,20 @@ public class TicketService implements ITicketService{
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		for (int i = ticketInfos.size()-1; i >=0; i--) {
 			TicketInfo ticket = ticketInfos.get(i);
+			//如果优惠券类型为首单优惠券，则判断该用户是否首单
+			if (com.mk.ots.common.enums.PromotionTypeEnum.shoudan.getId().equals(ticket.getType())) {
+				FirstOrderModel fom=new FirstOrderModel();
+				fom.setMid(mid);
+				boolean isFirstOrder =orderService.isFirstOrder(fom);
+				logger.info("用户：{}的首单查询结果为：{}",mid,isFirstOrder);
+				if (!isFirstOrder) {
+					//不是首单，则将优惠券从列表中移除
+					ticketInfos.remove(i);
+					logger.info("将首单优惠券：{}从优惠券列表中移除",ticket);
+					continue;
+				}
+			}
+			
 			//获取该用户对该酒店是否使用过15优惠券
 			if (ticket.getCheck()) {
 				if(ticket.getActivityid()==null){
@@ -647,22 +707,62 @@ public class TicketService implements ITicketService{
 		}
 	}
 	
-	
+	/**
+	 * 转换信息
+	 * 将优惠券信息转换为前端识别的信息
+	 * @param parse
+	 * @return
+	 */
 	private TicketInfo promotion2tickinfo(ITicketParse parse){
 		TicketInfo info = new TicketInfo();
 		BPromotion bp = parse.getPromotion();
 		info.setId(bp.getId());
 		info.setName(bp.getName());
+		info.setDescription(bp.getDescription());
 		info.setSelect(false);
 		info.setCheck(parse.checkUsable());
 		if(parse.getTicket()!=null){
-			info.setIsused(parse.getTicket().getStatus()==1);
+			if(parse.getTicket().getStatus()==TicketStatusEnum.unused.getId().intValue()){
+				//只有unused时，才是真正的未使用，其他的状态，都认为使用了。
+				info.setIsused(false);
+			}else{
+				info.setIsused(true);
+			}
+			info.setStatus(parse.getTicket().getStatus());
+			
+			//封装不同的状态值
+			
+			if(parse.getTicket().getStatus() == TicketStatusEnum.used.getId().intValue()){
+				info.setStatus(TicketStatusEnum.used.getId());
+				info.setStatusname(TicketStatusEnum.used.getName());
+			}else if(parse.getTicket().getStatus() == TicketStatusEnum.invalid.getId().intValue()){
+				info.setStatus(TicketStatusEnum.invalid.getId());
+				info.setStatusname(TicketStatusEnum.invalid.getName());
+			}else if(parse.getTicket().getStatus() == TicketStatusEnum.unused.getId().intValue()){
+				//check是否过期
+				if(!checkUsable(bp.getBegintime(), bp.getEndtime())){//过期的单据
+					info.setStatus(TicketStatusEnum.overdue.getId());
+					info.setStatusname(TicketStatusEnum.overdue.getName());
+					//如果已经过期，置为不可用
+					info.setIsused(true);
+				}else{//多少天失效
+					int diff = DateUtils.diffDay(new Date(), bp.getEndtime());
+					info.setStatus(TicketStatusEnum.unused.getId());
+					if(diff>0){
+						info.setStatusname(MessageFormat.format(TicketStatusEnum.limit.getName(),diff ));
+					}else{
+						info.setStatusname("今天过期");
+					}
+				}
+			}
+			logger.info("优惠券id："+bp.getId()+"状态："+info.getStatusname());
+			
 		}
 		info.setSubprice(parse.getOnlinePrice());
 		info.setOfflinePrice(parse.getOfflinePrice());
 		info.setOfflinesubprice(parse.getOfflinePrice());//接口要用这个字段，所以要封装
-		info.setType(bp.getType().getId());
-		info.setIsticket(bp.getIsticket());
+        info.setType(bp.getType().getId());
+        info.setIsticket(bp.getIsticket());
 		info.setBegintime(bp.getBegintime());
 		info.setEndtime(bp.getEndtime());
 		//add by zyj 20150702
@@ -674,7 +774,14 @@ public class TicketService implements ITicketService{
 		}else if(info.getOfflineprice()!=null && info.getOfflineprice().compareTo(BigDecimal.ZERO)>0){
 			info.setUselimit(TicketUselimitEnum.PT.getType());
 		}
+		
 		return info; 
+	}
+	
+	private boolean checkUsable(Date begintime,Date endtime) {
+		Date currentDate = new Date();
+		return  begintime.before(currentDate) 
+				&& endtime.after(currentDate);
 	}
 
 	public  Map<String, Object> findMaxAndMinUTicketId(Map<String, Object> paramMap){
@@ -1044,5 +1151,107 @@ public class TicketService implements ITicketService{
     @Override
     public void updateInvalidByMid(Long mid) {
         bHotelStatDao.updateInvalidByMid(mid);
+    }
+
+
+	@Override
+	public List<USendUticket> getNeedSendCountValid(int statisticInvalid, int batDataNum) {
+		return uSendUTicketDao.getNeedSendCountValid(statisticInvalid, batDataNum);
+	}
+
+
+	@Override
+	public void updateSendTicketInvalidByMid(Long mid) {
+		uSendUTicketDao.updateSendTicketInvalidByMid(mid);
+	}
+	
+	/**
+	 * 根据订单查询订单上使用的优惠券、酒店补贴、议价券等信息
+	 * @param order
+	 * @return
+	 */
+	public CouponParam queryCouponParam(OtaOrder order){
+		CouponParam couponParam = new CouponParam();
+		BigDecimal totalPrice = caculateAllCost(order);
+		couponParam.setUserCost(totalPrice);
+		
+		if(order==null||order.getId()==null){
+			logger.info("订单入参为空，返回");
+			return couponParam;
+		}
+		if(order.getTotalPrice()==null){
+			logger.info("订单总金额TotalPrice为空,orderid="+order.getId());
+			return couponParam;
+		}
+		logger.info("根据订单查询订单上使用的优惠券、酒店补贴、议价券等信息,orderid="+order.getId()+"，订单总金额："+couponParam.getUserCost());
+		//查询切客券
+		
+		//查询议价券
+		
+		//查询普通优惠券
+		List<BPromotion> alreadyBindList = iBPromotionDao.queryBPromotionByOrderId(order.getId());
+		if(CollectionUtils.isNotEmpty(alreadyBindList)){
+			logger.info("订单绑定优惠券list："+alreadyBindList.size()+",orderid="+order.getId());
+			for (BPromotion bPromotion : alreadyBindList) {
+				if(bPromotion!=null){
+					BigDecimal price = null;
+					if (order.getOrderType() == OrderTypeEnum.PT.getId()){
+						price = bPromotion.getOfflineprice();
+						logger.info("到付订单,orderid="+order.getId());
+		        	} else if(order.getOrderType() == OrderTypeEnum.YF.getId()) {
+		        		price = bPromotion.getOnlineprice();
+		        		logger.info("预付订单,orderid="+order.getId());
+		        	}
+					
+					
+					if(!PayTools.isPositive(price)){
+						continue;
+					}
+				
+					if(PromotionTypeEnum.yijia.getId().equals(bPromotion.getType())){
+						logger.info("议价券，只记录酒店补贴,orderid="+order.getId()+"，酒店补贴金额："+price);
+						couponParam.setHotelCost(price);
+					}else{
+						logger.info("非议价券，记录ota补贴,orderid="+order.getId()+"，ota补贴金额："+price);
+						couponParam.setCoupon(price);
+						if(bPromotion.getIsota()!=null && bPromotion.getIsota()){
+							if (totalPrice.subtract(price).compareTo(BigDecimal.ZERO) > 0) {
+								if(bPromotion.getOtapre()!=null){
+									couponParam.setUserCost(bPromotion.getOtapre().multiply(price));
+								}else{
+									couponParam.setUserCost(price);
+								}
+				            }else{
+				            	couponParam.setUserCost(BigDecimal.ZERO);
+				            }
+							logger.info("ota实际补贴,orderid="+order.getId()+"，金额："+couponParam.getUserCost());
+						}
+					} 
+				}
+			}
+			
+		}
+		logger.info("orderid="+order.getId()+",couponParam="+couponParam.toString()+"，订单总金额："+totalPrice);
+		return couponParam;
+	}
+	 /**
+     * 计算总花费
+     *
+     * @param order
+     * @param allcost
+     * @return
+     */
+    private BigDecimal caculateAllCost(OtaOrder order) {
+        BigDecimal allcost = BigDecimal.ZERO;
+        List<OtaRoomOrder> roomOrdrs = order.getRoomOrderList();
+        if(CollectionUtils.isNotEmpty(roomOrdrs)){
+        	for (OtaRoomOrder otaRoomOrder : roomOrdrs) {
+                allcost = allcost.add(otaRoomOrder.getTotalPrice());
+            }
+        }else{
+        	throw MyErrorEnum.customError.getMyException("用户订单没有找到房间");
+        }
+        
+        return allcost;
     }
 }

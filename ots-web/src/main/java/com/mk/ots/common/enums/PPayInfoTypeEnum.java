@@ -24,7 +24,9 @@ public enum PPayInfoTypeEnum {
 //	RESENDLEZHU(17,"补发乐住币"),
 //	REFUNDLEZHU(18,"手动收回乐住币"),
 	REFUNDLEZHU4LONG(19,"常住人收回乐住币"),
-	REFUNDLEZHU4QIEKE(20,"切客4小时内离店收回乐住币")
+	REFUNDLEZHU4QIEKE(20,"切客4小时内离店收回乐住币"),
+	ACCOUNTCOST(21,"使用账户金额（钱包）支付"),
+	ACCOUNTCOSTREFUND(22,"退还账户金额（钱包）支付")
 	;
 	private final Integer id;
 	private final String name;

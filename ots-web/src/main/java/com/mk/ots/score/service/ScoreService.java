@@ -19,12 +19,17 @@ import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 import com.mk.framework.exception.MyErrorEnum;
-import com.mk.framework.util.MyTokenUtils;
 import com.mk.orm.plugin.bean.Bean;
+import com.mk.ots.common.enums.OtaOrderFlagEnum;
+import com.mk.ots.mapper.THotelScoreMapper;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.OtaRoomOrder;
+import com.mk.ots.order.service.OrderBusinessLogService;
 import com.mk.ots.order.service.OrderService;
 import com.mk.ots.score.dao.ScoreDAO;
+import com.mk.ots.score.model.THotelScore;
+import com.mk.ots.wallet.model.CashflowTypeEnum;
+import com.mk.ots.wallet.service.IWalletCashflowService;
 
 /**
  * 评分服务类
@@ -45,6 +50,15 @@ public class ScoreService {
 
 	@Autowired
 	private OrderService orderService = null;
+	
+	@Autowired
+	private THotelScoreMapper tHotelScoreMapper;
+	
+	@Autowired
+	private IWalletCashflowService walletCashflowService;
+	
+	@Autowired
+	private OrderBusinessLogService orderBusinessLogService;
 
 	/**
 	 * 保存分数
@@ -155,6 +169,7 @@ public class ScoreService {
 		List cList = new ArrayList();
 		String scoreStr = param.get("score").toString();
 		String picStr = (String)param.get("pics");
+		String isDefault = (String) param.get("isdefault");
 		cList.add(roomid);
 		cList.add(roomtypeid);
 		cList.add(hotelid);
@@ -165,6 +180,7 @@ public class ScoreService {
 		}else{
 			cList.add(0L);
 		}
+		cList.add(isDefault);
 		cList.add(orderid);
 		
 		boolean isSuccess = true;
@@ -408,7 +424,7 @@ public class ScoreService {
 	 */
 	public List<Map<String,Object>> findScoreMxStatus(String hotelid,String roomtypeid,String roomid, String maxgrade, String mingrade,
 			String subjectid, String orderby, String startdateday,
-			String enddateday, String starttime, String endtime,String page,String limit, Long mid) {
+			String enddateday, String starttime, String endtime,String page,String limit, Long mid, String gradetype) {
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		int pageInt=1;
 		int limitInt=10;
@@ -421,7 +437,7 @@ public class ScoreService {
 		
 		List<Bean> list = scoreDAO.findScoreMx2(hotelid,roomtypeid,roomid, maxgrade, mingrade,
 				subjectid, orderby, startdateday, enddateday, starttime,
-				endtime,pageInt, limitInt, SCORE_TYPE_USER, mid);
+				endtime,pageInt, limitInt, SCORE_TYPE_USER, mid, gradetype);
 		
 		//根据ids 查询回得数据
 		List<Long> idList = new ArrayList<Long>();
@@ -543,9 +559,14 @@ public class ScoreService {
 	 * @param enddate
 	 */
 	public List<Bean> scoreGroupCount(String hotelid, String scoregroups,
-			String startdate, String enddate, Long mid) {
-		List<Bean> l = scoreDAO.findScoreGroup(hotelid, scoregroups, startdate, enddate, mid);
-		return l;
+			String startdate, String enddate, Long mid, String gradetype) {
+		List<Bean> resultList = new ArrayList<Bean>();
+		if(StringUtils.isBlank(gradetype)){
+			resultList = scoreDAO.findScoreGroup(hotelid, scoregroups, startdate, enddate, mid);
+		}else{
+			resultList = scoreDAO.findScoreGroupByGrade(hotelid, gradetype, startdate, enddate);
+		}
+		return resultList;
 	}
 	/**
 	 * 计算总数
@@ -565,8 +586,47 @@ public class ScoreService {
 	public long findScoreMxCount(String hotelid, String roomtypeid,
 			String roomid, String maxgrade, String mingrade, String subjectid,
 			String orderby, String startdateday, String enddateday,
-			String starttime, String endtime, Long mid) {
+			String starttime, String endtime, Long mid, String gradetype) {
 		return  scoreDAO.findScoreMxCount(hotelid,roomtypeid,roomid, maxgrade, mingrade,
-				subjectid, orderby, startdateday, enddateday, starttime, endtime, mid);
+				subjectid, orderby, startdateday, enddateday, starttime, endtime, mid, gradetype);
+	}
+
+	/**
+	 * 返现
+	 * @param scoreid
+	 * @return
+	 */
+	public Map<String, Object> scoreBackCash(Long scoreid) {
+		THotelScore tHotelScore = tHotelScoreMapper.selectByPrimaryKey(scoreid);
+        if(tHotelScore==null){
+            throw MyErrorEnum.errorParm.getMyException("此评价不存在.");
+        }
+
+		String isBacked = tHotelScore.getIscashbacked();
+		if(StringUtils.isNotBlank(isBacked) && isBacked.equals("T")){
+			throw MyErrorEnum.errorParm.getMyException("此评价已经返现.");
+		}
+		BigDecimal backcost = walletCashflowService.entry(tHotelScore.getMid(), CashflowTypeEnum.CASHBACK_HOTEL_IN, tHotelScore.getId());
+		if(backcost == null ){
+			backcost = BigDecimal.ZERO;
+		}
+		tHotelScore.setIscashbacked("T");
+		tHotelScore.setBackcashcost(backcost);
+		
+		orderBusinessLogService.saveLog(tHotelScore.getOrderid(), OtaOrderFlagEnum.SCORE_CASHBACK.getId(),  "点评返现, ¥" + backcost + "红包已放入您的账户");
+
+		int changecount = tHotelScoreMapper.updateByPrimaryKey(tHotelScore);
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("success", true);	
+		resultMap.put("cashbackcost", backcost);
+		return resultMap;
+	}
+	/**
+	 * 获取orderid
+	 * @param scoreid
+	 * @return
+	 */
+	public THotelScore findScoreByScoreid(Long scoreid){
+		return tHotelScoreMapper.selectByPrimaryKey(scoreid);
 	}
 }

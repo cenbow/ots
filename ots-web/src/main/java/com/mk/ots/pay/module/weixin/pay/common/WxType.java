@@ -9,7 +9,8 @@ package com.mk.ots.pay.module.weixin.pay.common;
 public enum WxType {
 	app(1,"APP端支付"),
 	wechat(2,"公众帐号支付"),   
-	test_wechat(3,"测试公众帐号支付"),
+	test_wechat(3,"联调测试公众帐号支付"),
+	test_app(4,"模拟测试公众帐号支付"),
 	;
 	
 	private final Integer id;

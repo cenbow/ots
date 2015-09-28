@@ -104,7 +104,9 @@ public class AndroidPushMessage extends AbstractMessage {
                 	logger.info("msgId: " + ((PushBatchUniMsgResponse) response).getMsgId() + ",sendTime: " + ((PushBatchUniMsgResponse) response).getSendTime());
             	}
             	isRtnFlag = true;
-			} else {
+			} 
+            /**去掉广播功能
+            else {
 				// 未设置推送设备
 				isRtnFlag = false;
 				logger.error("未指定消息接收者.则为广播消息");
@@ -116,6 +118,7 @@ public class AndroidPushMessage extends AbstractMessage {
 						+ response.getSendTime());
 				isRtnFlag = true;
 			}
+			*/
         } catch (PushClientException e) {
         	logger.error("send msg error.", e);
         	isRtnFlag = false;

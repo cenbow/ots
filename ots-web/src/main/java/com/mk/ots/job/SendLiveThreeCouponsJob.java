@@ -282,7 +282,7 @@ public class SendLiveThreeCouponsJob extends QuartzJobBean {
 			lPushLog.setActiveid(activeId);
 
 			// push message
-			this.iMessageService.PushMsg(phone, title, msgContent, MessageType.USER.getId(), url, activeId);
+			this.iMessageService.pushMsg(phone, title, msgContent, MessageType.USER.getId(), url, activeId);
 		}
 
         logger.info("住三送一活动（activityId：17）给用户{" + uMember.getMid() + "}发放券成功");

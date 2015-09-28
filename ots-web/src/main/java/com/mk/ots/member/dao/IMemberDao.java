@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.common.base.Optional;
 import com.mk.framework.datasource.dao.BaseDao;
 import com.mk.ots.member.model.UMember;
+import com.mk.ots.order.model.FirstOrderModel;
 
 public interface IMemberDao extends BaseDao<UMember, String> {
 
@@ -34,5 +35,7 @@ public interface IMemberDao extends BaseDao<UMember, String> {
 	public abstract Optional<List<UMember>> findPushMember(String phone);
 	
 	public abstract Optional<List<UMember>> findBindMemberByGroupid(String groupid);
+	
+	public abstract List<UMember> findUMemberByFirstOrder(FirstOrderModel fom);
 
 }

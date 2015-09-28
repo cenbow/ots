@@ -18,10 +18,14 @@
     <result column="pmsrefundtime" property="pmsrefundtime" jdbcType="TIMESTAMP" />
     <result column="refundreason" property="refundreason" jdbcType="VARCHAR" />
     <result column="qiekeIncome" property="qiekeIncome" jdbcType="DECIMAL" />
+    <result column="accountcost" property="accountcost" jdbcType="DECIMAL" />
+    <result column="realaccountcost" property="realaccountcost" jdbcType="DECIMAL" />
+    <result column="realallcost" property="realallcost" jdbcType="DECIMAL" />
   </resultMap>
   <sql id="Base_Column_List" >
     id, payid, allcost, hotelgive, otagive, usercost, realcost, realotagive,refund,
-     pmssend, pmssendtime, sendreason, pmsrefund, pmsrefundtime, refundreason,qiekeIncome
+     pmssend, pmssendtime, sendreason, pmsrefund, pmsrefundtime, refundreason,
+     qiekeIncome,accountcost,realaccountcost,realallcost
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
@@ -37,14 +41,16 @@
     insert into p_orderlog ( payid, allcost, 
       hotelgive, otagive, usercost, 
       realcost, realotagive,refund,pmssend,pmssendtime,
-       sendreason, pmsrefund, pmsrefundtime, refundreason,qiekeIncome)
+       sendreason, pmsrefund, pmsrefundtime, refundreason,
+       qiekeIncome,accountcost,realaccountcost,realallcost)
     values ( #{payid,jdbcType=BIGINT}, #{allcost,jdbcType=DECIMAL}, 
       #{hotelgive,jdbcType=DECIMAL}, #{otagive,jdbcType=DECIMAL}, #{usercost,jdbcType=DECIMAL}, 
       #{realcost,jdbcType=DECIMAL}, #{realotagive,jdbcType=DECIMAL},
       #{refund,jdbcType=CHAR},#{pmssend,jdbcType=BIGINT},#{pmssendtime,jdbcType=TIMESTAMP}, 
       #{sendreason,jdbcType=VARCHAR},#{pmsrefund,jdbcType=BIGINT},
       #{pmsrefundtime,jdbcType=TIMESTAMP}, #{refundreason,jdbcType=VARCHAR},
-       #{qiekeIncome,jdbcType=DECIMAL})
+      #{qiekeIncome,jdbcType=DECIMAL},#{accountcost,jdbcType=DECIMAL},#{realaccountcost,jdbcType=DECIMAL},
+      #{realallcost,jdbcType=DECIMAL})
   </insert>
   <insert id="insertSelective" parameterType="com.mk.ots.pay.model.POrderLog" >
     insert into p_orderlog
@@ -97,6 +103,16 @@
       <if test="qiekeIncome != null" >
         qiekeIncome,
       </if>
+      <if test="accountcost != null" >
+        accountcost,
+      </if>
+       <if test="realaccountcost != null" >
+        realaccountcost,
+      </if>
+       <if test="realallcost != null" >
+        realallcost,
+      </if>
+      
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -147,7 +163,18 @@
       <if test="qiekeIncome != null" >
         #{qiekeIncome,jdbcType=DECIMAL},
       </if>
+      <if test="accountcost != null" >
+        #{accountcost,jdbcType=DECIMAL},
+      </if>
+       <if test="realaccountcost != null" >
+        #{realaccountcost,jdbcType=DECIMAL},
+      </if>
+       <if test="realallcost != null" >
+        #{realallcost,jdbcType=DECIMAL},
+      </if>
     </trim>
+    
+    
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.pay.model.POrderLog" >
     update p_orderlog
@@ -197,6 +224,16 @@
       <if test="qiekeIncome != null" >
         qiekeIncome = #{qiekeIncome,jdbcType=DECIMAL},
       </if>
+      <if test="accountcost != null" >
+        accountcost = #{accountcost,jdbcType=DECIMAL},
+      </if>
+       <if test="realaccountcost != null" >
+       realaccountcost =  #{realaccountcost,jdbcType=DECIMAL},
+      </if>
+       <if test="realallcost != null" >
+        realallcost = #{realallcost,jdbcType=DECIMAL},
+      </if>
+      
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -216,7 +253,11 @@
       pmsrefund=#{pmsrefund,jdbcType=BIGINT},
       pmsrefundtime=#{pmsrefundtime,jdbcType=TIMESTAMP},
       refundreason = #{refundreason,jdbcType=VARCHAR},
-      qiekeIncome = #{qiekeIncome,jdbcType=DECIMAL}
+      qiekeIncome = #{qiekeIncome,jdbcType=DECIMAL},
+      accountcost = #{accountcost,jdbcType=DECIMAL},
+      realaccountcost = #{realaccountcost,jdbcType=DECIMAL},
+      realallcost = #{realallcost,jdbcType=DECIMAL}
+      
     where id = #{id,jdbcType=BIGINT}
   </update>
   
@@ -237,4 +278,5 @@
     update p_orderlog set qiekeIncome=#{qiekeIncome,jdbcType=DECIMAL} 
       where payid=(select id from p_pay where orderid=#{orderid,jdbcType=BIGINT})
   </update>
+
 </mapper>

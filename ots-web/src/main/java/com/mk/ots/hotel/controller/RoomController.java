@@ -21,6 +21,7 @@ import com.mk.framework.AppUtils;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.hotel.service.BedTypeService;
 import com.mk.ots.hotel.service.RoomService;
 import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.web.ServiceOutput;
@@ -40,6 +41,9 @@ public class RoomController {
     
     @Autowired
     RoomstateService roomstateService = null;
+    
+    @Autowired
+    private BedTypeService bedTypeService;
 
     
     /**
@@ -53,10 +57,9 @@ public class RoomController {
      * @return
      */
     @RequestMapping(value = "/findRoomStatus")
-    public ResponseEntity<Map<String, Object>> findRoomStatus(String hotelid,String roomtypeid,
-            String roomid,String date){
+    public ResponseEntity<Map<String, Object>> findRoomStatus(String hotelid,String roomtypeid, String roomid,String date){
         Bean roomtemp =roomService.findRoomStatus(hotelid,roomtypeid,roomid,date);
-        Map m = new HashMap();
+        Map<String, Object> m = new HashMap<String, Object>();
         m.put("hotelid", hotelid);
         m.put("roomtypeid", roomtypeid);
         m.put("roomid", roomid);

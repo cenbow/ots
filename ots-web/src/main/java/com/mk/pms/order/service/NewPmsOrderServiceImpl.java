@@ -185,13 +185,17 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 								//释放原来的房态 add jianghe
 								//根据pmsroomorder找order
 								OtaRoomOrder roomOrder = AppUtils.getBean(OrderServiceImpl.class).findRoomOrderByPmsRoomOrderNoAndHotelId((String) customNo.get("customeno"), hotelId);
-								OtaOrder otaorder = new OtaOrder();
-								otaorder.setId(Long.parseLong(roomOrder.getStr("otaorderid")));
-								otaorder.setHotelId(hotelId);
-								roomstateService.unlockRoomInOTS(otaorder);
-								logger.info("huangfang:otaorderid:"+Long.parseLong(roomOrder.getStr("otaorderid"))+",hotelid:"+hotelId);
+								if(roomOrder!=null){
+									OtaOrder otaorder = new OtaOrder();
+									otaorder.setId(roomOrder.getLong("otaorderid"));
+									otaorder.setHotelId(hotelId);
+									roomstateService.unlockRoomInOTS(otaorder);
+									logger.info("huangfang:otaorderid:"+roomOrder.getLong("otaorderid")+",hotelid:"+hotelId);
+								}
 								//end
 							} catch (Exception e) {
+								e.printStackTrace();
+								logger.error("pms2.0换房失败：{},{},{}",(String) customNo.get("customeno"),hotelId,e.getMessage());
 								logger.error("huangfang:otaorderid:"+(String) customNo.get("customeno")+",hotelid:"+hotelId);
 							}
 							
@@ -464,6 +468,12 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			NewPmsOrderServiceImpl.logger.info("NewPmsOrderServiceImpl::synOrder::synLockValue:" + synLockValue);
 
 			EHotel hotel = this.eHotelDAO.findEHotelByid(hotelId);
+			if (hotel == null) {
+				 data.put("success", false);
+				 data.put("errorcode", PmsErrorEnum.noknowError.getErrorCode());
+				 data.put("errormsg", "OTS里没有这个id" + hotelId + "的酒店");
+				 return data;
+			}
 			NewPmsOrderServiceImpl.logger.info("同步[" + hotel.getHotelName() + "]酒店的所有有效清单");
 			this.hotelDAO.resetAllOrder(hotelId);
 

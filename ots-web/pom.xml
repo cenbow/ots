@@ -26,6 +26,9 @@
 		<junit.version>4.11</junit.version>
 		<mockito.core.version>1.9.5</mockito.core.version>
 		<commons-configuration.version>1.6</commons-configuration.version>
+
+		<kafka.version>1.0.2</kafka.version>
+		<care-kafka.version>1.0.0</care-kafka.version>
 	</properties>
 
 	<repositories>
@@ -47,6 +50,16 @@
 	</pluginRepositories>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.mk</groupId>
+			<artifactId>mk-kafka</artifactId>
+			<version>${kafka.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mk</groupId>
+			<artifactId>mk-care-kafka</artifactId>
+			<version>${care-kafka.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>xmlpull</groupId>
 			<artifactId>xmlpull</artifactId>
@@ -560,6 +573,12 @@
 			<groupId>org.elasticsearch</groupId>
 			<artifactId>elasticsearch</artifactId>
 			<version>1.5.1</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -640,6 +659,27 @@
 			<version>5.1.3.Final</version>
 		</dependency>
 
+		<!-- <dependency> <groupId>message.voice</groupId> <artifactId>CCP_REST_SDK_JAVA_v2.7r</artifactId> <version>0.0.1</version> </dependency> <dependency> <groupId>message.sms</groupId> <artifactId>CCP_REST_SMS_SDK_JAVA_v2.6.3r</artifactId> <version>0.0.1</version> </dependency> -->
+
+		<dependency>
+			<groupId>com.cloopen</groupId>
+			<artifactId>CCP_REST_SDK_JAVA</artifactId>
+			<version>v2.7r</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.cloopen</groupId>
+			<artifactId>CCP_REST_SMS_SDK_JAVA</artifactId>
+			<version>v2.6.3r</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.5.6</version>
+		</dependency>
+
+
 
 		<dependency>
 			<groupId>commons-configuration</groupId>
@@ -672,6 +712,10 @@
 					<artifactId>google-collections</artifactId>
 					<groupId>com.google.collections</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
@@ -697,6 +741,19 @@
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka_2.10</artifactId>
 			<version>0.8.2.1</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -706,51 +763,6 @@
 		</dependency>
 
 
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-commons</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-ord-face</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-ord-biz</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-pay-face</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-pay-biz</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-pro-face</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-pro-biz</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-fun-face</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-fun-biz</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 	<build>
 		<finalName>ots</finalName>
@@ -961,6 +973,15 @@
 				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
 				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
 				<liveHotelNum>3</liveHotelNum>
+				<!-- kafka start -->
+				<zk_connect>10.4.31.46:2181</zk_connect>
+				<!-- kafka end -->
+
+				<!-- BMS黑名单验证接口 -->
+				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
+				<sendmess.testorformal>0</sendmess.testorformal>
+				<black_Switch>1</black_Switch>
 			</properties>
 		</profile>
 
@@ -996,6 +1017,15 @@
 				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
 				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
 				<liveHotelNum>3</liveHotelNum>
+				<!-- kafka start -->
+				<zk_connect>10.4.31.46:2181</zk_connect>
+				<!-- kafka end -->
+
+				<!-- BMS黑名单验证接口 -->
+				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
+				<sendmess.testorformal>0</sendmess.testorformal>
+				<black_Switch>1</black_Switch>
 			</properties>
 		</profile>
 
@@ -1021,6 +1051,7 @@
 				<hessian_soap>http://123.58.131.40:8080/soap/hessian</hessian_soap>
 				<hessian_bms>http://sale.imike.com</hessian_bms>
 				<newpms.url>https://otai.imike.com/otai/ots2pms</newpms.url>
+
 				<jedis.pool.maxidl>20</jedis.pool.maxidl>
 				<jedis.pool.minidl>8</jedis.pool.minidl>
 				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
@@ -1036,6 +1067,15 @@
 				<baidumessage_DeployStatus>2</baidumessage_DeployStatus>
 				<SendCouponsJob_datelimit>-1</SendCouponsJob_datelimit>
 				<liveHotelNum>3</liveHotelNum>
+				<!-- kafka start -->
+				<zk_connect>10.4.36.125:2181,10.4.37.39:2181,10.4.39.92:2181</zk_connect>
+				<!-- kafka end -->
+
+				<!-- BMS黑名单验证接口 -->
+				<blacklist.url>http://10.4.36.210:8080/check</blacklist.url>
+				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
+				<sendmess.testorformal>1</sendmess.testorformal>
+				<black_Switch>0</black_Switch>
 			</properties>
 		</profile>
 
@@ -1067,16 +1107,27 @@
 				<jedis.pool.maxidl>20</jedis.pool.maxidl>
 				<jedis.pool.minidl>8</jedis.pool.minidl>
 				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
-				<addpay>https://otai.imike.com/otai/ots2pms/addpay</addpay>
-				<cancelpay>https://otai.imike.com/otai/ots2pms/cancelpay</cancelpay>
-				<selectCustomerpay>https://otai.imike.com/otai/ots2pms/selectcustomerpay</selectCustomerpay>
-				<cancelpaybyerror>https://otai.imike.com/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+				<addpay>https://smlt-otai.imike.cn/otai/ots2pms/addpay</addpay>
+				<cancelpay>https://smlt-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
+				<selectCustomerpay>https://smlt-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+				<cancelpaybyerror>https://smlt-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+				<!-- 1：开发状态 2：生产状态 -->
+				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
 				<inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
 				<wx_type>test_wechat</wx_type>
 				<!-- 1：开发状态 2：生产状态 -->
 				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
 				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
 				<liveHotelNum>1</liveHotelNum>
+				<!-- kafka start -->
+				<zk_connect>10.4.31.46:2181</zk_connect>
+				<!-- kafka end -->
+
+				<!-- BMS黑名单验证接口 -->
+				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
+				<sendmess.testorformal>0</sendmess.testorformal>
+				<black_Switch>1</black_Switch>
 			</properties>
 		</profile>
 		<profile>
@@ -1114,6 +1165,15 @@
 				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
 				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
 				<liveHotelNum>1</liveHotelNum>
+				<!-- kafka start -->
+				<zk_connect>10.4.31.46:2181</zk_connect>
+				<!-- kafka end -->
+
+				<!-- BMS黑名单验证接口 -->
+				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
+				<sendmess.testorformal>0</sendmess.testorformal>
+				<black_Switch>1</black_Switch>
 			</properties>
 		</profile>
 
@@ -1128,9 +1188,7 @@
 				<slave.jdbc.url><![CDATA[jdbc:mysql://10.4.24.11:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
 				<slave.jdbc.user>smlt-writer</slave.jdbc.user>
 				<slave.jdbc.password>j9bcyZ5U5LQp7xxEomsu</slave.jdbc.password>
-				<!-- <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.28.44:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
-				<slave.jdbc.user>smlt-reader</slave.jdbc.user>
-				<slave.jdbc.password>ims8LfQKTBs6gj79TdgB</slave.jdbc.password> -->
+				<!-- <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.28.44:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url> <slave.jdbc.user>smlt-reader</slave.jdbc.user> <slave.jdbc.password>ims8LfQKTBs6gj79TdgB</slave.jdbc.password> -->
 				<spring.redis.sentinel.master>ota2-test-redis</spring.redis.sentinel.master>
 				<spring.redis.sentinel.nodes>10.4.20.206:26379</spring.redis.sentinel.nodes>
 				<synserver.ip>10.4.17.121</synserver.ip>
@@ -1152,11 +1210,20 @@
 				<!-- 1：开发状态 2：生产状态 -->
 				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
 				<inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-				<wx_type>test_wechat</wx_type>
+				<wx_type>test_app</wx_type>
 				<!-- 1：开发状态 2：生产状态 -->
 				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
 				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
 				<liveHotelNum>3</liveHotelNum>
+				<!-- kafka start -->
+				<zk_connect>10.4.31.46:2181</zk_connect>
+				<!-- kafka end -->
+
+				<!-- BMS黑名单验证接口 -->
+				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
+				<sendmess.testorformal>0</sendmess.testorformal>
+				<black_Switch>1</black_Switch>
 			</properties>
 		</profile>
 
@@ -1195,6 +1262,15 @@
 				<cancelpay>https://10.4.11.218:8443/otai/ots2pms/cancelpay</cancelpay>
 				<selectCustomerpay>https://10.4.11.218:8443/otai/ots2pms/selectcustomerpay</selectCustomerpay>
 				<cancelpaybyerror>https://10.4.11.218:8443/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+				<!-- kafka start -->
+				<zk_connect>10.4.31.46:2181</zk_connect>
+				<!-- kafka end -->
+
+				<!-- BMS黑名单验证接口 -->
+				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
+				<sendmess.testorformal>0</sendmess.testorformal>
+				<black_Switch>1</black_Switch>
 			</properties>
 		</profile>
 
@@ -1227,7 +1303,6 @@
 				<!-- 1：开发状态 2：生产状态 -->
 				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
 				<inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-				<wx_type>test_wechat</wx_type>
 				<!-- 1：开发状态 2：生产状态 -->
 				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
 				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
@@ -1238,8 +1313,68 @@
 				<cancelpay>https://192.168.0.21:8443/otai/ots2pms/cancelpay</cancelpay>
 				<selectCustomerpay>https://192.168.0.21:8443/otai/ots2pms/selectcustomerpay</selectCustomerpay>
 				<cancelpaybyerror>https://192.168.0.21:8443/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+
+				<!-- kafka start -->
+				<zk_connect>192.168.0.17:2181</zk_connect>
+				<!-- <zk_connect>10.4.36.125:2181,10.4.37.39:2181,10.4.39.92:2181</zk_connect> -->
+				<!-- kafka end -->
+				<!-- BMS黑名单验证接口 -->
+				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
+				<sendmess.testorformal>0</sendmess.testorformal>
+				<black_Switch>1</black_Switch>
 			</properties>
 		</profile>
 
+		<profile>
+			<id>bgp-simulation</id>
+			<properties>
+				<label>product</label>
+				<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+				<master.jdbc.url><![CDATA[jdbc:mysql://10.10.187.189:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+				<master.jdbc.user>smlt-writer</master.jdbc.user>
+				<master.jdbc.password>j9bcyZ5U5LQp7xxEomsu</master.jdbc.password>
+				<slave.jdbc.url><![CDATA[jdbc:mysql://10.10.187.189:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+				<slave.jdbc.user>smlt-writer</slave.jdbc.user>
+				<slave.jdbc.password>j9bcyZ5U5LQp7xxEomsu</slave.jdbc.password>
+				<!-- <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.28.44:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url> <slave.jdbc.user>smlt-reader</slave.jdbc.user> <slave.jdbc.password>ims8LfQKTBs6gj79TdgB</slave.jdbc.password> -->
+				<spring.redis.sentinel.master>ots-smlt-bj-redis</spring.redis.sentinel.master>
+				<spring.redis.sentinel.nodes>10.10.115.57:26379</spring.redis.sentinel.nodes>
+				<synserver.ip>10.10.124.247</synserver.ip>
+				<synserver.port>8000</synserver.port>
+				<elasticsearch.clusterhosts>10.10.118.60:9300</elasticsearch.clusterhosts>
+				<elasticsearch.clustername>ots-smlt-bj-elastic-1</elasticsearch.clustername>
+				<elasticsearch.index>ots</elasticsearch.index>
+				<elasticsearch.type>hotel</elasticsearch.type>
+				<hessian_soap>http://10.10.131.104:8085/soap/hessian</hessian_soap>
+				<hessian_bms>http://bj-smlt-sms.imike.cn/</hessian_bms>
+				<newpms.url>https://bj-smlt-otai.imike.cn/otai/ots2pms</newpms.url>
+				<jedis.pool.maxidl>20</jedis.pool.maxidl>
+				<jedis.pool.minidl>8</jedis.pool.minidl>
+				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+				<addpay>https://bj-smlt-otai.imike.cn/otai/ots2pms/addpay</addpay>
+				<cancelpay>https://bj-smlt-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
+				<selectCustomerpay>https://bj-smlt-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+				<cancelpaybyerror>https://bj-smlt-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+				<!-- 1：开发状态 2：生产状态 -->
+				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+				<inform_sale_url><![CDATA[http://bj-smlt-sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+				<wx_type>test_wechat</wx_type>
+				<!-- 1：开发状态 2：生产状态 -->
+				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
+				<liveHotelNum>3</liveHotelNum>
+
+				<!-- kafka start -->
+				<zk_connect>10.4.31.46:2181</zk_connect>
+				<!-- kafka end -->
+
+				<!-- BMS黑名单验证接口 -->
+				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
+				<sendmess.testorformal>0</sendmess.testorformal>
+				<black_Switch>1</black_Switch>
+			</properties>
+		</profile>
 	</profiles>
 </project>

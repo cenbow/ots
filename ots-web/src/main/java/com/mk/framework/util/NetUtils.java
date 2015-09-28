@@ -1,16 +1,6 @@
 package com.mk.framework.util;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.ws.http.HTTPException;
-
 import net.sf.json.JSONObject;
-
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -34,67 +24,73 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.ws.http.HTTPException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 
 public class NetUtils {
-	
-	private static String charset = "UTF-8";
-	private static int timeout = 30 * 1000;
-	private static int trytime = 1;
-	private static final Logger logger = LoggerFactory.getLogger(NetUtils.class);
-	
-	public static String getIpAddr(HttpServletRequest request) { 
-	 	String ip = request.getHeader("x-forwarded-for"); 
-	    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
-	        ip = request.getHeader("Proxy-Client-IP"); 
-	    } 
-	    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
-	        ip = request.getHeader("WL-Proxy-Client-IP"); 
-	    } 
-	    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
-	        ip = request.getRemoteAddr(); 
-	    } 
-	    String ips[]=StringUtils.split(ip, ',');
-	    for (String string : ips) {
-			if(StringUtils.isBlank(string) || "unknown".equalsIgnoreCase(string)){
-				continue;
-			}else{
-				return string;
-			}
-		}
-	    return ip; 
-	}
-	
-	/**
-	 * 
-	 * @param url
-	 * @param send
-	 * @return
-	 * @throws HttpException
-	 * @throws IOException
-	 */
-	public static String dopost(String url, String send) throws HttpException, IOException {
-		HttpClient theclient = new HttpClient();
-		PostMethod method = new PostMethod(url);
-		try {
-			method.setRequestEntity(new StringRequestEntity(send, "text/xml", "UTF-8"));
-			method.getParams().setParameter(HttpMethodParams.SO_TIMEOUT, timeout);
-			theclient.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
-			method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
-					new DefaultHttpMethodRetryHandler(trytime, false));
-			method.getParams().setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET, charset);
-			int status = theclient.executeMethod(method);
-			if (status == HttpStatus.SC_OK) {
-				return method.getResponseBodyAsString();
-			} else {
-				throw new HTTPException(status);
-			}
-		} finally {
-			method.releaseConnection();
-		}
-	}
-	
+
+    private static final Logger logger = LoggerFactory.getLogger(NetUtils.class);
+    private static String charset = "UTF-8";
+    private static int timeout = 30 * 1000;
+    private static int trytime = 1;
+
+    public static String getIpAddr(HttpServletRequest request) {
+        String ip = request.getHeader("x-forwarded-for");
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        String ips[] = StringUtils.split(ip, ',');
+        for (String string : ips) {
+            if (StringUtils.isBlank(string) || "unknown".equalsIgnoreCase(string)) {
+                continue;
+            } else {
+                return string;
+            }
+        }
+        return ip;
+    }
+
     /**
-     * 
+     * @param url
+     * @param send
+     * @return
+     * @throws HttpException
+     * @throws IOException
+     */
+    public static String dopost(String url, String send) throws HttpException, IOException {
+        HttpClient theclient = new HttpClient();
+        PostMethod method = new PostMethod(url);
+        try {
+            method.setRequestEntity(new StringRequestEntity(send, "text/xml", "UTF-8"));
+            method.getParams().setParameter(HttpMethodParams.SO_TIMEOUT, timeout);
+            theclient.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
+            method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
+                    new DefaultHttpMethodRetryHandler(trytime, false));
+            method.getParams().setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET, charset);
+            int status = theclient.executeMethod(method);
+            if (status == HttpStatus.SC_OK) {
+                return method.getResponseBodyAsString();
+            } else {
+                throw new HTTPException(status);
+            }
+        } finally {
+            method.releaseConnection();
+        }
+    }
+
+    /**
      * @param address
      * @param params
      * @return
@@ -120,7 +116,7 @@ public class NetUtils {
         try {
             uefEntity = new UrlEncodedFormEntity(formparams, NetUtils.charset);
             httpPost.setEntity(uefEntity);
-            
+
             response = httpclient.execute(httpPost);
             if (response.getStatusLine().getStatusCode() == 200) {
                 HttpEntity entity = response.getEntity();

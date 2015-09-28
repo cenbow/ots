@@ -12,6 +12,8 @@ import com.alibaba.fastjson.JSONObject;
 public interface NewPMSHotelService {
 	
 	public Map<String,Object> initPMS(String hotelPMS);
+	public Map<String,Object> installPms(String hotelPMS,String hotelname);
+	public void sendOfflineMsg(String hotelPMS);
 	
     public Map<String, Object> syncHotelInfo(JSONObject jsonOBJ);
 

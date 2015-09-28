@@ -1,15 +1,5 @@
 package com.mk.ots.login.controller;
 
-import java.util.Date;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
@@ -26,6 +16,14 @@ import com.mk.ots.member.model.UMember;
 import com.mk.ots.member.service.IMemberService;
 import com.mk.ots.system.model.UToken;
 import com.mk.ots.system.service.impl.VerifyCodeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * 会员登录接口
@@ -55,7 +53,6 @@ public class LoginController {
 		}
 		String verifyCode = verifyCodeService.generatePhoneVerifyCode(phonenum, VerifyEnum.LOGIN);
 		String msgcontent = verifyCodeService.generateMsgContent(verifyCode, VerifyEnum.LOGIN);
-		//TODO  调用短信或语音接口
 		return new ResponseEntity<String>("验证码已发送. testmsg:"+msgcontent, HttpStatus.OK);
 	}
 	

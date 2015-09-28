@@ -66,6 +66,64 @@ public class OtaOrder extends BizModel<OtaOrder> {
 		return this;
 	}
 
+	public String getCityCode(){
+		return this.get("citycode","");
+	}
+	
+	public void setCityCode(String cityCode){
+		this.set("citycode",cityCode);
+	}
+	
+	/**
+	 * 此订单使用的返现
+	 * @return
+	 */
+	public BigDecimal getAvailableMoney(){
+		return this.get("availablemoney");
+	}
+	
+	/**
+	 * 得到，返现
+	 * @return
+	 */
+	public BigDecimal getCashBack(){
+		return this.get("cashback");
+	}
+	
+	
+	/**
+	 * 设置，订单能用的返现
+	 * @param availableMoney
+	 */
+	public void setAvailableMoney(BigDecimal availableMoney){
+		this.set("availablemoney", availableMoney);
+	}
+	/**
+	 * 设置，返现
+	 * @param cashBack
+	 */
+	public void setCashBack(BigDecimal cashBack){
+		this.set("cashback", cashBack);
+	}
+	
+	/**
+	 *  0，无需领取
+    * 1，还未领取
+    * 2，已经领取
+	 * @param isReceiveCashBack
+	 */
+	public void setIsReceiveCashBack(int isReceiveCashBack){
+		this.set("IsReceiveCashBack", isReceiveCashBack);
+	}
+	
+	/**
+	 * 得到返现是否已经领取
+	 * @return
+	 */
+	public int getReceiveCashBack(){
+		return this.get("isreceivecashback",0);
+	}
+	
 	public String getOrderId() {
 		return this.get("orderid", "");
 	}

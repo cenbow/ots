@@ -38,7 +38,7 @@ import com.mk.ots.order.service.TicketOrderService;
 import com.mk.ots.pay.module.ali.AliPay;
 import com.mk.ots.pay.module.weixin.AppPay;
 import com.mk.ots.pay.module.weixin.WeChat;
-import com.mk.ots.pay.module.weixin.pay.common.Tools;
+import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.ots.pay.service.IPayService;
 import com.mk.ots.pay.service.IPriceService;
 import com.mk.ots.promo.model.BPromotionProduct;
@@ -296,7 +296,7 @@ public class PayTicketController {
 			// 微信
 			if (onlinepaytype.equals("1")) {
 				this.logger.info("微信ID" + payno + " 去微信查询！orderid::" + orderid);
-				int priceint = Tools.get100price(price);
+				int priceint = PayTools.get100price(price);
 				payid = AppPay.query(orderid, payid, priceint);
 				bTicketOrder.setUpdatetime(new Date());
 				bTicketOrder.setPaystatus(PayStatusEnum.alreadyPay.getId());

@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+import com.mk.care.kafka.common.CopywriterTypeEnum;
+import com.mk.care.kafka.model.Message;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.util.CharUtils;
 import com.mk.framework.util.MyTokenUtils;
@@ -33,8 +35,10 @@ import com.mk.ots.common.enums.ComefromtypeEnum;
 import com.mk.ots.common.enums.OSTypeEnum;
 import com.mk.ots.common.enums.TokenTypeEnum;
 import com.mk.ots.common.utils.DESUtils;
+import com.mk.ots.kafka.message.OtsCareProducer;
 import com.mk.ots.logininfo.model.BLoginInfo;
 import com.mk.ots.logininfo.service.IBloginInfoService;
+import com.mk.ots.logininfo.service.impl.BloginInfoService;
 import com.mk.ots.member.model.BAppUpdate;
 import com.mk.ots.member.model.UMember;
 import com.mk.ots.member.service.IBAppUpdateService;
@@ -71,6 +75,11 @@ public class AppController {
 	private IBloginInfoService iBloginInfoService ;
 	@Autowired
 	private IBAppUpdateService iBAppUpdateService;
+	
+	@Autowired
+	private BloginInfoService bloginInfoService;
+	@Autowired
+	private OtsCareProducer careProducer;
 	/**
 	 * @param unionid
 	 *            微信unionid,非必填（两项至少有一项）
@@ -79,90 +88,111 @@ public class AppController {
 	 * @return
 	 */
 	@RequestMapping("/unionidandphone/check")
-	public ResponseEntity<Map<String, Object>> check(String unionid, String channelid, String phone, String ostype) {
+	public ResponseEntity<Map<String, Object>> check(String unionid, String channelid, String phone, String ostype,String _s) {
 		logger.info("check(unionid:{}, phone:{}, ostype:{})", unionid, phone,
 				ostype);
-		// 1. 校验参数
-		if (Strings.isNullOrEmpty(unionid) && Strings.isNullOrEmpty(phone)) {
-			throw MyErrorEnum.errorParm
-					.getMyException("[微信(unionid)|手机号(phone)],至少包含一项参数.");
-		}
-		if (Strings.isNullOrEmpty(ostype)) {
-			throw MyErrorEnum.errorParm
-					.getMyException("[客户端类型(ostype)] 不允许为空.");
-		}
-
-		// 2. 根据unionid和手机检索用户信息
-		logger.info("检索用户：{},{}", unionid, phone);
-		Optional<UMember> ofMember = Optional.absent();
-		if (!Strings.isNullOrEmpty(unionid) && !Strings.isNullOrEmpty(phone)) {
-			ofMember = iMemberService.findMember(phone, unionid);
-			UMember um = null;
-			if (ofMember.isPresent()) {
-				um = ofMember.get();
-			}
-			logger.info("根据微信id,手机号检索用户: unionid:{}, phone:{}, info:{}",
-					unionid, phone, um);
-		} else if (!Strings.isNullOrEmpty(unionid)) {
-			ofMember = iMemberService.findMemberByUnionid(unionid);
-			UMember um = null;
-			if (ofMember.isPresent()) {
-				um = ofMember.get();
-			}
-			logger.info("根据微信id检索用户：unionid:{}, info:{}", unionid, um);
-		} else if (!Strings.isNullOrEmpty(phone)) {
-			ofMember = iMemberService.findMemberByLoginName(phone);
-			UMember um = null;
-			if (ofMember.isPresent()) {
-				um = ofMember.get();
-			}
-			logger.info("根据手机号检索用户：phone:{}, info:{}", phone, um);
-		}
-
+		
+		
 		// 3. 判断用户并获取token
-		boolean check = false; // 是否绑定
-		String token = ""; // token信息
-		if (ofMember.isPresent()) {
-			UMember member = ofMember.get();
-			unionid = member.getUnionid();
-			phone = member.getLoginname();
-			check = !Strings.isNullOrEmpty(unionid);
-			TokenTypeEnum tokenType = TokenTypeEnum.PT;
-			if (!Strings.isNullOrEmpty(ostype)) {
-				if (OSTypeEnum.IOS.getId().equals(ostype)
-						|| OSTypeEnum.ANDROID.getId().equals(ostype)) {
-					tokenType = TokenTypeEnum.APP; // 手机app
-				} else if (OSTypeEnum.WX.getId().equals(ostype)) {
-					tokenType = TokenTypeEnum.WX; // 微信客户端
-				} else {
-					tokenType = TokenTypeEnum.PT; // 网页
-				}
+		boolean check;
+		String token;
+		try {
+			// 1. 校验参数
+			if (Strings.isNullOrEmpty(unionid) && Strings.isNullOrEmpty(phone)) {
+				throw MyErrorEnum.errorParm
+						.getMyException("[微信(unionid)|手机号(phone)],至少包含一项参数.");
 			}
-			logger.info("tokentype:{}", tokenType);
+			if (Strings.isNullOrEmpty(ostype)) {
+				throw MyErrorEnum.errorParm
+						.getMyException("[客户端类型(ostype)] 不允许为空.");
+			}
 
-			UToken uToken = iTokenService.findTokenByMId(member.getMid()
-					.longValue(), tokenType);
-			if (uToken == null) {
-				uToken = MyTokenUtils.genAndCacheUToken(member.getMid(),
-						tokenType, null); // 生成并缓存token
-			}
-			if (uToken != null) {
-				token = uToken.getAccesstoken();
-			}
-			logger.info("mid:{}, tokentype:{}, token:{}. ", member.getMid(),
-					tokenType.getName(), token);
+			// 2. 根据unionid和手机检索用户信息
+			logger.info("检索用户：{},{}", unionid, phone);
 			
-			if(!Strings.isNullOrEmpty(channelid)){
-				member.setOstype(ostype);
-				member.setChannelid(channelid);
-				iMemberService.saveOrUpdate(member); //更新用户channelid及客户类型
+			//黑名单验证
+			this.iMemberService.checkPhoneIsBlack(phone,"Member.check","check：checkPhoneIsBlack","您的账号已被冻结，如有疑问请拨打客服电话4001-888-733");
+			Optional<UMember> ofMember = Optional.absent();
+			if (!Strings.isNullOrEmpty(unionid) && !Strings.isNullOrEmpty(phone)) {
+				ofMember = iMemberService.findMember(phone, unionid);
+				UMember um = null;
+				if (ofMember.isPresent()) {
+					um = ofMember.get();
+				}
+				logger.info("根据微信id,手机号检索用户: unionid:{}, phone:{}, info:{}",
+						unionid, phone, um);
+			} else if (!Strings.isNullOrEmpty(unionid)) {
+				ofMember = iMemberService.findMemberByUnionid(unionid);
+				UMember um = null;
+				if (ofMember.isPresent()) {
+					um = ofMember.get();
+				}
+				logger.info("根据微信id检索用户：unionid:{}, info:{}", unionid, um);
+			} else if (!Strings.isNullOrEmpty(phone)) {
+				ofMember = iMemberService.findMemberByLoginName(phone);
+				UMember um = null;
+				if (ofMember.isPresent()) {
+					um = ofMember.get();
+				}
+				logger.info("根据手机号检索用户：phone:{}, info:{}", phone, um);
 			}
-		} else {
-			logger.info("未检索到用户. unionid:{}, phone:{}", unionid, phone);
-			token = "";
-			unionid = "";
-			phone = "";
+
 			check = false;
+			token = "";
+			if (ofMember.isPresent()) {
+				UMember member = ofMember.get();
+				unionid = member.getUnionid();
+				phone = member.getLoginname();
+				check = !Strings.isNullOrEmpty(unionid);
+				TokenTypeEnum tokenType = TokenTypeEnum.PT;
+				if (!Strings.isNullOrEmpty(ostype)) {
+					if (OSTypeEnum.IOS.getId().equals(ostype)
+							|| OSTypeEnum.ANDROID.getId().equals(ostype)) {
+						tokenType = TokenTypeEnum.APP; // 手机app
+					} else if (OSTypeEnum.WX.getId().equals(ostype)) {
+						tokenType = TokenTypeEnum.WX; // 微信客户端
+					} else {
+						tokenType = TokenTypeEnum.PT; // 网页
+					}
+				}
+				logger.info("tokentype:{}", tokenType);
+
+				UToken uToken = iTokenService.findTokenByMId(member.getMid()
+						.longValue(), tokenType);
+				if (uToken == null) {
+					uToken = MyTokenUtils.genAndCacheUToken(member.getMid(),
+							tokenType, null); // 生成并缓存token
+				}
+				if (uToken != null) {
+					token = uToken.getAccesstoken();
+				}
+				logger.info("mid:{}, tokentype:{}, token:{}. ", member.getMid(),
+						tokenType.getName(), token);
+				
+				if(!Strings.isNullOrEmpty(channelid)){
+					member.setOstype(ostype);
+					member.setChannelid(channelid);
+					iMemberService.saveOrUpdate(member); //更新用户channelid及客户类型
+				}
+			} else {
+				logger.info("未检索到用户. unionid:{}, phone:{}", unionid, phone);
+				token = "";
+				unionid = "";
+				phone = "";
+				check = false;
+			}
+		} finally{
+			try {
+				BLoginInfo bLoginInfo=new BLoginInfo();
+				bLoginInfo.setCreatetime(new Date());
+				bLoginInfo.setPhone(phone);
+				bLoginInfo.setUuid(unionid);
+				bLoginInfo.setSecurity(_s);
+				bloginInfoService.save(bLoginInfo);
+				logger.info("记录登陆/注册信息成功：{}",bLoginInfo);
+			} catch (Exception e) {
+				logger.info("记录登陆/注册信息失败，{}",e.getMessage());
+			}
 		}
 
 		// 4. 组织数据返回
@@ -226,6 +256,8 @@ public class AppController {
 		String checkerrortype = ""; // 绑定失败的原因，1、unionid已被其他手机号绑定，2、手机号已被其他unionid绑定
 		String token = "";
 		boolean isCheck = true;
+		//判断用户是否是注册
+		boolean isRegister = false;
 		logger.info(">>>>binding weixinname:{}",weixinname);
 		
 		//1.comefromtype若为“BQK”，且comefrom为空，则不保存comefromtype到u_member表
@@ -283,6 +315,7 @@ public class AppController {
 			// 调用发放券接口：发放新用户礼包
 			iPromoService.genTicketByAllRegNewMember(regMem.getMid());
 			logger.info("手机注册发放新用户礼包. mid:{}", regMem.getMid());
+			isRegister = true;
 		} else if (Strings.isNullOrEmpty(phone) && !Strings.isNullOrEmpty(unionid)) { // 微信注册
 			logger.info("微信注册入口. phone:{}, unionid:{}", phone, unionid);
 			ofMember = iMemberService.findMemberByUnionid(unionid);
@@ -312,6 +345,7 @@ public class AppController {
 			// 调用发放券接口：发放新用户礼包
 			iPromoService.genTicketByAllRegNewMember(regMem.getMid());
 			logger.info("微信注册发放新用户礼包. mid:{}", regMem.getMid());
+			isRegister = true;
 		} else if (!Strings.isNullOrEmpty(phone) && !Strings.isNullOrEmpty(unionid)) {
 			if (!Strings.isNullOrEmpty(ostype)
 					&& ("3".equals(ostype) || "2".equals(ostype) || "1".equals(ostype))) {
@@ -369,6 +403,7 @@ public class AppController {
 
 					iPromoService.genTicketByAllRegNewMember(regMem.getMid());
 					logger.info("微信注册发放新用户礼包. mid:{}", regMem.getMid());
+					isRegister = true;
 				}
 			} else {
 				// 2. App绑定微信(先注册后绑定)
@@ -422,6 +457,27 @@ public class AppController {
 		logger.info("tokentype:{}", tokenType);
 
 		UMember um = ofMember.get();
+		if(isRegister){
+			try {
+				boolean isActivity = false;
+				if(StringUtils.isNotEmpty(comefromtype)){
+					if(ComefromtypeEnum.huodong.getType().equals(comefromtype)){
+						isActivity = true;
+					}
+				}
+				if(!isActivity){
+					Message message = new Message();
+					message.setMid(um.getMid());
+					message.setCopywriterTypeEnum(CopywriterTypeEnum.register);
+					logger.info("注册发送消息的Message对象："+message);
+					careProducer.sendSmsMsg(message);
+					careProducer.sendAppMsg(message);
+					careProducer.sendWeixinMsg(message);
+				}
+			} catch (Exception e) {
+				logger.error("发送消息异常",e);
+			}
+		}
 		UToken uToken = iTokenService.findTokenByMId(um.getMid().longValue(),
 				tokenType);
 		if (uToken == null) {
@@ -521,7 +577,7 @@ public class AppController {
 		//手机号和用户mid必须有一个不为空
 		if (!Strings.isNullOrEmpty(phone)||mid!= null) {
 		BLoginInfo  bLoginInfo = new BLoginInfo();
-		if (phone.startsWith("+86")) {
+		if (!Strings.isNullOrEmpty(phone)&&phone.startsWith("+86")) {
 			phone = phone.substring(3);
 		}
 		bLoginInfo.setPhone(phone);
@@ -574,4 +630,5 @@ public class AppController {
 		}
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
+	
 }

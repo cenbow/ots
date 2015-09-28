@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import com.mk.framework.datasource.dao.mybatis.MyBatisDaoImpl;
 import com.mk.ots.member.dao.IMemberDao;
 import com.mk.ots.member.model.UMember;
+import com.mk.ots.order.model.FirstOrderModel;
 
 @Component
 public class MemberDao extends MyBatisDaoImpl<UMember, String> implements IMemberDao{
@@ -107,5 +108,16 @@ public class MemberDao extends MyBatisDaoImpl<UMember, String> implements IMembe
 		Map<String,Object> param = Maps.newHashMap();
 		param.put("groupid", groupid);
 		return Optional.fromNullable(this.find("findBindMemberByGroupid", param));
+	}
+	
+	@Override
+	public List<UMember> findUMemberByFirstOrder(FirstOrderModel fom) {
+		Map<String,Object> param = Maps.newHashMap();
+		param.put("mid", fom.getMid());
+		param.put("appid", fom.getAppid());
+		param.put("idcard", fom.getIdcard());
+		param.put("phone", fom.getPhone());
+		param.put("deviceid", fom.getDeviceid());
+		return this.find("findUMemberByFirstOrder", param);
 	}
 }

@@ -82,6 +82,16 @@ public class THotelModel {
     
     private Long pmsopttime;
     
+    private int hoteltype;//mike3.0 酒店类型
+    
+    /** 酒店省份编码 */
+    private String provcode;
+    /** 酒店区县编码 */
+    private String discode;
+    /** 酒店区域编码 */
+    private String areacode;
+    /** 酒店区域名 */
+    private String areaname;
     
     //jianghe add begin 住店历史
     private Long roomTypeId;
@@ -90,7 +100,13 @@ public class THotelModel {
     private Date createTime;
     ////jianghe add end
     
+    public int getHoteltype() {
+    	return hoteltype;
+    }
     
+    public void setHoteltype(int hoteltype) {
+    	this.hoteltype = hoteltype;
+    }
 
     public Long getPmsopttime() {
 		return pmsopttime;
@@ -403,5 +419,37 @@ public class THotelModel {
 	public void setProvince(String province) {
 		this.province = province;
 	}
+
+    public String getProvcode() {
+        return provcode;
+    }
+
+    public void setProvcode(String provcode) {
+        this.provcode = provcode;
+    }
+
+    public String getDiscode() {
+        return discode;
+    }
+
+    public void setDiscode(String discode) {
+        this.discode = discode;
+    }
+
+    public String getAreacode() {
+        return areacode;
+    }
+
+    public void setAreacode(String areacode) {
+        this.areacode = areacode;
+    }
+
+    public String getAreaname() {
+        return areaname;
+    }
+
+    public void setAreaname(String areaname) {
+        this.areaname = areaname;
+    }
     
 }

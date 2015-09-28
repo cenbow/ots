@@ -24,6 +24,8 @@ public class TRoomModel {
     
     private String isWindow;
     
+    private String roomTypeName;
+    
 
 	public Long getId() {
         return id;
@@ -88,6 +90,16 @@ public class TRoomModel {
 	public void setIsWindow(String isWindow) {
 		this.isWindow = isWindow;
 	}
+
+	public String getRoomTypeName() {
+		return roomTypeName;
+	}
+
+	public void setRoomTypeName(String roomTypeName) {
+		this.roomTypeName = roomTypeName;
+	}
     
+	
+	
     
 }

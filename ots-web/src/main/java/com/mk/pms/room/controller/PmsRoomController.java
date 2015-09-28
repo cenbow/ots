@@ -1,19 +1,5 @@
 package com.mk.pms.room.controller;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.google.gson.Gson;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.common.utils.DateUtils;
@@ -26,6 +12,19 @@ import com.mk.pms.room.bean.RoomRepairJsonBean;
 import com.mk.pms.room.bean.RoomRepairLockJsonBean;
 import com.mk.pms.room.bean.RoomRepairPo;
 import com.mk.pms.room.service.PmsRoomService;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author jianghe
@@ -82,9 +81,11 @@ public class PmsRoomController {
 				map.put("hotelid", theHotelId);
 				TRoomModel tRoomModel = pmsRoomService.selectTroomByPms(map);
 				if(tRoomModel==null){
-					throw MyErrorEnum.errorParm.getMyException("未找到pms为 "+rrlJsonBean.getRoomid()+" 的房间信息"); 
-				}
-				Long theRoomId = tRoomModel.getId();
+                    //throw MyErrorEnum.errorParm.getMyException("未找到pms为 "+rrlJsonBean.getRoomid()+" 的房间信息");
+                    logger.error("lock::未找到pms为 " + rrlJsonBean.getRoomid() + " 的房间信息");
+                    continue;
+                }
+                Long theRoomId = tRoomModel.getId();
 				roomRepairPo.setRoomid(theRoomId);
 				//通过roomid查询roomtypeid
 				TRoom tRoom = roomService.findTRoomByRoomId(roomRepairPo.getRoomid());

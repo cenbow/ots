@@ -28,6 +28,7 @@ import com.mk.ots.hotel.dao.RoomDAO;
 import com.mk.ots.hotel.dao.RoomTypeDAO;
 import com.mk.ots.hotel.model.THotel;
 import com.mk.ots.hotel.model.THotelModel;
+import com.mk.ots.hotel.service.HotelPriceService;
 import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.manager.RedisCacheName;
 import com.mk.ots.manager.SysConfigManager;
@@ -58,6 +59,8 @@ public class PMSHotelServiceImpl implements PMSHotelService {
 	private THotelMapper tHotelMapper;
 	@Autowired
 	private RoomstateService roomstateService;
+	@Autowired
+	private HotelPriceService hotelPriceService;
 
 	/**
 	 * 同步房间 1.同步房间 2.同步房型 3.同步酒店
@@ -199,12 +202,14 @@ public class PMSHotelServiceImpl implements PMSHotelService {
 		    List delRoomTypeLog =(List) changemap.get("delRoomTypeLog");
 		    roomDAO.logHotelTrack(hotelid, eHotelBean.get("hotelname").toString(), roomnum, delRoomNoLog, addRoomNoLog, delRoomTypeLog);
 		    logger.info("记录酒店基本信息轨迹日志--结束");
-		    //刷新价格
+		    //需要废弃
 			roomstateService.updateHotelMikepricesCache(Long.parseLong(hotelid), null, true);
+			
+		    hotelPriceService.refreshMikePrices(Long.parseLong(hotelid));
 		    
 			resultMap.put("success", true);
 		}catch(Exception e){
-		    logger.info("-==== OTS Info:: syncHotelInfo method error: {}", e.getStackTrace());
+		    logger.error("PMS1.0同步房间:: syncHotelInfo method error:{},{}",hotelid, e.getMessage());
 			resultMap.put("success", false);
 			resultMap.put("errorcode", PmsErrorEnum.noknowError.getErrorCode());
 			resultMap.put("errormsg", e.getLocalizedMessage());

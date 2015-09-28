@@ -3,7 +3,8 @@ package com.mk.ots.pay.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-import com.mk.ots.pay.module.weixin.pay.common.Tools;
+import com.mk.ots.pay.module.weixin.pay.common.PayTools;
+
  
 public class CancelPms implements Serializable{
 	private static final long serialVersionUID = 1L;
@@ -19,9 +20,9 @@ public class CancelPms implements Serializable{
 	
 	public CancelPms(Long orderid, BigDecimal cost ) {
 		super();
-		this.uuid = Tools.getUuid();
+		this.uuid = PayTools.getUuid();
 		this.function = "cancelpaybyerror";
-		this.timestamp = Tools.getTimestamp();
+		this.timestamp = PayTools.getTimestamp();
 		this.cost = cost;
 		this.memo = "订单号："+orderid+"取消乐住币，金额是："+cost;
 	}

@@ -24,6 +24,7 @@ import com.mk.ots.rpc.service.HmsHotelService;
 import com.mk.ots.web.ServiceOutput;
 import com.mk.pms.hotel.service.NewPMSHotelService;
 import com.mk.pms.hotel.service.PMSHotelService;
+import com.mk.pms.order.control.PmsUtilController;
 import com.mk.pms.room.service.PmsRoomService;
 
 /**
@@ -152,6 +153,72 @@ public class PMSHotelController {
         } finally{
         	logger.info("ots::HotelController::changeonlinestatus  end");
         }
+		return new ResponseEntity<Map<String,Object>>(result,HttpStatus.OK);
+	}
+    
+    /**
+	 * ots通过接口方式，申请酒店上线(hms端酒店安装过程中调用)
+	 * @param hotelPMS 酒店PMS号
+	 * @return
+	 */
+	@RequestMapping(value = "/installpms", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> online(String hotelPMS,String hotelname){
+		logger.info("ots::PMSHotelController::installpms::params{}  begin", hotelPMS);
+		Map<String,Object> result= new HashMap<String,Object>();
+		try {
+			if(StringUtils.isEmpty(hotelPMS)){
+				logger.error("安装失败：参数hotelPMS不能为空");
+				throw MyErrorEnum.errorParm.getMyException("安装失败：参数hotelPMS不能为空");
+			}
+			if(StringUtils.isEmpty(hotelname)){
+				logger.error("安装失败：参数hotelname不能为空");
+				throw MyErrorEnum.errorParm.getMyException("安装失败：参数hotelname不能为空");
+			}
+			result = newPMSHotelService.installPms(hotelPMS,hotelname);
+		}catch (Exception e) {
+        	e.printStackTrace();
+        	result.put(ServiceOutput.STR_MSG_SUCCESS, false);
+        	result.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+        	result.put(ServiceOutput.STR_MSG_ERRMSG, "pms安装失败");
+        	logger.error("ots::PMSHotelController::installpms  error {} {}",hotelPMS,e.getMessage());
+        } finally{
+        	logger.info("ots::PMSHotelController::installpms  end");
+        }
+		return new ResponseEntity<Map<String,Object>>(result,HttpStatus.OK);
+	}
+	/**
+	 * @param hotelPMS
+	 * 通知酒店离线接口
+	 */
+	@RequestMapping(value = "/sendofflinemsg", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> sendofflinemsg(final String hotelPMS){
+		logger.info("ots::PMSHotelController::sendofflinemsg::params{}  begin", hotelPMS);
+		Map<String,Object> result= new HashMap<String,Object>();
+		try {
+			if(StringUtils.isEmpty(hotelPMS)){
+				logger.error("安装失败：参数hotelPMS不能为空");
+				throw MyErrorEnum.errorParm.getMyException("安装失败：参数hotelPMS不能为空");
+			}
+			//异步调用通知下线
+			PmsUtilController.pool.execute(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						newPMSHotelService.sendOfflineMsg(hotelPMS);
+					} catch (Exception e) {
+						logger.error("pms下线失败:hotelPMS:{},error{}", hotelPMS, e.getMessage());
+					}
+				}
+			});
+			result.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		}catch (Exception e) {
+			result.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			result.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			result.put(ServiceOutput.STR_MSG_ERRMSG, "pms安装失败");
+			logger.error("ots::PMSHotelController::sendofflinemsg  error {} {}",hotelPMS,e.getMessage());
+		} finally{
+			logger.info("ots::PMSHotelController::sendofflinemsg  end");
+		}
 		return new ResponseEntity<Map<String,Object>>(result,HttpStatus.OK);
 	}
 }

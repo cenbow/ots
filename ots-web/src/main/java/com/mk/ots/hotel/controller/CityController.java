@@ -16,9 +16,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mk.orm.plugin.bean.Bean;
+import com.mk.ots.common.bean.ParamBaseBean;
 import com.mk.ots.hotel.bean.TCity;
+import com.mk.ots.hotel.model.TBusinesszoneModel;
 import com.mk.ots.hotel.service.CityService;
 import com.mk.ots.web.ServiceOutput;
 
@@ -176,6 +179,63 @@ public class CityController {
             rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
             e.printStackTrace();
 		}
-		return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
+		return new ResponseEntity<Map<String,Object>>(rtnMap, HttpStatus.OK);
+	}
+	
+	
+	
+	/**
+	 * 
+	 * 城市位置区域搜索
+	 * @param pbb
+	 * @param localcitycode
+	 * @param citycode
+	 * @return
+	 */
+	@RequestMapping(value="/queryzone", method=RequestMethod.POST, produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Map<String, Object>> getCityBusinessZone(ParamBaseBean pbb, String localcitycode, String citycode) {
+        Map<String,Object> rtnMap = Maps.newHashMap();
+        if (localcitycode == null || StringUtils.isBlank(localcitycode)) {
+            rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+            rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+            rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "参数localcitycode不能为空.");
+            return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
+        }
+        if (citycode == null || StringUtils.isBlank(citycode)) {
+            rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+            rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+            rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "参数citycode不能为空.");
+            return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
+        }
+        List<Map<String, Object>> distances = Lists.newArrayList();
+        Map<String, Object> distance = new HashMap<String, Object>();
+        if(localcitycode.equals(citycode)) {
+        	distance.put("name", "3千米");
+        	distance.put("value", 3000);
+        } else {
+        	distance.put("name", "全城");
+        	distance.put("value", 0);
+        }
+        distances.add(distance);
+        List<Map<String, Object>> datas = Lists.newArrayList();
+        Map<String, Object> data = new HashMap<String, Object>();
+        try {
+        	List<TBusinesszoneModel> tbusinesszones = cityService.findBusinessZoneByCityCode(citycode);
+			for (TBusinesszoneModel tbusinesszone : tbusinesszones) {
+				data.put("type", tbusinesszone.getBusinesszonetype());
+				data.put("name", tbusinesszone.getName());
+				data.put("coordinates", Lists.newArrayList());
+				datas.add(data);
+			}
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
+	        rtnMap.put("distance", distances);
+	        rtnMap.put("datas", datas);
+		} catch (Exception e) {
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+            rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+            rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
+            e.printStackTrace();
+		}
+        return new ResponseEntity<Map<String,Object>>(rtnMap, HttpStatus.OK);
 	}
 }

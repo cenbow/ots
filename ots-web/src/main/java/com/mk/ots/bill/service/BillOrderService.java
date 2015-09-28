@@ -24,10 +24,11 @@ public class BillOrderService {
 	
 	/**
 	 * 账单汇总 月表
+	 * @param isThreshold 
 	 * @param request
 	 * @return
 	 */
-	public void genBillConfirmChecks(Date begintime, String hotelid){
-		billOrderDAO.genBillConfirmChecks(begintime, hotelid);
+	public void genBillConfirmChecks(Date begintime, String hotelid, String isThreshold){
+		billOrderDAO.genBillConfirmChecks(begintime, hotelid, isThreshold);
 	}
 }

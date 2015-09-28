@@ -1,14 +1,15 @@
 package com.mk.ots.bill.controller;
 
-import java.net.MalformedURLException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,18 +17,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
-import com.caucho.hessian.client.HessianProxyFactory;
 import com.mk.framework.AppUtils;
+import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.bill.dao.BillOrderDAO;
 import com.mk.ots.bill.service.BillOrderService;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.home.util.HomeConst;
-import com.mk.ots.order.hessian.OrderHessianService;
+import com.mk.ots.order.controller.OrderController;
 
 @RestController
 @RequestMapping("/bill")
 public class BillOrderController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(BillOrderDAO.class);
 
 	@Autowired
 	BillOrderService billOrderService;
@@ -71,22 +74,33 @@ public class BillOrderController {
 	 */
 	@RequestMapping(value = "/genBillConfirmChecks")
 	public ResponseEntity<JSONObject> genBillConfirmChecks(HttpServletRequest request) {
+		
+		// 加redis锁
+		String hotelid = request.getParameter("hotelid");
+		String isThreshold = request.getParameter("isThreshold");
+		String lockValue = null;
+		if(StringUtils.isNotBlank(hotelid)){
+			lockValue = DistributedLockUtil.tryLock("orderBillLock_" + hotelid, 40);
+			if (lockValue == null) {
+				logger.info("酒店：" + hotelid + "正在执行结算任务，无法进行二次结算");
+				throw MyErrorEnum.customError.getMyException("酒店：" + hotelid + "正在执行结算任务，无法进行二次结算");
+			}
+		}
 		JSONObject m = new JSONObject();
 		String theMonthDay = request.getParameter("theMonthDay");
-		String hotelid = request.getParameter("hotelid");
-		if(theMonthDay != null){
-			Date begintime = DateUtils.getDateFromString(theMonthDay);
-			billOrderService.genBillConfirmChecks(begintime, hotelid);
+		try {
+			if(theMonthDay != null){
+				Date begintime = DateUtils.getDateFromString(theMonthDay);
+				billOrderService.genBillConfirmChecks(begintime, hotelid, isThreshold);
+			}
+		} catch (Exception e) {
+			throw e;
+		} finally{
+			// 释放 redis锁
+			logger.info("释放分布锁orderBillLock_, hotelid= " + hotelid);
+			DistributedLockUtil.releaseLock("orderBillLock_" + hotelid, lockValue);
 		}
-//		String theMonth = DateUtils.getYearMonth(-1);//获取当前月的前一个月
-//		if (theMonth != null) {
-//			String[] months = theMonth.split(",");
-//			for (String month : months) {
-//				String begintime0 = DateUtils.getMonthLastDay(month);
-//				Date begintime = DateUtils.getDateFromString(DateUtils.getDateAdded(0, begintime0));
-//				billOrderService.genBillConfirmChecks(begintime, hotelid);
-//			}
-//		}
+		
 		m.put("sucess", true);
 		return new ResponseEntity<JSONObject>(m, HttpStatus.OK);
 	}

@@ -116,7 +116,7 @@ public class PushRemindTicketJob  extends QuartzJobBean {
 							Long count = iMessageService.findActiveCount(lPushLog);
 							if(count==0){
 								//push message
-								iMessageService.PushMsg(phone, title, msgContent, MessageType.USER.getId(), url,activeid15);
+								iMessageService.pushMsg(phone, title, msgContent, MessageType.USER.getId(), url,activeid15);
 							}else{
 								logger.info("用户mid："+uTicket.getMid()+"没有超过30天的15元优惠券提醒");
 							}

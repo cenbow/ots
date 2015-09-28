@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mk.framework.exception.MyErrorEnum;
+import com.mk.ots.hotel.bean.RoomTypePriceBean;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.OtaRoomOrder;
 import com.mk.ots.order.bean.OtaRoomPrice;
@@ -44,7 +45,31 @@ public class PriceService implements IPriceService {
 			*/
 			priceDAO.saveOrUpdate(roomPrice);
         }
-
+	}
+	
+	@Override
+	public void saveOtaRoomPriceByOtaRoomOrder(OtaRoomOrder roomOrder, List<RoomTypePriceBean> roomtypeList, boolean flag) {
+		if(roomOrder==null){
+			MyErrorEnum.errorParm.getMyException();
+		}
+		priceDAO.deletePriceByRoomOrder(roomOrder.getLong("id"));
+		Date nowDate=new Date();
+		for (int i = 0; i < roomtypeList.size(); i++) {
+			RoomTypePriceBean rtpBean = roomtypeList.get(i);
+			OtaRoomPrice roomPrice=new OtaRoomPrice();
+			roomPrice.set("CreateTime",nowDate);
+			roomPrice.set("OtaRoomOrderId", roomOrder.get("id"));
+			roomPrice.set("PriceType", roomOrder.getInt("pricetype"));
+			roomPrice.set("ActionDate",rtpBean.getDay());
+			if(flag){
+				roomPrice.set("Price",rtpBean.getPrice());
+				roomPrice.set("PmsPrice",rtpBean.getPrice());
+			} else {
+				roomPrice.set("Price",rtpBean.getMikeprice());
+				roomPrice.set("PmsPrice",rtpBean.getMikeprice());
+			}
+			priceDAO.saveOrUpdate(roomPrice);
+		}
 	}
 
 	@Override

@@ -23,33 +23,33 @@ public interface IPayDAO extends BaseDao<PPay, Long>{
 
 	public Long countPPayByOrderId(Long orderid, PaySrcEnum type);
 	
-	public Long countOrderByType(Long orderid , PayStatusEnum payStatus);
+//	public Long countOrderByType(Long orderid , PayStatusEnum payStatus);
 	
-	public boolean updateOrderStatus(Long orderid,OtaOrderStatusEnum orderStatus, PayStatusEnum payStatus);
+//	public boolean updateOrderStatus(Long orderid,OtaOrderStatusEnum orderStatus, PayStatusEnum payStatus);
 
 	public PPay getPayByOrderId(Long orderId);
 
 	public List<UUseTicketRecord> findTicketRecords(List<Long> recordIdList);
 
-	public PmsError findPmsErrorByOrderId(Long orderId);
+//	public PmsError findPmsErrorByOrderId(Long orderId);
 
 	public PPay findPayById(Long payid);
 
-	public Boolean updateRoomOrderStatus(Long orderId, OtaOrderStatusEnum orderStatus, PayStatusEnum payStatus);
+//	public Boolean updateRoomOrderStatus(Long orderId, OtaOrderStatusEnum orderStatus, PayStatusEnum payStatus);
 
-	public void delPromoPriceByOrderId(Long orderId);
+//	public void delPromoPriceByOrderId(Long orderId);
 
-	public List<BPromotion> findPromotions(List<Long> list, Long orderId);
+//	public List<BPromotion> findPromotions(List<Long> list, Long orderId);
 
 	public List<UTicket> findTickets(List<Long> promotionNoList, Long mid);
 
-	public Long countTicketsByMember(Long mid, Long promoId);
+//	public Long countTicketsByMember(Long mid, Long promoId);
 
-	public Long countOrderTicket(Long promoId, Long orderId);
+//	public Long countOrderTicket(Long promoId, Long orderId);
 
-	public List<PmsError> getPayToPmsErrorList(PmsErrorTypeEnum paytopmserror, Long startTime);
+//	public List<PmsError> getPayToPmsErrorList(PmsErrorTypeEnum paytopmserror, Long startTime);
 
-	public BPromotionPrice getPromoPrice(Long orderId, Long promotionId);
+//	public BPromotionPrice getPromoPrice(Long orderId, Long promotionId);
 
 	public void updateOrderPromos(Long id, Boolean isCoupon, Boolean isPromotion);
 	

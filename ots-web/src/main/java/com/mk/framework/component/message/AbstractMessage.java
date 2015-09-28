@@ -13,8 +13,21 @@ public abstract class AbstractMessage implements ITips {
     private String url;
     private String content = "";
     private String msgtype = ITips.PUSH_TYPE_SINGLE;
+    private String mobiles="";
     
-    public ITips setReceivers(String receivers) {
+    public String getMobiles() {
+		return mobiles;
+	}
+
+	public ITips setMobiles(String mobiles) {
+		if (!Strings.isNullOrEmpty(mobiles)) {
+			this.mobiles = mobiles;
+			setReceivers(mobiles);
+		}
+		return this;
+	}
+
+	public ITips setReceivers(String receivers) {
     	if(!Strings.isNullOrEmpty(receivers)){
     		if(receivers.indexOf(",")!=-1){
     			List idsList= Splitter.on(',').trimResults().omitEmptyStrings().splitToList(receivers);

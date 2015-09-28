@@ -5,6 +5,8 @@ import com.mk.framework.exception.MyErrorEnum;
 public enum PayStatusEnum {
 	doNotPay(50,"无需支付"),
 	waitPay(100,"等待支付"),
+	paying(110,"支付中"),
+	payFail(111,"支付失败"),
 	alreadyPay(120,"已支付"),
 	refundPay(130,"已退款"),
 	;

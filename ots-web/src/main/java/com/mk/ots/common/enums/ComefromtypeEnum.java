@@ -9,6 +9,7 @@ public enum ComefromtypeEnum {
 	qieke("QK","切客"),
 	qudao("QD","渠道"),
 	b_qieke("BQK","B规则切客"),
+    huodong("HD","活动"),
 	;
 	private String type;
 	private String name;

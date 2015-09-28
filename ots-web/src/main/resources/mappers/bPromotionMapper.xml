@@ -4,6 +4,7 @@
   <resultMap id="BaseResultMap" type="com.mk.ots.promo.model.BPromotion" >
     <id column="id" property="id" jdbcType="BIGINT" />
     <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
     <result column="Createtime" property="createtime" jdbcType="TIMESTAMP" />
     <result column="Begintime" property="begintime" jdbcType="TIMESTAMP" />
     <result column="Endtime" property="endtime" jdbcType="TIMESTAMP" />
@@ -37,7 +38,8 @@
   <sql id="Base_Column_List" >
     id, name, Createtime, Begintime, Endtime, type, isticket, num, classname, isota, 
     otapre, activitiesid, pic, version, isinstance, weight,
-    totalnum,plannum,protype,onlineprice,offlineprice, expiretype, expiredaynum, effectivetype,platformtype,sourcecdkey,channelid
+    totalnum,plannum,protype,onlineprice,offlineprice, expiretype, expiredaynum, 
+    effectivetype,platformtype,sourcecdkey,channelid,description
   </sql>
   <sql id="Blob_Column_List" >
     info, note
@@ -61,7 +63,8 @@
       isota, otapre, activitiesid, 
       pic, version, info, 
       note, isinstance, weight,
-      totalnum,plannum,protype,onlineprice,offlineprice, expiretype, expiredaynum, effectivetype,platformtype,sourcecdkey,channelid)
+      totalnum,plannum,protype,onlineprice,offlineprice, expiretype, expiredaynum, 
+      effectivetype,platformtype,sourcecdkey,channelid,description)
     values ( #{name,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP}, 
       #{begintime,jdbcType=TIMESTAMP}, #{endtime,jdbcType=TIMESTAMP}, #{type,jdbcType=INTEGER}, 
       #{isticket,jdbcType=CHAR}, #{num,jdbcType=INTEGER}, #{classname,jdbcType=VARCHAR}, 
@@ -71,7 +74,8 @@
       #{totalnum,jdbcType=BIGINT}, #{plannum,jdbcType=BIGINT},#{protype,jdbcType=INTEGER},
       #{onlineprice,jdbcType=DECIMAL},#{offlineprice,jdbcType=DECIMAL},
       #{expiretype,jdbcType=INTEGER},#{expiredaynum,jdbcType=INTEGER},#{effectivetype,jdbcType=INTEGER},
-      #{platformtype,jdbcType=INTEGER}, #{sourcecdkey,jdbcType=VARCHAR}, #{channelid,jdbcType=BIGINT}
+      #{platformtype,jdbcType=INTEGER}, #{sourcecdkey,jdbcType=VARCHAR}, #{channelid,jdbcType=BIGINT},
+      #{description,jdbcType=VARCHAR}
       
       )
   </insert>
@@ -83,6 +87,9 @@
       </if>
       <if test="name != null" >
         name,
+      </if>
+      <if test="description != null" >
+        description,
       </if>
       <if test="createtime != null" >
         Createtime,
@@ -175,6 +182,9 @@
       <if test="name != null" >
         #{name,jdbcType=VARCHAR},
       </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
       <if test="createtime != null" >
         #{createtime,jdbcType=TIMESTAMP},
       </if>
@@ -266,6 +276,9 @@
       <if test="name != null" >
         name = #{name,jdbcType=VARCHAR},
       </if>
+      <if test="description != null" >
+        description = #{description,jdbcType=VARCHAR},
+      </if>
       <if test="createtime != null" >
         Createtime = #{createtime,jdbcType=TIMESTAMP},
       </if>
@@ -353,8 +366,9 @@
     where id = #{id,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.mk.ots.promo.model.BPromotion" >
-    update b_promotion
+    update b_promotion 
     set name = #{name,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
       Createtime = #{createtime,jdbcType=TIMESTAMP},
       Begintime = #{begintime,jdbcType=TIMESTAMP},
       Endtime = #{endtime,jdbcType=TIMESTAMP},
@@ -425,5 +439,22 @@
 		(select * from b_promotion where (type = 2 or type = 3 or type = 7) and isinstance = 'T') b
 	 where a.promotion = b.id
   </select>
+  <select id="queryBPromotionByOrderId" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	 select p.* from b_promotion p join  b_promotion_price c on p.id = c.promotion 
+  	 where c.otaorderid =  #{otaorderid}
+  </select>
   
+  <select id="queryPromotionByOrderId" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	 SELECT * FROM b_promotion WHERE id IN(
+  	 SELECT promotionid FROM u_ticket  WHERE otaorderid=#{otaorderid})
+  </select>
+
+    <select id="findFirstOrderPromotionByHardwarecode" parameterType="java.util.Map" resultMap="BaseResultMap">
+        SELECT a.*
+        FROM b_promotion a
+            JOIN u_promotion_log b
+                ON a.id = b.promotionid
+        WHERE a.type = 8 AND a.isinstance = 'F' AND b.hardwarecode = #{hardwarecode}
+    </select>
+
 </mapper>

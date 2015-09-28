@@ -1,20 +1,18 @@
 package com.mk.ots.ticket.dao.impl;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.joda.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.google.common.collect.Maps;
 import com.mk.framework.datasource.dao.mybatis.MyBatisDaoImpl;
 import com.mk.ots.common.enums.PromotionTypeEnum;
 import com.mk.ots.ticket.dao.UTicketDao;
 import com.mk.ots.ticket.model.UTicket;
+import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class UTicketDaoImpl extends MyBatisDaoImpl<UTicket, Long> implements UTicketDao{
@@ -366,4 +364,5 @@ public class UTicketDaoImpl extends MyBatisDaoImpl<UTicket, Long> implements UTi
         param.put("status", id);
         return super.findOne("findUnactiveUTicket", param);
     }
+
 }

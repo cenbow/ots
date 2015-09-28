@@ -9,12 +9,13 @@
     <result column="updateby" property="updateby" jdbcType="INTEGER" />
     <result column="createtime" property="createtime" jdbcType="TIMESTAMP" />
     <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+    <result column="citycode" property="citycode" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, rulekey, rulevalue, createby, updateby, createtime, updatetime
+    id, rulekey, rulevalue, createby, updateby, createtime, updatetime, citycode
   </sql>
   <sql id="Base_Column_List2" >
-    d.id, d.rulekey, d.rulevalue, d.createby, d.updateby, d.createtime, d.updatetime
+    d.id, d.rulekey, d.rulevalue, d.createby, d.updateby, d.createtime, d.updatetime, d.citycode
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
@@ -29,10 +30,10 @@
   <insert id="insert" parameterType="com.mk.ots.rule.model.BAreaRuleDetail" >
     insert into b_area_rule_detail (id, rulekey, rulevalue, 
       createby, updateby, createtime, 
-      updatetime)
+      updatetime, citycode)
     values (#{id,jdbcType=BIGINT}, #{rulekey,jdbcType=VARCHAR}, #{rulevalue,jdbcType=VARCHAR}, 
       #{createby,jdbcType=INTEGER}, #{updateby,jdbcType=INTEGER}, #{createtime,jdbcType=TIMESTAMP}, 
-      #{updatetime,jdbcType=TIMESTAMP})
+      #{updatetime,jdbcType=TIMESTAMP}, #{citycode})
   </insert>
   <insert id="insertSelective" parameterType="com.mk.ots.rule.model.BAreaRuleDetail" >
     insert into b_area_rule_detail
@@ -58,6 +59,9 @@
       <if test="updatetime != null" >
         updatetime,
       </if>
+      <if test="citycode != null" >
+        citycode,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -80,6 +84,9 @@
       </if>
       <if test="updatetime != null" >
         #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="citycode != null" >
+        #{citycode},
       </if>
     </trim>
   </insert>
@@ -123,7 +130,7 @@
     select 
     <include refid="Base_Column_List2" />
     from b_area_rule_detail d left join b_area_rule_detail_relation r on d.id = r.detailid 
-    where r.rulecode = #{rulecode,jdbcType=BIGINT} and d.rulekey=#{rulekey}
+    where r.rulecode = #{rulecode,jdbcType=BIGINT} and d.rulekey=#{rulekey} and d.citycode=#{citycode}
   </select>
   
   

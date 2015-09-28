@@ -1,25 +1,36 @@
 package com.mk.ots.member.service.impl;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONObject;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.exception.MyException;
+import com.mk.framework.util.UrlUtils;
 import com.mk.ots.common.utils.CalculateMd5;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.member.dao.IMemberDao;
 import com.mk.ots.member.model.UMember;
 import com.mk.ots.member.service.IMemberService;
+import com.mk.ots.order.common.PropertyConfigurer;
+import com.mk.ots.order.model.FirstOrderModel;
+import com.mk.ots.order.service.OrderUtil;
 @Service
 public class MemberService implements IMemberService{
 	
 	@Autowired
 	private IMemberDao iMemberDao;
-	
+    @Autowired
+    private OrderUtil orderUtil;
 	@Override
 	public void updateBaseInfo(long mid, String name, String sex, String birthday){
 		iMemberDao.updateBaseInfo(mid, name, sex, birthday);
@@ -31,8 +42,8 @@ public class MemberService implements IMemberService{
 	}
 	@Override
 	public Optional<UMember> findMemberById(long mid) {
-		return this.findMemberById(mid,null);
-	}
+        return this.findMemberById(mid, "T");
+    }
 	
 	@Override
 	public Optional<UMember> findMemberById(long mid,String state) {
@@ -125,7 +136,6 @@ public class MemberService implements IMemberService{
 		String passwordMD5 = CalculateMd5.caculateCF(payPsd, Constant.defaulCharset);
 		iMemberDao.updatePayPwd(member.getMid(), passwordMD5);
 		// 3,保存修改密码记录
-		//TODO 记录修改密码记录 saveMemberPsdLog(member,MemberPasswordLogEnum.payPassword, passwordMD5, updateDate);
 		return true;
 	}
 
@@ -182,5 +192,33 @@ public class MemberService implements IMemberService{
 			}
 		}
 		return null;
+	}
+	@Override
+	public void checkPhoneIsBlack(String phone,String type,String name,String errmsg){
+		String blackSwitch = PropertyConfigurer.getProperty("blackSwitch");
+		//1:开关关闭，说明不用查黑名单
+		if ("1".equals(blackSwitch)) {
+			return ;
+		}
+		Map params = new HashMap();
+		params.put("phone", phone);
+		JSONObject data = null;
+		String url = UrlUtils.getUrl("blacklist.url");
+		Transaction t = Cat.newTransaction(type, name);
+		try {
+			data = JSONObject.parseObject(orderUtil.doPost(url, params, 1000));// 超时1秒
+			t.setStatus(Transaction.SUCCESS);
+		} catch (Exception e) {
+			t.setStatus(e);
+		} finally {
+			t.complete();
+		}
+		if (data != null && "T".equals(data.getString("check"))) {
+			throw MyErrorEnum.customError.getMyException(errmsg);
+		}
+       }
+	@Override
+	public List<UMember> findUMemberByFirstOrder(FirstOrderModel fom) {
+		return iMemberDao.findUMemberByFirstOrder(fom);
 	}
 }

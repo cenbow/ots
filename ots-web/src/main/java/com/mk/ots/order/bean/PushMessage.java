@@ -1,6 +1,6 @@
 package com.mk.ots.order.bean;
 
-import com.mk.framework.component.message.Constant;
+import com.mk.care.kafka.model.Message;
 import com.mk.ots.message.model.MessageType;
 
 /**
@@ -17,6 +17,22 @@ public class PushMessage {
 	private String msgContent;
 	//类型
 	private String msgtype=MessageType.USER.getId();
+	
+	public Message getMessage() {
+		return message;
+	}
+	public void setMessage(Message message) {
+		this.message = message;
+	}
+	public Boolean getIsSms() {
+		return isSms;
+	}
+	public void setIsSms(Boolean isSms) {
+		this.isSms = isSms;
+	}
+	private Message message;
+	
+	private Boolean isSms=false; 
 	
 	public String getPhone() {
 		return phone;

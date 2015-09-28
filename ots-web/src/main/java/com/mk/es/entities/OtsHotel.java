@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoPoint;
 
 import com.mk.orm.plugin.bean.Bean;
@@ -107,6 +108,31 @@ public class OtsHotel {
     /**存放酒店总图片数**/
     private int hotelpicnum;
     
+    private Integer hoteltype;
+    
+    /**mike 3.0 月销量**/
+    private Long ordernummon;
+    
+    /** 酒店省份编码 */
+    private String provcode;
+    /** 酒店城市编码 */
+    private String citycode;
+    /** 酒店区县编码 */
+    private String discode;
+    /** 酒店区域编码 */
+    private String areacode;
+    /** 酒店区域名 */
+    private String areaname;
+    
+    /** 酒店区县名称 */
+    private String hoteldisname;
+    /** 酒店城市名称 */
+    private String hotelcityname;
+    /** 酒店省份名称 */
+    private String hotelprovince;
+    /** 酒店联系电话 */
+    private String hotelphone;
+    
     public OtsHotel() {
         
     }
@@ -138,11 +164,18 @@ public class OtsHotel {
         setHotelrulecode(bean.getInt("rulecode"));
         setHoteldisc((String)bean.get("introduction", ""));
         setFlag(1);
-        setCratetime(time);
+        setCreatetime(time);
         setModifytime(time);
         setRetentiontime((String)bean.get("retentiontime",""));
         setDefaultlevaltime((String)bean.get("defaultlevaltime",""));
         setHotelpicnum(bean.getInt("hotelpicnum"));
+        if (bean.get("hoteltype") != null) {
+            if (StringUtils.isNotBlank(String.valueOf(bean.get("hoteltype")))) {
+                setHoteltype(Integer.valueOf(String.valueOf(bean.get("hoteltype"))));
+            }
+        }
+        //订单初始化ES时 月销量为0
+        setOrdernummon(0l);
     }
 
     /** getters and setters */
@@ -267,11 +300,11 @@ public class OtsHotel {
         this.hoteldisc = hoteldisc;
     }
 
-    public Long getCratetime() {
+    public Long getCreatetime() {
         return createtime;
     }
 
-    public void setCratetime(Long createtime) {
+    public void setCreatetime(Long createtime) {
         this.createtime = createtime;
     }
 
@@ -401,6 +434,93 @@ public class OtsHotel {
 	public void setHotelpicnum(int hotelpicnum) {
 		this.hotelpicnum = hotelpicnum;
 	}
-    
-    
+
+	public Integer getHoteltype() {
+		return hoteltype;
+	}
+
+	public void setHoteltype(Integer hoteltype) {
+		this.hoteltype = hoteltype;
+	}
+
+	public Long getOrdernummon() {
+		return ordernummon;
+	}
+
+	public void setOrdernummon(Long ordernummon) {
+		this.ordernummon = ordernummon;
+	}
+
+    public String getProvcode() {
+        return provcode;
+    }
+
+    public void setProvcode(String provcode) {
+        this.provcode = provcode;
+    }
+
+    public String getCitycode() {
+        return citycode;
+    }
+
+    public void setCitycode(String citycode) {
+        this.citycode = citycode;
+    }
+
+    public String getDiscode() {
+        return discode;
+    }
+
+    public void setDiscode(String discode) {
+        this.discode = discode;
+    }
+
+    public String getAreacode() {
+        return areacode;
+    }
+
+    public void setAreacode(String areacode) {
+        this.areacode = areacode;
+    }
+
+    public String getAreaname() {
+        return areaname;
+    }
+
+    public void setAreaname(String areaname) {
+        this.areaname = areaname;
+    }
+
+    public String getHoteldisname() {
+        return hoteldisname;
+    }
+
+    public void setHoteldisname(String hoteldisname) {
+        this.hoteldisname = hoteldisname;
+    }
+
+    public String getHotelcityname() {
+        return hotelcityname;
+    }
+
+    public void setHotelcityname(String hotelcityname) {
+        this.hotelcityname = hotelcityname;
+    }
+
+    public String getHotelprovince() {
+        return hotelprovince;
+    }
+
+    public void setHotelprovince(String hotelprovince) {
+        this.hotelprovince = hotelprovince;
+    }
+
+    public String getHotelphone() {
+        return hotelphone;
+    }
+
+    public void setHotelphone(String hotelphone) {
+        this.hotelphone = hotelphone;
+    }
+
 }

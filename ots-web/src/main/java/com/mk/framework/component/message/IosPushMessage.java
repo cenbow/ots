@@ -103,7 +103,10 @@ public class IosPushMessage extends AbstractMessage {
             	}
             	isRtnFlag = true;
             	logger.info("ostype: ios, msgid: {}, sendtime:{}>>>result:{}", ((PushMsgToSingleDeviceResponse)response).getMsgId(), ((PushMsgToSingleDeviceResponse)response).getSendTime());
-            }else{
+            }
+            /**
+        	 * 去掉广播功能
+            else{
             	// 未设置推送设备
             	//isRtnFlag = false;
                 logger.error("未指定消息接收者,则为广播");
@@ -117,7 +120,9 @@ public class IosPushMessage extends AbstractMessage {
 	
 		    	isRtnFlag = true;
 		    	logger.info("ostype: ios, msgid: {}, sendtime:{}>>>result:{}", response.getMsgId(), response.getSendTime());
+		    	
             }
+            */
         } catch (PushClientException e) {
         	isRtnFlag = false;
             if (BaiduPushConstants.ERROROPTTYPE) {

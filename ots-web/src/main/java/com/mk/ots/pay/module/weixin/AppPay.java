@@ -1,25 +1,22 @@
 package com.mk.ots.pay.module.weixin;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Map.Entry;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
-
 import com.mk.framework.exception.MyErrorEnum;
+import com.mk.ots.pay.module.query.QueryPayPram;
 import com.mk.ots.pay.module.weixin.pay.Weixin;
 import com.mk.ots.pay.module.weixin.pay.common.Configure;
+import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.ots.pay.module.weixin.pay.common.RandomStringGenerator;
-import com.mk.ots.pay.module.weixin.pay.common.Tools;
 import com.mk.ots.pay.module.weixin.pay.common.WxType;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * futao.xiao
  * 2015年5月21日 
@@ -28,12 +25,13 @@ import org.slf4j.LoggerFactory;
  */
 public class AppPay {
  	private static Logger logger = LoggerFactory.getLogger(AppPay.class);
-	
+ 	
+ 	
 	  /**
    * 退款查询
    */
   public static boolean refundQuery(String weixinpayid){
-		return Weixin.refundQuery(weixinpayid, WxType.app);
+		return Weixin.refundQuery(weixinpayid, getWxtype());
   }
  	
  	
@@ -45,13 +43,13 @@ public class AppPay {
     	logger.info("微信支付前去微信创建订单，还没进入微信系统.");
 		Map<String,String> resmap= new TreeMap<String, String>();
 		String url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
-		String appid =Configure.getAppid(WxType.app);
-		String mch_id =Configure.getMchid(WxType.app);
-		String key =Configure.getKey(WxType.app);
+		String appid =Configure.getAppid(getWxtype());
+		String mch_id =Configure.getMchid(getWxtype());
+		String key =Configure.getKey(getWxtype());
 		logger.info("############appid={},mch_id={},key={}", appid, mch_id, key);
 		String nonce_str =RandomStringGenerator.getRandomStringByLength(32);// UUID.randomUUID().toString().replaceAll("-", "");
   		String total_fee = price+"";
-		String spbill_create_ip =  Tools.getIpAddr();  //"183.131.145.108"; 
+		String spbill_create_ip =  PayTools.getIpAddr();  //"183.131.145.108"; 
 		String trade_type = "APP";
 		String sign = "";
 		Map<String, String> map = new TreeMap<String, String>();
@@ -78,17 +76,17 @@ public class AppPay {
 			root.addContent(temp);
 		}
 		sb.append("&key=").append(key);
-		sign =Tools.caculateCF(sb.toString(), "UTF-8").toUpperCase();
+		sign =PayTools.caculateCF(sb.toString(), "UTF-8").toUpperCase();
 		map.put("sign", sign);
 		Element esign = new Element("sign");
 		esign.setText(sign);
 		root.addContent(esign);
-		String sendxml =Tools.XMLtoString(new Document(root));
+		String sendxml =PayTools.XMLtoString(new Document(root));
 		logger.info("去微信支付请求的参数是:"+sendxml);
 		Document doc=null;
 		try {
-			String xml = Tools.dopost(url, sendxml);
-			doc = Tools.StringtoXML(xml);
+			String xml = PayTools.dopost(url, sendxml);
+			doc = PayTools.StringtoXML(xml);
 			logger.info("请求微信返回的数据是:"+doc);
 		} catch (JDOMException | IOException e1) {
 			logger.error(e1.getMessage(), e1);
@@ -123,7 +121,7 @@ public class AppPay {
 					sb.append(entry.getKey()).append("=").append(value);
 				}
 				sb.append("&key=").append(key);
-				sign = Tools.caculateCF(sb.toString(), "UTF-8").toUpperCase();
+				sign = PayTools.caculateCF(sb.toString(), "UTF-8").toUpperCase();
 				resmap.put("sign", sign);
 				resmap.put("packagevalue", "Sign=WXPay");
 			}
@@ -142,7 +140,7 @@ public class AppPay {
      * @return  微信退款ID
      */
     public static String refund(String weixinpayid,String orderid,int price ){
-		return Weixin.refund(weixinpayid, orderid, price, WxType.app);
+		return Weixin.refund(weixinpayid, orderid, price, getWxtype() );
     }
 
     /**
@@ -152,7 +150,7 @@ public class AppPay {
      * @param price    【单位是fe】
      */
     public static  String  query(String orderid,String payid,int price){
-		return Weixin.queryByPrice(orderid, payid, price, WxType.app);
+		return Weixin.queryByPrice(orderid, payid, price, getWxtype() );
     }
     
     /**
@@ -161,7 +159,7 @@ public class AppPay {
      * @return  微信退款ID
      */
     public static  String  query(String weixinid,String orderid){
-		return Weixin.queryById(orderid, weixinid, WxType.app);
+		return Weixin.queryById(orderid, weixinid, getWxtype() );
     }
     
     
@@ -171,7 +169,7 @@ public class AppPay {
      * @return  微信退款ID
      */
     public static  boolean  verify(HttpServletRequest request){
-		return Weixin.verify(request, WxType.app);
+		return Weixin.verify(request, getWxtype());
     }
     
     
@@ -181,19 +179,31 @@ public class AppPay {
      * @return   boolean
      */
     public static  boolean  queryIsPayING(String orderid){
-		return Weixin.queryIsPayING(orderid, WxType.app);
+		return Weixin.queryIsPayING(orderid, getWxtype());
     }
     
 
     /***
      *  仅供 订单是否支付和退款的查询
      */
-    public static String  onlyQuery(String orderid){
-    	String s=Weixin.onlyQuery(orderid, WxType.app);
-    	if(s!=null){
-    		s="订单号"+orderid+" "+s;
-    	}
-    	return  s;
+
+    public static QueryPayPram  onlyQuery(String orderid,QueryPayPram pram){
+    	return Weixin.onlyQuery(orderid, WxType.app, pram);
     }
+    
+    private static WxType getWxtype() {
+//		logger.info("当前App微信支付环境:" + WX_TYPE);
+//		if (WX_TYPE.equals(WxType.test_app.name())) {
+//			logger.info("当前App微信支付环境是测试环境.");
+//			return WxType.test_app;
+//		}
+//		logger.info("当前App微信支付环境是生产环境.");
+    	//没有测试环境着
+		return WxType.app;
+	} 
+    
+    
+ 
+    
     
 }

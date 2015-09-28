@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.google.common.collect.Maps;
 import com.mk.framework.datasource.dao.mybatis.MyBatisDaoImpl;
 import com.mk.ots.order.model.BOtaorder;
+import com.mk.ots.order.model.FirstOrderModel;
 
 /**
  * otaorder dao
@@ -99,4 +100,15 @@ public class OtaOrderDAO extends MyBatisDaoImpl<BOtaorder, Long> {
 		 logger.info("今月({})切客次数:{} <= 系统限制次数:{} = {}", new Date(), count, limit, b);
 		 return b;
 	 }
+	 
+	 public boolean isFirstOrder(List<Long> midList) {
+		boolean result=false;
+		Map<String, Object> newHashMap = Maps.newHashMap();
+		newHashMap.put("midList", midList);
+		long count = this.count("isFirstOrder", newHashMap);
+		if (count==0) {
+			result=true;
+		}
+		return result;
+	}
 }

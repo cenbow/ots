@@ -13,12 +13,13 @@ public class BLoginInfo {
     private String wifimacaddr;
     private String blmacaddr;
     private Date createtime;
+    private String security;
 
     public BLoginInfo() {
 	}
     
     public BLoginInfo(Long id, String phone, Long mid,  String uuid,
-    		String sysno,String deviceimei,String simsn,String wifimacaddr,String blmacaddr,Date createtime) {
+    		String sysno,String deviceimei,String simsn,String wifimacaddr,String blmacaddr,Date createtime,String security) {
     	this.sysno = sysno;
     	this.phone = phone;
     	this.mid = mid;
@@ -29,7 +30,18 @@ public class BLoginInfo {
     	this.sysno = wifimacaddr;
     	this.sysno = blmacaddr;
     	this.createtime = createtime;
+    	this.security=security;
     }
+
+
+
+	public String getSecurity() {
+		return security;
+	}
+
+	public void setSecurity(String security) {
+		this.security = security;
+	}
 
 	public Long getId() {
 		return id;
@@ -117,9 +129,7 @@ public class BLoginInfo {
 				+ ", uuid=" + uuid + ", sysno=" + sysno + ", deviceimei="
 				+ deviceimei + ", simsn=" + simsn + ", wifimacaddr="
 				+ wifimacaddr + ", blmacaddr=" + blmacaddr + ", createtime="
-				+ createtime + "]";
+				+ createtime + ", security=" + security + "]";
 	}
-
-
   
 }

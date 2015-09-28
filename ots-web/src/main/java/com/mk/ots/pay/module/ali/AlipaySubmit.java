@@ -237,7 +237,7 @@ public class AlipaySubmit {
             nameValuePair[i++] = new NameValuePair(entry.getKey(), entry.getValue());
             s=s+entry.getKey()+"="+entry.getValue()+"&";
         }
-        System.out.println(s);
+//        System.out.println(s);
         return nameValuePair;
     }
 	

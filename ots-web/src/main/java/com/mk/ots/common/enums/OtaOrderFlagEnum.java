@@ -32,7 +32,15 @@ public enum OtaOrderFlagEnum {
 	KF_MODIFYORDERSTATUSAFTERCANCELPAY("22","客服取消第三方支付，取消了订单"),
 	ORDER_START_PAY("23","选择支付方式"),
 	BANK_PAY_SUCCESS("24","用户支付成功"),
-	BANK_REFUND_SUCCESS("25","银行退款成功");
+	BANK_REFUND_SUCCESS("25","银行退款成功"),
+	MODIFY_OTA_ORDER_PAYSTATUS("26","运维工具订单修改支付状态"),
+	MODIFY_CHECKINUSERBYUSER("27","修改入住人"),
+	SCORE_CASHBACK("28", "点评返现完成,乐住币已放入您的账户"),
+	ORDER_CASHBACK("29", "下单返现，乐住币已放入您的账户"),
+	ORDER_BACKCASH("39", "取消订单，乐住币已返回您的账户"),
+	C_MODIFYCHECKINUSER("30", "c端更新入住人"),
+	SCORE_OK("31", "点评完成");
+	
 	private final String id;
 	private final String name;
 	

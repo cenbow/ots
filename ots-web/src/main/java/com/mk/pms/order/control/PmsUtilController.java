@@ -1,26 +1,5 @@
 package com.mk.pms.order.control;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-
-import redis.clients.jedis.Jedis;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.mk.framework.AppUtils;
@@ -34,7 +13,26 @@ import com.mk.ots.order.service.OrderService;
 import com.mk.ots.web.ServiceOutput;
 import com.mk.pms.order.service.NewPmsOrderService;
 import com.mk.pms.order.service.PmsOrderService;
+import com.mk.pms.order.service.PmsOrderUtilService;
 import com.mk.pms.order.service.PmsService;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import redis.clients.jedis.Jedis;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @RestController
 @RequestMapping("/pmsutil")
@@ -55,8 +53,10 @@ public class PmsUtilController {
 	
 	@Autowired
 	OrderService orderService;
+	@Autowired
+	PmsOrderUtilService pmsOrderUtilService;
 
-	private static ExecutorService pool = Executors.newFixedThreadPool(5);
+    public static ExecutorService pool = Executors.newFixedThreadPool(10);
 
 	@RequestMapping(value = "/pmsroomorderok", method = RequestMethod.POST)
 	public ResponseEntity<JSONObject> createOrder(HttpServletRequest request) {
@@ -168,9 +168,10 @@ public class PmsUtilController {
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			jedis.close();
-		}
-	}
+            if (jedis != null)
+                jedis.close();
+        }
+    }
 
 	/**
 	 * @param hotelId
@@ -182,11 +183,16 @@ public class PmsUtilController {
 	public ResponseEntity<Map<String, Object>> synPmsOrderBefore(String hotelId, final String roomNos) {
 		PmsUtilController.logger.info("pmsutil::synPmsOrder::params{}  begin", hotelId);
 		Map<String, Object> result = new HashMap<String, Object>();
-		try {
-			if (StringUtils.isEmpty(hotelId)) {
-				throw MyErrorEnum.errorParm.getMyException("参数为空!");
-			}
-			final Long hotelid = Long.parseLong(hotelId);
+        if (StringUtils.isEmpty(hotelId)) {
+            throw MyErrorEnum.errorParm.getMyException("参数为空!");
+        }
+        // 加60秒锁
+        Jedis jedis = this.cacheManager.getNewJedis();
+        try {
+            if (jedis.exists("synPmsOrderBefore:" + hotelId)) {
+                throw MyErrorEnum.errorParm.getMyException("反查进行中，请一分钟之后再执行反查操作!");
+            }
+            final Long hotelid = Long.parseLong(hotelId);
 			PmsUtilController.pool.execute(new Runnable() {
 				@Override
 				public void run() {
@@ -198,16 +204,18 @@ public class PmsUtilController {
 					}
 				}
 			});
-			result.put(ServiceOutput.STR_MSG_SUCCESS, true);
-			result.put(ServiceOutput.STR_MSG_ERRMSG, "申请反查成功，反查任务执行中，请1分钟之后查看房态信息");
+            jedis.set("synPmsOrderBefore:" + hotelId, "1", "NX", "EX", 60);
+            result.put(ServiceOutput.STR_MSG_SUCCESS, true);
+            result.put(ServiceOutput.STR_MSG_ERRMSG, "申请反查成功，反查任务执行中，请1分钟之后查看房态信息");
 		} catch (Exception e) {
 			result.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			result.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			result.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 		} finally {
-			PmsUtilController.logger.info("pmsutil::transPmsOrder  end");
-		}
-		return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
+            if (jedis != null)
+                jedis.close();
+        }
+        return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
 	}
 
 	/**
@@ -307,5 +315,53 @@ public class PmsUtilController {
 		return new ResponseEntity<ServiceOutput>(output, HttpStatus.OK);
 	}
 	
-	
+	/**
+	 * @param orderId
+	 * @param status
+	 * @param dateTime
+	 * @return
+	 */
+	@RequestMapping(value = "/changePmsRoomOrderStatus", method = RequestMethod.POST)
+	public ResponseEntity<JSONObject> changePmsRoomOrderStatus(HttpServletRequest request) {
+		
+		String orderId = request.getParameter("orderId");
+		String status = request.getParameter("status");
+		String dateTime = request.getParameter("dateTime");
+		String operator = request.getParameter("operator");
+		String note = request.getParameter("note");
+		
+		String pmsorderno = request.getParameter("pmsroomorderno");
+		String hotelid = request.getParameter("hotelid");
+        if(!StringUtils.isNotBlank(operator)){
+            operator = "" ;
+        }
+        if(!StringUtils.isNotBlank(note)){
+        	note = "" ;
+        }
+        if(!StringUtils.isNotBlank(dateTime)){
+        	
+        }
+		JSONObject jsonObj = new JSONObject();
+		logger.info("changePmsRoomOrderStatus::参数：orderId:{},status:{},dateTime:{}", orderId,status,dateTime);
+		try {
+			if(StringUtils.isNotBlank(orderId)){
+				Long orderid = Long.parseLong(orderId);
+				boolean b = pmsOrderUtilService.changeRoomOrderStatus(orderid, status, dateTime,operator,note);
+			} else {
+				if (!StringUtils.isNotBlank(pmsorderno) || !StringUtils.isNotBlank(hotelid)) {
+					throw MyErrorEnum.customError.getMyException("请输入订单号或PMS客单及酒店id!");
+				}
+				Long hotelId = Long.parseLong(hotelid);
+				boolean b = pmsOrderUtilService.changePmsRoomOrderStatus(pmsorderno, hotelId, status, dateTime, operator, note);
+			}
+			
+			jsonObj.put("success", true);
+			jsonObj.put("message", "ok");
+		} catch (Exception e) {
+			jsonObj.put("success", false);
+			jsonObj.put("errmsg", e.getLocalizedMessage());
+		}
+		PmsUtilController.logger.info("changePmsRoomOrderStatus:end");
+		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
 }

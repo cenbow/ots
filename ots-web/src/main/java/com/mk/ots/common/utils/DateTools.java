@@ -9,9 +9,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.mk.framework.exception.MyErrorEnum;
+import com.mk.ots.order.service.OrderServiceImpl;
 
 public class DateTools {
+	
+	private static Logger logger = LoggerFactory.getLogger(DateTools.class);
 	
 	/**
 	 *	一天的毫秒数 
@@ -55,7 +61,8 @@ public class DateTools {
 		dateList.add(endCal.getTime());
 		return dateList;
 	}
-	public  static List<Date> getBeginDateList(Date beginTime, Date endTime) {
+	public static List<Date> getBeginDateList(Date beginTime, Date endTime) {
+		logger.info("计算住的日期的参数：beginTime:{},endTime:{}",beginTime, endTime);
 		List<Date> dateList =new  ArrayList<Date>();
 		if(beginTime.after(endTime)){
 			MyErrorEnum.errorParm.getMyException("开始时间大于结束时间");
@@ -69,7 +76,11 @@ public class DateTools {
 		while (!beginCal.after(endCal)) {
 			dateList.add(beginCal.getTime());
 			beginCal.add(Calendar.DATE, 1);
+			if (DateUtils.getDiffHoure(DateUtils.getDatetime(beginCal.getTime()), DateUtils.getDatetime(endTime)) <= 12) {
+				break;
+			}
 		}
+		logger.info("计算住的日期:完成:dateList:{}",dateList);
 		return dateList;
 	}
 	
@@ -95,6 +106,35 @@ public class DateTools {
 	    long between_days=(time2-time1)/(1000*3600*24);  
 	   return Integer.parseInt(String.valueOf(between_days));
    }
+	
+	
+	/**
+	 * 计算日期相差天数
+	 * @param beginDate
+	 * @param endDate
+	 * @return
+	 */
+	public static Integer getBetweenDays(String begindate, String enddate) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		Date beginDate = null;
+		Date endDate = null;
+	    try {
+	    	beginDate = sdf.parse(begindate);
+	    	endDate = sdf.parse(enddate);  
+		} catch (ParseException e) {
+			throw MyErrorEnum.errorParm.getMyException("日期解析错误");
+		}  
+	    Calendar cal = Calendar.getInstance();
+		cal.setTime(beginDate);
+		long time1 = cal.getTimeInMillis();
+		cal.setTime(endDate);
+		long time2 = cal.getTimeInMillis();
+		long between_days = (time2 - time1) / (1000 * 3600 * 24);
+
+		return Integer.parseInt(String.valueOf(between_days));
+	}
+	
+	
 	
 	public static Long getMilliseconds(Long mills,int addDay){
 		if(mills == null){

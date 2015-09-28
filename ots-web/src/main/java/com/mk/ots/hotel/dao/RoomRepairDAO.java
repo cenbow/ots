@@ -86,44 +86,6 @@ public class RoomRepairDAO   {
         }
         return result;
     }
-    /**
-     * 优化方法 到
-     * @param hotelId
-     * @param roomTypeId
-     * @param curDay
-     * @param endDay
-     * @return
-     */
-    @Deprecated
-    public List<RoomTemp> findRoomTemp(Long hotelId,Long roomTypeId, Long curDay, Long endDay) {
-        List <RoomTemp> roomTempList = new ArrayList<RoomTemp>();
-        SimpleDateFormat dateformat=new SimpleDateFormat("yyyyMMdd");
-            StringBuilder sb = new StringBuilder();
-            while(curDay<endDay){
-                String curStr = dateformat.format(new Date(curDay));
-                sb.append("select "+curDay+" as 'date',roomid from t_room_repair  where RoomTypeId='"+roomTypeId+"'");
-                sb.append(" and Endtime>='"+curStr+"'");
-                curDay += DateTools.DAY_MILLSECONDS;
-                curStr = dateformat.format(new Date(curDay));
-                sb.append(" and Begintime<="+curStr+" ");
-                if(curDay<endDay){
-                    sb.append("union all ");
-                }
-            }
-            String sql =sb.toString();
-            List<Bean> ll = Db.find(sql);
-            RoomTemp roomTemp = null;
-            for(Bean b: ll){
-                roomTemp = new RoomTemp();
-                roomTemp.setHotelId(hotelId);
-                roomTemp.setRoomId(b.getLong("roomid"));
-                roomTemp.setRoomTypeId(roomTypeId);
-                roomTemp.setTime(dateformat.format(new Date(b.getLong("date"))));
-                roomTempList.add(roomTemp);
-            }
-            
-        return roomTempList;
-    }
     public void deleteAllRoomRepairs(Long hotelid){
     	Db.update("delete from t_room_repair where hotelid=?", hotelid);
     }

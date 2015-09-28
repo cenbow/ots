@@ -15,7 +15,7 @@ public interface IPromotionPriceService {
 
 	public abstract List<BPromotion> queryAllOrderQikePromotions(Long mid, Long otaorderid);
 
-	public abstract void updateTicketUnusedStatus(OtaOrder order);
+	public abstract void updateTicketStatus(OtaOrder order);
 
 	public abstract List<BPromotionPrice> queryBPromotionPricesByPromId(Long promotionid);
 

@@ -15,11 +15,11 @@ public class SchedulePlan {
 	@JsonProperty("name")
     private String name;
 
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyyMMddHHmmss",timezone="GMT+8")
 	@JsonProperty("startdate")
     private Date startdate;
 
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyyMMddHHmmss",timezone="GMT+8")
 	@JsonProperty("enddate")
     private Date enddate;
 

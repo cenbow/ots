@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 
 import com.mk.ots.hotel.bean.TCity;
 import com.mk.ots.hotel.dao.CityDAO;
+import com.mk.ots.hotel.model.TBusinesszoneModel;
 import com.mk.ots.hotel.model.TCityModel;
 import com.mk.ots.mapper.CityMapper;
+import com.mk.ots.mapper.TBusinesszoneMapper;
 import com.mk.ots.mapper.TCityMapper;
 
 /**
@@ -27,6 +29,9 @@ public class CityService {
 	
 	@Autowired
 	private TCityMapper tcityMapper;
+	
+	@Autowired
+	private TBusinesszoneMapper tBusinesszoneMapper;
 	
 	/**
 	 * 获取省
@@ -75,6 +80,16 @@ public class CityService {
 	
 	public TCityModel findCityById(Long cityid) {
 	    return tcityMapper.selectByPrimaryKey(cityid);
+	}
+	
+	
+	/**
+	 * 根据城市code 查询城市商圈
+	 * @param citycode
+	 * @return
+	 */
+	public List<TBusinesszoneModel> findBusinessZoneByCityCode(String citycode) {
+		return tBusinesszoneMapper.getBusinessZoneByCityCode(citycode);
 	}
 	
 }

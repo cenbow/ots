@@ -8,16 +8,22 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +33,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mk.framework.AppUtils;
 import com.mk.framework.exception.MyErrorEnum;
@@ -41,6 +48,7 @@ import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.enums.PPayInfoTypeEnum;
 import com.mk.ots.common.enums.PayStatusEnum;
 import com.mk.ots.common.enums.PayTitleTypeEnum;
+import com.mk.ots.common.enums.PromotionTypeEnum;
 import com.mk.ots.common.enums.SexEnum;
 import com.mk.ots.common.enums.TicketUselimitEnum;
 import com.mk.ots.common.utils.Constant;
@@ -59,16 +67,36 @@ import com.mk.ots.pay.model.PPayInfo;
 import com.mk.ots.ticket.model.TicketInfo;
 import com.mk.ots.ticket.service.ITicketService;
 import com.mk.ots.ticket.service.impl.TicketService;
+import com.mk.ots.wallet.service.IWalletCashflowService;
 
 @Service
 public class OrderUtil {
 
 	@Autowired
 	CheckInUserDAO checkInUserDAO;
+	@Autowired
+	OrderServiceImpl orderService;
+    @Autowired
+    private IWalletCashflowService walletCashflowService;
 	
 	public static final int BORDERLINEHOUR = 6;
 
 	public static Logger logger = LoggerFactory.getLogger(OrderUtil.class);
+	
+	
+	public static Map statusMapping = new HashMap<>();
+	static {
+		statusMapping.put("110,120", ImmutableMap.of("code", "1", "name", "未付款"));
+		statusMapping.put("140", ImmutableMap.of("code", "2", "name", "已预定"));
+		statusMapping.put("160,180", ImmutableMap.of("code", "3", "name", "已入住"));
+		statusMapping.put("190,200", ImmutableMap.of("code", "5", "name", "已完成"));
+		statusMapping.put("510", ImmutableMap.of("code", "6", "name", "退款中"));
+		statusMapping.put("511", ImmutableMap.of("code", "7", "name", "订单过期"));
+		statusMapping.put("512", ImmutableMap.of("code", "8", "name", "退款完成"));
+		statusMapping.put("513", ImmutableMap.of("code", "9", "name", "订单取消"));
+		statusMapping.put("514", ImmutableMap.of("code", "10", "name", "后台取消"));
+		statusMapping.put("520", ImmutableMap.of("code", "11", "name", "未入住"));
+	}
 
 	/**
 	 * 显示订单需要显示的按钮状态
@@ -168,6 +196,7 @@ public class OrderUtil {
 		jsonObj.put("timeouttime", DateUtils.formatDateTime(DateUtils.addMinutes(returnOrder.getDate("createtime"), 15)));
 		jsonObj.put("promotion", returnOrder.getPromotion());
 		jsonObj.put("coupon", returnOrder.getCoupon());
+		jsonObj.put("receivecashback",returnOrder.getReceiveCashBack());
 		jsonObj.put("isscore", returnOrder.get("isscore") == null ? "F" : returnOrder.get("isscore"));// 是否已评价(T/F)
 		ITicketService ticketService = AppUtils.getBean(TicketService.class);
 
@@ -203,13 +232,14 @@ public class OrderUtil {
 		jsonObj.put("contactsweixin", returnOrder.get("ContactsWeiXin", ""));
 		jsonObj.put("note", returnOrder.get("Note", ""));
 		jsonObj.put("orderstatus", returnOrder.getOrderStatus());
+		// 设置订单状态的汉字描述
+		setOrderStatusName(jsonObj, returnOrder);
 		// jsonObj.put("canshow", returnOrder.getCanshow().equals("T"));// true
 		// or false
 		// 最后可退款时间
-		jsonObj.put("lastrefundtime",
-				DateUtils.getStringFromDate(DateUtils.addDays(returnOrder.getDate("begintime"), -1), DateUtils.FORMATSHORTDATETIME) + lastrefundtime);
-		if (sdf.format(returnOrder.get("createtime")).startsWith(
-				DateUtils.getStringFromDate(returnOrder.getDate("begintime"), DateUtils.FORMATSHORTDATETIME))) {
+		jsonObj.put("lastrefundtime", DateUtils.getStringFromDate(DateUtils.addDays(returnOrder.getDate("begintime"), -1), DateUtils.FORMATSHORTDATETIME) + lastrefundtime);
+		if (sdf.format(returnOrder.get("createtime")).startsWith(DateUtils.getStringFromDate(returnOrder.getDate("begintime"), DateUtils.FORMATSHORTDATETIME))
+				&& returnOrder.getDate("endtime").after(new Date())) {
 			String refundruleStr = refundruleJson.getString("ONE_DAY");
 			jsonObj.put("refundrule", refundruleStr);
 		} else {
@@ -222,17 +252,20 @@ public class OrderUtil {
 			sb.setLength(sb.length() - 1);
 			jsonObj.put("refundrule", MessageFormat.format(refundruleStr, new String[] { sb.toString() }));
 		}
+		// 超过预离时间不显示
+		if (returnOrder.getDate("endtime").before(new Date())) {
+			jsonObj.put("refundrule", "");
+		}
 
 		// 第三方支付
-		if (pay != null && pay.getpOrderLog() != null && pay.getpOrderLog().getBigDecimal("usercost") != null) {
-			BigDecimal needpay = pay.getpOrderLog().getBigDecimal("usercost").subtract(pay.getpOrderLog().getBigDecimal("realcost"));
+		if (pay != null && pay.getpOrderLog() != null && pay.getpOrderLog().getUsercost()!= null) {
+			BigDecimal needpay = pay.getpOrderLog().getUsercost().subtract(pay.getpOrderLog().getRealcost());
 			if (needpay.compareTo(BigDecimal.ZERO) > 0) {
 				List<PPayInfo> list = pay.getPayInfos();
 				boolean find = false;
 				if (list != null) {
 					for (PPayInfo pPayInfo : list) {
-						if (pPayInfo.getType() == PPayInfoTypeEnum.Z2P) {// TODO
-																			// 是否有第三方支付
+						if (pPayInfo.getType() == PPayInfoTypeEnum.Z2P) {// 是否有第三方支付
 							find = true;
 							break;
 						}
@@ -263,52 +296,49 @@ public class OrderUtil {
 			for (TicketInfo ticketInfo : tickes) {
 				// 查找选中的优惠券
 				if (ticketInfo.isSelect()) {
-					if (TicketUselimitEnum.ALL.getType().equals(ticketInfo.getUselimit())||TicketUselimitEnum.YF.getType().equals(ticketInfo.getUselimit())) {// 订单为到付
+					if (TicketUselimitEnum.ALL.getType().equals(ticketInfo.getUselimit())
+							|| TicketUselimitEnum.YF.getType().equals(ticketInfo.getUselimit())) {// 订单为到付
 						logger.info("OrderUtil::循环TicketInfo::" + ticketInfo + "::" + ticketInfo.getSubprice());
 						promotionprice = promotionprice.add(ticketInfo.getSubprice());
-						//重写优惠券价格，供实际支付使用
-						promotionprice = rewritePromotionprice(returnOrder.getTotalPrice(), promotionprice,ticketInfo.getActivityid());
-						
-					} else if(TicketUselimitEnum.PT.getType().equals(ticketInfo.getUselimit())){
+						// 重写优惠券价格，供实际支付使用
+						promotionprice = rewritePromotionprice(returnOrder.getTotalPrice(), promotionprice, ticketInfo.getActivityid());
+					} else if (TicketUselimitEnum.PT.getType().equals(ticketInfo.getUselimit())) {
 						logger.info("OrderUtil::循环TicketInfo::" + ticketInfo + "::" + ticketInfo.getOfflineprice());
 						promotionprice = promotionprice.add(ticketInfo.getOfflineprice());
 					}
-					if(StringUtils.isEmpty(uselimit)){
+					if (StringUtils.isEmpty(uselimit)) {
 						uselimit = ticketInfo.getUselimit();
 					}
 				}
 			}
-			
-			
+
 			if (returnOrder.getTotalPrice().compareTo(promotionprice) > 0) {
 				promotionprice = returnOrder.getTotalPrice().subtract(promotionprice);
 			} else {
 				promotionprice = new BigDecimal(0);
 			}
-			LoggerFactory.getLogger(OrderUtil.class).info("OrderUtil::议价价钱::" + promotionprice.longValue());
 			
+			LoggerFactory.getLogger(OrderUtil.class).info("OrderUtil::议价价钱::" + promotionprice.longValue());
+
 			jsonObj.put("uselimit", uselimit);
-			if(returnOrder.getSpreadUser() != null){//切客时
+			if (returnOrder.getSpreadUser() != null) {// 切客时
 				jsonObj.put("onlinepay", promotionprice);
 				jsonObj.put("offlinepay", promotionprice);
-				
-			}else{
-				
-				if (TicketUselimitEnum.ALL.getType().equals(uselimit)){
+
+			} else {
+				if (TicketUselimitEnum.ALL.getType().equals(uselimit)) {
 					jsonObj.put("onlinepay", promotionprice);
 					jsonObj.put("offlinepay", promotionprice);
-				}else if(TicketUselimitEnum.YF.getType().equals(uselimit)) {// 订单为到付
+				} else if (TicketUselimitEnum.YF.getType().equals(uselimit)) {// 订单为到付
 					jsonObj.put("onlinepay", promotionprice);
-					jsonObj.put("offlinepay", returnOrder.getTotalPrice());//如果前端用了线下支付的，就显示原价
-				} else if(TicketUselimitEnum.PT.getType().equals(uselimit)){
+					jsonObj.put("offlinepay", returnOrder.getTotalPrice());// 如果前端用了线下支付的，就显示原价
+				} else if (TicketUselimitEnum.PT.getType().equals(uselimit)) {
 					jsonObj.put("offlinepay", promotionprice);
-					jsonObj.put("onlinepay", returnOrder.getTotalPrice());//如果前端用了在线支付的，就显示原价
+					jsonObj.put("onlinepay", returnOrder.getTotalPrice());// 如果前端用了在线支付的，就显示原价
 				}
 			}
-			
 		}
-		jsonObj.put("orderretentiontime",
-				DateUtils.getStringFromDate(DateUtils.addMinutes(returnOrder.getDate("createtime"), 15), DateUtils.FORMATDATETIME));
+		jsonObj.put("orderretentiontime", DateUtils.getStringFromDate(DateUtils.addMinutes(returnOrder.getDate("createtime"), 15), DateUtils.FORMATDATETIME));
 		jsonObj.put("receipt", returnOrder.getReceipt());
 		if (returnOrder.getSpreadUser() != null) { // 切客
 			jsonObj.put("spreaduser", returnOrder.getSpreadUser());
@@ -420,9 +450,40 @@ public class OrderUtil {
 			}
 			roomOrder.add(jsonRoom);
 		}// end of loop otaroomorders
-
+		
+		/*********************钱包业务*****************/
+		if ("modify".equals(returnOrder.getStr("act"))) {
+			if(returnOrder.getOrderType()==OrderTypeEnum.YF.getId()){
+				orderService.setAvailableMoney(jsonObj, returnOrder);
+			}else if(returnOrder.getOrderType()==OrderTypeEnum.PT.getId()){
+	        	this.logger.info("返现金额解冻，订单号{}",returnOrder.getId());
+				this.orderService.unLockCashFlow(returnOrder);
+			}
+		} else if (returnOrder.getAvailableMoney() != null && returnOrder.getAvailableMoney().compareTo(new BigDecimal(0)) == 1) {
+			// 非修改场景减掉使用的钱包金额 
+			BigDecimal onlinepay = jsonObj.getBigDecimal("onlinepay");
+			jsonObj.put("onlinepay",onlinepay.subtract(returnOrder.getAvailableMoney()));
+		}
+		/*********************钱包业务*****************/
 		jsonObj.put("roomorder", roomOrder);
-
+		
+		jsonObj.put("citycode", returnOrder.getCityCode());
+		//钱包
+		jsonObj.put("walletcost", returnOrder.getAvailableMoney());
+		
+		BigDecimal cashbackcost = returnOrder.getCashBack() == null? new BigDecimal(0l):returnOrder.getCashBack();
+		//返现
+		jsonObj.put("cashbackcost", cashbackcost);
+		
+		// 设置用户关怀信息
+		if (returnOrder.getOrderStatus() < OtaOrderStatusEnum.Confirm.getId()) {
+			setUserMessage(jsonObj, returnOrder, hotel);
+		}
+		
+		// 计算订单费用明细json数组
+		setOrderPayDetail(jsonObj, returnOrder, tickes);
+//		if (returnOrder.getOrderStatus() >= OtaOrderStatusEnum.Confirm.getId()) {
+//		}
 	}
 
 	/**
@@ -570,7 +631,13 @@ public class OrderUtil {
 			jsonObj.put("check", ticketInfo.getCheck() ? "T" : "F");
 			jsonObj.put("subprice", ticketInfo.getSubprice());
 			jsonObj.put("offlinesubprice", ticketInfo.getOfflineprice());
-			jsonObj.put("type", ticketInfo.getType());
+			//C端写死了类型，此处进行转码
+			if(PromotionTypeEnum.shoudan.getId() == ticketInfo.getType()){
+				jsonObj.put("type", PromotionTypeEnum.immReduce.getId());
+			}else{
+				jsonObj.put("type", ticketInfo.getType());
+			}
+			
 			jsonObj.put("isticket", ticketInfo.getIsticket() ? "T" : "F");
 			jsonObj.put("begintime",
 					ticketInfo.getBegintime() != null ? DateUtils.getStringFromDate(ticketInfo.getBegintime(), DateUtils.FORMATDATETIME) : "");
@@ -621,5 +688,126 @@ public class OrderUtil {
 		}
 		logger.info("OTSMessage::createOrder::checkNotNulls"+_s.toString());
 		return s.length() > 0;
+	}
+
+	/**
+	 * 计算订单费用明细json数组
+	 * @param jsonObj
+	 * @param returnOrder
+	 * @param tickes
+	 */
+	private void setOrderPayDetail(JSONObject jsonObj, OtaOrder returnOrder, List<TicketInfo> tickes) {
+		JSONArray orderpaydetail = new JSONArray();
+		BigDecimal totalprice = returnOrder.getTotalPrice();
+		BigDecimal yijia = new BigDecimal(0);
+		BigDecimal youhuijuan = new BigDecimal(0);
+		BigDecimal lezhubi = returnOrder.getAvailableMoney();
+		if (CollectionUtils.isNotEmpty(tickes)) {
+			for (TicketInfo ticketInfo : tickes) {
+				if (PromotionTypeEnum.yijia.getId().equals(ticketInfo.getType())) {
+					yijia = yijia.add(ticketInfo.getOfflinesubprice());
+				} else if(ticketInfo.isSelect() && ticketInfo.getSubprice().doubleValue() > 0) {
+					youhuijuan = youhuijuan.add(ticketInfo.getSubprice());
+				} else if(ticketInfo.isSelect() && ticketInfo.getOfflineprice().doubleValue() > 0) {
+					youhuijuan = youhuijuan.add(ticketInfo.getOfflineprice());
+				}
+			}
+		}
+		youhuijuan = youhuijuan == null ? new BigDecimal(0) : youhuijuan;
+		lezhubi = lezhubi == null ? new BigDecimal(0) : lezhubi;
+		this.logger.info("setOrderPayDetail:orderid:{},总价:{},优惠劵:{},议价卷:{},乐住币:{}", returnOrder.getId(), totalprice, youhuijuan, yijia, lezhubi);
+		orderpaydetail.add(JSONObject.parse("{\"name\": \"房款\", \"cost\":" + totalprice.toString() + "}"));
+		orderpaydetail.add(JSONObject.parse("{\"name\": \"优惠券\", \"cost\":" + youhuijuan.toString() + "}"));
+		if (yijia.abs().doubleValue() > 0) {
+			orderpaydetail.add(JSONObject.parse("{\"name\": \"议价优惠劵\", \"cost\":" + yijia.toString() + "}"));
+		}
+		orderpaydetail.add(JSONObject.parse("{\"name\": \"红包\", \"cost\":" + lezhubi.toString() + "}"));
+		jsonObj.put("orderpaydetail", orderpaydetail);
+	}
+
+	/**
+	 * 给C端：订单状态的汉字描述
+	 * @param jsonObj
+	 * @param returnOrder
+	 */
+	private void setOrderStatusName(JSONObject jsonObj, OtaOrder returnOrder) {
+		for (Object key : statusMapping.keySet()) {// orderstatus对应C端的状态名称
+			if (key.toString().indexOf(String.valueOf(returnOrder.getOrderStatus())) >= 0) {
+				Object value = statusMapping.get(key);
+				if (value instanceof ImmutableMap) {
+					String code = (String) ((ImmutableMap)value).get("code");
+					String name = (String) ((ImmutableMap)value).get("name");
+					jsonObj.put("orderstatuscode", code);
+					jsonObj.put("orderstatusname", name);
+				}
+				if (returnOrder.getOrderStatus() == 140 && returnOrder.getOrderType() == 2 && (returnOrder.getOrderMethod() == 4 || returnOrder.getOrderMethod() == 5)) {
+					jsonObj.put("orderstatusname", "前台现付");
+				}
+				if (returnOrder.getOrderStatus() >= 160 && returnOrder.getOrderStatus() <= 200 && jsonObj.getString("isscore").equals("F")) {
+					jsonObj.put("orderstatusname", "待评价");
+					jsonObj.put("orderstatuscode", "4");
+				}
+			}
+		}
+	}
+
+	/**
+	 * 设置用户关怀信息
+	 * @param jsonObj
+	 * @param returnOrder
+	 */
+	private void setUserMessage(JSONObject jsonObj, OtaOrder returnOrder, THotel hotel) {
+		Date createTime = returnOrder.getCreateTime();
+		Date endTime = returnOrder.getEndTime();
+		Calendar calNow = Calendar.getInstance();
+		calNow.setTime(createTime);
+		
+		String leavetime = hotel.get("defaultleavetime", "120000");
+		leavetime = leavetime.substring(0, 2);
+		String retentiontime = hotel.get("retentiontime", "180000");
+		retentiontime = retentiontime.substring(0, 2);
+		this.logger.info("setUserMessage::leavetime:{},retentiontime:{}", leavetime, retentiontime);
+		double diff = DateUtils.getDiffHoure(DateUtils.getDatetime(createTime), DateUtils.getDatetime(returnOrder.getDate("begintime")));
+		boolean now = diff <= 2 || DateUtils.getStringFromDate(createTime, "yyyyMMdd").equals(DateUtils.getStringFromDate(returnOrder.getBeginTime(), "yyyyMMdd"));
+		this.logger.info("setUserMessage::now:{},createTime:{},endTime:{}", now, createTime, endTime);
+		// 凌晨23:56-2:00下单，可当天办理入住，提示“您最晚可在xxxx年xx月xx日12：00办理退房哦”
+		if (now && (DateUtils.getStringFromDate(calNow.getTime(), "HH:mm").compareTo("23:56") >= 0 
+				 || DateUtils.getStringFromDate(calNow.getTime(), "HH:mm").compareTo("02:00") < 0)) {
+			String[] times = DateUtils.getStringFromDate(endTime, "yyyy-MM-dd").split("-");
+			jsonObj.put("usermessage", MessageFormat.format("您最晚可在{0}年{1}月{2}日{3}:00办理退房哦", times[0], times[1], times[2], leavetime));
+		} else if(now && calNow.get(calNow.HOUR_OF_DAY) >= 2 && calNow.get(calNow.HOUR_OF_DAY) < 12){
+			//凌晨2:00后下单，必须在12：00后办理入住，提示“您在xxxx年xx月xx日12:00后可办理入住哦”；
+			String[] times = DateUtils.getStringFromDate(createTime, "yyyy-MM-dd").split("-");
+			jsonObj.put("usermessage", MessageFormat.format("您在{0}年{1}月{2}日{3}:00后可办理入住哦",times[0], times[1], times[2], leavetime));
+		} else {
+			jsonObj.put("usermessage", MessageFormat.format("您预订的酒店，在入住日期前一天{0}:00前可进行退款操作；预订今日酒店，付款完成后就不可以修改订单或退款咯", retentiontime));
+		}
+	}
+	
+	public static String doPost(String url, Map<String, String> params, int timeout) throws Exception {
+		String back = "";
+		HttpClient client = new HttpClient();
+		client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
+		PostMethod method = new PostMethod(url);
+		try {
+			method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(1, false));
+			method.getParams().setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET, "UTF-8");
+			method.getParams().setParameter(HttpMethodParams.SO_TIMEOUT, timeout);
+			for (String key : params.keySet()) {
+				method.setParameter(key, params.get(key));
+			}
+			int status = client.executeMethod(method);
+			if (status == HttpStatus.SC_OK) {
+				back = method.getResponseBodyAsString();
+			} else {
+				throw new Exception("异常：" + status);
+			}
+		} catch (Exception e) {
+			logger.info("doPost:异常" + e.getLocalizedMessage());
+			throw e;
+		} finally {
+			method.releaseConnection();
+		}
+		return back;
 	}
 }

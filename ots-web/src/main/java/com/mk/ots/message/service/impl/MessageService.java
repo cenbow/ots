@@ -1,14 +1,13 @@
 package com.mk.ots.message.service.impl;
 
-import com.ctc.wstx.util.StringUtil;
-import java.io.IOException;
-import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,29 +17,32 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
-import com.mk.framework.component.message.*;
+import com.mk.care.kafka.common.CopywriterTypeEnum;
+import com.mk.framework.component.message.AndroidPushMessage;
+import com.mk.framework.component.message.ITips;
+import com.mk.framework.component.message.IosPushMessage;
+import com.mk.framework.component.message.SmsMessage;
+import com.mk.framework.component.message.VoiceMessage;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.common.enums.MessageTypeEnum;
 import com.mk.ots.common.enums.OSTypeEnum;
+import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.manager.OtsCacheManager;
+import com.mk.ots.mapper.BMessageCopywriterMapper;
 import com.mk.ots.member.dao.IMemberDao;
 import com.mk.ots.member.model.UMember;
+import com.mk.ots.message.dao.IBMessageWhiteListDao;
 import com.mk.ots.message.dao.ILMessageLogDao;
 import com.mk.ots.message.dao.ILPushLogDao;
+import com.mk.ots.message.dao.IMessageProviderDao;
+import com.mk.ots.message.model.BMessageCopywriter;
+import com.mk.ots.message.model.BMessageWhiteList;
 import com.mk.ots.message.model.LMessageLog;
 import com.mk.ots.message.model.LPushLog;
+import com.mk.ots.message.model.MessageProvider;
 import com.mk.ots.message.model.MessageType;
 import com.mk.ots.message.service.IMessageService;
-
-import org.elasticsearch.common.base.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import com.mk.ots.order.common.PropertyConfigurer;
 
 /**
  * @author nolan
@@ -54,9 +56,15 @@ public class MessageService implements IMessageService {
 	private ILPushLogDao ilPushLogDao;
 	@Autowired
 	private IMemberDao iMemberDao;
+	@Autowired
+	private IMessageProviderDao iMessageProviderDao;
 
 	@Autowired
 	private OtsCacheManager cacheManager;
+	@Autowired
+	private IBMessageWhiteListDao ibMessageWhiteListDao;
+	@Autowired
+	private BMessageCopywriterMapper bMessageCopywriterMapper;
 	
 	/**
 	 * 发送短信消息
@@ -66,47 +74,181 @@ public class MessageService implements IMessageService {
 	 * @return
 	 */
 	@Override
-	public boolean sendMsg(Long msgid, String phone, String msgContent, MessageTypeEnum messageTypeEnum) {
+	public boolean sendMsg(Long msgid, String phone, String msgContent, MessageTypeEnum messageTypeEnum, String ip) {
 		logger.info("send message: {}, {}, {}", phone, msgContent, messageTypeEnum);
+		Date sendDate=new Date();
 		if (messageTypeEnum == null) {
 			logger.error("短信类型错误. ");
 			throw MyErrorEnum.customError.getMyException("短信类型错误.");
 		}
-
+		
+		
 		boolean rtnstatus = false;
-		try {
+		if(!checkWhitelist(phone)){
+			return rtnstatus;
+		}
+	    try {
 			ITips message = null;
 			if (messageTypeEnum == MessageTypeEnum.normal) {
-				message = new SmsMessage();
+			    message = new SmsMessage();
 			} else if (messageTypeEnum == MessageTypeEnum.audioMessage) {
-				message = new VoiceMessage();
-			}
+			    message = new VoiceMessage();
+			} 
 
 			ITips setContent = message.setTitle("--").setReceivers(phone).setContent(msgContent).setMsgId(msgid);
-			for (int i = 0, n = 2; i < n; i++) {
+			for(int i=0,n=2; i<n; i++){
 				rtnstatus = setContent.send();
 				logger.info("发送短信响应结果:{}", rtnstatus);
-				if (rtnstatus) {
+				if(rtnstatus){
 					logger.info("发送短信成功.....{}", phone);
 					break;
-				} else {
-					logger.info("第{}次重新发送短信....", i + 1);
+				}else{
+					logger.info("第{}次重新发送短信....", i+1);
 				}
-			}
-
-			if (!rtnstatus) {
-				logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);
+		    }
+			
+			if(!rtnstatus){
+				logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);	
 			}
 		} catch (Exception e) {
 			logger.error("send message occur error. info: {}, {}, {}.", phone, msgContent, messageTypeEnum);
 			e.printStackTrace();
 		}
+		
 
 		return rtnstatus;
 	}
-
+	
+	/**
+	 * 根据权重随机生成消息发送实体
+	 * @param messageTypeEnum
+	 * @return
+	 */
+	public ITips getMessageInstanceWithWeight( MessageTypeEnum messageTypeEnum,String ExceptProvider){
+		ITips message = null;
+		String[] providerClasStrings=getMessageProviderClasses(ExceptProvider);
+		if (providerClasStrings==null) {
+			return null;
+		}
+		try {
+			for (int j = 0; j < providerClasStrings.length; j++) {
+				if (messageTypeEnum == MessageTypeEnum.normal) {
+					if (providerClasStrings[j].toLowerCase().contains("sms")) {
+						message=(ITips)Class.forName(providerClasStrings[j]).newInstance();
+						break;
+					}
+				} else if (messageTypeEnum == MessageTypeEnum.audioMessage) {
+					if (providerClasStrings[j].toLowerCase().contains("voice")) {
+						message=(ITips)Class.forName(providerClasStrings[j]).newInstance();
+						break;
+					}
+				} 
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return message;
+	}
+	
+	/**
+	 * 返回可用运营商对应的类列表
+	 * @param ExceptProvider
+	 * @return
+	 */
+	public String[] getMessageProviderClasses(String ExceptProvider) {
+		List<MessageProvider> providers=iMessageProviderDao.queryAllProviders(ExceptProvider);
+		if (providers!=null &&providers.size()>0) {
+			/*for (MessageProvider messageProvider : providers) {
+				logger.info(messageProvider.getProvidename());
+			}*/
+			Long total=0l;
+			Long[] temp=new Long[providers.size()];
+			for (int i = 0; i < providers.size(); i++) {
+				total+=providers.get(i).getWeight();
+				temp[i]=total;
+			}
+			Double randomLong=Math.random()*total;
+			logger.info(randomLong+" : "+total);
+			for (int i = 0; i < temp.length; i++) {
+				if (randomLong<=temp[i]) {
+					String providerClasString=providers.get(i).getProviderclass();
+					String[] providerClasStrings;
+					if (Strings.isNullOrEmpty(providerClasString)) {
+						logger.info("数据库中providerClass字段为空！");
+						return null;
+					}else {
+						providerClasStrings=providerClasString.split(",");
+						logger.info("数据库中providerClass内容为："+providerClasString);
+						return providerClasStrings;
+					}
+				}
+			}
+			return null;
+		}else {
+			return null;
+		}
+	}
+	
+	/**
+	 * 重新发送消息
+	 * @param phone
+	 * @param msgContent
+	 * @param messageTypeEnum
+	 * @param ip
+	 * @return
+	 */
 	@Override
-	public Long logsms(String phone, String msgContent, MessageTypeEnum messageTypeEnum, String source, String ip) {
+	public boolean reSendMsg(Long msgid,String phone, String msgContent, MessageTypeEnum messageTypeEnum, String ip,Date sendDate,String ExceptProvider) {
+		boolean result=false;
+		logger.info("手机号：{}，短信：{}重发开始！",phone,msgContent);
+		//获取配置文件中重发消息的时间间隔
+		Properties properties;
+		int interval=30; 
+		try {
+			properties = PropertiesLoaderUtils
+					.loadAllProperties("/message.properties");
+			interval = properties.get("message.resendtime") == null ? 30
+					: Integer.parseInt(properties.get("message.resendtime")
+							.toString());
+
+			if (new Date().before(DateUtils.addSeconds(sendDate, interval))) {
+				logger.info("在发送失败重发时间间隔内，重新发送短信");
+				ITips iTips = getMessageInstanceWithWeight(messageTypeEnum,
+						ExceptProvider);
+				if (iTips == null) {
+					logger.info("不能获取短信运营商实例！");
+				} else {
+					ITips setContent = iTips.setTitle("--").setMobiles(phone)
+							.setContent(msgContent).setMsgId(msgid);
+					result = setContent.send();
+					logger.info("发送短信响应结果:{}", result);
+
+					logsms(phone, msgContent, messageTypeEnum, "", ip, iTips
+							.getClass().getSimpleName(), result);
+
+					if (!result) {
+						logger.error(
+								"resend message occur error. info: {}, {}, {}. ",
+								phone, msgContent, messageTypeEnum);
+					}
+				}
+			} else {
+				logger.info("超过发送失败重发时间间隔，不在重新发送短信!");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * @param phone
+	 * @param msgContent
+	 * @param messageTypeEnum
+	 */
+	@Override
+	public Long logsms(String phone, String msgContent, MessageTypeEnum messageTypeEnum, String source, String ip, String provider,Boolean result){
 		LMessageLog log = new LMessageLog();
 		log.setMessage(msgContent);
 		log.setPhone(phone);
@@ -114,6 +256,8 @@ public class MessageService implements IMessageService {
 		log.setIp(ip);
 		log.setTime(new Date());
 		log.setType(Integer.parseInt(messageTypeEnum.getId()));
+		log.setSuccess(result);
+		log.setProvidername(provider);
 		iLMessageLogDao.insert(log);
 		return log.getId();
 	}
@@ -125,11 +269,21 @@ public class MessageService implements IMessageService {
 
 
 	@Override
-	public boolean PushMsg(String phone, String title, String msgContent, String msgtype, String url, Long activeid) {
+	public boolean pushMsg(String phone, String title, String msgContent, String msgtype, String url, Long activeid) {
 		logger.info(">>>推送消息----------------------//开始");
 		logger.info(">>> param: {}, {}, {}, {}, {}.", phone, title, msgContent, msgtype, url);
 
+		
+		if(StringUtils.isBlank(msgContent)){
+			logger.info("消息内容为空，不发送");
+			return false;
+		}
+		
+		
 		boolean result = false;
+		if(!checkWhitelist(phone)){
+			return result;
+		}
 		Optional<List<UMember>> of = Optional.absent();
 		if (MessageType.USER.getId().equals(msgtype)) {
 			of = iMemberDao.findPushMember(phone);
@@ -181,10 +335,30 @@ public class MessageService implements IMessageService {
 
 	}
 	
+	/**
+	 * 校验号码是否在白名单中
+	 * @param phone
+	 * @return
+	 */
+	private boolean checkWhitelist(String phone){
+		try {
+			String testorformal = PropertyConfigurer.getProperty("sendmess.testorformal");
+			if ("0".equals(testorformal)) { //0 为测试环境,1为线上环境
+				BMessageWhiteList bmwl = ibMessageWhiteListDao.findByPhone(phone);
+				if (bmwl==null) {
+					logger.info("phone["+phone+"]不在白名单中");
+					return false;
+				}
+			}
+		} catch (Exception e) {
+			logger.error("判断手机号在不在白名单中程序出错",e);
+		}
+		return true;
+	}
 
 	@Override
 	public boolean pushMsg(String phone, String title, String msgContent, String msgtype, String url) {
-		return PushMsg(phone, title, msgContent, msgtype, url, null);
+		return pushMsg(phone, title, msgContent, msgtype, url, null);
 	}
 
 	@Override
@@ -241,7 +415,7 @@ public class MessageService implements IMessageService {
 
 
 	@Override
-	public boolean PushMsgToAll(String title, String msgContent,
+	public boolean pushMsgToAll(String title, String msgContent,
 			String msgtype, String url, String pushid) {
 		boolean result=false;
 		logger.info(">>>开始广播 msgtype(1用户,2广播):{}",msgtype);
@@ -249,15 +423,19 @@ public class MessageService implements IMessageService {
 		ITips androidPushMessage = new AndroidPushMessage();
 		ITips iosPushMessage = new IosPushMessage();
 		boolean sendflag = false;
+		boolean sendflag1 = false;
+		boolean sendflag2 = false;
 		if (androidPushMessage != null && iosPushMessage != null) {
 			try {
-				sendflag = androidPushMessage.setMsgtype(msgtype)
+				sendflag1 = androidPushMessage.setMsgtype(msgtype)
 						.setTitle(title).setUrl(url).setContent(msgContent)
-						.send()
-						&& iosPushMessage.setMsgtype(msgtype).setTitle(title)
+						.send();
+				sendflag2 = iosPushMessage.setMsgtype(msgtype).setTitle(title)
 								.setUrl(url).setContent(msgContent).send();
+				
+				sendflag = sendflag1 && sendflag2;
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("发送消息异常",e);
 			}
 			Optional<List<UMember>> of = Optional.absent();
 			of = iMemberDao.findPushMember(null);
@@ -290,7 +468,7 @@ public class MessageService implements IMessageService {
 	}
 
 	@Override
-	public boolean PushMsgToGroup(String usergroupid, String title, String msgContent, String msgtype, String url, String pushid) {
+	public boolean pushMsgToGroup(String usergroupid, String title, String msgContent, String msgtype, String url, String pushid) {
 		boolean result=false;
 		logger.info(">>>开始组播消息 usergroupid：{}， title：{}， msgContent：{}， msgtype：{}， url：{}， pushid：{}",usergroupid,title,msgContent,msgtype,url,pushid);
 		Optional<List<UMember>> of = Optional.absent();
@@ -301,6 +479,11 @@ public class MessageService implements IMessageService {
 		StringBuffer iosString=new StringBuffer();
 		if (of.isPresent()) {
 			for (UMember umember : of.get()) {
+				if(!checkWhitelist(umember.getPhone())){
+					logger.info("存在不在白名单里的用户，phone："+umember.getPhone());
+					return result;
+				}
+				
 				if (OSTypeEnum.ANDROID.getId().equals(umember.getOstype())) {
 					androidString.append(umember.getChannelid()).append(",");
 				}else if (OSTypeEnum.IOS.getId().equals(umember.getOstype())) {
@@ -386,12 +569,15 @@ public class MessageService implements IMessageService {
 		return ilPushLogDao.find(pushlog);
 	}
 
+
+	
 	@Override
-	public void rewriteReport(Long msgid, boolean reportstatus, String reporttime) {
+	public void rewriteReport(Long msgid, boolean reportstatus, String reporttime,String provider) {
 		logger.info("RewriteReport(回执信息) msgid:{}, reportstatus:{}, reporttime:{}", msgid, reportstatus, reporttime);
 		LMessageLog message = new LMessageLog();
 		message.setId(msgid);
 		message.setSuccess(reportstatus);
+		message.setProvidername(provider);
 		message.setReporttime(reporttime);
 		this.iLMessageLogDao.update(message);
 	}
@@ -410,6 +596,11 @@ public class MessageService implements IMessageService {
 		//id 只是将时间间隔临时的放在这个属性中，此时的ID不是主键的意思
 		msg.setId(timeSpace);
 		return this.iLMessageLogDao.findCount("selectCountByPhoneAndMsg", msg);
+	}
+	
+	@Override
+	public LMessageLog findMsgById(Long id) {
+		return iLMessageLogDao.findById(id);
 	}
 
 	public Long findActiveCount(LPushLog lPushLog) {
@@ -497,5 +688,60 @@ public class MessageService implements IMessageService {
 			}
 		}
         return checkResult;
+	}
+
+	@Override
+	public boolean sendCode(Long msgid, String phone, String msgContent,
+			MessageTypeEnum messageTypeEnum, String ip) {
+		logger.info("send code: {}, {}, {}", phone, msgContent, messageTypeEnum);
+		Date sendDate=new Date();
+		if (messageTypeEnum == null) {
+			logger.error("短信类型错误. ");
+			throw MyErrorEnum.customError.getMyException("短信类型错误.");
+		}
+		boolean rtnstatus = false;
+		try {
+			//获取消息发送实体
+			ITips message =getMessageInstanceWithWeight(messageTypeEnum,null);
+			if (message==null) {
+				logger.info("不能获取短信运营商实例！");
+			}else {
+				//语音验证码
+				if(messageTypeEnum.equals(MessageTypeEnum.normal)){
+					//如果是sms发送验证码，则需自己拼接前后缀
+					if (!message.getClass().getName().contains("Yun")) {
+
+						BMessageCopywriter record =new BMessageCopywriter();
+						
+						record.setCopywriterType(CopywriterTypeEnum.register_check.getId());
+						record.setMsgType(1);
+						BMessageCopywriter bMessageCopywriter = bMessageCopywriterMapper.selectByType(record);
+						if(bMessageCopywriter!=null && StringUtils.isNotBlank(bMessageCopywriter.getCopywriter())){
+							msgContent = MessageFormat.format(bMessageCopywriter.getCopywriter(), msgContent);
+						}else{
+							msgContent="验证码："+msgContent+"（眯客弹指间有房间，保证低价、快速入住)";
+						}
+					}
+				}
+				
+				ITips setContent = message.setTitle("--").setMobiles(phone).setContent(msgContent).setMsgId(msgid);
+				rtnstatus = setContent.send();
+				logger.info("发送短信响应结果:{}", rtnstatus);
+				//更新数据库发送状态
+				rewriteReport(msgid, rtnstatus, sendDate.toString(), message.getClass().getSimpleName());
+				//发送失败则重新发送短信
+				if (!rtnstatus) {
+					rtnstatus=reSendMsg(msgid, phone, msgContent, messageTypeEnum, ip,sendDate,message.getClass().getName());
+				}
+				
+				if(!rtnstatus){
+					logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);	
+				}
+			}
+		} catch (Exception e1) {
+			logger.error("send message occur error. info: {}, {}, {}.", phone, msgContent, messageTypeEnum);
+			e1.printStackTrace();
+		}
+		return rtnstatus;
 	}
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ import com.mk.ots.hotel.model.THotelModel;
 import com.mk.ots.hotel.model.TRoomModel;
 import com.mk.ots.hotel.model.TRoomTypeInfoModel;
 import com.mk.ots.hotel.model.TRoomTypeModel;
+import com.mk.ots.hotel.service.HotelPriceService;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomService;
 import com.mk.ots.hotel.service.RoomTypeService;
@@ -42,13 +44,14 @@ import com.mk.ots.mapper.ERoomtypeInfoMapper;
 import com.mk.ots.mapper.TFacilityMapper;
 import com.mk.ots.mapper.THotelMapper;
 import com.mk.ots.mapper.TRoomtypeInfoMapper;
-import com.mk.ots.pay.module.weixin.pay.common.Tools;
+import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.ots.rpc.service.PmsSoapServiceImpl;
 import com.mk.pms.hotel.bean.PMSHotelInfoJSONBean;
 import com.mk.pms.hotel.bean.PMSRoomBean;
 import com.mk.pms.hotel.bean.PMSRoomTypeBean;
 import com.mk.pms.myenum.PmsErrorEnum;
 import com.mk.pms.myenum.PmsStatusEnum;
+import com.mk.pms.order.control.PmsUtilController;
 
 import jodd.util.StringUtil;
 
@@ -97,6 +100,9 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 
 	@Autowired
 	private PmsSoapServiceImpl pmsSoapServiceImpl;
+	
+	@Autowired
+	private HotelPriceService hotelPriceService;
 	
 	/**
 	 * 安装PMS
@@ -180,9 +186,12 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 
 			boolean isSucced = this.syncRoomTypes(hotelId, eHotel.getHotelname(), roomNum, pmsHotelInfoJsonBean.getRoomtype());
 			if(isSucced){
-				resultMap.put("success", true);
-				//刷新价格
+				//需要废弃
 				roomstateService.updateHotelMikepricesCache(hotelId, null, true);
+				
+				hotelPriceService.refreshMikePrices(hotelId);
+				
+				resultMap.put("success", true);
 			}else{
 				resultMap.put("success", false);
 				resultMap.put("errcode", -1);
@@ -190,7 +199,7 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 			}
 			return resultMap;
 		}catch(Exception e){
-		    logger.error("PMS2.0同步房间:: syncHotelInfo method error: {}", e.getMessage());
+		    logger.error("PMS2.0同步房间:: syncHotelInfo method error:{},{}",hotelId, e.getMessage());
 			resultMap.put("success", false);
 			resultMap.put("errcode", PmsErrorEnum.noknowError.getErrorCode());
 			resultMap.put("errmsg", e.getMessage());
@@ -665,7 +674,7 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 	 private String doPostJson(String url, String json) {
 			JSONObject back = new JSONObject();
 			try {
-				return Tools.dopostjson(url, json);
+				return PayTools.dopostjson(url, json);
 			} catch (Exception e) {
 				logger.info("doPostJson参数:{},{},异常:{}", url, json, e.getLocalizedMessage());
 				e.printStackTrace();
@@ -739,5 +748,55 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("success",true);
 		return resultMap;
+	}
+
+	@Override
+	public Map<String, Object> installPms(String hotelPMS,String hotelname) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		JSONObject hotel = new JSONObject();
+		hotel.put("hotelid", hotelPMS);
+		hotel.put("hotelname", hotelname);
+		String resultJSONStr=doPostJson(UrlUtils.getUrl("newpms.url") + "/online", hotel.toJSONString());
+		JSONObject jsonOBJ = null;
+		jsonOBJ = JSON.parseObject(resultJSONStr);
+		
+		if (jsonOBJ.getBooleanValue("success")) {
+			EHotelModel eHotel = eHotelmapper.selectByPms(hotelPMS);
+			if(eHotel==null){
+				logger.error("PMS2.0安装PMS，更新安装状态失败，PMS为 {} 的酒店不存在",hotelPMS);
+				resultMap.put("success", false);
+				resultMap.put("errcode", "-1");
+				resultMap.put("errmsg", "PMS2.0安装PMS，更新安装状态失败，PMS为 "+hotelPMS+" 的酒店不存在");
+			}else{
+				//更新酒店安装状态为-1，(安装完成，同步数据过程中)
+				eHotel.setState(-1);
+				eHotelmapper.updateByPrimaryKeySelective(eHotel);
+				resultMap.put("success", true);
+			}
+			
+		} else {
+			logger.error("PMS2.0安装PMS,调用酒店上线接口失败:{}", jsonOBJ.getString("errmsg"));
+			resultMap.put("success", false);
+			resultMap.put("errcode", jsonOBJ.getString("errcode"));
+			resultMap.put("errmsg", jsonOBJ.getString("errmsg"));
+		}
+		return resultMap;
+	}
+
+	@Override
+	public void sendOfflineMsg(String hotelPMS) {
+		JSONObject hotel = new JSONObject();
+		hotel.put("hotelid", hotelPMS);
+		String resultJSONStr=doPostJson(UrlUtils.getUrl("newpms.url") + "/offline", hotel.toJSONString());
+		JSONObject jsonOBJ = null;
+		jsonOBJ = JSON.parseObject(resultJSONStr);
+		
+		if (jsonOBJ.getBooleanValue("success")) {
+			logger.info("调用pms下线成功,hotelPMS{}:return{}",hotelPMS,resultJSONStr);
+		    
+		} else {
+			logger.info("调用pms下线失败,hotelPMS{}:return{}",hotelPMS,resultJSONStr);
+		}
 	}
 }

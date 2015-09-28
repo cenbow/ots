@@ -2,6 +2,8 @@ package com.mk.ots.message.model;
 
 import java.util.Date;
 
+import org.stringtemplate.v4.compiler.CodeGenerator.primary_return;
+
 public class LMessageLog {
 	
 	private Long id;
@@ -21,6 +23,8 @@ public class LMessageLog {
 	private Boolean success;
 
 	private String reporttime;
+	
+	private String providername;
 	    
 	public String getReporttime() {
 		return reporttime;
@@ -28,6 +32,14 @@ public class LMessageLog {
 
 	public void setReporttime(String reporttime) {
 		this.reporttime = reporttime;
+	}
+
+	public String getProvidername() {
+		return providername;
+	}
+
+	public void setProvidername(String providername) {
+		this.providername = providername;
 	}
 
 	public Long getId() {

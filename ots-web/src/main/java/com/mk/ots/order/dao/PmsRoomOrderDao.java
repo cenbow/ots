@@ -12,18 +12,8 @@ import com.mk.ots.order.bean.PmsRoomOrder;
 public class PmsRoomOrderDao {
 	
 	public PmsRoomOrder getPmsRoomOrder(String pmsRoomOrderNo, Long hotelId){
-		StringBuffer sql = new StringBuffer("select * from b_otaroomorder ox where ");
-		List<Object> paras = new ArrayList<>();
-		if(StringUtils.isNotBlank(pmsRoomOrderNo)){
-			sql.append(" and ox.PmsRoomOrderNo = ?");
-			paras.add(pmsRoomOrderNo);
-		}
-		if(!"".equals(hotelId) && hotelId != null){
-			sql.append(" and ox.Hotelid = ?");
-			paras.add(hotelId);
-		}
-		return PmsRoomOrder.dao.find(sql.toString(), paras).get(0);
-		
+		StringBuffer sql = new StringBuffer("select * from b_pmsroomorder ox where ox.PmsRoomOrderNo = ? and ox.Hotelid = ? ");
+		return PmsRoomOrder.dao.find(sql.toString(), pmsRoomOrderNo, hotelId).get(0);
 	}
     
 	public PmsRoomOrder getCheckInTime(Long otaorderid){

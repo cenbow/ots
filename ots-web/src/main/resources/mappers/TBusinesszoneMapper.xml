@@ -109,4 +109,17 @@
 	left join t_businesszone b on a.businesszoneid=b.id 
 	left join t_businesszonetype c on b.businessZoneType=c.id where hotelid=#{hotelid}
   </select>
+  
+  
+  <select id="getBusinessZoneByCityCode" resultMap="BaseResultMap" parameterType="java.lang.String">
+  	SELECT
+		c.type AS businesszonetype,
+		a. NAME AS NAME
+	FROM
+		t_businesszone a
+	INNER JOIN t_city b ON a.cityid = b.cityid
+	LEFT JOIN t_businesszonetype c ON a.businessZoneType = c.businesszone_type
+	WHERE
+		b. CODE = #{citycode};
+  </select>
 </mapper>

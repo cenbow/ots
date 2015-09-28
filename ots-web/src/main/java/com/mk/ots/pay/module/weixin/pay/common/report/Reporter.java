@@ -40,8 +40,13 @@ public class Reporter {
     		t = new Thread(r);
     	    t.setDaemon(true);  //后台线程
     	    t.start();
+    	}else if(type.getId().intValue()==WxType.test_app.getId().intValue()){
+    		TestAppReportRunable  r=new TestAppReportRunable(rs);
+    		t = new Thread(r);
+    	    t.setDaemon(true);  //后台线程
+    	    t.start();
     	}
     		
-       
+    	
     }
 }

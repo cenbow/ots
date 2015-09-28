@@ -480,17 +480,21 @@ public class OrderDAO extends BaseDAO {
 	}
 
 	/**
-	 * 判断用户是否已经有了未完成的订单
-	 *
-	 * @param mid
-	 * @param startTime
-	 * @param endTime
-	 * @return
-	 */
-	public Long findOrderCountByMid(Long mid, Date startTime, Date endTime) {
-		String sql = "select count(id) c from b_otaorder t where orderStatus in (120,140,160,180,190,200,520) " + "and mid=? and t.Begintime < ? and t.Endtime > ?";
-		return Db.queryLong(sql, mid, endTime, startTime);
-	}
+     * 判断用户是否已经有了未完成的订单
+     *
+     * @param mid
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    public List<Bean> findOrderCountByMid(Long mid, Date startTime, Date endTime) {
+        String sql = "select id, ordertype, orderstatus, paystatus from b_otaorder t where "
+                + " orderStatus in (120,140,160,180,190,200,520) " 
+                + " and mid=? "
+                + " and t.Begintime < ? "
+                + " and t.Endtime > ?";
+        return Db.find(sql, mid, endTime, startTime);
+    }
 
 	/**
 	 * 订单数量统计
@@ -531,7 +535,7 @@ public class OrderDAO extends BaseDAO {
 	 * @return
 	 */
 	public Long findMonthlySaleByHotelId(Long hotelId, String beforetime, String yestertime) {
-		String sql = "SELECT count(1) FROM b_otaorder WHERE HotelId = ? AND OrderStatus IN (180, 190, 200) AND Createtime BETWEEN ? AND ?";
+		String sql = "SELECT count(1) FROM b_otaorder WHERE HotelId = ? AND OrderStatus IN (180, 190, 200) AND DATE_FORMAT(Createtime, '%Y%m%d%H%i%s') BETWEEN ? AND ?";
 		return Db.queryLong(sql, hotelId, beforetime, yestertime);
 	}
 	
@@ -540,7 +544,7 @@ public class OrderDAO extends BaseDAO {
 	 * @return
 	 */
 	public List<Bean> findAllMonthlySales(String beforetime, String yestertime) {
-		String sql = "SELECT HotelId as hid, count(HotelId) cnt FROM b_otaorder WHERE OrderStatus IN (180, 190, 200) AND Createtime BETWEEN ? AND ? GROUP BY HotelId";
+		String sql = "SELECT HotelId as hid, count(HotelId) cnt FROM b_otaorder WHERE OrderStatus IN (180, 190, 200) AND DATE_FORMAT(Createtime, '%Y%m%d%H%i%s') BETWEEN ? AND ? GROUP BY HotelId";
 		return Db.find(sql, beforetime, yestertime);
 	}
 	
@@ -594,5 +598,12 @@ public class OrderDAO extends BaseDAO {
 		sql.append("order by t.id ");
 
 		return OtaOrder.dao.find(sql.toString(), paras.toArray());
+	}
+	
+	public List<OtaOrder> findPayingConfirmedOrders(int interval) {
+		
+		String sql = "select * from b_otaorder where ordertype=1 and orderstatus=140 and paystatus=110 and (NOW() - INTERVAL ? MINUTE) > createtime";
+		
+		return OtaOrder.dao.find(sql, interval);
 	}
 }

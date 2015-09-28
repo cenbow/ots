@@ -57,9 +57,110 @@ public class BillOrderDAO {
 		//设置每天订单执行范围 当天00:00  小于第二天的时间
 		String startTime = DateUtils.getStringFromDate(beginTime, DateUtils.FORMAT_DATE);
 		String endTime = DateUtils.getDateAdded(1, startTime);
+		String theMonthFirstDay = DateUtils.getMonthFirstDay(DateUtils.getDatetime(beginTime));
+		String theLastMonthFirstDay = DateUtils.getMonthFirstDay(DateUtils.getDateAdded(-1, theMonthFirstDay)); //下个月1号的时间
 		
-		//每天查询订单信息 sql
+		//每天查询订单信息 sql 
 		StringBuffer sql = new StringBuffer();
+		StringBuffer sql0updatetime = new StringBuffer();
+		StringBuffer sql0noshow = new StringBuffer();
+		//每天查询订单信息sql 查询noshow 520状态的订单
+		String sql0noshow1 = "SELECT "
+				+ "o.id orderid, "
+				+ "o.HotelId hotelid, "
+				+ "o.OrderStatus orderstatus, "
+				+ "o.Ordertype ordertype, "
+				+ "o.Paystatus paystatus, "
+				+ "o.Begintime begintime, "
+				+ "o.Endtime endtime, "
+				+ "o.Createtime orderCreatetime, "
+				+ "o.daynumber daynumber, "
+				+ "( "
+					+ "CASE "
+					+ "WHEN isnull(o.spreadUser) THEN "
+					 + "1 " //非切客
+					+ "ELSE "
+					 + "2 " //切客 有值
+					+ "END "
+				+ ") AS spreaduser, "
+				+ "bpp.promotion isPromotion, " //判断切客是否绑定优惠券 A规则 = 4 则绑定优惠券
+				+ "o.Invalidreason invalidreason, "
+				+ "ro.RoomTypeName roomtypename, "
+				+ "ro.RoomNo roomno, "
+				+ "ox.checkintime checkintime, "
+				+ "o.rulecode rulecode "
+				+ "FROM "
+				+ "b_otaorder o "
+					+ "LEFT JOIN b_otaroomorder ro ON o.id = ro.OtaOrderId "
+					+ "LEFT JOIN b_pmsroomorder ox ON ro.PMSRoomOrderNo = ox.PmsRoomOrderNo "
+					+ "AND ro.Hotelid = ox.Hotelid "
+					+ "LEFT JOIN b_promotion_price bpp ON o.id = bpp.otaorderid "
+				+ "WHERE "
+				+ "o.updatetime >= :startTime "
+				+ "AND o.updatetime < :endTime "
+				+ "AND o.orderstatus = 520 AND o.Ordertype = 1 "
+				+ "AND NOT EXISTS ( "
+					+ "SELECT "
+					+ "	 orderid "
+					+ "FROM "
+					+ "	 b_bill_orders "
+					+ "WHERE "
+					+ "	 o.id = b_bill_orders.orderid "
+				+ ")";
+		sql0noshow.append(sql0noshow1);
+		if(null != hotelid){
+			sql0noshow.append(" AND o.hotelid = " + hotelid);
+		}
+		//每天查询订单信息sql 查询update时间是当天的 如果update时间是当天并且该订单没有在 结算的订单明细表中 则把这一类的订单添加到明细表中。
+		String sql0updatetime1 = "SELECT "
+				+ "o.id orderid, "
+				+ "o.HotelId hotelid, "
+				+ "o.OrderStatus orderstatus, "
+				+ "o.Ordertype ordertype, "
+				+ "o.Paystatus paystatus, "
+				+ "o.Begintime begintime, "
+				+ "o.Endtime endtime, "
+				+ "o.Createtime orderCreatetime, "
+				+ "o.daynumber daynumber, "
+				+ "( "
+					+ "CASE "
+					+ "WHEN isnull(o.spreadUser) THEN "
+					 + "1 " //非切客
+					+ "ELSE "
+					 + "2 " //切客 有值
+					+ "END "
+				+ ") AS spreaduser, "
+				+ "bpp.promotion isPromotion, " //判断切客是否绑定优惠券 A规则 = 4 则绑定优惠券
+				+ "o.Invalidreason invalidreason, "
+				+ "ro.RoomTypeName roomtypename, "
+				+ "ro.RoomNo roomno, "
+				+ "ox.checkintime checkintime, "
+				+ "o.rulecode rulecode "
+				+ "FROM "
+				+ "b_otaorder o "
+					+ "LEFT JOIN b_otaroomorder ro ON o.id = ro.OtaOrderId "
+					+ "LEFT JOIN b_pmsroomorder ox ON ro.PMSRoomOrderNo = ox.PmsRoomOrderNo "
+					+ "AND ro.Hotelid = ox.Hotelid "
+					+ "LEFT JOIN b_promotion_price bpp ON o.id = bpp.otaorderid "
+				+ "WHERE "
+				+ "o.updatetime >= :startTime "
+				+ "AND o.updatetime < :endTime "
+				+ "AND ox.checkintime >= :theLastMonthFirstDay "
+				+ "AND ox.checkintime < :startTime "
+				+ "AND ((o.orderstatus IN (180, 190, 200) AND o.Ordertype = 2) "
+				+ "OR (o.Ordertype = 1 AND o.Paystatus = 120)) "
+				+ "AND NOT EXISTS ( "
+					+ "SELECT "
+					+ "	 orderid "
+					+ "FROM "
+					+ "	 b_bill_orders "
+					+ "WHERE "
+					+ "	 o.id = b_bill_orders.orderid "
+				+ ")";
+		sql0updatetime.append(sql0updatetime1);
+		if(null != hotelid){
+			sql0updatetime.append(" AND o.hotelid = " + hotelid);
+		}
 		String sql0 = "SELECT "
 				+ "o.id orderid, "
 				+ "o.HotelId hotelid, "
@@ -94,29 +195,39 @@ public class BillOrderDAO {
 				+ "ox.checkintime >= :startTime "
 				+ "AND ox.checkintime < :endTime "
 				+ "AND ((o.orderstatus IN (180, 190, 200) AND o.Ordertype = 2) "
-				+ "OR (o.Ordertype = 1 AND o.Paystatus = 120)) ";
+				+ "OR (o.Ordertype = 1 AND o.Paystatus = 120)) "
+				+ "AND NOT EXISTS ( "
+					+ "SELECT "
+					+ "	 orderid "
+					+ "FROM "
+					+ "	 b_bill_orders "
+					+ "WHERE "
+					+ "	 o.id = b_bill_orders.orderid "
+				+ ") ";
 		sql.append(sql0);
 		if(null != hotelid){
-			sql.append("AND o.hotelid = " + hotelid);
+			sql.append(" AND o.hotelid = " + hotelid);
 		}
 				
 		//每天查询 订单各种金额 sql
 		String sql2 = "SELECT "
 				+ "o.id AS orderid, "
 				+ "ol.payid AS payid, "
-				+ "ol.allcost AS allcost, "
+				+ "ol.realallcost AS allcost, "
 				+ "ol.hotelgive AS hotelgive,  "
 				+ "ol.otagive AS otagive, "
 				+ "( "
 					+ "CASE " 
-					+ "WHEN o.ordertype = 1 AND o.paystatus = 120 THEN ol.usercost " 
+					+ "WHEN o.ordertype = 1 AND o.paystatus = 120 THEN ol.realcost " 
 					+ "WHEN o.ordertype = 2 THEN 0 " 
 					+ "ELSE 0 " 
 					+ "END "
 				+ ") AS usercost, " 
 				+ "ol.realcost AS realcost, "
 				+ "ol.realotagive AS realotagive, "
-				+ "ol.qiekeIncome AS qiekeIncome "
+				+ "ol.qiekeIncome AS qiekeIncome, "
+				//钱包字段
+				+ "o.availablemoney As availablemoney "
 				+ "FROM "
 					+ "b_otaorder o "
 					+ "LEFT JOIN p_pay p ON o.id = p.orderid "
@@ -126,21 +237,55 @@ public class BillOrderDAO {
 		
 		//插入到数据表中 b_bill_orders
 		final String insertSql = "insert into b_bill_orders " 
-				+ "(hotelid, orderid, ordertype, roomtypename, roomno, begintime, endtime, daynumber, allcost, usercost, cutcost, hotelgive, othergive, servicecost, createtime, isPromotion, Invalidreason, payStatus, spreadUser, checkintime, prepaymentDiscount, toPayDiscount, rulecode, orderCreatetime) values "
-				+ "(:hotelid, :orderid, :ordertype, :roomtypename, :roomno, :begintime, :endtime, :daynumber, :allcost, :usercost, :cutcost, :hotelgive, :othergive, :servicecost, :createtime, :isPromotion, :invalidreason, :paystatus, :spreaduser, :checkintime, :prepaymentDiscount, :toPayDiscount, :rulecode, :orderCreatetime)";
+				+ "(hotelid, orderid, ordertype, roomtypename, roomno, begintime, endtime, daynumber, allcost, usercost, cutcost, hotelgive, othergive, servicecost, createtime, isPromotion, Invalidreason, payStatus, spreadUser, checkintime, prepaymentDiscount, toPayDiscount, rulecode, orderCreatetime, statusTime,"
+				//钱包字段
+				+ "availablemoney) values "
+				+ "(:hotelid, :orderid, :ordertype, :roomtypename, :roomno, :begintime, :endtime, :daynumber, :allcost, :usercost, :cutcost, :hotelgive, :othergive, :servicecost, :createtime, :isPromotion, :invalidreason, :paystatus, :spreaduser, :checkintime, :prepaymentDiscount, :toPayDiscount, :rulecode,:orderCreatetime, :statusTime,"
+				//钱包字段
+				+ ":availablemoney)";
 		
 		//查询每天订单条件 时间
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("startTime", startTime);
 		paramMap.put("endTime", endTime);
-		
+		paramMap.put("theLastMonthFirstDay", "2015-09-01"); //TODO  2015-09-01
+
 		//执行查询 
 		final List<Map> result = new ArrayList<Map>();
-		List<Map<String,Object>> datas;
+		List<Map<String,Object>> datas = null;
+		List<Map<String,Object>> datasupdatetime;
+		List<Map<String,Object>> datasnoshow;
+
 		int insertCount = 0;
 		
+		//使用订单表中updatetime 查询因为入住时间同步晚 未同步到订单明细中的订单
+		datasupdatetime = namedParameterJdbcTemplate.queryForList(sql0updatetime.toString(), paramMap);
+		//将订单id写入日志
+		List<Long> orderids = new ArrayList<Long>();
+		for (int i = 0; i < datasupdatetime.size(); i++) {
+			Map<String, Object> map = datasupdatetime.get(i);
+			Long orderid = (Long) map.get("orderId");
+			orderids.add(orderid);
+		}
+		logger.info("BillOrderDAO::genBillOrders, 查询订单表中updateTime是今天的记录条数,共计:{}条, 订单id分别为:{}",datasupdatetime.size(),orderids);
+		
+		//使用订单表中updatetime 查询noshow 订单
+		datasnoshow = namedParameterJdbcTemplate.queryForList(sql0noshow.toString(), paramMap);
+		//将订单id写入日志
+		List<Long> orderidsnoshow = new ArrayList<Long>();
+		for (int i = 0; i < datasnoshow.size(); i++) {
+			Map<String, Object> map = datasnoshow.get(i);
+			Long orderid = (Long) map.get("orderId");
+			orderidsnoshow.add(orderid);
+		}
+		logger.info("BillOrderDAO::genBillOrders, 查询订单表中updateTime是今天订单状态是noshow的记录条数,共计:{}条, 订单id分别为:{}",datasnoshow.size(),orderidsnoshow);
+
 		datas = namedParameterJdbcTemplate.queryForList(sql.toString(), paramMap);
+		datas.addAll(datasupdatetime);
+		datas.addAll(datasnoshow);
+		logger.info("BillOrderDAO::genBillOrders, 查询明细时间范围,开始时间{},结束时间{},上个月第一天{}",paramMap.get("startTime"),paramMap.get("endTime"),paramMap.get("theLastMonthFirstDay"));
 		logger.info("BillOrderDAO::genBillOrders, 查询订单完成,共计:{}条",datas.size());
+		List<Long> orderidsinsert = new ArrayList<Long>();
 		for (int i = 0; i < datas.size(); i++) {
 			Map<String, Object> map = datas.get(i);
 			Long orderid = (Long) map.get("orderId");
@@ -152,6 +297,11 @@ public class BillOrderDAO {
 			List<Map<String,Object>> datasCost = namedParameterJdbcTemplate.queryForList(sql2, paramMapSql2);
 			Map<String, Object> datas2 = datasCost.get(0);
 			if(orderid.longValue() == ((Long)datas2.get("orderid")).longValue()){
+				
+				/**
+				 * 计算
+				 */
+				
 				Long spreaduser = (Long)map.get("spreaduser");//1=非切克 2=切客
 				Integer invalidreason = (Integer)map.get("invalidreason");//有值=非切客 空=切客
 				if(invalidreason == null){
@@ -163,6 +313,10 @@ public class BillOrderDAO {
 				BigDecimal otagive = (BigDecimal) datas2.get("realotagive");
 				Integer rulecode = (Integer)map.get("rulecode");
 				BigDecimal qiekeIncome = (BigDecimal) datas2.get("qiekeIncome");
+				
+				//红包字段
+				BigDecimal availablemoney = (BigDecimal) datas2.get("availablemoney");
+				map.put("availablemoney", availablemoney);
 				
 				//判断1.0 2.0 切客条件 
 //				System.out.println("orderid="+orderid+"; spreaduser="+spreaduser + "; invalidreason="+invalidreason + "; isPromotion="+isPromotion + "; rulecode="+rulecode);
@@ -211,22 +365,29 @@ public class BillOrderDAO {
 				BigDecimal servicecost = new BigDecimal(0);
 				Date createTime = (Date) map.get("orderCreatetime");
 				Date checkintime = (Date) map.get("checkintime");
-				long temp = checkintime.getTime() - createTime.getTime(); // 相差毫秒数 > 15分钟，直单到付预付收取服务费
-				if(spreaduser == 1L){//判断不是切客
-					if(temp > BillOrderDAO.TIME_FOR_FIFTEEN){//判断下单时间大于15分钟的 //new BigDecimal(0) == qiekeIncome && 
-						servicecost = allcost.subtract(hotelgive).multiply(new BigDecimal(0.1));
-					} else{
-						servicecost = new BigDecimal(0);
-					}
+				//noshow状态的订单收取服务费(只预付)
+				if(null == checkintime){
+					servicecost = allcost.subtract(hotelgive).multiply(new BigDecimal(0.1));
+				} else {
+					long temp = checkintime.getTime() - createTime.getTime(); // 相差毫秒数 > 15分钟，直单到付预付收取服务费
+					if(spreaduser == 1L){//判断不是切客
+						if(temp > BillOrderDAO.TIME_FOR_FIFTEEN){//判断下单时间大于15分钟的 //new BigDecimal(0) == qiekeIncome && 
+							servicecost = allcost.subtract(hotelgive).multiply(new BigDecimal(0.1));
+						} else{
+							servicecost = new BigDecimal(0);
+						}
+					}					
 				}
 				map.put("servicecost", servicecost);
 				
 				//明细表中创建时间
 				map.put("createtime", new Date());
+				//明细表中增加 每天汇总是否已经结算了 该订单数据   === 写入统计当下时间的updatetime
+				//明细表中增加 每天汇总是否已经结算了 该订单数据
+				map.put("statusTime", startTime);//默认初始值为0 后面写入该值为每天汇总表中每个酒店的汇总id
 				result.add(map);
-				
+
 				insertCount += result.size();
-//				logger.info("genBillOrders,size{}",result.size());
 
 				if(orderidId == null){
 					namedParameterJdbcTemplate.batchUpdate(insertSql, result.toArray(new Map[0]));					
@@ -253,7 +414,9 @@ public class BillOrderDAO {
 							+ "spreadUser = :spreaduser, "
 							+ "checkinTime = :checkintime, "
 							+ "prepaymentDiscount = :prepaymentDiscount, "
-							+ "toPayDiscount = :toPayDiscount "
+							+ "toPayDiscount = :toPayDiscount, "
+							//钱包字段
+							+ "availablemoney = :availablemoney "
 							+ "WHERE "
 							+ "orderId = " + orderidId;
 					namedParameterJdbcTemplate.batchUpdate(updateSqlExit, result.toArray(new Map[0]));
@@ -265,12 +428,12 @@ public class BillOrderDAO {
 				if(i % 100 == 0){
 				    logger.info("已经执行了{}条",i);
 				}
+				//每天插入表中订单记录
+				orderidsinsert.add(orderid);
 			}
 		}
-		logger.info("BillOrderDAO::genBillOrders,插入条数共计:{}",insertCount);
-		
+		logger.info("BillOrderDAO::genBillOrders,插入条数共计:{}, 订单id分别为:{} .ok", insertCount, orderidsinsert);
 		saveJobHistory(HomeConst.BILL_ORDERS_JOB_HIS, DateUtils.getDatetime(), 1);
-		logger.info("BillOrderDAO::genBillOrders.ok");
 		
 		logger.info("BillOrderDAO::genBillOrdersDay::start");
 		//生成每个酒店每天的账单
@@ -306,11 +469,12 @@ public class BillOrderDAO {
 				"        ELSE 0 " +
 				"    END) invaildcutofforders, " +
 				"    SUM(prepaymentDiscount) prepaymentDiscount, " +
-				"    SUM(toPayDiscount) toPayDiscount " +
+				"    SUM(toPayDiscount) toPayDiscount, " +
+				//钱包字段
+				"    SUM(availablemoney) availablemoney " +
 				"FROM " +
 				"    b_bill_orders bo " +
-				"    WHERE bo.checkintime >= :startTime " +
-				"    AND bo.checkintime < :endTime ";
+				"WHERE bo.statusTime >= :startTime AND bo.statusTime < :endTime ";
 		selectHotelBillSql.append(selectHotelBillSql0);
 		if(null != hotelid){
 			selectHotelBillSql.append(" AND bo.hotelid = " + hotelid);
@@ -319,15 +483,23 @@ public class BillOrderDAO {
 		}
 		
 		String insertHotelBillSql = "INSERT INTO b_bill_confirm_everyday "
-				+ "(hotelid, ordernum, topaynum, topaymon, hoteldiscountcost, servicecost, otherdiscountcost, cutofforders, cutoffcost, prepaymentnum, prepaymentcost, invaildcutofforders, createtime, begintime, endtime, prepaymentDiscount, toPayDiscount, billcost) VALUES "
-				+ "(:hotelid, :ordernum, :topaynum, :topaymon, :hoteldiscountcost, :servicecost, :otherdiscountcost, :cutofforders, :cutoffcost, :prepaymentnum, :prepaymentcost, :invaildcutofforders, :createtime, :begintime, :endtime, :prepaymentDiscount, :toPayDiscount, :billcost)";
+				+ "(hotelid, ordernum, topaynum, topaymon, hoteldiscountcost, servicecost, otherdiscountcost, cutofforders, cutoffcost, prepaymentnum, prepaymentcost, invaildcutofforders, createtime, begintime, endtime, prepaymentDiscount, toPayDiscount, billcost,"
+				//钱包字段
+				+ "availablemoney) VALUES "
+				+ "(:hotelid, :ordernum, :topaynum, :topaymon, :hoteldiscountcost, :servicecost, :otherdiscountcost, :cutofforders, :cutoffcost, :prepaymentnum, :prepaymentcost, :invaildcutofforders, :createtime, :begintime, :endtime, :prepaymentDiscount, :toPayDiscount, :billcost,"
+				//钱包字段
+				+ ":availablemoney)";
 
 		final List<Map> resultDay = new ArrayList<Map>();
 		List<Map<String,Object>> datasDay;
 		int insertCountDay = 0;
 		datasDay = namedParameterJdbcTemplate.queryForList(selectHotelBillSql.toString(), paramMap);
 		for (int i = 0; i < datasDay.size(); i++) {
+	        /************计算费用，记录账单***************/
 			Map<String, Object> mapEv = datasDay.get(i);
+			Long hotelidjs = (Long) mapEv.get("hotelid");
+			Long ordernum = (Long) mapEv.get("ordernum");
+			
 			// “总服务费”-“其他优惠金额”- "切客结算总费用"  -  "预付总金额"  -“调整金额”
 			// servicecost - otherdiscountcost - cutoffcost -prepaymentcost
 			BigDecimal servicecost = (BigDecimal)mapEv.get("servicecost");
@@ -346,36 +518,38 @@ public class BillOrderDAO {
 			calendar.add(Calendar.SECOND, -1);
 			Date time = calendar.getTime();
 			mapEv.put("endtime", DateUtils.getStringFromDate(time, DateUtils.FORMATDATETIME));
+			//
 			
 			resultDay.add(mapEv);
 			
 			insertCountDay += resultDay.size();
-//			logger.info("genBillConfirmChecksEveryDay,size{}",resultDay.size());
 			if(i % 50 == 0){
 			    logger.info("BillOrderDAO::genBillOrdersDay,已经执行了{}个酒店",i);
 			}
 			
 			String uHotelBillSql = "INSERT INTO b_bill_confirm_everyday "
-					+ "(hotelid, ordernum, topaynum, topaymon, hoteldiscountcost, servicecost, otherdiscountcost, cutofforders, cutoffcost, prepaymentnum, prepaymentcost, invaildcutofforders, createtime, begintime, endtime, prepaymentDiscount, toPayDiscount, billcost) VALUES "
-					+ "(:hotelid, :ordernum, :topaynum, :topaymon, :hoteldiscountcost, :servicecost, :otherdiscountcost, :cutofforders, :cutoffcost, :prepaymentnum, :prepaymentcost, :invaildcutofforders, :createtime, :begintime, :endtime, :prepaymentDiscount, :toPayDiscount, :billcost)";
-
+					+ "(hotelid, ordernum, topaynum, topaymon, hoteldiscountcost, servicecost, otherdiscountcost, cutofforders, cutoffcost, prepaymentnum, prepaymentcost, invaildcutofforders, createtime, begintime, endtime, prepaymentDiscount, toPayDiscount, billcost,"
+					//钱包字段
+					+ "availablemoney) VALUES "
+					+ "(:hotelid, :ordernum, :topaynum, :topaymon, :hoteldiscountcost, :servicecost, :otherdiscountcost, :cutofforders, :cutoffcost, :prepaymentnum, :prepaymentcost, :invaildcutofforders, :createtime, :begintime, :endtime, :prepaymentDiscount, :toPayDiscount, :billcost,"
+					//钱包字段
+					+ ":availablemoney)";
 			
 			namedParameterJdbcTemplate.batchUpdate(insertHotelBillSql, resultDay.toArray(new Map[0]));
 			resultDay.clear();
-			
-		}
-		logger.info("BillOrderDAO::genBillOrdersDay,插入条数共计:{}",insertCountDay);
-		logger.info("BillOrderDAO::genBillOrdersDay.ok");
-		
+			/************计算费用，记录账单***************/
+			logger.info("BillOrderDAO::genBillOrders, 酒店id:{}, 每天汇总表中汇总的订单个数:{} ",hotelidjs, ordernum);
+		}		
+		logger.info("BillOrderDAO::genBillOrdersDay,统计酒店个数共计:{} .ok",insertCountDay);
 	}
 	
 	/**
 	 * 每月1号对账单数据每个酒店生成一个审核数据
 	 *    默认调度 传时间参数 8月1号（下个月1号）
-	 *    
+	 * @param isThreshold 
 	 * @param theMonth
 	 */
-	public void genBillConfirmChecks(Date begintime, String hotelid){//默认传过来下个月第一天 //如果是用户传过来则为一个用户日期+hotelid
+	public void genBillConfirmChecks(Date begintime, String hotelid, String isThreshold){//默认传过来下个月第一天 //如果是用户传过来则为一个用户日期+hotelid
 		
 		logger.info("BillOrderDAO::genBillConfirmChecks::执行月报表开始::hotelid:" + hotelid);
 		
@@ -404,7 +578,9 @@ public class BillOrderDAO {
 				+ "endtime, "
 				+ "SUM(prepaymentDiscount) prepaymentdiscount, "
 				+ "SUM(toPayDiscount) topaydiscount, "
-				+ "SUM(billcost) billcost "
+				+ "SUM(billcost) billcost, "
+				//钱包字段
+				+ "SUM(availablemoney) availablemoney "
 				+ " FROM b_bill_confirm_everyday"
 				+ " WHERE"
 				+ " begintime >= :fstarttime " //开始时间>=20150701
@@ -420,9 +596,13 @@ public class BillOrderDAO {
 				+ "AND hotelid = :hotelid "
 				+ "ORDER BY id DESC";
 		final String insertSql = "INSERT INTO b_bill_confirm_check "
-				+ "(invaildcutofforders, hotelid, billtime, begintime, endtime, ordernum, prepaymentnum, prepaymentcost, topaynum, topaymon, cutofforders, cutoffcost, hoteldiscountcost, otherdiscountcost, servicecost, createtime, changecost, billcost, checkstatus, prepaymentdiscount, topaydiscount) "
+				+ "(invaildcutofforders, hotelid, billtime, begintime, endtime, ordernum, prepaymentnum, prepaymentcost, topaynum, topaymon, cutofforders, cutoffcost, hoteldiscountcost, otherdiscountcost, servicecost, createtime, changecost, billcost, checkstatus, prepaymentdiscount, topaydiscount,isThreshold,"
+				//钱包字段
+				+ "availablemoney) "
 				+ "values "
-				+ "(:invaildcutofforders, :hotelid, :billtime, :begintime, :endtime, :ordernum, :prepaymentnum, :prepaymentcost, :topaynum, :topaymon, :cutofforders, :cutoffcost, :hoteldiscountcost, :otherdiscountcost, :servicecost, :createtime, :changecost, :billcost, :checkstatus, :prepaymentdiscount, :topaydiscount)"; 
+				+ "(:invaildcutofforders, :hotelid, :billtime, :begintime, :endtime, :ordernum, :prepaymentnum, :prepaymentcost, :topaynum, :topaymon, :cutofforders, :cutoffcost, :hoteldiscountcost, :otherdiscountcost, :servicecost, :createtime, :changecost, :billcost, :checkstatus, :prepaymentdiscount, :topaydiscount,:isThreshold,"
+				//钱包字段
+				+ ":availablemoney)"; 
 		
 		if(null != hotelid){//执行一个酒店的
 			if(nowMonth.equals(theMonth)){//证明是当月的 值 不是默认的下个月
@@ -459,7 +639,6 @@ public class BillOrderDAO {
 				datasPriod = namedParameterJdbcTemplate.queryForList(sqlPriod, paramMapPriod);
 				if(datasPriod.size() == 0){
 					fstarttime = DateUtils.getMonthFirstDay(DateUtils.getDateAdded(-1, DateUtils.getDate()));
-//					fendtime = DateUtils.getMonthLastDay(DateUtils.getDateAdded(0, DateUtils.getDate()));
 					fendtime = DateUtils.getStringFromDate(begintime, DateUtils.FORMAT_DATE);
 				} else {
 					Map<String, Object> mapPriod = datasPriod.get(0);
@@ -498,7 +677,12 @@ public class BillOrderDAO {
 						map.put("createtime", new Date());
 						map.put("changecost", BigDecimal.ZERO);
 						map.put("checkstatus", 0);
-						
+						if(isThreshold != null){
+							map.put("isThreshold", isThreshold);
+						}else{
+							map.put("isThreshold", "Y");
+						}
+
 						result.add(map);
 						// 添加、更新到缓存
 						logger.info("BillOrderDAO::genBillConfirmChecks,size{}",result.size());
@@ -520,11 +704,6 @@ public class BillOrderDAO {
 						calendar.setTime(DateUtils.getDateFromString(fendtime));
 						calendar.add(Calendar.SECOND, -1);
 						Date time = calendar.getTime();
-	//					map.put("endtime", DateUtils.getStringFromDate(time2, DateUtils.FORMATDATETIME));
-	//					Calendar calendar = Calendar.getInstance();
-	//					calendar.setTime(DateUtils.getDateFromString(DateUtils.getDateAdded(-1, DateUtils.getStringFromDate(begintime, DateUtils.FORMAT_DATE))));
-	//					calendar.add(Calendar.SECOND, -1);
-	//					Date time = calendar.getTime();
 						paramMapInsertPriod.put("endtime", DateUtils.getStringFromDate(time, DateUtils.FORMATDATETIME));
 						resultInsertPriod.add(paramMapInsertPriod);
 						namedParameterJdbcTemplate.batchUpdate(insertSqlPeiod, resultInsertPriod.toArray(new Map[0]));
@@ -534,12 +713,7 @@ public class BillOrderDAO {
 									+ "SELECT id FROM b_bill_confirm_check c "
 									+ "WHERE c.hotelid = t.hotelid AND c.billtime = :themonth ORDER BY c.id DESC LIMIT 1 "
 								+ ") "
-								+ "WHERE t.checkintime >= :begintime AND t.checkintime <= :endtime AND t.hotelid = :hotelid AND t.id > 0 ";
-	//					Map<String, Object> paramMapPid = new HashMap<String, Object>();
-	//					paramMapPid.put("theMonth", theMonth);
-	//					paramMapPid.put("hotelid", hotelidAll);
-	//					paramMapPid.put("paramMapPid", fstarttime);
-	//					paramMapPid.put("fendtime", fendtime);
+								+ "WHERE t.statusTime >= :begintime AND t.statusTime <= :endtime AND t.hotelid = :hotelid AND t.id > 0 ";
 						namedParameterJdbcTemplate.update(sqlPid, paramMapInsertPriod);
 						String sqlPidEv = "UPDATE b_bill_confirm_everyday t SET t.pId = ( "
 								+ "SELECT id FROM b_bill_confirm_check c "
@@ -550,7 +724,6 @@ public class BillOrderDAO {
 					}
 				}
 			}
-			
 		} else {//执行所有酒店的
 			//查询出所有酒店 循环 查询每个酒店的账期 执行查询 插入表中 并且写入每个酒店的账期表 更新 明细表和天表 中的PID字段
 			//从每天表中查询所有酒店 1号-31号的
@@ -624,6 +797,7 @@ public class BillOrderDAO {
 							map.put("createtime", new Date());
 							map.put("changecost", BigDecimal.ZERO);
 							map.put("checkstatus", 0);
+							map.put("isThreshold", "N");
 							
 							result.add(map);
 							// 添加、更新到缓存
@@ -657,12 +831,7 @@ public class BillOrderDAO {
 										+ "SELECT id FROM b_bill_confirm_check c "
 										+ "WHERE c.hotelid = t.hotelid AND c.billtime = :themonth ORDER BY c.id DESC LIMIT 1 "
 									+ ") "
-									+ "WHERE t.checkintime >= :begintime AND t.checkintime <= :endtime AND t.hotelid = :hotelid AND t.id > 0 ";
-	//						Map<String, Object> paramMapPid = new HashMap<String, Object>();
-	//						paramMapPid.put("theMonth", theMonth);
-	//						paramMapPid.put("hotelid", hotelidAll);
-	//						paramMapPid.put("paramMapPid", fstarttime);
-	//						paramMapPid.put("fendtime", fendtime);
+									+ "WHERE t.statusTime >= :begintime AND t.statusTime <= :endtime AND t.hotelid = :hotelid AND t.id > 0 ";
 							namedParameterJdbcTemplate.update(sqlPid, paramMapInsertPriod);
 							String sqlPidEv = "UPDATE b_bill_confirm_everyday t SET t.pId = ( "
 									+ "SELECT id FROM b_bill_confirm_check c "

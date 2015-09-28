@@ -55,7 +55,20 @@
 
 	<bean class="com.mk.framework.AppUtils" />
 
-
+    <!-- kafka start -->
+	
+	<bean class="com.mk.kafka.client.MkKafkaContext"/>
+	<bean class="com.mk.ots.kafka.message.CareProducer"/>
+	<bean class="com.mk.ots.kafka.message.OtsCareProducer"/>
+	
+	
+	<aop:aspectj-autoproxy proxy-target-class="true">
+	    		<aop:include name="produceAsepct" />
+    </aop:aspectj-autoproxy>
+    
+	<bean id ="produceAsepct" class="com.mk.kafka.client.aspect.MkProducerAnnotationAspect"/>
+	
+	<!-- kafka end -->
 
 
 </beans>

@@ -41,7 +41,7 @@ public class LPushLog {
     /**
      * 
      */
-	@JsonFormat(pattern="yyyyMMddHHmmss")
+	@JsonFormat(pattern="yyyyMMddHHmmss",timezone="GMT+8")
 	@JsonProperty("msgtime")
     private Date time;
 

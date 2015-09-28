@@ -40,6 +40,8 @@ public class OtaCheckInUser extends BizModel<OtaCheckInUser> {
 		return getStr("name");
 	}
 
-	
+	public String getPhone(){
+		return this.get("phone");
+	}
 	
 }

@@ -4,6 +4,8 @@ public enum PayTaskTypeEnum {
 	
 	SENDMSG2LANDLORD(1,"预付订单支付成功通知酒店老板", 15),
 	AUTORETRYSENDLEZHU(2,"自动重试下发乐住币", 0),
+	PROCESSPAYINGCONFIRMEDORDER(3,"处理已确认支付中订单", 30),
+	PROCESSPAYSTATUSERROR(4,"处理支付状态异常订单", 30),
 	;
 
 	
