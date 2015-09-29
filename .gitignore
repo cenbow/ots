@@ -23,3 +23,13 @@
 /ots-pro-face/*.classpath
 /ots-pro-face/*.project
 /*.project
+/.settings
+/ots-commons/.settings
+/ots-fun-biz/.settings
+/ots-fun-face/.settings
+/ots-ord-biz/.settings
+/ots-ord-face/.settings
+/ots-pay-biz/.settings
+/ots-pay-face/.settings
+/ots-pro-biz/.settings
+/ots-pro-face/.settings
