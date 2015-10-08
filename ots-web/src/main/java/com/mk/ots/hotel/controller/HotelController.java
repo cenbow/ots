@@ -176,9 +176,7 @@ public class HotelController {
      * @param hotel
      * @return
      */
-    @RequestMapping(value = {"/hotel/querylist_bak"})
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> getHotelList(ParamBaseBean pbb, THotel hotel, HttpServletRequest request) throws Exception {
+    private ResponseEntity<Map<String, Object>> getHotelList(ParamBaseBean pbb, THotel hotel, HttpServletRequest request) throws Exception {
     	ObjectMapper objectMapper = new ObjectMapper();
     	String params = objectMapper.writeValueAsString(request.getParameterMap());
     	//日志
