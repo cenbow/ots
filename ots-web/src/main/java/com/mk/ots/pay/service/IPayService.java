@@ -108,7 +108,7 @@ public interface IPayService {
 
 	public Map<String, Object> createPay(HttpServletRequest request, long longorderId, String promotionno, String couponno, String paytype, String onlinepaytype);
 
-	public Boolean payresponse(Long longorderid, String payid, String price, PPayInfoOtherTypeEnum payinfotype);
+	public Boolean payresponse(Long longorderid, String payid, String price, PPayInfoOtherTypeEnum payinfotype, String userId);
 
 	/**
 	 * 手动下发乐住币

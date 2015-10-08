@@ -60,4 +60,6 @@ public interface IPayDAO extends BaseDao<PPay, Long>{
 	
 	public List<PPay> findPayByOrderidAndPaySrc(Long orderId,PaySrcEnum type);
 	
+	public int updateUserIdByOrderId(Long orderId, String userId);
+	
 }

@@ -22,4 +22,5 @@
 	        where a.thotelid=#{hotelid};
   </select> 
  
+ 
 </mapper>

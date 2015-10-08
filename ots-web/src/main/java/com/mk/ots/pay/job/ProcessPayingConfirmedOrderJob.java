@@ -45,7 +45,7 @@ public class ProcessPayingConfirmedOrderJob implements PayJob {
 				logger.info("订单:" +orderId+ "银行确认已经支付.");
 				if(payService.payIsWaitPay(String.valueOf(orderId))) {
 					logger.info("订单:" +orderId+ "支付流水中没有记录,调用payresponse.");
-					payService.payresponse(orderId, pram.getBankno(), pram.getPrice().toString(), pram.getBanktype());
+					payService.payresponse(orderId, pram.getBankno(), pram.getPrice().toString(), pram.getBanktype(), null);
 				} else {
 					logger.info("订单:" +orderId+ "支付流水中已经存在记录,更改订单支付状态为已支付(120).");
 					orderService.changeOrderStatusByPay(orderId, null, PayStatusEnum.alreadyPay, null);

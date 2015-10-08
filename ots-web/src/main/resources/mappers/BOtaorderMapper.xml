@@ -595,7 +595,14 @@
 						  and rulecode=1002 and createtime between #{startdate} and #{enddate}
 
 	</select>	
-	
+	<!-- 一个手机号每月切客4次 -->
+	<select id="isCheckNumMonthForC" resultType="long" parameterType="java.util.Map">
+			select count(distinct id) as checknum from b_otaorder 
+					where orderstatus != 510 and orderstatus != 511 and orderstatus != 512 and orderstatus != 513   
+						  and mid = #{mid} and spreaduser is not null and invalidreason is null 
+						  and rulecode=1002 and createtime between #{startdate} and #{enddate}
+
+	</select>	
 	<!-- 判断是否用户首单-->
 	<select id="isFirstOrder" resultType="long" parameterType="java.util.Map">
 		SELECT COUNT(DISTINCT b.id) FROM b_otaorder b where b.OrderStatus IN (140,160,180,190,200) and  b.mid in

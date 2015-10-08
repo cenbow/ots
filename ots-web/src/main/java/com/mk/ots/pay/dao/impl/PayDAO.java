@@ -229,6 +229,15 @@ public class PayDAO extends MyBatisDaoImpl<PPay, Long> implements IPayDAO{
 		param.put("type", type.getId().intValue());
 	    return find("findByOrderIdAndPaysrc", param);
 	}
+
+	@Override
+	public int updateUserIdByOrderId(Long orderId, String userId) {
+		
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("orderid", orderId);
+		param.put("userid", userId);
+	    return this.update("updateUserIdByOrderId", param);
+	}
 	
 	
 }

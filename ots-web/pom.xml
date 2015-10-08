@@ -761,8 +761,7 @@
 			<artifactId>avro</artifactId>
 			<version>1.7.7</version>
 		</dependency>
-
-
+		
 		<dependency>
 			<groupId>com.mk</groupId>
 			<artifactId>ots-fun-face</artifactId>
@@ -808,6 +807,7 @@
 			<artifactId>ots-commons</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+
 	</dependencies>
 	<build>
 		<finalName>ots</finalName>

@@ -89,6 +89,7 @@ public class AutoPmsWorkerServiceImpl{
 								// 离店时间
 								dateTime = DateUtils.getDatetime(bean.getDate("Endtime"));
 							}
+
 							this.logger.info("changePmsRoomOrderStatus:loop:nextStatus:{},dateTime:{}", nextStatus, dateTime);
 							pmsOrderUtilService.changeRoomOrderStatus(bean.getLong("orderid"), nextStatus, dateTime, "", "调度入住,离店");
 							if (nextStatus.equals("200")) {

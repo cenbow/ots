@@ -127,8 +127,7 @@ public class OtsCacheManager {
 	 * @param value
 	 * @param seconds
 	 */
-	public void setExpires(String cacheName, String key, String value,
-			int seconds) {
+	public void setExpires(String cacheName, String key, String value, int seconds) {
 		// //long time = new Date().getTime();
 		Jedis jedis = this.getNewJedis();
 		try {
@@ -137,9 +136,7 @@ public class OtsCacheManager {
 			// //jedis.set(expiresKey, value);
 			// //jedis.expireAt(expiresKey, time + expires);
 		} catch (Exception e) {
-			OtsCacheManager.logger
-					.error("OtsCacheManager setExpires method error:\n"
-							+ e.getMessage());
+			OtsCacheManager.logger.error("OtsCacheManager setExpires method error:\n" + e.getMessage());
 		} finally {
 			if (jedis != null) {
 				jedis.close();
@@ -154,17 +151,13 @@ public class OtsCacheManager {
 	 * @param value
 	 * @param seconds
 	 */
-	public void setExpires(String cacheName, String key, Object value,
-			int seconds) {
+	public void setExpires(String cacheName, String key, Object value, int seconds) {
 		Jedis jedis = this.getNewJedis();
 		try {
 			String expiresKey = cacheName.concat("~").concat(key);
-			jedis.setex(expiresKey.getBytes(), seconds,
-					SerializeUtil.serialize(value));
+			jedis.setex(expiresKey.getBytes(), seconds, SerializeUtil.serialize(value));
 		} catch (Exception e) {
-			OtsCacheManager.logger
-					.error("OtsCacheManager setExpires method error:\n"
-							+ e.getMessage());
+			OtsCacheManager.logger.error("OtsCacheManager setExpires method error:\n" + e.getMessage());
 		} finally {
 			if (jedis != null) {
 				jedis.close();
@@ -196,7 +189,7 @@ public class OtsCacheManager {
 		}
 
 		return result;
-	
+
 	}
 
 	/**
@@ -244,9 +237,7 @@ public class OtsCacheManager {
 			jedis.del(set.toArray(kk));
 
 		} catch (Exception e) {
-			OtsCacheManager.logger
-					.error("OtsCacheManager remove method error:\n"
-							+ e.getMessage());
+			OtsCacheManager.logger.error("OtsCacheManager remove method error:\n" + e.getMessage());
 		} finally {
 			if (jedis != null) {
 				jedis.close();
@@ -255,15 +246,15 @@ public class OtsCacheManager {
 	}
 
 	public void del(String key) {
-		Jedis jedis = getNewJedis();
+		Jedis jedis = this.getNewJedis();
 		try {
-			Set<String> set = this.getNewJedis().keys(key);
+			Set<String> set = jedis.keys(key);
 			String[] kk = new String[set.size()];
 			jedis.del(set.toArray(kk));
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			if(jedis!=null){
+			if (jedis != null) {
 				jedis.close();
 			}
 		}
@@ -282,76 +273,78 @@ public class OtsCacheManager {
 			OtsCacheManager.logger.error("OtsCacheManager removeAll method error:\n" + e.getMessage());
 		}
 	}
-	
-	//lpush
-		public void lpush(String queneName,String str){
-			Jedis jedis = getNewJedis();
-			try {
-				jedis.lpush(queneName, str);
-			} catch (Exception e) {
-			} finally {
-				if(jedis!=null){
-					jedis.close();
-				}
+
+	// lpush
+	public void lpush(String queneName, String str) {
+		Jedis jedis = this.getNewJedis();
+		try {
+			jedis.lpush(queneName, str);
+		} catch (Exception e) {
+		} finally {
+			if (jedis != null) {
+				jedis.close();
 			}
 		}
-		//rpop
-		public String rpop(String queneName){
-			Jedis jedis = getNewJedis();
-			String value = null;
-			try {
-				value = jedis.rpop(queneName);
-			} catch (Exception e) {
-			} finally {
-				if(jedis!=null){
-					jedis.close();
-				}
+	}
+
+	// rpop
+	public String rpop(String queneName) {
+		Jedis jedis = this.getNewJedis();
+		String value = null;
+		try {
+			value = jedis.rpop(queneName);
+		} catch (Exception e) {
+		} finally {
+			if (jedis != null) {
+				jedis.close();
 			}
-			return value;
 		}
-		
-		public boolean isExistKey(String key){
-			Jedis jedis = getNewJedis();
-			try {
-				if(jedis.exists(key))
-					return true;
-			} catch (Exception e) {
-			} finally {
-				if(jedis!=null){
-					jedis.close();
-				}
+		return value;
+	}
+
+	public boolean isExistKey(String key) {
+		Jedis jedis = this.getNewJedis();
+		try {
+			if (jedis.exists(key)) {
+				return true;
 			}
-			return false;
-		}
-		
-		public String hmset(String key,Map<String,String> map){
-			Jedis jedis = getNewJedis();
-			try {
-				jedis.hmset(key, map);
-			} catch (Exception e) {
-				throw e;
-			} finally {
-				if(jedis!=null){
-					jedis.close();
-				}
+		} catch (Exception e) {
+		} finally {
+			if (jedis != null) {
+				jedis.close();
 			}
-			return "OK";
 		}
-		
-		public Map<String,String> hgetAll(String key){
-			Map<String,String> map = new HashMap<String,String>();
-			Jedis jedis = getNewJedis();
-			try {
-				map = jedis.hgetAll(key);
-			} catch (Exception e) {
-				throw e;
-			} finally {
-				if(jedis!=null){
-					jedis.close();
-				}
+		return false;
+	}
+
+	public String hmset(String key, Map<String, String> map) {
+		Jedis jedis = this.getNewJedis();
+		try {
+			jedis.hmset(key, map);
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			if (jedis != null) {
+				jedis.close();
 			}
-			return map;
 		}
+		return "OK";
+	}
+
+	public Map<String, String> hgetAll(String key) {
+		Map<String, String> map = new HashMap<String, String>();
+		Jedis jedis = this.getNewJedis();
+		try {
+			map = jedis.hgetAll(key);
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			if (jedis != null) {
+				jedis.close();
+			}
+		}
+		return map;
+	}
 
 	/**
 	 * 得到指定名称的所有缓存信息
@@ -366,13 +359,6 @@ public class OtsCacheManager {
 
 	public Jedis getNewJedis() {
 		return this.jedis = this.jedisConnectionFactory.getJedis();
-	}
-
-	private Jedis getJedis() {
-		if (this.jedis == null) {
-			this.jedis = this.jedisConnectionFactory.getJedis();
-		}
-		return this.jedis;
 	}
 
 }

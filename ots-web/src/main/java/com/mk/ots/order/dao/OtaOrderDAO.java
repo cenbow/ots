@@ -90,12 +90,22 @@ public class OtaOrderDAO extends MyBatisDaoImpl<BOtaorder, Long> {
 		 }
 		 
 		 int limit = 3;
+		 long count = 0;
 		 Map<String, Object> newHashMap = Maps.newHashMap();
-		 newHashMap.put("mid", mid);
-		 newHashMap.put("hotelid", hotelid);
-		 newHashMap.put("startdate", startdate);
-		 newHashMap.put("enddate", enddate);
-		 long count = this.count("isCheckNumMonthForB", newHashMap);
+		 if(hotelid == null){
+			 newHashMap.put("mid", mid);
+//			 newHashMap.put("hotelid", hotelid);
+			 newHashMap.put("startdate", startdate);
+			 newHashMap.put("enddate", enddate);
+			 count = this.count("isCheckNumMonthForC", newHashMap);
+		 } else {
+			 newHashMap.put("mid", mid);
+			 newHashMap.put("hotelid", hotelid);
+			 newHashMap.put("startdate", startdate);
+			 newHashMap.put("enddate", enddate);
+			 count = this.count("isCheckNumMonthForB", newHashMap);
+		 }
+
 		 boolean b = count <= limit;
 		 logger.info("今月({})切客次数:{} <= 系统限制次数:{} = {}", new Date(), count, limit, b);
 		 return b;

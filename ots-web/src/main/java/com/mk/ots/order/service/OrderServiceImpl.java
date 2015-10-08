@@ -319,56 +319,56 @@ public class OrderServiceImpl implements OrderService {
    * @param newOrder
    * @return
    */
-	public OtaOrder saveOrder(OtaOrder newOrder) {
-		Transaction t = Cat.newTransaction("Order.doCreateOrder", "saveOrder");
-		try {
-			// 新表单存储 并且计算价格 先保存-1 没有获得价格 保存后在设置为0
-			BigDecimal temp = new BigDecimal(-1);
-			BigDecimal total = temp;
-			newOrder.setTotalPrice(total);
-			newOrder.set("Price", temp);
-			newOrder.set("daynumber", 0L);
-			// 这里需要先保存订单 以保证下面OtaRoomOrder能获取到OtaOrder的ID
-			OtaOrder temporder = newOrder.saveOrUpdate();
-			// 需要关联客单 第一个客单
+  public OtaOrder saveOrder(OtaOrder newOrder) {
+  	Transaction t = Cat.newTransaction("Order.doCreateOrder", "saveOrder");
+      try {
+      // 新表单存储 并且计算价格 先保存-1 没有获得价格 保存后在设置为0
+      BigDecimal temp = new BigDecimal(-1);
+      BigDecimal total = temp;
+      newOrder.setTotalPrice(total);
+      newOrder.set("Price", temp);
+      newOrder.set("daynumber", 0L);
+      // 这里需要先保存订单 以保证下面OtaRoomOrder能获取到OtaOrder的ID
+      OtaOrder temporder = newOrder.saveOrUpdate();
+      // 需要关联客单 第一个客单
 
-			OtaRoomOrder linkRoomOrder = null;
-			for (OtaRoomOrder otaRoomOrder : newOrder.getRoomOrderList()) {
-				if (total.equals(new BigDecimal(-1))) {
-					total = new BigDecimal(0);
-				}
-				otaRoomOrder.set("OtaOrderId", newOrder.getId());
-				if (linkRoomOrder != null) {
-					otaRoomOrder.set("LinkRoomOrderId", linkRoomOrder.getLong("id"));
-				}
-				// 保存订单
-				otaRoomOrder = saveRoomOrder(newOrder, otaRoomOrder, newOrder.get("spreadUser") != null);
-				if (linkRoomOrder == null) {
-					linkRoomOrder = otaRoomOrder;
-					otaRoomOrder.set("LinkRoomOrderId", linkRoomOrder.getLong("id"));
-					otaRoomOrder.update();
-				}
-				if (otaRoomOrder.getBigDecimal("totalprice") != null) {
-					total = total.add(otaRoomOrder.getBigDecimal("totalprice"));// 计算总价格
-				}
-			}
-			// 客单价格计算完毕再次保存订单 以保存价格
-			newOrder.setPrice(newOrder.getRoomOrderList().get(0).getBigDecimal("price"));
-			newOrder.setDaynumber(newOrder.getRoomOrderList().get(0).getLong("orderday").longValue());
-			newOrder.setTotalPrice(total);
-			if (total.equals(temp) || temporder.getPrice().equals(temp)) {
-				throw MyErrorEnum.saveOrderCost.getMyException("获取价格错误");
-			}
-			newOrder.saveOrUpdate();
-			t.setStatus(Transaction.SUCCESS);
-		} catch (Exception e) {
-			t.setStatus(e);
-			throw e;
-		} finally {
-			t.complete();
-		}
-		return newOrder;
-	}
+      OtaRoomOrder linkRoomOrder = null;
+      for (OtaRoomOrder otaRoomOrder : newOrder.getRoomOrderList()) {
+          if (total.equals(new BigDecimal(-1))) {
+              total = new BigDecimal(0);
+          }
+          otaRoomOrder.set("OtaOrderId", newOrder.getId());
+          if (linkRoomOrder != null) {
+              otaRoomOrder.set("LinkRoomOrderId", linkRoomOrder.getLong("id"));
+          }
+          // 保存订单
+          otaRoomOrder = saveRoomOrder(newOrder, otaRoomOrder, newOrder.get("spreadUser") != null);
+          if (linkRoomOrder == null) {
+              linkRoomOrder = otaRoomOrder;
+              otaRoomOrder.set("LinkRoomOrderId", linkRoomOrder.getLong("id"));
+              otaRoomOrder.update();
+          }
+          if (otaRoomOrder.getBigDecimal("totalprice") != null) {
+              total = total.add(otaRoomOrder.getBigDecimal("totalprice"));// 计算总价格
+          }
+      }
+      // 客单价格计算完毕再次保存订单 以保存价格
+      newOrder.setPrice(newOrder.getRoomOrderList().get(0).getBigDecimal("price"));
+      newOrder.setDaynumber(newOrder.getRoomOrderList().get(0).getLong("orderday").longValue());
+      newOrder.setTotalPrice(total);
+      if (total.equals(temp) || temporder.getPrice().equals(temp)) {
+          throw MyErrorEnum.saveOrderCost.getMyException("获取价格错误");
+      }
+      newOrder.saveOrUpdate();
+      t.setStatus(Transaction.SUCCESS);
+      } catch (Exception e) {
+          t.setStatus(e);
+          throw e;
+      }finally {
+          t.complete();
+       }
+      return newOrder;
+  }
 
   @Override
   public void cancelOrder(Long orderId, String type) {
@@ -504,6 +504,7 @@ public class OrderServiceImpl implements OrderService {
 
         } else if ("F".equals(useWallet)) {
         	unLockCashFlow(order);
+			
         }
     }
     
@@ -535,7 +536,7 @@ public class OrderServiceImpl implements OrderService {
             // 取消pms订单
             cancelPmsOrder(order);
 
-          order.update();
+            order.update();
         } else if (order.getPayStatus() < PayStatusEnum.alreadyPay.getId()) {
           logger.info("OTSMessage::取消订单:等待支付系统调度取消订单。" + order.getId());
           order.setOrderStatus(OtaOrderStatusEnum.CancelByU_NoRefund.getId());
@@ -544,38 +545,38 @@ public class OrderServiceImpl implements OrderService {
 				logger.info("用户回退取消订单:cancelType:{},orderid:{}", order.getStr("cancelType"), order.getId());
 				order.setOrderStatus(OtaOrderStatusEnum.CancelBySystem.getId());
 			}
-          order.update();
+			order.update();
 
             // 修改已使用券状态
             iPromotionPriceService.updateTicketStatus(order);
             logger.info("修改订单{}的券为可用状态,执行成功.", order.getId());
             orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.CANCELBYUSERWAITPAY.getId(), "", "", "");
         } else {
-            logger.info("OTSMessage::取消订单::被用户取消。{}", order.getId());
-            order.setOrderStatus(OtaOrderStatusEnum.CancelByU_NoRefund.getId());
-            order.update();
+			logger.info("OTSMessage::取消订单::被用户取消。{}", order.getId());
+			order.setOrderStatus(OtaOrderStatusEnum.CancelByU_NoRefund.getId());
+			order.update();
 
-            // 修改已使用券状态
-            iPromotionPriceService.updateTicketStatus(order);
-            logger.info("修改订单{}的券为可用状态,执行成功.", order.getId());
-            orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.CANCELBYUSER.getId(), "", "", "");
-        }
+			// 修改已使用券状态
+			iPromotionPriceService.updateTicketStatus(order);
+			logger.info("修改订单{}的券为可用状态,执行成功.", order.getId());
+			orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.CANCELBYUSER.getId(), "", "", "");
+		}
 
-        // 更新otaroomorder 
-        OtaRoomOrder roomOrderTemp = this.roomOrderDAO.findOtadRoomOrderByOtaOrderId(order.getId());
-        roomOrderTemp.set("OrderStatus", order.getOrderStatus());
-        roomOrderTemp.update();
+		// 更新otaroomorder
+		OtaRoomOrder roomOrderTemp = this.roomOrderDAO.findOtadRoomOrderByOtaOrderId(order.getId());
+		roomOrderTemp.set("OrderStatus", order.getOrderStatus());
+		roomOrderTemp.update();
 
-        // ots解房
-        unLockRoom(order);
+		// ots解房
+		unLockRoom(order);
 
-        //取消订单成功后  取消push消息
-        pushMsgNo(order);
-        /*******取消钱包***********/
-        cancelAvailableMoney(order);
-        /*******取消钱包***********/
-        logger.info("OTSMessage::cancelOrder---end{}", order.getId());
-    }
+		// 取消订单成功后 取消push消息
+		pushMsgNo(order);
+		/******* 取消钱包 ***********/
+		cancelAvailableMoney(order);
+		/******* 取消钱包 ***********/
+		logger.info("OTSMessage::cancelOrder---end{}", order.getId());
+	}
 
   public void cancelPmsOrder(OtaOrder order) {
       THotel hotel = this.hotelService.readonlyTHotel(order.getLong("hotelId"));
@@ -680,11 +681,11 @@ public class OrderServiceImpl implements OrderService {
   /**
    * 退还支付后的优惠券
    */
-  private void  returnTicketOrderPay(OtaOrder order){
+    private void returnTicketOrderPay(OtaOrder order) {
         logger.info("OTSMessage::cancelOrderPay:取消订单,退还优惠券。" + order.getId());
         iPromotionPriceService.updateTicketStatus(order);
         logger.info("修改订单{}的券为可用状态,执行成功.", order.getId());
-  }
+    }
 
   /**
    * 删除订单
@@ -2079,7 +2080,7 @@ public class OrderServiceImpl implements OrderService {
 		}
 		// 住三送一活动，调用促销接口
 		logger.info("住三送一活动,调用促销接口,orderid = " + otaorderid);
-		ticketService.saveOrUpdateHotelStat(otaorder,pmsRoomOrder);
+      ticketService.saveOrUpdateHotelStat(otaorder,pmsRoomOrder);
 		
 		/*********************** 离店推送信息 *********************/
 		OrderServiceImpl.logger.info("状态变成离店，开始推送消息 ,订单号{}", otaorderid);
@@ -2178,7 +2179,7 @@ public class OrderServiceImpl implements OrderService {
       returnOrder.put("otaRoomPrices", otaRoomPrices);
       returnOrder.put("act", "create");
       Transaction t = Cat.newTransaction("Order.doCreateOrder", "getOrderToJson");
-        Cat.logMetricForCount("Order.doCreateOrder.Count");
+      Cat.logMetricForCount("Order.doCreateOrder.Count");
       try {
           orderUtil.getOrderToJson(jsonObj, ppay, returnOrder, showRoom, showInUser);
             t.setStatus(Transaction.SUCCESS);
@@ -2679,46 +2680,46 @@ public class OrderServiceImpl implements OrderService {
       
       
         OtaOrder pOrder = this.extractOrderBeanForModify(request, order, modifyByRoomType);
-      // 校验此用户是否有订单
-      checkOrdersByMid(pOrder);
-      // 预付订单、等待支付的情况，计算房价
-		pOrder = this.saveOrder(pOrder);
-      THotel hotel = hotelService.readonlyTHotel(pOrder.getHotelId());
-      logger.info("doModifyOrder:orderid:{},orderStatus:{}", orderId, pOrder.getOrderStatus());
-      // 价格获取
-      //修改入住人信息
-      //预抵时间前一小时push消息放入到orderTasks任务表中
-      pushCheckInBefore1Msg(pOrder);
-      //过保留时间（预抵时间） 未到的 push消息 放入到任务表中
-      pushOutCheckInTimeMsg(pOrder);
-      
-      /**
-       * 拿到pms客单号
-       */
-      List<OtaRoomOrder> list=pOrder.getRoomOrderList();
-      String pmsRoomOrderNo=null;
-      if(null!=list&&list.size()>0){
-          OtaRoomOrder otaRoomOrder=list.get(0);
-          pmsRoomOrderNo=otaRoomOrder.getPmsRoomOrderNo();
-      }
-      logger.info("pmsroomorderno = {}",pmsRoomOrderNo);
-      
+        // 校验此用户是否有订单
+        checkOrdersByMid(pOrder);
+        // 预付订单、等待支付的情况，计算房价
+        pOrder = this.saveOrder(pOrder);
+        THotel hotel = hotelService.readonlyTHotel(pOrder.getHotelId());
+        logger.info("doModifyOrder:orderid:{},orderStatus:{}", orderId, pOrder.getOrderStatus());
+        // 价格获取
+        //修改入住人信息
+        //预抵时间前一小时push消息放入到orderTasks任务表中
+        pushCheckInBefore1Msg(pOrder);
+        //过保留时间（预抵时间） 未到的 push消息 放入到任务表中
+        pushOutCheckInTimeMsg(pOrder);
+
+        /**
+         * 拿到pms客单号
+         */
+        List<OtaRoomOrder> list = pOrder.getRoomOrderList();
+        String pmsRoomOrderNo = null;
+        if (null != list && list.size() > 0) {
+            OtaRoomOrder otaRoomOrder = list.get(0);
+            pmsRoomOrderNo = otaRoomOrder.getPmsRoomOrderNo();
+        }
+        logger.info("pmsroomorderno = {}", pmsRoomOrderNo);
+
         if (pOrder.getOrderStatus()<OtaOrderStatusEnum.CheckInOnline.getId()) {
-          Long otaOrderId = pOrder.getId();
-          OrderServiceImpl.logger.info("OrderServiceImpl:: doModifyOrder:: 修改入住人名字 start orderid : " + otaOrderId);
-          List<OtaRoomOrder> roomOrderList;
-          //若订单为规则B，则做以下处理：
-          //1.15分钟之内，有优惠券的订单若C端调用修改订单接口，修改入住人姓名，OTS记录修改后的入住人姓名，但不向PMS发送修改后的cpname
-          Date createTime = pOrder.getCreateTime();
-          Date nowDateTime = new Date();
-          long temp = nowDateTime.getTime() - createTime.getTime(); // 相差毫秒数
-              roomOrderList = pOrder.getRoomOrderList();
-              for (OtaRoomOrder roomOrder : roomOrderList) {
-                  // 如果改变了联系人,是否PmsRoomOrderNo
-                  if (order.getAttrs().containsKey("modify_lxr") && StringUtils.isNotBlank(roomOrder.getPmsRoomOrderNo())) {
-                      modifyPmsOrder(hotel, order, roomOrder);
-                  }
-              }
+            Long otaOrderId = pOrder.getId();
+            OrderServiceImpl.logger.info("OrderServiceImpl:: doModifyOrder:: 修改入住人名字 start orderid : " + otaOrderId);
+            List<OtaRoomOrder> roomOrderList;
+            //若订单为规则B，则做以下处理：
+            //1.15分钟之内，有优惠券的订单若C端调用修改订单接口，修改入住人姓名，OTS记录修改后的入住人姓名，但不向PMS发送修改后的cpname
+            Date createTime = pOrder.getCreateTime();
+            Date nowDateTime = new Date();
+            long temp = nowDateTime.getTime() - createTime.getTime(); // 相差毫秒数
+            roomOrderList = pOrder.getRoomOrderList();
+            for (OtaRoomOrder roomOrder : roomOrderList) {
+                // 如果改变了联系人,是否PmsRoomOrderNo
+                if (order.getAttrs().containsKey("modify_lxr") && StringUtils.isNotBlank(roomOrder.getPmsRoomOrderNo())) {
+                    modifyPmsOrder(hotel, order, roomOrder);
+                }
+            }
 
       }else if(//等待支付 且 已经有客单
               OtaOrderStatusEnum.WaitPay.getId() == pOrder.getOrderStatus()&&
@@ -2742,21 +2743,21 @@ public class OrderServiceImpl implements OrderService {
 		}
       logger.info("绑定优惠券逻辑----------------结束.");
 
-      /*
-       * // 缓存获取会员对象 存会员等级 Optional<UMember> opMember =
-       * memberService.findMemberById(order.getLong("mid"));
-       * 
-       * List<OtaRoomPrice> otaRoomPrices =
-       * payService.createPayByCreateOrder(order, opMember.get(),
-       * priceService.findOtaRoomPriceByOrder(order), order.getCouponNo(),
-       * order.getPromotionNo());
-       */
-      List<OtaRoomPrice> otaRoomPrices = priceService.findOtaRoomPriceByOrder(order);
-      boolean showRoom = true;// 显示客单
+        /*
+         * // 缓存获取会员对象 存会员等级 Optional<UMember> opMember =
+         * memberService.findMemberById(order.getLong("mid"));
+         * 
+         * List<OtaRoomPrice> otaRoomPrices =
+         * payService.createPayByCreateOrder(order, opMember.get(),
+         * priceService.findOtaRoomPriceByOrder(order), order.getCouponNo(),
+         * order.getPromotionNo());
+         */
+        List<OtaRoomPrice> otaRoomPrices = priceService.findOtaRoomPriceByOrder(order);
+        boolean showRoom = true;// 显示客单
         boolean showInUser = true;// 显示入住人--暂时没有
-      // 订单转换为json
-      order.put("otaRoomPrices", otaRoomPrices);
-      order.put("act", "modify");
+        // 订单转换为json
+        order.put("otaRoomPrices", otaRoomPrices);
+        order.put("act", "modify");
         order.put("isuselewallet", request.getParameter("isuselewallet"));
 
       orderUtil.getOrderToJson(jsonObj, null, order, showRoom, showInUser);
@@ -3019,10 +3020,11 @@ public class OrderServiceImpl implements OrderService {
                   } else if(OrderTypeEnum.YF.getId().equals(Integer.parseInt(orderType))){
                       order.set("ordertype", Integer.parseInt(orderType));
 //                      order.set("paystatus", PayStatusEnum.waitPay.getId());
-                        //订单返现
-                        if (order.getCashBack().longValue() > 0) {
-                			order.setIsReceiveCashBack(ReceiveCashBackEnum.notReceiveCashBack.getId());
-                		}
+                      //订单返现
+                      if (order.getCashBack().longValue() > 0) {
+              			order.setIsReceiveCashBack(ReceiveCashBackEnum.notReceiveCashBack.getId());
+              		}
+
                   }
               }
           }
@@ -3081,7 +3083,7 @@ public class OrderServiceImpl implements OrderService {
                     }
                 }
             }
-            // 如果roomId不为空，如果换房
+          // 如果roomId不为空，如果换房
           if (StringUtils.isNotBlank(roomId) && StringUtils.isNotBlank(String.valueOf(roomOrder.getRoomId()))) {
               String oldRoomId = String.valueOf(roomOrder.getRoomId());
               if (!oldRoomId.equals(roomId)) {
@@ -3138,9 +3140,9 @@ public class OrderServiceImpl implements OrderService {
           for (int i = 0; i < jsonArr.size(); i++) {
               JSONObject jsonObj = jsonArr.getJSONObject(i);
               OtaCheckInUser inUser = new OtaCheckInUser();
-                if (StringUtils.isBlank(jsonObj.getString("name"))) {
+              if (StringUtils.isBlank(jsonObj.getString("name"))) {
 					continue;
-				}
+              }
               inUser.set("Name", jsonObj.getString("name"));
               if (StringUtils.isNotBlank(jsonObj.getString("sex"))) {
                   inUser.set("Sex", jsonObj.getString("sex"));
@@ -3181,6 +3183,9 @@ public class OrderServiceImpl implements OrderService {
                * "jpg"); ImgBase64Util.generateImage(jsonObj.getString("img"),
                * file); FileManager.getInstance().uploadUserCardPic(file);
                */
+//                if (StringUtils.isNotBlank(jsonObj.getString("_pk_"))) {
+//                	inUser.set("id", jsonObj.getLong("_pk_"));
+//                }
               inUsers.add(inUser);
           }
           return inUsers;
@@ -3339,19 +3344,18 @@ public class OrderServiceImpl implements OrderService {
    * false; }
    */
 
-  public void saveOrUpdateOtaCheckInUser(OtaRoomOrder roomOrder, List<OtaCheckInUser> checkInUserList) {
-      // 修改客单时
-      Long mid = MyTokenUtils.getMidByToken("");
-      if (checkInUserList != null && checkInUserList.size() > 0) {
-          // 删除所有入住人
-          checkInUserDAO.delectOtaCheckInUserByRoomOrderId(roomOrder.getLong("id"));
-          for (OtaCheckInUser otaCheckInUser : checkInUserList) {
-              otaCheckInUser.set("mid", mid);
-              otaCheckInUser.set("OtaRoomOrderId", roomOrder.getLong("id"));
-              otaCheckInUser.saveOrUpdate();
-          }
-      }
-  }
+    public void saveOrUpdateOtaCheckInUser(OtaRoomOrder roomOrder, List<OtaCheckInUser> checkInUserList) {
+        Long mid = MyTokenUtils.getMidByToken("");
+        if (checkInUserList != null && checkInUserList.size() > 0) {
+        	// 删除所有入住人
+            checkInUserDAO.delectOtaCheckInUserByRoomOrderId(roomOrder.getLong("id"));
+            for (OtaCheckInUser otaCheckInUser : checkInUserList) {
+                otaCheckInUser.set("mid", mid);
+                otaCheckInUser.set("OtaRoomOrderId", roomOrder.getLong("id"));
+                otaCheckInUser.saveOrUpdate();
+            }
+        }
+    }
 
   @Override
   public OtaRoomOrder findOtaRoomOrderByOrderId(Long otaOrderId) {
@@ -3519,8 +3523,8 @@ public class OrderServiceImpl implements OrderService {
               order.update();
               logger.info("OrderServiceImpl:: doUpdateOrder:: isSyncPrice:T:price:" + orderId + "::"+ roomOrder.get("price"));
           }
-            List<OtaCheckInUser> inUsers = this.getInUsersByJsonForB(checkInUser);
-            this.saveOrUpdateOtaCheckInUserForB(roomOrder, inUsers);
+          List<OtaCheckInUser> inUsers = this.getInUsersByJsonForB(checkInUser);
+          this.saveOrUpdateOtaCheckInUserForB(roomOrder, inUsers);
           OrderServiceImpl.logger.info("OTSMessage::doUpdateOrder:更新房号对应的roomorder数据," +orderId + "::" + roomId + "::" + roomTypeId);
           this.orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.KF_MODIFYORDER.getId(), "", operator + "  更新房间信息：" + roomOrder.getRoomNo(), "");
           List<OtaRoomPrice> otaRoomPrices = this.priceService.findOtaRoomPriceByOrder(order);
@@ -4424,6 +4428,7 @@ public class OrderServiceImpl implements OrderService {
         String callVersion = request.getParameter("callversion");
         String ip = request.getParameter("ip");
         OrderServiceImpl.logger.info("checkInUser:{}",checkInUser);
+
         // 对当前订单进行修改入住人
         OtaOrder order = this.findOtaOrderById(Long.parseLong(orderId));
         if (order == null) {
@@ -4677,23 +4682,22 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
             // 业务点跟踪的收集
-			for (String key : businessCodeMap.keySet()) {
-				String bussinessCode = log.getBussinesscode();
-				String bussinessDesc = log.getBusinessdesc();
+            for (String key : businessCodeMap.keySet()) {
+                String bussinessCode = log.getBussinesscode();
+                String bussinessDesc = log.getBusinessdesc();
                 if (key.indexOf(bussinessCode) >= 0 && !result.containsKey(bussinessCode) && StringUtils.isNotBlank(bussinessDesc)) {
-                	this.logger.info("加入：bussinessCode:{},bussinessDesc:{}");
-					JSONObject j = new JSONObject();
-					j.put("statusname", bussinessDesc);
-					j.put("time", log.getCreatetime());
-					result.put(bussinessCode, j);
-				}
-			}
+                    JSONObject j = new JSONObject();
+                    this.logger.info("加入：bussinessCode:{},bussinessDesc:{}",bussinessCode,bussinessCode);
+                    j.put("statusname", bussinessDesc);
+                    j.put("time", log.getCreatetime());
+                    result.put(bussinessCode, j);
+                }
+            }
         }
         // 同时包含512、514，删除514
         if (result.containsKey("512") && result.containsKey("514")) {
 			result.remove("514");
 		}
-
         List<JSONObject> list = new ArrayList<>(result.values());
 
         Collections.sort(list, new Comparator<JSONObject>() {// 日期由小到大
@@ -4710,22 +4714,21 @@ public class OrderServiceImpl implements OrderService {
         jsonObj.put("datas", datas);
     }
 
-	
-	@Override
-	public boolean modifyOtaOrderByPayStatus(OtaOrder order, Integer payStatus, String opertorName) {
-		logger.info("OTSMessage::modifyOtaOrderStatus::start::订单号：" + order.getId() + ",payStatus:" + payStatus + ",opertorName:" + opertorName);
-		if (payStatus == PayStatusEnum.alreadyPay.getId()) {
-			order.setPayStatus(PayStatusEnum.alreadyPay.getId());
-		} else {
-			order.setPayStatus(PayStatusEnum.waitPay.getId());
-		}
-		boolean flag = order.update();
-		logger.info("OTSMessage::modifyOtaOrderStatus::订单号：" + order.getId() + ",修改结果：" + flag);
-		orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.MODIFY_OTA_ORDER_PAYSTATUS.getId(), "", opertorName + "：修改支付状态为：" + payStatus, "");
-		logger.info("OTSMessage::modifyOtaOrderStatus::end::订单号：" + order.getId() + ",payStatus:" + payStatus + ",opertorName:" + opertorName);
-		return flag;
-	}
-
+    @Override
+    public boolean modifyOtaOrderByPayStatus(OtaOrder order, Integer payStatus, String opertorName) {
+        logger.info("OTSMessage::modifyOtaOrderStatus::start::订单号：" + order.getId() + ",payStatus:" + payStatus + ",opertorName:" + opertorName);
+        if (payStatus == PayStatusEnum.alreadyPay.getId()) {
+            order.setPayStatus(PayStatusEnum.alreadyPay.getId());
+        } else {
+            order.setPayStatus(PayStatusEnum.waitPay.getId());
+        }
+        boolean flag = order.update();
+        logger.info("OTSMessage::modifyOtaOrderStatus::订单号：" + order.getId() + ",修改结果：" + flag);
+        orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.MODIFY_OTA_ORDER_PAYSTATUS.getId(), "", opertorName + "：修改支付状态为：" + payStatus, "");
+        logger.info("OTSMessage::modifyOtaOrderStatus::end::订单号：" + order.getId() + ",payStatus:" + payStatus + ",opertorName:" + opertorName);
+        return flag;
+    }
+    
 	/**
 	 * 检验mid是否在黑名单
 	 */

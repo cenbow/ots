@@ -3,8 +3,9 @@ package com.mk.ots.common.enums;
 public enum OtaFreqTrvEnum {
 	IN_FREQUSER("1", "FREQUSER"),
 	OK_LESS4("2", "LESS4"),
-	MONTHE_UP4("3", "MONTHE_UP4"), // 每月超过4单
+	MONTHE_UP4("3", "MONTHE_UP4"), // 一个酒店每月超过4单
 	ONEDAY_UP1("4", "ONEDAY_UP1"),// 每天超过一单
+	MONTHE_UP5("5", "MONTHE_UP5"), // 每月超过4单
 	L1("-1", "LESS4");
 	
 	private final String id;

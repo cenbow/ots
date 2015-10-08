@@ -1092,7 +1092,7 @@ public class RoomstateService {
 	        		    roomtype.setVctxt("");
 	        		} else {
 	        		    if (vcroomnum == 0) {
-	        		        roomtype.setVctxt("满房");
+	        		        roomtype.setVctxt("满房,最近预定3小时前");
 	        		    } else {
 	        		        if (vcroomnum <= 3) {
 	        		            roomtype.setVctxt("仅剩" + vcroomnum + "间");

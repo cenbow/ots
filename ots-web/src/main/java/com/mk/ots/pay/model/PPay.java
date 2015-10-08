@@ -51,8 +51,18 @@ public class PPay implements Serializable{
     private Long neworderid;
 
     private PaySrcEnum paysrc;
+    
+    private String userid;
 
-    public Long getId() {
+    public String getUserid() {
+		return userid;
+	}
+
+	public void setUserid(String userid) {
+		this.userid = userid;
+	}
+
+	public Long getId() {
         return id;
     }
 

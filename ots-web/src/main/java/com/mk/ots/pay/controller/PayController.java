@@ -136,7 +136,10 @@ public class PayController {
 					long orderIdNum = getLongOrderId(orderid);
 					
 					this.logger.info("支付宝回调，订单号：" + orderid + "  支付宝支付成功，第一次回调");
-					Boolean rb = this.payService.payresponse(orderIdNum, payid, price, PPayInfoOtherTypeEnum.alipay);
+					
+					String userId = request.getParameter("buyer_id");
+					logger.info("订单:" +orderid+ "用户标识为:" + userId);
+					Boolean rb = this.payService.payresponse(orderIdNum, payid, price, PPayInfoOtherTypeEnum.alipay, userId);
 					if (rb != null && rb) {
 						// 处理成功后给支付宝返回 success将不会再请求
 						res = "success";
@@ -186,8 +189,10 @@ public class PayController {
 		String result_code = elroot.getChildText("result_code");
 		String payid = elroot.getChildText("transaction_id");
 		String total_fee = elroot.getChildText("total_fee");
+		String userId = elroot.getChildText("openid");
 
-		this.logger.info("return_code={},return_msg={},orderid={},result_code={},payid={},total_fee={}", return_code, return_msg, orderid,result_code, payid, total_fee);
+		this.logger.info("return_code={},return_msg={},orderid={},result_code={},payid={},total_fee={},userId={}", 
+				return_code, return_msg, orderid,result_code, payid, total_fee, userId);
 		
 		String lockValue = DistributedLockUtil.tryLock(PayLockKeyUtil.genLockKey4PayCallBack(orderid), 40);
 		if(StringUtils.isNotEmpty(lockValue)) {
@@ -218,7 +223,8 @@ public class PayController {
 				}else if (boo)  {
 					Long orderIdNum=getLongOrderId(orderid);
 					
-					Boolean  rb=this.payService.payresponse(orderIdNum, payid, total_fee, PPayInfoOtherTypeEnum.wxpay);
+					Boolean  rb=this.payService.payresponse(orderIdNum, payid, total_fee, PPayInfoOtherTypeEnum.wxpay,
+							userId);
 					if (rb!=null && rb ) {
 						res = "<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>";
 //						res = "SUCCESS";
@@ -344,8 +350,10 @@ public class PayController {
 	 */
 	@RequestMapping(value = "/weixin", method = RequestMethod.POST)
 	// 微信公共帐号专用支付成功回调地址
-	public ResponseEntity<Map<String, Object>> wxcheck(HttpServletRequest request, String orderid, String payno, String price) {
-		this.logger.info("微信公共账号付款完成后回调,订单号:" + orderid + ",payno:" + payno + ",price:" + price);
+	public ResponseEntity<Map<String, Object>> wxcheck(HttpServletRequest request, String orderid, String payno, 
+			String price, String openid) {
+		this.logger.info("微信公共账号付款完成后回调,订单号:" + orderid + ",payno:" + payno 
+				+ ",price:" + price + ",openid:" + openid);
 		Map<String, Object> map = new HashMap<String, Object>();
 		if (Strings.isNullOrEmpty(orderid)) { // 订单号 必填
 			this.logger.error("支付完成后，回调订单号orderid为空：");
@@ -384,7 +392,8 @@ public class PayController {
 					}
 					// 支付创建pms订单
 					this.logger.info("支付完成，开始创建pms订单！orderid::" + orderid);
-					Boolean rb = this.payService.payresponse(orderIdNum, payid, price, PPayInfoOtherTypeEnum.wechatpay);
+					Boolean rb = this.payService.payresponse(orderIdNum, payid, price, 
+							PPayInfoOtherTypeEnum.wechatpay, openid);
 					if (rb == null) {
 						map.put("success", false);
 						map.put("errcode", MyErrorEnum.OrderCancelBySystem.getErrorCode());

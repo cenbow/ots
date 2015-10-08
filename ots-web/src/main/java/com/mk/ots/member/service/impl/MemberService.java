@@ -1,13 +1,5 @@
 package com.mk.ots.member.service.impl;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONObject;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
@@ -24,9 +16,17 @@ import com.mk.ots.member.service.IMemberService;
 import com.mk.ots.order.common.PropertyConfigurer;
 import com.mk.ots.order.model.FirstOrderModel;
 import com.mk.ots.order.service.OrderUtil;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 @Service
 public class MemberService implements IMemberService{
-	
+
 	@Autowired
 	private IMemberDao iMemberDao;
     @Autowired
@@ -35,7 +35,7 @@ public class MemberService implements IMemberService{
 	public void updateBaseInfo(long mid, String name, String sex, String birthday){
 		iMemberDao.updateBaseInfo(mid, name, sex, birthday);
 	}
-	
+
 	@Override
 	public void updateBaseInfo(long mid, String name, String unionid){
 		iMemberDao.updateBaseInfo(mid, name, unionid);
@@ -44,12 +44,12 @@ public class MemberService implements IMemberService{
 	public Optional<UMember> findMemberById(long mid) {
         return this.findMemberById(mid, "T");
     }
-	
+
 	@Override
 	public Optional<UMember> findMemberById(long mid,String state) {
 		return iMemberDao.findMemberById(mid,state);
 	}
-	
+
 	@Override
 	public Optional<UMember> findMemberByLoginName(String loginName){
 		Optional<UMember> optionalUMember = this.findMemberByLoginName(loginName,null);
@@ -58,12 +58,12 @@ public class MemberService implements IMemberService{
 		}
 		return Optional.absent();
 	}
-	
+
 	@Override
 	public Optional<UMember> findMemberByLoginName(String loginName,String state){
 		return iMemberDao.findMemberByLoginName(loginName,state);
 	}
-	
+
 	@Override
 	public boolean checkExistByLoginName(String loginName,String state) {
 		Optional<UMember> optionalMember = iMemberDao.findMemberByLoginName(loginName,state);
@@ -86,7 +86,7 @@ public class MemberService implements IMemberService{
 		iMemberDao.updatePhoneNum(member.getMid(), newPhoneNum);
 		return Optional.fromNullable(member);
 	}
-	
+
 	@Override
 	public boolean checkLoginPsdVerifyName(long mid, String name) {
 		if(Strings.isNullOrEmpty(name)){
@@ -94,13 +94,13 @@ public class MemberService implements IMemberService{
 		}
 		return iMemberDao.checkLoginPsdVerifyName(mid,name);
 	}
-	
+
 	@Override
 	public Optional<UMember> findMemberByUnionid(String unionid) {
 		return iMemberDao.findMemberByUnionid(unionid,null);
 	}
-	
-	
+
+
 	@Override
 	public Optional<UMember> findMemberByUnionid(String unionid,String state) {
 		return iMemberDao.findMemberByUnionid(unionid,state);
@@ -114,7 +114,7 @@ public class MemberService implements IMemberService{
 		if(!optionalMember.isPresent()){
 			throw new MyException(MyErrorEnum.memberNotExist);
 		}
-		UMember member = optionalMember.get(); 
+		UMember member = optionalMember.get();
 		String memberPayPsd = member.getPaypassword();
 		String pagePsd = CalculateMd5.caculateCF(payPsd, Constant.defaulCharset);
 		if (pagePsd.equals(memberPayPsd)) {
@@ -125,12 +125,12 @@ public class MemberService implements IMemberService{
 
 	@Override
 	public boolean resetPayPwd(String phoneNum, String payPsd) {
-		Optional<UMember> optionalMember = iMemberDao.findMemberByLoginName(phoneNum, UMember.NORMAL_STATE); 
+		Optional<UMember> optionalMember = iMemberDao.findMemberByLoginName(phoneNum, UMember.NORMAL_STATE);
 		// 1,检测用户是否存在:不存在时给出错误提示
 		if(!optionalMember.isPresent()){
 			throw new MyException(MyErrorEnum.memberNotExist);
 		}
-		
+
 		UMember member = optionalMember.get();
 		// 2,保存新密码
 		String passwordMD5 = CalculateMd5.caculateCF(payPsd, Constant.defaulCharset);
@@ -148,7 +148,7 @@ public class MemberService implements IMemberService{
 	public void save(UMember member) {
 		this.iMemberDao.save(member);
 	}
-	
+
 	@Override
 	public void saveOrUpdate(UMember member) {
 		if(member.getMid()!=null){
@@ -172,12 +172,12 @@ public class MemberService implements IMemberService{
 		}
 		return null;
 	}
-	
+
 	@Override
 	public boolean isExistUnionid(String unionid){
 		return this.iMemberDao.findMemberByUnionid(unionid, null).isPresent();
 	}
-	
+
 	@Override
 	public Optional<UMember> findMember(String phone, String unionid) {
 		return this.iMemberDao.findMember(phone, unionid);
@@ -195,6 +195,9 @@ public class MemberService implements IMemberService{
 	}
 	@Override
 	public void checkPhoneIsBlack(String phone,String type,String name,String errmsg){
+		if(StringUtils.isEmpty(phone)){
+            return;
+        }
 		String blackSwitch = PropertyConfigurer.getProperty("blackSwitch");
 		//1:开关关闭，说明不用查黑名单
 		if ("1".equals(blackSwitch)) {

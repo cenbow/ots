@@ -1790,8 +1790,17 @@ public class PayService implements IPayService {
 	// paytype 支付类型,必填： 1、微信 2、支付宝 3、网银 4、其他
 	// price 支付了多少钱
 	@Override
-	public Boolean payresponse(Long longorderid, String bankpayid, String price, PPayInfoOtherTypeEnum payinfotype) {
+	public Boolean payresponse(Long longorderid, String bankpayid, String price, PPayInfoOtherTypeEnum payinfotype, 
+			String userId) {
 		this.logger.info("支付完成回调，确认已经支付成功，开始数据库操作，orderid=" + longorderid);
+		if(StringUtils.isNotEmpty(userId)) {
+			logger.info("订单:" + longorderid + "记录用户第三方支付标识.");
+			try {
+				iPayDAO.updateUserIdByOrderId(longorderid, userId);
+			} catch (Throwable e) {
+				logger.error("订单:" + longorderid + "记录用户第三方支付标识异常!", e);
+			}
+		}
 		//尝试从支付状态异常表删除数据
 		deletePayStatusError(longorderid);
 		OtaOrder order = this.orderService.findOtaOrderById(longorderid);
@@ -2594,7 +2603,7 @@ public class PayService implements IPayService {
 //                if(!payTaskDao.exist(orderid, PayTaskTypeEnum.AUTORETRYSENDLEZHU)){ //Task
 //                	this.payresponse(orderid, pram.getBankno(), pram.getPrice()+"", pram.getBanktype());
 //                }
-                this.payresponse(orderid, pram.getBankno(), pram.getPrice()+"", pram.getBanktype());
+                this.payresponse(orderid, pram.getBankno(), pram.getPrice()+"", pram.getBanktype(), null);
   				return "已支付";
   			} 
   		}
@@ -2706,7 +2715,7 @@ public class PayService implements IPayService {
 			POrderLog orderLog = this.ipOrderLogDao.findPOrderLogByPay(this.getPayid(order.getId()));
 			//判断是否支付
 			if (order.getOrderType() == OrderTypeEnum.PT.getId().intValue() || 
-					doPayed(this.ipPayInfoDao.findByPayId(orderLog.getPayid()))) {
+					order.getPayStatus() == PayStatusEnum.alreadyPay.getId().intValue()) {
 				BigDecimal bd = this.getRuleValue(order.getOrderType(), rule, order.getId());
 				this.logger.info("订单号：" + order.getId() + "查询到 POrderLog ，准备把切客收益(QiekeIncome)置为" + bd);
 				orderLog.setQiekeIncome(bd);

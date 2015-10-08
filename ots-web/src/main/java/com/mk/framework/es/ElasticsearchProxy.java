@@ -601,6 +601,16 @@ public class ElasticsearchProxy {
 	}
 
 	/**
+<<<<<<< HEAD
+	 * 分数排序.
+	 *
+	 * @param indexName
+	 * @param typeName
+	 * @param gpList
+	 * @param customerLocation
+	 * @param mkPriceDateList
+	 * @return
+=======
 	 * 指定索引搜索酒店信息
 	 * @param indexName
 	 * 参数: ES索引名称
@@ -613,6 +623,7 @@ public class ElasticsearchProxy {
      * @param mkPriceDateList
      * 参数: 一段时间的眯客价属性字段列表
      * @return
+>>>>>>> mike3.0
 	 */
 	public SearchHit[] searchHotelByBsiCycle(String indexName, String typeName, List<GeoPoint> gpList, GeoPoint customerLocation, List<String> mkPriceDateList) {
 		SearchRequestBuilder searchBuilder = this.prepareSearch(indexName, typeName);

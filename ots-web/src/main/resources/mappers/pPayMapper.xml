@@ -14,13 +14,14 @@
     <result column="needreturn" property="needreturn" jdbcType="CHAR"/>
     <result column="neworderid" property="neworderid" jdbcType="BIGINT" />
     <result column="paysrc" property="paysrc" jdbcType="INTEGER" />
+    <result column="userid" property="userid" jdbcType="VARCHAR" />
     
     <association property="umember"  column="mid" javaType="com.mk.ots.member.model.UMember" select="findUMemberByMid"/>
 	<association property="hotel"  column="hotelid" select="findTHotelByHotelId"/>
   </resultMap>
 	
 	<sql id="Base_Column_List" >
-  	  id, mid, orderid, orderprice, lezhu, time, pmsorderno, hotelId, status, needReturn, newOrderId, paysrc
+  	  id, mid, orderid, orderprice, lezhu, time, pmsorderno, hotelId, status, needReturn, newOrderId, paysrc,userid
   	</sql>
   
   
@@ -28,12 +29,14 @@
     insert into p_pay (mid, orderid, 
       orderprice, lezhu, time, 
       pmsorderno, hotelId, status, 
-      needReturn, newOrderId, paysrc
+      needReturn, newOrderId, paysrc,userid
       )
     values (#{member.mid,jdbcType=BIGINT}, #{orderid,jdbcType=BIGINT}, 
       #{orderprice,jdbcType=DECIMAL}, #{lezhu,jdbcType=DECIMAL}, #{time,jdbcType=TIMESTAMP}, 
       #{pmsorderno,jdbcType=VARCHAR}, #{hotel.hotelid,jdbcType=BIGINT}, #{status,jdbcType=INTEGER,javaType=com.mk.ots.common.enums.PayTypeEnum}, 
-      #{needreturn,jdbcType=CHAR,javaType=com.mk.ots.common.enums.NeedReturnEnum}, #{neworderid,jdbcType=BIGINT}, #{paysrc,jdbcType=INTEGER, javaType=com.mk.ots.common.enums.PaySrcEnum}
+      #{needreturn,jdbcType=CHAR,javaType=com.mk.ots.common.enums.NeedReturnEnum}, 
+      #{neworderid,jdbcType=BIGINT}, #{paysrc,jdbcType=INTEGER, javaType=com.mk.ots.common.enums.PaySrcEnum},
+      #{userid,jdbcType=VARCHAR}
       )
   </insert>
    	
@@ -83,6 +86,10 @@
 	    needReturn = #{needreturn,jdbcType=CHAR}
 	  where id = #{id,jdbcType=BIGINT}
 		 
+	</update>
+	
+	<update id="updateUserIdByOrderId" parameterType="java.util.Map">
+	   update p_pay  set userid=#{userid} where orderid = #{orderid}
 	</update>
 	
 	
