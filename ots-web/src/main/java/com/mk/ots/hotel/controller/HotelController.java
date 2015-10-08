@@ -379,7 +379,15 @@ public class HotelController {
     }
     
     /**
-     * 
+     * 更新酒店眯客价Redis缓存: H端在更新酒店价格时，调用该接口更新Redis中该酒店的眯客价缓存。
+     * @param hotelid
+     * 参数：酒店id
+     * @param roomtypeid
+     * 参数：房型id
+     * @param isforce
+     * 参数：是否强制更新。
+     * T是：先删除Redis缓存，查询数据库，再放到Redis中；
+     * F否：不删除Redis缓存，Redis有的话直接返回，没有再查询数据库，放到Redis中。
      * @return
      */
     @RequestMapping(value="/hotel/updateHotelMikepricesCache")
@@ -390,8 +398,13 @@ public class HotelController {
     }
     
     /**
-     * 酒店眯客价
+     * 酒店眯客价: 返回酒店一段时间内的眯客价和眯客价对应房型的门市价。
      * @param hotelid
+     * 参数：酒店id
+     * @param startdateday
+     * 参数：开始日期
+     * @param enddateday
+     * 参数：截止日期
      * @return
      */
     @RequestMapping(value="/hotel/mikeprices")
@@ -442,10 +455,16 @@ public class HotelController {
     }
     
     /**
-     * @param mid
-     * @param code
-     * 查询已住历史酒店
      * 眯客2.5需求
+     * 用户登录后查询该用户已住过的历史酒店。
+     * @param citycode
+     * 参数：城市编码
+     * @param page
+     * 参数：分页页码（如果有分页）
+     * @param limit
+     * 参数：每页条数（如果有分页）
+     * @param token
+     * 参数：token验证码
      */
     @RequestMapping(value = "/history/querylist", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> queryHistoryHotels(ParamBaseBean pbb,String citycode,Integer page,Integer limit,String token) {
@@ -463,9 +482,6 @@ public class HotelController {
 	    	if (limit == null || StringUtils.isBlank(limit.toString())) {
 	    		throw MyErrorEnum.errorParm.getMyException("传参：每页显示量为空!");
 	    	}
-	    	/*if (StringUtils.isEmpty(citycode)) {
-	    		throw MyErrorEnum.errorParm.getMyException("传参：城市编码为空!");
-	    	}*/
 	 	    int start = (page - 1) * limit;
 	    	List<Map<String,Object>> list = hotelService.queryHistoryHotels(token,citycode,start,limit);
 	    	result.put("hotel", list);
@@ -483,26 +499,23 @@ public class HotelController {
     }
     
     /**
-     * @param mid
-     * @param code
-     * 查询已住历史酒店次数
      * 眯客2.5需求
+     * 查询已住历史酒店次数
+     * @param citycode
+     * 参数：城市编码
+     * @param token
+     * 参数：token验证码
      */
     @RequestMapping(value = "/history/querycount", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> queryHistoryHotelsCount(ParamBaseBean pbb,String citycode,String token) {
-    	
     	//日志
     	//roomStateLogUtil.sendLog(pbb.getHardwarecode(),pbb.getCallmethod(), pbb.getCallversion(), pbb.getIp(), "/history/querycount", token+","+citycode,"ots");
     	logger.info("HotelController::queryHistoryHotelsCount::params{}  begin", token+","+citycode);
-    	
     	Map<String, Object> result = new HashMap<String, Object>();
     	try {
     		if(StringUtils.isBlank(token)){
 				throw MyErrorEnum.errorParm.getMyException("传参：token为空！");
 			}
-	    	/*if (StringUtils.isEmpty(citycode)) {
-	    		throw MyErrorEnum.errorParm.getMyException("传参：城市编码为空!");
-	    	}*/
 	    	long hotelcount = hotelService.queryHistoryHotelsCount(token,citycode);
 	    	result.put("count", hotelcount);
 	    	result.put(ServiceOutput.STR_MSG_SUCCESS, true);
@@ -518,10 +531,12 @@ public class HotelController {
 		return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
     }
     /**
-     * @param mid
-     * @param hotelid
-     * 删除某会员某酒店住店历史纪录
      * 眯客2.5需求
+     * 删除某会员某酒店住店历史纪录
+     * @param token
+     * 参数：token验证码
+     * @param hotelid
+     * 参数：酒店id
      */
     @RequestMapping(value = "/history/deleterecords", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> deleteHotelStats(ParamBaseBean pbb,String token, Long hotelid) {
@@ -643,7 +658,7 @@ public class HotelController {
 	}
     
     /**
-     * 更新ES中酒店的眯客价
+     * 更新ES中酒店的眯客价: 更新一段时间的酒店眯客价数据到ES酒店信息中，供酒店搜索使用。
      * @param hotelid
      * 参数：酒店id
      * @return
@@ -707,9 +722,9 @@ public class HotelController {
     }
     
     /**
-     * 更新ES中酒店的眯客价
-     * @param hotelid
-     * 参数：酒店id
+     * 强制更新指定城市酒店的眯客价Redis缓存（/hotel/updateHotelMikepricesCache）。
+     * @param citycode
+     * 参数：城市编码
      * @return
      */
     @RequestMapping(value="/hotel/updatemikepricecache")
