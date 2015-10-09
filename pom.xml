@@ -704,5 +704,6 @@
 		<module>ots-pro-face</module>
 		<module>ots-pro-biz</module>
 		<module>ots-web</module>
+		<module>ots-entities</module>
 	</modules>
 </project>
