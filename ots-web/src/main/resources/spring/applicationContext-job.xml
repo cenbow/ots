@@ -50,6 +50,8 @@
                 <ref bean="refreshEsMikePriceTrigger"/>
                 <ref bean="confirmedPayingOrderTrigger"/>
                 <ref bean="payStatusErrorOrderTrigger"/>
+                
+                <ref bean="SendTicketJobTrigger"/>
 			</list>
 		</property>
 	</bean>
@@ -197,6 +199,18 @@
 	<bean id="SendCouponsJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
 		<property name="name" value="SendCouponsJob" />
 		<property name="jobClassName" value="com.mk.ots.job.SendCouponsJob" />
+	</bean>
+	
+	
+	
+	<!-- 每天16:00:01给固定用户推送优惠券信息 -->
+	<bean id="SendTicketJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="SendTicketJobJobDetail" />
+		<property name="cronExpression" value="1 0 16 * * ? " />
+	</bean>
+	<bean id="SendTicketJobJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="SendTicketJob" />
+		<property name="jobClassName" value="com.mk.ots.job.SendTicketJob" />
 	</bean>
 
     <!-- 每天10:01:00给用户推送住三送一活动的优惠券信息 -->
