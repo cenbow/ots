@@ -1411,7 +1411,7 @@
 				<liveHotelNum>3</liveHotelNum>
 
 				<!-- kafka start -->
-				<zk_connect>10.4.31.46:2181</zk_connect>
+				<zk_connect>10.10.144.40:2181,10.10.136.210:2181,10.10.115.52:2181</zk_connect>
 				<!-- kafka end -->
 
 				<!-- BMS黑名单验证接口 -->
