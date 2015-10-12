@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.mybatis.mapper.BStrategyPriceMapper" >
-  <resultMap id="BaseResultMap" type="com.mybatis.model.BStrategyPrice" >
+<mapper namespace="com.mk.ots.pricedrop.model.BStrategyPrice" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.pricedrop.model.BStrategyPrice" >
     <id column="id" property="id" jdbcType="BIGINT" />
     <result column="name" property="name" jdbcType="VARCHAR" />
     <result column="type" property="type" jdbcType="BIGINT" />
@@ -198,7 +198,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.mybatis.model.BStrategyPriceExample" resultType="java.lang.Integer" >
+  <select id="countByExample" parameterType="com.mk.ots.pricedrop.model.BStrategyPrice" resultType="java.lang.Integer" >
     select count(*) from b_strategy_price
     <if test="_parameter != null" >
       <include refid="Example_Where_Clause" />

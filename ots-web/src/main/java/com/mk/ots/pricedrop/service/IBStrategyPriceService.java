@@ -1,12 +1,8 @@
 package com.mk.ots.pricedrop.service;
 
-import com.mybatis.model.BStrategyPrice;
-import com.mybatis.model.BStrategyPriceExample;
-
 import java.util.List;
 
-import org.apache.ibatis.annotations.Param;
-import org.stringtemplate.v4.compiler.STParser.list_return;
+import com.mk.ots.pricedrop.model.BStrategyPrice;
 
 public interface IBStrategyPriceService {
    /* int countByExample(BStrategyPriceExample example);

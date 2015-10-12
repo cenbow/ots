@@ -155,7 +155,7 @@ public class BStrategyPriceController {
 			    e.printStackTrace();
 			    throw MyErrorEnum.customError.getMyException("字符串结束时间转化为date类型错误");
 			   }
-			  
+			 
 			
 		}
 		if(Strings.isNullOrEmpty(ruleroom)){
