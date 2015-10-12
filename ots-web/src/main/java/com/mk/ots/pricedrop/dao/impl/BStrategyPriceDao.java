@@ -1,10 +1,11 @@
 package com.mk.ots.pricedrop.dao.impl;
 
+import org.springframework.stereotype.Component;
+
 import com.mk.framework.datasource.dao.mybatis.MyBatisDaoImpl;
 import com.mk.ots.pricedrop.dao.IBStrategyPriceDao;
 import com.mk.ots.pricedrop.model.BStrategyPrice;
-import com.mk.ots.promo.model.BPromotion;
-
+@Component
 public class BStrategyPriceDao extends MyBatisDaoImpl<BStrategyPrice, Long> implements IBStrategyPriceDao{
 
 	@Override
