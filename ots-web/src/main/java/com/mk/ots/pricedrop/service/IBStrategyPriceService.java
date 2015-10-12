@@ -1,41 +1,45 @@
 package com.mk.ots.pricedrop.service;
 
-import java.util.List;
-
 import com.mk.ots.pricedrop.model.BStrategyPrice;
 
+import java.util.List;
+
+/**
+ *
+ */
 public interface IBStrategyPriceService {
-   /* int countByExample(BStrategyPriceExample example);
 
-    int deleteByExample(BStrategyPriceExample example);
-
-    int deleteByPrimaryKey(Long id);
-*/
-    public  void insert(BStrategyPrice bStrategyPrice);
+    public void insert(BStrategyPrice bStrategyPrice);
 
     /**
      * 根据酒店id查询房型
-     * @param hotelid
-     * @return
+     *
+     * @param hotelid 酒店id
+     * @return List<BStrategyPrice>
      */
     public List<BStrategyPrice> findBStrategyPricesByHotelId(Long hotelid);
+
+    /**
+     * 根据酒店id集合查询房型
+     *
+     * @param hotelid 酒店id
+     * @return List<BStrategyPrice>
+     */
+    public List<BStrategyPrice> findBStrategyPricesByHotelId(List<Long> hotelid);
+
     /**
      * 根据查询所有房型
-     * @param hotelid
-     * @return
+     *
+     * @return List<BStrategyPrice>
      */
     public List<BStrategyPrice> findAllBStrategyPrices();
-    /*int insertSelective(BStrategyPrice record);
 
-    List<BStrategyPrice> selectByExample(BStrategyPriceExample example);
-
-    BStrategyPrice selectByPrimaryKey(Long id);
-
-    int updateByExampleSelective(@Param("record") BStrategyPrice record, @Param("example") BStrategyPriceExample example);
-
-    int updateByExample(@Param("record") BStrategyPrice record, @Param("example") BStrategyPriceExample example);
-
-    int updateByPrimaryKeySelective(BStrategyPrice record);
-
-    int updateByPrimaryKey(BStrategyPrice record);*/
+    /**
+     * 根据酒店及房型查询对应的单条配置信息
+     *
+     * @param hotelid    酒店id
+     * @param roomtype 房型
+     * @return BStrategyPrice
+     */
+    public BStrategyPrice findByHotelidAndRoomtype(Long hotelid, Long roomtype);
 }
