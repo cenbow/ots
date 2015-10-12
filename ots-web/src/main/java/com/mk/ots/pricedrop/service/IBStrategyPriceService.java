@@ -11,7 +11,7 @@ public interface IBStrategyPriceService {
 
     int deleteByPrimaryKey(Long id);
 */
-    public  void insert(BStrategyPrice bStrategyPrice);
+    public  void save(BStrategyPrice bStrategyPrice);
 
     /**
      * 根据酒店id查询房型

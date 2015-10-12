@@ -5,12 +5,12 @@ import com.mk.ots.pricedrop.dao.IBStrategyPriceDao;
 import com.mk.ots.pricedrop.model.BStrategyPrice;
 import com.mk.ots.promo.model.BPromotion;
 
-public class BStrategyPriceDao extends MyBatisDaoImpl<BPromotion, Long> implements IBStrategyPriceDao{
+public class BStrategyPriceDao extends MyBatisDaoImpl<BStrategyPrice, Long> implements IBStrategyPriceDao{
 
 	@Override
-	public void insert(BStrategyPrice bStrategyPrice) {
+	public void save(BStrategyPrice bStrategyPrice) {
 		// TODO Auto-generated method stub
-		
+		this.insert(bStrategyPrice);
 	}
 
 	
