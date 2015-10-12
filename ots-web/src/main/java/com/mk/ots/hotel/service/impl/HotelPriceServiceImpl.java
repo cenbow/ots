@@ -25,6 +25,7 @@ import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.util.UrlUtils;
 import com.mk.ots.common.utils.DateTools;
+import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.hotel.bean.EDailyRate;
 import com.mk.ots.hotel.bean.ERackRate;
 import com.mk.ots.hotel.bean.ERackRateExample;
@@ -51,6 +52,7 @@ import com.mk.ots.hotel.model.EHotelModel;
 import com.mk.ots.hotel.model.THotelModel;
 import com.mk.ots.hotel.model.TRoomTypeModel;
 import com.mk.ots.hotel.service.HotelPriceService;
+import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.manager.OtsCacheManager;
 import com.mk.ots.mapper.EDailyRateMapper;
 import com.mk.ots.mapper.EHotelMapper;
@@ -123,7 +125,9 @@ public class HotelPriceServiceImpl implements HotelPriceService {
 	@Autowired
 	private IBStrategyPriceService strategryPriceService;
 	@Autowired
-	protected ElasticsearchProxy esProxy;
+	private ElasticsearchProxy esProxy;
+	@Autowired
+	private RoomstateService roomstateService;
 
 	/**
 	 * @param hotelPMS
@@ -1347,6 +1351,69 @@ public class HotelPriceServiceImpl implements HotelPriceService {
 		return flag;
 	}
 	
+	private Map<Long, Map<String, Object>> calReduceMinPrice(List<Long> hotelids ){
+		List<BStrategyPrice> hotels = new ArrayList<BStrategyPrice>();
+		if(hotelids != null){
+			hotels = strategryPriceService.findBStrategyPricesByHotelId(hotelids);
+		}else{
+			hotels = strategryPriceService.findAllBStrategyPrices();
+		}
+		Map<Long, Map<String, Object>> sMap = new HashMap<Long, Map<String, Object>>();
+		for(BStrategyPrice stPrice : hotels){
+			Long hotelid = stPrice.getRulehotel();
+			Map<String, Object> timeMap = new HashMap<String, Object>();
+			sMap.put(hotelid, timeMap);
+			for(BStrategyPrice subPrice : hotels){
+				Long shotelid = subPrice.getRulehotel();
+				if( hotelid.equals(shotelid)){
+					Long sroomtypeid = subPrice.getRuleroomtype();
+					BigDecimal price = BigDecimal.ZERO;
+					String reduceType = ""+stPrice.getType();// 1:标准价;2:直减;3:折扣
+					String begindate = DateUtils.getDate();
+					String enddate = DateUtils.formatDate(DateUtils.addDays(new Date(), 1));
+					String[] mikePrices = null;
+					BigDecimal mkPrice = BigDecimal.ZERO;
+					switch(reduceType){
+						case "1":
+							if(stPrice.getValue() != null )
+								price = stPrice.getValue();
+							break;
+						case "2":
+							// 眯客价-直减价格，
+							if(this.isUseNewPrice())
+								mikePrices = this.getRoomtypeMikePrices(hotelid, sroomtypeid, begindate, enddate);
+		        			else
+		        				mikePrices = roomstateService.getRoomtypeMikePrices(hotelid, sroomtypeid, begindate, enddate);
+							mkPrice = new BigDecimal(mikePrices[0]);
+							price = mkPrice.subtract(stPrice.getValue());
+
+							break;
+						case "3":
+							//眯客价*折扣
+							if(this.isUseNewPrice())
+								mikePrices = this.getRoomtypeMikePrices(hotelid, sroomtypeid, begindate, enddate);
+		        			else
+		        				mikePrices = roomstateService.getRoomtypeMikePrices(hotelid, sroomtypeid, begindate, enddate);
+							mkPrice = new BigDecimal(mikePrices[0]);
+							price = mkPrice.multiply(stPrice.getValue());
+							break;
+						default:
+							if(stPrice.getValue() != null )
+								price = stPrice.getValue();
+							break;
+					}
+					String timeRange = subPrice.getRulebegintime() +"~"+ subPrice.getRuleendtime();
+					if(timeMap.containsKey(timeRange)){
+						BigDecimal ss = (BigDecimal)timeMap.get(timeRange);
+						timeMap.put(timeRange, ss.min(subPrice.getValue()));
+					}else{
+						timeMap.put(timeRange, subPrice.getValue());
+					}
+				}
+			}
+		}
+		return sMap;
+	}
 	
 	/**
 	 * 初始化直减价格到ES
@@ -1354,25 +1421,18 @@ public class HotelPriceServiceImpl implements HotelPriceService {
 	 * @param roomtypeid
 	 * @return
 	 */
-	public Map initReducePriceToES(Long hotelid, Long roomtypeid){
-		List<BStrategyPrice> hotels = strategryPriceService.findAllBStrategyPrices();
-		List<Long> hotelids = new ArrayList<Long>();
-		for(BStrategyPrice stPrice : hotels){
-			Map<String, Object> reducePrice = new HashMap<String, Object>();
-			reducePrice.put("begintime", stPrice.getRulebegintime());
-			reducePrice.put("endtime", stPrice.getRuleendtime());
-			String reduceType = "S";
-			reducePrice.put("reduceValue", stPrice.getStprice());
-
-			SearchHit[] searchHits = esProxy.searchHotelByHotelId(""+hotelid);
+	public Map initReducePriceToES(List<Long> hotelids ){
+		Map<Long, Map<String, Object>> pm = this.calReduceMinPrice(hotelids);
+		for (Long key : pm.keySet()) {
+			Map<String, Object> rdPrice = pm.get(key);
+			SearchHit[] searchHits = esProxy.searchHotelByHotelId(""+ key);			
 			 for (int i = 0; i < searchHits.length; i++) {
 	                SearchHit searchHit = searchHits[i];
 	                String _id = searchHit.getId();
-	                Map<String, Object> doc = searchHit.getSource();
-	                doc.remove("reducePrice");
-					doc.put("reducePrice", reducePrice);
-		             esProxy.updateDocument(_id, doc);
-		             log.info("更新酒店:{}直减价格成功.", hotelid);
+	                Map<String, Object> doc = searchHit.getSource();	                
+					doc.put("reducePrice", rdPrice);
+		            esProxy.updateDocument(_id, doc);
+		            log.info("更新酒店:{}直减价格成功.", key);
 			 }
 		}
 		
