@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.elasticsearch.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import com.google.common.collect.Maps;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.common.enums.StrategyPriceType;
 import com.mk.ots.pricedrop.model.BStrategyPrice;
+import com.mk.ots.pricedrop.service.IBStrategyPriceService;
 
 /**
  * @author zhangyajun
@@ -32,21 +34,30 @@ import com.mk.ots.pricedrop.model.BStrategyPrice;
 public class BStrategyPriceController {
 	final Logger logger = LoggerFactory.getLogger(BStrategyPriceController.class);
 
+	@Autowired
+	private IBStrategyPriceService iBStrategyPriceService;
 	@RequestMapping("/create")
 	public ResponseEntity<Map<String, Object>> insertSalestrategyRule(HttpServletRequest request) {
 		BStrategyPrice bStrategyPrice = new BStrategyPrice();
 		//参数校验
-		parameterCheck(request,bStrategyPrice);
-		/*UMember manager = MyTokenUtils.getMemberByToken(authcode);
-		if(manager==null || !"15801209201".equals(manager.getPhone())){
-			throw MyErrorEnum.customError.getMyException("管理权限错误");
-		}*/
+		this.parameterCheck(request,bStrategyPrice);
 		
-		
+		//保存
+		this.iBStrategyPriceService.save(bStrategyPrice);
+		if (bStrategyPrice.getId()==null) {
+			logger.info("保存价格策略失败");
+			throw MyErrorEnum.customError.getMyException("保存价格策略失败");
+		}
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		rtnMap.put("success", true);
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
+	
+	/**
+	 * 参数验证
+	 * @param request
+	 * @param bStrategyPrice
+	 */
 	private void  parameterCheck(HttpServletRequest request,BStrategyPrice bStrategyPrice){
 		String name = request.getParameter("name");
 		String type = request.getParameter("type");
@@ -142,6 +153,16 @@ public class BStrategyPriceController {
 		}
 		if(Strings.isNullOrEmpty(rulebegintime)){
 			throw MyErrorEnum.customError.getMyException("起始时间参数不能为空");
+		}else {
+			  SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			   Date date = null;
+			   try {
+			    date = format.parse(rulebegintime);
+			    bStrategyPrice.setRulebegintime(date);
+			   } catch (ParseException e) {
+			    e.printStackTrace();
+			    throw MyErrorEnum.customError.getMyException("字符串起始时间转化为date类型错误");
+			   }
 		}
 		
 		if(Strings.isNullOrEmpty(ruleendtime)){
@@ -151,24 +172,36 @@ public class BStrategyPriceController {
 			   Date date = null;
 			   try {
 			    date = format.parse(ruleendtime);
+			    bStrategyPrice.setRuleendtime(date);
 			   } catch (ParseException e) {
 			    e.printStackTrace();
 			    throw MyErrorEnum.customError.getMyException("字符串结束时间转化为date类型错误");
 			   }
-			 
 			
+		}
+
+		if(Strings.isNullOrEmpty(ruleroomtype)){
+			throw MyErrorEnum.customError.getMyException("规则房型参数不能为空");
+		}else {
+			try {
+				long ruleroomtypeLong = Long.parseLong(ruleroomtype);
+				bStrategyPrice.setRuleroomtype(ruleroomtypeLong);
+			} catch (Exception e) {
+				// TODO: handle exception
+				throw MyErrorEnum.customError.getMyException("规则酒店参数转换为整数是异常");
+			}
 		}
 		if(Strings.isNullOrEmpty(ruleroom)){
 			throw MyErrorEnum.customError.getMyException("承包房间参数不能为空");
 		}
-		if(Strings.isNullOrEmpty(ruleroomtype)){
-			throw MyErrorEnum.customError.getMyException("规则房型参数不能为空");
-		}
+		
 		if(Strings.isNullOrEmpty(enable)){
 			throw MyErrorEnum.customError.getMyException("是否启用参数不能为空");
 		}
 		
 		bStrategyPrice.setName(name);
+		bStrategyPrice.setRuleroom(ruleroom);
+		bStrategyPrice.setEnable(enable);
 		
 	} 
 }

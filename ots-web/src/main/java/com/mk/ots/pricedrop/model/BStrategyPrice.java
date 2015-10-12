@@ -123,4 +123,15 @@ public class BStrategyPrice {
     public void setEnable(String enable) {
         this.enable = enable == null ? null : enable.trim();
     }
+
+	@Override
+	public String toString() {
+		return "BStrategyPrice [id=" + id + ", name=" + name + ", type=" + type
+				+ ", value=" + value + ", stprice=" + stprice + ", rulearea="
+				+ rulearea + ", rulehotel=" + rulehotel + ", ruleroomtype="
+				+ ruleroomtype + ", rulebegintime=" + rulebegintime
+				+ ", ruleendtime=" + ruleendtime + ", ruleroom=" + ruleroom
+				+ ", enable=" + enable + "]";
+	}
+    
 }

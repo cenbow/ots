@@ -89,8 +89,35 @@ public class OtaOrder extends BizModel<OtaOrder> {
 	public BigDecimal getCashBack(){
 		return this.get("cashback");
 	}
-	
-	
+	/**
+	 * 得到结算类型
+	 * @return
+	 */
+	public int getClearingType(){
+		return this.get("clearingtype");
+	}
+	/**
+	 * 设置结算类型
+	 * @param clearingtype
+	 */
+	public void setClearingType(int clearingtype){
+		this.set("clearingtype", clearingtype);
+		
+	}
+	/**
+	 * 设置结算金额
+	 * @param clearingMoney
+	 */
+	public void setClearingMoney(BigDecimal clearingMoney){
+		this.set("clearingmoney", clearingMoney);
+	}
+	/**
+	 * 得到结算金额
+	 * @return
+	 */
+	public BigDecimal getClearingMoney(){
+		return this.get("clearingmoney");
+	}
 	/**
 	 * 设置，订单能用的返现
 	 * @param availableMoney

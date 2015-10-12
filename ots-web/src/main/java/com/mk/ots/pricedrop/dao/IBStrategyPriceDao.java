@@ -4,6 +4,6 @@ import com.mk.ots.pricedrop.model.BStrategyPrice;
 
 public interface IBStrategyPriceDao{
 	
-	public void insert(BStrategyPrice bStrategyPrice);
+	public void save(BStrategyPrice bStrategyPrice);
 	
 }
