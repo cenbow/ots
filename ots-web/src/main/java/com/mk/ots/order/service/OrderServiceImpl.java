@@ -56,6 +56,7 @@ import com.mk.orm.kit.JsonKit;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
 import com.mk.ots.common.bean.PageObject;
+import com.mk.ots.common.enums.ClearingTypeEnum;
 import com.mk.ots.common.enums.NeedReturnEnum;
 import com.mk.ots.common.enums.OSTypeEnum;
 import com.mk.ots.common.enums.OrderTasksEnum;
@@ -522,6 +523,19 @@ public class OrderServiceImpl implements OrderService {
      */
     public void cancelOrder(OtaOrder order) {
         logger.info("OTSMessage::取消订单:start{}", order);
+        
+        /*******直减订单处理******/
+        if(order.getClearingType()==ClearingTypeEnum.priceDrop.getId()&&order.getPayStatus()>PayStatusEnum.paying.getId()){
+        	this.logger.info("已经付款的直减订单，不能取消,订单号：{}",order.getId());
+        	//已经付款就不能取消
+        	throw MyErrorEnum.customError.getMyException("已经付款的直减订单，不能取消");
+        }else{
+        	this.logger.info("直减订单，取消冻结房间,订单号：{}",order.getId());
+        	//取消冻结
+        }
+        /*******直减订单处理******/
+        
+        
         boolean haveCreatePms = false;
         for (OtaRoomOrder roomOrder : order.getRoomOrderList()) {
             if (StringUtils.isNotBlank(roomOrder.getPmsRoomOrderNo())) {
@@ -2157,6 +2171,10 @@ public class OrderServiceImpl implements OrderService {
 			order.setIsReceiveCashBack(ReceiveCashBackEnum.notReceiveCashBack.getId());
 		}
         /*******************订单返现*************/
+		/*******************直减订单处理******************/
+		//如果是直减订单
+		//1，打标记    2，记录结算价格    3，冻结
+		/*******************直减订单处理******************/
       // 判断是否调用切客的创建
       if (order.get("spreadUser") != null) {
           returnOrder = createQKOrder(order);
@@ -2682,6 +2700,12 @@ public class OrderServiceImpl implements OrderService {
         OtaOrder pOrder = this.extractOrderBeanForModify(request, order, modifyByRoomType);
         // 校验此用户是否有订单
         checkOrdersByMid(pOrder);
+        /***************直减订单不能到付***************/
+        if(order.getClearingType()==ClearingTypeEnum.priceDrop.getId()&&order.getOrderType()==OrderTypeEnum.PT.getId()){
+        	this.logger.info("直减订单，只能在线支付,订单号：{}",pOrder.getId());
+        	throw MyErrorEnum.customError.getMyException("直减订单，只能在线支付");
+        }
+        /***************直减订单不能到付***************/
         // 预付订单、等待支付的情况，计算房价
         pOrder = this.saveOrder(pOrder);
         THotel hotel = hotelService.readonlyTHotel(pOrder.getHotelId());
