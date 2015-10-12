@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
+import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.util.UrlUtils;
 import com.mk.ots.common.utils.DateTools;
@@ -61,6 +63,8 @@ import com.mk.ots.mapper.TRoomTypeMapper;
 import com.mk.ots.mapper.TSettingMikeRateMapper;
 import com.mk.ots.mapper.TWeekendRateMapper;
 import com.mk.ots.pay.module.weixin.pay.common.PayTools;
+import com.mk.ots.pricedrop.model.BStrategyPrice;
+import com.mk.ots.pricedrop.service.IBStrategyPriceService;
 import com.mk.pms.room.service.PmsRoomService;
 
 @Service
@@ -116,6 +120,10 @@ public class HotelPriceServiceImpl implements HotelPriceService {
 	private TSettingMikeRateMapper tSettingMikeRateMapper;
 	@Autowired
 	private OtsCacheManager cacheManager;
+	@Autowired
+	private IBStrategyPriceService strategryPriceService;
+	@Autowired
+	protected ElasticsearchProxy esProxy;
 
 	/**
 	 * @param hotelPMS
@@ -1337,5 +1345,37 @@ public class HotelPriceServiceImpl implements HotelPriceService {
 			flag = true;
 		}
 		return flag;
+	}
+	
+	
+	/**
+	 * 初始化直减价格到ES
+	 * @param hotelid
+	 * @param roomtypeid
+	 * @return
+	 */
+	public Map initReducePriceToES(Long hotelid, Long roomtypeid){
+		List<BStrategyPrice> hotels = strategryPriceService.findAllBStrategyPrices();
+		List<Long> hotelids = new ArrayList<Long>();
+		for(BStrategyPrice stPrice : hotels){
+			Map<String, Object> reducePrice = new HashMap<String, Object>();
+			reducePrice.put("begintime", stPrice.getRulebegintime());
+			reducePrice.put("endtime", stPrice.getRuleendtime());
+			String reduceType = "S";
+			reducePrice.put("reduceValue", stPrice.getStprice());
+
+			SearchHit[] searchHits = esProxy.searchHotelByHotelId(""+hotelid);
+			 for (int i = 0; i < searchHits.length; i++) {
+	                SearchHit searchHit = searchHits[i];
+	                String _id = searchHit.getId();
+	                Map<String, Object> doc = searchHit.getSource();
+	                doc.remove("reducePrice");
+					doc.put("reducePrice", reducePrice);
+		             esProxy.updateDocument(_id, doc);
+		             log.info("更新酒店:{}直减价格成功.", hotelid);
+			 }
+		}
+		
+		return null;
 	}
 }
