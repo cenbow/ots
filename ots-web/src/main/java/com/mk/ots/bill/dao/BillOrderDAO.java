@@ -32,6 +32,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.google.common.collect.ImmutableMap;
+import com.mk.ots.common.enums.ClearingTypeEnum;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.home.util.HomeConst;
 
@@ -111,6 +112,8 @@ public class BillOrderDAO {
 		if(null != hotelid){
 			sql0noshow.append(" AND o.hotelid = " + hotelid);
 		}
+		//普通订单参加结算
+		sql0noshow.append("and o.clearingtype = "+ClearingTypeEnum.generalOrder.getId());
 		//每天查询订单信息sql 查询update时间是当天的 如果update时间是当天并且该订单没有在 结算的订单明细表中 则把这一类的订单添加到明细表中。
 		String sql0updatetime1 = "SELECT "
 				+ "o.id orderid, "
@@ -161,6 +164,9 @@ public class BillOrderDAO {
 		if(null != hotelid){
 			sql0updatetime.append(" AND o.hotelid = " + hotelid);
 		}
+		//普通订单参加结算
+		sql0updatetime.append("and o.clearingtype = "+ClearingTypeEnum.generalOrder.getId());
+		
 		String sql0 = "SELECT "
 				+ "o.id orderid, "
 				+ "o.HotelId hotelid, "
@@ -208,7 +214,9 @@ public class BillOrderDAO {
 		if(null != hotelid){
 			sql.append(" AND o.hotelid = " + hotelid);
 		}
-				
+		//普通订单参加结算
+		sql.append("and o.clearingtype = "+ClearingTypeEnum.generalOrder.getId());
+			
 		//每天查询 订单各种金额 sql
 		String sql2 = "SELECT "
 				+ "o.id AS orderid, "

@@ -9,7 +9,9 @@ import java.util.List;
  */
 public interface IBStrategyPriceService {
 
-    public void insert(BStrategyPrice bStrategyPrice);
+    int deleteByPrimaryKey(Long id);
+
+    public void save(BStrategyPrice bStrategyPrice);
 
     /**
      * 根据酒店id查询房型
@@ -37,7 +39,7 @@ public interface IBStrategyPriceService {
     /**
      * 根据酒店及房型查询对应的单条配置信息
      *
-     * @param hotelid    酒店id
+     * @param hotelid  酒店id
      * @param roomtype 房型
      * @return BStrategyPrice
      */

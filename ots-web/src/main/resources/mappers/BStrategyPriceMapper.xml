@@ -15,7 +15,7 @@
     <result column="ruleroom" property="ruleroom" jdbcType="VARCHAR" />
     <result column="enable" property="enable" jdbcType="CHAR" />
   </resultMap>
-  <sql id="Example_Where_Clause" >
+ <!--  <sql id="Example_Where_Clause" >
     <where >
       <foreach collection="oredCriteria" item="criteria" separator="or" >
         <if test="criteria.valid" >
@@ -43,8 +43,8 @@
         </if>
       </foreach>
     </where>
-  </sql>
-  <sql id="Update_By_Example_Where_Clause" >
+  </sql> -->
+ <!--  <sql id="Update_By_Example_Where_Clause" >
     <where >
       <foreach collection="example.oredCriteria" item="criteria" separator="or" >
         <if test="criteria.valid" >
@@ -72,12 +72,12 @@
         </if>
       </foreach>
     </where>
-  </sql>
+  </sql> -->
   <sql id="Base_Column_List" >
     id, name, type, value, stprice, rulearea, rulehotel, ruleroomtype, rulebegintime, 
     ruleendtime, ruleroom, enable
   </sql>
-  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.mybatis.model.BStrategyPriceExample" >
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.mk.ots.pricedrop.model.BStrategyPrice" >
     select
     <if test="distinct" >
       distinct
@@ -101,13 +101,13 @@
     delete from b_strategy_price
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <delete id="deleteByExample" parameterType="com.mybatis.model.BStrategyPriceExample" >
+  <delete id="deleteByExample" parameterType="com.mk.ots.pricedrop.model.BStrategyPrice" >
     delete from b_strategy_price
     <if test="_parameter != null" >
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="com.mybatis.model.BStrategyPrice" >
+  <insert id="insert" parameterType="com.mk.ots.pricedrop.model.BStrategyPrice" useGeneratedKeys="true" keyProperty="id">
     insert into b_strategy_price (id, name, type, 
       value, stprice, rulearea, 
       rulehotel, ruleroomtype, rulebegintime, 
@@ -119,7 +119,7 @@
       #{ruleendtime,jdbcType=TIMESTAMP}, #{ruleroom,jdbcType=VARCHAR}, #{enable,jdbcType=CHAR}
       )
   </insert>
-  <insert id="insertSelective" parameterType="com.mybatis.model.BStrategyPrice" >
+  <insert id="insertSelective" parameterType="com.mk.ots.pricedrop.model.BStrategyPrice" >
     insert into b_strategy_price
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -266,7 +266,7 @@
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <update id="updateByPrimaryKeySelective" parameterType="com.mybatis.model.BStrategyPrice" >
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.pricedrop.model.BStrategyPrice" >
     update b_strategy_price
     <set >
       <if test="name != null" >
@@ -305,7 +305,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.mybatis.model.BStrategyPrice" >
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.pricedrop.model.BStrategyPrice" >
     update b_strategy_price
     set name = #{name,jdbcType=VARCHAR},
       type = #{type,jdbcType=BIGINT},
