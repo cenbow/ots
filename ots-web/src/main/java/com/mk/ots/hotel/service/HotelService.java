@@ -415,7 +415,7 @@ public class HotelService {
 					// 查询 hotelid 的 特价房信息
 
 
-					Boolean isonpromo = true; //TODO:
+					String isonpromo = ""; //TODO:
 					String promotext = ""; //TODO:
 					String promotextcolor = ""; //TODO
 					String promostarttime = ""; //TODO
