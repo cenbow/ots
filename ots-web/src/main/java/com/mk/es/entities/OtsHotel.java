@@ -132,6 +132,7 @@ public class OtsHotel {
     /** 酒店联系电话 */
     private String hotelphone;
 
+    // mike3.1 添加今夜特价房信息
 
     /** 是否为特价房酒店 */
     private String isonpromo;
