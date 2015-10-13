@@ -156,17 +156,14 @@ public class WalletController {
                     logger.error("uWalletCashFlow copy error:", e);
                 }
                 extend.setCashflowtypestr(uWalletCashFlow.getCashflowtype().getDesc());
-                extend.setIsgetin(getIsgetin(uWalletCashFlow.getCashflowtype()));
+                extend.setIsgetin(getIsgetin(uWalletCashFlow.getPrice()));
                 result.add(extend);
             }
         }
         return result;
     }
 
-    private int getIsgetin(CashflowTypeEnum cashflowTypeEnum){
-        if (cashflowTypeEnum==CashflowTypeEnum.CONSUME_ORDER_OUT_LOCK||cashflowTypeEnum==CashflowTypeEnum.CONSUME_ORDER_OUT_CONFIRM){
-           return 1; //支出
-        }
-        return 2;  //收入
+    private int getIsgetin(BigDecimal price){                //1支出 2收入
+        return price.compareTo(BigDecimal.ZERO) < 0 ? 1 : 2;
     }
 }
