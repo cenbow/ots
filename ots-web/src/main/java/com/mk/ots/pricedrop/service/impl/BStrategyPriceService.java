@@ -13,7 +13,8 @@ public class BStrategyPriceService implements IBStrategyPriceService {
 
 	@Autowired
 	private IBStrategyPriceDao iBStrategyPriceDao;
-	@Override
+
+    @Override
 	public void save(BStrategyPrice bStrategyPrice) {
 		// TODO Auto-generated method stub
 		iBStrategyPriceDao.save(bStrategyPrice);
@@ -25,7 +26,7 @@ public class BStrategyPriceService implements IBStrategyPriceService {
 		return null;
 	}
 
-	@Override
+    @Override
 	public List<BStrategyPrice> findAllBStrategyPrices() {
 		// TODO Auto-generated method stub
 		return null;
@@ -45,4 +46,5 @@ public class BStrategyPriceService implements IBStrategyPriceService {
 	public BStrategyPrice findByHotelidAndRoomtype(Long hotelid, Long roomtype) {
 		return null;
 	}
+
 }
