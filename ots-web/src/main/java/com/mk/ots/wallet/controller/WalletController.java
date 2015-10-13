@@ -11,8 +11,11 @@ import com.mk.ots.order.service.OrderService;
 import com.mk.ots.score.service.ScoreService;
 import com.mk.ots.wallet.model.CashflowTypeEnum;
 import com.mk.ots.wallet.model.UWalletCashFlow;
+import com.mk.ots.wallet.model.UWalletCashFlowExtend;
 import com.mk.ots.wallet.service.IWalletCashflowService;
 import com.mk.ots.wallet.service.IWalletService;
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -135,7 +140,33 @@ public class WalletController {
         rtnMap.put("pageindex", tmppageindex);
         rtnMap.put("pagenum", page.getTotalPages());
         rtnMap.put("datasize", tmpdatasize);
-        rtnMap.put("result", page.getResult());
+        List<UWalletCashFlowExtend> result = getuWalletCashFlowExtends(page);
+        rtnMap.put("result", result);
         return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+    }
+
+    private List<UWalletCashFlowExtend> getuWalletCashFlowExtends(Page<UWalletCashFlow> page) {
+        List<UWalletCashFlowExtend> result=new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(page.getResult())){
+            for(UWalletCashFlow uWalletCashFlow:page.getResult()){
+                UWalletCashFlowExtend extend=new UWalletCashFlowExtend();
+                try{
+                    BeanUtils.copyProperties(extend, uWalletCashFlow);
+                }catch (Exception e){
+                    logger.error("uWalletCashFlow copy error:", e);
+                }
+                extend.setCashflowtypestr(uWalletCashFlow.getCashflowtype().getDesc());
+                extend.setIsgetin(getIsgetin(uWalletCashFlow.getCashflowtype()));
+                result.add(extend);
+            }
+        }
+        return result;
+    }
+
+    private int getIsgetin(CashflowTypeEnum cashflowTypeEnum){
+        if (cashflowTypeEnum==CashflowTypeEnum.CONSUME_ORDER_OUT_LOCK||cashflowTypeEnum==CashflowTypeEnum.CONSUME_ORDER_OUT_CONFIRM){
+           return 1; //支出
+        }
+        return 2;  //收入
     }
 }
