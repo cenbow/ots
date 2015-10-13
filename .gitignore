@@ -36,3 +36,6 @@
 /ots-entities/.settings
 /ots-entities/.project
 /ots-entities/.classpath
+*.iml
+target/
+.idea
