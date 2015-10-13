@@ -114,7 +114,7 @@ public class WalletController {
      */
     @RequestMapping("/detail/query")
     public ResponseEntity<Map<String, Object>> querydetail(ParamBaseBean pbb,Long orderid, String pageindex, String datasize) {
-        logger.info("【/detail/query】 params is : {}", pbb.toString());
+        logger.info("【entry/detail/query】 params is : {}", pbb.toString());
         //1. 请求参数处理
         Long mid = MyTokenUtils.getMidByToken("");
         int tmppageindex = 1;
