@@ -484,6 +484,23 @@ public class OtaOrder extends BizModel<OtaOrder> {
 		this.set("daynumber", daynumber);
 	}
 
+
+	public String getPromoType() {
+		return this.get("promotype");
+	}
+
+	public void setPromoType(String promoType) {
+		this.set("promotype", promoType);
+	}
+
+	public String getRoomTicket() {
+		return this.get("roomticket");
+	}
+
+	public void setRoomTicket(String roomTicket) {
+		this.set("roomticket", roomTicket);
+	}
+
 	public void setRoomOrderList(List<OtaRoomOrder> roomOrderList) {
 		this.roomOrderList = roomOrderList;
 	}

@@ -415,6 +415,7 @@ public class OrderController {
 			List<OtaRoomPrice> otaRoomPrices = this.priceService.findOtaRoomPriceByOrder(order);
 			order.put("otaRoomPrices", otaRoomPrices);
 			order.put("act", "query");
+			//封装order json信息
 			this.orderUtil.getOrderToJson(jsonObj1, ppay, order, showRoom, showInUser);
 			orders.add(jsonObj1);
 		}

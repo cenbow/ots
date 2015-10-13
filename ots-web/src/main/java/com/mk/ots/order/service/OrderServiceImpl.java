@@ -2162,6 +2162,9 @@ public class OrderServiceImpl implements OrderService {
       OtaOrder returnOrder = null;
         /*******************订单返现*************/
         Long roomTypeId=order.getRoomOrderList().get(0).getRoomTypeId();
+       //判断房间类型
+        Long roomId = order.getRoomOrderList().get(0).getRoomId();
+        order.setPromoType(getPromoType(roomId));
 		Map<String, Object> cash = cashBackService.getCashBackByRoomtypeId(roomTypeId, DateUtils.formatDate(order.getBeginTime()),
 				DateUtils.formatDate(order.getEndTime()));
 		this.logger.info("getCashBackByRoomtypeId:返现详细:{}", gson.toJson(cash));
@@ -2225,7 +2228,16 @@ public class OrderServiceImpl implements OrderService {
       putOrderJobIntoManager(returnOrder);
   }
 
-  /**
+    /**
+     * 根据房间id得到对应的特价类型
+     * @param roomId
+     * @return
+     */
+    private String getPromoType(Long roomId) {
+        return null;
+    }
+
+    /**
    * 校验此用户是否有订单
    * 
    * @param order

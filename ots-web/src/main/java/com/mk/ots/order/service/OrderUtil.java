@@ -173,6 +173,8 @@ public class OrderUtil {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		// DecimalFormat format=new DecimalFormat("#.00");
 		// format.setRoundingMode(RoundingMode.UP);
+		jsonObj.put("promotype", returnOrder.getPromoType());
+		jsonObj.put("roomticket", returnOrder.getRoomTicket());
 		jsonObj.put("orderid", returnOrder.getId());
 		jsonObj.put("hotelid", returnOrder.getHotelId());
 		jsonObj.put("hotelname", returnOrder.getHotelName());
