@@ -1,10 +1,10 @@
 package com.mk.ots.restful.output;
 
+import com.google.common.collect.Lists;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
-
-import com.google.common.collect.Lists;
 
 /**
  * roomstate/querylist房态查询接口返回数据实体类.
@@ -129,7 +129,12 @@ public class RoomstateQuerylistRespEntity implements Serializable {
         // 房型根据可售房间数在C端显示的文本内容
         private String vctxt;
         // mike 3.0 add end 
-        
+
+        // mike 3.1
+        private String promotype;
+        private String isonpromo;
+
+
         public String getIsfocus() {
 			return isfocus;
 		}
@@ -238,6 +243,22 @@ public class RoomstateQuerylistRespEntity implements Serializable {
 		public void setCashbackcost(BigDecimal cashbackcost) {
 			this.cashbackcost = cashbackcost;
 		}
+
+        public String getPromotype() {
+            return promotype;
+        }
+
+        public void setPromotype(String promotype) {
+            this.promotype = promotype;
+        }
+
+        public String getIsonpromo() {
+            return isonpromo;
+        }
+
+        public void setIsonpromo(String isonpromo) {
+            this.isonpromo = isonpromo;
+        }
     }
     
     /**
