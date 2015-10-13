@@ -39,3 +39,4 @@
 *.iml
 target/
 .idea
+catalina.base_IS_UNDEFINED/
