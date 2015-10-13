@@ -1,15 +1,14 @@
 package com.mk.es.entities;
 
+import com.mk.orm.plugin.bean.Bean;
+import com.mk.ots.common.utils.Constant;
+import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.geo.GeoPoint;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.geo.GeoPoint;
-
-import com.mk.orm.plugin.bean.Bean;
-import com.mk.ots.common.utils.Constant;
 
 /**
  * OTS Hotel Entity.
@@ -132,7 +131,23 @@ public class OtsHotel {
     private String hotelprovince;
     /** 酒店联系电话 */
     private String hotelphone;
-    
+
+
+    /** 是否为特价房酒店 */
+    private String isonpromo;
+
+    /** 特价文字*/
+    private String promotext;
+
+    /** 特价文字颜色 */
+    private String promotextcolor;
+
+    /** 特价房开始时间 */
+    private String promostarttime;
+
+    /** 特价房结束时间 */
+    private String promoendtime;
+
     public OtsHotel() {
         
     }
@@ -523,4 +538,43 @@ public class OtsHotel {
         this.hotelphone = hotelphone;
     }
 
+    public String getIsonpromo() {
+        return isonpromo;
+    }
+
+    public void setIsonpromo(String isonpromo) {
+        this.isonpromo = isonpromo;
+    }
+
+    public String getPromotext() {
+        return promotext;
+    }
+
+    public void setPromotext(String promotext) {
+        this.promotext = promotext;
+    }
+
+    public String getPromotextcolor() {
+        return promotextcolor;
+    }
+
+    public void setPromotextcolor(String promotextcolor) {
+        this.promotextcolor = promotextcolor;
+    }
+
+    public String getPromostarttime() {
+        return promostarttime;
+    }
+
+    public void setPromostarttime(String promostarttime) {
+        this.promostarttime = promostarttime;
+    }
+
+    public String getPromoendtime() {
+        return promoendtime;
+    }
+
+    public void setPromoendtime(String promoendtime) {
+        this.promoendtime = promoendtime;
+    }
 }

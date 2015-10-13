@@ -407,7 +407,27 @@ public class HotelService {
 					
 					//mike3.0 添加月销量
 					hotel.setOrdernummon(getOrderNumMon(Long.valueOf(hotelid)));
-					
+
+
+
+					//mike3.1 添加特价房
+
+					// 查询 hotelid 的 特价房信息
+
+
+					Boolean isonpromo = true; //TODO:
+					String promotext = ""; //TODO:
+					String promotextcolor = ""; //TODO
+					String promostarttime = ""; //TODO
+					String promoendtime = ""; //TODO
+
+					hotel.setIsonpromo(isonpromo);
+					hotel.setPromotext(promotext);
+					hotel.setPromotextcolor(promotextcolor);
+					hotel.setPromostarttime(promostarttime);
+					hotel.setPromoendtime(promoendtime);
+
+
 					// 先把新的酒店放到集合中，后面做批量添加
 					coll.add(hotel);
 					logger.info("hotelid: {} added in collections and will be add in elasticsearch document.", hotelid);
