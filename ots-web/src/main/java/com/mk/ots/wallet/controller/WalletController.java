@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.model.Page;
 import com.mk.framework.util.MyTokenUtils;
+import com.mk.ots.common.bean.ParamBaseBean;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.service.OrderService;
 import com.mk.ots.score.service.ScoreService;
@@ -12,6 +13,8 @@ import com.mk.ots.wallet.model.CashflowTypeEnum;
 import com.mk.ots.wallet.model.UWalletCashFlow;
 import com.mk.ots.wallet.service.IWalletCashflowService;
 import com.mk.ots.wallet.service.IWalletService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,6 +34,9 @@ import java.util.Map;
 @Controller
 @RequestMapping(value = "/wallet", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 public class WalletController {
+
+    final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     private IWalletService iWalletService;
 
@@ -107,7 +113,8 @@ public class WalletController {
      * @return ResponseEntity
      */
     @RequestMapping("/detail/query")
-    public ResponseEntity<Map<String, Object>> querydetail(Long orderid, String pageindex, String datasize) {
+    public ResponseEntity<Map<String, Object>> querydetail(ParamBaseBean pbb,Long orderid, String pageindex, String datasize) {
+        logger.info("【/detail/query】 params is : {}", pbb.toString());
         //1. 请求参数处理
         Long mid = MyTokenUtils.getMidByToken("");
         int tmppageindex = 1;
