@@ -15,11 +15,6 @@ public class BStrategyPriceService implements IBStrategyPriceService {
 	private IBStrategyPriceDao iBStrategyPriceDao;
 
     @Override
-    public int deleteByPrimaryKey(Long id) {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
 	public void save(BStrategyPrice bStrategyPrice) {
 		// TODO Auto-generated method stub
 		iBStrategyPriceDao.save(bStrategyPrice);
@@ -32,19 +27,24 @@ public class BStrategyPriceService implements IBStrategyPriceService {
 	}
 
     @Override
-    public List<BStrategyPrice> findBStrategyPricesByHotelId(List<Long> hotelid) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
 	public List<BStrategyPrice> findAllBStrategyPrices() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-    @Override
-    public BStrategyPrice findByHotelidAndRoomtype(Long hotelid, Long roomtype) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
+	@Override
+	public int deleteByPrimaryKey(Long id) {
+		return 0;
+	}
+
+	@Override
+	public List<BStrategyPrice> findBStrategyPricesByHotelId(List<Long> hotelid) {
+		return null;
+	}
+
+	@Override
+	public BStrategyPrice findByHotelidAndRoomtype(Long hotelid, Long roomtype) {
+		return null;
+	}
 
 }
