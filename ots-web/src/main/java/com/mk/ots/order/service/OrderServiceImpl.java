@@ -19,6 +19,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.http.HTTPException;
 
+import com.mk.ots.common.enums.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -56,22 +57,6 @@ import com.mk.orm.kit.JsonKit;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
 import com.mk.ots.common.bean.PageObject;
-import com.mk.ots.common.enums.ClearingTypeEnum;
-import com.mk.ots.common.enums.NeedReturnEnum;
-import com.mk.ots.common.enums.OSTypeEnum;
-import com.mk.ots.common.enums.OrderTasksEnum;
-import com.mk.ots.common.enums.OrderTasksStatusEnum;
-import com.mk.ots.common.enums.OrderTasksTypeEnum;
-import com.mk.ots.common.enums.OrderTypeEnum;
-import com.mk.ots.common.enums.OtaFreqTrvEnum;
-import com.mk.ots.common.enums.OtaOrderFlagEnum;
-import com.mk.ots.common.enums.OtaOrderStatusEnum;
-import com.mk.ots.common.enums.PPayInfoTypeEnum;
-import com.mk.ots.common.enums.PayStatusEnum;
-import com.mk.ots.common.enums.PriceTypeEnum;
-import com.mk.ots.common.enums.PromotionTypeEnum;
-import com.mk.ots.common.enums.ReceiveCashBackEnum;
-import com.mk.ots.common.enums.RuleEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateTools;
 import com.mk.ots.common.utils.DateUtils;
@@ -2987,6 +2972,7 @@ public class OrderServiceImpl implements OrderService {
   }
 
     private OtaOrder extractOrderBeanForModify(HttpServletRequest request, OtaOrder order, boolean createByRoomType) {
+      String roomTicket = request.getParameter("roomticket");
       String hotelId = request.getParameter("hotelid");
       String roomTypeId = request.getParameter("roomtypeid");
       String priceType = request.getParameter("pricetype");
@@ -3023,6 +3009,7 @@ public class OrderServiceImpl implements OrderService {
           throw MyErrorEnum.errorParm.getMyException("时间格式错误---startdateday:" + startdateday + " enddateday: " + enddateday);
       }
       try {
+          order.setRoomTicket(roomTicket);
           if (StringUtils.isNotBlank(hotelId)) {
               order.setHotelId(Long.parseLong(hotelId));
           }
@@ -3124,13 +3111,19 @@ public class OrderServiceImpl implements OrderService {
               String oldRoomId = String.valueOf(roomOrder.getRoomId());
               if (!oldRoomId.equals(roomId)) {
                   // 房间id修改 房号 房间pms
+                  String newPromoType = getPromoType(Long.parseLong(oldRoomId));
+                  order.setPromoType(newPromoType);
                   TRoom tempRoom = this.roomService.findTRoomByRoomId(Long.parseLong(roomId));
                   if (tempRoom != null) {
                       roomOrder.set("roomid", tempRoom.get("id"));
                       roomOrder.set("roomno", tempRoom.get("name"));
                       roomOrder.set("roompms", tempRoom.get("pms"));
                   }
-
+                  checkPayByPromoType(order, newPromoType);
+              }else{
+                  //如果选择了今夜特价房则只能使用在线支付或房券支付
+                  String oldPromoType = getPromoType(Long.parseLong(oldRoomId));
+                  checkPayByPromoType(order, oldPromoType);
               }
           }
           // 预付 到付 担保
@@ -3161,7 +3154,23 @@ public class OrderServiceImpl implements OrderService {
       return order;
   }
 
-  /**
+    private void checkPayByPromoType(OtaOrder order, String promoType) {
+        if(PromoTypeEnum.TJ.getCode().equals(promoType)){
+            //如果选择了今夜特价房则只能使用在线支付或房券支付 其他都不能使用
+            if("T".equals(order.getPromotion())){
+                throw MyErrorEnum.customError.getMyException("很抱歉，没有房间可以预定了");
+            }
+            if("T".equals(order.getCouponNo())){
+                throw MyErrorEnum.customError.getMyException("很抱歉，没有房间可以预定了");
+            }
+            if(!OrderTypeEnum.YF.getId().toString().equals(order.getOrderType())){
+                throw MyErrorEnum.customError.getMyException("很抱歉，没有房间可以预定了");
+            }
+        }
+    }
+
+
+    /**
    * Json转换为联系人
    * 
    * @param checkInUser
