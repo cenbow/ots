@@ -38,4 +38,5 @@
 /ots-entities/.classpath
 *.iml
 target/
-.idea
+.idea/
+.metadata/
