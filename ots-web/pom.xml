@@ -1024,6 +1024,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1068,6 +1071,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1118,6 +1124,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.36.210:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>1</sendmess.testorformal>
 				<black_Switch>0</black_Switch>
@@ -1170,6 +1179,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1216,6 +1228,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1266,6 +1281,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1313,6 +1331,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1365,6 +1386,9 @@
 				<!-- kafka end -->
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1416,6 +1440,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
