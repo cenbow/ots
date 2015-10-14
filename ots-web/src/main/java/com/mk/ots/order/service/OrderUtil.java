@@ -703,6 +703,7 @@ public class OrderUtil {
 		BigDecimal totalprice = returnOrder.getTotalPrice();
 		BigDecimal yijia = new BigDecimal(0);
 		BigDecimal youhuijuan = new BigDecimal(0);
+		BigDecimal roomTicket = returnOrder.getTotalPrice().multiply(new BigDecimal("-1"));
 		BigDecimal lezhubi = returnOrder.getAvailableMoney();
 		if (CollectionUtils.isNotEmpty(tickes)) {
 			for (TicketInfo ticketInfo : tickes) {
@@ -724,6 +725,7 @@ public class OrderUtil {
 			orderpaydetail.add(JSONObject.parse("{\"name\": \"议价优惠劵\", \"cost\":" + yijia.toString() + "}"));
 		}
 		orderpaydetail.add(JSONObject.parse("{\"name\": \"红包\", \"cost\":" + lezhubi.toString() + "}"));
+		orderpaydetail.add(JSONObject.parse("{\"name\": \"房券\", \"cost\":" + roomTicket.toString() + "}"));
 		jsonObj.put("orderpaydetail", orderpaydetail);
 	}
 
