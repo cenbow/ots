@@ -19,7 +19,9 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.http.HTTPException;
 
+import com.mk.framework.util.*;
 import com.mk.ots.common.enums.*;
+import com.mk.ots.remote.RoomRemoteService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -49,10 +51,6 @@ import com.mk.care.kafka.model.Message;
 import com.mk.framework.AppUtils;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
-import com.mk.framework.util.Cast;
-import com.mk.framework.util.MyTokenUtils;
-import com.mk.framework.util.PayUtil;
-import com.mk.framework.util.UrlUtils;
 import com.mk.orm.kit.JsonKit;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
@@ -234,8 +232,10 @@ public class OrderServiceImpl implements OrderService {
     private Gson gson = new Gson();
 	@Autowired
 	private HotelPriceService hotelPriceService ;
-	 @Autowired
-		private OtsCareProducer careProducer;
+	@Autowired
+    private OtsCareProducer careProducer;
+    @Autowired
+    private RoomRemoteService roomRemoteService;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
     private static final long TIME_FOR_FIFTEEN = Long.parseLong(PropertyConfigurer.getProperty("transferCheckinUsernameTime"));
@@ -444,9 +444,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * 设置订单的可用钱包
      *
-     * @param request
      * @param jsonObj
-     * @param orderId
      * @param order
      */
     public void setAvailableMoney(JSONObject jsonObj, OtaOrder order) {
@@ -2110,7 +2108,7 @@ public class OrderServiceImpl implements OrderService {
   /**
    * 保存移动硬件信息
    * 
-   * @param order
+   * @param otaOrderMac
    */
   private void saveMac(OtaOrderMac otaOrderMac) {
       Gson g = new Gson();
@@ -2219,7 +2217,13 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     private String getPromoType(Long roomId) {
-        return null;
+        net.sf.json.JSONObject jsonObject = roomRemoteService.querySaleRoomByRoomId(roomId);
+        Long promoType = jsonObject.getLong("saleType");
+        if(promoType == null){
+            return PromoTypeEnum.OTHER.getCode().toString();
+        }else{
+            return promoType.toString();
+        }
     }
 
     /**
@@ -3466,7 +3470,6 @@ public class OrderServiceImpl implements OrderService {
    * @param sqnum
    * @param orderStatus
    * @param token
-   * @param jsonObj
    */
   public JSONObject selectCountByOrderStatus(String sqnum, List<String> orderStatus, String token) {
       logger.info("OTSMessage::OrderService::selectCountByOrderStatus:{}::begin", orderStatus);
