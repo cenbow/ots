@@ -845,6 +845,9 @@ public class RoomstateService {
 	 */
 	public List<RoomstateQuerylistRespEntity> findHotelRoomState(String roomno,RoomstateQuerylistReqEntity params) throws Exception {
 		List<RoomstateQuerylistRespEntity> respEntityList = Lists.newArrayList();
+		String callMethod = params.getCallmethod();
+		Integer callEntry = params.getCallentry();
+
 		try {
 			Long hotelid = params.getHotelid();
 			Long roomtypeid = params.getRoomtypeid();

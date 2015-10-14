@@ -1254,7 +1254,7 @@
 				<spring.redis.sentinel.nodes>10.4.20.206:26379</spring.redis.sentinel.nodes>
 				<synserver.ip>10.4.17.121</synserver.ip>
 				<synserver.port>8000</synserver.port>
-				<elasticsearch.clusterhosts>10.4.32.10:9300</elasticsearch.clusterhosts>
+				<elasticsearch.clusterhosts>192.168.81.87:9300</elasticsearch.clusterhosts>
 				<elasticsearch.clustername>smlt-elasticsearch</elasticsearch.clustername>
 				<elasticsearch.index>ots</elasticsearch.index>
 				<elasticsearch.type>hotel</elasticsearch.type>
@@ -1284,7 +1284,7 @@
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
 
 				<!-- 特价房查询接口 -->
-				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
+				<roomsale.url>http://192.168.70.183:8080/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>

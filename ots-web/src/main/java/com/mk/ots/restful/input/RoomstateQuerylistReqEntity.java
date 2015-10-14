@@ -1,10 +1,9 @@
 package com.mk.ots.restful.input;
 
-import java.io.Serializable;
+import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.Range;
+import java.io.Serializable;
 
 /**
  * roomstate/querylist房态查询接口入参实体类.
@@ -45,9 +44,10 @@ public class RoomstateQuerylistReqEntity implements Serializable {
 	/**
 	 * the entry identifier which represents the search entrance
 	 * 
-	 * 1-摇一摇 2-房态搜索入口
+	 * 1-摇一摇 2-房态搜索入口 3-qieke
 	 */
 	private Integer callentry;
+	private String callmethod;
 
 	public Integer getCallentry() {
 		return callentry;
@@ -129,4 +129,12 @@ public class RoomstateQuerylistReqEntity implements Serializable {
 		this.orderby = orderby;
 	}
 
+
+	public String getCallmethod() {
+		return callmethod;
+	}
+
+	public void setCallmethod(String callmethod) {
+		this.callmethod = callmethod;
+	}
 }

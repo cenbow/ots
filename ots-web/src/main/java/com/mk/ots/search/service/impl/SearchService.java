@@ -1526,8 +1526,10 @@ public class SearchService implements ISearchService {
 			Double callMethodVer = Double.parseDouble(callMethod);
 
 			if (callEntry != null && callEntry == 1) {
+				Cat.logEvent("CallEntrey", "摇一摇");
 				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isPromoted", Boolean.FALSE)));
 			} else if (callMethodVer > 3.0 && isPromoOnly != null) {
+
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format("new version recognized, callMethod:%s, promoType:%s", callMethodVer,
 							isPromoOnly));
