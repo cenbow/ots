@@ -2,6 +2,7 @@ package com.mk.ots.card.service.impl;
 
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
+import com.mk.ots.card.dao.IBCardDAO;
 import com.mk.ots.card.model.BCard;
 import com.mk.ots.card.model.CardTypeEnum;
 import com.mk.ots.card.model.UCardUseLog;
@@ -17,14 +18,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class BCardService implements IBCardService {
 
     private static Logger logger = LoggerFactory.getLogger(BCardService.class);
-
     @Autowired
-    private CardMapper cardMapper;
+    private IBCardDAO bCardDAO;
 
     @Autowired
     private IUCardUseLogService uCardUseLogService;
@@ -37,7 +39,7 @@ public class BCardService implements IBCardService {
         if (StringUtils.isEmpty(pwd)) {
             throw MyErrorEnum.customError.getMyException("密码不能为空.");
         }
-        BCard card = this.cardMapper.findActivatedByPwd(pwd);
+        BCard card = this.bCardDAO.findActivatedByPwd(pwd);
 
         if (null == card) {
             throw MyErrorEnum.customError.getMyException("密码错误.");
@@ -77,32 +79,48 @@ public class BCardService implements IBCardService {
         String lockKey = "rechargeCard_" + pwd;
         //加锁
         logger.info("充值卡：" + pwd + "加分布锁");
-        String lockValue = DistributedLockUtil.tryLock(lockKey, 40);
-        if (lockValue == null) {
-            logger.error("充值卡：" + pwd + " 重复充值");
-            throw MyErrorEnum.customError.getMyException("不能重复充值");
-        }
+//        String lockValue = DistributedLockUtil.tryLock(lockKey, 40);
+//        if (lockValue == null) {
+//            logger.error("充值卡：" + pwd + " 重复充值");
+//            throw MyErrorEnum.customError.getMyException("不能重复充值");
+//        }
 
         try {
             //充值
             Long cardId = card.getId();
-            this.iWalletCashflowService.accountCharge(mid, card.getPrice(), cardId);
+//            this.iWalletCashflowService.accountCharge(mid, card.getPrice(), cardId);
+
+            //消费充值卡
+            this.updateCardUsed(mid, cardId);
 
             //log
-            UCardUseLog log = new UCardUseLog();
-            log.setCardId(cardId);
-            log.setMid(mid);
-            log.setCardPrice(card.getPrice());
-            log.setCreateTime(new Date());
-            this.uCardUseLogService.insert(log);
+            this.saveLog(mid, card, cardId);
         } catch (Exception e) {
             logger.error(e.getMessage());
         } finally {
             logger.info("充值卡：" + pwd + "释放分布锁");
-            DistributedLockUtil.releaseLock(lockKey, lockValue);
+//            DistributedLockUtil.releaseLock(lockKey, lockValue);
         }
 
         logger.info("充值卡：" + pwd + " 结束");
         return card;
+    }
+
+    private void updateCardUsed(Long mid, Long cardId) {
+        Map<String,Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("id",cardId);
+        paramMap.put("mid",mid);
+        paramMap.put("status", CardTypeEnum.TYPE_USED);
+
+        this.bCardDAO.updateStatusById(paramMap);
+    }
+
+    private void saveLog(Long mid, BCard card, Long cardId) {
+        UCardUseLog log = new UCardUseLog();
+        log.setCardId(cardId);
+        log.setMid(mid);
+        log.setCardPrice(card.getPrice());
+        log.setCreateTime(new Date());
+        this.uCardUseLogService.insert(log);
     }
 }
