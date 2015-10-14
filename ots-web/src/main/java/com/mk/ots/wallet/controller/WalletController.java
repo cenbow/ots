@@ -179,19 +179,18 @@ public class WalletController {
         logger.info("【wallet/balance/charge】 params is : {}", bean.toString());
         logger.info("【wallet/balance/charge】 params is : {token,chargeno,Phone}", token + " , " + chargeno + " , " + phone);
 
-//        if (StringUtils.isEmpty(token)) {
-//            throw MyErrorEnum.errorParm.getMyException("获取用户信息失败.");
-//        }
-//        UMember memberByToken = MyTokenUtils.getMemberByToken(token);
-//        if(memberByToken == memberByToken){
-//            throw MyErrorEnum.errorParm.getMyException("获取用户信息失败.");
-//        }
-//        if (StringUtils.isEmpty(chargeno)) {
-//            throw MyErrorEnum.errorParm.getMyException("充值密码为空.");
-//        }
-//
-//        Long mid = memberByToken.getMid();
-        Long mid = 1116l;
+        if (StringUtils.isEmpty(token)) {
+            throw MyErrorEnum.errorParm.getMyException("获取用户信息失败.");
+        }
+        UMember memberByToken = MyTokenUtils.getMemberByToken(token);
+        if(memberByToken == memberByToken){
+            throw MyErrorEnum.errorParm.getMyException("获取用户信息失败.");
+        }
+        if (StringUtils.isEmpty(chargeno)) {
+            throw MyErrorEnum.errorParm.getMyException("充值密码为空.");
+        }
+
+        Long mid = memberByToken.getMid();
         String result = "F";
         String errMsg = "";
         BigDecimal price = null;

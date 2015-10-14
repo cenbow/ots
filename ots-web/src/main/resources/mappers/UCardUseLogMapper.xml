@@ -14,8 +14,8 @@
 
   <insert id="insert" parameterType="com.mk.ots.card.model.UCardUseLog" useGeneratedKeys="true" keyProperty="id">
     insert into u_card_uselog (<include refid="Base_Column_List" />)
-    values (#{id,jdbcType=BIGINT}, #{card_id,jdbcType=BIGINT}, #{mid,jdbcType=BIGINT}, #{card_price,jdbcType=DECIMAL},
-    #{create_time,jdbcType=TIMESTAMP})
+    values (#{id,jdbcType=BIGINT}, #{cardId,jdbcType=BIGINT}, #{mid,jdbcType=BIGINT}, #{cardPrice,jdbcType=DECIMAL},
+    #{createTime,jdbcType=TIMESTAMP})
   </insert>
 
 </mapper>

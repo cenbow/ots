@@ -79,16 +79,16 @@ public class BCardService implements IBCardService {
         String lockKey = "rechargeCard_" + pwd;
         //加锁
         logger.info("充值卡：" + pwd + "加分布锁");
-//        String lockValue = DistributedLockUtil.tryLock(lockKey, 40);
-//        if (lockValue == null) {
-//            logger.error("充值卡：" + pwd + " 重复充值");
-//            throw MyErrorEnum.customError.getMyException("不能重复充值");
-//        }
+        String lockValue = DistributedLockUtil.tryLock(lockKey, 40);
+        if (lockValue == null) {
+            logger.error("充值卡：" + pwd + " 重复充值");
+            throw MyErrorEnum.customError.getMyException("不能重复充值");
+        }
 
         try {
             //充值
             Long cardId = card.getId();
-//            this.iWalletCashflowService.accountCharge(mid, card.getPrice(), cardId);
+            this.iWalletCashflowService.accountCharge(mid, card.getPrice(), cardId);
 
             //消费充值卡
             this.updateCardUsed(mid, cardId);
@@ -99,7 +99,7 @@ public class BCardService implements IBCardService {
             logger.error(e.getMessage());
         } finally {
             logger.info("充值卡：" + pwd + "释放分布锁");
-//            DistributedLockUtil.releaseLock(lockKey, lockValue);
+            DistributedLockUtil.releaseLock(lockKey, lockValue);
         }
 
         logger.info("充值卡：" + pwd + " 结束");
@@ -110,7 +110,7 @@ public class BCardService implements IBCardService {
         Map<String,Object> paramMap = new HashMap<String, Object>();
         paramMap.put("id",cardId);
         paramMap.put("mid",mid);
-        paramMap.put("status", CardTypeEnum.TYPE_USED);
+        paramMap.put("status", CardTypeEnum.TYPE_USED.getId());
 
         this.bCardDAO.updateStatusById(paramMap);
     }
