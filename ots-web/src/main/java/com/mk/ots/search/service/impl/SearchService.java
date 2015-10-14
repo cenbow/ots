@@ -580,7 +580,7 @@ public class SearchService implements ISearchService {
 			 * added in mike3.1
 			 */
 			this.makePromoFilter(reqentity, filterBuilders);
-			
+
 			if (AppUtils.DEBUG_MODE) {
 				logger.info("boolFilter is : \n{}", boolFilter.toString());
 			}
@@ -767,6 +767,22 @@ public class SearchService implements ISearchService {
 	 */
 	private void sortByOrders(SearchRequestBuilder searchBuilder) {
 		searchBuilder.addSort("ordernummon", SortOrder.DESC);
+	}
+
+	/**
+	 * 
+	 * @param searchBuilder
+	 */
+	private void sortByPromo(SearchRequestBuilder searchBuilder, String version) {
+		Double callMethodVer = 0.0;
+
+		if (!StringUtils.isEmpty(version)) {
+			callMethodVer = Double.parseDouble(version);
+		}
+
+		if (callMethodVer >= 3.1) {
+			searchBuilder.addSort("isonpromo", SortOrder.DESC);
+		}
 	}
 
 	/**
@@ -1008,6 +1024,12 @@ public class SearchService implements ISearchService {
 				if (paramOrderby == null) {
 					paramOrderby = 0;
 				}
+
+				/**
+				 * added in mike3.1, lift up promo as the top search variable
+				 */
+				sortByPromo(searchBuilder, reqentity.getCallversion());
+
 				if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
 					// 距离排序
 					this.sortByDistance(searchBuilder, new GeoPoint(lat, lon));
