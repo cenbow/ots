@@ -1,5 +1,6 @@
 package com.mk.ots.hotel.service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
@@ -381,7 +382,7 @@ public class HotelService {
                     hotel.setHoteltype(bean.getHoteltype());
 
                     //mike3.0 添加月销量
-                    hotel.setOrdernummon(getOrderNumMon(Long.valueOf(hotelid)));
+//                    hotel.setOrdernummon(getOrderNumMon(Long.valueOf(hotelid)));
 
 
                     //mike3.1 添加特价房
@@ -391,14 +392,28 @@ public class HotelService {
                         Map params = new HashMap();
                         params.put("hotelId", bean.getId().toString());
                         String url = UrlUtils.getUrl("roomsale.url");
-                        JSONObject data = JSONObject.parseObject(OrderUtil.doPost(url, params, 1000));
-
+                        String resp = "[\n" +
+                                "    {\n" +
+                                "        \"isOnPromo\": \"T\",\n" +
+                                "        \"promoText\": \"今夜特价\",\n" +
+                                "        \"promoTextColor\": \"#256887\",\n" +
+                                "        \"promoStartTime\": \"10:32:00\",\n" +
+                                "        \"promoEndTime\": \"2015-10-15 00:00:00.0\",\n" +
+                                "        \"saleType\": 1,\n" +
+                                "        \"saleName\": \"特价房\",\n" +
+                                "        \"salePrice\": 50,\n" +
+                                "        \"roomNo\": \"106\",\n" +
+                                "        \"roomtypeid\": 626,\n" +
+                                "        \"useDescribe\": null\n" +
+                                "    }]";
+                        //JSONArray data = JSONArray.parseArray(OrderUtil.doPost(url, params, 5500));
+                        JSONArray data = JSONArray.parseArray(resp);
                         if (data != null) {
-                            hotel.setPromotype(data.getString("saleType"));
-                            hotel.setPromotext(data.getString("promoText"));
-                            hotel.setPromotextcolor(data.getString("promoTextColor"));
-                            hotel.setPromostarttime(data.getString("promoStartTime"));
-                            hotel.setPromoendtime(data.getString("promoEndTime"));
+                            hotel.setPromotype(((JSONObject) data.get(0)).getString("saleType"));
+                            hotel.setPromotext(((JSONObject) data.get(0)).getString("promoText"));
+                            hotel.setPromotextcolor(((JSONObject)data.get(0)).getString("promoTextColor"));
+                            hotel.setPromostarttime(((JSONObject)data.get(0)).getString("promoStartTime"));
+                            hotel.setPromoendtime(((JSONObject)data.get(0)).getString("promoEndTime"));
                         }
                     } catch (Exception e) {
                         Cat.logError("Init ES Indexer Call roomsale api exception", e);
