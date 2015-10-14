@@ -187,7 +187,7 @@ public class HotelController {
 			if (StringUtils.isBlank(hotel.getStartdateday())) {
 				hotel.setStartdateday(strCurDay);
 			}
-	
+
 			if (StringUtils.isBlank(hotel.getEnddateday())) {
 				hotel.setEnddateday(strCurDay);
 			}
@@ -214,6 +214,46 @@ public class HotelController {
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 
+	private Boolean countErrors(Errors errors) {
+		StringBuffer bfErrors = new StringBuffer();
+		for (ObjectError error : errors.getAllErrors()) {
+			bfErrors.append(error.getDefaultMessage()).append("; ");
+		}
+
+		return bfErrors.length() > 0;
+	}
+
+	/**
+	 * 
+	 * 
+	 * @param hotelEntity
+	 * @param errors
+	 * @return
+	 */
+	private Map<String, Object> invokeSearchHotels(HotelQuerylistReqEntity hotelEntity, Boolean promoOnly)
+			throws Exception {
+		Date day = new Date();
+
+		// 当前日期
+		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
+		// 下一天日期
+		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
+		// search hotel from elasticsearch
+		// 如果没有开始日期和截止日期，默认今住明退
+		if (StringUtils.isBlank(hotelEntity.getStartdateday())) {
+			hotelEntity.setStartdateday(strCurDay);
+		}
+		if (StringUtils.isBlank(hotelEntity.getEnddateday())) {
+			hotelEntity.setEnddateday(strNextDay);
+		}
+
+		hotelEntity.setIsPromoOnly(promoOnly);
+
+		Map<String, Object> resultMap = searchService.readonlySearchHotels(hotelEntity);
+
+		return resultMap;
+	}
+
 	@RequestMapping(value = { "/hotel/querypromolist" })
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> searchPromoHotels(HttpServletRequest request,
@@ -225,37 +265,21 @@ public class HotelController {
 		logger.info("【/hotel/querypromolist】 request params is : {}", params);
 		logger.info("【/hotel/querypromolist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
+
+		if (countErrors(errors)) {
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+
 		try {
 			Date day = new Date();
 			long starttime = day.getTime();
-			StringBuffer bfErrors = new StringBuffer();
-			for (ObjectError error : errors.getAllErrors()) {
-				bfErrors.append(error.getDefaultMessage()).append("; ");
-			}
 
-			if (bfErrors.length() > 0) {
-				rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
-				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-				rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, bfErrors.toString());
-				return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
-			}
-			// 当前日期
-			String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
-			// 下一天日期
-			String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
-			// search hotel from elasticsearch
-			// 如果没有开始日期和截止日期，默认今住明退
-			if (StringUtils.isBlank(reqentity.getStartdateday())) {
-				reqentity.setStartdateday(strCurDay);
-			}
-			if (StringUtils.isBlank(reqentity.getEnddateday())) {
-				reqentity.setEnddateday(strNextDay);
-			}
+			rtnMap = invokeSearchHotels(reqentity, Boolean.TRUE);
 
-			reqentity.setIsPromoOnly(Boolean.TRUE);
-
-			Map<String, Object> resultMap = searchService.readonlySearchHotels(reqentity);
-			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(resultMap,
+			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
 					HttpStatus.OK);
 			if (AppUtils.DEBUG_MODE) {
 				long endtime = new Date().getTime();
@@ -295,34 +319,23 @@ public class HotelController {
 		logger.info("remote client request ui is: {}", request.getRequestURI());
 		logger.info("【/hotel/querylist】 request params is : {}", params);
 		logger.info("【/hotel/querylist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
+
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
+
+		if (countErrors(errors)) {
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+
 		try {
 			Date day = new Date();
 			long starttime = day.getTime();
-			StringBuffer bfErrors = new StringBuffer();
-			for (ObjectError error : errors.getAllErrors()) {
-				bfErrors.append(error.getDefaultMessage()).append("; ");
-			}
-			if (bfErrors.length() > 0) {
-				rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
-				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-				rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, bfErrors.toString());
-				return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
-			}
-			// 当前日期
-			String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
-			// 下一天日期
-			String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
-			// search hotel from elasticsearch
-			// 如果没有开始日期和截止日期，默认今住明退
-			if (StringUtils.isBlank(reqentity.getStartdateday())) {
-				reqentity.setStartdateday(strCurDay);
-			}
-			if (StringUtils.isBlank(reqentity.getEnddateday())) {
-				reqentity.setEnddateday(strNextDay);
-			}
-			Map<String, Object> resultMap = searchService.readonlySearchHotels(reqentity);
-			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(resultMap,
+
+			rtnMap = invokeSearchHotels(reqentity, null);
+
+			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
 					HttpStatus.OK);
 			if (AppUtils.DEBUG_MODE) {
 				long endtime = new Date().getTime();
