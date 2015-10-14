@@ -175,7 +175,7 @@ public class HotelController {
 		// roomStateLogUtil.sendLog(pbb.getHardwarecode(),pbb.getCallmethod(),
 		// pbb.getCallversion(), pbb.getIp(), "/hotel/querylist", params,"ots");
 
-		logger.info("【/hotel/querylist】 begin...");
+		logger.info("【/hotel/auerylist】 begin...");
 		logger.info("remote client request ui is: {}", request.getRequestURI());
 		logger.info("【/hotel/querylist】 params is : {}--{}", params, pbb.toString());
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
@@ -187,9 +187,11 @@ public class HotelController {
 			if (StringUtils.isBlank(hotel.getStartdateday())) {
 				hotel.setStartdateday(strCurDay);
 			}
+	
 			if (StringUtils.isBlank(hotel.getEnddateday())) {
 				hotel.setEnddateday(strCurDay);
 			}
+
 			Map<String, Object> resultMap = hotelService.readonlyFromEsStore(hotel);
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(resultMap,
 					HttpStatus.OK);
@@ -230,6 +232,7 @@ public class HotelController {
 			for (ObjectError error : errors.getAllErrors()) {
 				bfErrors.append(error.getDefaultMessage()).append("; ");
 			}
+
 			if (bfErrors.length() > 0) {
 				rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
@@ -248,9 +251,9 @@ public class HotelController {
 			if (StringUtils.isBlank(reqentity.getEnddateday())) {
 				reqentity.setEnddateday(strNextDay);
 			}
-			
+
 			reqentity.setIsPromoOnly(Boolean.TRUE);
-			
+
 			Map<String, Object> resultMap = searchService.readonlySearchHotels(reqentity);
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(resultMap,
 					HttpStatus.OK);
