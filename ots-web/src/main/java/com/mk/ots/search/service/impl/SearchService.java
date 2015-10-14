@@ -1541,24 +1541,39 @@ public class SearchService implements ISearchService {
 	 */
 	private void makePromoFilter(HotelQuerylistReqEntity reqentity, List<FilterBuilder> filterBuilders) {
 		Boolean isPromoOnly = reqentity.getIsPromoOnly();
-		String callMethod = reqentity.getCallmethod();
+		String callVersion = reqentity.getCallversion();
 		Integer callEntry = reqentity.getCallentry();
+		String callMethod = reqentity.getCallmethod();
 
-		if (!StringUtils.isEmpty(callMethod)) {
-			Double callMethodVer = Double.parseDouble(callMethod);
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("callEntry:%s; callMethod:%s; callVersion:%s; isPromoOnly:%s", callEntry,
+					callMethod, callVersion, isPromoOnly));
+		}
 
-			if (callEntry != null && callEntry == 1) {
-				Cat.logEvent("CallEntrey", "摇一摇");
-				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isPromoted", Boolean.FALSE)));
-			} else if (callMethodVer > 3.0 && isPromoOnly != null) {
+		if (callEntry != null && callEntry != 2) {
+			if (callEntry == 1) {
+				Cat.logEvent("摇一摇", Event.SUCCESS);
+			} else if (callEntry == 3) {
+				Cat.logEvent("切客", Event.SUCCESS);
+			}
 
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromote", Boolean.FALSE)));
+		} else if (StringUtils.isNotEmpty(callMethod) && "3".equalsIgnoreCase(callMethod)) {
+			Cat.logEvent("wechat", Event.SUCCESS);
+			
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromote", Boolean.FALSE)));
+		} else if (!StringUtils.isEmpty(callVersion)) {
+			Double callMethodVer = Double.parseDouble(callVersion);
+
+			if (callMethodVer >= 3.1 && isPromoOnly != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format("new version recognized, callMethod:%s, promoType:%s", callMethodVer,
 							isPromoOnly));
 				}
 
 				if (isPromoOnly == Boolean.TRUE) {
-					filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isPromoted", isPromoOnly)));
+					filterBuilders
+							.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromote", isPromoOnly)));
 				}
 			}
 		}
