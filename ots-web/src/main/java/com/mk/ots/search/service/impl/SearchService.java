@@ -1557,23 +1557,23 @@ public class SearchService implements ISearchService {
 				Cat.logEvent("切客", Event.SUCCESS);
 			}
 
-			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromote", Boolean.FALSE)));
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", Boolean.FALSE)));
 		} else if (StringUtils.isNotEmpty(callMethod) && "3".equalsIgnoreCase(callMethod)) {
 			Cat.logEvent("wechat", Event.SUCCESS);
 			
-			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromote", Boolean.FALSE)));
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", Boolean.FALSE)));
 		} else if (!StringUtils.isEmpty(callVersion)) {
-			Double callMethodVer = Double.parseDouble(callVersion);
+			Double version = Double.parseDouble(callVersion);
 
-			if (callMethodVer >= 3.1 && isPromoOnly != null) {
+			if (version >= 3.1 && isPromoOnly != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("new version recognized, callMethod:%s, promoType:%s", callMethodVer,
+					logger.debug(String.format("new version recognized, version:%s, promoType:%s", version,
 							isPromoOnly));
 				}
 
 				if (isPromoOnly == Boolean.TRUE) {
 					filterBuilders
-							.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromote", isPromoOnly)));
+							.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", isPromoOnly)));
 				}
 			}
 		}
