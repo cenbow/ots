@@ -1,5 +1,6 @@
 package com.mk.ots.hotel.controller;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,16 +12,10 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.BoolFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.QueryFilterBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
+import org.joda.time.DateTimeFieldType;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.Seconds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +32,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mk.framework.AppUtils;
 import com.mk.framework.es.ElasticsearchProxy;
@@ -45,7 +39,6 @@ import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.common.bean.ParamBaseBean;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.hotel.comm.enums.HotelTypeEnum;
 import com.mk.ots.hotel.model.THotel;
 import com.mk.ots.hotel.service.CashBackService;
 import com.mk.ots.hotel.service.HotelPriceService;
@@ -54,7 +47,6 @@ import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
-import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
 import com.mk.ots.search.service.ISearchService;
@@ -98,6 +90,8 @@ public class HotelController {
 	 */
 	@Autowired
 	private ISearchService searchService;
+
+	private final SimpleDateFormat defaultFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 
 	/**
 	 * 
@@ -284,6 +278,37 @@ public class HotelController {
 			if (AppUtils.DEBUG_MODE) {
 				long endtime = new Date().getTime();
 				resultResponse.getBody().put("$times$", endtime - starttime + " ms");
+			}
+
+			resultResponse.getBody().put("ispromoting", rtnMap.size() > 0 ? 1 : 0);
+			resultResponse.getBody().put("promotext", "重庆特价 sb...");
+
+			/**
+			 * TODO: waiting for long's interface to get the times
+			 */
+			String startInternalTime = "2015-10-15 22:30";
+			String endInternalTime = "2015-10-16 02:00";
+
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("promo time received, startTime:%s; endTime:%s", startInternalTime,
+						endInternalTime));
+			}
+
+			LocalDateTime startExTime = LocalDateTime.fromDateFields(defaultFormatter.parse(startInternalTime));
+			LocalDateTime endExTime = LocalDateTime.fromDateFields(defaultFormatter.parse(endInternalTime));
+
+			resultResponse.getBody().put("promostarttime",
+					String.format("%s:%s", startExTime.getHourOfDay(), startExTime.getMinuteOfHour()));
+			resultResponse.getBody().put("promoendtime",
+					String.format("%s:%s", endExTime.getHourOfDay(), endExTime.getMinuteOfHour()));
+
+			if (rtnMap.size() == 0) {
+				resultResponse.getBody().put("promosec", 0);
+			} else {
+				LocalDateTime currentTime = LocalDateTime.now();
+				Integer seconds = Seconds.secondsBetween(currentTime, endExTime).getSeconds();
+
+				resultResponse.getBody().put("promosec", seconds);
 			}
 
 			logger.info("【/hotel/querypromolist】 end...");
