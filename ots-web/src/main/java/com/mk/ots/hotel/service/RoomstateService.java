@@ -30,6 +30,8 @@ import com.mk.pms.room.bean.RoomLockJsonBean;
 import com.mk.pms.room.bean.RoomLockPo;
 import com.mk.pms.room.service.PmsRoomService;
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -938,23 +940,30 @@ public class RoomstateService {
 
 					RoomstateQuerylistRespEntity.Roomtype roomtype = respEntity.new Roomtype();
 
+					// mike3.1 特价房型
 					try {
+						if (!StringUtils.isEmpty(callMethod)) {
+							Double callMethodVerion= Double.parseDouble(callMethod);
+							if (callEntry != null && callEntry != 3 && callMethodVerion > 3.0) {
+								Map roomsaleparams = new HashMap();
 
-						Map roomsaleparams = new HashMap();
-						roomsaleparams.put("roomTypeId", troomType.getId());
-						String url = UrlUtils.getUrl("roomsale.url");
-						JSONObject data = JSONObject.parseObject(OrderUtil.doPost(url, roomsaleparams, 1000));
-						String isonpromo = "F";
+								roomsaleparams.put("roomTypeId", troomType.getId());
+								String url = UrlUtils.getUrl("roomsale.url");
+								JSONObject data = JSONObject.parseObject(OrderUtil.doPost(url, roomsaleparams, 1000));
+								String isonpromo = "F";
 
-						if(data != null && "T".equals(data.getString("isOnPromo"))){
-							isonpromo = "T";
+								if(data != null && "T".equals(data.getString("isOnPromo"))){
+									isonpromo = "T";
+								}
+
+								roomtype.setIsonpromo(isonpromo);
+
+								if(data != null ){
+									roomtype.setPromotype(data.getString("saleType"));
+								}
+							}
 						}
 
-						roomtype.setIsonpromo(isonpromo);
-
-						if(data != null ){
-							roomtype.setPromotype(data.getString("saleType"));
-						}
 
 					} catch (Exception e) {
 						Cat.logError("findHotelRoomState Call roomsale api exception", e);
@@ -962,9 +971,6 @@ public class RoomstateService {
 
 
 	        		roomtype.setRoomtypeid(troomType.getId());
-
-
-
 	        		roomtype.setBednum(troomType.getBednum());
 	        		roomtype.setRoomtypename(troomType.getName());
 	        		
