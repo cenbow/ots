@@ -48,6 +48,7 @@ public class RoomstateQuerylistReqEntity implements Serializable {
 	 */
 	private Integer callentry;
 	private String callmethod;
+	private String callversion;
 
 	public Integer getCallentry() {
 		return callentry;
@@ -136,5 +137,13 @@ public class RoomstateQuerylistReqEntity implements Serializable {
 
 	public void setCallmethod(String callmethod) {
 		this.callmethod = callmethod;
+	}
+
+	public String getCallversion() {
+		return callversion;
+	}
+
+	public void setCallversion(String callversion) {
+		this.callversion = callversion;
 	}
 }

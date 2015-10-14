@@ -849,6 +849,7 @@ public class RoomstateService {
 		List<RoomstateQuerylistRespEntity> respEntityList = Lists.newArrayList();
 		String callMethod = params.getCallmethod();
 		Integer callEntry = params.getCallentry();
+		String callVersionStr = params.getCallversion();
 
 		try {
 			Long hotelid = params.getHotelid();
@@ -942,12 +943,12 @@ public class RoomstateService {
 
 					// mike3.1 特价房型
 					try {
-						if (!StringUtils.isEmpty(callMethod)) {
-							Double callMethodVerion= Double.parseDouble(callMethod);
-							if (callEntry != null && callEntry != 3 && callMethodVerion > 3.0) {
+						if (StringUtils.isNotBlank(callVersionStr)) {
+							Double callVerion= Double.parseDouble(callVersionStr);
+							if (callEntry != null && callEntry != 3 && callVerion > 3.0 && !"3".equals(callMethod.trim())) {
 								Map roomsaleparams = new HashMap();
 
-								roomsaleparams.put("roomTypeId", troomType.getId());
+								roomsaleparams.put("roomTypeId", troomType.getId().toString());
 								String url = UrlUtils.getUrl("roomsale.url");
 								JSONObject data = JSONObject.parseObject(OrderUtil.doPost(url, roomsaleparams, 1000));
 								String isonpromo = "F";
@@ -968,7 +969,6 @@ public class RoomstateService {
 					} catch (Exception e) {
 						Cat.logError("findHotelRoomState Call roomsale api exception", e);
 					}
-
 
 	        		roomtype.setRoomtypeid(troomType.getId());
 	        		roomtype.setBednum(troomType.getBednum());

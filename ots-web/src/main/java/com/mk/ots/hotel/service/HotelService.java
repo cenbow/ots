@@ -252,7 +252,7 @@ public class HotelService {
             Collection<Object> coll = new ArrayList<Object>();
             try {
                 List<THotelModel> hotels = mapper.findListInfo(thotelid == null ? null : Long.valueOf(thotelid));
-                StringBuffer bfSql = new StringBuffer();
+                 StringBuffer bfSql = new StringBuffer();
                 for (THotelModel bean : hotels) {
                     String hotelid = bean.getId().toString();
 
@@ -389,7 +389,7 @@ public class HotelService {
                     try {
 
                         Map params = new HashMap();
-                        params.put("hotelId", bean.getId());
+                        params.put("hotelId", bean.getId().toString());
                         String url = UrlUtils.getUrl("roomsale.url");
                         JSONObject data = JSONObject.parseObject(OrderUtil.doPost(url, params, 1000));
 
