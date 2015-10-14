@@ -8,7 +8,7 @@ public class BCard {
     private String batchNo;
     private String name;
     private String no;
-    private String pwd;
+    private String password;
     private Integer status;
     private BigDecimal price;
     private BigDecimal cost;
@@ -52,12 +52,12 @@ public class BCard {
         this.no = no;
     }
 
-    public String getPwd() {
-        return pwd;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPwd(String pwd) {
-        this.pwd = pwd;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Integer getStatus() {

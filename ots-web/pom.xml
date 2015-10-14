@@ -1221,6 +1221,7 @@
 
 		<profile>
 			<id>shanghai-simulation</id>
+
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
