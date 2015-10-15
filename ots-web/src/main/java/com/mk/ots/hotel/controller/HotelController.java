@@ -206,13 +206,13 @@ public class HotelController {
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 
-	private Boolean countErrors(Errors errors) {
+	private String countErrors(Errors errors) {
 		StringBuffer bfErrors = new StringBuffer();
 		for (ObjectError error : errors.getAllErrors()) {
 			bfErrors.append(error.getDefaultMessage()).append("; ");
 		}
 
-		return bfErrors.length() > 0;
+		return bfErrors.toString();
 	}
 
 	/**
@@ -246,7 +246,6 @@ public class HotelController {
 		return resultMap;
 	}
 
-
 	@RequestMapping(value = { "/hotel/querypromolist" })
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> searchPromoHotels(HttpServletRequest request,
@@ -258,58 +257,62 @@ public class HotelController {
 		logger.info("【/hotel/querypromolist】 request params is : {}", params);
 		logger.info("【/hotel/querypromolist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-	
-		if (countErrors(errors)) {
+
+		String errorMessage = "";
+		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(String.format("parameters validation failed with error %s", errorMessage));
+
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
-	
+
 		try {
 			Date day = new Date();
 			long starttime = day.getTime();
-	
+
 			rtnMap = invokeSearchHotels(reqentity, Boolean.TRUE);
-	
+
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
 					HttpStatus.OK);
 			if (AppUtils.DEBUG_MODE) {
 				long endtime = new Date().getTime();
 				resultResponse.getBody().put("$times$", endtime - starttime + " ms");
 			}
-	
+
 			resultResponse.getBody().put("ispromoting", rtnMap.size() > 0 ? 1 : 0);
 			resultResponse.getBody().put("promotext", "重庆特价 sb...");
-	
+
 			/**
 			 * TODO: waiting for long's interface to get the times
 			 */
 			String startInternalTime = "2015-10-15 22:30";
 			String endInternalTime = "2015-10-16 02:00";
-	
+
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("promo time received, startTime:%s; endTime:%s", startInternalTime,
 						endInternalTime));
 			}
-	
+
 			LocalDateTime startExTime = LocalDateTime.fromDateFields(defaultFormatter.parse(startInternalTime));
 			LocalDateTime endExTime = LocalDateTime.fromDateFields(defaultFormatter.parse(endInternalTime));
-	
+
 			resultResponse.getBody().put("promostarttime",
 					String.format("%s:%s", startExTime.getHourOfDay(), startExTime.getMinuteOfHour()));
 			resultResponse.getBody().put("promoendtime",
 					String.format("%s:%s", endExTime.getHourOfDay(), endExTime.getMinuteOfHour()));
-	
+
 			if (rtnMap.size() == 0) {
 				resultResponse.getBody().put("promosec", 0);
 			} else {
 				LocalDateTime currentTime = LocalDateTime.now();
 				Integer seconds = Seconds.secondsBetween(currentTime, endExTime).getSeconds();
-	
+
 				resultResponse.getBody().put("promosec", seconds);
 			}
-	
+
 			logger.info("【/hotel/c】 end...");
 			logger.info("【/hotel/querypromolist】response data:success::{} , count::{}\n",
 					objectMapper.writeValueAsString(resultResponse.getBody().get("success")),
@@ -345,14 +348,18 @@ public class HotelController {
 		logger.info("【/hotel/querylist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
 
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-
-		if (countErrors(errors)) {
+		
+		String errorMessage = "";
+		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(String.format("parameters validation failed with error %s", errorMessage));
+
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
-
+		
 		try {
 			Date day = new Date();
 			long starttime = day.getTime();
