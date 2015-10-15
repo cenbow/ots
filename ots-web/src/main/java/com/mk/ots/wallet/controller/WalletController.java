@@ -204,14 +204,13 @@ public class WalletController {
         //组织数据响应
         Map<String, Object> rtnMap = Maps.newHashMap();
         rtnMap.put("success", result);
-        rtnMap.put("errmsg", errMsg);
-        rtnMap.put("chargeprice", price);
 
         if ("T".equals(result)) {
-            rtnMap.put("errcode", HttpStatus.OK);
+            rtnMap.put("chargeprice", price);
             return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
         } else {
             rtnMap.put("errcode", HttpStatus.BAD_REQUEST);
+            rtnMap.put("errmsg", errMsg);
             return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.BAD_REQUEST);
         }
     }
