@@ -132,14 +132,14 @@ public class HotelQuerylistReqEntity extends ParamBaseBean implements Serializab
 	 */
 	private Integer callentry;
 
-	private Boolean isPromoOnly;
-	
-	public Boolean getIsPromoOnly() {
-		return isPromoOnly;
+	private Boolean ispromoonly;
+
+	public Boolean getIspromoonly() {
+		return ispromoonly;
 	}
 
-	public void setIsPromoOnly(Boolean isPromoOnly) {
-		this.isPromoOnly = isPromoOnly;
+	public void setIspromoonly(Boolean ispromoonly) {
+		this.ispromoonly = ispromoonly;
 	}
 
 	public Integer getCallentry() {
