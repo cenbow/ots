@@ -60,11 +60,11 @@ public class ElasticsearchProxy {
 	public final static String OTS_INDEX_DEFAULT = "ots";
 	/** 默认type */
 	public final static String HOTEL_TYPE_DEFAULT = "hotel";
-	
+
 	/**
 	 * 默认位置区域
 	 */
-	public final static String POSITION_TYPE_DEFAULT ="position";
+	public final static String POSITION_TYPE_DEFAULT = "position";
 
 	private Gson gson = new Gson();
 	private Client client = null;
@@ -189,10 +189,13 @@ public class ElasticsearchProxy {
 	 */
 	public void deleteAllDocument() {
 		try {
-			DeleteByQueryResponse deleteByQueryResponse = this.getClient().prepareDeleteByQuery(ElasticsearchProxy.OTS_INDEX_DEFAULT).setTypes(ElasticsearchProxy.HOTEL_TYPE_DEFAULT)
-					.setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
+			DeleteByQueryResponse deleteByQueryResponse = this.getClient()
+					.prepareDeleteByQuery(ElasticsearchProxy.OTS_INDEX_DEFAULT)
+					.setTypes(ElasticsearchProxy.HOTEL_TYPE_DEFAULT).setQuery(QueryBuilders.matchAllQuery()).execute()
+					.actionGet();
 			int status = deleteByQueryResponse.status().getStatus();
-			this.logger.info("deleteAllDocument from index: {}, type: {}, state is {}", ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.HOTEL_TYPE_DEFAULT, status);
+			this.logger.info("deleteAllDocument from index: {}, type: {}, state is {}",
+					ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.HOTEL_TYPE_DEFAULT, status);
 		} catch (Exception e) {
 			this.logger.error("deleteAllDocument method error:\n" + e.getLocalizedMessage(), e);
 			e.printStackTrace();
@@ -209,7 +212,8 @@ public class ElasticsearchProxy {
 	 */
 	public void deleteAllDocument(String indexName, String typeName) {
 		try {
-			DeleteByQueryResponse deleteByQueryResponse = this.getClient().prepareDeleteByQuery(indexName).setTypes(typeName).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
+			DeleteByQueryResponse deleteByQueryResponse = this.getClient().prepareDeleteByQuery(indexName)
+					.setTypes(typeName).setQuery(QueryBuilders.matchAllQuery()).execute().actionGet();
 			int status = deleteByQueryResponse.status().getStatus();
 			this.logger.info("deleteAllDocument from index: {}, type: {}, state is {}", indexName, typeName, status);
 		} catch (Exception e) {
@@ -294,7 +298,8 @@ public class ElasticsearchProxy {
 		try {
 			String docs = this.getGson().toJson(obj);
 			updateResponse = this.prepareUpdate(indexName, typeName).setId(id).setDoc(docs).execute().actionGet();
-			this.logger.info("updateDocument id: {} from index: {}, type: {}, use object: {}.", id, indexName, typeName, docs);
+			this.logger.info("updateDocument id: {} from index: {}, type: {}, use object: {}.", id, indexName, typeName,
+					docs);
 		} catch (Exception e) {
 			this.logger.error("updateDocument method error:\n" + e.getLocalizedMessage(), e);
 			e.printStackTrace();
@@ -313,7 +318,8 @@ public class ElasticsearchProxy {
 		try {
 			updateResponse = this.prepareUpdate().setId(id).setDoc(field, value).execute().actionGet();
 		} catch (Exception e) {
-			this.logger.error("updateDocument method error:\n{}, field: {}, value: {}", e.getLocalizedMessage(), field, value);
+			this.logger.error("updateDocument method error:\n{}, field: {}, value: {}", e.getLocalizedMessage(), field,
+					value);
 			e.printStackTrace();
 		}
 		return updateResponse;
@@ -333,10 +339,13 @@ public class ElasticsearchProxy {
 	public UpdateResponse updateDocument(String indexName, String typeName, String id, String field, Object value) {
 		UpdateResponse updateResponse = null;
 		try {
-			updateResponse = this.prepareUpdate(indexName, typeName).setId(id).setDoc(field, value).execute().actionGet();
-			this.logger.info("updateDocument id: {}, field: {}, value: {} from index: {}, type: {}.", id, field, value, indexName, typeName);
+			updateResponse = this.prepareUpdate(indexName, typeName).setId(id).setDoc(field, value).execute()
+					.actionGet();
+			this.logger.info("updateDocument id: {}, field: {}, value: {} from index: {}, type: {}.", id, field, value,
+					indexName, typeName);
 		} catch (Exception e) {
-			this.logger.error("updateDocument method error:\n{}, field: {}, value: {}", e.getLocalizedMessage(), field, value);
+			this.logger.error("updateDocument method error:\n{}, field: {}, value: {}", e.getLocalizedMessage(), field,
+					value);
 			e.printStackTrace();
 		}
 		return updateResponse;
@@ -348,7 +357,9 @@ public class ElasticsearchProxy {
 	 * @return
 	 */
 	private IndexRequestBuilder prepareIndex(Object obj) {
-		return this.getClient().prepareIndex(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.HOTEL_TYPE_DEFAULT).setSource(this.getGson().toJson(obj));
+		return this.getClient()
+				.prepareIndex(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.HOTEL_TYPE_DEFAULT)
+				.setSource(this.getGson().toJson(obj));
 	}
 
 	/**
@@ -366,7 +377,8 @@ public class ElasticsearchProxy {
 	 * @return
 	 */
 	private DeleteRequestBuilder prepareDelete() {
-		return this.getClient().prepareDelete().setIndex(ElasticsearchProxy.OTS_INDEX_DEFAULT).setType(ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
+		return this.getClient().prepareDelete().setIndex(ElasticsearchProxy.OTS_INDEX_DEFAULT)
+				.setType(ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
 	}
 
 	/**
@@ -388,7 +400,8 @@ public class ElasticsearchProxy {
 	 * @return
 	 */
 	private UpdateRequestBuilder prepareUpdate() {
-		return this.getClient().prepareUpdate().setIndex(ElasticsearchProxy.OTS_INDEX_DEFAULT).setType(ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
+		return this.getClient().prepareUpdate().setIndex(ElasticsearchProxy.OTS_INDEX_DEFAULT)
+				.setType(ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
 	}
 
 	/**
@@ -410,7 +423,8 @@ public class ElasticsearchProxy {
 	 * @return
 	 */
 	public SearchRequestBuilder prepareSearch() {
-		return this.getClient().prepareSearch(ElasticsearchProxy.OTS_INDEX_DEFAULT).setTypes(ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
+		return this.getClient().prepareSearch(ElasticsearchProxy.OTS_INDEX_DEFAULT)
+				.setTypes(ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
 	}
 
 	/**
@@ -455,14 +469,21 @@ public class ElasticsearchProxy {
 				}
 			}
 
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("clustername:%s; clusterhosts:%s; elasticsearch.index:%s",
+						this.prop.getProperty("elasticsearch.clustername", "elasticsearch"), clusterHosts, cityIndexs));
+			}
+
 			// 默认上海index，没有index的话自动创建
 			if (!this.indexExists(ElasticsearchProxy.OTS_INDEX_DEFAULT)) {
 				// auto create the index if it not exists.
-				final CreateIndexRequestBuilder createIndexRequestBuilder = this.client.admin().indices().prepareCreate(ElasticsearchProxy.OTS_INDEX_DEFAULT);
+				final CreateIndexRequestBuilder createIndexRequestBuilder = this.client.admin().indices()
+						.prepareCreate(ElasticsearchProxy.OTS_INDEX_DEFAULT);
 				final XContentBuilder mappingBuilder = this.createGeoMappingBuilder();
 				createIndexRequestBuilder.addMapping(ElasticsearchProxy.HOTEL_TYPE_DEFAULT, mappingBuilder);
 				createIndexRequestBuilder.execute().actionGet();
-				this.logger.info("auto create the index: {}, type: {}.", ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
+				this.logger.info("auto create the index: {}, type: {}.", ElasticsearchProxy.OTS_INDEX_DEFAULT,
+						ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
 			}
 
 			// 其它城市的index
@@ -474,11 +495,13 @@ public class ElasticsearchProxy {
 				String _index = indexs[i];
 				if (!this.indexExists(_index)) {
 					// auto create the index if it not exists.
-					final CreateIndexRequestBuilder createIndexRequestBuilder = this.client.admin().indices().prepareCreate(_index);
+					final CreateIndexRequestBuilder createIndexRequestBuilder = this.client.admin().indices()
+							.prepareCreate(_index);
 					final XContentBuilder mappingBuilder = this.createGeoMappingBuilder();
 					createIndexRequestBuilder.addMapping(ElasticsearchProxy.HOTEL_TYPE_DEFAULT, mappingBuilder);
 					createIndexRequestBuilder.execute().actionGet();
-					this.logger.info("auto create the index: {}, type: {}.", _index, ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
+					this.logger.info("auto create the index: {}, type: {}.", _index,
+							ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
 				}
 			}
 		} catch (Exception e) {
@@ -585,39 +608,46 @@ public class ElasticsearchProxy {
 		}
 		return hits;
 	}
-	
+
 	/**
 	 * 搜索默认索引酒店信息
+	 * 
 	 * @param gpList
-	 * 参数: 商圈坐标集合
+	 *            参数: 商圈坐标集合
 	 * @param customerLocation
-	 * 参数: 用户坐标
+	 *            参数: 用户坐标
 	 * @param mkPriceDateList
-	 * 参数: 一段时间的眯客价属性字段列表
+	 *            参数: 一段时间的眯客价属性字段列表
 	 * @return
 	 */
-	public SearchHit[] searchHotelByBsiCycle(List<GeoPoint> gpList, GeoPoint customerLocation, List<String> mkPriceDateList) {
-	    return searchHotelByBsiCycle(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.HOTEL_TYPE_DEFAULT, gpList, customerLocation, mkPriceDateList);
+	public SearchHit[] searchHotelByBsiCycle(List<GeoPoint> gpList, GeoPoint customerLocation,
+			List<String> mkPriceDateList) {
+		return searchHotelByBsiCycle(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.HOTEL_TYPE_DEFAULT,
+				gpList, customerLocation, mkPriceDateList);
 	}
 
 	/**
 	 * 指定索引搜索酒店信息
+	 * 
 	 * @param indexName
-	 * 参数: ES索引名称
+	 *            参数: ES索引名称
 	 * @param typeName
-	 * 参数: EStype名称
-     * @param gpList
-     * 参数: 商圈坐标集合
-     * @param customerLocation
-     * 参数: 用户坐标
-     * @param mkPriceDateList
-     * 参数: 一段时间的眯客价属性字段列表
-     * @return
+	 *            参数: EStype名称
+	 * @param gpList
+	 *            参数: 商圈坐标集合
+	 * @param customerLocation
+	 *            参数: 用户坐标
+	 * @param mkPriceDateList
+	 *            参数: 一段时间的眯客价属性字段列表
+	 * @return
 	 */
-	public SearchHit[] searchHotelByBsiCycle(String indexName, String typeName, List<GeoPoint> gpList, GeoPoint customerLocation, List<String> mkPriceDateList) {
+	public SearchHit[] searchHotelByBsiCycle(String indexName, String typeName, List<GeoPoint> gpList,
+			GeoPoint customerLocation, List<String> mkPriceDateList) {
 		SearchRequestBuilder searchBuilder = this.prepareSearch(indexName, typeName);
-		ScriptScoreFunctionBuilder scoreSortScriptBuilder = this.createScoreSortScriptBuilder(customerLocation, mkPriceDateList);
-		FunctionScoreQueryBuilder queryBuilder = QueryBuilders.functionScoreQuery(this.createGeoFilterBuilder(gpList), scoreSortScriptBuilder);
+		ScriptScoreFunctionBuilder scoreSortScriptBuilder = this.createScoreSortScriptBuilder(customerLocation,
+				mkPriceDateList);
+		FunctionScoreQueryBuilder queryBuilder = QueryBuilders.functionScoreQuery(this.createGeoFilterBuilder(gpList),
+				scoreSortScriptBuilder);
 		searchBuilder.setQuery(queryBuilder);
 		searchBuilder.setFrom(0).setSize(10);
 		SearchResponse searchResponse = searchBuilder.execute().actionGet();
@@ -635,7 +665,8 @@ public class ElasticsearchProxy {
 	 * @param mkPriceDateList
 	 * @return
 	 */
-	public SearchHit[] searchHotelByBsiCycleWithNoScore(String indexName, String typeName, List<GeoPoint> gpList, GeoPoint customerLocation, List<String> mkPriceDateList) {
+	public SearchHit[] searchHotelByBsiCycleWithNoScore(String indexName, String typeName, List<GeoPoint> gpList,
+			GeoPoint customerLocation, List<String> mkPriceDateList) {
 		SearchRequestBuilder searchBuilder = this.prepareSearch(indexName, typeName);
 		searchBuilder.setPostFilter(this.createGeoFilterBuilder(gpList));
 		searchBuilder.addSort(this.createSortScriptBuilder(customerLocation, mkPriceDateList));
@@ -655,14 +686,15 @@ public class ElasticsearchProxy {
 
 	/**
 	 * 创建ES ScriptSortBuilder对象
+	 * 
 	 * @param customerLocation
-	 * 参数: 用户坐标
+	 *            参数: 用户坐标
 	 * @param mkPriceDateList
-	 * 参数: 一段时间的眯客价属性字段列表
-	 * @return ScriptSortBuilder
-	 * 返回值
+	 *            参数: 一段时间的眯客价属性字段列表
+	 * @return ScriptSortBuilder 返回值
 	 */
-	private ScriptScoreFunctionBuilder createScoreSortScriptBuilder(GeoPoint customerLocation, List<String> mkPriceDateList) {
+	private ScriptScoreFunctionBuilder createScoreSortScriptBuilder(GeoPoint customerLocation,
+			List<String> mkPriceDateList) {
 		ScriptScoreFunctionBuilder scriptSortBuilder = new ScriptScoreFunctionBuilder();
 		scriptSortBuilder.script("calculate-score");
 		scriptSortBuilder.param("lat", customerLocation.lat());
@@ -671,12 +703,12 @@ public class ElasticsearchProxy {
 		scriptSortBuilder.param("dt1", 1);
 		// dt2: 距离3000米
 		scriptSortBuilder.param("dt2", 3);
-		
+
 		// pt1: 价格200元
 		scriptSortBuilder.param("pt1", 200);
 		// pt2: 价格300元
 		scriptSortBuilder.param("pt2", 300);
-		
+
 		// 眯客价属性列表
 		scriptSortBuilder.param("mkPriceDates", mkPriceDateList);
 
