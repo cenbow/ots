@@ -38,6 +38,8 @@ import com.mk.ots.web.ServiceOutput;
 import com.mk.pms.order.dao.PmsOrderDAO;
 import com.mk.pms.order.dao.PmsRoomOrderDAO;
 import com.mk.sever.ServerChannel;
+
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -410,6 +412,40 @@ public class HotelService {
 					esProxy.batchAddDocument(coll);
 					output.setSuccess(true);
 					output.setMsgAttr("count", coll.size());
+
+					Date curDate = DateUtils.addDays(new Date(), -1);
+					// 将当期日期格式化为yyyyMMdd格式
+					String startdate = DateUtils.getStringFromDate(curDate, DateUtils.FORMATSHORTDATETIME);
+					// 默认保存多少天的眯客价
+					Integer days = MIKEPRICE_DAYS;
+
+					for (Object object : coll) {
+						OtsHotel otsHotel = (OtsHotel) object;
+
+						Date mikepriceDate = DateUtils.addDays(DateUtils.getDateFromString(startdate), days);
+						String startdateday = DateUtils.getStringFromDate(mikepriceDate, DateUtils.FORMATSHORTDATETIME);
+						String enddateday = startdateday;
+						// 取眯客价
+						String[] prices = null;
+						if (hotelPriceService.isUseNewPrice())
+							prices = hotelPriceService.getHotelMikePrices(Long.parseLong(otsHotel.getHotelid()),
+									startdateday, enddateday);
+						else
+							prices = roomstateService.getHotelMikePrices(Long.parseLong(otsHotel.getHotelid()),
+									startdateday, enddateday);
+						BigDecimal mikePriceValue = new BigDecimal(prices[0]);
+						String mikePriceKey = MIKE_PRICE_PROP
+								+ DateUtils.getStringFromDate(mikepriceDate, DateUtils.FORMATSHORTDATETIME);
+						Map<String, Object> otsHotelMap = new HashMap<String, Object>();
+						BeanUtils.populate(otsHotel, otsHotelMap);
+						otsHotelMap.put(mikePriceKey, mikePriceValue);
+
+						logger.info(String.format("mike price for hotel:%s; name:%s, value:%s", otsHotel.getHotelid(),
+								mikePriceKey, mikePriceValue));
+
+						esProxy.updateDocument(otsHotel.getHotelid(), otsHotelMap);
+					}
+
 					logger.info("total pms hotel added: {}条.", coll.size());
 				} else {
 					output.setSuccess(true);
