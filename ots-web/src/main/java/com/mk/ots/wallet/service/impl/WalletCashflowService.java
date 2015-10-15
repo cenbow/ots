@@ -87,7 +87,7 @@ public class WalletCashflowService implements IWalletCashflowService {
             return false;
         }
         UWalletCashFlow uWalletCashFlow = this.iuWalletCashFlowDAO.findByTypeAndSourceid(mid, CashflowTypeEnum.MIKE_CHARGE_CARD, cardid);
-        if (uWalletCashFlow == null) {
+        if (uWalletCashFlow != null) {
             logger.info(">>>充值卡充值失败: 此卡号"+cardid+"已充值过.");
             return false;
         }

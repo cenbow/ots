@@ -33,6 +33,6 @@
   <update id="updateStatusById" parameterType="java.util.Map">
     UPDATE b_card
     SET status=#{status},update_time=now(),update_by=#{mid}
-    WHERE id=#{id}
+    WHERE id=#{id} and status = #{soucreStatus}
   </update>
 </mapper>

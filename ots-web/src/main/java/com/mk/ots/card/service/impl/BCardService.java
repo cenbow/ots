@@ -47,11 +47,17 @@ public class BCardService implements IBCardService {
 
         //验证状态
         int status = card.getStatus();
-        if (CardTypeEnum.TYPE_ACTIVE.getId() < status) {
-            throw MyErrorEnum.customError.getMyException("未开始.");
+        if (CardTypeEnum.TYPE_INIT.getId() == status) {
+            throw MyErrorEnum.customError.getMyException("充值卡未生效.");
         }
-        if (CardTypeEnum.TYPE_ACTIVE.getId() > status) {
-            throw MyErrorEnum.customError.getMyException("已充值.");
+        if (CardTypeEnum.TYPE_OUT.getId() == status) {
+            throw MyErrorEnum.customError.getMyException("充值卡未生效.");
+        }
+        if (CardTypeEnum.TYPE_USED.getId() == status) {
+            throw MyErrorEnum.customError.getMyException("充值卡已使用.");
+        }
+        if (CardTypeEnum.TYPE_CANCEL.getId() == status) {
+            throw MyErrorEnum.customError.getMyException("充值卡已注销.");
         }
 
         //验证是否在有效期内期
@@ -60,7 +66,7 @@ public class BCardService implements IBCardService {
         Date now = new Date();
 
         if (now.before(beginDate) || now.after(endDate)) {
-            throw MyErrorEnum.customError.getMyException("已过期.");
+            throw MyErrorEnum.customError.getMyException("充值卡已过期.");
         }
         return card;
     }
@@ -88,8 +94,11 @@ public class BCardService implements IBCardService {
         try {
             //充值
             Long cardId = card.getId();
-            this.iWalletCashflowService.accountCharge(mid, card.getPrice(), cardId);
+            boolean isSuccess = this.iWalletCashflowService.accountCharge(mid, card.getPrice(), cardId);
 
+            if (!isSuccess) {
+                throw MyErrorEnum.customError.getMyException("充值失败.");
+            }
             //消费充值卡
             this.updateCardUsed(mid, cardId);
 
@@ -110,6 +119,7 @@ public class BCardService implements IBCardService {
         Map<String,Object> paramMap = new HashMap<String, Object>();
         paramMap.put("id",cardId);
         paramMap.put("mid",mid);
+        paramMap.put("soucreStatus", CardTypeEnum.TYPE_ACTIVE.getId());
         paramMap.put("status", CardTypeEnum.TYPE_USED.getId());
 
         this.bCardDAO.updateStatusById(paramMap);
