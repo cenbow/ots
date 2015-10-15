@@ -22,6 +22,7 @@ import javax.xml.ws.http.HTTPException;
 import com.mk.framework.util.*;
 import com.mk.ots.common.enums.*;
 import com.mk.ots.remote.RoomRemoteService;
+import com.mk.ots.remote.json.RoomSale;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -2139,8 +2140,8 @@ public class OrderServiceImpl implements OrderService {
    * @param jsonObj
    */
   public void doCreateOrder(OtaOrder order, JSONObject jsonObj) {
-  	  checkMidIsBlack("您的账号存在异常，如有疑问请拨打客服电话4001-888-733");
-  	
+  	  checkMidIsBlack(order.getToken(),"您的账号存在异常，如有疑问请拨打客服电话4001-888-733");
+
       // 提交订单
       OtaOrder returnOrder = null;
         /*******************订单返现*************/
@@ -2148,6 +2149,8 @@ public class OrderServiceImpl implements OrderService {
        //判断房间类型
         Long roomId = order.getRoomOrderList().get(0).getRoomId();
         order.setPromoType(getPromoType(roomId));
+       //检查订单promo type是否符合支付规则
+        checkPayByPromoType(order, order.getPromoType());
 		Map<String, Object> cash = cashBackService.getCashBackByRoomtypeId(roomTypeId, DateUtils.formatDate(order.getBeginTime()),
 				DateUtils.formatDate(order.getEndTime()));
 		this.logger.info("getCashBackByRoomtypeId:返现详细:{}", gson.toJson(cash));
@@ -2217,12 +2220,11 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     private String getPromoType(Long roomId) {
-        net.sf.json.JSONObject jsonObject = roomRemoteService.querySaleRoomByRoomId(roomId);
-        Long promoType = jsonObject.getLong("saleType");
-        if(promoType == null){
+        List<RoomSale> roomSalesList = roomRemoteService.querySaleRoomByRoomId(roomId);
+        if(CollectionUtils.isEmpty(roomSalesList)){
             return PromoTypeEnum.OTHER.getCode().toString();
         }else{
-            return promoType.toString();
+            return roomSalesList.get(0).getSaleType().toString();
         }
     }
 
@@ -2303,8 +2305,6 @@ public class OrderServiceImpl implements OrderService {
       //设置规则
       int ruleCode=Integer.parseInt(hotel.get("rulecode").toString());
       order.setRuleCode(ruleCode);
-      // session 获取会员id
-      order.set("mid", MyTokenUtils.getMidByToken(""));
       if (order.getMid() == null) {
           throw MyErrorEnum.notfindUser.getMyException();
       }
@@ -2487,12 +2487,12 @@ public class OrderServiceImpl implements OrderService {
       int ruleCode=Integer.parseInt(hotel.get("rulecode").toString());
       order.setRuleCode(ruleCode);
       // session 获取会员id
-      member = MyTokenUtils.getMemberByToken("");
+      member = MyTokenUtils.getMemberByToken(order.getToken());
       if (member == null) {
           // 会员不存在
           throw MyErrorEnum.memberNotExist.getMyException("");
       }
-      order.set("mid", MyTokenUtils.getMidByToken(""));
+      order.set("mid", MyTokenUtils.getMidByToken(order.getToken()));
       if (order.get("mid") == null) {
           throw MyErrorEnum.notfindUser.getMyException();
       }
@@ -2763,7 +2763,7 @@ public class OrderServiceImpl implements OrderService {
 			List<Long> promoNoList = getPromoNoList("", couponno);
 			// 创建订单时无法判断此订单是到付还是预付，且只有非切客模式下可以编辑券
 			if (pOrder.getSpreadUser() == null) { // 预付且spreaduser为空
-				promoService.bindPromotionPrice(promoNoList, MyTokenUtils.getMemberByToken(""), pOrder);
+				promoService.bindPromotionPrice(promoNoList, MyTokenUtils.getMemberByToken(order.getToken()), pOrder);
 			}
 		}
       logger.info("绑定优惠券逻辑----------------结束.");
@@ -3162,13 +3162,13 @@ public class OrderServiceImpl implements OrderService {
         if(PromoTypeEnum.TJ.getCode().equals(promoType)){
             //如果选择了今夜特价房则只能使用在线支付或房券支付 其他都不能使用
             if("T".equals(order.getPromotion())){
-                throw MyErrorEnum.customError.getMyException("很抱歉，没有房间可以预定了");
+                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能与其他促销一起使用");
             }
             if("T".equals(order.getCouponNo())){
-                throw MyErrorEnum.customError.getMyException("很抱歉，没有房间可以预定了");
+                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能使用优惠券");
             }
-            if(!OrderTypeEnum.YF.getId().toString().equals(order.getOrderType())){
-                throw MyErrorEnum.customError.getMyException("很抱歉，没有房间可以预定了");
+            if(OrderTypeEnum.YF.getId() != order.getOrderType()){
+                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能使用房券");
             }
         }
     }
@@ -4780,8 +4780,8 @@ public class OrderServiceImpl implements OrderService {
 	/**
 	 * 检验mid是否在黑名单
 	 */
-	private void checkMidIsBlack(String errmsg) {
-		UMember member = MyTokenUtils.getMemberByToken("");
+	private void checkMidIsBlack(String token,String errmsg) {
+		UMember member = MyTokenUtils.getMemberByToken(token);
 		if (member == null) {
 			throw MyErrorEnum.memberNotExist.getMyException("");
 		}

@@ -40,6 +40,8 @@ public class OtaOrder extends BizModel<OtaOrder> {
 		this.otaOrderMac = otaOrderMac;
 	}
 
+	private String token;
+
 	public OtaOrder() {
 		super();
 		try {
@@ -94,7 +96,7 @@ public class OtaOrder extends BizModel<OtaOrder> {
 	 * @return
 	 */
 	public int getClearingType(){
-		return this.get("clearingtype");
+		return this.get("clearingtype")==null?0: Integer.parseInt(String.valueOf(this.get("clearingtype")));
 	}
 	/**
 	 * 设置结算类型
@@ -537,4 +539,11 @@ public class OtaOrder extends BizModel<OtaOrder> {
 		return this.get("activeid");
 	}
 
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
 }

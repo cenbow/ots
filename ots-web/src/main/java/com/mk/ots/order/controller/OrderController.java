@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.mk.ots.system.model.UToken;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.base.Strings;
 import org.slf4j.Logger;
@@ -623,8 +624,12 @@ public class OrderController {
 			order.put("couponno", couponNo);
 			order.set("coupon", "T");
 		}
-		if (MyTokenUtils.getToken("").getOstype() != null) {
-			order.set("ostype", MyTokenUtils.getToken("").getOstype());
+		String token = request.getParameter("token");
+		order.setToken(token);
+		UToken uToken = MyTokenUtils.getToken(token);
+		if (uToken!=null && uToken.getOstype() != null) {
+			order.set("ostype", MyTokenUtils.getToken(token).getOstype());
+			order.setMid(uToken.getMid());
 		} else {
 			order.set("ostype", OSTypeEnum.OTHER.getId());
 		}
