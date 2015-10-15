@@ -55,11 +55,11 @@ public class RoomRemoteService {
                         RoomSale.class);
                 roomSalesList.add(roomSale);
             }
+            logger.info(String.format("end remote url %s resule [%s]", QUERY_SALE_ROOM, roomId, JsonKit.toJson(jsonStr)));
         } catch (Exception e) {
             logger.error("querySaleRoomByRoomId doPost error", e);
             e.printStackTrace();
         }
-        logger.info(String.format("end remote url %s resule [%s]", QUERY_SALE_ROOM, roomId, JsonKit.toJson(jsonStr)));
         return roomSalesList;
     }
 }
