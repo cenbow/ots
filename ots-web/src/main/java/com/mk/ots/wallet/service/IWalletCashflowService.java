@@ -32,6 +32,15 @@ public interface IWalletCashflowService {
     BigDecimal entry(Long mid, CashflowTypeEnum cashflowtype, Long sourceid);
 
     /**
+     * 账户充值接口
+     * @param mid
+     * @param price
+     * @param cardid
+     * @return
+     */
+    boolean accountCharge(Long mid, BigDecimal price, Long cardid);
+
+    /**
      * 回退订单金额
      *
      * @param orderid 订单id
