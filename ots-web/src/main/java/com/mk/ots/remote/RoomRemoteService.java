@@ -31,10 +31,23 @@ public class RoomRemoteService {
     public List<RoomSale> querySaleRoomByRoomId(Long roomId){
         logger.info(String.format("begin remote url %s params: roomid[%s]", QUERY_SALE_ROOM, roomId));
         String address = TASKFACTORY_URL + QUERY_SALE_ROOM;
-        JSONObject obj = null;
         List<RoomSale> roomSalesList = new ArrayList<RoomSale>();
         try {
-            String jsonStr = NetUtils.dopost(address, String.format("roomId=%s",roomId.toString()));
+            String jsonStr = "[\n" +
+                    "  {\n" +
+                    "    \"isOnPromo\": \"T\",\n" +
+                    "    \"promoText\": \"今夜特价\",\n" +
+                    "    \"promoTextColor\": \"#256887\",\n" +
+                    "    \"promoStartTime\": \"10:32:00\",\n" +
+                    "    \"promoEndTime\": \"2015-10-15 00:00:00.0\",\n" +
+                    "    \"saleType\": 1,\n" +
+                    "    \"saleName\": \"特价房\",\n" +
+                    "    \"salePrice\": 50.0,\n" +
+                    "    \"roomNo\": \"106\",\n" +
+                    "    \"roomtypeid\": 626,\n" +
+                    "    \"useDescribe\": null\n" +
+                    "  }\n" +
+                    "]";//NetUtils.dopost(address, String.format("roomId=%s",roomId.toString()));
             JSONArray jsonArray1 = JSONArray.fromObject(jsonStr);
             for (int i = 0; i < jsonArray1.size(); i++) {
                 JSONObject jsonObject2 = jsonArray1.getJSONObject(i);
@@ -42,11 +55,11 @@ public class RoomRemoteService {
                         RoomSale.class);
                 roomSalesList.add(roomSale);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("querySaleRoomByRoomId doPost error", e);
             e.printStackTrace();
         }
-        logger.info(String.format("end remote url %s resule [%s]", QUERY_SALE_ROOM, roomId, JsonKit.toJson(obj)));
+        logger.info(String.format("end remote url %s resule [%s]", QUERY_SALE_ROOM, roomId, JsonKit.toJson(jsonStr)));
         return roomSalesList;
     }
 }
