@@ -19,6 +19,10 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.http.HTTPException;
 
+import com.mk.framework.util.*;
+import com.mk.ots.common.enums.*;
+import com.mk.ots.remote.RoomRemoteService;
+import com.mk.ots.remote.json.RoomSale;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -48,30 +52,10 @@ import com.mk.care.kafka.model.Message;
 import com.mk.framework.AppUtils;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
-import com.mk.framework.util.Cast;
-import com.mk.framework.util.MyTokenUtils;
-import com.mk.framework.util.PayUtil;
-import com.mk.framework.util.UrlUtils;
 import com.mk.orm.kit.JsonKit;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
 import com.mk.ots.common.bean.PageObject;
-import com.mk.ots.common.enums.ClearingTypeEnum;
-import com.mk.ots.common.enums.NeedReturnEnum;
-import com.mk.ots.common.enums.OSTypeEnum;
-import com.mk.ots.common.enums.OrderTasksEnum;
-import com.mk.ots.common.enums.OrderTasksStatusEnum;
-import com.mk.ots.common.enums.OrderTasksTypeEnum;
-import com.mk.ots.common.enums.OrderTypeEnum;
-import com.mk.ots.common.enums.OtaFreqTrvEnum;
-import com.mk.ots.common.enums.OtaOrderFlagEnum;
-import com.mk.ots.common.enums.OtaOrderStatusEnum;
-import com.mk.ots.common.enums.PPayInfoTypeEnum;
-import com.mk.ots.common.enums.PayStatusEnum;
-import com.mk.ots.common.enums.PriceTypeEnum;
-import com.mk.ots.common.enums.PromotionTypeEnum;
-import com.mk.ots.common.enums.ReceiveCashBackEnum;
-import com.mk.ots.common.enums.RuleEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateTools;
 import com.mk.ots.common.utils.DateUtils;
@@ -249,8 +233,10 @@ public class OrderServiceImpl implements OrderService {
     private Gson gson = new Gson();
 	@Autowired
 	private HotelPriceService hotelPriceService ;
-	 @Autowired
-		private OtsCareProducer careProducer;
+	@Autowired
+    private OtsCareProducer careProducer;
+    @Autowired
+    private RoomRemoteService roomRemoteService;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
     private static final long TIME_FOR_FIFTEEN = Long.parseLong(PropertyConfigurer.getProperty("transferCheckinUsernameTime"));
@@ -459,9 +445,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * 设置订单的可用钱包
      *
-     * @param request
      * @param jsonObj
-     * @param orderId
      * @param order
      */
     public void setAvailableMoney(JSONObject jsonObj, OtaOrder order) {
@@ -2125,7 +2109,7 @@ public class OrderServiceImpl implements OrderService {
   /**
    * 保存移动硬件信息
    * 
-   * @param order
+   * @param otaOrderMac
    */
   private void saveMac(OtaOrderMac otaOrderMac) {
       Gson g = new Gson();
@@ -2156,12 +2140,17 @@ public class OrderServiceImpl implements OrderService {
    * @param jsonObj
    */
   public void doCreateOrder(OtaOrder order, JSONObject jsonObj) {
-  	  checkMidIsBlack("您的账号存在异常，如有疑问请拨打客服电话4001-888-733");
-  	
+  	  checkMidIsBlack(order.getToken(),"您的账号存在异常，如有疑问请拨打客服电话4001-888-733");
+
       // 提交订单
       OtaOrder returnOrder = null;
         /*******************订单返现*************/
         Long roomTypeId=order.getRoomOrderList().get(0).getRoomTypeId();
+       //判断房间类型
+        Long roomId = order.getRoomOrderList().get(0).getRoomId();
+        order.setPromoType(getPromoType(roomId));
+       //检查订单promo type是否符合支付规则
+        checkPayByPromoType(order, order.getPromoType());
 		Map<String, Object> cash = cashBackService.getCashBackByRoomtypeId(roomTypeId, DateUtils.formatDate(order.getBeginTime()),
 				DateUtils.formatDate(order.getEndTime()));
 		this.logger.info("getCashBackByRoomtypeId:返现详细:{}", gson.toJson(cash));
@@ -2225,7 +2214,21 @@ public class OrderServiceImpl implements OrderService {
       putOrderJobIntoManager(returnOrder);
   }
 
-  /**
+    /**
+     * 根据房间id得到对应的特价类型
+     * @param roomId
+     * @return
+     */
+    private String getPromoType(Long roomId) {
+        List<RoomSale> roomSalesList = roomRemoteService.querySaleRoomByRoomId(roomId);
+        if(CollectionUtils.isEmpty(roomSalesList)){
+            return PromoTypeEnum.OTHER.getCode().toString();
+        }else{
+            return roomSalesList.get(0).getSaleType().toString();
+        }
+    }
+
+    /**
    * 校验此用户是否有订单
    * 
    * @param order
@@ -2302,8 +2305,6 @@ public class OrderServiceImpl implements OrderService {
       //设置规则
       int ruleCode=Integer.parseInt(hotel.get("rulecode").toString());
       order.setRuleCode(ruleCode);
-      // session 获取会员id
-      order.set("mid", MyTokenUtils.getMidByToken(""));
       if (order.getMid() == null) {
           throw MyErrorEnum.notfindUser.getMyException();
       }
@@ -2486,12 +2487,12 @@ public class OrderServiceImpl implements OrderService {
       int ruleCode=Integer.parseInt(hotel.get("rulecode").toString());
       order.setRuleCode(ruleCode);
       // session 获取会员id
-      member = MyTokenUtils.getMemberByToken("");
+      member = MyTokenUtils.getMemberByToken(order.getToken());
       if (member == null) {
           // 会员不存在
           throw MyErrorEnum.memberNotExist.getMyException("");
       }
-      order.set("mid", MyTokenUtils.getMidByToken(""));
+      order.set("mid", MyTokenUtils.getMidByToken(order.getToken()));
       if (order.get("mid") == null) {
           throw MyErrorEnum.notfindUser.getMyException();
       }
@@ -2762,7 +2763,7 @@ public class OrderServiceImpl implements OrderService {
 			List<Long> promoNoList = getPromoNoList("", couponno);
 			// 创建订单时无法判断此订单是到付还是预付，且只有非切客模式下可以编辑券
 			if (pOrder.getSpreadUser() == null) { // 预付且spreaduser为空
-				promoService.bindPromotionPrice(promoNoList, MyTokenUtils.getMemberByToken(""), pOrder);
+				promoService.bindPromotionPrice(promoNoList, MyTokenUtils.getMemberByToken(order.getToken()), pOrder);
 			}
 		}
       logger.info("绑定优惠券逻辑----------------结束.");
@@ -2975,6 +2976,7 @@ public class OrderServiceImpl implements OrderService {
   }
 
     private OtaOrder extractOrderBeanForModify(HttpServletRequest request, OtaOrder order, boolean createByRoomType) {
+      String roomTicket = request.getParameter("roomticket");
       String hotelId = request.getParameter("hotelid");
       String roomTypeId = request.getParameter("roomtypeid");
       String priceType = request.getParameter("pricetype");
@@ -3011,6 +3013,7 @@ public class OrderServiceImpl implements OrderService {
           throw MyErrorEnum.errorParm.getMyException("时间格式错误---startdateday:" + startdateday + " enddateday: " + enddateday);
       }
       try {
+          order.setRoomTicket(roomTicket);
           if (StringUtils.isNotBlank(hotelId)) {
               order.setHotelId(Long.parseLong(hotelId));
           }
@@ -3112,13 +3115,19 @@ public class OrderServiceImpl implements OrderService {
               String oldRoomId = String.valueOf(roomOrder.getRoomId());
               if (!oldRoomId.equals(roomId)) {
                   // 房间id修改 房号 房间pms
+                  String newPromoType = getPromoType(Long.parseLong(oldRoomId));
+                  order.setPromoType(newPromoType);
                   TRoom tempRoom = this.roomService.findTRoomByRoomId(Long.parseLong(roomId));
                   if (tempRoom != null) {
                       roomOrder.set("roomid", tempRoom.get("id"));
                       roomOrder.set("roomno", tempRoom.get("name"));
                       roomOrder.set("roompms", tempRoom.get("pms"));
                   }
-
+                  checkPayByPromoType(order, newPromoType);
+              }else{
+                  //如果选择了今夜特价房则只能使用在线支付或房券支付
+                  String oldPromoType = getPromoType(Long.parseLong(oldRoomId));
+                  checkPayByPromoType(order, oldPromoType);
               }
           }
           // 预付 到付 担保
@@ -3149,7 +3158,23 @@ public class OrderServiceImpl implements OrderService {
       return order;
   }
 
-  /**
+    private void checkPayByPromoType(OtaOrder order, String promoType) {
+        if(PromoTypeEnum.TJ.getCode().equals(promoType)){
+            //如果选择了今夜特价房则只能使用在线支付或房券支付 其他都不能使用
+            if("T".equals(order.getPromotion())){
+                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能与其他促销一起使用");
+            }
+            if("T".equals(order.getCouponNo())){
+                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能使用优惠券");
+            }
+            if(OrderTypeEnum.YF.getId() != order.getOrderType()){
+                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能使用房券");
+            }
+        }
+    }
+
+
+    /**
    * Json转换为联系人
    * 
    * @param checkInUser
@@ -3445,7 +3470,6 @@ public class OrderServiceImpl implements OrderService {
    * @param sqnum
    * @param orderStatus
    * @param token
-   * @param jsonObj
    */
   public JSONObject selectCountByOrderStatus(String sqnum, List<String> orderStatus, String token) {
       logger.info("OTSMessage::OrderService::selectCountByOrderStatus:{}::begin", orderStatus);
@@ -4756,8 +4780,8 @@ public class OrderServiceImpl implements OrderService {
 	/**
 	 * 检验mid是否在黑名单
 	 */
-	private void checkMidIsBlack(String errmsg) {
-		UMember member = MyTokenUtils.getMemberByToken("");
+	private void checkMidIsBlack(String token,String errmsg) {
+		UMember member = MyTokenUtils.getMemberByToken(token);
 		if (member == null) {
 			throw MyErrorEnum.memberNotExist.getMyException("");
 		}

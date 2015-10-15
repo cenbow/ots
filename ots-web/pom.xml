@@ -1167,6 +1167,8 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+				<!-- taskfactory url -->
+				<taskfactory.url>http://192.168.70.183:8080</taskfactory.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
