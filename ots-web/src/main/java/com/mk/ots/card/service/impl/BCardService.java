@@ -8,8 +8,6 @@ import com.mk.ots.card.model.CardTypeEnum;
 import com.mk.ots.card.model.UCardUseLog;
 import com.mk.ots.card.service.IBCardService;
 import com.mk.ots.card.service.IUCardUseLogService;
-import com.mk.ots.mapper.CardMapper;
-import com.mk.ots.order.controller.OrderController;
 import com.mk.ots.wallet.service.IWalletCashflowService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -116,7 +114,7 @@ public class BCardService implements IBCardService {
     }
 
     private void updateCardUsed(Long mid, Long cardId) {
-        Map<String,Object> paramMap = new HashMap<String, Object>();
+        Map<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put("id",cardId);
         paramMap.put("mid",mid);
         paramMap.put("soucreStatus", CardTypeEnum.TYPE_ACTIVE.getId());

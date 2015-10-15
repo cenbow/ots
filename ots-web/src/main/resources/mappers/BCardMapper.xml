@@ -23,7 +23,7 @@
     end_date,description,create_time,update_time,create_by,update_by
   </sql>
 
-    <select id="findActivatedByPwd" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <select id="findActivatedByPwd" parameterType="java.util.Map" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List" />
         from b_card
