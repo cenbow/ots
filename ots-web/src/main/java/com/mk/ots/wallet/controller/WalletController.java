@@ -125,10 +125,10 @@ public class WalletController {
      * @return ResponseEntity
      */
     @RequestMapping("/detail/query")
-    public ResponseEntity<Map<String, Object>> querydetail(ParamBaseBean pbb,Long orderid, String pageindex, String datasize) {
+    public ResponseEntity<Map<String, Object>> querydetail(ParamBaseBean pbb,String token, Long orderid, String pageindex, String datasize) {
         logger.info("【entry/detail/query】 params is : {}", pbb.toString());
         //1. 请求参数处理
-        Long mid = MyTokenUtils.getMidByToken("");
+        Long mid = MyTokenUtils.getMidByToken(token);
         int tmppageindex = 1;
         int tmpdatasize = 10;
         if (!Strings.isNullOrEmpty(pageindex)) {
@@ -182,15 +182,14 @@ public class WalletController {
         if (StringUtils.isEmpty(token)) {
             throw MyErrorEnum.errorParm.getMyException("获取用户信息失败.");
         }
-        UMember memberByToken = MyTokenUtils.getMemberByToken(token);
-        if(memberByToken == memberByToken){
+        Long mid = MyTokenUtils.getMidByToken(token);
+        if(null == mid){
             throw MyErrorEnum.errorParm.getMyException("获取用户信息失败.");
         }
         if (StringUtils.isEmpty(chargeno)) {
             throw MyErrorEnum.errorParm.getMyException("充值密码为空.");
         }
 
-        Long mid = memberByToken.getMid();
         String result = "F";
         String errMsg = "";
         BigDecimal price = null;
