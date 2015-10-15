@@ -15,7 +15,7 @@
     <result column="ruleroom" property="ruleroom" jdbcType="VARCHAR" />
     <result column="enable" property="enable" jdbcType="CHAR" />
   </resultMap>
- <!--  <sql id="Example_Where_Clause" >
+  <sql id="Example_Where_Clause" >
     <where >
       <foreach collection="oredCriteria" item="criteria" separator="or" >
         <if test="criteria.valid" >
@@ -43,8 +43,8 @@
         </if>
       </foreach>
     </where>
-  </sql> -->
- <!--  <sql id="Update_By_Example_Where_Clause" >
+  </sql>
+ <sql id="Update_By_Example_Where_Clause" >
     <where >
       <foreach collection="example.oredCriteria" item="criteria" separator="or" >
         <if test="criteria.valid" >
@@ -72,7 +72,7 @@
         </if>
       </foreach>
     </where>
-  </sql> -->
+  </sql>
   <sql id="Base_Column_List" >
     id, name, type, value, stprice, rulearea, rulehotel, ruleroomtype, rulebegintime, 
     ruleendtime, ruleroom, enable

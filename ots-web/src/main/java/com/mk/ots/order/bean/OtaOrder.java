@@ -486,7 +486,7 @@ public class OtaOrder extends BizModel<OtaOrder> {
 
 
 	public String getPromoType() {
-		return this.get("promotype");
+		return String.valueOf(this.get("promotype"));
 	}
 
 	public void setPromoType(String promoType) {
