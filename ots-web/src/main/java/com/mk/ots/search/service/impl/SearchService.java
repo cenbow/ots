@@ -289,7 +289,7 @@ public class SearchService implements ISearchService {
 			logger.error("failed to validateSearchDate", e);
 			validateStr = e.getLocalizedMessage();
 		}
-		
+
 		return validateStr;
 	}
 
@@ -1363,6 +1363,8 @@ public class SearchService implements ISearchService {
 			rtnMap.put("count", totalHits);
 			rtnMap.put("hotel", hotels);
 		} catch (Exception e) {
+			logger.error("failed to readonlyOtsHotelListFromEsStore...", e);
+			
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
