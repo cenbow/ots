@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.ticket.model.BPromo" >
+<resultMap id="BaseResultMap" type="com.mk.ots.ticket.model.BPromo" >
+    <result column="id" property="id" jdbcType="BIGINT" />
+    <result column="batch_no" property="batchNo" jdbcType="VARCHAR" />
+    <result column="promo_name" property="promoName" jdbcType="VARCHAR" />
+    <result column="promo_no" property="promoNo" jdbcType="VARCHAR" />
+    <result column="promo_pwd" property="promoPwd" jdbcType="VARCHAR" />
+    <result column="promo_status" property="promoStatus" jdbcType="INTEGER" />
+    <result column="promo_city_id" property="promoCityId" jdbcType="BIGINT" />
+    <result column="promo_type" property="promoType" jdbcType="INTEGER" />
+    <result column="begin_time" property="beginTime" jdbcType="VARCHAR" />
+    <result column="end_time" property="endTime" jdbcType="VARCHAR" />
+    <result column="begin_date" property="beginDate" jdbcType="TIMESTAMP" />
+    <result column="end_date" property="endDate" jdbcType="TIMESTAMP" />
+    <result column="description" property="description"  />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="create_by" property="createBy" jdbcType="VARCHAR" />
+    <result column="update_by" property="updateBy" jdbcType="VARCHAR" />
+  </resultMap>
+
+
+  <select id="findBPromoByPromo" resultMap="BaseResultMap"  parameterType="java.util.Map">
+      select * from b_promo where promo_pwd=#{promoPwd,jdbcType=VARCHAR}
+  </select>
+
+    <select id="findBPromoByPromoNoActiv" resultMap="BaseResultMap"  parameterType="java.util.Map">
+        select  * from b_promo where promo_pwd=#{promoPwd,jdbcType=VARCHAR} and  promo_city_id =#{cityId,jdbcType=BIGINT}  and   promo_status =  3
+    </select>
+
+   <select id="findBPromoById" resultType="com.mk.ots.ticket.model.BPromo"  parameterType="java.util.Map">
+       select * from b_promo  where id=#{id,jdbcType=BIGINT}
+   </select>
+
+    <update id="updateBpromoForUse" parameterType="java.util.Map">
+        update  b_promo
+            <set >
+                <if test="promoStatus != null" >
+                    promo_status=#{promoStatus,jdbcType=BIGINT},
+                </if>
+                <if test="updateTime != null" >
+                    update_time=#{updateTime,jdbcType=DATETIME},
+                </if>
+                <if test="updateBy != null" >
+                    update_by=#{updateBy,jdbcType=VARCHAR},
+                </if>
+            </set>
+            where promo_pwd = #{promoPwd}  and   promo_status =  #{promoOldStatus}
+    </update>
+</mapper>
