@@ -1,26 +1,29 @@
 package com.mk.ots.hotel.controller;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
+import com.google.common.collect.Maps;
+import com.mk.framework.AppUtils;
+import com.mk.framework.es.ElasticsearchProxy;
+import com.mk.framework.exception.MyErrorEnum;
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.utils.Constant;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.hotel.model.THotel;
+import com.mk.ots.hotel.service.CashBackService;
+import com.mk.ots.hotel.service.HotelPriceService;
+import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.hotel.service.RoomstateService;
+import com.mk.ots.restful.input.HotelQuerylistReqEntity;
+import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
+import com.mk.ots.search.service.ISearchService;
+import com.mk.ots.web.ServiceOutput;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.BoolFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.QueryFilterBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,31 +37,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Event;
-import com.dianping.cat.message.Transaction;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.mk.framework.AppUtils;
-import com.mk.framework.es.ElasticsearchProxy;
-import com.mk.framework.exception.MyErrorEnum;
-import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.common.utils.Constant;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.hotel.comm.enums.HotelTypeEnum;
-import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.service.CashBackService;
-import com.mk.ots.hotel.service.HotelPriceService;
-import com.mk.ots.hotel.service.HotelService;
-import com.mk.ots.hotel.service.RoomstateService;
-import com.mk.ots.restful.input.HotelQuerylistReqEntity;
-import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
-import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
-import com.mk.ots.search.service.ISearchService;
-import com.mk.ots.web.ServiceOutput;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.util.*;
 
 /**
  * 酒店前端控制类 发布接口
@@ -175,7 +156,7 @@ public class HotelController {
 		// roomStateLogUtil.sendLog(pbb.getHardwarecode(),pbb.getCallmethod(),
 		// pbb.getCallversion(), pbb.getIp(), "/hotel/querylist", params,"ots");
 
-		logger.info("【/hotel/querylist】 begin...");
+		logger.info("【/hotel/auerylist】 begin...");
 		logger.info("remote client request ui is: {}", request.getRequestURI());
 		logger.info("【/hotel/querylist】 params is : {}--{}", params, pbb.toString());
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
@@ -187,9 +168,11 @@ public class HotelController {
 			if (StringUtils.isBlank(hotel.getStartdateday())) {
 				hotel.setStartdateday(strCurDay);
 			}
+
 			if (StringUtils.isBlank(hotel.getEnddateday())) {
 				hotel.setEnddateday(strCurDay);
 			}
+
 			Map<String, Object> resultMap = hotelService.readonlyFromEsStore(hotel);
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(resultMap,
 					HttpStatus.OK);
@@ -212,6 +195,46 @@ public class HotelController {
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 
+	private Boolean countErrors(Errors errors) {
+		StringBuffer bfErrors = new StringBuffer();
+		for (ObjectError error : errors.getAllErrors()) {
+			bfErrors.append(error.getDefaultMessage()).append("; ");
+		}
+
+		return bfErrors.length() > 0;
+	}
+
+	/**
+	 * 
+	 * 
+	 * @param hotelEntity
+	 * @param errors
+	 * @return
+	 */
+	private Map<String, Object> invokeSearchHotels(HotelQuerylistReqEntity hotelEntity, Boolean promoOnly)
+			throws Exception {
+		Date day = new Date();
+
+		// 当前日期
+		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
+		// 下一天日期
+		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
+		// search hotel from elasticsearch
+		// 如果没有开始日期和截止日期，默认今住明退
+		if (StringUtils.isBlank(hotelEntity.getStartdateday())) {
+			hotelEntity.setStartdateday(strCurDay);
+		}
+		if (StringUtils.isBlank(hotelEntity.getEnddateday())) {
+			hotelEntity.setEnddateday(strNextDay);
+		}
+
+		hotelEntity.setIsPromoOnly(promoOnly);
+
+		Map<String, Object> resultMap = searchService.readonlySearchHotels(hotelEntity);
+
+		return resultMap;
+	}
+
 	@RequestMapping(value = { "/hotel/querypromolist" })
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> searchPromoHotels(HttpServletRequest request,
@@ -223,36 +246,21 @@ public class HotelController {
 		logger.info("【/hotel/querypromolist】 request params is : {}", params);
 		logger.info("【/hotel/querypromolist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
+
+		if (countErrors(errors)) {
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+
 		try {
 			Date day = new Date();
 			long starttime = day.getTime();
-			StringBuffer bfErrors = new StringBuffer();
-			for (ObjectError error : errors.getAllErrors()) {
-				bfErrors.append(error.getDefaultMessage()).append("; ");
-			}
-			if (bfErrors.length() > 0) {
-				rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
-				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-				rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, bfErrors.toString());
-				return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
-			}
-			// 当前日期
-			String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
-			// 下一天日期
-			String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
-			// search hotel from elasticsearch
-			// 如果没有开始日期和截止日期，默认今住明退
-			if (StringUtils.isBlank(reqentity.getStartdateday())) {
-				reqentity.setStartdateday(strCurDay);
-			}
-			if (StringUtils.isBlank(reqentity.getEnddateday())) {
-				reqentity.setEnddateday(strNextDay);
-			}
-			
-			reqentity.setIsPromoOnly(Boolean.TRUE);
-			
-			Map<String, Object> resultMap = searchService.readonlySearchHotels(reqentity);
-			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(resultMap,
+
+			rtnMap = invokeSearchHotels(reqentity, Boolean.TRUE);
+
+			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
 					HttpStatus.OK);
 			if (AppUtils.DEBUG_MODE) {
 				long endtime = new Date().getTime();
@@ -292,34 +300,23 @@ public class HotelController {
 		logger.info("remote client request ui is: {}", request.getRequestURI());
 		logger.info("【/hotel/querylist】 request params is : {}", params);
 		logger.info("【/hotel/querylist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
+
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
+
+		if (countErrors(errors)) {
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+
 		try {
 			Date day = new Date();
 			long starttime = day.getTime();
-			StringBuffer bfErrors = new StringBuffer();
-			for (ObjectError error : errors.getAllErrors()) {
-				bfErrors.append(error.getDefaultMessage()).append("; ");
-			}
-			if (bfErrors.length() > 0) {
-				rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
-				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-				rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, bfErrors.toString());
-				return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
-			}
-			// 当前日期
-			String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
-			// 下一天日期
-			String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
-			// search hotel from elasticsearch
-			// 如果没有开始日期和截止日期，默认今住明退
-			if (StringUtils.isBlank(reqentity.getStartdateday())) {
-				reqentity.setStartdateday(strCurDay);
-			}
-			if (StringUtils.isBlank(reqentity.getEnddateday())) {
-				reqentity.setEnddateday(strNextDay);
-			}
-			Map<String, Object> resultMap = searchService.readonlySearchHotels(reqentity);
-			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(resultMap,
+
+			rtnMap = invokeSearchHotels(reqentity, null);
+
+			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
 					HttpStatus.OK);
 			if (AppUtils.DEBUG_MODE) {
 				long endtime = new Date().getTime();

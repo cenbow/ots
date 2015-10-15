@@ -1,3 +1,4 @@
+
 package com.mk.ots.hotel.service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -259,11 +260,15 @@ public class HotelService {
 
                     // 如果ES中已经有该酒店，则先删除再重新添加。
                     SearchHit[] searchHits = esProxy.searchHotelByHotelId(hotelid);
-                    for (int i = 0; i < searchHits.length; i++) {
-                        logger.info("hotelid: {} has exists.", hotelid);
-                        esProxy.deleteDocument(searchHits[i].getId());
-                        logger.info("hotelid: {} has deleted.", hotelid);
+
+                    if (searchHits != null){
+                        for (int i = 0; i < searchHits.length; i++) {
+                            logger.info("hotelid: {} has exists.", hotelid);
+                            esProxy.deleteDocument(searchHits[i].getId());
+                            logger.info("hotelid: {} has deleted.", hotelid);
+                        }
                     }
+
 
                     List<Map<String, Object>> businessZones = new ArrayList<Map<String, Object>>();
                     bfSql.setLength(0);
@@ -382,7 +387,7 @@ public class HotelService {
                     hotel.setHoteltype(bean.getHoteltype());
 
                     //mike3.0 添加月销量
-//                    hotel.setOrdernummon(getOrderNumMon(Long.valueOf(hotelid)));
+                    hotel.setOrdernummon(getOrderNumMon(Long.valueOf(hotelid)));
 
 
                     //mike3.1 添加特价房
@@ -414,6 +419,7 @@ public class HotelService {
                             hotel.setPromotextcolor(((JSONObject)data.get(0)).getString("promoTextColor"));
                             hotel.setPromostarttime(((JSONObject)data.get(0)).getString("promoStartTime"));
                             hotel.setPromoendtime(((JSONObject)data.get(0)).getString("promoEndTime"));
+                            hotel.setIsonpromo(true);
                         }
                     } catch (Exception e) {
                         Cat.logError("Init ES Indexer Call roomsale api exception", e);

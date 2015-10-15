@@ -580,7 +580,7 @@ public class SearchService implements ISearchService {
 			 * added in mike3.1
 			 */
 			this.makePromoFilter(reqentity, filterBuilders);
-			
+
 			if (AppUtils.DEBUG_MODE) {
 				logger.info("boolFilter is : \n{}", boolFilter.toString());
 			}
@@ -767,6 +767,22 @@ public class SearchService implements ISearchService {
 	 */
 	private void sortByOrders(SearchRequestBuilder searchBuilder) {
 		searchBuilder.addSort("ordernummon", SortOrder.DESC);
+	}
+
+	/**
+	 * 
+	 * @param searchBuilder
+	 */
+	private void sortByPromo(SearchRequestBuilder searchBuilder, String version) {
+		Double callMethodVer = 0.0;
+
+		if (!StringUtils.isEmpty(version)) {
+			callMethodVer = Double.parseDouble(version);
+		}
+
+		if (callMethodVer >= 3.1) {
+			searchBuilder.addSort("isonpromo", SortOrder.DESC);
+		}
 	}
 
 	/**
@@ -1008,6 +1024,12 @@ public class SearchService implements ISearchService {
 				if (paramOrderby == null) {
 					paramOrderby = 0;
 				}
+
+				/**
+				 * added in mike3.1, lift up promo as the top search variable
+				 */
+				sortByPromo(searchBuilder, reqentity.getCallversion());
+
 				if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
 					// 距离排序
 					this.sortByDistance(searchBuilder, new GeoPoint(lat, lon));
@@ -1519,24 +1541,39 @@ public class SearchService implements ISearchService {
 	 */
 	private void makePromoFilter(HotelQuerylistReqEntity reqentity, List<FilterBuilder> filterBuilders) {
 		Boolean isPromoOnly = reqentity.getIsPromoOnly();
-		String callMethod = reqentity.getCallmethod();
+		String callVersion = reqentity.getCallversion();
 		Integer callEntry = reqentity.getCallentry();
+		String callMethod = reqentity.getCallmethod();
 
-		if (!StringUtils.isEmpty(callMethod)) {
-			Double callMethodVer = Double.parseDouble(callMethod);
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("callEntry:%s; callMethod:%s; callVersion:%s; isPromoOnly:%s", callEntry,
+					callMethod, callVersion, isPromoOnly));
+		}
 
-			if (callEntry != null && callEntry == 1) {
-				Cat.logEvent("CallEntrey", "摇一摇");
-				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isPromoted", Boolean.FALSE)));
-			} else if (callMethodVer > 3.0 && isPromoOnly != null) {
+		if (callEntry != null && callEntry != 2) {
+			if (callEntry == 1) {
+				Cat.logEvent("摇一摇", Event.SUCCESS);
+			} else if (callEntry == 3) {
+				Cat.logEvent("切客", Event.SUCCESS);
+			}
 
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", Boolean.FALSE)));
+		} else if (StringUtils.isNotEmpty(callMethod) && "3".equalsIgnoreCase(callMethod)) {
+			Cat.logEvent("wechat", Event.SUCCESS);
+			
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", Boolean.FALSE)));
+		} else if (!StringUtils.isEmpty(callVersion)) {
+			Double version = Double.parseDouble(callVersion);
+
+			if (version >= 3.1 && isPromoOnly != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("new version recognized, callMethod:%s, promoType:%s", callMethodVer,
+					logger.debug(String.format("new version recognized, version:%s, promoType:%s", version,
 							isPromoOnly));
 				}
 
 				if (isPromoOnly == Boolean.TRUE) {
-					filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isPromoted", isPromoOnly)));
+					filterBuilders
+							.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", isPromoOnly)));
 				}
 			}
 		}
