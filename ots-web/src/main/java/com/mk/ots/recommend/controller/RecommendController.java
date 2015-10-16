@@ -40,7 +40,7 @@ public class RecommendController {
 	 * @return
 	 */
 	@RequestMapping("/query")
-	public ResponseEntity<Map<String, Object>> query(String position){
+	public ResponseEntity<Map<String, Object>> query(String position, String callmethod){
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		if(StringUtils.isEmpty(position)){
 			throw MyErrorEnum.errorParm.getMyException();
@@ -58,6 +58,11 @@ public class RecommendController {
 		
 		if(CollectionUtils.isNotEmpty(list)){
 			for (TRecommenditem tRecommendItem : list) {
+
+				if("3".equals(callmethod) && tRecommendItem.getViewtype() == 3){
+					continue;
+				}
+
 				RecommendList recommendList  =new RecommendList();
 				recommendList.setName(tRecommendItem.getTitle());
 				recommendList.setDescription(tRecommendItem.getDescription());
