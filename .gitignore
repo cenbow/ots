@@ -38,8 +38,9 @@
 /ots-entities/.classpath
 *.iml
 target/
-.idea/
-.metadata/
+.idea
 catalina.base_IS_UNDEFINED/
+*.ipr
+*.iws
+.metadata/
 .recommenders/
-RemoteSystemsTempFiles/

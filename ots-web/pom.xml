@@ -1135,7 +1135,6 @@
 
 		<profile>
 			<id>test</id>
-
 			<properties>
 				<label>product</label>
 				<jdbc.driver>com.mk.jdbc.MonitorDriver</jdbc.driver>
@@ -1177,7 +1176,8 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
-
+				<!-- taskfactory url -->
+				<taskfactory.url>http://192.168.70.183:8080</taskfactory.url>
 				<!-- 特价房查询接口 -->
 				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->

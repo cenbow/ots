@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.card.model.UCardUseLog" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.card.model.UCardUseLog" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="card_id" property="cardId" jdbcType="BIGINT" />
+    <result column="mid" property="mid" jdbcType="BIGINT" />
+    <result column="card_price" property="cardPrice" jdbcType="DECIMAL" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, card_id, mid, card_price, create_time
+  </sql>
+
+  <insert id="insert" parameterType="com.mk.ots.card.model.UCardUseLog" useGeneratedKeys="true" keyProperty="id">
+    insert into u_card_uselog (<include refid="Base_Column_List" />)
+    values (#{id,jdbcType=BIGINT}, #{cardId,jdbcType=BIGINT}, #{mid,jdbcType=BIGINT}, #{cardPrice,jdbcType=DECIMAL},
+    #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+
+  <select id="findByCardId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from u_card_uselog
+    where card_id = #{cardId}
+  </select>
+
+</mapper>
