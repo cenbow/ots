@@ -1,5 +1,31 @@
 package com.mk.ots.hotel.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.joda.time.LocalDateTime;
+import org.joda.time.Seconds;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
@@ -21,29 +47,9 @@ import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
+import com.mk.ots.room.sale.model.TRoomSale;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.joda.time.LocalDateTime;
-import org.joda.time.Seconds;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 /**
  * 酒店前端控制类 发布接口
@@ -277,17 +283,33 @@ public class HotelController {
 				resultResponse.getBody().put("$times$", endtime - starttime + " ms");
 			}
 
-			resultResponse.getBody().put("ispromoting", rtnMap.size() > 0 ? 1 : 0);
+			@SuppressWarnings("unchecked")
+			List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+
+			resultResponse.getBody().put("ispromoting", (hotels != null && hotels.size() > 0) ? 1 : 0);
 			resultResponse.getBody().put("promotext", "重庆特价 sb...");
+
+			Integer hotelId = null;
+			if (hotels != null && hotels.size() > 0) {
+				Map<String, Object> hotel = hotels.get(0);
+				hotelId = Integer.getInteger(String.valueOf(hotel.get("hotelid")));
+			}
+
+			TRoomSale roomSale = hotelService.queryPromoData(hotelId);
 
 			/**
 			 * TODO: waiting for long's interface to get the times
 			 */
-			String startInternalTime = "2015-10-15 22:30";
-			String endInternalTime = "2015-10-16 02:00";
+			String startInternalTime = "2015-10-16 21:30";
+			String endInternalTime = "2015-10-17 2:30";
 
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("promo time received, startTime:%s; endTime:%s", startInternalTime,
+			if (roomSale != null) {
+				startInternalTime = roomSale.getStartTime();
+				endInternalTime = roomSale.getEndTime();
+			}
+
+			if (logger.isInfoEnabled()) {
+				logger.info(String.format("promo time received, startTime:%s; endTime:%s", startInternalTime,
 						endInternalTime));
 			}
 
@@ -317,7 +339,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
-			logger.error("【/hotel/querypromolist】 is error: {} ", e.getMessage());
+			logger.error("【/hotel/querypromolist】 is error: {} ", e);
 		}
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
@@ -343,7 +365,7 @@ public class HotelController {
 		logger.info("【/hotel/querylist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
 
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		
+
 		String errorMessage = "";
 		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
@@ -354,7 +376,7 @@ public class HotelController {
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
-		
+
 		try {
 			Date day = new Date();
 			long starttime = day.getTime();

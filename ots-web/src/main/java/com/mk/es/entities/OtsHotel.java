@@ -133,7 +133,7 @@ public class OtsHotel {
     private String hotelphone;
 
     // mike3.1 添加今夜特价房信息
-	private Boolean isonpromo;
+	private String isonpromo;
 
     /** 是否为特价房酒店 */
     private String promotype;
@@ -195,11 +195,11 @@ public class OtsHotel {
         setOrdernummon(0l);
     }
 
-    public Boolean getIsonpromo() {
+    public String getIsonpromo() {
 		return isonpromo;
 	}
 
-	public void setIsonpromo(Boolean isonpromo) {
+	public void setIsonpromo(String isonpromo) {
 		this.isonpromo = isonpromo;
 	}
 

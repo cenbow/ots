@@ -491,6 +491,24 @@ public class HotelService {
 	}
 
 	/**
+	 * query promo data
+	 * 
+	 * @param hotelId
+	 * @return
+	 */
+	public TRoomSale queryPromoData(Integer hotelId) {
+		if (hotelId == null || hotelId == 0) {
+			return null;
+		}
+
+		TRoomSale roomSale = new TRoomSale();
+		roomSale.setHotelId(hotelId);
+
+		TRoomSale result = roomSaleService.getOneRoomSale(roomSale);
+		return result;
+	}
+
+	/**
 	 * 初始化非签约酒店数据到ES
 	 *
 	 * @param cityid
