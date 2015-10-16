@@ -18,4 +18,11 @@
     #{createTime,jdbcType=TIMESTAMP})
   </insert>
 
+  <select id="findByCardId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from u_card_uselog
+    where card_id = #{cardId}
+  </select>
+
 </mapper>

@@ -13,4 +13,9 @@ import java.util.Map;
 @Component
 public class UCardUseLogDAO extends MyBatisDaoImpl<UCardUseLog, Long> implements IUCardUseLogDAO {
 
+    public UCardUseLog findByCardId (Long cardId) {
+        Map<String, Object> param = new HashMap<String, Object>();
+        param.put("cardId", cardId);
+        return super.findOne("findByCardId",param);
+    }
 }

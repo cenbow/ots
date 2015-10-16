@@ -7,4 +7,5 @@ import java.util.Map;
 
 public interface IUCardUseLogDAO extends BaseDao<UCardUseLog, Long> {
 
+    public UCardUseLog findByCardId (Long cardId);
 }

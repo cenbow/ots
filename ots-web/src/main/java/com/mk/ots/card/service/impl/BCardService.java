@@ -58,6 +58,13 @@ public class BCardService implements IBCardService {
             throw MyErrorEnum.customError.getMyException("充值卡已注销.");
         }
 
+        //验证log中是否使用
+        UCardUseLog log = this.uCardUseLogService.findByCardId(card.getId());
+        if (null != log) {
+            logger.info("充值卡：" + pwd + " 状态异常！");
+            throw MyErrorEnum.customError.getMyException("充值卡已使用！");
+        }
+
         //验证是否在有效期内期
         Date beginDate = card.getBeginDate();
         Date endDate = card.getEndDate();
