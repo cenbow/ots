@@ -24,6 +24,8 @@ import com.mk.ots.order.service.OrderUtil;
 import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.room.bean.RoomCensus;
+import com.mk.ots.room.sale.model.TRoomSale;
+import com.mk.ots.room.sale.service.RoomSaleService;
 import com.mk.ots.web.ServiceOutput;
 import com.mk.pms.myenum.PmsRoomOrderStatusEnum;
 import com.mk.pms.room.bean.RoomLockJsonBean;
@@ -124,6 +126,9 @@ public class RoomstateService {
 	
 	@Autowired
 	private HotelPriceService hotelPriceService;
+
+	@Autowired
+	private RoomSaleService roomSaleService;
 	/**
 	 * 
 	 * @param hotelid
@@ -942,32 +947,28 @@ public class RoomstateService {
 					RoomstateQuerylistRespEntity.Roomtype roomtype = respEntity.new Roomtype();
 
 					// mike3.1 特价房型
-					try {
-						if (StringUtils.isNotBlank(callVersionStr)) {
-							Double callVerion= Double.parseDouble(callVersionStr);
-							if (callEntry != null && callEntry != 3 && callVerion > 3.0 && !"3".equals(callMethod.trim())) {
-								Map roomsaleparams = new HashMap();
 
-								roomsaleparams.put("roomTypeId", troomType.getId().toString());
-								String url = UrlUtils.getUrl("roomsale.url");
-								JSONObject data = JSONObject.parseObject(OrderUtil.doPost(url, roomsaleparams, 1000));
-								String isonpromo = "F";
+					if (StringUtils.isNotBlank(callVersionStr)) {
+						Double callVerion= Double.parseDouble(callVersionStr);
+						if (callEntry != null && callEntry != 3 && callVerion > 3.0 && !"3".equals(callMethod.trim())) {
 
-								if(data != null && "T".equals(data.getString("isOnPromo"))){
-									isonpromo = "T";
-								}
+							TRoomSale roomSale = new TRoomSale();
+							Integer roomTypeId = Integer.valueOf(troomType.getId().toString());
+							roomSale.setRoomTypeId(roomTypeId);
+							TRoomSale result=roomSaleService.getOneRoomSale(roomSale);
 
-								roomtype.setIsonpromo(isonpromo);
+							String isonpromo = "F";
 
-								if(data != null ){
-									roomtype.setPromotype(data.getString("saleType"));
-								}
+							if(result != null && "F".equals(result.getIsBack())){ // isBack == F 为特价房
+								isonpromo = "T";
+							}
+
+							roomtype.setIsonpromo(isonpromo);
+
+							if(result != null ){
+								roomtype.setPromotype(result.getSaleType().toString());
 							}
 						}
-
-
-					} catch (Exception e) {
-						Cat.logError("findHotelRoomState Call roomsale api exception", e);
 					}
 
 	        		roomtype.setRoomtypeid(troomType.getId());

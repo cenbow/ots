@@ -33,6 +33,8 @@ import com.mk.ots.order.service.OrderUtil;
 import com.mk.ots.price.dao.BasePriceDAO;
 import com.mk.ots.price.dao.PriceDAO;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
+import com.mk.ots.room.sale.model.TRoomSale;
+import com.mk.ots.room.sale.service.RoomSaleService;
 import com.mk.ots.score.dao.ScoreDAO;
 import com.mk.ots.ticket.dao.BHotelStatDao;
 import com.mk.ots.utils.DistanceUtil;
@@ -157,6 +159,10 @@ public class HotelService {
 
     @Autowired
     private BedTypeMapper bedTypeMapper;
+
+    @Autowired
+    private RoomSaleService roomSaleService;
+
 
     /**
      * es filter builders
@@ -392,38 +398,21 @@ public class HotelService {
 
                     //mike3.1 添加特价房
 
-                    try {
 
-                        Map params = new HashMap();
-                        params.put("hotelId", bean.getId().toString());
-                        String url = UrlUtils.getUrl("roomsale.url");
-                        String resp = "[\n" +
-                                "    {\n" +
-                                "        \"isOnPromo\": \"T\",\n" +
-                                "        \"promoText\": \"今夜特价\",\n" +
-                                "        \"promoTextColor\": \"#256887\",\n" +
-                                "        \"promoStartTime\": \"10:32:00\",\n" +
-                                "        \"promoEndTime\": \"2015-10-15 00:00:00.0\",\n" +
-                                "        \"saleType\": 1,\n" +
-                                "        \"saleName\": \"特价房\",\n" +
-                                "        \"salePrice\": 50,\n" +
-                                "        \"roomNo\": \"106\",\n" +
-                                "        \"roomtypeid\": 626,\n" +
-                                "        \"useDescribe\": null\n" +
-                                "    }]";
-                        //JSONArray data = JSONArray.parseArray(OrderUtil.doPost(url, params, 5500));
-                        JSONArray data = JSONArray.parseArray(resp);
-                        if (data != null) {
-                            hotel.setPromotype(((JSONObject) data.get(0)).getString("saleType"));
-                            hotel.setPromotext(((JSONObject) data.get(0)).getString("promoText"));
-                            hotel.setPromotextcolor(((JSONObject)data.get(0)).getString("promoTextColor"));
-                            hotel.setPromostarttime(((JSONObject)data.get(0)).getString("promoStartTime"));
-                            hotel.setPromoendtime(((JSONObject)data.get(0)).getString("promoEndTime"));
-                            hotel.setIsonpromo(true);
-                        }
-                    } catch (Exception e) {
-                        Cat.logError("Init ES Indexer Call roomsale api exception", e);
+                    TRoomSale roomSale = new TRoomSale();
+                    Integer hotelId = Integer.valueOf(bean.getId().toString());
+                    roomSale.setHotelId(hotelId);
+                    TRoomSale result=roomSaleService.getOneRoomSale(roomSale);
+
+                    if (result != null) {
+                        hotel.setPromotype(result.getSaleType().toString());
+                        hotel.setPromotext(result.getPromoName());
+                        hotel.setPromotextcolor(result.getFontColor());
+                        hotel.setPromostarttime(result.getStartTime());
+                        hotel.setPromoendtime(result.getEndTime());
+                        hotel.setIsonpromo(true);
                     }
+
 
                     // 先把新的酒店放到集合中，后面做批量添加
                     coll.add(hotel);
