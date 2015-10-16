@@ -104,6 +104,7 @@ public class BCardService implements IBCardService {
             this.saveLog(mid, card, cardId);
         } catch (Exception e) {
             logger.error(e.getMessage());
+            throw MyErrorEnum.customError.getMyException("充值失败.");
         } finally {
             logger.info("充值卡：" + pwd + "释放分布锁");
             DistributedLockUtil.releaseLock(lockKey, lockValue);
