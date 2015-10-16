@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.mapper.RoomSaleMapper">
+
+	<resultMap id="BaseResultMap" type="com.mk.ots.room.sale.model.TRoomSale">
+	    <result property="id" column="id" />
+	    <result property="roomTypeId" column="roomTypeId" />
+	    <result property="oldRoomTypeId" column="oldRoomTypeId" />
+        <result property="roomNo" column="roomNo" />
+        <result property="pms" column="pms" />
+        <result property="createDate" column="createDate" />
+        <result property="salePrice" column="salePrice" />
+        <result property="costPrice" column="costPrice" />
+        <result property="startTime" column="startTime" />
+        <result property="endTime" column="endTime" />
+        <result property="roomId" column="roomId" />
+        <result property="configId" column="configId" />
+        <result property="isBack" column="isBack" />
+        <result property="saleName" column="saleName" />
+        <result property="saleType" column="saleType" />
+        <result property="hotelId" column="hotelId" />
+        <result property="promoName" column="promoName" />
+        <result property="fontColor" column="fontColor" />
+        <result property="useDescribe" column="useDescribe" />
+        <result property="cityId" column="cityId" />
+	</resultMap>
+
+    <sql id="Base_Column_List" >
+        a.id, a.roomTypeId,a.oldRoomTypeId,a.roomNo,a.pms,a.createDate,a.salePrice,a.costPrice,
+        a.startTime,a.endTime,a.roomId,a.configId,a.isBack,a.saleName,a.saleType,a.hotelId,
+        b.promoName,b.fontColor,b.useDescribe
+    </sql>
+
+    <sql id="Base_Query_List" >
+        <where>
+            a.isBack ='F'
+            <if test="id != null">
+                 a.id = #{id}
+            </if>
+            <if test="roomTypeId != null">
+                AND a.roomTypeId = #{roomTypeId}
+            </if>
+            <if test="oldRoomTypeId != null">
+                AND a.oldRoomTypeId = #{oldRoomTypeId}
+            </if>
+            <if test="roomNo != null">
+                AND a.roomNo = #{roomNo}
+            </if>
+            <if test="pms != null">
+            AND a.pms = #{pms}
+            </if>
+            <if test="saleName != null">
+                AND a.saleName = #{saleName}
+            </if>
+            <if test="saleType != null">
+                AND a.saleType = #{saleType}
+            </if>
+            <if test="createDate != null">
+                AND a.createDate = #{createDate}
+            </if>
+            <if test="isBack != null">
+                AND a.isBack = #{isBack}
+            </if>
+            <if test="hotelId != null">
+                AND a.hotelId = #{hotelId}
+            </if>
+            <if test="roomId != null">
+                AND a.roomId = #{roomId}
+            </if>
+        </where>
+    </sql>
+
+    <select id="queryRoomSale" resultMap="BaseResultMap" parameterType="com.mk.ots.room.sale.model.TRoomSale">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM  t_room_sale a
+        LEFT JOIN t_room_sale_config_info b ON a.saleType = b.saleType
+    <include refid="Base_Query_List"/>
+    </select>
+    <select id="getSaleRoomListByHotel" resultMap="BaseResultMap" >
+        SELECT
+        <include refid="Base_Column_List"/>,d.cityId
+        FROM  t_room_sale a
+        LEFT JOIN t_room_sale_config_info b ON a.saleType = b.saleType
+        left outer join t_hotel c on a.hotelId=c.id
+        left outer join t_city d on c.citycode = d.code
+           WHERE  a.isBack ='F'
+           GROUP BY a.hotelId
+    </select>
+    <select id="countRoomSale" resultType="Integer" parameterType="com.mk.ots.room.sale.model.TRoomSale">
+        select count(*) from count_agent_spread
+        <include refid="Base_Query_List"/>
+    </select>
+    <select id="getOneRoomSale" resultMap="BaseResultMap" parameterType="com.mk.ots.room.sale.model.TRoomSale">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM  t_room_sale a
+        LEFT JOIN t_room_sale_config_info b ON a.saleType = b.saleType
+        <include refid="Base_Query_List"/>
+        limit 1
+    </select>
+    <insert id="saveRoomSale"  parameterType="com.mk.ots.room.sale.model.TRoomSale" >
+        INSERT INTO t_room_sale
+       (roomTypeId,oldRoomTypeId,roomNo,pms,createDate,salePrice,costPrice,
+        startTime,endTime,roomId,configId,isBack,saleName,saleType)
+         VALUE
+         (
+            #{roomTypeId}, #{oldRoomTypeId},#{roomNo}, #{pms}, #{createDate},
+            #{salePrice}, #{costPrice},#{startTime},#{endTime},#{roomId},#{configId},
+            #{isBack},#{saleName},#{saleType}
+         )
+    </insert>
+
+    <delete id="deleteRoomSale" parameterType="Integer">
+         delete from t_room_sale where id = #{id}
+    </delete>
+
+    <update id="updateRoomSale" parameterType="com.mk.ots.room.sale.model.TRoomSale" >
+        update t_room_sale
+        set
+         roomTypeId = #{roomTypeId},
+         oldRoomTypeId = #{oldRoomTypeId},
+         roomNo =  #{roomNo},
+         pms =  #{pms},
+         createDate  = #{createDate},
+         salePrice =  #{salePrice},
+         costPrice =  #{costPrice},
+         startTime =  #{startTime},
+         endTime =  #{endTime},
+         roomId =  #{roomId},
+         configId =  #{configId},
+         isBack =  #{isBack},
+         saleName =  #{saleName},
+         saleType =  #{saleType}
+        where id = #{id}
+    </update>
+
+    <select id="queryYesterdayRoomSale" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM  t_room_sale
+        WHERE createDate > date_add(CURDATE() , interval -1 DAY)
+    </select>
+
+    <select id="queryUnBackRoomSale" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM  t_room_sale WHERE isBack = 'F'
+    </select>
+
+    <update id="updateRoomSaleBack" parameterType="com.mk.ots.room.sale.model.TRoomSale" >
+        update t_room_sale
+        set isBack =  #{isBack}
+        where id = #{id}
+    </update>
+</mapper>
