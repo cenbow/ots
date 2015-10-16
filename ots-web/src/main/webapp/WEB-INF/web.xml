@@ -33,7 +33,7 @@
 			,/hotel,/room,/cache,/verifycode/send,/verifycode/sendCode,/verifycode/verify,/roomstate,/score/querylist
 			,/score/subject/querylist,/scoregroupcount,/pay/create,/pay/check,/pay/findpay,/active/querylist,/systime,/picwindinfo
 			,/picurl,/appstatus,/schedule,/hms,/order/changeprice,/pay/alires,/pay/hmsfindpay,/pay/wxres,/pay/alicancel,/pay/weixin,/message/report
-			,/ticket/activeforwardcount,/app/checkupdate,/search/,/recommend
+			,/ticket/activeforwardcount,/app/checkupdate,/search/,/recommend,/roomsale
 
 			</param-value>
 		</init-param>
