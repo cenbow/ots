@@ -431,8 +431,13 @@ public class HotelService {
                 }
                 if (coll.size() > 0) {
                     esProxy.batchAddDocument(coll);
+
                     output.setSuccess(true);
                     output.setMsgAttr("count", coll.size());
+                    for (THotelModel bean : hotels) {
+                        updateEsMikePrice(bean.getId());
+                        logger.info("update Hotelid {} 's MikePrice", bean.getId());
+                    }
                     logger.info("total pms hotel added: {}条.", coll.size());
                 } else {
                     output.setSuccess(true);
