@@ -1,17 +1,17 @@
 package com.mk.ots.room.sale.model;
 
 public class RoomSaleDto {
-    private String isOnPromo; //ÊÇ·ñ»î¶¯ÖĞ
-    private String  promoText ;//»î¶¯ÎÄ×ÖËµÃ÷
-    private String promoTextColor;//»î¶¯ÎÄ×ÖÑÕÉ«
-    private String promoStartTime;//»î¶¯¿ªÊ¼Ê±¼ä
-    private String promoEndTime;//»î¶¯½áÊøÊ±¼ä
-    private Integer saleType;//´ÙÏúÀàĞÍ
-    private String saleName;//´ÙÏúÃû³Æ
-    private Double salePrice;//´ÙÏú¼Û¸ñ
-    private String roomNo;//·¿¼äºÅ
-    private Integer roomtypeid;//·¿ĞÍId
-    private String useDescribe;//Ê¹ÓÃÃèÊö
+    private String isOnPromo; //æ˜¯å¦æ´»åŠ¨ä¸­
+    private String  promoText ;//æ´»åŠ¨æ–‡å­—è¯´æ˜
+    private String promoTextColor;//æ´»åŠ¨æ–‡å­—é¢œè‰²
+    private String promoStartTime;//æ´»åŠ¨å¼€å§‹æ—¶é—´
+    private String promoEndTime;//æ´»åŠ¨ç»“æŸæ—¶é—´
+    private Integer saleType;//ä¿ƒé”€ç±»å‹
+    private String saleName;//ä¿ƒé”€åç§°
+    private Double salePrice;//ä¿ƒé”€ä»·æ ¼
+    private String roomNo;//æˆ¿é—´å·
+    private Integer roomtypeid;//æˆ¿å‹Id
+    private String useDescribe;//ä½¿ç”¨æè¿°
 
     public String getIsOnPromo() {
         return isOnPromo;
