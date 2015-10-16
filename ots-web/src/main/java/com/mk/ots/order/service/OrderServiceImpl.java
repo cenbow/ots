@@ -23,6 +23,8 @@ import com.mk.framework.util.*;
 import com.mk.ots.common.enums.*;
 import com.mk.ots.remote.RoomRemoteService;
 import com.mk.ots.remote.json.RoomSale;
+import com.mk.ots.room.sale.model.TRoomSale;
+import com.mk.ots.room.sale.service.RoomSaleService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -236,7 +238,7 @@ public class OrderServiceImpl implements OrderService {
 	@Autowired
     private OtsCareProducer careProducer;
     @Autowired
-    private RoomRemoteService roomRemoteService;
+    private RoomSaleService roomSaleService;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
     private static final long TIME_FOR_FIFTEEN = Long.parseLong(PropertyConfigurer.getProperty("transferCheckinUsernameTime"));
@@ -2220,11 +2222,13 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     private String getPromoType(Long roomId) {
-        List<RoomSale> roomSalesList = roomRemoteService.querySaleRoomByRoomId(roomId);
-        if(CollectionUtils.isEmpty(roomSalesList)){
+        TRoomSale tRoomSale = new TRoomSale();
+        tRoomSale.setRoomId(roomId.intValue());
+        TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
+        if(resultRoomSale == null || PromoTypeEnum.OTHER.getCode().equals(resultRoomSale.getSaleType())){
             return PromoTypeEnum.OTHER.getCode().toString();
         }else{
-            return roomSalesList.get(0).getSaleType().toString();
+            return resultRoomSale.getSaleType().toString();
         }
     }
 
