@@ -469,8 +469,8 @@ public class ElasticsearchProxy {
 				}
 			}
 
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("clustername:%s; clusterhosts:%s; elasticsearch.index:%s",
+			if (logger.isInfoEnabled()) {
+				logger.info(String.format("clustername:%s; clusterhosts:%s; elasticsearch.index:%s",
 						this.prop.getProperty("elasticsearch.clustername", "elasticsearch"), clusterHosts, cityIndexs));
 			}
 
