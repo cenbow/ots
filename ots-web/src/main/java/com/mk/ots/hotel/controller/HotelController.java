@@ -308,7 +308,7 @@ public class HotelController {
 				resultResponse.getBody().put("promosec", seconds);
 			}
 
-			logger.info("【/hotel/c】 end...");
+			logger.info("【/hotel/querypromolist】 end...");
 			logger.info("【/hotel/querypromolist】response data:success::{} , count::{}\n",
 					objectMapper.writeValueAsString(resultResponse.getBody().get("success")),
 					resultResponse.getBody().get("count"));

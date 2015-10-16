@@ -263,7 +263,7 @@ public class HotelService {
 				/**
 				 * add only for temporary use
 				 */
-				for (int j = 0; j < 100; j++) {
+				for (int j = 0; j < hotels.size(); j++) {
 					THotelModel bean = hotels.get(j);
 					// for (THotelModel bean : hotels) {
 					String hotelid = bean.getId().toString();
@@ -396,6 +396,7 @@ public class HotelService {
 					hotel.setOrdernummon(getOrderNumMon(Long.valueOf(hotelid)));
 
 					// mike3.1 添加特价房
+					hotel.setIsonpromo(Boolean.FALSE);
 
 					TRoomSale roomSale = new TRoomSale();
 					Integer hotelId = Integer.valueOf(bean.getId().toString());
@@ -422,10 +423,10 @@ public class HotelService {
 					output.setSuccess(true);
 					output.setMsgAttr("count", coll.size());
 					
-					for (THotelModel bean : hotels) {
-						updateEsMikePrice(bean.getId());
-						logger.info("update Hotelid {} 's MikePrice", bean.getId());
-					}
+//					for (THotelModel bean : hotels) {
+//						updateEsMikePrice(bean.getId());
+//						logger.info("update Hotelid {} 's MikePrice", bean.getId());
+//					}
 					logger.info("total pms hotel added: {}条.", coll.size());
 				} else {
 					output.setSuccess(true);
