@@ -12,8 +12,6 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.joda.time.DateTimeFieldType;
-import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Seconds;
 import org.slf4j.Logger;
@@ -208,13 +206,13 @@ public class HotelController {
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 
-	private Boolean countErrors(Errors errors) {
+	private String countErrors(Errors errors) {
 		StringBuffer bfErrors = new StringBuffer();
 		for (ObjectError error : errors.getAllErrors()) {
 			bfErrors.append(error.getDefaultMessage()).append("; ");
 		}
 
-		return bfErrors.length() > 0;
+		return bfErrors.toString();
 	}
 
 	/**
@@ -241,7 +239,7 @@ public class HotelController {
 			hotelEntity.setEnddateday(strNextDay);
 		}
 
-		hotelEntity.setIsPromoOnly(promoOnly);
+		hotelEntity.setIspromoonly(promoOnly);
 
 		Map<String, Object> resultMap = searchService.readonlySearchHotels(hotelEntity);
 
@@ -260,10 +258,14 @@ public class HotelController {
 		logger.info("【/hotel/querypromolist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
-		if (countErrors(errors)) {
+		String errorMessage = "";
+		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(String.format("parameters validation failed with error %s", errorMessage));
+
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
 
@@ -311,7 +313,7 @@ public class HotelController {
 				resultResponse.getBody().put("promosec", seconds);
 			}
 
-			logger.info("【/hotel/querypromolist】 end...");
+			logger.info("【/hotel/c】 end...");
 			logger.info("【/hotel/querypromolist】response data:success::{} , count::{}\n",
 					objectMapper.writeValueAsString(resultResponse.getBody().get("success")),
 					resultResponse.getBody().get("count"));
@@ -346,14 +348,18 @@ public class HotelController {
 		logger.info("【/hotel/querylist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
 
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-
-		if (countErrors(errors)) {
+		
+		String errorMessage = "";
+		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(String.format("parameters validation failed with error %s", errorMessage));
+
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
-
+		
 		try {
 			Date day = new Date();
 			long starttime = day.getTime();
