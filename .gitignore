@@ -42,3 +42,5 @@ target/
 catalina.base_IS_UNDEFINED/
 *.ipr
 *.iws
+.metadata/
+.recommenders/

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class BStrategyPriceService implements IBStrategyPriceService {
+public  class BStrategyPriceService implements IBStrategyPriceService {
 
 	@Autowired
 	private IBStrategyPriceDao iBStrategyPriceDao;
@@ -46,5 +46,4 @@ public class BStrategyPriceService implements IBStrategyPriceService {
 	public BStrategyPrice findByHotelidAndRoomtype(Long hotelid, Long roomtype) {
 		return null;
 	}
-
 }
