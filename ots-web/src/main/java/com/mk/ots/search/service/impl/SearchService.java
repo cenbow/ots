@@ -79,9 +79,9 @@ import com.mk.ots.mapper.THotelScoreMapper;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
-import com.mk.ots.room.sale.service.RoomSaleService;
 import com.mk.ots.restful.output.SearchPositionsDistanceRespEntity;
 import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
+import com.mk.ots.room.sale.service.RoomSaleService;
 import com.mk.ots.search.enums.PositionTypeEnum;
 import com.mk.ots.search.model.PositionTypeModel;
 import com.mk.ots.search.model.SAreaInfo;
@@ -781,7 +781,12 @@ public class SearchService implements ISearchService {
 		searchBuilder.addSort("ordernummon", SortOrder.DESC);
 	}
 
-	private boolean isInPromoPeriod() throws Exception {
+	/**
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean isInPromoPeriod() {
 		/**
 		 * hasn't been initialized yet
 		 */
@@ -790,8 +795,13 @@ public class SearchService implements ISearchService {
 			String startTime = promoTimes.get(0);
 			String endTime = promoTimes.get(1);
 
-			promoStartTime = LocalDateTime.fromDateFields(defaultFormatter.parse(startTime));
-			promoEndTime = LocalDateTime.fromDateFields(defaultFormatter.parse(endTime));
+			try {
+				promoStartTime = LocalDateTime.fromDateFields(defaultFormatter.parse(startTime));
+				promoEndTime = LocalDateTime.fromDateFields(defaultFormatter.parse(endTime));
+			} catch (Exception ex) {
+				logger.error(String.format("failed to parse startTime %s/endTime %s", startTime, endTime), ex);
+				return false;
+			}
 		}
 
 		boolean isAfter = LocalDateTime.now().isAfter(promoStartTime);

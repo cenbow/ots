@@ -53,4 +53,11 @@ public interface ISearchService {
      * @return
      */
     public Map<String, Object> readonlySyncCityPOI(String citycode, String typeid, boolean forceUpate);
+    
+    /**
+     * check if it is in current promotion period 
+     * 
+     * @return
+     */
+    public boolean isInPromoPeriod();
 }
