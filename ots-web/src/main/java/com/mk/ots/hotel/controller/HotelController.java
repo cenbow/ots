@@ -872,15 +872,20 @@ public class HotelController {
 	 * 
 	 * @param citycode
 	 *            参数：城市编码
+	 * @param hotelid
+	 *            参数 酒店编码， 如果有该参数，仅更新该酒店的 redis 缓存
 	 * @return
 	 */
 	@RequestMapping(value = "/hotel/updatemikepricecache")
-	public ResponseEntity<Map<String, Object>> updateMikePriceCache(String citycode) {
+	public ResponseEntity<Map<String, Object>> updateMikePriceCache(String citycode,String hotelid) {
 		logger.info("updateMikePriceCache method begin...");
 		long startTime = new Date().getTime();
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		try {
-			if (StringUtils.isNotBlank(citycode)) {
+			if(StringUtils.isNotBlank(hotelid)){
+				Long thotelId = Long.valueOf(hotelid);
+				hotelService.updateRedisMikePrice(thotelId);
+			}else if (StringUtils.isNotBlank(citycode)) {
 				hotelService.batchUpdateRedisMikePrice(citycode);
 			}
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
