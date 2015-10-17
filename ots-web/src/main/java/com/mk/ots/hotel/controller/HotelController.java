@@ -47,7 +47,6 @@ import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
-import com.mk.ots.room.sale.model.TRoomSale;
 import com.mk.ots.room.sale.service.RoomSaleService;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
@@ -292,12 +291,6 @@ public class HotelController {
 
 			resultResponse.getBody().put("ispromoting", (hotels != null && hotels.size() > 0) ? 1 : 0);
 			resultResponse.getBody().put("promotext", "重庆特价...");
-
-			Integer hotelId = null;
-			if (hotels != null && hotels.size() > 0) {
-				Map<String, Object> hotel = hotels.get(0);
-				hotelId = Integer.getInteger(String.valueOf(hotel.get("hotelid")));
-			}
 
 			/**
 			 * TODO: waiting for long's interface to get the times
