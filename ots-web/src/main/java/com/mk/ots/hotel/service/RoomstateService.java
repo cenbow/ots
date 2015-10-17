@@ -979,7 +979,7 @@ public class RoomstateService {
 					// 构建 RoomstateQuerylistRespEntity.Roomtype 房型数据
 
 					RoomstateQuerylistRespEntity.Roomtype roomtype = respEntity.new Roomtype();
-
+					String isonpromo = "F";
 					// mike3.1 特价房型
 					if (StringUtils.isNotBlank(callVersionStr) && callEntry != null
 							&& StringUtils.isNotBlank(callMethod)) {
@@ -991,13 +991,16 @@ public class RoomstateService {
 							roomSale.setRoomTypeId(roomTypeId);
 							TRoomSale result = roomSaleService.getOneRoomSale(roomSale);
 
-							String isonpromo = "F";
 
 							if (result != null && "F".equals(result.getIsBack())) { // isBack
 																					// ==
 																					// F
 																					// 为特价房
 								isonpromo = "T";
+								// 眯客价
+								roomtype.setRoomtypeprice(new BigDecimal(result.getSalePrice()));
+								// 门市价
+								roomtype.setRoomtypepmsprice(new BigDecimal(result.getCostPrice()));
 							}
 
 							roomtype.setIsonpromo(isonpromo);
@@ -1029,21 +1032,24 @@ public class RoomstateService {
 						priceTransaction.complete();
 					}
 
-					if (prices == null || prices.length == 0) {
-						// 眯客价
-						roomtype.setRoomtypeprice(troomType.getCost());
-						// 门市价
-						roomtype.setRoomtypepmsprice(troomType.getCost());
-					} else {
-						// 眯客价
-						if (prices[0] != null) {
-							roomtype.setRoomtypeprice(new BigDecimal(prices[0]));
-						} else {
+					if("F".equals(isonpromo)){
+						if (prices == null || prices.length == 0) {
+							// 眯客价
 							roomtype.setRoomtypeprice(troomType.getCost());
+							// 门市价
+							roomtype.setRoomtypepmsprice(troomType.getCost());
+						} else {
+							// 眯客价
+							if (prices[0] != null) {
+								roomtype.setRoomtypeprice(new BigDecimal(prices[0]));
+							} else {
+								roomtype.setRoomtypeprice(troomType.getCost());
+							}
+							// 门市价
+							roomtype.setRoomtypepmsprice(troomType.getCost());
 						}
-						// 门市价
-						roomtype.setRoomtypepmsprice(troomType.getCost());
 					}
+
 
 					// 查询房型信息t_roomtype_info
 					TRoomTypeInfoModel troomtypeInfoModel = troomtypeInfoMapper

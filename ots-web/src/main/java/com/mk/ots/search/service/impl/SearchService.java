@@ -1581,7 +1581,7 @@ public class SearchService implements ISearchService {
 			/**
 			 * old version compatible, promo types won't show
 			 */
-			if (("3.1".compareTo(callVersion.trim()) > 0)) {
+			if (StringUtils.isBlank(callVersion) || "3.1".compareTo(callVersion.trim()) > 0) {
 				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
 			}
 

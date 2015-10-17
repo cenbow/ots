@@ -34,8 +34,9 @@
     <sql id="Base_Query_List" >
         <where>
             a.isBack ='F'
+
             <if test="id != null">
-                 a.id = #{id}
+                AND  a.id = #{id}
             </if>
             <if test="roomTypeId != null">
                 AND a.roomTypeId = #{roomTypeId}
