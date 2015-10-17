@@ -1251,10 +1251,10 @@
 				<slave.jdbc.password>j9bcyZ5U5LQp7xxEomsu</slave.jdbc.password>
 				<!-- <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.28.44:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url> <slave.jdbc.user>smlt-reader</slave.jdbc.user> <slave.jdbc.password>ims8LfQKTBs6gj79TdgB</slave.jdbc.password> -->
 				<spring.redis.sentinel.master>ota2-test-redis</spring.redis.sentinel.master>
-				<spring.redis.sentinel.nodes>127.0.0.1:26379</spring.redis.sentinel.nodes>
+				<spring.redis.sentinel.nodes>10.4.20.206:26379</spring.redis.sentinel.nodes>
 				<synserver.ip>10.4.17.121</synserver.ip>
 				<synserver.port>8000</synserver.port>
-				<elasticsearch.clusterhosts>10.10.55.172:9300</elasticsearch.clusterhosts>
+				<elasticsearch.clusterhosts>192.168.81.87:9300</elasticsearch.clusterhosts>
 				<elasticsearch.clustername>smlt-elasticsearch</elasticsearch.clustername>
 				<elasticsearch.index>ots</elasticsearch.index>
 				<elasticsearch.type>hotel</elasticsearch.type>
