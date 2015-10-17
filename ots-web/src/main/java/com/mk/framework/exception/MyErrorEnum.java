@@ -121,6 +121,17 @@ public enum MyErrorEnum {
 	notAllowMultiGet("-919", "此活动优惠券不可重复领取."),
 	alreadyEndGet("－920", "此活动优惠券已被领完."),
 	IllegalActive("－921","无效活动."),
+	
+	
+	//-----------------------------
+	promoPswError("－1001","卷密码不正确."),
+	promoNotActivte("－1002","卷没有被激活."),
+	promoAreaError("－1003","该卷不能在此区域使用."),
+	promoDayError("－1004","该卷不在有效期内."),
+	promoTimeError("－1005","该卷使用时间不对."),
+	promoTypeError("－1006","特价房才能使用优惠劵."),
+	promoCityCodeError("－1007","酒店信息不正确."),
+
 	// -----------------------------
 	customError("0000","");
 	;

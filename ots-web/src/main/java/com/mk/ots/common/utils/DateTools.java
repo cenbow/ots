@@ -1,5 +1,6 @@
 package com.mk.ots.common.utils;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.elasticsearch.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +82,7 @@ public class DateTools {
 				break;
 			}
 		}
-		logger.info("计算住的日期:完成:dateList:{}",dateList);
+		logger.info("计算住的日期:完成:dateList:{}", dateList);
 		return dateList;
 	}
 	
@@ -154,7 +156,7 @@ public class DateTools {
 	
 	public static String getFormatBeginDate(Long mills,int addDay){
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMdd");
-		return sdf.format(getBeginMilliS(mills,addDay,null));
+		return sdf.format(getBeginMilliS(mills, addDay, null));
 	}
 	
 	public static Date getBeginDate(Long mills,int addDay){
@@ -275,7 +277,89 @@ public class DateTools {
 		}
 		return dayList;
 	}
-	
+
+	/**
+	 * 判断 compareday  是否在两个日期之间
+	 * @param startdateStr   起始时间
+	 * @param compareday     被比较的时间
+	 * @param enddateStr    结束时间
+	 * @return    true /  false
+	 * @throws ParseException
+	 */
+	public  static  boolean   dayBetween(String startdateStr,String  compareday,String enddateStr) throws ParseException {
+		if (getCompareResult(compareday,startdateStr,"yyyy-MM-dd")){
+			return  false;
+		}
+		if (!getCompareResult(compareday, enddateStr,"yyyy-MM-dd")){
+			return  false;
+		}
+		return  true;
+	}
+
+
+	/**
+	 * 获取两个日期的差值
+	 * @param smdate
+	 * @param bdate
+	 * @return  'bdate' - 'smdate'日期差
+	 * @throws ParseException
+	 */
+	public static int daysBetween(String bdate,String smdate) throws ParseException {
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(sdf.parse(smdate));
+		long time1 = cal.getTimeInMillis();
+		cal.setTime(sdf.parse(bdate));
+		long time2 = cal.getTimeInMillis();
+		long between_days=(time2-time1)/(1000*3600*24);
+
+		return Integer.parseInt(String.valueOf(between_days));
+	}
+
+	/**
+	 * 比较两个日期类型的String大小
+	 * @param dataA
+	 * @param dataB
+	 * @return
+	 * @throws ParseException
+	 */
+	public static boolean getCompareResult(String dataA,String dataB,String  example) throws ParseException {
+		if(Strings.isNullOrEmpty(example)){
+			example = "yyyy-MM-dd";
+		}
+		DateFormat dafShort=new SimpleDateFormat(example);
+		Date a=dafShort.parse(dataA);
+		Date b=dafShort.parse(dataB);
+		return a.before(b);
+	}
+
+
+	/**
+	 * 时间Date类型转换为日期类型
+	 * @param date  要转换的时间类型
+	 * @param example  转换后的格式
+	 * @return
+	 */
+	public static String dateToString(Date date,String  example){
+		if (null == date) {
+			return null;
+		}
+		if(Strings.isNullOrEmpty(example)){
+			example = "yyyy-MM-dd HH:mm:ss";
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat(example);
+		return sdf.format(date);
+	}
+
+	public static String getTime(String  example) {
+		if(Strings.isNullOrEmpty(example)){
+			example = "HH:mm:ss";
+		}
+		Calendar calendar = Calendar.getInstance();
+		Date d = calendar.getTime();
+		SimpleDateFormat sdf = new SimpleDateFormat(example);
+		return sdf.format(d);
+	}
 	
 	
 	public static  String getDate(){

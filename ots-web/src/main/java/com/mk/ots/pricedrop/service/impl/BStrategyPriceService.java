@@ -32,11 +32,7 @@ public  class BStrategyPriceService implements IBStrategyPriceService {
 		return null;
 	}
 
-	@Override
-	public int deleteByPrimaryKey(Long id) {
-		return 0;
-	}
-
+	
 	@Override
 	public List<BStrategyPrice> findBStrategyPricesByHotelId(List<Long> hotelid) {
 		return null;
@@ -46,5 +42,11 @@ public  class BStrategyPriceService implements IBStrategyPriceService {
 	@Override
 	public BStrategyPrice findByHotelidAndRoomtype(Long hotelid, Long roomtype) {
 		return null;
+	}
+
+	@Override
+	public int deleteByPrimaryKey(Long id) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
