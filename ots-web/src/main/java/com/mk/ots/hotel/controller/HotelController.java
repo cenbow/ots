@@ -48,6 +48,7 @@ import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
 import com.mk.ots.room.sale.model.TRoomSale;
+import com.mk.ots.room.sale.service.RoomSaleService;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
 
@@ -66,6 +67,9 @@ public class HotelController {
 	 */
 	@Autowired
 	private HotelService hotelService;
+
+	@Autowired
+	private RoomSaleService roomSaleService;
 
 	@Autowired
 	private RoomstateService roomstateService;
@@ -295,17 +299,16 @@ public class HotelController {
 				hotelId = Integer.getInteger(String.valueOf(hotel.get("hotelid")));
 			}
 
-			TRoomSale roomSale = hotelService.queryPromoData(hotelId);
-
 			/**
 			 * TODO: waiting for long's interface to get the times
 			 */
 			String startInternalTime = "2015-10-16 21:30";
 			String endInternalTime = "2015-10-17 2:30";
 
-			if (roomSale != null) {
-				startInternalTime = roomSale.getStartTime();
-				endInternalTime = roomSale.getEndTime();
+			if (roomSaleService != null) {
+				List<String> times = roomSaleService.queryPromoTime();
+				startInternalTime = times.get(0);
+				endInternalTime = times.get(1);
 			}
 
 			if (logger.isInfoEnabled()) {

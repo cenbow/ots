@@ -1463,15 +1463,6 @@ public class SearchService implements ISearchService {
 		}
 	}
 
-	public static void main(String[] args) {
-		String version = "0.01";
-		System.out.println(Double.valueOf(version));
-
-		String version1 = "3.1";
-		String version2 = "3.1.1";
-		System.out.println(version2.compareTo(version1));
-	}
-
 	/**
 	 * 
 	 * @param reqentity

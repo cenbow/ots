@@ -3,10 +3,12 @@ package com.mk.ots.room.sale.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.mapper.RoomSaleMapper;
 import com.mk.ots.room.sale.model.TRoomSale;
 import com.mk.ots.room.sale.service.RoomSaleService;
@@ -18,6 +20,7 @@ import com.mk.ots.room.sale.service.RoomSaleService;
  */
 @Service
 public class RoomSaleServiceImpl implements RoomSaleService {
+	private Logger logger = org.slf4j.LoggerFactory.getLogger(RoomSaleServiceImpl.class);
 
 	@Autowired
 	private RoomSaleMapper roomSaleMapper;
@@ -38,14 +41,19 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 	public List<TRoomSale> queryRoomSale(TRoomSale bean) {
 		return roomSaleMapper.queryRoomSale(bean);
 	}
-	
+
 	public List<String> queryPromoTime() {
 		List<TRoomSale> saleRoomList = roomSaleMapper.getSaleRoomListByHotel();
 		List<String> promoTime = new ArrayList<String>();
-		if (saleRoomList != null) {
+		if (saleRoomList != null && saleRoomList.size() > 0) {
 			TRoomSale roomSale = saleRoomList.get(0);
 			promoTime.add(roomSale.getStartTime());
 			promoTime.add(roomSale.getEndTime());
+		} else {
+			if (logger.isInfoEnabled()) {
+				logger.info("no saleRoom has been found in queryPromoTime");
+			}
+
 		}
 
 		return promoTime;
