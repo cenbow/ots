@@ -1463,6 +1463,15 @@ public class SearchService implements ISearchService {
 		}
 	}
 
+	public static void main(String[] args) {
+		String version = "0.01";
+		System.out.println(Double.valueOf(version));
+
+		String version1 = "3.1";
+		String version2 = "3.1.1";
+		System.out.println(version2.compareTo(version1));
+	}
+
 	/**
 	 * 
 	 * @param reqentity
@@ -1577,28 +1586,34 @@ public class SearchService implements ISearchService {
 					callMethod, callVersion, isPromoOnly));
 		}
 
-		if (callEntry != null && callEntry != 2) {
-			if (callEntry == 1) {
-				Cat.logEvent("摇一摇", Event.SUCCESS);
-			} else if (callEntry == 3) {
-				Cat.logEvent("切客", Event.SUCCESS);
+		if (isPromoOnly == null) {
+			/**
+			 * old version compatible, promo types won't show
+			 */
+			if (("3.1".compareTo(callVersion.trim()) > 0)) {
+				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
 			}
 
-			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
-		} else if (StringUtils.isNotEmpty(callMethod) && "3".equalsIgnoreCase(callMethod)) {
-			Cat.logEvent("wechat", Event.SUCCESS);
+			return;
+		} else if (isPromoOnly) {
+			if ("3.1".compareTo(callVersion.trim()) > 0) {
+				logger.warn("version before 3.1 shouldn't access this attribute isonpromo...");
+			}
 
-			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
-		} else if (StringUtils.isNotBlank(callVersion)) {
-			if (("3.1".compareTo(callVersion.trim()) <= 0) && isPromoOnly != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("new version recognized, version:%s, promoType:%s", callVersion,
-							isPromoOnly));
+			if (callEntry != null && callEntry != 2) {
+				if (callEntry == 1) {
+					Cat.logEvent("摇一摇", Event.SUCCESS);
+				} else if (callEntry == 3) {
+					Cat.logEvent("切客", Event.SUCCESS);
 				}
 
-				if (isPromoOnly == Boolean.TRUE) {
-					filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
-				}
+				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
+			} else if (StringUtils.isNotEmpty(callMethod) && "3".equalsIgnoreCase(callMethod)) {
+				Cat.logEvent("wechat", Event.SUCCESS);
+
+				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
+			} else {
+				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
 			}
 		}
 	}
