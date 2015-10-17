@@ -287,7 +287,7 @@ public class HotelController {
 			List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
 
 			resultResponse.getBody().put("ispromoting", (hotels != null && hotels.size() > 0) ? 1 : 0);
-			resultResponse.getBody().put("promotext", "重庆特价 sb...");
+			resultResponse.getBody().put("promotext", "重庆特价...");
 
 			Integer hotelId = null;
 			if (hotels != null && hotels.size() > 0) {
