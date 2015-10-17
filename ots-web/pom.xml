@@ -1254,7 +1254,7 @@
 				<spring.redis.sentinel.nodes>10.4.20.206:26379</spring.redis.sentinel.nodes>
 				<synserver.ip>10.4.17.121</synserver.ip>
 				<synserver.port>8000</synserver.port>
-				<elasticsearch.clusterhosts>192.168.81.87:9300</elasticsearch.clusterhosts>
+				<elasticsearch.clusterhosts>10.4.32.10:9300</elasticsearch.clusterhosts>
 				<elasticsearch.clustername>smlt-elasticsearch</elasticsearch.clustername>
 				<elasticsearch.index>ots</elasticsearch.index>
 				<elasticsearch.type>hotel</elasticsearch.type>
