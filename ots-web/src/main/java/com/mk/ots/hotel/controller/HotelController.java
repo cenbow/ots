@@ -289,7 +289,6 @@ public class HotelController {
 			@SuppressWarnings("unchecked")
 			List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
 
-			resultResponse.getBody().put("ispromoting", (hotels != null && hotels.size() > 0) ? 1 : 0);
 			resultResponse.getBody().put("promotext", "重庆特价...");
 
 			/**
@@ -311,6 +310,8 @@ public class HotelController {
 
 			LocalDateTime startExTime = LocalDateTime.fromDateFields(defaultFormatter.parse(startInternalTime));
 			LocalDateTime endExTime = LocalDateTime.fromDateFields(defaultFormatter.parse(endInternalTime));
+
+			resultResponse.getBody().put("ispromoting", searchService.isInPromoPeriod() ? 1 : 0);
 
 			resultResponse.getBody().put("promostarttime",
 					String.format("%s:%s", startExTime.getHourOfDay(), startExTime.getMinuteOfHour()));
