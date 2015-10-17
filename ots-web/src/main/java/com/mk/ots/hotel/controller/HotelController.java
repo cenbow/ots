@@ -285,10 +285,7 @@ public class HotelController {
 				long endtime = new Date().getTime();
 				resultResponse.getBody().put("$times$", endtime - starttime + " ms");
 			}
-
-			@SuppressWarnings("unchecked")
-			List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-
+			
 			resultResponse.getBody().put("promotext", "重庆特价...");
 
 			/**
