@@ -35,6 +35,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +79,7 @@ import com.mk.ots.mapper.THotelScoreMapper;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
+import com.mk.ots.room.sale.service.RoomSaleService;
 import com.mk.ots.restful.output.SearchPositionsDistanceRespEntity;
 import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
 import com.mk.ots.search.enums.PositionTypeEnum;
@@ -143,6 +145,9 @@ public class SearchService implements ISearchService {
 	@Autowired
 	private RoomstateService roomstateService;
 
+	@Autowired
+	private RoomSaleService roomSaleService;
+
 	/**
 	 * 注入酒店信息mapper
 	 */
@@ -181,6 +186,11 @@ public class SearchService implements ISearchService {
 
 	@Autowired
 	private SSubwayStationMapper subwayStationMapper;
+
+	private LocalDateTime promoStartTime;
+	private LocalDateTime promoEndTime;
+
+	private final SimpleDateFormat defaultFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 
 	/*
 	 * 获取 区域位置类型
@@ -769,6 +779,25 @@ public class SearchService implements ISearchService {
 	 */
 	private void sortByOrders(SearchRequestBuilder searchBuilder) {
 		searchBuilder.addSort("ordernummon", SortOrder.DESC);
+	}
+
+	private boolean isInPromoPeriod() throws Exception {
+		/**
+		 * hasn't been initialized yet
+		 */
+		if (promoStartTime == null) {
+			List<String> promoTimes = roomSaleService.queryPromoTime();
+			String startTime = promoTimes.get(0);
+			String endTime = promoTimes.get(1);
+
+			promoStartTime = LocalDateTime.fromDateFields(defaultFormatter.parse(startTime));
+			promoEndTime = LocalDateTime.fromDateFields(defaultFormatter.parse(endTime));
+		}
+
+		boolean isAfter = LocalDateTime.now().isAfter(promoStartTime);
+		boolean isBefore = LocalDateTime.now().isBefore(promoEndTime);
+		
+		return isAfter && isBefore;
 	}
 
 	/**
@@ -1364,7 +1393,7 @@ public class SearchService implements ISearchService {
 			rtnMap.put("hotel", hotels);
 		} catch (Exception e) {
 			logger.error("failed to readonlyOtsHotelListFromEsStore...", e);
-			
+
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
@@ -1561,11 +1590,11 @@ public class SearchService implements ISearchService {
 				Cat.logEvent("切客", Event.SUCCESS);
 			}
 
-			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", Boolean.FALSE)));
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
 		} else if (StringUtils.isNotEmpty(callMethod) && "3".equalsIgnoreCase(callMethod)) {
 			Cat.logEvent("wechat", Event.SUCCESS);
 
-			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", Boolean.FALSE)));
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
 		} else if (!StringUtils.isEmpty(callVersion)) {
 			Double version = Double.parseDouble(callVersion);
 
@@ -1576,7 +1605,7 @@ public class SearchService implements ISearchService {
 				}
 
 				if (isPromoOnly == Boolean.TRUE) {
-					filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", isPromoOnly)));
+					filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
 				}
 			}
 		}
