@@ -37,6 +37,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -205,7 +206,7 @@ public class HotelService {
 
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
-
+	
 	/**
 	 * 房态标识：可用
 	 */

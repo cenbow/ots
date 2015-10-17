@@ -44,3 +44,6 @@ catalina.base_IS_UNDEFINED/
 *.iws
 .metadata/
 .recommenders/
+RemoteSystemsTempFiles/
+*.swp
+*.swo
