@@ -796,7 +796,7 @@ public class SearchService implements ISearchService {
 
 		boolean isAfter = LocalDateTime.now().isAfter(promoStartTime);
 		boolean isBefore = LocalDateTime.now().isBefore(promoEndTime);
-		
+
 		return isAfter && isBefore;
 	}
 
@@ -805,13 +805,7 @@ public class SearchService implements ISearchService {
 	 * @param searchBuilder
 	 */
 	private void sortByPromo(SearchRequestBuilder searchBuilder, String version) {
-		Double callMethodVer = 0.0;
-
-		if (!StringUtils.isEmpty(version)) {
-			callMethodVer = Double.parseDouble(version);
-		}
-
-		if (callMethodVer >= 3.1) {
+		if (StringUtils.isNotEmpty(version) && ("3.1".compareTo(version) <= 0)) {
 			searchBuilder.addSort("isonpromo", SortOrder.DESC);
 		}
 	}
@@ -1595,13 +1589,11 @@ public class SearchService implements ISearchService {
 			Cat.logEvent("wechat", Event.SUCCESS);
 
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
-		} else if (!StringUtils.isEmpty(callVersion)) {
-			Double version = Double.parseDouble(callVersion);
-
-			if (version >= 3.1 && isPromoOnly != null) {
+		} else if (StringUtils.isNotBlank(callVersion)) {
+			if (("3.1".compareTo(callVersion.trim()) <= 0) && isPromoOnly != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug(
-							String.format("new version recognized, version:%s, promoType:%s", version, isPromoOnly));
+					logger.debug(String.format("new version recognized, version:%s, promoType:%s", callVersion,
+							isPromoOnly));
 				}
 
 				if (isPromoOnly == Boolean.TRUE) {
