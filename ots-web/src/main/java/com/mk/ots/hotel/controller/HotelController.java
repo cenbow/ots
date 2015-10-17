@@ -295,8 +295,8 @@ public class HotelController {
 			/**
 			 * TODO: waiting for long's interface to get the times
 			 */
-			String startInternalTime = "2015-10-16 21:30";
-			String endInternalTime = "2015-10-17 2:30";
+			String startInternalTime = "2015-10-17 16:00";
+			String endInternalTime = "2015-10-17 18:30";
 
 			if (roomSaleService != null) {
 				List<String> times = roomSaleService.queryPromoTime();
