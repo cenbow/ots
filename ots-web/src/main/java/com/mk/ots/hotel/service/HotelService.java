@@ -206,7 +206,7 @@ public class HotelService {
 
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
-	
+
 	/**
 	 * 房态标识：可用
 	 */
@@ -2698,8 +2698,13 @@ public class HotelService {
 				SqlSession session = sqlSessionFactory.openSession();
 				THotelMapper mapper = session.getMapper(THotelMapper.class);
 				List<Long> hotelIdArr = mapper.findAllHotelIds();
+				Integer i = 0;
 				for (Long hotelId : hotelIdArr) {
 					updateEsMikePrice(hotelId);
+
+					if (logger.isInfoEnabled()) {
+						logger.info("updating mkPrice with index {}, hotelId {}", i++, hotelId);
+					}
 				}
 			}
 		});
