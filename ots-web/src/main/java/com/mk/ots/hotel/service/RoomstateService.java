@@ -991,7 +991,6 @@ public class RoomstateService {
 							roomSale.setRoomTypeId(roomTypeId);
 							TRoomSale result = roomSaleService.getOneRoomSale(roomSale);
 
-
 							if (result != null && "F".equals(result.getIsBack())) { // isBack
 																					// ==
 																					// F
@@ -1032,7 +1031,7 @@ public class RoomstateService {
 						priceTransaction.complete();
 					}
 
-					if("F".equals(isonpromo)){
+					if ("F".equals(isonpromo)) {
 						if (prices == null || prices.length == 0) {
 							// 眯客价
 							roomtype.setRoomtypeprice(troomType.getCost());
@@ -1049,7 +1048,6 @@ public class RoomstateService {
 							roomtype.setRoomtypepmsprice(troomType.getCost());
 						}
 					}
-
 
 					// 查询房型信息t_roomtype_info
 					TRoomTypeInfoModel troomtypeInfoModel = troomtypeInfoMapper
@@ -2108,31 +2106,33 @@ public class RoomstateService {
 					if (minTimepriceMap == null || minTimepriceMap.size() == 0) {
 						//
 						Map<String, String> minRoompriceMap = this.getMinRoomprice(mikeRoompriceMap);
-						Iterator<Entry<String, String>> iterRoomprice = minRoompriceMap.entrySet().iterator();
-						while (iterRoomprice.hasNext()) {
-							Map.Entry<String, String> entry = iterRoomprice.next();
-							// key为roomtypeid
-							String key = entry.getKey();
-							Long roomtypeid = Long.valueOf(key);
-							BigDecimal cost = BigDecimal.ZERO;
-							// 根据key查房型的门市价.
-							if (roomtypeid != null) {
-								cost = this.getRoomtypeCost(roomtypeid);
-							}
-							String val = entry.getValue();
+						if (minRoompriceMap != null) {
+							Iterator<Entry<String, String>> iterRoomprice = minRoompriceMap.entrySet().iterator();
+							while (iterRoomprice.hasNext()) {
+								Map.Entry<String, String> entry = iterRoomprice.next();
+								// key为roomtypeid
+								String key = entry.getKey();
+								Long roomtypeid = Long.valueOf(key);
+								BigDecimal cost = BigDecimal.ZERO;
+								// 根据key查房型的门市价.
+								if (roomtypeid != null) {
+									cost = this.getRoomtypeCost(roomtypeid);
+								}
+								String val = entry.getValue();
 
-							//
-							if (!StringUtils.isBlank(val)) {
-								resultVal[0] = val;
-								resultVal[1] = cost.toString();
+								//
+								if (!StringUtils.isBlank(val)) {
+									resultVal[0] = val;
+									resultVal[1] = cost.toString();
+								}
+								break;
 							}
-							break;
 						}
 					}
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("failed to calculate mkprice", e);
 		}
 		return resultVal;
 	}
