@@ -17,11 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mk.ots.common.utils.DateTools;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 
@@ -81,11 +79,11 @@ public class BpromoServiceImpl implements IBPromoService {
 
 		//判断当前日期是否在有效期内
 		String  nowDate = DateUtils.getDate();
-		String  beginDateStr = dateToString(bPromo.getBeginDate(), "yyyy-MM-dd");
-		String  endDateStr = dateToString(bPromo.getEndDate(), "yyyy-MM-dd");
+		String  beginDateStr = DateTools.dateToString(bPromo.getBeginDate(), "yyyy-MM-dd");
+		String  endDateStr = DateTools.dateToString(bPromo.getEndDate(), "yyyy-MM-dd");
 
 		try {
-			if(!dayBetween(beginDateStr,nowDate,endDateStr)){
+			if(!DateTools.dayBetween(beginDateStr, nowDate, endDateStr)){
                 throw   MyErrorEnum.promoDayError.getMyException();
             }
 		} catch (ParseException e) {
@@ -97,10 +95,10 @@ public class BpromoServiceImpl implements IBPromoService {
 		String   beginTimeComp = DateUtils.getDate() + " " +  bPromo.getBeginTime();
 		String   endTimeComp =  DateUtils.getDate() + " " + bPromo.getEndTime();
 		try {
-			if(!getCompareResult(beginTimeComp,nowTimeComp,"yyyy-MM-dd HH:mm")){
+			if(!DateTools.getCompareResult(beginTimeComp, nowTimeComp, "yyyy-MM-dd HH:mm")){
                 throw   MyErrorEnum.promoTimeError.getMyException();
             }
-			if(!getCompareResult(nowTimeComp,endTimeComp,"yyyy-MM-dd HH:mm")){
+			if(!DateTools.getCompareResult(nowTimeComp, endTimeComp, "yyyy-MM-dd HH:mm")){
 				throw   MyErrorEnum.promoTimeError.getMyException();
 			}
 		} catch (ParseException e) {
@@ -133,80 +131,5 @@ public class BpromoServiceImpl implements IBPromoService {
 		iupromoUserLogDao.add(upromoUserLog);
 
 		iBPromoDao.updateBpromoForUse(bpromo.getPromoPwd(), newPromoStatus, DateUtils.getDatetime(), otaOrder.getMid()+"");
-	}
-
-	public  boolean   dayBetween(String startdateStr,String  compareday,String enddateStr) throws ParseException {
-		if (getCompareResult(compareday,startdateStr,"yyyy-MM-dd")){
-			return  false;
-		}
-		if (!getCompareResult(compareday, enddateStr,"yyyy-MM-dd")){
-			return  false;
-		}
-		return  true;
-	}
-
-
-	/**
-	 * 获取两个日期的差值
-	 * @param smdate
-	 * @param bdate
-	 * @return  'bdate' - 'smdate'日期差
-	 * @throws ParseException
-	 */
-	public static int daysBetween(String bdate,String smdate) throws ParseException {
-		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(sdf.parse(smdate));
-		long time1 = cal.getTimeInMillis();
-		cal.setTime(sdf.parse(bdate));
-		long time2 = cal.getTimeInMillis();
-		long between_days=(time2-time1)/(1000*3600*24);
-
-		return Integer.parseInt(String.valueOf(between_days));
-	}
-
-	/**
-	 * 比较两个日期类型的String大小
-	 * @param dataA
-	 * @param dataB
-	 * @return
-	 * @throws ParseException
-	 */
-	public boolean getCompareResult(String dataA,String dataB,String  example) throws ParseException {
-		if(Strings.isNullOrEmpty(example)){
-			example = "yyyy-MM-dd";
-		}
-		DateFormat dafShort=new SimpleDateFormat(example);
-		Date a=dafShort.parse(dataA);
-		Date b=dafShort.parse(dataB);
-		return a.before(b);
-	}
-
-
-	/**
-	 * 时间Date类型转换为日期类型
-	 * @param date  要转换的时间类型
-	 * @param example  转换后的格式
-	 * @return
-	 */
-	public static String dateToString(Date date,String  example){
-		if (null == date) {
-			return null;
-		}
-		if(Strings.isNullOrEmpty(example)){
-			example = "yyyy-MM-dd HH:mm:ss";
-		}
-		SimpleDateFormat sdf = new SimpleDateFormat(example);
-		return sdf.format(date);
-	}
-
-	public static String getTime(String  example) {
-		if(Strings.isNullOrEmpty(example)){
-			example = "HH:mm:ss";
-		}
-		Calendar calendar = Calendar.getInstance();
-		Date d = calendar.getTime();
-		SimpleDateFormat sdf = new SimpleDateFormat(example);
-		return sdf.format(d);
 	}
 }
