@@ -14,6 +14,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.session.SqlSession;
@@ -37,7 +41,6 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -215,6 +218,8 @@ public class HotelService {
 	 * 房态标识：不可用
 	 */
 	private final String ROOM_STATUS_NVC = "nvc";
+
+	private final AtomicInteger mkPriceCounter = new AtomicInteger(0);
 
 	public THotel readonlyTHotel(long id) {
 		return THotel.dao.findById(id);
@@ -2692,27 +2697,72 @@ public class HotelService {
 	 * 查询所有酒店数据，刷新全量眯客价到ES
 	 */
 	public void batchUpdateEsMikePrice() {
-		Thread t = new Thread(new Runnable() {
+		final int coreNum = 10;
+		ExecutorService exService = Executors.newFixedThreadPool(10);
+		SqlSession session = sqlSessionFactory.openSession();
+		THotelMapper mapper = session.getMapper(THotelMapper.class);
+
+		final List<Long> hotelIdArr = mapper.findAllHotelIds();
+		final int hotelCounter = hotelIdArr.size() / coreNum;
+		final List<Future<?>> mkPriceFutures = new ArrayList<Future<?>>();
+
+		if (logger.isInfoEnabled()) {
+			logger.info("using multi-threading to process mkPrice indexes");
+		}
+
+		for (int i = 0; i < coreNum; i++) {
+			final int index = i;
+			final int currentMKIndex = i * hotelCounter;
+
+			Future<?> mkPriceFuture = exService.submit(new Runnable() {
+				private int beginIndex = currentMKIndex;
+
+				@Override
+				public void run() {
+					for (int j = beginIndex; j < ((index == coreNum - 1) ? hotelIdArr.size()
+							: beginIndex + hotelCounter); j++) {
+						if (hotelIdArr.get(j) != null) {
+							updateEsMikePrice(hotelIdArr.get(j));
+							int mkPriceCounterTmp = mkPriceCounter.incrementAndGet();
+							if (mkPriceCounterTmp % 100 == 0 && logger.isInfoEnabled()) {
+								logger.info("{} mkPrice has been updated", mkPriceCounterTmp);
+							}
+						}
+
+						if (logger.isInfoEnabled()) {
+							logger.info("updating mkPrice with index {}, hotelId {}", j, hotelIdArr.get(j));
+						}
+					}
+				}
+			});
+			mkPriceFutures.add(mkPriceFuture);
+		}
+
+		Thread waitThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				SqlSession session = sqlSessionFactory.openSession();
-				THotelMapper mapper = session.getMapper(THotelMapper.class);
-				List<Long> hotelIdArr = mapper.findAllHotelIds();
-				Integer i = 0;
-				for (Long hotelId : hotelIdArr) {
-					updateEsMikePrice(hotelId);
+				try {
+					if (logger.isInfoEnabled()) {
+						logger.info("waiting for mkPrice update to complete...");
+					}
+
+					for (Future<?> mkFuture : mkPriceFutures) {
+						mkFuture.get();
+
+						if (logger.isInfoEnabled()) {
+							logger.info("1 mkPrice update worker finished...");
+						}
+					}
 
 					if (logger.isInfoEnabled()) {
-						logger.info("updating mkPrice with index {}, hotelId {}", i++, hotelId);
+						logger.info("all mkPrices {} have been updated...", hotelIdArr.size());
 					}
+				} catch (Exception e) {
+					logger.error("failed to wait for mkFuture to complete...", e);
 				}
 			}
 		});
-		try {
-			t.start();
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		}
+		waitThread.start();
 	}
 
 	/**
