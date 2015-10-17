@@ -1,15 +1,23 @@
 package com.mk.ots.rpc.service;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Resource;
-
+import com.google.gson.Gson;
+import com.mk.es.entities.OtsHotel;
+import com.mk.framework.es.ElasticsearchProxy;
+import com.mk.orm.plugin.bean.Bean;
+import com.mk.orm.plugin.bean.Db;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.hotel.dao.CityDAO;
+import com.mk.ots.hotel.model.THotelModel;
+import com.mk.ots.hotel.service.HotelPriceService;
+import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.hotel.service.RoomService;
+import com.mk.ots.hotel.service.RoomstateService;
+import com.mk.ots.mapper.BedTypeMapper;
+import com.mk.ots.mapper.EHotelMapper;
+import com.mk.ots.mapper.THotelMapper;
+import com.mk.ots.rpc.IHotelService;
+import com.mk.ots.web.ServiceOutput;
+import com.mk.pms.hotel.service.NewPMSHotelService;
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.collections.keyvalue.AbstractMapEntry;
 import org.apache.commons.lang.StringUtils;
@@ -21,26 +29,9 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.Gson;
-import com.mk.es.entities.OtsHotel;
-import com.mk.framework.es.ElasticsearchProxy;
-import com.mk.orm.plugin.bean.Bean;
-import com.mk.orm.plugin.bean.Db;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.hotel.dao.CityDAO;
-import com.mk.ots.hotel.model.EHotelModel;
-import com.mk.ots.hotel.model.THotelModel;
-import com.mk.ots.hotel.service.HotelPriceService;
-import com.mk.ots.hotel.service.HotelService;
-import com.mk.ots.hotel.service.RoomService;
-import com.mk.ots.hotel.service.RoomstateService;
-import com.mk.ots.mapper.EHotelMapper;
-import com.mk.ots.mapper.BedTypeMapper;
-import com.mk.ots.mapper.THotelMapper;
-import com.mk.ots.rpc.IHotelService;
-import com.mk.ots.web.ServiceOutput;
-import com.mk.pms.hotel.service.NewPMSHotelService;
-import com.mk.pms.order.control.PmsUtilController;
+import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.util.*;
 
 @Service
 public class HmsHotelService implements IHotelService {
@@ -240,7 +231,9 @@ public class HmsHotelService implements IHotelService {
             hotel.setHotelprovince(thotelModel.getProvince());
             // 酒店电话
             hotel.setHotelphone(thotelModel.getHotelphone());
-            
+
+            // mike3.1 新增酒店默认isonpromo 为0
+            hotel.setIsonpromo("0");
             boolean sucess = this.save(hotel);
             if (sucess) {
                 rtnMap.put("success", true);
