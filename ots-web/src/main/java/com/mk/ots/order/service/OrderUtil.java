@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.mk.ots.common.enums.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
@@ -41,16 +42,6 @@ import com.mk.framework.util.MyTokenUtils;
 import com.mk.framework.util.ThreadUtil;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.ots.common.bean.Ethnic;
-import com.mk.ots.common.enums.ButtonTypeEnum;
-import com.mk.ots.common.enums.CardTypeEnum;
-import com.mk.ots.common.enums.OrderTypeEnum;
-import com.mk.ots.common.enums.OtaOrderStatusEnum;
-import com.mk.ots.common.enums.PPayInfoTypeEnum;
-import com.mk.ots.common.enums.PayStatusEnum;
-import com.mk.ots.common.enums.PayTitleTypeEnum;
-import com.mk.ots.common.enums.PromotionTypeEnum;
-import com.mk.ots.common.enums.SexEnum;
-import com.mk.ots.common.enums.TicketUselimitEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.common.utils.SysConfig;
@@ -173,6 +164,8 @@ public class OrderUtil {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		// DecimalFormat format=new DecimalFormat("#.00");
 		// format.setRoundingMode(RoundingMode.UP);
+		jsonObj.put("promotype", StringUtils.defaultIfEmpty(returnOrder.getPromoType(), PromoTypeEnum.OTHER.getCode().toString()));
+		jsonObj.put("roomticket", StringUtils.defaultIfEmpty(returnOrder.getRoomTicket(),""));
 		jsonObj.put("orderid", returnOrder.getId());
 		jsonObj.put("hotelid", returnOrder.getHotelId());
 		jsonObj.put("hotelname", returnOrder.getHotelName());
@@ -203,10 +196,10 @@ public class OrderUtil {
 		List<TicketInfo> tickes = null;
 		if (returnOrder.getStr("act") != null && returnOrder.getStr("act").equals("create")) {
 			// 订单修改（查询券）
-			tickes = ticketService.getBindOrderAndAvailableTicketInfos(returnOrder, MyTokenUtils.getMidByToken(""));
+			tickes = ticketService.getBindOrderAndAvailableTicketInfos(returnOrder, MyTokenUtils.getMidByToken(returnOrder.getToken()));
 		} else if (returnOrder.getOrderStatus() < OtaOrderStatusEnum.Confirm.getId()) {
 			// 订单修改（查询券）
-			tickes = ticketService.getBindOrderAndAvailableTicketInfos(returnOrder, MyTokenUtils.getMidByToken(""));
+			tickes = ticketService.getBindOrderAndAvailableTicketInfos(returnOrder, MyTokenUtils.getMidByToken(returnOrder.getToken()));
 		} else if (returnOrder.getOrderStatus() >= OtaOrderStatusEnum.Confirm.getId()) {
 			// 查询订单（查询券）
 			tickes = ticketService.getOrderAlreadyBindTickets(returnOrder);

@@ -68,6 +68,34 @@ public class WalletCashflowService implements IWalletCashflowService {
         return iuWalletCashFlowDAO.find(pageEntity, entity);
     }
 
+    /**
+     * 账户充值接口
+     * @param mid
+     * @param price
+     * @param cardid
+     * @return
+     */
+    @Override
+    public boolean accountCharge(Long mid, BigDecimal price, Long cardid) {
+        logger.info(">>>充值卡充值: mid:{}, price:{}, cardid:{}", mid, price, cardid);
+        if (cardid == null || cardid <= 0) {
+            logger.info(">>>充值卡充值失败: 此卡号"+cardid+"不能为空.");
+            return false;
+        }
+        if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
+            logger.info(">>>充值卡充值失败: 充值卡金额需大于0.");
+            return false;
+        }
+        UWalletCashFlow uWalletCashFlow = this.iuWalletCashFlowDAO.findByTypeAndSourceid(mid, CashflowTypeEnum.MIKE_CHARGE_CARD, cardid);
+        if (uWalletCashFlow != null) {
+            logger.info(">>>充值卡充值失败: 此卡号"+cardid+"已充值过.");
+            return false;
+        }
+        boolean result = saveCashflowAndSynWallet(mid, price, CashflowTypeEnum.MIKE_CHARGE_CARD, cardid);
+        logger.info(">>>充值卡充值: 充值卡充值成功.");
+        return result;
+    }
+
     @Override
     public BigDecimal entry(Long mid, CashflowTypeEnum cashflowtype, Long sourceid) {
         logger.info(">>>点评返现: mid:{}, cashflowtype:{}, sourceid:{}", mid, cashflowtype, sourceid);
@@ -218,9 +246,11 @@ public class WalletCashflowService implements IWalletCashflowService {
         BigDecimal realprice = BigDecimal.ZERO;
         if (CashflowTypeEnum.CASHBACK_HOTEL_IN.equals(cashflowTypeEnum) || CashflowTypeEnum.CASHBACK_ORDER_IN.equals(cashflowTypeEnum)) {
             realprice = price.abs();
-        } else if (CashflowTypeEnum.CONSUME_ORDER_OUT_LOCK.equals(cashflowTypeEnum)) {
+        } else if (CashflowTypeEnum.CONSUME_ORDER_OUT_LOCK.equals(cashflowTypeEnum)|| CashflowTypeEnum.CONSUME_ORDER_OUT_CONFIRM.equals(cashflowTypeEnum)) {
             realprice = price.multiply(new BigDecimal(-1));
         } else if (CashflowTypeEnum.CONSUME_ORDER_REFUND.equals(cashflowTypeEnum)) {
+            realprice = price.abs();
+        } else if (CashflowTypeEnum.MIKE_CHARGE_CARD.equals(cashflowTypeEnum)){
             realprice = price.abs();
         }
         logger.info(">>>记录钱包流水并同步钱包总额: 记录钱包流水//开始");

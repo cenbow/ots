@@ -1,5 +1,6 @@
 package com.mk.ots.hotel.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.google.common.collect.Lists;
@@ -8,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mk.framework.AppUtils;
 import com.mk.framework.util.SerializeUtil;
+import com.mk.framework.util.UrlUtils;
 import com.mk.orm.kit.JsonKit;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.utils.Constant;
@@ -18,15 +20,20 @@ import com.mk.ots.mapper.*;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.OtaRoomOrder;
 import com.mk.ots.order.model.PmsRoomOrderModel;
+import com.mk.ots.order.service.OrderUtil;
 import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.room.bean.RoomCensus;
+import com.mk.ots.room.sale.model.TRoomSale;
+import com.mk.ots.room.sale.service.RoomSaleService;
 import com.mk.ots.web.ServiceOutput;
 import com.mk.pms.myenum.PmsRoomOrderStatusEnum;
 import com.mk.pms.room.bean.RoomLockJsonBean;
 import com.mk.pms.room.bean.RoomLockPo;
 import com.mk.pms.room.service.PmsRoomService;
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -119,6 +126,9 @@ public class RoomstateService {
 	
 	@Autowired
 	private HotelPriceService hotelPriceService;
+
+	@Autowired
+	private RoomSaleService roomSaleService;
 	/**
 	 * 
 	 * @param hotelid
@@ -842,6 +852,10 @@ public class RoomstateService {
 	 */
 	public List<RoomstateQuerylistRespEntity> findHotelRoomState(String roomno,RoomstateQuerylistReqEntity params) throws Exception {
 		List<RoomstateQuerylistRespEntity> respEntityList = Lists.newArrayList();
+		String callMethod = params.getCallmethod();
+		Integer callEntry = params.getCallentry();
+		String callVersionStr = params.getCallversion();
+
 		try {
 			Long hotelid = params.getHotelid();
 			Long roomtypeid = params.getRoomtypeid();
@@ -913,7 +927,9 @@ public class RoomstateService {
 			List<RoomstateQuerylistRespEntity.Roomtype> roomtypes = Lists.newArrayList();
 			
 			Transaction t = Cat.newTransaction("RoomState", "loopsql");
-	        
+
+
+
 	        try {
 	        	t.setStatus(Transaction.SUCCESS);
 	        	 //返回酒店下的所有房型返现
@@ -927,7 +943,34 @@ public class RoomstateService {
 	        			}
 	        		}
 	        		// 构建 RoomstateQuerylistRespEntity.Roomtype 房型数据
-	        		RoomstateQuerylistRespEntity.Roomtype roomtype = respEntity.new Roomtype();
+
+					RoomstateQuerylistRespEntity.Roomtype roomtype = respEntity.new Roomtype();
+
+					// mike3.1 特价房型
+
+					if (StringUtils.isNotBlank(callVersionStr)) {
+						Double callVerion= Double.parseDouble(callVersionStr);
+						if (callEntry != null && callEntry != 3 && callVerion > 3.0 && !"3".equals(callMethod.trim())) {
+
+							TRoomSale roomSale = new TRoomSale();
+							Integer roomTypeId = Integer.valueOf(troomType.getId().toString());
+							roomSale.setRoomTypeId(roomTypeId);
+							TRoomSale result=roomSaleService.getOneRoomSale(roomSale);
+
+							String isonpromo = "F";
+
+							if(result != null && "F".equals(result.getIsBack())){ // isBack == F 为特价房
+								isonpromo = "T";
+							}
+
+							roomtype.setIsonpromo(isonpromo);
+
+							if(result != null ){
+								roomtype.setPromotype(result.getSaleType().toString());
+							}
+						}
+					}
+
 	        		roomtype.setRoomtypeid(troomType.getId());
 	        		roomtype.setBednum(troomType.getBednum());
 	        		roomtype.setRoomtypename(troomType.getName());

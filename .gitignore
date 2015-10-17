@@ -39,3 +39,8 @@
 *.iml
 target/
 .idea
+catalina.base_IS_UNDEFINED/
+*.ipr
+*.iws
+.metadata/
+.recommenders/

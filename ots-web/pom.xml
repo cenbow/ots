@@ -1024,6 +1024,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1068,6 +1071,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1118,6 +1124,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.36.210:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>1</sendmess.testorformal>
 				<black_Switch>0</black_Switch>
@@ -1126,9 +1135,6 @@
 
 		<profile>
 			<id>test</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<properties>
 				<label>product</label>
 				<jdbc.driver>com.mk.jdbc.MonitorDriver</jdbc.driver>
@@ -1170,6 +1176,10 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+				<!-- taskfactory url -->
+				<taskfactory.url>http://192.168.70.183:8080</taskfactory.url>
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1216,6 +1226,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1224,6 +1237,9 @@
 
 		<profile>
 			<id>shanghai-simulation</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<properties>
 				<label>product</label>
 				<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
@@ -1266,6 +1282,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://192.168.70.183:8080/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1313,6 +1332,9 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1365,6 +1387,9 @@
 				<!-- kafka end -->
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
@@ -1416,10 +1441,69 @@
 
 				<!-- BMS黑名单验证接口 -->
 				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
 				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
 				<sendmess.testorformal>0</sendmess.testorformal>
 				<black_Switch>1</black_Switch>
 			</properties>
 		</profile>
+		
+		<profile>
+			<id>shanghai-simulation2</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<label>product</label>
+				<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+				<master.jdbc.url><![CDATA[jdbc:mysql://10.4.24.11:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+				<master.jdbc.user>smlt-writer</master.jdbc.user>
+				<master.jdbc.password>j9bcyZ5U5LQp7xxEomsu</master.jdbc.password>
+				<slave.jdbc.url><![CDATA[jdbc:mysql://10.4.24.11:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+				<slave.jdbc.user>smlt-writer</slave.jdbc.user>
+				<slave.jdbc.password>j9bcyZ5U5LQp7xxEomsu</slave.jdbc.password>
+				<!-- <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.28.44:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url> <slave.jdbc.user>smlt-reader</slave.jdbc.user> <slave.jdbc.password>ims8LfQKTBs6gj79TdgB</slave.jdbc.password> -->
+				<spring.redis.sentinel.master>ota2-test-redis</spring.redis.sentinel.master>
+				<spring.redis.sentinel.nodes>192.168.81.87:26379</spring.redis.sentinel.nodes>
+				<synserver.ip>10.4.17.121</synserver.ip>
+				<synserver.port>8000</synserver.port>
+				<elasticsearch.clusterhosts>192.168.81.87:9300</elasticsearch.clusterhosts>
+				<elasticsearch.clustername>smlt-ots</elasticsearch.clustername>
+				<elasticsearch.index>ots</elasticsearch.index>
+				<elasticsearch.type>hotel</elasticsearch.type>
+				<hessian_soap>http://10.4.26.201:8082/soap/hessian</hessian_soap>
+				<hessian_bms>http://sms.imike.cn/</hessian_bms>
+				<newpms.url>https://smlt-otai.imike.cn/otai/ots2pms</newpms.url>
+				<jedis.pool.maxidl>20</jedis.pool.maxidl>
+				<jedis.pool.minidl>8</jedis.pool.minidl>
+				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+				<addpay>https://smlt-otai.imike.cn/otai/ots2pms/addpay</addpay>
+				<cancelpay>https://smlt-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
+				<selectCustomerpay>https://smlt-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+				<cancelpaybyerror>https://smlt-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+				<!-- 1：开发状态 2：生产状态 -->
+				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+				<inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+				<wx_type>test_app</wx_type>
+				<!-- 1：开发状态 2：生产状态 -->
+				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
+				<liveHotelNum>3</liveHotelNum>
+				<!-- kafka start -->
+				<zk_connect>10.4.31.46:2181</zk_connect>
+				<!-- kafka end -->
+
+				<!-- BMS黑名单验证接口 -->
+				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+
+				<!-- 特价房查询接口 -->
+				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
+				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
+				<sendmess.testorformal>0</sendmess.testorformal>
+				<black_Switch>1</black_Switch>
+			</properties>
+		</profile>		
 	</profiles>
 </project>
