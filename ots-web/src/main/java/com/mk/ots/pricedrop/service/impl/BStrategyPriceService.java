@@ -42,6 +42,7 @@ public  class BStrategyPriceService implements IBStrategyPriceService {
 		return null;
 	}
 
+	
 	@Override
 	public BStrategyPrice findByHotelidAndRoomtype(Long hotelid, Long roomtype) {
 		return null;
