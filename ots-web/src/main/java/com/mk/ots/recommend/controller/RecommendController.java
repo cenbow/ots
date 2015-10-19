@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.mk.ots.common.utils.Constant;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ public class RecommendController {
 	 * @return
 	 */
 	@RequestMapping("/query")
-	public ResponseEntity<Map<String, Object>> query(String position, String callmethod){
+	public ResponseEntity<Map<String, Object>> query(String position, String callmethod, String cityid){
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		if(StringUtils.isEmpty(position)){
 			throw MyErrorEnum.errorParm.getMyException();
@@ -59,7 +60,7 @@ public class RecommendController {
 		if(CollectionUtils.isNotEmpty(list)){
 			for (TRecommenditem tRecommendItem : list) {
 
-				if("3".equals(callmethod) && tRecommendItem.getViewtype() == 3){
+				if(Constant.WEIXIN_CALLMETHOD.equals(callmethod) && tRecommendItem.getViewtype() == Constant.TONIGHT_PROMO_VIEWTYPE){
 					continue;
 				}
 
