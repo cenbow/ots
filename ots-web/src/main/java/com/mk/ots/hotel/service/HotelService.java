@@ -432,7 +432,7 @@ public class HotelService {
 					hotel.setOrdernummon(getOrderNumMon(Long.valueOf(hotelid)));
 
 					// mike3.1 添加特价房
-					hotel.setIsonpromo("0");
+
 
 					TRoomSale roomSale = new TRoomSale();
 					Integer hotelId = Integer.valueOf(bean.getId().toString());
@@ -446,6 +446,8 @@ public class HotelService {
 						hotel.setPromotextcolor(result.getFontColor());
 						hotel.setPromostarttime(result.getStartTime());
 						hotel.setPromoendtime(result.getEndTime());
+					}else {
+						hotel.setIsonpromo("0");
 					}
 
 					// 先把新的酒店放到集合中，后面做批量添加

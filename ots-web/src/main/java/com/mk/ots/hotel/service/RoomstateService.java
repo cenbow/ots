@@ -958,10 +958,10 @@ public class RoomstateService {
 							roomSale.setRoomTypeId(roomTypeId);
 							TRoomSale result=roomSaleService.getOneRoomSale(roomSale);
 
-							String isonpromo = "F";
+							String isonpromo = "0";
 
 							if(result != null && "F".equals(result.getIsBack())){ // isBack == F 为特价房
-								isonpromo = "T";
+								isonpromo = "1";
 							}
 
 							roomtype.setIsonpromo(isonpromo);
