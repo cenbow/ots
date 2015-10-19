@@ -164,6 +164,22 @@ public class WalletController {
                 }
                 extend.setCashflowtypestr(uWalletCashFlow.getCashflowtype().getDesc());
                 extend.setIsgetin(getIsgetin(uWalletCashFlow.getPrice()));
+
+                //若是订单相关，写入hotelName
+                if (CashflowTypeEnum.CASHBACK_ORDER_IN == extend.getCashflowtype()
+                        || CashflowTypeEnum.CASHBACK_HOTEL_IN == extend.getCashflowtype()
+                        || CashflowTypeEnum.CONSUME_ORDER_OUT_LOCK == extend.getCashflowtype()
+                        || CashflowTypeEnum.CONSUME_ORDER_OUT_CONFIRM == extend.getCashflowtype()
+                        || CashflowTypeEnum.CONSUME_ORDER_REFUND == extend.getCashflowtype()) {
+                    Long orderId = extend.getSourceid();
+                    if (null != orderId) {
+                        OtaOrder otaOrder = orderService.findOtaOrderById(orderId);
+                        if (null != otaOrder) {
+                            String hotelName = otaOrder.getHotelName();
+                            extend.setHotelName(hotelName);
+                        }
+                    }
+                }
                 result.add(extend);
             }
         }
