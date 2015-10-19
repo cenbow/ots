@@ -615,7 +615,11 @@ public class HotelService {
 				hotel.setRoomnum(1l);
 				hotel.setIsnewpms(Constant.STR_FALSE);
 				hotel.setPriority(4);
-
+				/**
+				 * added in mike3.1
+				 */
+				hotel.setIsonpromo("0");
+				
 				// 先把新的酒店放到集合中，后面做批量添加
 				addList.add(hotel);
 				logger.info("not pms hotelid: {} added in collections and will be add in elasticsearch document.",
