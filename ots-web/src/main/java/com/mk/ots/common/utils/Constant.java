@@ -207,4 +207,8 @@ public class Constant {
      * 新手优惠券
      */
     public static final long ACTIVE_NEW_USER=1L;
+
+	public static final Integer TONIGHT_PROMO_VIEWTYPE = 3;
+
+	public static final String WEIXIN_CALLMETHOD = "3";
 }
