@@ -10,6 +10,11 @@ public class UWalletCashFlowExtend extends UWalletCashFlow{
      */
     private int isgetin;
 
+    /**
+     * 酒店名称
+     */
+    public String hotelName;
+
     public String getCashflowtypestr() {
         return cashflowtypestr;
     }
@@ -24,5 +29,13 @@ public class UWalletCashFlowExtend extends UWalletCashFlow{
 
     public void setIsgetin(int isgetin) {
         this.isgetin = isgetin;
+    }
+
+    public String getHotelName() {
+        return hotelName;
+    }
+
+    public void setHotelName(String hotelName) {
+        this.hotelName = hotelName;
     }
 }
