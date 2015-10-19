@@ -1123,7 +1123,7 @@ public class SearchService implements ISearchService {
 																										// yub
 																										// 20150724
 				result.put("distance", hotelDistance);
-
+				
 				// 眯客3.0增加userdistance属性：用户坐标与酒店坐标的距离
 				double userDistance = DistanceUtil.distance(userlon, userlat, hotelLongitude, hotelLatitude);
 				// 选择地标搜索(机场车站、地铁线路、景点、医院、高校)，按照用户坐标和地标坐标计算距离
