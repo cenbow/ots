@@ -508,7 +508,10 @@ public class HmsHotelService implements IHotelService {
 			hotel.setHotelprovince(thotelModel.getProvince());
 			// 酒店电话
 			hotel.setHotelphone(thotelModel.getHotelphone());
-			
+
+            // mike3.1 新增酒店默认isonpromo 为0
+            hotel.setIsonpromo("0");
+            
             boolean success = update(hotel);
             if (success) {
                 rtnMap.put("success", true);
