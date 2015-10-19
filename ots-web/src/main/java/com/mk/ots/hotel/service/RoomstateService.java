@@ -949,8 +949,8 @@ public class RoomstateService {
 					// mike3.1 特价房型
 
 					if (StringUtils.isNotBlank(callVersionStr)) {
-						Double callVerion= Double.parseDouble(callVersionStr);
-						if (callEntry != null && callEntry != 3 && callVerion > 3.0 && !"3".equals(callMethod.trim())) {
+
+						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0 && !"3".equals(callMethod.trim())) {
 
 							TRoomSale roomSale = new TRoomSale();
 							Integer roomTypeId = Integer.valueOf(troomType.getId().toString());
@@ -965,7 +965,7 @@ public class RoomstateService {
 
 							roomtype.setIsonpromo(isonpromo);
 
-							if(result != null ){
+							if(result != null && result.getSaleType()!=null){
 								roomtype.setPromotype(result.getSaleType().toString());
 							}
 						}
