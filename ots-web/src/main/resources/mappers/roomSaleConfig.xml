@@ -253,7 +253,7 @@
                 AND b.roomId = #{roomId}
             </if>
             <if test="roomTypeId != null">
-                AND b.roomTypeId = #{roomTypeId}
+                AND b.saleRoomTypeId = #{roomTypeId}
             </if>
             <if test="valid != null">
                 AND b.valid = #{valid}

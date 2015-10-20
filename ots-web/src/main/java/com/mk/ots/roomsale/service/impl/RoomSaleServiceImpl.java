@@ -91,6 +91,7 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 			roomPromo.setPromoType(rooms.getPromoType());
 			roomPromo.setPromoValue(rooms.getSaleTypeValue());
 			roomPromo.setPromoLabel(rooms.getSaleLabel());
+			roomPromoDtoList.add(roomPromo);
 		}
 		return roomPromoDtoList;
 	}
