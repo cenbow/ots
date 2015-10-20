@@ -1,4 +1,4 @@
-package com.mk.ots.room.sale.model;
+package com.mk.ots.roomsale.model;
 
 public class TRoomSaleConfig {
     private Integer id;

@@ -1,8 +1,9 @@
-package com.mk.ots.room.sale.controller;
+package com.mk.ots.roomsale.controller;
 
 import com.google.common.collect.Maps;
-import com.mk.ots.room.sale.model.TRoomSale;
-import com.mk.ots.room.sale.service.RoomSaleService;
+import com.mk.ots.roomsale.model.TRoomSale;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import com.mk.ots.roomsale.service.RoomSaleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,4 +43,16 @@ public class RoomSaleController {
 		List<TRoomSale>result=roomSaleService.queryRoomSale(bean);
 		return new ResponseEntity<List<TRoomSale>>(result, HttpStatus.OK);
 	}
+
+	@RequestMapping("/queryRoomSaleConfigInfo")
+	public ResponseEntity<List<TRoomSaleConfigInfo>> queryRoomSaleInfo() {
+		List<TRoomSaleConfigInfo>result = new ArrayList<TRoomSaleConfigInfo>();
+		TRoomSaleConfigInfo info = new TRoomSaleConfigInfo();
+		info.setId(1);
+		info.setSaleValue("50");
+		info.setSaleLabel("经济房");
+		result.add(info);
+		return new ResponseEntity<List<TRoomSaleConfigInfo>>(result, HttpStatus.OK);
+	}
+
 }
