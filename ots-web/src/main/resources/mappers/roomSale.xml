@@ -19,16 +19,16 @@
         <result property="saleName" column="saleName" />
         <result property="saleType" column="saleType" />
         <result property="hotelId" column="hotelId" />
-        <result property="promoName" column="promoName" />
+        <result property="promoName" column="saleName" />
         <result property="fontColor" column="fontColor" />
-        <result property="useDescribe" column="useDescribe" />
+        <result property="description" column="useDescribe" />
         <result property="cityId" column="cityId" />
 	</resultMap>
 
     <sql id="Base_Column_List" >
         a.id, a.roomTypeId,a.oldRoomTypeId,a.roomNo,a.pms,a.createDate,a.salePrice,a.costPrice,
         a.startTime,a.endTime,a.roomId,a.configId,a.isBack,a.saleName,a.saleType,a.hotelId,
-        b.promoName,b.fontColor,b.useDescribe
+           b.fontColor,b.description
     </sql>
 
     <sql id="Base_Query_List" >
@@ -72,9 +72,20 @@
     </sql>
     
     <select id="queryRoomPromoByHotel" resultType="map" parameterType="String">
-    SELECT startTime, endTime 
-    FROM  t_room_sale_config where roomTypeId = #{roomTypeId}
+	SELECT config.roomId as roomid, config.roomTypeId as roomtypeid, config.saleName as salename,
+	info.startTime as starttime, info.endTime as endtime, info.fontColor as namefontcolor,
+	type.fontColor as typefontcolor, type.description as typedesc
+	FROM t_room_sale_config config 
+	join t_room_sale_config_info info on config.saleroomtypeid = info.id 
+	join t_room_sale_type type on info.saletypeid = type.id
+	where config.hotelId = #{hotelId}
  	</select>
+
+    <select id="queryRoomPromoInfoByHotel" resultType="map" parameterType="String">
+        SELECT config.saletype as promotype, config.costprice as promopice
+        FROM t_room_sale_config config
+        where config.hotelId = #{hotelId}
+    </select>
 
     <select id="queryRoomPromoByType" resultType="map" parameterType="String">
     SELECT startTime, endTime 

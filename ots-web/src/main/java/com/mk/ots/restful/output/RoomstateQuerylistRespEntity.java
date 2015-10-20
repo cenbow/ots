@@ -139,7 +139,10 @@ public class RoomstateQuerylistRespEntity implements Serializable {
         private String promoendtime;
         private String promotext;
         private String promoduetime;
-        private String promoduesec;
+        private String promodustartsec;
+        private String promoduendsec;
+        private Long promostatus;
+
         
         public String getPromostarttime() {
 			return promostarttime;
@@ -165,13 +168,32 @@ public class RoomstateQuerylistRespEntity implements Serializable {
 		public void setPromoduetime(String promoduetime) {
 			this.promoduetime = promoduetime;
 		}
-		public String getPromoduesec() {
-			return promoduesec;
-		}
-		public void setPromoduesec(String promoduesec) {
-			this.promoduesec = promoduesec;
-		}
-		public String getIsfocus() {
+
+        public String getPromodustartsec() {
+            return promodustartsec;
+        }
+
+        public void setPromodustartsec(String promodustartsec) {
+            this.promodustartsec = promodustartsec;
+        }
+
+        public String getPromoduendsec() {
+            return promoduendsec;
+        }
+
+        public void setPromoduendsec(String promoduendsec) {
+            this.promoduendsec = promoduendsec;
+        }
+
+        public Long getPromostatus() {
+            return promostatus;
+        }
+
+        public void setPromostatus(Long promostatus) {
+            this.promostatus = promostatus;
+        }
+
+        public String getIsfocus() {
 			return isfocus;
 		}
 		public void setIsfocus(String isfocus) {
