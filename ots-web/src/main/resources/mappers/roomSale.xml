@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mk.ots.mapper.RoomSaleMapper">
 
-	<resultMap id="BaseResultMap" type="com.mk.ots.room.sale.model.TRoomSale">
+	<resultMap id="BaseResultMap" type="com.mk.ots.roomsale.model.TRoomSale">
 	    <result property="id" column="id" />
 	    <result property="roomTypeId" column="roomTypeId" />
 	    <result property="oldRoomTypeId" column="oldRoomTypeId" />
@@ -71,7 +71,7 @@
         </where>
     </sql>
 
-    <select id="queryRoomSale" resultMap="BaseResultMap" parameterType="com.mk.ots.room.sale.model.TRoomSale">
+    <select id="queryRoomSale" resultMap="BaseResultMap" parameterType="com.mk.ots.roomsale.model.TRoomSale">
     SELECT
     <include refid="Base_Column_List"/>
     FROM  t_room_sale a
@@ -88,11 +88,11 @@
            WHERE  a.isBack ='F'
            GROUP BY a.hotelId
     </select>
-    <select id="countRoomSale" resultType="Integer" parameterType="com.mk.ots.room.sale.model.TRoomSale">
+    <select id="countRoomSale" resultType="Integer" parameterType="com.mk.ots.roomsale.model.TRoomSale">
         select count(*) from count_agent_spread
         <include refid="Base_Query_List"/>
     </select>
-    <select id="getOneRoomSale" resultMap="BaseResultMap" parameterType="com.mk.ots.room.sale.model.TRoomSale">
+    <select id="getOneRoomSale" resultMap="BaseResultMap" parameterType="com.mk.ots.roomsale.model.TRoomSale">
         SELECT
         <include refid="Base_Column_List"/>
         FROM  t_room_sale a
@@ -100,7 +100,7 @@
         <include refid="Base_Query_List"/>
         limit 1
     </select>
-    <insert id="saveRoomSale"  parameterType="com.mk.ots.room.sale.model.TRoomSale" >
+    <insert id="saveRoomSale"  parameterType="com.mk.ots.roomsale.model.TRoomSale" >
         INSERT INTO t_room_sale
        (roomTypeId,oldRoomTypeId,roomNo,pms,createDate,salePrice,costPrice,
         startTime,endTime,roomId,configId,isBack,saleName,saleType)
@@ -116,7 +116,7 @@
          delete from t_room_sale where id = #{id}
     </delete>
 
-    <update id="updateRoomSale" parameterType="com.mk.ots.room.sale.model.TRoomSale" >
+    <update id="updateRoomSale" parameterType="com.mk.ots.roomsale.model.TRoomSale" >
         update t_room_sale
         set
          roomTypeId = #{roomTypeId},
@@ -149,7 +149,7 @@
         FROM  t_room_sale WHERE isBack = 'F'
     </select>
 
-    <update id="updateRoomSaleBack" parameterType="com.mk.ots.room.sale.model.TRoomSale" >
+    <update id="updateRoomSaleBack" parameterType="com.mk.ots.roomsale.model.TRoomSale" >
         update t_room_sale
         set isBack =  #{isBack}
         where id = #{id}

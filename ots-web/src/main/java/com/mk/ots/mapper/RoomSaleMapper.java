@@ -1,6 +1,6 @@
 package com.mk.ots.mapper;
 
-import com.mk.ots.room.sale.model.TRoomSale;
+import com.mk.ots.roomsale.model.TRoomSale;
 
 import java.util.List;
 /**

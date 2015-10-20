@@ -147,12 +147,12 @@ public class WalletController {
         rtnMap.put("pageindex", tmppageindex);
         rtnMap.put("pagenum", page.getTotalPages());
         rtnMap.put("datasize", tmpdatasize);
-        List<UWalletCashFlowExtend> result = getuWalletCashFlowExtends(page);
+        List<UWalletCashFlowExtend> result = getWalletCashFlowExtends(page);
         rtnMap.put("result", result);
         return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
     }
 
-    private List<UWalletCashFlowExtend> getuWalletCashFlowExtends(Page<UWalletCashFlow> page) {
+    private List<UWalletCashFlowExtend> getWalletCashFlowExtends(Page<UWalletCashFlow> page) {
         List<UWalletCashFlowExtend> result=new ArrayList<>();
         if (CollectionUtils.isNotEmpty(page.getResult())){
             for(UWalletCashFlow uWalletCashFlow:page.getResult()){
@@ -177,8 +177,14 @@ public class WalletController {
                         if (null != otaOrder) {
                             String hotelName = otaOrder.getHotelName();
                             extend.setHotelName(hotelName);
+                        } else {
+                            extend.setHotelName("");
                         }
+                    } else {
+                        extend.setHotelName("");
                     }
+                } else {
+                    extend.setHotelName("");
                 }
                 result.add(extend);
             }

@@ -81,7 +81,7 @@ import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
 import com.mk.ots.restful.output.SearchPositionsDistanceRespEntity;
 import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
-import com.mk.ots.room.sale.service.RoomSaleService;
+import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.enums.PositionTypeEnum;
 import com.mk.ots.search.model.PositionTypeModel;
 import com.mk.ots.search.model.SAreaInfo;
