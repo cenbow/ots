@@ -21,5 +21,5 @@ public interface RoomSaleMapper {
 
 	public List<Map<String, Object>> queryRoomPromoByType(String roomTypeId);
 	
-	public List<Map<String, Object>> queryRoomPromoByHotel(String hotelId);
+	public List<Map<String, Object>> queryRoomPromoInfoByHotel(String hotelId);
 }

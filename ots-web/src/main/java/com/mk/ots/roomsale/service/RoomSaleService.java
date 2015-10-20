@@ -24,8 +24,6 @@ public interface RoomSaleService {
 	/**
 	 * map contains following fields:
 	 * <p>
-	 * promotype
-	 * <p>
 	 * roomid
 	 * <p>
 	 * roomtypeid
@@ -47,4 +45,6 @@ public interface RoomSaleService {
 	 * @throws Exception
 	 */
 	public List<Map<String, Object>> queryRoomPromoByHotel(String hotelId) throws Exception;
+
+	public List<Map<String, Object>> queryRoomPromoInfoByHotel(String hotelId) throws Exception;
 }
