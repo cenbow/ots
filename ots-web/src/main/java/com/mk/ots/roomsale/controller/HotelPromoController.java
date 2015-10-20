@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  *
  * 特价类型接口
@@ -63,8 +64,8 @@ public class HotelPromoController {
                 result.put(ServiceOutput.STR_MSG_ERRMSG, "没有活动");
                 return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
             }
-            // todo cityid not
-	 	    List<TRoomSaleConfigInfo> roomSaleConfigInfoList= roomSaleConfigInfoService.queryListBySaleTypeId(Integer.parseInt(saletypeid),start,limit);
+
+	 	    List<TRoomSaleConfigInfo> roomSaleConfigInfoList= roomSaleConfigInfoService.queryListBySaleTypeId(cityid,Integer.parseInt(saletypeid),start,limit);
 
             List<JSONObject> list  = new ArrayList<JSONObject>();
             if(CollectionUtils.isNotEmpty(roomSaleConfigInfoList)) {
@@ -82,27 +83,6 @@ public class HotelPromoController {
                 }
             }
 
-//			JSONObject ptype1 = new JSONObject();
-//			ptype1.put("promotypeid", 1);
-//			ptype1.put("promotypetext", "经济房");
-//			ptype1.put("promotypeprice", 50);
-//			ptype1.put("promosec", 1890);
-//			list.add(ptype1);
-//
-//			JSONObject ptype2 = new JSONObject();
-//			ptype2.put("promotypeid", 2);
-//			ptype2.put("promotypetext", "舒适房");
-//			ptype2.put("promotypeprice", 80);
-//			ptype2.put("promosec", 1995);
-//			list.add(ptype2);
-//
-//			JSONObject ptype3 = new JSONObject();
-//			ptype3.put("promotypeid", 3);
-//			ptype3.put("promotypetext", "豪华房");
-//			ptype3.put("promotypeprice", 120);
-//			ptype3.put("promosec", 2090);
-//			list.add(ptype3);
-
 			result.put("promotypes", list);
 
 	    	result.put(ServiceOutput.STR_MSG_SUCCESS, true);
@@ -117,7 +97,5 @@ public class HotelPromoController {
 		}
 		return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
     }
-
-
 
 }

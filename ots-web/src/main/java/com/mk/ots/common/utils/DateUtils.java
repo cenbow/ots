@@ -1529,29 +1529,41 @@ public class DateUtils extends Object {
 	    return days.intValue();
 	}
 
-    /**
-     * seconds
-     * @param startDate
-     * @param endDate
-     * @param startTime
-     * @return
-     */
     public static long calDiffTime(Date startDate,Date endDate, Time startTime) {
         Calendar cal=Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
 
         if (DateUtils.addDays(endDate,1).before(sysTime)){
             return Constant.PROMO_FININSHED;  //活动已结束
-        } else if (startDate.after(sysTime)){
+        } else if (startDate.after(sysTime)){    //活動未開始
             cal.setTime(startDate);
-            getCalTime(startTime, cal);
-            return DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime),DateUtils.formatDatetime(cal.getTime()));
+            return timeDiff(startTime, cal, sysTime);
         }else if (DateUtils.addDays(endDate,1).after(sysTime)&&startDate.before(sysTime)){
             cal.setTime(sysTime);
-            getCalTime(startTime, cal);
-            return DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime),DateUtils.formatDatetime(cal.getTime()));
+            return timeDiff(startTime, cal, sysTime);
         }
         return 0;
+    }
+
+    public static long timeDiff(Time startTime, Calendar cal, java.util.Date sysTime) {
+        getCalTime(startTime, cal);
+        long diff= DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime), DateUtils.formatDatetime(cal.getTime()));
+        //活動開始     diff  =0
+        if (diff<0){
+            diff=0;
+        }
+        return diff;
+    }
+
+    public static void getCalTime(Time startTime, Calendar cal) {
+        int year=cal.get(Calendar.YEAR);
+        int month=cal.get(Calendar.MONTH);
+        int day=cal.get(Calendar.DAY_OF_MONTH);
+        cal.setTime(startTime);
+        int hour= cal.get(Calendar.HOUR_OF_DAY);
+        int min= cal.get(Calendar.MINUTE);
+        int sec = cal.get(Calendar.SECOND);
+        cal.set(year,month,day,hour,min,sec);
     }
 
     public static long promoStatus(Date startDate, Date endDate, Time startTime, Time endTime) {
@@ -1610,17 +1622,6 @@ public class DateUtils extends Object {
 
         LocalDateTime endExTime = LocalDateTime.fromDateFields(cal.getTime());
         return Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
-    }
-
-    public static void getCalTime(Date startTime, Calendar cal) {
-        int year=cal.get(Calendar.YEAR);
-        int month=cal.get(Calendar.MONTH);
-        int day=cal.get(Calendar.DAY_OF_MONTH);
-        cal.setTime(startTime);
-        int hour= cal.get(Calendar.HOUR_OF_DAY);
-        int min= cal.get(Calendar.MINUTE);
-        int sec = cal.get(Calendar.SECOND);
-        cal.set(year,month,day,hour,min,sec);
     }
 
 
