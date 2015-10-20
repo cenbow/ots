@@ -14,5 +14,5 @@ public interface RoomSaleService {
     public TRoomSale getOneRoomSale(TRoomSale bean);
     public List<TRoomSale> queryRoomSale(TRoomSale bean);
     public List<String> queryPromoTime();
-    public Map<String, Object> queryRoomPromoTime(String roomTypeId) throws Exception;
+    public Map<String, Object> queryRoomPromoByType(String roomTypeId) throws Exception;
 }

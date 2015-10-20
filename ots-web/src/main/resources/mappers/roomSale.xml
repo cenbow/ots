@@ -71,12 +71,12 @@
         </where>
     </sql>
     
-    <select id="queryRoomPromoByHotel" resultMap="String" parameterType="String">
+    <select id="queryRoomPromoByHotel" resultType="map" parameterType="String">
     SELECT startTime, endTime 
     FROM  t_room_sale_config where roomTypeId = #{roomTypeId}
  	</select>
 
-    <select id="queryRoomPromoByType" resultMap="String" parameterType="String">
+    <select id="queryRoomPromoByType" resultType="map" parameterType="String">
     SELECT startTime, endTime 
     FROM  t_room_sale_config where roomTypeId = #{roomTypeId}
  	</select>

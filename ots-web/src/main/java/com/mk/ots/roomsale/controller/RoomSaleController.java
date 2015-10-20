@@ -55,14 +55,15 @@ public class RoomSaleController {
 	public ResponseEntity<Map<String, Object>> queryPromoByTypeId(String roomTypeId) {
 		Map<String, Object> result = null;
 		try {
-			result = roomSaleService.queryRoomPromoTime(roomTypeId);
+			result = roomSaleService.queryRoomPromoByType(roomTypeId);
 			return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
 		} catch (Exception ex) {
 			logger.error("failed to queryPromoByTypeId", ex);
 			return new ResponseEntity<Map<String, Object>>(new HashMap<String, Object>(), HttpStatus.BAD_REQUEST);
 		}
-
 	}
+	
+	
 
 	@RequestMapping("/queryRoomSaleConfigInfo")
 	public ResponseEntity<List<TRoomSaleConfigInfo>> queryRoomSaleInfo() {
@@ -76,3 +77,4 @@ public class RoomSaleController {
 	}
 
 }
+
