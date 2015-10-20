@@ -20,6 +20,7 @@ import java.util.Map;
 * RoomSaleMapper.
 * @author kangxiaolong.
 */
+
 @Controller
 @RequestMapping(value="/roomsale", method=RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 public class RoomSaleController {
