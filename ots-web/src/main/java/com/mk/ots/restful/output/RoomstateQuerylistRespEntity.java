@@ -109,6 +109,8 @@ public class RoomstateQuerylistRespEntity implements Serializable {
         private String bedlength;
         //卫浴类型
         private String bathroomtype; 
+        
+        
         //洗浴方式
 //        private Long bathmode;
         
@@ -133,9 +135,43 @@ public class RoomstateQuerylistRespEntity implements Serializable {
         // mike 3.1
         private String promotype;
         private String isonpromo;
-
-
-        public String getIsfocus() {
+        private String promostarttime;
+        private String promoendtime;
+        private String promotext;
+        private String promoduetime;
+        private String promoduesec;
+        
+        public String getPromostarttime() {
+			return promostarttime;
+		}
+		public void setPromostarttime(String promostarttime) {
+			this.promostarttime = promostarttime;
+		}
+		public String getPromoendtime() {
+			return promoendtime;
+		}
+		public void setPromoendtime(String promoendtime) {
+			this.promoendtime = promoendtime;
+		}
+		public String getPromotext() {
+			return promotext;
+		}
+		public void setPromotext(String promotext) {
+			this.promotext = promotext;
+		}
+		public String getPromoduetime() {
+			return promoduetime;
+		}
+		public void setPromoduetime(String promoduetime) {
+			this.promoduetime = promoduetime;
+		}
+		public String getPromoduesec() {
+			return promoduesec;
+		}
+		public void setPromoduesec(String promoduesec) {
+			this.promoduesec = promoduesec;
+		}
+		public String getIsfocus() {
 			return isfocus;
 		}
 		public void setIsfocus(String isfocus) {

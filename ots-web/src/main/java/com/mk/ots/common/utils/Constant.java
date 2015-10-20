@@ -211,4 +211,15 @@ public class Constant {
 	public static final Integer TONIGHT_PROMO_VIEWTYPE = 3;
 
 	public static final String WEIXIN_CALLMETHOD = "3";
+
+	public static final Integer ANDROID_PLATFORM = 1;
+
+	public static final Integer IOS_PLATFORM = 2;
+
+	public static final Integer WEIXIN_PLATFORM = 4;
+
+	public static final Integer CITY_RECOMMEND_ITEM_LIMT = 1;
+	public static final Integer RECOMMEND_ITEM_LIMT = 4;
+
+	public static final Integer RECOMMEND_GLOBAL = -1;
 }

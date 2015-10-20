@@ -1,8 +1,9 @@
 package com.mk.ots.roomsale.service;
 
-import com.mk.ots.roomsale.model.TRoomSale;
-
 import java.util.List;
+import java.util.Map;
+
+import com.mk.ots.roomsale.model.TRoomSale;
 
 /**
  * RoomSaleMapper.
@@ -13,4 +14,5 @@ public interface RoomSaleService {
     public TRoomSale getOneRoomSale(TRoomSale bean);
     public List<TRoomSale> queryRoomSale(TRoomSale bean);
     public List<String> queryPromoTime();
+    public Map<String, Object> queryRoomPromoTime(String roomTypeId) throws Exception;
 }
