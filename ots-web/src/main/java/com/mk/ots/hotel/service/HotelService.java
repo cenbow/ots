@@ -91,7 +91,9 @@ import com.mk.ots.order.service.OrderService;
 import com.mk.ots.price.dao.BasePriceDAO;
 import com.mk.ots.price.dao.PriceDAO;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
+import com.mk.ots.roomsale.model.RoomPromoDto;
 import com.mk.ots.roomsale.model.TRoomSale;
+import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.score.dao.ScoreDAO;
 import com.mk.ots.ticket.dao.BHotelStatDao;
@@ -447,7 +449,7 @@ public class HotelService {
 
 					List<Map<String, Object>> promoinfo;
 
-					promoinfo = roomSaleService.queryRoomPromoByHotel(hotelid);
+					promoinfo = roomSaleService.queryRoomPromoInfoByHotel(hotelid);
 					if (promoinfo == null) {
 						promoinfo = new ArrayList<>();
 					}
@@ -1546,10 +1548,6 @@ public class HotelService {
 		return freeRoomCount; // 可订房间数
 	}
 
-	private Integer mockIsRoomTypePromote(Long roomTypeId) {
-		return 0;
-	}
-
 	/**
 	 * calculate room vacancy for promo rooms
 	 * 
@@ -1576,11 +1574,24 @@ public class HotelService {
 
 		for (TRoomModel roomModel : roomModels) {
 			Long curRoomTypeId = roomModel.getRoomtypeid();
+			Long roomid = roomModel.getId();
 
-			/**
-			 * TODO: about to replace mock
-			 */
-			Integer curPromoType = mockIsRoomTypePromote(curRoomTypeId);
+			TRoomSaleConfig config = new TRoomSaleConfig();
+			config.setHotelId(hotelid == null ? 0 : hotelid.intValue());
+			config.setRoomId(roomid == null ? 0 : roomid.intValue());
+			config.setRoomTypeId(curRoomTypeId == null ? 0 : curRoomTypeId.intValue());
+
+			Integer curPromoType = 0;
+			try {
+				List<RoomPromoDto> promo = roomSaleService.queryRoomPromoByHotel(config);
+
+				if (promo.size() > 0) {
+					curPromoType = Integer.parseInt(promo.get(0).getPromoType());
+				}
+			} catch (Exception ex) {
+				logger.warn(String.format("failed to queryRoomPromoByHotel, roomid:%s; roomtypeid:%s", roomid,
+						curRoomTypeId), ex);
+			}
 
 			if (curPromoType != null && promoType == curPromoType) {
 				RoomstateQuerylistRespEntity.Room room = new RoomstateQuerylistRespEntity().new Room();
