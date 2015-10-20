@@ -13,8 +13,8 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import com.mk.ots.common.enums.*;
-import com.mk.ots.room.sale.model.TRoomSale;
-import com.mk.ots.room.sale.service.RoomSaleService;
+import com.mk.ots.roomsale.model.TRoomSale;
+import com.mk.ots.roomsale.service.RoomSaleService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -1243,7 +1243,7 @@ public class PayService implements IPayService {
                 tRoomSale.setRoomId((int)otaRoomOrder.getRoomId());
                 TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
                 //TODO
-                //allcost = allcost.add(resultRoomSale.getSetTleValue());
+//                allcost = allcost.add(resultRoomSale.getSetTleValue());
             }
         }else{
             for (OtaRoomOrder otaRoomOrder : roomOrdrs) {
