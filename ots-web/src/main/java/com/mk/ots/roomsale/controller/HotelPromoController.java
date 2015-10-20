@@ -68,11 +68,15 @@ public class HotelPromoController {
             List<JSONObject> list  = new ArrayList<JSONObject>();
             if(CollectionUtils.isNotEmpty(roomSaleConfigInfoList)) {
                 for(TRoomSaleConfigInfo saleConfigInfo:roomSaleConfigInfoList){
+                    long sec=calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),saleConfigInfo.getStartTime());
+                    if (sec<0){
+                        continue;
+                    }
                     JSONObject ptype1 = new JSONObject();
                     ptype1.put("promotypeid", saleConfigInfo.getId());
                     ptype1.put("promotypetext", saleConfigInfo.getSaleLabel());
                     ptype1.put("promotypeprice", saleConfigInfo.getSaleValue());
-                    ptype1.put("promosec", calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),saleConfigInfo.getStartTime()));
+                    ptype1.put("promosec", sec/1000);          //秒
                     list.add(ptype1);
                 }
             }
@@ -124,16 +128,16 @@ public class HotelPromoController {
         Calendar cal=Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
 
-        if (endDate.before(sysTime)){
+        if (DateUtils.addDays(endDate,1).before(sysTime)){
             return -1;  //活动已结束
         } else if (startDate.after(sysTime)){
             cal.setTime(startDate);
             getCalTime(startTime, cal);
-            return DateUtils.getDiffTime(DateUtils.formatDatetime(cal.getTime()),DateUtils.formatDatetime(sysTime));
-        }else if (endDate.after(sysTime)&&startDate.before(sysTime)){
+            return DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime),DateUtils.formatDatetime(cal.getTime()));
+        }else if (DateUtils.addDays(endDate,1).after(sysTime)&&startDate.before(sysTime)){
             cal.setTime(sysTime);
             getCalTime(startTime, cal);
-            return DateUtils.getDiffTime(DateUtils.formatDatetime(cal.getTime()),DateUtils.formatDatetime(sysTime));
+            return DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime),DateUtils.formatDatetime(cal.getTime()));
         }
         return 0;
     }
@@ -143,7 +147,7 @@ public class HotelPromoController {
         int month=cal.get(Calendar.MONTH);
         int day=cal.get(Calendar.DAY_OF_MONTH);
         cal.setTime(startTime);
-        int hour= cal.get(Calendar.HOUR);
+        int hour= cal.get(Calendar.HOUR_OF_DAY);
         int min= cal.get(Calendar.MINUTE);
         int sec = cal.get(Calendar.SECOND);
         cal.set(year,month,day,hour,min,sec);

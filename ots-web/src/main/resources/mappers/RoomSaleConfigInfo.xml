@@ -62,11 +62,16 @@
         </where>
     </sql>
 
-    <select id="queryListBySaleTypeId" resultMap="BaseResultMap" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfigInfo">
+    <select id="queryListBySaleTypeId" resultMap="BaseResultMap" parameterType="java.util.Map">
         SELECT
         <include refid="Base_Column_List"/>
         FROM  t_room_sale_config_info a
-        <include refid="Base_Query_List"/>
+        <where>
+              a.valid ='T'
+            <if test="saleTypeId != null">
+                AND a.saleTypeId = #{saleTypeId}
+            </if>
+        </where>
         limit ${start} , ${limit}
     </select>
 

@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -19,6 +21,10 @@ public class RoomSaleConfigInfoServiceImpl implements RoomSaleConfigInfoService 
 
 
     public List<TRoomSaleConfigInfo> queryListBySaleTypeId(int saleTypeId,int start,int limit){
-        return roomSaleConfigInfoMapper.queryListBySaleTypeId(saleTypeId,start,limit);
+        Map<String,Object> map=new HashMap<>();
+        map.put("saleTypeId",saleTypeId);
+        map.put("start",start);
+        map.put("limit",limit);
+        return roomSaleConfigInfoMapper.queryListBySaleTypeId(map);
     }
 }
