@@ -67,4 +67,10 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 			throw new Exception(String.format("failed to queryRoomPromoByType %s", roomTypeId), ex);
 		}
 	}
+
+	@Override
+	public List<Map<String, Object>> queryRoomPromoByHotel(String hotelId) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
