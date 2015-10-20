@@ -58,7 +58,7 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		return promoTime;
 	}
 
-	public Map<String, Object> queryRoomPromoTime(String roomTypeId) throws Exception {
+	public Map<String, Object> queryRoomPromoByType(String roomTypeId) throws Exception {
 		try {
 			List<Map<String, Object>> saleRoomList = roomSaleMapper.queryRoomPromoByType(roomTypeId);
 			return saleRoomList.get(0);
