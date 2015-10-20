@@ -62,7 +62,7 @@
         </where>
     </sql>
 
-    <select id="queryListBySaleTypeId" resultMap="BaseResultMap" parameterType="com.mk.ots.roomsale.model.TRoomSale">
+    <select id="queryListBySaleTypeId" resultMap="BaseResultMap" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfigInfo">
         SELECT
         <include refid="Base_Column_List"/>
         FROM  t_room_sale_config_info a
