@@ -45,4 +45,6 @@ public interface RoomSaleService {
 	 * @throws Exception
 	 */
 	public List<Map<String, Object>> queryRoomPromoByHotel(String hotelId) throws Exception;
+
+	public List<Map<String, Object>> queryRoomPromoInfoByHotel(String hotelId) throws Exception;
 }

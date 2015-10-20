@@ -451,7 +451,7 @@ public class HotelService {
 
 					List<Map<String, Object>> promoinfo;
 
-					promoinfo = roomSaleService.queryRoomPromoByHotel(hotelid);
+					promoinfo = roomSaleService.queryRoomPromoInfoByHotel(hotelid);
 					if (promoinfo == null){
 						promoinfo = new ArrayList<>();
 					}

@@ -1,17 +1,16 @@
 package com.mk.ots.roomsale.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.mapper.RoomSaleMapper;
 import com.mk.ots.roomsale.model.TRoomSale;
 import com.mk.ots.roomsale.service.RoomSaleService;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * RoomSaleMapper.
@@ -76,6 +75,17 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		} catch (Exception ex) {
 			logger.error(String.format("failed to queryRoomPromoByHotel %s", hotelId), ex);
 			throw new Exception(String.format("failed to queryRoomPromoByHotel %s", hotelId), ex);
+		}
+	}
+
+	@Override
+	public List<Map<String, Object>> queryRoomPromoInfoByHotel(String hotelId) throws Exception {
+		try {
+			List<Map<String, Object>> saleRoomList = roomSaleMapper.queryRoomPromoInfoByHotel(hotelId);
+			return saleRoomList;
+		} catch (Exception ex) {
+			logger.error(String.format("failed to queryRoomPromoInfoByHotel %s", hotelId), ex);
+			throw new Exception(String.format("failed to queryRoomPromoInfoByHotel %s", hotelId), ex);
 		}
 	}
 }
