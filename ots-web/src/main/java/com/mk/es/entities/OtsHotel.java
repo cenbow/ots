@@ -133,20 +133,7 @@ public class OtsHotel {
     // mike3.1 添加今夜特价房信息
 	private String isonpromo;
 
-    /** 是否为特价房酒店 */
-    private String promotype;
 
-    /** 特价文字*/
-    private String promotext;
-
-    /** 特价文字颜色 */
-    private String promotextcolor;
-
-    /** 特价房开始时间 */
-    private String promostarttime;
-
-    /** 特价房结束时间 */
-    private String promoendtime;
     private List<Map<String, Object>> promoinfo;
 
 
@@ -546,46 +533,6 @@ public class OtsHotel {
 
     public void setHotelphone(String hotelphone) {
         this.hotelphone = hotelphone;
-    }
-
-    public String getPromotype() {
-        return promotype;
-    }
-
-    public void setPromotype(String promotype) {
-        this.promotype = promotype;
-    }
-
-    public String getPromotext() {
-        return promotext;
-    }
-
-    public void setPromotext(String promotext) {
-        this.promotext = promotext;
-    }
-
-    public String getPromotextcolor() {
-        return promotextcolor;
-    }
-
-    public void setPromotextcolor(String promotextcolor) {
-        this.promotextcolor = promotextcolor;
-    }
-
-    public String getPromostarttime() {
-        return promostarttime;
-    }
-
-    public void setPromostarttime(String promostarttime) {
-        this.promostarttime = promostarttime;
-    }
-
-    public String getPromoendtime() {
-        return promoendtime;
-    }
-
-    public void setPromoendtime(String promoendtime) {
-        this.promoendtime = promoendtime;
     }
 
     public List<Map<String, Object>> getPromoinfo() {

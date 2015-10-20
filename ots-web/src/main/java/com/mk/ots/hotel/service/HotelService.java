@@ -456,7 +456,7 @@ public class HotelService {
 
 					List<Map<String, Object>> promoinfo;
 
-					promoinfo = roomSaleService.queryRoomSale() ; //TODO 小龙
+					promoinfo = roomSaleService.; //TODO 小龙
 					if (promoinfo == null){
 						promoinfo = new ArrayList<>();
 					}

@@ -61,7 +61,7 @@
 		<appender-ref ref="infoFile" />
 	</logger>
 
-	<root level="DEBUG">
+	<root level="info">
 		<appender-ref ref="infoFile" />
 	</root>
 

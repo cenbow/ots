@@ -2,6 +2,7 @@ package com.mk.ots.roomsale.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +53,18 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 			if (logger.isInfoEnabled()) {
 				logger.info("no saleRoom has been found in queryPromoTime");
 			}
-
 		}
 
 		return promoTime;
+	}
+
+	public Map<String, Object> queryRoomPromoTime(String roomTypeId) throws Exception {
+		try {
+			List<Map<String, Object>> saleRoomList = roomSaleMapper.queryRoomPromoByType(roomTypeId);
+			return saleRoomList.get(0);
+		} catch (Exception ex) {
+			logger.error(String.format("failed to queryRoomPromoByType %s", roomTypeId), ex);
+			throw new Exception(String.format("failed to queryRoomPromoByType %s", roomTypeId), ex);
+		}
 	}
 }
