@@ -1,4 +1,4 @@
-package com.mk.ots.room.sale.service.impl;
+package com.mk.ots.roomsale.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,10 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mk.ots.hotel.service.HotelService;
-import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.mapper.RoomSaleMapper;
-import com.mk.ots.room.sale.model.TRoomSale;
-import com.mk.ots.room.sale.service.RoomSaleService;
+import com.mk.ots.roomsale.model.TRoomSale;
+import com.mk.ots.roomsale.service.RoomSaleService;
 
 /**
  * RoomSaleMapper.

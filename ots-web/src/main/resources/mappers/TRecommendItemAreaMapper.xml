@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.TRecommendItemAreaMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.recommend.model.TRecommendItemArea" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="itemid" property="itemid" jdbcType="BIGINT" />
+    <result column="proid" property="proid" jdbcType="BIGINT" />
+    <result column="cityid" property="cityid" jdbcType="BIGINT" />
+    <result column="proName" property="proname" jdbcType="VARCHAR" />
+    <result column="cityName" property="cityname" jdbcType="VARCHAR" />
+    <result column="deleted" property="deleted" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, itemid, proid, cityid, proName, cityName, deleted
+  </sql>
+  <select id="selectByCityId" parameterType="map" resultMap="BaseResultMap" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_recommenditem_area t
+    where
+    t.deleted = 'F'
+    <if test="cityid != null">
+      and `cityid` = #{cityid,jdbcType=BIGINT}
+    </if>
+
+
+  </select>
+
+</mapper>

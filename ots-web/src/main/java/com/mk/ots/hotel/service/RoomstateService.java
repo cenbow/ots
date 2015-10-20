@@ -1,7 +1,6 @@
 
 package com.mk.ots.hotel.service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.google.common.collect.Lists;
@@ -10,7 +9,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mk.framework.AppUtils;
 import com.mk.framework.util.SerializeUtil;
-import com.mk.framework.util.UrlUtils;
 import com.mk.orm.kit.JsonKit;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.utils.Constant;
@@ -21,20 +19,17 @@ import com.mk.ots.mapper.*;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.OtaRoomOrder;
 import com.mk.ots.order.model.PmsRoomOrderModel;
-import com.mk.ots.order.service.OrderUtil;
 import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.room.bean.RoomCensus;
-import com.mk.ots.room.sale.model.TRoomSale;
-import com.mk.ots.room.sale.service.RoomSaleService;
+import com.mk.ots.roomsale.model.TRoomSale;
+import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.web.ServiceOutput;
 import com.mk.pms.myenum.PmsRoomOrderStatusEnum;
 import com.mk.pms.room.bean.RoomLockJsonBean;
 import com.mk.pms.room.bean.RoomLockPo;
 import com.mk.pms.room.service.PmsRoomService;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
