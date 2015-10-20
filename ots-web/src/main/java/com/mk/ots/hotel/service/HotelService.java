@@ -382,9 +382,6 @@ public class HotelService {
 						facies.add(item.getColumns());
 					}
 
-
-
-
 					OtsHotel hotel = new OtsHotel();
 					hotel.setHotelid(bean.getId().toString());
 					hotel.setHotelname(bean.getHotelname() == null ? "" : bean.getHotelname());
@@ -437,7 +434,6 @@ public class HotelService {
 
 					// mike3.1 添加特价房
 
-
 					TRoomSale roomSale = new TRoomSale();
 					Integer hotelId = Integer.valueOf(bean.getId().toString());
 					roomSale.setHotelId(hotelId);
@@ -445,18 +441,18 @@ public class HotelService {
 
 					if (result != null) {
 						hotel.setIsonpromo("1");
-					}else {
+					} else {
 						hotel.setIsonpromo("0");
 					}
 
 					List<Map<String, Object>> promoinfo;
 
 					promoinfo = roomSaleService.queryRoomPromoByHotel(hotelid);
-					if (promoinfo == null){
+					if (promoinfo == null) {
 						promoinfo = new ArrayList<>();
 					}
 
-                    hotel.setPromoinfo(promoinfo);
+					hotel.setPromoinfo(promoinfo);
 					// 先把新的酒店放到集合中，后面做批量添加
 					coll.add(hotel);
 					logger.info("hotelid: {} added in collections and will be add in elasticsearch document.", hotelid);
@@ -628,7 +624,7 @@ public class HotelService {
 				 * added in mike3.1
 				 */
 				hotel.setIsonpromo("0");
-				
+
 				// 先把新的酒店放到集合中，后面做批量添加
 				addList.add(hotel);
 				logger.info("not pms hotelid: {} added in collections and will be add in elasticsearch document.",
@@ -1548,6 +1544,64 @@ public class HotelService {
 			logger.error("getAvlblRoomNum hotelid: {} exception {}", hotelid, e);
 		}
 		return freeRoomCount; // 可订房间数
+	}
+
+	private Integer mockIsRoomTypePromote(Long roomTypeId) {
+		return 0;
+	}
+
+	/**
+	 * calculate room vacancy for promo rooms
+	 * 
+	 * @param roomTypeId
+	 * @param roomModels
+	 * @param hotelid
+	 * @param isonline
+	 * @param starttime
+	 * @param endtime
+	 * @param lockRoomsCache
+	 * @return
+	 */
+	public Integer calPromoVacants(Integer promoType, Long hotelid, String isnewpms, String isvisible, String isonline,
+			String starttime, String endtime) throws Exception {
+		Integer vacants = 0;
+
+		List<TRoomModel> roomModels = tRoomMapper.findRoomsByHotelId(hotelid);
+		Map<String, String> lockRoomsCache = null;
+		try {
+			lockRoomsCache = roomstateService.findBookedRoomsByHotelIdNewPms(hotelid, starttime, endtime);
+		} catch (Exception ex) {
+			throw new Exception(String.format("failed to load cache for hotelId %s", hotelid), ex);
+		}
+
+		for (TRoomModel roomModel : roomModels) {
+			Long curRoomTypeId = roomModel.getRoomtypeid();
+
+			/**
+			 * TODO: about to replace mock
+			 */
+			Integer curPromoType = mockIsRoomTypePromote(curRoomTypeId);
+
+			if (curPromoType != null && promoType == curPromoType) {
+				RoomstateQuerylistRespEntity.Room room = new RoomstateQuerylistRespEntity().new Room();
+				room.setRoomid(roomModel.getId());
+				room.setRoomno(roomModel.getName());
+
+				try {
+					this.processRoomState(room, hotelid, starttime, endtime, lockRoomsCache);
+				} catch (Exception ex) {
+					logger.error(String.format("failed to calculate room vacancy for room %s", roomModel.getId()), ex);
+					continue;
+				}
+
+				if (room.getRoomstatus().equals(roomstateService.ROOM_STATUS_VC)) {
+					vacants++;
+				}
+			}
+
+		}
+
+		return vacants;
 	}
 
 	/**
