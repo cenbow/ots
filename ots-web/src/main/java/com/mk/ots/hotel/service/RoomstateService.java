@@ -1,7 +1,6 @@
 
 package com.mk.ots.hotel.service;
 
-<<<<<<< HEAD
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,8 +17,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-=======
->>>>>>> deeaa0c6aeb48fad29abcabc3f1fa1864756d5e3
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.google.common.collect.Lists;
@@ -65,14 +62,6 @@ import com.mk.pms.myenum.PmsRoomOrderStatusEnum;
 import com.mk.pms.room.bean.RoomLockJsonBean;
 import com.mk.pms.room.bean.RoomLockPo;
 import com.mk.pms.room.service.PmsRoomService;
-<<<<<<< HEAD
-=======
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import redis.clients.jedis.Jedis;
->>>>>>> deeaa0c6aeb48fad29abcabc3f1fa1864756d5e3
 
 import redis.clients.jedis.Jedis;
 
