@@ -34,7 +34,7 @@ public class HotelPromoController {
 	@RequestMapping(value = "/promo/querytypelist", method = RequestMethod.POST)
 	@ResponseBody
     public ResponseEntity<Map<String, Object>> querytypelist(ParamBaseBean pbb,String cityid,Integer page,Integer limit) {
-    	logger.info("HotelPromoController::querytypelist::params{}  begin", cityid+","+page+","+limit);
+    	logger.info("HotelPromoController::querytypelist::params{}  begin", pbb+","+cityid+","+page+","+limit);
     	Map<String, Object> result = new HashMap<String, Object>();
     	try {
 
@@ -48,9 +48,8 @@ public class HotelPromoController {
 	    	
 	 	    int start = (page - 1) * limit;
 
-			//TODO 小龙 service
-	 	  // List<Map<String, Object>> list = hotelCollectionService.querylist(token,citycode,start,limit);
-	 	   // int count = hotelCollectionService.readonlyHotelCollectedCount(token);
+//	 	    List<Map<String, Object>> list = hotelCollectionService.querylist(token,citycode,start,limit);
+//	 	   int count = hotelCollectionService.readonlyHotelCollectedCount(token);
 			List<JSONObject> list  = new ArrayList<JSONObject>();
 
 			JSONObject ptype1 = new JSONObject();
