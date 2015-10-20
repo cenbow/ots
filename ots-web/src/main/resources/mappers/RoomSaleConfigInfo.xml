@@ -72,8 +72,8 @@
             <if test="saleTypeId != null">
                 AND a.saleTypeId = #{saleTypeId}
             </if>
-            <if test="cityCode != null">
-                AND b.cityCode = #{cityCode}
+            <if test="citycode != null">
+                AND b.citycode = #{citycode}
             </if>
         </where>
         limit ${start} , ${limit}
