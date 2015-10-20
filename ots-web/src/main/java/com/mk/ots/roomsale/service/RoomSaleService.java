@@ -1,6 +1,6 @@
-package com.mk.ots.room.sale.service;
+package com.mk.ots.roomsale.service;
 
-import com.mk.ots.room.sale.model.TRoomSale;
+import com.mk.ots.roomsale.model.TRoomSale;
 
 import java.util.List;
 

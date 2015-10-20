@@ -21,10 +21,8 @@ import javax.xml.ws.http.HTTPException;
 
 import com.mk.framework.util.*;
 import com.mk.ots.common.enums.*;
-import com.mk.ots.remote.RoomRemoteService;
-import com.mk.ots.remote.json.RoomSale;
-import com.mk.ots.room.sale.model.TRoomSale;
-import com.mk.ots.room.sale.service.RoomSaleService;
+import com.mk.ots.roomsale.model.TRoomSale;
+import com.mk.ots.roomsale.service.RoomSaleService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;

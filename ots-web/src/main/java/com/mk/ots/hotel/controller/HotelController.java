@@ -47,7 +47,7 @@ import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
-import com.mk.ots.room.sale.service.RoomSaleService;
+import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
 
