@@ -1,8 +1,6 @@
 package com.mk.ots.roomsale.service;
 
-import com.mk.ots.roomsale.model.TRoomSale;
-import com.mk.ots.roomsale.model.TRoomSaleConfig;
-import com.mk.ots.roomsale.model.TRoomSaleToIndex;
+import com.mk.ots.roomsale.model.*;
 
 import java.util.List;
 import java.util.Map;
@@ -46,9 +44,9 @@ public interface RoomSaleService {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Map<String, Object>> queryRoomPromoByHotel(String hotelId) throws Exception;
+	public List<RoomPromoDto> queryRoomPromoByHotel(TRoomSaleConfig bean);
 
 	public List<Map<String, Object>> queryRoomPromoInfoByHotel(String hotelId) throws Exception;
 	public Boolean checkRoomSale(TRoomSaleConfig bean);
-	public List<TRoomSaleToIndex> getUpdateIndexList(TRoomSaleConfig bean);
+	public List<RoomSaleToIndexDto> getUpdateIndexList(TRoomSaleConfig bean);
 }
