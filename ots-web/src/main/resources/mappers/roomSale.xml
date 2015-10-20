@@ -78,7 +78,7 @@
 	FROM t_room_sale_config config 
 	join t_room_sale_config_info info on config.saleroomtypeid = info.id 
 	join t_room_sale_type type on info.saletypeid = type.id
-	where info.hotelId = #{hotelId}
+	where config.hotelId = #{hotelId}
  	</select>
 
     <select id="queryRoomPromoByType" resultType="map" parameterType="String">
