@@ -24,6 +24,8 @@ public interface RoomSaleService {
 	/**
 	 * map contains following fields:
 	 * <p>
+	 * promotype
+	 * <p>
 	 * roomid
 	 * <p>
 	 * roomtypeid

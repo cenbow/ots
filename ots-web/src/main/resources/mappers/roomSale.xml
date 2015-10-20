@@ -72,7 +72,7 @@
     </sql>
     
     <select id="queryRoomPromoByHotel" resultType="map" parameterType="String">
-	SELECT config.roomId as roomid, config.roomTypeId as roomtypeid, config.saleName as salename, 
+	SELECT config.saleType as promotype, config.roomId as roomid, config.roomTypeId as roomtypeid, config.saleName as salename, 
 	info.startTime as starttime, info.endTime as endtime, info.fontColor as namefontcolor, 
 	type.fontColor as typefontcolor, type.description as typedesc
 	FROM t_room_sale_config config 
