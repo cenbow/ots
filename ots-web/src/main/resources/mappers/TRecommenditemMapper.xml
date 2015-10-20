@@ -17,14 +17,15 @@
     <result column="endTime" property="endtime" jdbcType="TIMESTAMP" />
     <result column="description" property="description" jdbcType="VARCHAR" />
     <result column="detailid" property="detailid" jdbcType="BIGINT" />
+    <result column="platform" property="platform" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
     id, positionId, title, subTitle, imageUrl, link, viewType, createTime, sort, deleted, 
-    status, startTime, endTime, description,detailid
+    status, startTime, endTime, description,detailid, platform
   </sql>
    <sql id="Plus_Column_List" >
     t.id, t.positionId, t.title, t.subTitle, t.imageUrl, t.link, t.viewType, t.createTime, t.sort, t.deleted, 
-    t.status, t.startTime, t.endTime, t.description,t.detailid
+    t.status, t.startTime, t.endTime, t.description,t.detailid, t.platform
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
@@ -212,6 +213,11 @@
 				t.deleted = 'F' /* 没有删除*/
 			AND t.`status` = 3 /* 发布中 */
 			and p.positioncode  =#{position}
+
+           <if test="platform != null">
+             and <![CDATA[ t.platform & #{platform} = #{platform} ]]>
+           </if>
+
 			and p.deleted = 'F' /* 没有删除*/
 			ORDER BY
 				t.sort DESC,t.createTime DESC;
@@ -225,6 +231,11 @@
 				t.deleted = 'F' /* 没有删除*/
 			AND t.`status` = 3 /* 发布中 */
 			and p.positioncode  =#{position}
+
+           <if test="platform != null">
+             and <![CDATA[ t.platform & #{platform} = #{platform} ]]>
+           </if>
+
 			and p.deleted = 'F' /* 没有删除*/
 			ORDER BY
 				t.sort DESC,t.createTime DESC LIMIT 5;
