@@ -1,5 +1,7 @@
 package com.mk.ots.roomsale.model;
 
+import java.math.BigDecimal;
+
 public class TRoomSale {
     private Integer id;
     private Integer roomTypeId;
@@ -20,6 +22,7 @@ public class TRoomSale {
     private String saleLabel;
     private String fontColor;
     private Integer cityId;
+    private BigDecimal settleValue;
 
 
     public Integer getId() {
@@ -174,5 +177,13 @@ public class TRoomSale {
 
     public void setSaleLabel(String saleLabel) {
         this.saleLabel = saleLabel;
+    }
+
+    public BigDecimal getSettleValue() {
+        return settleValue;
+    }
+
+    public void setSettleValue(BigDecimal settleValue) {
+        this.settleValue = settleValue;
     }
 }

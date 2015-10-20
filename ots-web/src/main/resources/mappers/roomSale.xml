@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mk.ots.mapper.RoomSaleMapper">
@@ -23,6 +22,7 @@
         <result property="saleLabel" column="saleLabel" />
         <result property="fontColor" column="fontColor" />
         <result property="cityId" column="cityId" />
+        <result property="settleValue" column="settleValue" />
 	</resultMap>
 
     <sql id="Base_Column_List" >
@@ -33,7 +33,7 @@
     <sql id="Config_Column_List" >
         a.id, a.roomTypeId,a.oldRoomTypeId,a.roomNo,a.pms,a.createDate,a.salePrice,a.costPrice,
         a.startTime,a.endTime,a.roomId,a.configId,a.isBack,a.saleName,a.saleType,config.hotelId,
-        b.saleValue,b.fontColor
+        b.saleValue,b.fontColor,a.settleValue
     </sql>
 
     <sql id="Base_Query_List" >
@@ -165,5 +165,27 @@
         set isBack =  #{isBack}
         where id = #{id}
     </update>
+
+
+    <select id="queryRoomPromoByHotel" resultType="map" parameterType="String">
+        SELECT config.roomId as roomid, config.roomTypeId as roomtypeid, config.saleName as salename,
+        info.startTime as starttime, info.endTime as endtime, info.fontColor as namefontcolor,
+        type.fontColor as typefontcolor, type.description as typedesc
+        FROM t_room_sale_config config
+        join t_room_sale_config_info info on config.saleroomtypeid = info.id
+        join t_room_sale_type type on info.saletypeid = type.id
+        where config.hotelId = #{hotelId}
+    </select>
+
+    <select id="queryRoomPromoInfoByHotel" resultType="map" parameterType="String">
+        SELECT config.saletype as promotype, config.costprice as promopice
+        FROM t_room_sale_config config
+        where config.hotelId = #{hotelId}
+    </select>
+
+    <select id="queryRoomPromoByType" resultType="map" parameterType="String">
+        SELECT startTime, endTime
+        FROM  t_room_sale_config where roomTypeId = #{roomTypeId}
+    </select>
 </mapper>
 
