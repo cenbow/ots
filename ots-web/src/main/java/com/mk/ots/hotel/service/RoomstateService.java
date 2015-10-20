@@ -1014,7 +1014,7 @@ public class RoomstateService {
 							Integer roomTypeId = Integer.valueOf(troomType.getId().toString());
 							roomSale.setRoomTypeId(roomTypeId);
 							TRoomSale result = roomSaleService.getOneRoomSale(roomSale);
-
+							Boolean
 							String isonpromo = "0";
 
 							if (result != null && "F".equals(result.getIsBack())) { // isBack

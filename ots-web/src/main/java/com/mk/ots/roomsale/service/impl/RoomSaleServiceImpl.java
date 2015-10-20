@@ -1,8 +1,11 @@
 package com.mk.ots.roomsale.service.impl;
 
 import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.mapper.RoomSaleConfigMapper;
 import com.mk.ots.mapper.RoomSaleMapper;
 import com.mk.ots.roomsale.model.TRoomSale;
+import com.mk.ots.roomsale.model.TRoomSaleConfig;
+import com.mk.ots.roomsale.model.TRoomSaleToIndex;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,8 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 	private RoomSaleMapper roomSaleMapper;
 	@Autowired
 	private HotelService hotelService;
+	@Autowired
+	private RoomSaleConfigMapper roomSaleConfigMapper;
 
 	public void saleBegin() {
 		List<TRoomSale> saleRoomList = roomSaleMapper.getSaleRoomListByHotel();
@@ -88,4 +93,23 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 			throw new Exception(String.format("failed to queryRoomPromoInfoByHotel %s", hotelId), ex);
 		}
 	}
+	public Boolean checkRoomSale(TRoomSaleConfig bean){
+		TRoomSaleConfig roomSaleConfig = roomSaleConfigMapper.checkRoomSale(bean);
+		if (roomSaleConfig==null||roomSaleConfig.getId()==null){
+			return  false;
+		}else {
+			return  true;
+		}
+	}
+	public List<TRoomSaleToIndex> getUpdateIndexList(TRoomSaleConfig bean){
+		List<TRoomSaleConfig> roomSaleConfig = roomSaleConfigMapper.getRoomSaleByParams(bean);
+		List<TRoomSaleToIndex> roomSaleToIndexList=new ArrayList<TRoomSaleToIndex>();
+		for (TRoomSaleConfig rooms:roomSaleConfig){
+			TRoomSaleToIndex saleIndex=new TRoomSaleToIndex();
+			saleIndex.setPromoType(rooms.getSaleType());
+			saleIndex.setPromoPrice(rooms.getSaleValue());
+		}
+		return roomSaleToIndexList;
+	}
+
 }
