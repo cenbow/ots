@@ -72,7 +72,7 @@
             <if test="saleTypeId != null">
                 AND a.saleTypeId = #{saleTypeId}
             </if>
-            <if test="citycode != null">
+            <if test="citycode != null and citycode != '' ">
                 AND b.citycode = #{citycode}
             </if>
         </where>
