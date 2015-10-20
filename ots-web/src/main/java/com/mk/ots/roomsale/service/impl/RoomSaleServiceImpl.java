@@ -3,15 +3,19 @@ package com.mk.ots.roomsale.service.impl;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.mapper.RoomSaleConfigMapper;
 import com.mk.ots.mapper.RoomSaleMapper;
+import com.mk.ots.roomsale.model.RoomPromoDto;
+import com.mk.ots.roomsale.model.RoomSaleToIndexDto;
 import com.mk.ots.roomsale.model.TRoomSale;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
-import com.mk.ots.roomsale.model.TRoomSaleToIndex;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -73,14 +77,23 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 	}
 
 	@Override
-	public List<Map<String, Object>> queryRoomPromoByHotel(String hotelId) throws Exception {
-		try {
-			List<Map<String, Object>> saleRoomList = roomSaleMapper.queryRoomPromoByHotel(hotelId);
-			return saleRoomList;
-		} catch (Exception ex) {
-			logger.error(String.format("failed to queryRoomPromoByHotel %s", hotelId), ex);
-			throw new Exception(String.format("failed to queryRoomPromoByHotel %s", hotelId), ex);
+	public List<RoomPromoDto> queryRoomPromoByHotel(TRoomSaleConfig bean){
+		List<TRoomSaleConfig> roomSaleConfig = roomSaleConfigMapper.getRoomSaleByParams(bean);
+		List<RoomPromoDto> roomPromoDtoList = new ArrayList<RoomPromoDto>();
+		for (TRoomSaleConfig rooms:roomSaleConfig){
+			RoomPromoDto roomPromo=new RoomPromoDto();
+			roomPromo.setRoomId(rooms.getRoomId());
+			roomPromo.setRoomTypeId(rooms.getSaleRoomTypeId());
+			roomPromo.setSaleName(rooms.getSaleName());
+			DateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd");
+			String startTime = dateFormat.format(new Date()) + " " + rooms.getStartTime();
+			roomPromo.setStartTime(startTime);
+			String endTime = dateFormat.format(new Date()) + " " + rooms.getEndTime();
+			roomPromo.setEndTime(endTime);
+			roomPromo.setNameFontColor(rooms.getFontColor());
+			roomPromo.setTypeDesc(rooms.getDescription());
 		}
+		return roomPromoDtoList;
 	}
 
 	@Override
@@ -101,15 +114,16 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 			return  true;
 		}
 	}
-	public List<TRoomSaleToIndex> getUpdateIndexList(TRoomSaleConfig bean){
+	public List<RoomSaleToIndexDto> getUpdateIndexList(TRoomSaleConfig bean){
 		List<TRoomSaleConfig> roomSaleConfig = roomSaleConfigMapper.getRoomSaleByParams(bean);
-		List<TRoomSaleToIndex> roomSaleToIndexList=new ArrayList<TRoomSaleToIndex>();
+		List<RoomSaleToIndexDto> roomSaleToIndexList = new ArrayList<RoomSaleToIndexDto>();
 		for (TRoomSaleConfig rooms:roomSaleConfig){
-			TRoomSaleToIndex saleIndex=new TRoomSaleToIndex();
+			RoomSaleToIndexDto saleIndex=new RoomSaleToIndexDto();
 			saleIndex.setPromoType(rooms.getSaleType());
 			saleIndex.setPromoPrice(rooms.getSaleValue());
 		}
 		return roomSaleToIndexList;
 	}
+
 
 }

@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.mk.ots.roomsale.model.RoomPromoDto;
+import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1010,25 +1012,36 @@ public class RoomstateService {
 						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
 								&& !"3".equals(callMethod.trim())) {
 
-							TRoomSale roomSale = new TRoomSale();
+							TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
 							Integer roomTypeId = Integer.valueOf(troomType.getId().toString());
-							roomSale.setRoomTypeId(roomTypeId);
-							TRoomSale result = roomSaleService.getOneRoomSale(roomSale);
-							Boolean
+							tRoomSaleConfig.setRoomTypeId(roomTypeId);
+
+							Boolean isPromo = roomSaleService.checkRoomSale(tRoomSaleConfig);
+							List<RoomPromoDto> list =  roomSaleService.queryRoomPromoByHotel(tRoomSaleConfig);
 							String isonpromo = "0";
 
-							if (result != null && "F".equals(result.getIsBack())) { // isBack
+							if (isPromo != null && isPromo) { // isBack
 																					// ==
-																					// F
-																					// 为特价房
 
 								isonpromo = "1";
-								//long sec=DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),saleConfigInfo.getStartTime());
 
-								roomtype.setPromotype("2");
-								roomtype.setPromotext("该房间正在参与今夜特价活动， 预定享受超低价。");
-								roomtype.setPromostarttime("22:00:00");
-								roomtype.setPromoendtime("06:00");
+								//long sec=DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),saleConfigInfo.getStartTime());
+								if (list != null && list.size() > 0){
+									RoomPromoDto roomPromoDto = list.get(0);
+
+									long promostaus = DateUtils.promoStatus();
+									roomtype.setPromostatus(promostaus);
+									 if(promostaus == Constant.PROMOING){
+
+									}else{
+
+									}
+									roomtype.setPromotype(roomPromoDto.get);
+									roomtype.setPromotext("该房间正在参与今夜特价活动， 预定享受超低价。");
+									roomtype.setPromostarttime("22:00:00");
+									roomtype.setPromoendtime("06:00");
+								}
+
 
 							}
 

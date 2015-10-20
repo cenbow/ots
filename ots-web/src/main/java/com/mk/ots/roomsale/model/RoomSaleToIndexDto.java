@@ -1,6 +1,6 @@
 package com.mk.ots.roomsale.model;
 
-public class TRoomSaleToIndex {
+public class RoomSaleToIndexDto {
     private Integer promoType;
     private Double promoPrice;
 
