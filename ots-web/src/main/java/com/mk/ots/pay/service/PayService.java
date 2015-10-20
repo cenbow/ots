@@ -11,6 +11,10 @@ import java.util.Map;
 import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+
+import com.mk.ots.common.enums.*;
+import com.mk.ots.room.sale.model.TRoomSale;
+import com.mk.ots.room.sale.service.RoomSaleService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -32,24 +36,6 @@ import com.google.common.collect.Lists;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.util.MyTokenUtils;
 import com.mk.orm.kit.JsonKit;
-import com.mk.ots.common.enums.ManualLuzhuRstEnum;
-import com.mk.ots.common.enums.MessageTypeEnum;
-import com.mk.ots.common.enums.NeedReturnEnum;
-import com.mk.ots.common.enums.OrderTypeEnum;
-import com.mk.ots.common.enums.OtaOrderFlagEnum;
-import com.mk.ots.common.enums.OtaOrderStatusEnum;
-import com.mk.ots.common.enums.PPayInfoOtherTypeEnum;
-import com.mk.ots.common.enums.PPayInfoTypeEnum;
-import com.mk.ots.common.enums.PayLogOtherTypeEnum;
-import com.mk.ots.common.enums.PayLogTypeEnum;
-import com.mk.ots.common.enums.PaySrcEnum;
-import com.mk.ots.common.enums.PayStatusEnum;
-import com.mk.ots.common.enums.PayTaskStatusEnum;
-import com.mk.ots.common.enums.PayTaskTypeEnum;
-import com.mk.ots.common.enums.PayTypeEnum;
-import com.mk.ots.common.enums.PmsSendEnum;
-import com.mk.ots.common.enums.RuleEnum;
-import com.mk.ots.common.enums.TokenTypeEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.SysConfig;
 import com.mk.ots.hotel.dao.HotelDAO;
@@ -183,6 +169,9 @@ public class PayService implements IPayService {
 
     @Autowired
     private IPayStatusErrorDao payStatusErrorDao;
+
+    @Autowired
+    private RoomSaleService roomSaleService;
 
     private static String INFORM_SALE_URL = ""; 
     
@@ -1051,7 +1040,7 @@ public class PayService implements IPayService {
         if (orderLog == null) {
         	return this.createOrderLog(pay, allcost, realCost, ticketParses, promotionParses, accountcost);
         }
-        this.updateOrderLog(ticketParses, promotionParses, orderLog, pay, realCost,accountcost);
+        this.updateOrderLog(ticketParses, promotionParses, orderLog, pay, realCost, accountcost);
         return orderLog.getOtagive();
     }
     
@@ -1247,9 +1236,21 @@ public class PayService implements IPayService {
     private BigDecimal caculateAllCost(OtaOrder order) {
         BigDecimal allcost = BigDecimal.ZERO;
         List<OtaRoomOrder> roomOrdrs = order.getRoomOrderList();
-        for (OtaRoomOrder otaRoomOrder : roomOrdrs) {
-            allcost = allcost.add(otaRoomOrder.getTotalPrice());
+        //判断特价房
+        if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
+            for (OtaRoomOrder otaRoomOrder : roomOrdrs) {
+                TRoomSale tRoomSale = new TRoomSale();
+                tRoomSale.setRoomId((int)otaRoomOrder.getRoomId());
+                TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
+                //TODO
+                //allcost = allcost.add(resultRoomSale.getSetTleValue());
+            }
+        }else{
+            for (OtaRoomOrder otaRoomOrder : roomOrdrs) {
+                allcost = allcost.add(otaRoomOrder.getTotalPrice());
+            }
         }
+
         return allcost;
     }
 
@@ -1641,7 +1642,7 @@ public class PayService implements IPayService {
         pin.setEnable(true);
         pin.setPmsSendId(pmsSendId);
         ipPayInfoDao.saveOrUpdate(pin);
-        logger.info("订单号："+pay.getOrderid()+"添加【使用钱包】流水完毕,id:" + pin.getId());
+        logger.info("订单号：" + pay.getOrderid() + "添加【使用钱包】流水完毕,id:" + pin.getId());
         if(pin.getId()!=null){
         	 return pin;
         }
@@ -2918,7 +2919,7 @@ public class PayService implements IPayService {
 	@Override
 	public boolean reSendLeZhu(OtaOrder order, long payid, Long pmsSendId,
 			BigDecimal price, String memberName) {
-		logger.info("payService:reSendLeZhu:进入自动重发乐住币业务开始，订单是:"+order.getId()+",支付订单是:"+payid+",pmsSendId:"+pmsSendId+",乐住币:"+price+",membername:"+memberName);
+		logger.info("payService:reSendLeZhu:进入自动重发乐住币业务开始，订单是:" + order.getId() + ",支付订单是:" + payid + ",pmsSendId:" + pmsSendId + ",乐住币:" + price + ",membername:" + memberName);
 		boolean reFlag = pmsAddpay(order,payid, pmsSendId, price, memberName,null);
 	        if (reFlag) {
 	        	logger.info("payService:reSendLeZhu:自动重发乐住币业务成功，订单是:"+order.getId()+",支付订单是:"+payid+",pmsSendId:"+pmsSendId+",乐住币:"+price+",membername:"+memberName);
@@ -3060,7 +3061,7 @@ public class PayService implements IPayService {
 		pRealOrderLog.setRealallcost(orderLog.getRealallcost());
 		pRealOrderLog.setHotelgive(orderLog.getHotelgive());
 		pRealOrderLog.setQiekeIncome(orderLog.getQiekeIncome());
-		logger.error("订单:" + orderid + "查询数据."+pRealOrderLog.toString());
+		logger.error("订单:" + orderid + "查询数据." + pRealOrderLog.toString());
 		return pRealOrderLog;
 	}
 		
@@ -3091,13 +3092,13 @@ public class PayService implements IPayService {
 		UMember member = getUMember(orderId,order.getMid());
 		PPay pay = this.saveOrGetPPay(order, member, order.getTotalPrice(),paytype);
 		CouponParam cp=ticketService.queryCouponParam(order );  //, pay
-		this.logger.info("订单:" + orderId + "总金额:{}", cp.getTotalPrice() +"支付帐单明细:{}", pay.toString());
+		this.logger.info("订单:" + orderId + "总金额:{}", cp.getTotalPrice() + "支付帐单明细:{}", pay.toString());
 		// 把原来记录先删除掉
 		this.ipPayInfoDao.deletePayInfoByPayid(pay.getId());
 		//添加使用 钱包支付的流水
-		addAccountCostPayinfo(pay,order.getAvailableMoney(),null);
+		addAccountCostPayinfo(pay, order.getAvailableMoney(),null);
 		//添加优惠券的流水
-		addCoupponPayinfo(pay,cp.getCoupon());
+		addCoupponPayinfo(pay, cp.getCoupon());
 		POrderLog orderLog=createOrderLog(pay.getId(),cp,order.getAvailableMoney());
 		//外层有取orderLog
 		pay.setpOrderLog(orderLog);
@@ -3144,7 +3145,7 @@ public class PayService implements IPayService {
     private PPayInfo addCoupponPayinfo(PPay pay, BigDecimal price){
     	logger.info("订单号："+pay.getOrderid()+"添加优惠券流水，金额是："+price);
     	if(PayTools.isPositive(price)){
-    		return addPPayinfo( pay,  price,  PPayInfoTypeEnum.Y2P ,null);
+    		return addPPayinfo(pay, price, PPayInfoTypeEnum.Y2P,null);
     	}
     	return  null;
 	}
@@ -3342,5 +3343,5 @@ public class PayService implements IPayService {
 		logger.info("++++++++++++++++++++++++++++++++++++++++++");
 		return "处理完毕.";
 	}
-	
+
 }
