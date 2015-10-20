@@ -765,7 +765,11 @@ public class OrderUtil {
 		boolean now = diff <= 2 || DateUtils.getStringFromDate(createTime, "yyyyMMdd").equals(DateUtils.getStringFromDate(returnOrder.getBeginTime(), "yyyyMMdd"));
 		this.logger.info("setUserMessage::now:{},createTime:{},endTime:{}", now, createTime, endTime);
 		// 凌晨23:56-2:00下单，可当天办理入住，提示“您最晚可在xxxx年xx月xx日12：00办理退房哦”
-		if (now && (DateUtils.getStringFromDate(calNow.getTime(), "HH:mm").compareTo("23:56") >= 0 
+		if(PromoTypeEnum.TJ.getCode().toString().equals(returnOrder.getPromoType())){
+			jsonObj.put("usermessage", "今夜特价房付款完成后不可以修改订单或者退款");
+			return;
+		}
+		if (now && (DateUtils.getStringFromDate(calNow.getTime(), "HH:mm").compareTo("23:56") >= 0
 				 || DateUtils.getStringFromDate(calNow.getTime(), "HH:mm").compareTo("02:00") < 0)) {
 			String[] times = DateUtils.getStringFromDate(endTime, "yyyy-MM-dd").split("-");
 			jsonObj.put("usermessage", MessageFormat.format("您最晚可在{0}年{1}月{2}日{3}:00办理退房哦", times[0], times[1], times[2], leavetime));

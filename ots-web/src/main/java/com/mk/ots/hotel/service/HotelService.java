@@ -381,10 +381,6 @@ public class HotelService {
 					for (Bean item : facilities) {
 						facies.add(item.getColumns());
 					}
-
-
-
-
 					OtsHotel hotel = new OtsHotel();
 					hotel.setHotelid(bean.getId().toString());
 					hotel.setHotelname(bean.getHotelname() == null ? "" : bean.getHotelname());
@@ -449,6 +445,7 @@ public class HotelService {
 						hotel.setIsonpromo("0");
 					}
 
+
 					List<Map<String, Object>> promoinfo;
 
 					promoinfo = roomSaleService.queryRoomPromoInfoByHotel(hotelid);
@@ -457,6 +454,7 @@ public class HotelService {
 					}
 
                     hotel.setPromoinfo(promoinfo);
+
 					// 先把新的酒店放到集合中，后面做批量添加
 					coll.add(hotel);
 					logger.info("hotelid: {} added in collections and will be add in elasticsearch document.", hotelid);
