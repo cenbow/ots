@@ -82,9 +82,9 @@
  	</select>
 
     <select id="queryRoomPromoInfoByHotel" resultType="map" parameterType="String">
-        SELECT config.saletype as promotype, config.costprice as promopice
+        SELECT saletype as promotype, costprice as promopice
         FROM t_room_sale_config
-        where config.hotelId = #{hotelId}
+        where hotelId = #{hotelId}
     </select>
 
     <select id="queryRoomPromoByType" resultType="map" parameterType="String">
