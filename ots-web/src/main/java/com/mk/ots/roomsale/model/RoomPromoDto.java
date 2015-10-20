@@ -1,13 +1,16 @@
 package com.mk.ots.roomsale.model;
 
+import java.sql.Date;
+import java.sql.Time;
+
 public class RoomPromoDto {
     private Integer roomId;
     private Integer roomTypeId;
     private String saleName;
-    private String startTime;
-    private String endTime;
-    private String startDate;
-    private String endDate;
+    private Time startTime;
+    private Time endTime;
+    private Date startDate;
+    private Date endDate;
     private String nameFontColor;
     private String typeDesc;
     private String promoType;
@@ -38,19 +41,19 @@ public class RoomPromoDto {
         this.saleName = saleName;
     }
 
-    public String getStartTime() {
+    public Time getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime(Time startTime) {
         this.startTime = startTime;
     }
 
-    public String getEndTime() {
+    public Time getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(String endTime) {
+    public void setEndTime(Time endTime) {
         this.endTime = endTime;
     }
 
@@ -70,19 +73,19 @@ public class RoomPromoDto {
         this.typeDesc = typeDesc;
     }
 
-    public String getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(String startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
-    public String getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(String endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 

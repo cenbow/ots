@@ -85,15 +85,12 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 			roomPromo.setRoomId(rooms.getRoomId());
 			roomPromo.setRoomTypeId(rooms.getSaleRoomTypeId());
 			roomPromo.setSaleName(rooms.getSaleName());
-			DateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd");
-			String startTime = dateFormat.format(new Date()) + " " + rooms.getStartTime();
-			roomPromo.setStartTime(startTime);
-			String endTime = dateFormat.format(new Date()) + " " + rooms.getEndTime();
-			roomPromo.setEndTime(endTime);
+			roomPromo.setStartTime(rooms.getStartTime());
+			roomPromo.setEndTime(rooms.getEndTime());
 			roomPromo.setNameFontColor(rooms.getFontColor());
 			roomPromo.setTypeDesc(rooms.getDescription());
-			roomPromo.setStartDate(dateFormat.format(rooms.getStartDate()));
-			roomPromo.setEndDate(dateFormat.format(rooms.getEndDate()));
+			roomPromo.setStartDate(rooms.getStartDate());
+			roomPromo.setEndDate(rooms.getEndDate());
 			roomPromo.setPromoType(rooms.getPromoType());
 			roomPromo.setPromoValue(rooms.getSaleTypeValue());
 			roomPromo.setPromoLabel(rooms.getSaleLabel());
@@ -129,6 +126,4 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		}
 		return roomSaleToIndexList;
 	}
-
-
 }
