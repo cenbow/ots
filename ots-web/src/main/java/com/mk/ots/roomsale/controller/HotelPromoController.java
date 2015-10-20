@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.sql.Time;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  *
@@ -67,7 +70,7 @@ public class HotelPromoController {
             List<JSONObject> list  = new ArrayList<JSONObject>();
             if(CollectionUtils.isNotEmpty(roomSaleConfigInfoList)) {
                 for(TRoomSaleConfigInfo saleConfigInfo:roomSaleConfigInfoList){
-                    long sec=calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),saleConfigInfo.getStartTime());
+                    long sec=DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(), saleConfigInfo.getStartTime());
                     if (sec<0){
                         continue;
                     }
@@ -93,50 +96,6 @@ public class HotelPromoController {
 			logger.info("HotelCollectionController::querylist::end");
 		}
 		return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
-    }
-
-    /**
-     * seconds
-     * @param startDate
-     * @param endDate
-     * @param startTime
-     * @return
-     */
-    private long calDiffTime(Date startDate,Date endDate, Time startTime) {
-        Calendar cal=Calendar.getInstance();
-        java.util.Date sysTime = cal.getTime();
-
-        if (DateUtils.addDays(endDate,1).before(sysTime)){
-            return -1;  //活动已结束
-        } else if (startDate.after(sysTime)){    //活動未開始
-            cal.setTime(startDate);
-            return timeDiff(startTime, cal, sysTime);
-        }else if (DateUtils.addDays(endDate,1).after(sysTime)&&startDate.before(sysTime)){
-            cal.setTime(sysTime);
-            return timeDiff(startTime, cal, sysTime);
-        }
-        return 0;
-    }
-
-    private long timeDiff(Time startTime, Calendar cal, java.util.Date sysTime) {
-        getCalTime(startTime, cal);
-        long diff= DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime), DateUtils.formatDatetime(cal.getTime()));
-        //活動開始     diff  =0
-        if (diff<0){
-            diff=0;
-        }
-        return diff;
-    }
-
-    private void getCalTime(Time startTime, Calendar cal) {
-        int year=cal.get(Calendar.YEAR);
-        int month=cal.get(Calendar.MONTH);
-        int day=cal.get(Calendar.DAY_OF_MONTH);
-        cal.setTime(startTime);
-        int hour= cal.get(Calendar.HOUR_OF_DAY);
-        int min= cal.get(Calendar.MINUTE);
-        int sec = cal.get(Calendar.SECOND);
-        cal.set(year,month,day,hour,min,sec);
     }
 
 }

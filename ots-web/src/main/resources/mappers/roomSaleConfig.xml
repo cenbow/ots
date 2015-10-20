@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.mapper.RoomSaleConfigMapper">
+
+	<resultMap id="roomSaleConfig" type="com.mk.ots.roomsale.model.TRoomSaleConfig">
+	    <result property="id" column="id" />
+	    <result property="hotelId" column="hotelId" />
+	    <result property="roomId" column="roomId" />
+        <result property="roomTypeId" column="roomTypeId" />
+        <result property="saleType" column="saleType"/>
+          <result property="saleValue" column="saleValue" />
+          <result property="costPrice" column="costPrice" />
+        <result property="num" column="num" />
+        <result property="saleName" column="saleName" />
+        <result property="settleValue" column="settleValue" />
+        <result property="settleType" column="settleType" />
+        <result property="valid" column="valid" />
+        <result property="styleType" column="styleType" />
+        <result property="started" column="started" />
+        <result property="saleConfigInfoId" column="saleConfigInfoId" />
+        <result property="createTime" column="createTime" />
+        <result property="createBy" column="createBy" />
+        <result property="updateTime" column="updateTime" />
+        <result property="updateBy" column="updateBy" />
+        <result property="saleRoomTypeId" column="saleRoomTypeId" />
+        <result property="saleTypeId" column="saleTypeId" />
+        <result property="startDate" column="startDate" />
+        <result property="endDate" column="endDate" />
+        <result property="startTime" column="startTime" />
+        <result property="endTime" column="endTime" />
+        <result property="saleValue" column="saleValue" />
+        <result property="saleLabel" column="saleLabel" />
+        <result property="description" column="description" />
+        <result property="fontColor" column="fontColor" />
+        <result property="saleTypeName" column="saleTypeName" />
+        <result property="saleTypeValue" column="saleTypeValue" />
+        <result property="promoType" column="promoType" />
+	</resultMap>
+
+    <sql id="Base_Column_List" >
+        hotelId, roomId, roomTypeId,saleType,saleValue,costPrice,num,saleName,settleValue,settleType,valid,
+        styleType,started,saleConfigInfoId,createTime,createBy,updateTime,updateBy,saleRoomTypeId
+    </sql>
+
+    <sql id="Base_Query_List" >
+        <where>
+              1 = 1
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+            <if test="hotelId != null">
+                AND hotelId = #{hotelId}
+            </if>
+            <if test="roomId != null">
+                AND roomId = #{roomId}
+            </if>
+            <if test="roomTypeId != null">
+                AND roomTypeId = #{roomTypeId}
+            </if>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+            <if test="saleName != null">
+                AND saleName = #{saleName}
+            </if>
+            <if test="matchDate != null">
+                <![CDATA[  AND startDate < #{matchDate}]]>
+            </if>
+            <if test="matchDate != null">
+                <![CDATA[  AND endDate > #{matchDate} ]]>
+            </if>
+            <if test="valid != null">
+                AND valid = #{valid}
+            </if>
+            <if test="saleRoomTypeIdIsNull != null">
+                AND saleRoomTypeId is null
+            </if>
+            <if test="saleRoomTypeId != null">
+                AND saleRoomTypeId = #{saleRoomTypeId}
+            </if>
+            <if test="settleValue != null">
+                AND settleValue = #{settleValue}
+            </if>
+            <if test="settleType != null">
+                AND settleType = #{settleType}
+            </if>
+            <if test="valid != null">
+                AND valid = #{valid}
+            </if>
+            <if test="saleRoomTypeIdIsNull != null">
+                AND saleRoomTypeId is null
+            </if>
+        </where>
+    </sql>
+
+    <select id="queryRoomSaleConfigByParams" resultMap="roomSaleConfig" parameterType="map">
+        SELECT
+        id,<include refid="Base_Column_List"/>
+         FROM  t_room_sale_config
+        <include refid="Base_Query_List"/>
+    </select>
+    <select id="queryRoomSaleConfigByValid" resultMap="roomSaleConfig" parameterType="String">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM  t_room_sale_config_info
+           WHERE valid = #{valid}
+    </select>
+    <select id="queryRoomSaleConfigByStarted" resultMap="roomSaleConfig" parameterType="String">
+        SELECT
+        a.id,<include refid="Base_Column_List"/>,startDate,endDate,startTime,endTime,saleValue,saleLabel,description,fontColor
+        FROM  t_room_sale_config_info  a LEFT  JOIN t_room_sale_config b ON a.id=b.saleConfigInfoId
+        WHERE b.Started = #{started}
+    </select>
+
+    <insert id="saveRoomSaleConfig"  parameterType="map"
+            useGeneratedKeys="true" keyProperty="id" >
+        INSERT INTO t_room_sale_config
+        (<include refid="Base_Column_List"/>)
+         VALUE
+         (
+            #{hotelId}, #{roomId},#{roomTypeId},#{saleType}, #{saleValue},#{costPrice},#{num},#{saleName},#{settleValue},
+            #{settleType},#{valid},#{styleType},#{started},#{saleConfigInfoId},#{createTime},#{createBy},#{updateTime},
+            #{updateBy},#{saleRoomTypeId}
+            )
+    </insert>
+
+
+    <delete id="deleteRoomSaleConfig" parameterType="Integer">
+         delete from t_room_sale_config where id = #{id}
+    </delete>
+
+    <update id="updateRoomSaleConfig" parameterType="map" >
+        update t_room_sale_config
+        <set >
+            <if test="hotelId != null" >
+                hotelId = #{hotelId},
+            </if>
+            <if test="roomId != null" >
+                roomId = #{roomId},
+            </if>
+            <if test="roomTypeId != null" >
+                roomTypeId =  #{roomTypeId},
+            </if>
+            <if test="saleType != null" >
+                saleType =  #{saleType},
+            </if>
+            <if test="saleValue != null" >
+                saleValue  = #{saleValue},
+            </if>
+            <if test="costPrice != null" >
+                costPrice  = #{costPrice},
+            </if>
+            <if test="num != null" >
+                num  = #{num},
+            </if>
+            <if test="saleName != null" >
+                saleName = #{saleName},
+            </if>
+            <if test="updatetime != null" >
+                settleValue=#{settleValue},
+            </if>
+            <if test="settleType != null" >
+                settleType=#{settleType},
+            </if>
+            <if test="valid != null" >
+                valid=#{valid},
+            </if>
+            <if test="styleType != null" >
+                styleType=#{styleType},
+            </if>
+            <if test="started != null" >
+                started = #{started},
+            </if>
+            <if test="saleConfigInfoId != null" >
+                saleConfigInfoId = #{saleConfigInfoId},
+            </if>
+            <if test="createTime != null" >
+                createTime = #{createTime},
+            </if>
+            <if test="createBy != null" >
+                createBy = #{createBy},
+            </if>
+            <if test="updateTime != null" >
+                updateTime = #{updateTime},
+            </if>
+            <if test="updateBy != null" >
+                updateBy = #{updateBy},
+            </if>
+            <if test="updateTime != null" >
+                updateTime = #{updateTime},
+            </if>
+            <if test="saleRoomTypeId != null" >
+                saleRoomTypeId=#{saleRoomTypeId},
+            </if>
+        </set>
+
+         WHERE  id= #{id}
+    </update>
+
+    <update id="updateRoomSaleConfigValid" parameterType="java.util.Map" >
+        update t_room_sale_config
+        set
+        valid =  #{valid}
+        WHERE  id= #{id}
+    </update>
+
+    <update id="updateRoomSaleConfigStarted" parameterType="java.util.Map" >
+        update t_room_sale_config
+        set
+        started =  #{isStart}
+        WHERE  id= #{id}
+    </update>
+    <select id="queryRoomSaleConfigById" resultMap="roomSaleConfig" parameterType="java.lang.Integer">
+        SELECT
+        id,<include refid="Base_Column_List"/>
+        FROM  t_room_sale_config
+        where   id = #{id}
+    </select>
+    <sql id="Base_view_Column_List" >
+        hotelId, roomId, roomTypeId,saleType,saleValue,costPrice,num,saleName,settleValue,settleType,valid,
+        styleType,started,saleConfigInfoId,createTime,createBy,updateTime,updateBy,saleRoomTypeId
+    </sql>
+    <select id="checkRoomSale" resultMap="roomSaleConfig" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfig">
+        SELECT
+        a.id
+        FROM  t_room_sale_config_info  a LEFT  JOIN t_room_sale_config b ON a.id=b.saleConfigInfoId
+        <where>
+            <if test="hotelId != null">
+                AND b.hotelId = #{hotelId}
+            </if>
+            <if test="roomId != null">
+                AND b.roomId = #{roomId}
+            </if>
+            <if test="roomTypeId != null">
+                AND b.saleRoomTypeId = #{roomTypeId}
+            </if>
+                AND b.valid = 'T' AND a.valid='T'
+        </where>
+        limit 1
+    </select>
+    <select id="getRoomSaleByParams" resultMap="roomSaleConfig" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfig">
+        SELECT
+          a.id as promoType,b.hotelId, b.roomId, b.roomTypeId,b.saleValue,b.costPrice,b.num,b.saleName as roomTypeName,
+        b.styleType,b.started,b.saleConfigInfoId,b.saleRoomTypeId,a.startDate,a.endDate,
+        a.startTime,a.endTime,a.saleValue as saleTypeValue,a.saleLabel,a.description,a.fontColor,c.saleName,c.id as saleType
+        FROM  t_room_sale_config_info  a LEFT  JOIN t_room_sale_config b ON a.id=b.saleConfigInfoId
+        LEFT JOIN  t_room_sale_type c ON  a.saleTypeId=c.id
+        <where>
+            <if test="hotelId != null">
+                AND b.hotelId = #{hotelId}
+            </if>
+            <if test="roomId != null">
+                AND b.roomId = #{roomId}
+            </if>
+            <if test="roomTypeId != null">
+                AND b.roomTypeId = #{roomTypeId}
+            </if>
+            <if test="valid != null">
+                AND b.valid = #{valid}
+            </if>
+        </where>
+    </select>
+</mapper>
