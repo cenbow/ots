@@ -71,12 +71,12 @@
         </where>
     </sql>
     
-    <select id="queryRoomPromoByHotel" resultMap="java.util.Map" parameterType="String">
+    <select id="queryRoomPromoByHotel" resultMap="String" parameterType="String">
     SELECT startTime, endTime 
     FROM  t_room_sale_config where roomTypeId = #{roomTypeId}
  	</select>
 
-    <select id="queryRoomPromoByType" resultMap="java.util.Map" parameterType="String">
+    <select id="queryRoomPromoByType" resultMap="String" parameterType="String">
     SELECT startTime, endTime 
     FROM  t_room_sale_config where roomTypeId = #{roomTypeId}
  	</select>
