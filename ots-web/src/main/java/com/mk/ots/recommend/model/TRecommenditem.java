@@ -32,6 +32,7 @@ public class TRecommenditem {
     private String description;
     
     private Long detailid;
+    private Integer platform;
 
     public Long getId() {
         return id;
@@ -152,6 +153,12 @@ public class TRecommenditem {
 	public void setDetailid(Long detailid) {
 		this.detailid = detailid;
 	}
-    
-    
+
+    public Integer getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(Integer platform) {
+        this.platform = platform;
+    }
 }

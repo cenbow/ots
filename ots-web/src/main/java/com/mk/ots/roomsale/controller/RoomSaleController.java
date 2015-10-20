@@ -1,5 +1,6 @@
-package com.mk.ots.room.sale.controller;
+package com.mk.ots.roomsale.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.common.collect.Maps;
-import com.mk.ots.room.sale.model.TRoomSale;
-import com.mk.ots.room.sale.service.RoomSaleService;
+import com.mk.ots.roomsale.model.TRoomSale;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import com.mk.ots.roomsale.service.RoomSaleService;
 
 /**
  * RoomSaleMapper.
@@ -61,4 +63,16 @@ public class RoomSaleController {
 		}
 
 	}
+
+	@RequestMapping("/queryRoomSaleConfigInfo")
+	public ResponseEntity<List<TRoomSaleConfigInfo>> queryRoomSaleInfo() {
+		List<TRoomSaleConfigInfo>result = new ArrayList<TRoomSaleConfigInfo>();
+		TRoomSaleConfigInfo info = new TRoomSaleConfigInfo();
+		info.setId(1);
+		info.setSaleValue("50");
+		info.setSaleLabel("经济房");
+		result.add(info);
+		return new ResponseEntity<List<TRoomSaleConfigInfo>>(result, HttpStatus.OK);
+	}
+
 }

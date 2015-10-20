@@ -1,9 +1,9 @@
-package com.mk.ots.room.sale.service;
-
-import com.mk.ots.room.sale.model.TRoomSale;
+package com.mk.ots.roomsale.service;
 
 import java.util.List;
 import java.util.Map;
+
+import com.mk.ots.roomsale.model.TRoomSale;
 
 /**
  * RoomSaleMapper.
