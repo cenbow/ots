@@ -19,16 +19,16 @@
         <result property="saleName" column="saleName" />
         <result property="saleType" column="saleType" />
         <result property="hotelId" column="hotelId" />
-        <result property="promoName" column="promoName" />
+        <result property="promoName" column="saleName" />
         <result property="fontColor" column="fontColor" />
-        <result property="useDescribe" column="useDescribe" />
+        <result property="description" column="useDescribe" />
         <result property="cityId" column="cityId" />
 	</resultMap>
 
     <sql id="Base_Column_List" >
         a.id, a.roomTypeId,a.oldRoomTypeId,a.roomNo,a.pms,a.createDate,a.salePrice,a.costPrice,
         a.startTime,a.endTime,a.roomId,a.configId,a.isBack,a.saleName,a.saleType,a.hotelId,
-        b.promoName,b.fontColor,b.useDescribe
+           b.fontColor,b.description
     </sql>
 
     <sql id="Base_Query_List" >

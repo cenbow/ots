@@ -90,7 +90,7 @@
         </where>
     </sql>
 
-    <select id="queryRoomSaleConfigByParams" resultMap="roomSaleConfig" parameterType="com.mk.taskfactory.api.dtos.TRoomSaleConfigDto">
+    <select id="queryRoomSaleConfigByParams" resultMap="roomSaleConfig" parameterType="map">
         SELECT
         id,<include refid="Base_Column_List"/>
          FROM  t_room_sale_config
@@ -109,7 +109,7 @@
         WHERE b.Started = #{started}
     </select>
 
-    <insert id="saveRoomSaleConfig"  parameterType="com.mk.taskfactory.api.dtos.TRoomSaleConfigDto"
+    <insert id="saveRoomSaleConfig"  parameterType="map"
             useGeneratedKeys="true" keyProperty="id" >
         INSERT INTO t_room_sale_config
         (<include refid="Base_Column_List"/>)
@@ -126,7 +126,7 @@
          delete from t_room_sale_config where id = #{id}
     </delete>
 
-    <update id="updateRoomSaleConfig" parameterType="com.mk.taskfactory.api.dtos.TRoomSaleConfigDto" >
+    <update id="updateRoomSaleConfig" parameterType="map" >
         update t_room_sale_config
         <set >
             <if test="hotelId != null" >

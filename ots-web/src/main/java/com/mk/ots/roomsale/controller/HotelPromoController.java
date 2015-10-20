@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.sql.Date;
-import java.sql.Time;
 import java.util.*;
 
 /**
@@ -124,7 +122,7 @@ public class HotelPromoController {
      * @param startTime
      * @return
      */
-    private long calDiffTime(Date startDate,Date endDate, Time startTime) {
+    private long calDiffTime(Date startDate,Date endDate, Date startTime) {
         Calendar cal=Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
 
@@ -142,7 +140,7 @@ public class HotelPromoController {
         return 0;
     }
 
-    private void getCalTime(Time startTime, Calendar cal) {
+    private void getCalTime(Date startTime, Calendar cal) {
         int year=cal.get(Calendar.YEAR);
         int month=cal.get(Calendar.MONTH);
         int day=cal.get(Calendar.DAY_OF_MONTH);
