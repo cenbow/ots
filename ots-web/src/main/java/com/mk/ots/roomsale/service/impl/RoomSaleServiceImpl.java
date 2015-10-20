@@ -92,6 +92,11 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 			roomPromo.setEndTime(endTime);
 			roomPromo.setNameFontColor(rooms.getFontColor());
 			roomPromo.setTypeDesc(rooms.getDescription());
+			roomPromo.setStartDate(dateFormat.format(rooms.getStartDate()));
+			roomPromo.setEndDate(dateFormat.format(rooms.getEndDate()));
+			roomPromo.setPromoType(rooms.getPromoType());
+			roomPromo.setPromoValue(rooms.getSaleTypeValue());
+			roomPromo.setPromoLabel(rooms.getSaleLabel());
 		}
 		return roomPromoDtoList;
 	}
