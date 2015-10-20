@@ -70,7 +70,12 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 
 	@Override
 	public List<Map<String, Object>> queryRoomPromoByHotel(String hotelId) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			List<Map<String, Object>> saleRoomList = roomSaleMapper.queryRoomPromoByHotel(hotelId);
+			return saleRoomList;
+		} catch (Exception ex) {
+			logger.error(String.format("failed to queryRoomPromoByHotel %s", hotelId), ex);
+			throw new Exception(String.format("failed to queryRoomPromoByHotel %s", hotelId), ex);
+		}
 	}
 }
