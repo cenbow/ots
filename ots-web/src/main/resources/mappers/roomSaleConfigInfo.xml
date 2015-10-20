@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.mapper.RoomSaleConfigInfoMapper">
+
+	<resultMap id="BaseResultMap" type="com.mk.ots.roomsale.model.TRoomSaleConfigInfo">
+	    <result property="id" column="id" />
+	    <result property="saleTypeId" column="saleTypeId" />
+	    <result property="startDate" column="startDate" />
+        <result property="endDate" column="endDate" />
+        <result property="startTime" column="startTime" />
+        <result property="endTime" column="endTime" />
+        <result property="saleValue" column="saleValue" />
+        <result property="saleLabel" column="saleLabel" />
+        <result property="description" column="description" />
+        <result property="fontColor" column="fontColor" />
+        <result property="valid" column="valid" />
+        <result property="createTime" column="createTime" />
+        <result property="createBy" column="createBy" />
+        <result property="updateTime" column="updateTime" />
+        <result property="updateBy" column="updateBy" />
+	</resultMap>
+
+    <sql id="Base_Query_List" >
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+            <if test="saleTypeId != null">
+                AND saleTypeId = #{saleTypeId}
+            </if>
+            <if test="startDate != null">
+                AND startDate = #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND endDate = #{endDate}
+            </if>
+            <if test="saleValue != null">
+                AND saleValue = #{saleValue}
+            </if>
+            <if test="saleLabel != null">
+                AND saleLabel = #{saleLabel}
+            </if>
+            <if test="description != null">
+                AND description = #{description}
+            </if>
+            <if test="fontColor != null">
+                AND fontColor = #{fontColor}
+            </if>
+            <if test="valid != null">
+                AND valid = #{valid}
+            </if>
+            <if test="createBy != null">
+                AND createBy = #{createBy}
+            </if>
+            <if test="updateBy != null">
+                AND updateBy = #{updateBy}
+            </if>
+            <if test="matchDate != null">
+                <![CDATA[  AND startDate >= #{matchDate}]]>
+            </if>
+            <if test="matchDate != null">
+                <![CDATA[  AND endDate <= #{matchDate} ]]>
+            </if>
+        </where>
+    </sql>
+
+    <sql id="Base_Column_List" >
+       saleTypeId,startDate,endDate,startTime,endTime,saleValue,saleLabel,description,
+       fontColor,valid,createTime,createBy,updateTime,updateBy
+    </sql>
+    <insert id="saveRoomSaleConfigInfo"  useGeneratedKeys="true" keyProperty="id" parameterType="com.mk.taskfactory.model.TRoomSaleConfigInfo" >
+        INSERT INTO t_room_sale_config_info
+        (<include refid="Base_Column_List"/>)
+        VALUE
+        (
+        #{saleTypeId}, #{startDate}, #{endDate}, #{startTime}, #{endTime}, #{saleValue}, #{saleLabel}, #{description},
+        #{fontColor}, #{valid}, #{createTime}, #{createBy}, #{updateTime}, #{updateBy}
+        )
+    </insert>
+
+    <select id="queryRoomSaleConfigInfoList"  resultMap="BaseResultMap"  parameterType="com.mk.taskfactory.api.dtos.TRoomSaleConfigInfoDto">
+        SELECT
+        id,<include refid="Base_Column_List"/>
+         FROM  t_room_sale_config_info
+        <include refid="Base_Query_List"/>
+    </select>
+
+    <update id="updateTRoomSaleConfigInfo" parameterType="com.mk.taskfactory.model.TRoomSaleConfigInfo" >
+        update t_room_sale_config_info
+        <set>
+        <if test="saleTypeId != null">
+             saleTypeId = #{saleTypeId},
+        </if>
+        <if test="startDate != null">
+            startDate = #{startDate},
+        </if>
+        <if test="endDate != null">
+            endDate = #{endDate},
+        </if>
+        <if test="saleValue != null">
+            saleValue = #{saleValue},
+        </if>
+        <if test="saleLabel != null">
+            saleLabel = #{saleLabel},
+        </if>
+        <if test="description != null">
+            description = #{description},
+        </if>
+        <if test="fontColor != null">
+            fontColor = #{fontColor},
+        </if>
+        <if test="valid != null">
+            valid = #{valid},
+        </if>
+        <if test="createBy != null">
+            createBy = #{createBy},
+        </if>
+        <if test="updateBy != null">
+            updateBy = #{updateBy},
+        </if>
+        </set>
+        <include refid="Base_Query_List"/>
+    </update>
+    <select id="queryRoomSaleConfigById"  resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+        SELECT
+        id,<include refid="Base_Column_List"/>
+        FROM  t_room_sale_config_info
+        WHERE  id=#{id}
+    </select>
+
+</mapper>
