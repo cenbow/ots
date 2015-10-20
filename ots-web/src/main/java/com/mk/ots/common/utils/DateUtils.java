@@ -3,23 +3,18 @@
  */
 package com.mk.ots.common.utils;
 
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDateTime;
+import org.joda.time.Seconds;
+
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
+import java.util.*;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.TimeZone;
-
-import org.joda.time.DateTimeConstants;
-import org.joda.time.LocalDateTime;
 
 /***
  * 处理所有和日期相关的处理.
@@ -1533,5 +1528,101 @@ public class DateUtils extends Object {
 	    Long days = diff / (1000 * 60 * 60 * 24);
 	    return days.intValue();
 	}
+
+    /**
+     * seconds
+     * @param startDate
+     * @param endDate
+     * @param startTime
+     * @return
+     */
+    public static long calDiffTime(Date startDate,Date endDate, Time startTime) {
+        Calendar cal=Calendar.getInstance();
+        java.util.Date sysTime = cal.getTime();
+
+        if (DateUtils.addDays(endDate,1).before(sysTime)){
+            return Constant.PROMO_FININSHED;  //活动已结束
+        } else if (startDate.after(sysTime)){
+            cal.setTime(startDate);
+            getCalTime(startTime, cal);
+            return DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime),DateUtils.formatDatetime(cal.getTime()));
+        }else if (DateUtils.addDays(endDate,1).after(sysTime)&&startDate.before(sysTime)){
+            cal.setTime(sysTime);
+            getCalTime(startTime, cal);
+            return DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime),DateUtils.formatDatetime(cal.getTime()));
+        }
+        return 0;
+    }
+
+    public static long promoStatus(Date startDate, Date endDate, Time startTime, Time endTime) {
+        Calendar cal = Calendar.getInstance();
+        java.util.Date sysTime = cal.getTime();
+
+        cal.setTime(startDate);
+        getCalTime(startTime, cal);
+
+        LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
+        LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
+        long startdiff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
+
+
+        cal.clear();
+        cal.setTime(endDate);
+        getCalTime(endTime, cal);
+
+        LocalDateTime endExTime = LocalDateTime.fromDateFields(cal.getTime());
+        long enddiff = Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
+
+        if (startdiff > 0){
+            return Constant.PROMO_NOT_START;
+        }else if (enddiff > 0){
+            return Constant.PROMOING;
+        }else {
+            return Constant.PROMO_FININSHED;
+        }
+
+
+    }
+
+    public static long promoStartDueTime(Date startDate, Time startTime) {
+        Calendar cal = Calendar.getInstance();
+        java.util.Date sysTime = cal.getTime();
+        cal.clear();
+        cal.setTime(startDate);
+        getCalTime(startTime, cal);
+
+        LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
+        LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
+        return Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
+
+
+    }
+
+    public static long promoEndDueTime( Date endDate, Time endTime) {
+        Calendar cal = Calendar.getInstance();
+        java.util.Date sysTime = cal.getTime();
+
+        LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
+
+        cal.clear();
+        cal.setTime(endDate);
+        getCalTime(endTime, cal);
+
+        LocalDateTime endExTime = LocalDateTime.fromDateFields(cal.getTime());
+        return Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
+    }
+
+    public static void getCalTime(Date startTime, Calendar cal) {
+        int year=cal.get(Calendar.YEAR);
+        int month=cal.get(Calendar.MONTH);
+        int day=cal.get(Calendar.DAY_OF_MONTH);
+        cal.setTime(startTime);
+        int hour= cal.get(Calendar.HOUR_OF_DAY);
+        int min= cal.get(Calendar.MINUTE);
+        int sec = cal.get(Calendar.SECOND);
+        cal.set(year,month,day,hour,min,sec);
+    }
+
+
     
 }

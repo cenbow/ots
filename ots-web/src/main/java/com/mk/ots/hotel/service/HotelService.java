@@ -441,7 +441,7 @@ public class HotelService {
 					TRoomSale roomSale = new TRoomSale();
 					Integer hotelId = Integer.valueOf(bean.getId().toString());
 					roomSale.setHotelId(hotelId);
-					TRoomSale result = roomSaleService.getOneRoomSale(roomSale);
+					TRoomSale result = new TRoomSale();//roomSaleService.getOneRoomSale(roomSale);
 
 					if (result != null) {
 						hotel.setIsonpromo("1");

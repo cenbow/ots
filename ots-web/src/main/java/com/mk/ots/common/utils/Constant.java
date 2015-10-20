@@ -222,4 +222,10 @@ public class Constant {
 	public static final Integer RECOMMEND_ITEM_LIMT = 4;
 
 	public static final Integer RECOMMEND_GLOBAL = -1;
+
+	public static final Integer PROMO_FININSHED = -1;
+
+	public static final Integer PROMOING = 1;
+
+	public static final Integer PROMO_NOT_START = 0;
 }

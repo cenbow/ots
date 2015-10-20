@@ -68,7 +68,9 @@ public class RoomSaleController {
 		List<Map<String, Object>> result = null;
 
 		try {
-			result = roomSaleService.queryRoomPromoInfoByHotel(hotelId);
+			TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
+			tRoomSaleConfig.setHotelId(Integer.valueOf(hotelId));
+			//List<RoomPromoDto> rms = roomSaleService.queryRoomPromoByHotel(tRoomSaleConfig);
 			return new ResponseEntity<List<Map<String, Object>>>(result, HttpStatus.OK);
 		} catch (Exception ex) {
 			logger.error("failed to queryPromoByHotelId", ex);
