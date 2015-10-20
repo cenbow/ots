@@ -29,10 +29,12 @@ public class TRoomSaleConfig {
     private Date endDate;
     private String startTime;
     private String endTime;
-    private String saleValue;
+    private Double saleValue;
     private String saleLabel;
     private String description;
     private String fontColor;
+    private String saleTypeName;
+    private String saleTypeValue;
 
     public Integer getId() {
         return id;
@@ -234,11 +236,11 @@ public class TRoomSaleConfig {
         this.endTime = endTime;
     }
 
-    public String getSaleValue() {
+    public Double getSaleValue() {
         return saleValue;
     }
 
-    public void setSaleValue(String saleValue) {
+    public void setSaleValue(Double saleValue) {
         this.saleValue = saleValue;
     }
 
@@ -264,5 +266,21 @@ public class TRoomSaleConfig {
 
     public void setFontColor(String fontColor) {
         this.fontColor = fontColor;
+    }
+
+    public String getSaleTypeName() {
+        return saleTypeName;
+    }
+
+    public void setSaleTypeName(String saleTypeName) {
+        this.saleTypeName = saleTypeName;
+    }
+
+    public String getSaleTypeValue() {
+        return saleTypeValue;
+    }
+
+    public void setSaleTypeValue(String saleTypeValue) {
+        this.saleTypeValue = saleTypeValue;
     }
 }
