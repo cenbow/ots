@@ -141,7 +141,7 @@ public class RoomstateQuerylistRespEntity implements Serializable {
         private String promoduetime;
         private String promodustartsec;
         private String promoduendsec;
-        private String promostatus;
+        private Long promostatus;
 
         
         public String getPromostarttime() {
@@ -185,11 +185,11 @@ public class RoomstateQuerylistRespEntity implements Serializable {
             this.promoduendsec = promoduendsec;
         }
 
-        public String getPromostatus() {
+        public Long getPromostatus() {
             return promostatus;
         }
 
-        public void setPromostatus(String promostatus) {
+        public void setPromostatus(Long promostatus) {
             this.promostatus = promostatus;
         }
 

@@ -635,13 +635,13 @@ public class RoomstateService {
 	/**
 	 * OTS（C端）解锁处理：仅对指定酒店、房间、起始、截止日期进行解锁处理. 注：OTS解锁处理，直接对redis缓存进行操作，删除对应的缓存key.
 	 * 
-	 * @param hotelid
+	 * @param
 	 *            参数：酒店id
-	 * @param roomid
+	 * @param
 	 *            参数：酒店房间id
-	 * @param begindate
+	 * @param
 	 *            参数：酒店预定开始日期（格式为yyyy-MM-dd）
-	 * @param enddate
+	 * @param
 	 *            参数：酒店预定结束日期（格式为yyyy-MM-dd）
 	 * @return Map
 	 */
@@ -728,7 +728,7 @@ public class RoomstateService {
 	 * PMS（酒店端）锁房处理：仅对指定id的预定数据进行锁房处理. 注：PMS锁房处理，b_pmsroomorder客单表中已经创建预定记录.
 	 * 根据id查询客单表，并对redis进行PMS锁房处理，缓存key值为1.
 	 * 
-	 * @param id
+	 * @param
 	 * @return Map
 	 */
 	public Map<String, Object> lockRoomInPMS(Long hotelid, Long roomid, String begindate, String enddate) {
@@ -769,7 +769,7 @@ public class RoomstateService {
 	 * 
 	 * @param hotelid
 	 * @param roomid
-	 * @param lockDate
+	 * @param
 	 * @return
 	 */
 	public Map<String, Object> unlockRoomInPMS(Long hotelid, Long roomid, String[] lockDates) {
@@ -822,7 +822,7 @@ public class RoomstateService {
 	 * PMS（酒店端）解锁处理：仅对指定id的预定数据进行解锁处理. 注：PMS解锁处理，b_pmsroomorder客单表预定状态已经变更.
 	 * 根据id查询客单表，并对redis进行PMS解锁处理，删除对应的缓存key.
 	 * 
-	 * @param id
+	 * @param
 	 * @return Map
 	 */
 	public Map<String, Object> unlockRoomInPMS(OtaOrder otaorder) {
@@ -992,7 +992,7 @@ public class RoomstateService {
 				t.setStatus(Transaction.SUCCESS);
 				// 返回酒店下的所有房型返现
 				Map<Long, Object> cashBackMap = cashBackService.getCashBackByHotelId(hotelid, begindate, enddate);
-				int roomTypeIndex = 0;
+
 				for (TRoomTypeModel troomType : troomTypes) {
 					// 如果按照床型查询
 					if (bednum != null) {
@@ -1031,19 +1031,25 @@ public class RoomstateService {
 
 									long promostaus = DateUtils.promoStatus(roomPromoDto.getStartDate(),roomPromoDto.getEndDate(),roomPromoDto.getStartTime(),roomPromoDto.getEndTime());
 									roomtype.setPromostatus(promostaus);
-									 if(promostaus == Constant.PROMOING){
-										 roomtype.setPromotype(roomPromoDto.getPromoType());
-										 roomtype.setPromotext(roomPromoDto.getTypeDesc());
-										 String promoStartTime = roomPromoDto.getStartTime().toString();
-										 if (StringUtils.isNotBlank(promoStartTime)){
-											 String [] tmp = promoStartTime.split(":");
-											 promoStartTime = tmp[0] + ":" + tmp[1];
-											 roomtype.setPromostarttime(promoStartTime);
-										 }
+									roomtype.setPromotype(roomPromoDto.getPromoType());
+									roomtype.setPromotext(roomPromoDto.getTypeDesc());
 
-										 roomtype.setPromoendtime("06:00");
+									String promoStartTime = roomPromoDto.getStartTime().toString();
+									if (StringUtils.isNotBlank(promoStartTime)){
+										String [] tmp = promoStartTime.split(":");
+										promoStartTime = tmp[0] + ":" + tmp[1];
+										roomtype.setPromostarttime(promoStartTime);
+									}
+
+									Long promodustartsec = DateUtils.promoStartDueTime(roomPromoDto.getStartDate(),roomPromoDto.getStartTime());
+									Long promoduendsec = DateUtils.promoEndDueTime(roomPromoDto.getEndDate(), roomPromoDto.getEndTime());
+									if(promostaus == Constant.PROMOING){
+										roomtype.setPromodustartsec("0");
+										roomtype.setPromoduendsec(promoduendsec.toString());
+
 									}else{
-
+										roomtype.setPromodustartsec(promodustartsec.toString());
+										roomtype.setPromoduendsec(promoduendsec.toString());
 									}
 
 								}
@@ -1053,9 +1059,7 @@ public class RoomstateService {
 
 							roomtype.setIsonpromo(isonpromo);
 
-							if (result != null && result.getSaleType() != null) {
-								roomtype.setPromotype(result.getSaleType().toString());
-							}
+
 						}
 					}
 
@@ -1240,23 +1244,7 @@ public class RoomstateService {
 						}
 					}
 
-					/**
-					 * TODO: add mocked first
-					 */
-					roomTypeIndex++;
-					if (roomTypeIndex == 0) {
-						roomtype.setPromostarttime("22:11");
-						roomtype.setPromostarttime("22:41");
-						roomtype.setPromotext("该房间正在参与今夜特价活动，预定享受超低价。");
-						roomtype.setPromoduesec("733");
-						roomtype.setIsonpromo("1");
-					} else if (roomTypeIndex == 1) {
-						roomtype.setPromostarttime("23:59");
-						roomtype.setPromostarttime("02:59");
-						roomtype.setPromotext("该房间正在参与今夜特价活动，预定享受超低价。");
-						roomtype.setPromoduesec("");
-						roomtype.setIsonpromo("1");
-					}
+
 
 					// 将tempList添加至roomList之后,实现锁房集合 已预订与可预订分类排序
 					// rooms.addAll(tempRooms);//不可预定房间
