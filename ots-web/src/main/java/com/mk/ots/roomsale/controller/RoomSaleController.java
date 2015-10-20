@@ -62,12 +62,23 @@ public class RoomSaleController {
 			return new ResponseEntity<Map<String, Object>>(new HashMap<String, Object>(), HttpStatus.BAD_REQUEST);
 		}
 	}
-	
-	
+
+	@RequestMapping("/queryPromoByHotelId")
+	public ResponseEntity<List<Map<String, Object>>> queryPromoByHotelId(String hotelId) {
+		List<Map<String, Object>> result = null;
+
+		try {
+			result = roomSaleService.queryRoomPromoByHotel(hotelId);
+			return new ResponseEntity<List<Map<String, Object>>>(result, HttpStatus.OK);
+		} catch (Exception ex) {
+			logger.error("failed to queryPromoByHotelId", ex);
+			return new ResponseEntity<List<Map<String, Object>>>(result, HttpStatus.OK);
+		}
+	}
 
 	@RequestMapping("/queryRoomSaleConfigInfo")
 	public ResponseEntity<List<TRoomSaleConfigInfo>> queryRoomSaleInfo() {
-		List<TRoomSaleConfigInfo>result = new ArrayList<TRoomSaleConfigInfo>();
+		List<TRoomSaleConfigInfo> result = new ArrayList<TRoomSaleConfigInfo>();
 		TRoomSaleConfigInfo info = new TRoomSaleConfigInfo();
 		info.setId(1);
 		info.setSaleValue("50");
@@ -77,4 +88,3 @@ public class RoomSaleController {
 	}
 
 }
-
