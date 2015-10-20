@@ -454,7 +454,12 @@ public class HotelService {
 						hotel.setIsonpromo("0");
 					}
 
-					List<Map<String, Object>> promoinfo =  new ArrayList<>() ; //TODO 小龙
+					List<Map<String, Object>> promoinfo;
+
+					promoinfo = roomSaleService.queryRoomSale() ; //TODO 小龙
+					if (promoinfo == null){
+						promoinfo = new ArrayList<>();
+					}
 
                     hotel.setPromoinfo(promoinfo);
 					// 先把新的酒店放到集合中，后面做批量添加

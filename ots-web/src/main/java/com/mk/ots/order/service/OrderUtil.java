@@ -165,6 +165,7 @@ public class OrderUtil {
 		// DecimalFormat format=new DecimalFormat("#.00");
 		// format.setRoundingMode(RoundingMode.UP);
 		jsonObj.put("promotype", StringUtils.defaultIfEmpty(returnOrder.getPromoType(), PromoTypeEnum.OTHER.getCode().toString()));
+		jsonObj.put("isonpromo", StringUtils.defaultIfEmpty(returnOrder.getPromoType(), PromoTypeEnum.OTHER.getCode().toString()));
 		jsonObj.put("roomticket", StringUtils.defaultIfEmpty(returnOrder.getRoomTicket(),""));
 		jsonObj.put("orderid", returnOrder.getId());
 		jsonObj.put("hotelid", returnOrder.getHotelId());
