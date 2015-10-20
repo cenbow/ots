@@ -20,10 +20,10 @@ import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleService;
 
 /**
- * RoomSaleMapper.
- * 
- * @author kangxiaolong.
- */
+* RoomSaleMapper.
+* @author kangxiaolong.
+*/
+
 @Controller
 @RequestMapping(value = "/roomsale", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 public class RoomSaleController {
