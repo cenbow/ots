@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.sql.Date;
 import java.sql.Time;
 import java.util.*;
 
@@ -62,8 +61,8 @@ public class HotelPromoController {
                 result.put(ServiceOutput.STR_MSG_ERRMSG, "没有活动");
                 return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
             }
-            // todo cityid not
-	 	    List<TRoomSaleConfigInfo> roomSaleConfigInfoList= roomSaleConfigInfoService.queryListBySaleTypeId(Integer.parseInt(saletypeid),start,limit);
+
+	 	    List<TRoomSaleConfigInfo> roomSaleConfigInfoList= roomSaleConfigInfoService.queryListBySaleTypeId(cityid,Integer.parseInt(saletypeid),start,limit);
 
             List<JSONObject> list  = new ArrayList<JSONObject>();
             if(CollectionUtils.isNotEmpty(roomSaleConfigInfoList)) {

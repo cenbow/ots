@@ -66,10 +66,14 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM  t_room_sale_config_info a
+        JOIN t_room_sale_city b on a.saleTypeId=b.saleTypeId
         <where>
               a.valid ='T'
             <if test="saleTypeId != null">
                 AND a.saleTypeId = #{saleTypeId}
+            </if>
+            <if test="cityCode != null">
+                AND b.cityCode = #{cityCode}
             </if>
         </where>
         limit ${start} , ${limit}

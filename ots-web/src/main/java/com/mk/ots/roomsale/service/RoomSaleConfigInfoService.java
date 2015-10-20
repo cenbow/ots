@@ -7,8 +7,11 @@ import java.util.List;
 public interface RoomSaleConfigInfoService {
     /**
      *
+     * @param cityid
      * @param saleTypeId
+     * @param start
+     * @param limit
      * @return
      */
-    List<TRoomSaleConfigInfo> queryListBySaleTypeId(int saleTypeId,int start,int limit);
+    List<TRoomSaleConfigInfo> queryListBySaleTypeId(String cityid,int saleTypeId,int start,int limit);
 }

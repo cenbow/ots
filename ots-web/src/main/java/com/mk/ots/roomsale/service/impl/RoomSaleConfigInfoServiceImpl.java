@@ -20,8 +20,9 @@ public class RoomSaleConfigInfoServiceImpl implements RoomSaleConfigInfoService 
 	private RoomSaleConfigInfoMapper roomSaleConfigInfoMapper;
 
 
-    public List<TRoomSaleConfigInfo> queryListBySaleTypeId(int saleTypeId,int start,int limit){
+    public List<TRoomSaleConfigInfo> queryListBySaleTypeId(String cityid,int saleTypeId,int start,int limit){
         Map<String,Object> map=new HashMap<>();
+        map.put("citycode",cityid);
         map.put("saleTypeId",saleTypeId);
         map.put("start",start);
         map.put("limit",limit);

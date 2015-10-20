@@ -6,8 +6,8 @@ import java.util.Date;
 public class TRoomSaleConfigInfo {
     private Integer id;
     private Integer saleTypeId;
-    private java.sql.Date startDate;
-    private java.sql.Date endDate;
+    private Date startDate;
+    private Date endDate;
     private Time startTime;
     private Time endTime;
     private String saleValue;
@@ -44,19 +44,19 @@ public class TRoomSaleConfigInfo {
         this.saleTypeId = saleTypeId;
     }
 
-    public java.sql.Date getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(java.sql.Date startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
-    public java.sql.Date getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(java.sql.Date endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 
