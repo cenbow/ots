@@ -1,18 +1,39 @@
 package com.mk.ots.roomsale.model;
 
+import java.math.BigDecimal;
+import java.util.Date;
+
 public class TRoomSaleConfig {
     private Integer id;
     private Integer hotelId;
     private Integer roomId;
     private Integer roomTypeId;
+    private Integer saleType;
+    private BigDecimal salePrice;
+    private BigDecimal costPrice;
+    private Integer num;
+    private String saleName;
+    private BigDecimal settleValue;
+    private Integer settleType;
+    private String valid;
+    private Integer styleType;
+    private String started;
+    private Integer saleConfigInfoId;
+    private Date createTime;
+    private String createBy;
+    private Date updateTime;
+    private String updateBy;
+    private Integer saleRoomTypeId;
+    private Integer saleTypeId;
+    private Date startDate;
+    private Date endDate;
     private String startTime;
     private String endTime;
-    private String startDate;
-    private String endDate;
-    private Double saleValue;
-    private Integer num;
-    private Integer type;
-    private String saleName;
+    private String saleValue;
+    private String saleLabel;
+    private String description;
+    private String fontColor;
+
     public Integer getId() {
         return id;
     }
@@ -45,52 +66,28 @@ public class TRoomSaleConfig {
         this.roomTypeId = roomTypeId;
     }
 
-    public String getStartTime() {
-        return startTime;
+    public Integer getSaleType() {
+        return saleType;
     }
 
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
+    public void setSaleType(Integer saleType) {
+        this.saleType = saleType;
     }
 
-    public String getEndTime() {
-        return endTime;
+    public BigDecimal getSalePrice() {
+        return salePrice;
     }
 
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
+    public void setSalePrice(BigDecimal salePrice) {
+        this.salePrice = salePrice;
     }
 
-    public String getStartDate() {
-        return startDate;
+    public BigDecimal getCostPrice() {
+        return costPrice;
     }
 
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
-    }
-
-    public String getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
-    }
-
-    public Double getSaleValue() {
-        return saleValue;
-    }
-
-    public void setSaleValue(Double saleValue) {
-        this.saleValue = saleValue;
-    }
-
-    public Integer getType() {
-        return type;
-    }
-
-    public void setType(Integer type) {
-        this.type = type;
+    public void setCostPrice(BigDecimal costPrice) {
+        this.costPrice = costPrice;
     }
 
     public Integer getNum() {
@@ -109,4 +106,163 @@ public class TRoomSaleConfig {
         this.saleName = saleName;
     }
 
+    public BigDecimal getSettleValue() {
+        return settleValue;
+    }
+
+    public void setSettleValue(BigDecimal settleValue) {
+        this.settleValue = settleValue;
+    }
+
+    public Integer getSettleType() {
+        return settleType;
+    }
+
+    public void setSettleType(Integer settleType) {
+        this.settleType = settleType;
+    }
+
+    public String getValid() {
+        return valid;
+    }
+
+    public void setValid(String valid) {
+        this.valid = valid;
+    }
+
+    public Integer getStyleType() {
+        return styleType;
+    }
+
+    public void setStyleType(Integer styleType) {
+        this.styleType = styleType;
+    }
+
+    public String getStarted() {
+        return started;
+    }
+
+    public void setStarted(String started) {
+        this.started = started;
+    }
+
+    public Integer getSaleConfigInfoId() {
+        return saleConfigInfoId;
+    }
+
+    public void setSaleConfigInfoId(Integer saleConfigInfoId) {
+        this.saleConfigInfoId = saleConfigInfoId;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getCreateBy() {
+        return createBy;
+    }
+
+    public void setCreateBy(String createBy) {
+        this.createBy = createBy;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public String getUpdateBy() {
+        return updateBy;
+    }
+
+    public void setUpdateBy(String updateBy) {
+        this.updateBy = updateBy;
+    }
+
+    public Integer getSaleRoomTypeId() {
+        return saleRoomTypeId;
+    }
+
+    public void setSaleRoomTypeId(Integer saleRoomTypeId) {
+        this.saleRoomTypeId = saleRoomTypeId;
+    }
+
+    public Integer getSaleTypeId() {
+        return saleTypeId;
+    }
+
+    public void setSaleTypeId(Integer saleTypeId) {
+        this.saleTypeId = saleTypeId;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getSaleValue() {
+        return saleValue;
+    }
+
+    public void setSaleValue(String saleValue) {
+        this.saleValue = saleValue;
+    }
+
+    public String getSaleLabel() {
+        return saleLabel;
+    }
+
+    public void setSaleLabel(String saleLabel) {
+        this.saleLabel = saleLabel;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getFontColor() {
+        return fontColor;
+    }
+
+    public void setFontColor(String fontColor) {
+        this.fontColor = fontColor;
+    }
 }

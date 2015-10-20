@@ -6,8 +6,8 @@ import java.util.Date;
 public class TRoomSaleConfigInfo {
     private Integer id;
     private Integer saleTypeId;
-    private java.sql.Date startDate;
-    private java.sql.Date endDate;
+    private Date startDate;
+    private Date endDate;
     private Time startTime;
     private Time endTime;
     private String saleValue;
@@ -16,17 +16,10 @@ public class TRoomSaleConfigInfo {
     private String fontColor;
     private String valid;
     private Date createTime;
-    private Date updateTime;
     private String createBy;
+    private Date updateTime;
     private String updateBy;
-
-    public String getUpdateBy() {
-        return updateBy;
-    }
-
-    public void setUpdateBy(String updateBy) {
-        this.updateBy = updateBy;
-    }
+    private String matchDate;
 
     public Integer getId() {
         return id;
@@ -44,19 +37,19 @@ public class TRoomSaleConfigInfo {
         this.saleTypeId = saleTypeId;
     }
 
-    public java.sql.Date getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(java.sql.Date startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
-    public java.sql.Date getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(java.sql.Date endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 
@@ -124,14 +117,6 @@ public class TRoomSaleConfigInfo {
         this.createTime = createTime;
     }
 
-    public Date getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
-    }
-
     public String getCreateBy() {
         return createBy;
     }
@@ -140,4 +125,27 @@ public class TRoomSaleConfigInfo {
         this.createBy = createBy;
     }
 
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public String getUpdateBy() {
+        return updateBy;
+    }
+
+    public void setUpdateBy(String updateBy) {
+        this.updateBy = updateBy;
+    }
+
+    public String getMatchDate() {
+        return matchDate;
+    }
+
+    public void setMatchDate(String matchDate) {
+        this.matchDate = matchDate;
+    }
 }
