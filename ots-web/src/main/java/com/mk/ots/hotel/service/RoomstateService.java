@@ -1029,17 +1029,23 @@ public class RoomstateService {
 								if (list != null && list.size() > 0){
 									RoomPromoDto roomPromoDto = list.get(0);
 
-									long promostaus = DateUtils.promoStatus();
+									long promostaus = DateUtils.promoStatus(roomPromoDto.getStartDate(),roomPromoDto.getEndDate(),roomPromoDto.getStartTime(),roomPromoDto.getEndTime());
 									roomtype.setPromostatus(promostaus);
 									 if(promostaus == Constant.PROMOING){
+										 roomtype.setPromotype(roomPromoDto.getPromoType());
+										 roomtype.setPromotext(roomPromoDto.getTypeDesc());
+										 String promoStartTime = roomPromoDto.getStartTime().toString();
+										 if (StringUtils.isNotBlank(promoStartTime)){
+											 String [] tmp = promoStartTime.split(":");
+											 promoStartTime = tmp[0] + ":" + tmp[1];
+											 roomtype.setPromostarttime(promoStartTime);
+										 }
 
+										 roomtype.setPromoendtime("06:00");
 									}else{
 
 									}
-									roomtype.setPromotype(roomPromoDto.get);
-									roomtype.setPromotext("该房间正在参与今夜特价活动， 预定享受超低价。");
-									roomtype.setPromostarttime("22:00:00");
-									roomtype.setPromoendtime("06:00");
+
 								}
 
 

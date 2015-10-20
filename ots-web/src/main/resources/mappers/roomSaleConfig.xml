@@ -34,6 +34,7 @@
         <result property="fontColor" column="fontColor" />
         <result property="saleTypeName" column="saleTypeName" />
         <result property="saleTypeValue" column="saleTypeValue" />
+        <result property="promoType" column="promoType" />
 	</resultMap>
 
     <sql id="Base_Column_List" >
@@ -239,7 +240,7 @@
     </select>
     <select id="getRoomSaleByParams" resultMap="roomSaleConfig" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfig">
         SELECT
-          b.hotelId, b.roomId, b.roomTypeId,b.saleValue,b.costPrice,b.num,b.saleName as roomTypeName,
+          a.id as promoType,b.hotelId, b.roomId, b.roomTypeId,b.saleValue,b.costPrice,b.num,b.saleName as roomTypeName,
         b.styleType,b.started,b.saleConfigInfoId,b.saleRoomTypeId,a.startDate,a.endDate,
         a.startTime,a.endTime,a.saleValue as saleTypeValue,a.saleLabel,a.description,a.fontColor,c.saleName,c.id as saleType
         FROM  t_room_sale_config_info  a LEFT  JOIN t_room_sale_config b ON a.id=b.saleConfigInfoId

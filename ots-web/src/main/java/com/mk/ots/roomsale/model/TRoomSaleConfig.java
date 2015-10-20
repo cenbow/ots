@@ -35,6 +35,7 @@ public class TRoomSaleConfig {
     private String fontColor;
     private String saleTypeName;
     private String saleTypeValue;
+    private String promoType;
 
     public Integer getId() {
         return id;
@@ -282,5 +283,13 @@ public class TRoomSaleConfig {
 
     public void setSaleTypeValue(String saleTypeValue) {
         this.saleTypeValue = saleTypeValue;
+    }
+
+    public String getPromoType() {
+        return promoType;
+    }
+
+    public void setPromoType(String promoType) {
+        this.promoType = promoType;
     }
 }

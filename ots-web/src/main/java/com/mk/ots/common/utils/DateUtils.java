@@ -1584,34 +1584,32 @@ public class DateUtils extends Object {
 
     }
 
-    public static long promoStartDueTime(Date startDate, Date endDate, Time startTime, Time endTime) {
+    public static long promoStartDueTime(Date startDate, Time startTime) {
         Calendar cal = Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
-
+        cal.clear();
         cal.setTime(startDate);
         getCalTime(startTime, cal);
 
         LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
         LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
-        long startdiff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
+        return Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
 
+
+    }
+
+    public static long promoEndDueTime( Date endDate, Time endTime) {
+        Calendar cal = Calendar.getInstance();
+        java.util.Date sysTime = cal.getTime();
+
+        LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
 
         cal.clear();
         cal.setTime(endDate);
         getCalTime(endTime, cal);
 
         LocalDateTime endExTime = LocalDateTime.fromDateFields(cal.getTime());
-        long enddiff = Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
-
-        if (startdiff > 0){
-            return startdiff;
-        }else if (enddiff > 0){
-            return 0;
-        }else {
-            return Constant.PROMO_FININSHED;
-        }
-
-
+        return Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
     }
 
     public static void getCalTime(Date startTime, Calendar cal) {
