@@ -6,9 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.geo.GeoPoint;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * OTS Hotel Entity.
@@ -149,6 +147,8 @@ public class OtsHotel {
 
     /** 特价房结束时间 */
     private String promoendtime;
+    private List<Map<String, Object>> promoinfo;
+
 
     public OtsHotel() {
         
@@ -587,4 +587,13 @@ public class OtsHotel {
     public void setPromoendtime(String promoendtime) {
         this.promoendtime = promoendtime;
     }
+
+    public List<Map<String, Object>> getPromoinfo() {
+        return promoinfo;
+    }
+
+    public void setPromoinfo(List<Map<String, Object>> promoinfo) {
+        this.promoinfo = promoinfo;
+    }
+
 }
