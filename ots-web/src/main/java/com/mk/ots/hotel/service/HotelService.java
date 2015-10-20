@@ -441,11 +441,6 @@ public class HotelService {
 
 					if (result != null) {
 						hotel.setIsonpromo("1");
-						hotel.setPromotype(result.getSaleType().toString());
-						hotel.setPromotext(result.getSaleLabel());
-						hotel.setPromotextcolor(result.getFontColor());
-						hotel.setPromostarttime(result.getStartTime());
-						hotel.setPromoendtime(result.getEndTime());
 					}else {
 						hotel.setIsonpromo("0");
 					}
