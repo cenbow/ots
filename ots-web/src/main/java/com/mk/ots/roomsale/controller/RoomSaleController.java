@@ -33,26 +33,6 @@ public class RoomSaleController {
 		rtnMap.put("success", true);
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
-	@RequestMapping("/getOneRoomSale")
-	public ResponseEntity<TRoomSale> getOneRoomSale(TRoomSale bean) {
-		TRoomSale result=roomSaleService.getOneRoomSale(bean);
-		return new ResponseEntity<TRoomSale>(result, HttpStatus.OK);
-	}
-	@RequestMapping("/queryRoomSale")
-	public ResponseEntity<List<TRoomSale>> queryRoomSale(TRoomSale bean) {
-		List<TRoomSale>result=roomSaleService.queryRoomSale(bean);
-		return new ResponseEntity<List<TRoomSale>>(result, HttpStatus.OK);
-	}
 
-	@RequestMapping("/queryRoomSaleConfigInfo")
-	public ResponseEntity<List<TRoomSaleConfigInfo>> queryRoomSaleInfo() {
-		List<TRoomSaleConfigInfo>result = new ArrayList<TRoomSaleConfigInfo>();
-		TRoomSaleConfigInfo info = new TRoomSaleConfigInfo();
-		info.setId(1);
-		info.setSaleValue("50");
-		info.setSaleLabel("经济房");
-		result.add(info);
-		return new ResponseEntity<List<TRoomSaleConfigInfo>>(result, HttpStatus.OK);
-	}
 
 }

@@ -17,9 +17,8 @@ public class TRoomSale {
     private String saleName;
     private Integer saleType;
     private Integer hotelId;
-    private String promoName;
+    private String saleLabel;
     private String fontColor;
-    private String useDescribe;
     private Integer cityId;
 
 
@@ -152,14 +151,6 @@ public class TRoomSale {
         this.hotelId = hotelId;
     }
 
-    public String getPromoName() {
-        return promoName;
-    }
-
-    public void setPromoName(String promoName) {
-        this.promoName = promoName;
-    }
-
     public String getFontColor() {
         return fontColor;
     }
@@ -168,13 +159,6 @@ public class TRoomSale {
         this.fontColor = fontColor;
     }
 
-    public String getUseDescribe() {
-        return useDescribe;
-    }
-
-    public void setUseDescribe(String useDescribe) {
-        this.useDescribe = useDescribe;
-    }
 
     public Integer getCityId() {
         return cityId;
@@ -182,5 +166,13 @@ public class TRoomSale {
 
     public void setCityId(Integer cityId) {
         this.cityId = cityId;
+    }
+
+    public String getSaleLabel() {
+        return saleLabel;
+    }
+
+    public void setSaleLabel(String saleLabel) {
+        this.saleLabel = saleLabel;
     }
 }
