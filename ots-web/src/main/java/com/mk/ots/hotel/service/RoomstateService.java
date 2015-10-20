@@ -1021,7 +1021,15 @@ public class RoomstateService {
 																					// ==
 																					// F
 																					// 为特价房
+
 								isonpromo = "1";
+								//long sec=DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),saleConfigInfo.getStartTime());
+
+								roomtype.setPromotype("2");
+								roomtype.setPromotext("该房间正在参与今夜特价活动， 预定享受超低价。");
+								roomtype.setPromostarttime("22:00:00");
+								roomtype.setPromoendtime("06:00");
+
 							}
 
 							roomtype.setIsonpromo(isonpromo);
