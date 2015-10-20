@@ -68,7 +68,7 @@
        saleTypeId,startDate,endDate,startTime,endTime,saleValue,saleLabel,description,
        fontColor,valid,createTime,createBy,updateTime,updateBy
     </sql>
-    <insert id="saveRoomSaleConfigInfo"  useGeneratedKeys="true" keyProperty="id" parameterType="com.mk.taskfactory.model.TRoomSaleConfigInfo" >
+    <insert id="saveRoomSaleConfigInfo"  useGeneratedKeys="true" keyProperty="id" parameterType="map" >
         INSERT INTO t_room_sale_config_info
         (<include refid="Base_Column_List"/>)
         VALUE
@@ -78,14 +78,14 @@
         )
     </insert>
 
-    <select id="queryRoomSaleConfigInfoList"  resultMap="BaseResultMap"  parameterType="com.mk.taskfactory.api.dtos.TRoomSaleConfigInfoDto">
+    <select id="queryRoomSaleConfigInfoList"  resultMap="BaseResultMap"  parameterType="map">
         SELECT
         id,<include refid="Base_Column_List"/>
          FROM  t_room_sale_config_info
         <include refid="Base_Query_List"/>
     </select>
 
-    <update id="updateTRoomSaleConfigInfo" parameterType="com.mk.taskfactory.model.TRoomSaleConfigInfo" >
+    <update id="updateTRoomSaleConfigInfo" parameterType="map" >
         update t_room_sale_config_info
         <set>
         <if test="saleTypeId != null">
@@ -126,6 +126,19 @@
         id,<include refid="Base_Column_List"/>
         FROM  t_room_sale_config_info
         WHERE  id=#{id}
+    </select>
+
+    <select id="queryListBySaleTypeId" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM  t_room_sale_config_info a
+        <where>
+            a.valid ='T'
+            <if test="saleTypeId != null">
+                AND a.saleTypeId = #{saleTypeId}
+            </if>
+        </where>
+        limit ${start} , ${limit}
     </select>
 
 </mapper>

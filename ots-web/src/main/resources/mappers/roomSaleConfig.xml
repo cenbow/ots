@@ -32,6 +32,9 @@
         <result property="saleLabel" column="saleLabel" />
         <result property="description" column="description" />
         <result property="fontColor" column="fontColor" />
+        <result property="saleTypeName" column="saleTypeName" />
+        <result property="saleTypeValue" column="saleTypeValue" />
+        <result property="promoType" column="promoType" />
 	</resultMap>
 
     <sql id="Base_Column_List" >
@@ -90,7 +93,7 @@
         </where>
     </sql>
 
-    <select id="queryRoomSaleConfigByParams" resultMap="roomSaleConfig" parameterType="com.mk.taskfactory.api.dtos.TRoomSaleConfigDto">
+    <select id="queryRoomSaleConfigByParams" resultMap="roomSaleConfig" parameterType="map">
         SELECT
         id,<include refid="Base_Column_List"/>
          FROM  t_room_sale_config
@@ -109,7 +112,7 @@
         WHERE b.Started = #{started}
     </select>
 
-    <insert id="saveRoomSaleConfig"  parameterType="com.mk.taskfactory.api.dtos.TRoomSaleConfigDto"
+    <insert id="saveRoomSaleConfig"  parameterType="map"
             useGeneratedKeys="true" keyProperty="id" >
         INSERT INTO t_room_sale_config
         (<include refid="Base_Column_List"/>)
@@ -126,7 +129,7 @@
          delete from t_room_sale_config where id = #{id}
     </delete>
 
-    <update id="updateRoomSaleConfig" parameterType="com.mk.taskfactory.api.dtos.TRoomSaleConfigDto" >
+    <update id="updateRoomSaleConfig" parameterType="map" >
         update t_room_sale_config
         <set >
             <if test="hotelId != null" >
@@ -212,5 +215,49 @@
         id,<include refid="Base_Column_List"/>
         FROM  t_room_sale_config
         where   id = #{id}
+    </select>
+    <sql id="Base_view_Column_List" >
+        hotelId, roomId, roomTypeId,saleType,saleValue,costPrice,num,saleName,settleValue,settleType,valid,
+        styleType,started,saleConfigInfoId,createTime,createBy,updateTime,updateBy,saleRoomTypeId
+    </sql>
+    <select id="checkRoomSale" resultMap="roomSaleConfig" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfig">
+        SELECT
+        a.id
+        FROM  t_room_sale_config_info  a LEFT  JOIN t_room_sale_config b ON a.id=b.saleConfigInfoId
+        <where>
+            <if test="hotelId != null">
+                AND b.hotelId = #{hotelId}
+            </if>
+            <if test="roomId != null">
+                AND b.roomId = #{roomId}
+            </if>
+            <if test="roomTypeId != null">
+                AND b.saleRoomTypeId = #{roomTypeId}
+            </if>
+                AND b.valid = 'T' AND a.valid='T'
+        </where>
+        limit 1
+    </select>
+    <select id="getRoomSaleByParams" resultMap="roomSaleConfig" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfig">
+        SELECT
+          a.id as promoType,b.hotelId, b.roomId, b.roomTypeId,b.saleValue,b.costPrice,b.num,b.saleName as roomTypeName,
+        b.styleType,b.started,b.saleConfigInfoId,b.saleRoomTypeId,a.startDate,a.endDate,
+        a.startTime,a.endTime,a.saleValue as saleTypeValue,a.saleLabel,a.description,a.fontColor,c.saleName,c.id as saleType
+        FROM  t_room_sale_config_info  a LEFT  JOIN t_room_sale_config b ON a.id=b.saleConfigInfoId
+        LEFT JOIN  t_room_sale_type c ON  a.saleTypeId=c.id
+        <where>
+            <if test="hotelId != null">
+                AND b.hotelId = #{hotelId}
+            </if>
+            <if test="roomId != null">
+                AND b.roomId = #{roomId}
+            </if>
+            <if test="roomTypeId != null">
+                AND b.roomTypeId = #{roomTypeId}
+            </if>
+            <if test="valid != null">
+                AND b.valid = #{valid}
+            </if>
+        </where>
     </select>
 </mapper>

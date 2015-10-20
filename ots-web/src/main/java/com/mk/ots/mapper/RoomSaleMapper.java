@@ -1,9 +1,9 @@
 package com.mk.ots.mapper;
 
+import com.mk.ots.roomsale.model.TRoomSale;
+
 import java.util.List;
 import java.util.Map;
-
-import com.mk.ots.roomsale.model.TRoomSale;
 
 
 /**
@@ -21,5 +21,8 @@ public interface RoomSaleMapper {
 
 	public List<Map<String, Object>> queryRoomPromoByType(String roomTypeId);
 	
+	public List<Map<String, Object>> queryRoomPromoByHotel(String hotelId);
+
 	public List<Map<String, Object>> queryRoomPromoInfoByHotel(String hotelId);
+
 }

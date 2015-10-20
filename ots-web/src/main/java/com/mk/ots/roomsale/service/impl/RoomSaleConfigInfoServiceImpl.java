@@ -27,4 +27,26 @@ public class RoomSaleConfigInfoServiceImpl implements RoomSaleConfigInfoService 
         map.put("limit",limit);
         return roomSaleConfigInfoMapper.queryListBySaleTypeId(map);
     }
+    
+
+	public Map<String, Object> queryRoomPromoByType(String roomTypeId) throws Exception {
+		try {
+			List<Map<String, Object>> saleRoomList = roomSaleMapper.queryRoomPromoByType(roomTypeId);
+			return saleRoomList.get(0);
+		} catch (Exception ex) {
+			logger.error(String.format("failed to queryRoomPromoByType %s", roomTypeId), ex);
+			throw new Exception(String.format("failed to queryRoomPromoByType %s", roomTypeId), ex);
+		}
+	}
+
+	@Override
+	public List<Map<String, Object>> queryRoomPromoByHotel(String hotelId) throws Exception {
+		try {
+			List<Map<String, Object>> saleRoomList = roomSaleMapper.queryRoomPromoByHotel(hotelId);
+			return saleRoomList;
+		} catch (Exception ex) {
+			logger.error(String.format("failed to queryRoomPromoByHotel %s", hotelId), ex);
+			throw new Exception(String.format("failed to queryRoomPromoByHotel %s", hotelId), ex);
+		}
+	}    
 }
