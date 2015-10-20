@@ -67,6 +67,7 @@
         <include refid="Base_Column_List"/>
         FROM  t_room_sale_config_info a
         <include refid="Base_Query_List"/>
+        limit ${start} , ${limit}
     </select>
 
 </mapper>

@@ -124,17 +124,29 @@ public class HotelPromoController {
         Calendar cal=Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
 
-        String calTime;
         if (endDate.before(sysTime)){
             return -1;  //活动已结束
-        }
-        //当前时间
-        if (startDate.after(sysTime)){
-            DateUtils
+        } else if (startDate.after(sysTime)){
+            cal.setTime(startDate);
+            getCalTime(startTime, cal);
+            return DateUtils.getDiffTime(DateUtils.formatDatetime(cal.getTime()),DateUtils.formatDatetime(sysTime));
         }else if (endDate.after(sysTime)&&startDate.before(sysTime)){
-
+            cal.setTime(sysTime);
+            getCalTime(startTime, cal);
+            return DateUtils.getDiffTime(DateUtils.formatDatetime(cal.getTime()),DateUtils.formatDatetime(sysTime));
         }
+        return 0;
+    }
 
+    private void getCalTime(Time startTime, Calendar cal) {
+        int year=cal.get(Calendar.YEAR);
+        int month=cal.get(Calendar.MONTH);
+        int day=cal.get(Calendar.DAY_OF_MONTH);
+        cal.setTime(startTime);
+        int hour= cal.get(Calendar.HOUR);
+        int min= cal.get(Calendar.MINUTE);
+        int sec = cal.get(Calendar.SECOND);
+        cal.set(year,month,day,hour,min,sec);
     }
 
 }

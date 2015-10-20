@@ -19,7 +19,6 @@ public class RoomSaleConfigInfoServiceImpl implements RoomSaleConfigInfoService 
 
 
     public List<TRoomSaleConfigInfo> queryListBySaleTypeId(int saleTypeId,int start,int limit){
-        List<TRoomSaleConfigInfo> roomSaleConfigInfoList=roomSaleConfigInfoMapper.queryListBySaleTypeId(saleTypeId,start,limit);
-
+        return roomSaleConfigInfoMapper.queryListBySaleTypeId(saleTypeId,start,limit);
     }
 }
