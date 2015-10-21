@@ -1639,7 +1639,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			return;
 		} else if (isPromoOnly) {
-			if ("3.1".compareTo(callVersion.trim()) > 0) {
+			if ("3.1".compareTo(callVersion) > 0) {
 				logger.warn("version before 3.1 shouldn't access this attribute isonpromo...");
 			}
 
