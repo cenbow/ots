@@ -91,7 +91,7 @@ import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.ots.web.ServiceOutput;
 
-public class PromoSearchServiceImpl implements ISearchService{
+public class PromoSearchServiceImpl implements ISearchService {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -318,6 +318,17 @@ public class PromoSearchServiceImpl implements ISearchService{
 			if (startdateday.equals(enddateday)) {
 				validateStr = "入住和离店不能是同一天.";
 				return validateStr;
+			}
+			if (StringUtils.isBlank(params.getPromotype())) {
+				validateStr = "活动类型必须传入";
+				return validateStr;
+			} else {
+				try {
+					Integer.parseInt(params.getPromotype());
+				} catch (Exception ex) {
+					validateStr = String.format("活动类型非法 %s", params.getPromotype());
+					return validateStr;
+				}
 			}
 			Date startDate = DateUtils.getDateFromString(params.getStartdateday());
 			Date endDate = DateUtils.getDateFromString(params.getEnddateday());
@@ -658,8 +669,7 @@ public class PromoSearchServiceImpl implements ISearchService{
 					}
 				}
 			}
-			
-			
+
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 			rtnMap.put("count", hotels.size());
 			rtnMap.put("hotel", hotels);
@@ -672,11 +682,23 @@ public class PromoSearchServiceImpl implements ISearchService{
 		return rtnMap;
 	}
 
-	private void resort(List<Map<String, Object>> hotels)
-	{
-		
+	private void resortPromo(List<Map<String, Object>> hotels) {
+		List<Map<String, Object>> datasVC = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> datasNVC = new ArrayList<Map<String, Object>>();
+		for (Map<String, Object> data : hotels) {
+			Integer roomVacancy = (Integer) data.get("roomvacancy");
+			if (roomVacancy != null && roomVacancy == 0) {
+				datasNVC.add(data);
+			} else {
+				datasVC.add(data);
+			}
+		}
+
+		hotels.clear();
+		hotels.addAll(datasVC);
+		hotels.addAll(datasNVC);
 	}
-	
+
 	/**
 	 * 
 	 * @param searchBuilder
@@ -1111,8 +1133,15 @@ public class PromoSearchServiceImpl implements ISearchService{
 			for (int i = 0; i < hits.length; i++) {
 				SearchHit hit = hits[i];
 				Map<String, Object> result = hit.getSource();
-				result.put("$sortScore", hit.getScore());
 				String es_hotelid = String.valueOf(result.get("hotelid"));
+
+				String isonpromo = (String) result.get("isonpromo");
+				if (StringUtils.isBlank(isonpromo) || "1".equals(isonpromo)) {
+					logger.warn(String.format("hotelid %s doesn't belong to promo", es_hotelid));
+					continue;
+				}
+
+				result.put("$sortScore", hit.getScore());
 				// 根据用户经纬度来计算两个经纬度坐标距离（单位：米）
 				Map<String, Object> pin = (Map<String, Object>) result.get("pin");
 				// hotel latitude and longitude
@@ -1122,7 +1151,7 @@ public class PromoSearchServiceImpl implements ISearchService{
 																										// yub
 																										// 20150724
 				result.put("distance", hotelDistance);
-				
+
 				// 眯客3.0增加userdistance属性：用户坐标与酒店坐标的距离
 				double userDistance = DistanceUtil.distance(userlon, userlat, hotelLongitude, hotelLatitude);
 				// 选择地标搜索(机场车站、地铁线路、景点、医院、高校)，按照用户坐标和地标坐标计算距离
@@ -1306,8 +1335,15 @@ public class PromoSearchServiceImpl implements ISearchService{
 						: Constant.STR_FALSE;
 				String p_online = Constant.STR_TRUE.equals(result.get("online")) ? Constant.STR_TRUE
 						: Constant.STR_FALSE;
+
 				Integer avlblroomnum = hotelService.getAvlblRoomNum(p_hotelid, p_isnewpms, p_visible, p_online,
 						reqentity.getStartdateday(), reqentity.getEnddateday());
+				Integer promoType = Integer.parseInt(reqentity.getPromotype());
+
+				Integer vacants = hotelService.calPromoVacants(promoType, Long.valueOf(hotelid), p_isnewpms, p_visible,
+						p_online, reqentity.getStartdateday(), reqentity.getEnddateday());
+				result.put("roomvacancy", vacants);
+
 				endTime = new Date().getTime();
 				times = endTime - startTime;
 				logger.info("查询酒店: {}可订房间数耗时: {}ms.", es_hotelid, times);
@@ -1390,6 +1426,11 @@ public class PromoSearchServiceImpl implements ISearchService{
 
 			// 重新按照是否可售分组排序
 			this.sortByVcState(hotels);
+
+			/**
+			 * adjust the order by suppress all no vacancy hotels
+			 */
+			this.resortPromo(hotels);
 
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 			rtnMap.put("count", totalHits);
@@ -2602,6 +2643,5 @@ public class PromoSearchServiceImpl implements ISearchService{
 		}
 		return result;
 	}
-
 
 }

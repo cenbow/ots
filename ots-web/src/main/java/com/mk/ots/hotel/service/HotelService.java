@@ -91,7 +91,9 @@ import com.mk.ots.order.service.OrderService;
 import com.mk.ots.price.dao.BasePriceDAO;
 import com.mk.ots.price.dao.PriceDAO;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
+import com.mk.ots.roomsale.model.RoomPromoDto;
 import com.mk.ots.roomsale.model.TRoomSale;
+import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.score.dao.ScoreDAO;
 import com.mk.ots.ticket.dao.BHotelStatDao;
@@ -1548,6 +1550,72 @@ public class HotelService {
 		return freeRoomCount; // 可订房间数
 	}
 
+	/**
+	 * calculate room vacancy for promo rooms
+	 * 
+	 * @param roomTypeId
+	 * @param roomModels
+	 * @param hotelid
+	 * @param isonline
+	 * @param starttime
+	 * @param endtime
+	 * @param lockRoomsCache
+	 * @return
+	 */
+	public Integer calPromoVacants(Integer promoType, Long hotelid, String isnewpms, String isvisible, String isonline,
+			String starttime, String endtime) throws Exception {
+		Integer vacants = 0;
+
+		List<TRoomModel> roomModels = tRoomMapper.findRoomsByHotelId(hotelid);
+		Map<String, String> lockRoomsCache = null;
+		try {
+			lockRoomsCache = roomstateService.findBookedRoomsByHotelIdNewPms(hotelid, starttime, endtime);
+		} catch (Exception ex) {
+			throw new Exception(String.format("failed to load cache for hotelId %s", hotelid), ex);
+		}
+
+		for (TRoomModel roomModel : roomModels) {
+			Long curRoomTypeId = roomModel.getRoomtypeid();
+			Long roomid = roomModel.getId();
+
+			TRoomSaleConfig config = new TRoomSaleConfig();
+			config.setHotelId(hotelid == null ? 0 : hotelid.intValue());
+			config.setRoomId(roomid == null ? 0 : roomid.intValue());
+			config.setRoomTypeId(curRoomTypeId == null ? 0 : curRoomTypeId.intValue());
+
+			Integer curPromoType = 0;
+			try {
+				List<RoomPromoDto> promo = roomSaleService.queryRoomPromoByHotel(config);
+
+				if (promo.size() > 0) {
+					curPromoType = Integer.parseInt(promo.get(0).getPromoType());
+				}
+			} catch (Exception ex) {
+				logger.warn(String.format("failed to queryRoomPromoByHotel, roomid:%s; roomtypeid:%s", roomid,
+						curRoomTypeId), ex);
+			}
+
+			if (curPromoType != null && promoType == curPromoType) {
+				RoomstateQuerylistRespEntity.Room room = new RoomstateQuerylistRespEntity().new Room();
+				room.setRoomid(roomModel.getId());
+				room.setRoomno(roomModel.getName());
+
+				try {
+					this.processRoomState(room, hotelid, starttime, endtime, lockRoomsCache);
+				} catch (Exception ex) {
+					logger.error(String.format("failed to calculate room vacancy for room %s", roomModel.getId()), ex);
+					continue;
+				}
+
+				if (room.getRoomstatus().equals(roomstateService.ROOM_STATUS_VC)) {
+					vacants++;
+				}
+			}
+
+		}
+
+		return vacants;
+	}
 	/**
 	 * make es term filter
 	 *
