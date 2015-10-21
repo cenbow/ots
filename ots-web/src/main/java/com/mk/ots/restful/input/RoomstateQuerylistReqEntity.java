@@ -49,6 +49,8 @@ public class RoomstateQuerylistReqEntity implements Serializable {
 	private Integer callentry;
 	private String callmethod;
 	private String callversion;
+	//是否显示全部房间 T:是 F:否
+	private String isShowAllRoom;
 
 	public Integer getCallentry() {
 		return callentry;
@@ -145,5 +147,13 @@ public class RoomstateQuerylistReqEntity implements Serializable {
 
 	public void setCallversion(String callversion) {
 		this.callversion = callversion;
+	}
+
+	public String getIsShowAllRoom() {
+		return isShowAllRoom;
+	}
+
+	public void setIsShowAllRoom(String isShowAllRoom) {
+		this.isShowAllRoom = isShowAllRoom;
 	}
 }
