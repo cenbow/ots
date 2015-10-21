@@ -23,72 +23,79 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  *
  * 特价类型接口
  */
 @Controller
 public class HotelPromoController {
-	
+
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    private RoomSaleConfigInfoService roomSaleConfigInfoService;
+	@Autowired
+	private RoomSaleConfigInfoService roomSaleConfigInfoService;
 
 	/**
 	 * 活动查询
-     **/
+	 **/
 
-    @RequestMapping(value = "/promo/querytypelist", method = RequestMethod.POST)
+	@RequestMapping(value = "/promo/querytypelist", method = RequestMethod.POST)
 	@ResponseBody
-    public ResponseEntity<Map<String, Object>> querytypelist(ParamBaseBean pbb,String cityid,String saletypeid,Integer page,Integer limit) {
-    	logger.info("HotelPromoController::querytypelist::params{}  begin", pbb+","+saletypeid+","+cityid+","+page+","+limit);
-    	Map<String, Object> result = new HashMap<String, Object>();
-    	try {
+	public ResponseEntity<Map<String, Object>> querytypelist(ParamBaseBean pbb, String cityid, String saletypeid,
+			Integer page, Integer limit) {
+		logger.info("HotelPromoController::querytypelist::params{}  begin",
+				pbb + "," + saletypeid + "," + cityid + "," + page + "," + limit);
+		Map<String, Object> result = new HashMap<String, Object>();
+		try {
 
-	    	if (page == null || StringUtils.isBlank(page.toString())) {
-	    		page = 1;
-	    	}
-	    	if (limit == null || StringUtils.isBlank(limit.toString())) {
+			if (page == null || StringUtils.isBlank(page.toString())) {
+				page = 1;
+			}
+			if (limit == null || StringUtils.isBlank(limit.toString())) {
 				limit = 10;
-	    	}
+			}
 
-	    	
-	 	    int start = (page - 1) * limit;
+			int start = (page - 1) * limit;
 
+			if (StringUtils.isEmpty(saletypeid)) {
+				result.put(ServiceOutput.STR_MSG_SUCCESS, false);
+				result.put(ServiceOutput.STR_MSG_ERRCODE, "404");
+				result.put(ServiceOutput.STR_MSG_ERRMSG, "没有活动");
+				return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
+			}
 
-            if (StringUtils.isEmpty(saletypeid)){
-                result.put(ServiceOutput.STR_MSG_SUCCESS, false);
-                result.put(ServiceOutput.STR_MSG_ERRCODE, "404");
-                result.put(ServiceOutput.STR_MSG_ERRMSG, "没有活动");
-                return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
-            }
+			List<TRoomSaleConfigInfo> roomSaleConfigInfoList = roomSaleConfigInfoService.queryListBySaleTypeId(cityid,
+					Integer.parseInt(saletypeid), start, limit);
 
-	 	    List<TRoomSaleConfigInfo> roomSaleConfigInfoList= roomSaleConfigInfoService.queryListBySaleTypeId(cityid,Integer.parseInt(saletypeid),start,limit);
+			List<JSONObject> list = new ArrayList<JSONObject>();
+			if (CollectionUtils.isNotEmpty(roomSaleConfigInfoList)) {
+				for (TRoomSaleConfigInfo saleConfigInfo : roomSaleConfigInfoList) {
+					long sec = DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
+							saleConfigInfo.getStartTime());
+					if (sec < 0) {
+						continue;
+					}
+					JSONObject ptype1 = new JSONObject();
 
-            List<JSONObject> list  = new ArrayList<JSONObject>();
-            if(CollectionUtils.isNotEmpty(roomSaleConfigInfoList)) {
-                for(TRoomSaleConfigInfo saleConfigInfo:roomSaleConfigInfoList){
-                    long sec=DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(), saleConfigInfo.getStartTime());
-                    if (sec<0){
-                        continue;
-                    }
-                    JSONObject ptype1 = new JSONObject();
-                    ptype1.put("promotypeid", saleConfigInfo.getId());
-                    ptype1.put("promotypetext", saleConfigInfo.getSaleLabel());
-                    ptype1.put("promotypeprice", saleConfigInfo.getSaleValue());
-                    ptype1.put("promosec", sec/1000);          //秒
-                    list.add(ptype1);
-                }
-            }
+					if (logger.isInfoEnabled()) {
+						logger.info(String.format("promotypeid: %s; promotypetext: %s; promotypeprice:%s",
+								saleConfigInfo.getId(), saleConfigInfo.getSaleLabel(), saleConfigInfo.getSaleValue()));
+					}
+
+					ptype1.put("promotypeid", saleConfigInfo.getId());
+					ptype1.put("promotypetext", saleConfigInfo.getSaleLabel());
+					ptype1.put("promotypeprice", saleConfigInfo.getSaleValue());
+					ptype1.put("promosec", sec / 1000); // 秒
+					list.add(ptype1);
+				}
+			}
 
 			result.put("promotypes", list);
 
-	    	result.put(ServiceOutput.STR_MSG_SUCCESS, true);
-    	}catch (Exception e) {
+			result.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error("HotelPromoController::querytypelist::error{}",e.getMessage());
+			logger.error("HotelPromoController::querytypelist::error{}", e.getMessage());
 			result.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			result.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			result.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
@@ -96,6 +103,6 @@ public class HotelPromoController {
 			logger.info("HotelCollectionController::querylist::end");
 		}
 		return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
-    }
+	}
 
 }

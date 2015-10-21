@@ -65,7 +65,7 @@
     </sql>
 
     <sql id="Base_Column_List" >
-       saleTypeId,startDate,endDate,startTime,endTime,saleValue,saleLabel,description,
+       id, saleTypeId,startDate,endDate,startTime,endTime,saleValue,saleLabel,description,
        fontColor,valid,createTime,createBy,updateTime,updateBy
     </sql>
     <insert id="saveRoomSaleConfigInfo"  useGeneratedKeys="true" keyProperty="id" parameterType="map" >
