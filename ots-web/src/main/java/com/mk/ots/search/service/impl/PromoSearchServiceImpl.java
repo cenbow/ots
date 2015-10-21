@@ -412,7 +412,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					this.searchTypeFilter(params);
 				}
 				rtnMap = this.readonlyOtsHotelListFromEsStore(params);
-				logger.info("未指定参数hotelid，搜索酒店数据结束.");
+				logger.info(String.format("未指定参数hotelid，搜索酒店数据结束. size:%s", rtnMap != null ? rtnMap.size() : 0));
 			} else {
 				logger.info("指定hotelid，返回酒店数据开始...");
 				rtnMap = this.readonlyOtsHotelFromEsStore(params);
