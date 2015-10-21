@@ -39,7 +39,7 @@ public class HotelPromoController {
 	 * 活动查询
 	 **/
 
-	@RequestMapping(value = "/promo/querytypelist", method = RequestMethod.POST)
+	@RequestMapping(value = "/hotel/querytypelist", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> querytypelist(ParamBaseBean pbb, String cityid, String saletypeid,
 			Integer page, Integer limit) {
