@@ -48,6 +48,7 @@ import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
 import com.mk.ots.roomsale.service.RoomSaleService;
+import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
 
@@ -92,6 +93,8 @@ public class HotelController {
 	 */
 	@Autowired
 	private ISearchService searchService;
+    @Autowired
+    private IPromoSearchService promoSearchService;
 
 	private final SimpleDateFormat defaultFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 
@@ -277,7 +280,22 @@ public class HotelController {
 			Date day = new Date();
 			long starttime = day.getTime();
 
-			rtnMap = invokeSearchHotels(reqentity, Boolean.TRUE);
+			// 当前日期
+			String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
+			// 下一天日期
+			String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
+			// search hotel from elasticsearch
+			// 如果没有开始日期和截止日期，默认今住明退
+			if (StringUtils.isBlank(reqentity.getStartdateday())) {
+				reqentity.setStartdateday(strCurDay);
+			}
+			if (StringUtils.isBlank(reqentity.getEnddateday())) {
+				reqentity.setEnddateday(strNextDay);
+			}
+
+			reqentity.setIspromoonly(Boolean.TRUE);
+
+			rtnMap = promoSearchService.readonlySearchHotels(reqentity);
 
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
 					HttpStatus.OK);
@@ -286,8 +304,6 @@ public class HotelController {
 				resultResponse.getBody().put("$times$", endtime - starttime + " ms");
 			}
 			
-			resultResponse.getBody().put("promotext", "重庆特价...");
-
 			/**
 			 * TODO: waiting for long's interface to get the times
 			 */

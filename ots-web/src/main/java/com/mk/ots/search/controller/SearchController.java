@@ -30,6 +30,7 @@ import com.mk.ots.restful.input.SearchPositionsFuzzyReqEntity;
 import com.mk.ots.restful.input.SearchPositionsReqEntity;
 import com.mk.ots.restful.input.SearchReqEntity;
 import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
+import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
 

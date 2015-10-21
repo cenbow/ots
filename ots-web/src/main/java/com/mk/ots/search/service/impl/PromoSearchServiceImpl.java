@@ -39,6 +39,7 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
@@ -91,6 +92,7 @@ import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.ots.web.ServiceOutput;
 
+@Service
 public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
