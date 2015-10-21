@@ -90,8 +90,8 @@
         <include refid="Config_Column_List"/>,d.cityId
         FROM  t_room_sale a
         <![CDATA[
-        LEFT JOIN t_room_sale_config_info b ON a.configId = b.id and a.isBack = 'F' and b.valid = 'T'
-        and startDate = date_format(DATE_ADD(SYSDATE(),INTERVAL 1 DAY),'%Y-%m-%d')
+        INNER  JOIN t_room_sale_config_info b ON a.configId = b.id and a.isBack = 'F' and b.valid = 'T'
+        and b.startDate <= date_format(DATE_ADD(SYSDATE(),INTERVAL 1 DAY),'%Y-%m-%d') and b.endDate >= date_format(DATE_ADD(SYSDATE(),INTERVAL 1 DAY),'%Y-%m-%d')
         INNER JOIN t_room_sale_config config ON config.saleConfigInfoId = b.id and config.valid = 'T'
         INNER JOIN t_hotel c on a.hotelId=c.id
         INNER JOIN t_city d on c.citycode = d.code
