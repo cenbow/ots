@@ -87,11 +87,11 @@ import com.mk.ots.search.model.SAreaInfo;
 import com.mk.ots.search.model.SLandMark;
 import com.mk.ots.search.model.SSubway;
 import com.mk.ots.search.model.SSubwayStation;
-import com.mk.ots.search.service.ISearchService;
+import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.ots.web.ServiceOutput;
 
-public class PromoSearchServiceImpl implements ISearchService {
+public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
