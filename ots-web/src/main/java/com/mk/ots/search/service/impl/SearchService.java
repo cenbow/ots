@@ -1123,7 +1123,7 @@ public class SearchService implements ISearchService {
 																										// yub
 																										// 20150724
 				result.put("distance", hotelDistance);
-				
+
 				// 眯客3.0增加userdistance属性：用户坐标与酒店坐标的距离
 				double userDistance = DistanceUtil.distance(userlon, userlat, hotelLongitude, hotelLatitude);
 				// 选择地标搜索(机场车站、地铁线路、景点、医院、高校)，按照用户坐标和地标坐标计算距离
@@ -1593,15 +1593,7 @@ public class SearchService implements ISearchService {
 			 */
 			if (StringUtils.isBlank(callVersion) || "3.1".compareTo(callVersion.trim()) > 0) {
 				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
-			}
-
-			return;
-		} else if (isPromoOnly) {
-			if ("3.1".compareTo(callVersion.trim()) > 0) {
-				logger.warn("version before 3.1 shouldn't access this attribute isonpromo...");
-			}
-
-			if (callEntry != null && callEntry != 2) {
+			} else if (callEntry != null && callEntry != 2) {
 				if (callEntry == 1) {
 					Cat.logEvent("摇一摇", Event.SUCCESS);
 				} else if (callEntry == 3) {
@@ -1611,11 +1603,10 @@ public class SearchService implements ISearchService {
 				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
 			} else if (StringUtils.isNotEmpty(callMethod) && "3".equalsIgnoreCase(callMethod)) {
 				Cat.logEvent("wechat", Event.SUCCESS);
-
+				
 				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
-			} else {
-				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
 			}
+			return;
 		}
 	}
 
