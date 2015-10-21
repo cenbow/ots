@@ -1606,8 +1606,6 @@ public class DateUtils extends Object {
         LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
         LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
         return Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
-
-
     }
 
     public static long promoEndDueTime( Date endDate, Time endTime) {

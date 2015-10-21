@@ -178,9 +178,11 @@
     </select>
 
     <select id="queryRoomPromoInfoByHotel" resultType="map" parameterType="String">
-        SELECT config.saletype as promotype, config.costprice as promopice
+        SELECT config.saleconfiginfoid as promotype, info.salevalue as promopice
         FROM t_room_sale_config config
-        where config.hotelId = #{hotelId}
+        join t_room_sale_config_info info on config.saleconfiginfoid = info.id
+        WHERE config.hotelId = #{hotelId}
+        GROUP  BY promotype
     </select>
 
     <select id="queryRoomPromoByType" resultType="map" parameterType="String">
