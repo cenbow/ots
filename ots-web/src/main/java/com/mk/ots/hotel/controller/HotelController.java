@@ -12,8 +12,6 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.joda.time.LocalDateTime;
-import org.joda.time.Seconds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -304,47 +302,14 @@ public class HotelController {
 				resultResponse.getBody().put("$times$", endtime - starttime + " ms");
 			}
 
-			/**
-			 * TODO: waiting for long's interface to get the times
-			 */
-			String startInternalTime = "2015-10-17 16:00";
-			String endInternalTime = "2015-10-17 18:30";
-
-			if (roomSaleService != null) {
-				List<String> times = roomSaleService.queryPromoTime();
-				startInternalTime = times.get(0);
-				endInternalTime = times.get(1);
-			}
-
 			if (logger.isInfoEnabled()) {
-				logger.info(String.format("promo time received, startTime:%s; endTime:%s; rtnMap: %s",
-						startInternalTime, endInternalTime, rtnMap.size()));
-			}
-
-			LocalDateTime startExTime = LocalDateTime.fromDateFields(defaultFormatter.parse(startInternalTime));
-			LocalDateTime endExTime = LocalDateTime.fromDateFields(defaultFormatter.parse(endInternalTime));
-
-			resultResponse.getBody().put("ispromoting", searchService.isInPromoPeriod() ? 1 : 0);
-
-			resultResponse.getBody().put("promostarttime",
-					String.format("%s:%s", startExTime.getHourOfDay(), startExTime.getMinuteOfHour()));
-			resultResponse.getBody().put("promoendtime",
-					String.format("%s:%s", endExTime.getHourOfDay(), endExTime.getMinuteOfHour()));
-
-			if (rtnMap.size() == 0) {
-				resultResponse.getBody().put("promosec", 0);
-			} else {
-				LocalDateTime currentTime = LocalDateTime.now();
-				Integer seconds = Seconds.secondsBetween(currentTime, endExTime).getSeconds();
-
-				resultResponse.getBody().put("promosec", seconds);
+				logger.info(String.format("searchPromoHotels-> rtnMap: %s", rtnMap == null ? 0 : rtnMap.size()));
 			}
 
 			logger.info("【/hotel/querypromolist】 end...");
-			logger.info("【/hotel/querypromolist】response data:success::{} , count::{}\n",
-					objectMapper.writeValueAsString(resultResponse.getBody().get("success")),
-					resultResponse.getBody().get("count"));
-			return resultResponse;
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		} catch (Exception e) {
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
