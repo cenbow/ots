@@ -1342,8 +1342,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						reqentity.getStartdateday(), reqentity.getEnddateday());
 				Integer promoType = Integer.parseInt(reqentity.getPromotype());
 
-				Integer vacants = hotelService.calPromoVacants(promoType, Long.valueOf(hotelid), p_isnewpms, p_visible,
-						p_online, reqentity.getStartdateday(), reqentity.getEnddateday());
+				Integer vacants = hotelService.calPromoVacants(promoType, p_hotelid, p_isnewpms, p_visible, p_online,
+						reqentity.getStartdateday(), reqentity.getEnddateday());
 				result.put("roomvacancy", vacants);
 
 				endTime = new Date().getTime();
