@@ -1620,9 +1620,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 */
 	private void makePromoFilter(HotelQuerylistReqEntity reqentity, List<FilterBuilder> filterBuilders) {
 		Boolean isPromoOnly = reqentity.getIspromoonly();
-		String callVersion = reqentity.getCallversion();
+		String callVersion = reqentity.getCallversion() == null ? "" : reqentity.getCallversion().trim();
 		Integer callEntry = reqentity.getCallentry();
-		String callMethod = reqentity.getCallmethod();
+		String callMethod = reqentity.getCallmethod() == null ? "" : reqentity.getCallmethod().trim();
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("callEntry:%s; callMethod:%s; callVersion:%s; isPromoOnly:%s", callEntry,
