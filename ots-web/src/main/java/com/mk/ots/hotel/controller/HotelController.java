@@ -93,8 +93,8 @@ public class HotelController {
 	 */
 	@Autowired
 	private ISearchService searchService;
-    @Autowired
-    private IPromoSearchService promoSearchService;
+	@Autowired
+	private IPromoSearchService promoSearchService;
 
 	private final SimpleDateFormat defaultFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 
@@ -303,7 +303,7 @@ public class HotelController {
 				long endtime = new Date().getTime();
 				resultResponse.getBody().put("$times$", endtime - starttime + " ms");
 			}
-			
+
 			/**
 			 * TODO: waiting for long's interface to get the times
 			 */
@@ -317,8 +317,8 @@ public class HotelController {
 			}
 
 			if (logger.isInfoEnabled()) {
-				logger.info(String.format("promo time received, startTime:%s; endTime:%s", startInternalTime,
-						endInternalTime));
+				logger.info(String.format("promo time received, startTime:%s; endTime:%s; rtnMap: %s",
+						startInternalTime, endInternalTime, rtnMap.size()));
 			}
 
 			LocalDateTime startExTime = LocalDateTime.fromDateFields(defaultFormatter.parse(startInternalTime));
@@ -884,15 +884,15 @@ public class HotelController {
 	 * @return
 	 */
 	@RequestMapping(value = "/hotel/updatemikepricecache")
-	public ResponseEntity<Map<String, Object>> updateMikePriceCache(String citycode,String hotelid) {
+	public ResponseEntity<Map<String, Object>> updateMikePriceCache(String citycode, String hotelid) {
 		logger.info("updateMikePriceCache method begin...");
 		long startTime = new Date().getTime();
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		try {
-			if(StringUtils.isNotBlank(hotelid)){
+			if (StringUtils.isNotBlank(hotelid)) {
 				Long thotelId = Long.valueOf(hotelid);
 				hotelService.updateRedisMikePrice(thotelId);
-			}else if (StringUtils.isNotBlank(citycode)) {
+			} else if (StringUtils.isNotBlank(citycode)) {
 				hotelService.batchUpdateRedisMikePrice(citycode);
 			}
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);

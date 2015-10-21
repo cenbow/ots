@@ -1138,7 +1138,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				String es_hotelid = String.valueOf(result.get("hotelid"));
 
 				String isonpromo = (String) result.get("isonpromo");
-				if (StringUtils.isBlank(isonpromo) || "1".equals(isonpromo)) {
+				if (StringUtils.isBlank(isonpromo) || "0".equals(isonpromo)) {
 					logger.warn(String.format("hotelid %s doesn't belong to promo", es_hotelid));
 					continue;
 				}
