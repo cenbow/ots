@@ -1219,9 +1219,15 @@ public class RoomstateService {
 								// isMatch = true;
 							}
 							rooms.add(room);
-							if (vcRoomCount < 5) {
+
+							if("T".equals(params.getIsShowAllRoom())){
 								vcRooms5.add(room);
-								vcRoomCount++;
+							}else{
+								//眯客3.0 只显示<=5个可预定房间
+								if (vcRoomCount < 5) {
+									vcRooms5.add(room);
+									vcRoomCount++;
+								}
 							}
 						}
 					}
