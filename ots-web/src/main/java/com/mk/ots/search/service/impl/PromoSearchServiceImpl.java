@@ -655,7 +655,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				try {
 					queryTransferData(result, reqentity);
 				} catch (Exception e) {
-					logger.error("酒店处理出错: {}", e.getMessage());
+					logger.error(String.format("failed to queryTransferData with hotelid %s..., ignore and continue...",
+							reqentity.getHotelid()), e);
 				}
 
 				// 添加到酒店列表
@@ -1921,24 +1922,24 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			logger.info(String.format("promoinfo:%s", data == null ? "" : data.get("promoinfo").toString()));
 
 			List<Map<String, Object>> promoInfoList = (List<Map<String, Object>>) data.get("promoinfo");
-			final Map<String, String> promoMap = new HashMap<String, String>();
+			final Map<Integer, String> promoMap = new HashMap<Integer, String>();
 			for (int i = 0; promoInfoList != null && i < promoInfoList.size(); i++) {
 				Integer promotype = 0;
 				String promoprice = "";
-
+				
 				try {
 					if (promoInfoList.get(i) != null && promoInfoList.get(i).containsKey("promotype")) {
 						promotype = promoInfoList.get(i).get("promotype") == null ? 0
 								: (Integer) promoInfoList.get(i).get("promotype");
 						promoprice = promoInfoList.get(i).get("promopice") == null ? ""
 								: (String) promoInfoList.get(i).get("promopice");
+
+						promoMap.put(promotype == null ? 0 : promotype, promoprice);
 					}
 				} catch (Exception ex) {
 					logger.warn("invalid dateformat for promotype and promopice", ex);
 					continue;
 				}
-
-				promoMap.put(promotype == null ? "0" : promotype.toString(), promoprice);
 			}
 
 			List<Map<String, Object>> roomtypeList = this.readonlyRoomtypeList(data, bedtype);
@@ -2005,8 +2006,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				roomtypeItem.put("roomtypeprice", roomtypeprice);
 
 				roomtypeItem.put("promoprice", "");
-				String roomPromotype = (String) roomtypeItem.get("promotype");
-				if (StringUtils.isNotBlank(roomPromotype)) {
+				Integer roomPromotype = (Integer) roomtypeItem.get("promotype");
+				if (roomPromotype != null) {
 					String promoPrice = promoMap.get(roomPromotype);
 					if (StringUtils.isNotBlank(promoPrice)) {
 						roomtypeItem.put("promoprice", promoPrice);
