@@ -178,7 +178,7 @@
     </select>
 
     <select id="queryRoomPromoInfoByHotel" resultType="map" parameterType="String">
-        SELECT config.saleconfiginfoid as promotype, info.salevalue as promopice
+        SELECT config.saleconfiginfoid as promotype, info.salevalue as promoprice
         FROM t_room_sale_config config
         join t_room_sale_config_info info on config.saleconfiginfoid = info.id
         WHERE config.hotelId = #{hotelId}

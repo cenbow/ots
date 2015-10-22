@@ -64,7 +64,7 @@
     <include refid="Base_Column_List" />
     from t_room
     where pms = #{pms} and roomtypeid in(select id from t_roomtype where ehotelid=#{hotelid})
-    
+    limit 1
   </select>
    
 </mapper>
