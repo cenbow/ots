@@ -205,7 +205,6 @@ public class WalletController {
             throw MyErrorEnum.errorParm.getMyException("获取用户信息失败.");
         }
         Long mid = MyTokenUtils.getMidByToken(token);
-        mid = 534428l;
         if(null == mid){
             throw MyErrorEnum.errorParm.getMyException("获取用户信息失败.");
         }
