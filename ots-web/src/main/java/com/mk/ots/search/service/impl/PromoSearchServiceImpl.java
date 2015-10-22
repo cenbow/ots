@@ -1935,9 +1935,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					}
 				} catch (Exception ex) {
 					logger.warn("invalid dateformat for promotype and promopice", ex);
+					continue;
 				}
 
-				promoMap.put(String.valueOf(promotype), promoprice);
+				promoMap.put(promotype == null ? "0" : promotype.toString(), promoprice);
 			}
 
 			List<Map<String, Object>> roomtypeList = this.readonlyRoomtypeList(data, bedtype);
@@ -2007,7 +2008,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				String roomPromotype = (String) roomtypeItem.get("promotype");
 				if (StringUtils.isNotBlank(roomPromotype)) {
 					String promoPrice = promoMap.get(roomPromotype);
-					roomtypeItem.put("promoprice", promoPrice);
+					if (StringUtils.isNotBlank(promoPrice)) {
+						roomtypeItem.put("promoprice", promoPrice);
+					}
 				}
 
 				if (roomtypeItem.get("promotype") == null) {
