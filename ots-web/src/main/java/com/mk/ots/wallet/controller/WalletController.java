@@ -12,6 +12,7 @@ import com.mk.ots.common.bean.ParamBaseBean;
 import com.mk.ots.member.model.UMember;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.service.OrderService;
+import com.mk.ots.score.model.THotelScore;
 import com.mk.ots.score.service.ScoreService;
 import com.mk.ots.wallet.model.CashflowTypeEnum;
 import com.mk.ots.wallet.model.UWalletCashFlow;
@@ -166,20 +167,26 @@ public class WalletController {
                 extend.setIsgetin(getIsgetin(uWalletCashFlow.getPrice()));
 
                 //若是订单相关，写入hotelName
+                Long orderId = null;
                 if (CashflowTypeEnum.CASHBACK_ORDER_IN == extend.getCashflowtype()
-                        || CashflowTypeEnum.CASHBACK_HOTEL_IN == extend.getCashflowtype()
                         || CashflowTypeEnum.CONSUME_ORDER_OUT_LOCK == extend.getCashflowtype()
                         || CashflowTypeEnum.CONSUME_ORDER_OUT_CONFIRM == extend.getCashflowtype()
                         || CashflowTypeEnum.CONSUME_ORDER_REFUND == extend.getCashflowtype()) {
-                    Long orderId = extend.getSourceid();
-                    if (null != orderId) {
-                        OtaOrder otaOrder = orderService.findOtaOrderById(orderId);
-                        if (null != otaOrder) {
-                            String hotelName = otaOrder.getHotelName();
-                            extend.setHotelName(hotelName);
-                        } else {
-                            extend.setHotelName("");
-                        }
+                    orderId = extend.getSourceid();
+                } else if (CashflowTypeEnum.CASHBACK_HOTEL_IN == extend.getCashflowtype()) {
+                    Long scoreId = extend.getSourceid();
+                    THotelScore score = this.scoreService.findScoreByScoreid(scoreId);
+                    orderId = score.getOrderid();
+                } else {
+                    extend.setHotelName("");
+                }
+
+                //按订单号查询酒店
+                if (null != orderId) {
+                    OtaOrder otaOrder = orderService.findOtaOrderById(orderId);
+                    if (null != otaOrder) {
+                        String hotelName = otaOrder.getHotelName();
+                        extend.setHotelName(hotelName);
                     } else {
                         extend.setHotelName("");
                     }
