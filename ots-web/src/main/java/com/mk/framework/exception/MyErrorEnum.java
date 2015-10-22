@@ -132,6 +132,10 @@ public enum MyErrorEnum {
 	promoTypeError("－1006","特价房才能使用优惠劵."),
 	promoCityCodeError("－1007","酒店信息不正确."),
 
+	promotionError("-1008","很抱歉，今夜特价房不能与其他促销一起使用"),
+	couponNoError("-1009","很抱歉，今夜特价房不能使用优惠券"),
+	OrderTypeError("-1010","很抱歉，今夜特价房只能使用在线支付"),
+
 	// -----------------------------
 	customError("0000","");
 	;

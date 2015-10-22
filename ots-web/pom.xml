@@ -1135,9 +1135,7 @@
 
 		<profile>
 			<id>test</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
+
 			<properties>
 				<label>product</label>
 				<jdbc.driver>com.mk.jdbc.MonitorDriver</jdbc.driver>
@@ -1240,7 +1238,9 @@
 
 		<profile>
 			<id>shanghai-simulation</id>
-
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<properties>
 				<label>product</label>
 				<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>

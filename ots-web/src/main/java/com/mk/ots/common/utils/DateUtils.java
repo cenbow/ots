@@ -1102,6 +1102,11 @@ public class DateUtils extends Object {
         return parseDate(d, DEFAULT_DATE_FORMATS);
     }
 
+    public static Date parseDate(String d, String format) throws ParseException {
+        SimpleDateFormat dateParser = new SimpleDateFormat(format);
+        return dateParser.parse(d);
+    }
+
     /**
      * Returns a formatter that can be use by the current thread if needed to convert Date objects to the Internal
      * representation.
@@ -1467,9 +1472,19 @@ public class DateUtils extends Object {
      * 执行测试方法
      * @param args 参数
      */
-    public static void main(String[] args) {
-    	System.out.println(getTodayBeginTime());
+    public static void main(String[] args){
+        String format = "yyyy-MM-dd";
+        SimpleDateFormat dateParser = new SimpleDateFormat(format);
+        try {
+            Date bg = dateParser.parse("2015-10-22 02:00:00");
+            Date ed = dateParser.parse("2015-10-23 09:00:00");
+            System.out.print(diffDay(bg, ed));
+            DateUtils.parseDate(DateUtils.formatDateTime(new Date(),DateUtils.FORMAT_DATE));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
+
     
     private LocalDateTime calcNextSunday(LocalDateTime d) {
         return d.withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59).withDayOfWeek(DateTimeConstants.SUNDAY);

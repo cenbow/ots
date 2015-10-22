@@ -412,7 +412,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					this.searchTypeFilter(params);
 				}
 				rtnMap = this.readonlyOtsHotelListFromEsStore(params);
-				logger.info("未指定参数hotelid，搜索酒店数据结束.");
+				logger.info(String.format("未指定参数hotelid，搜索酒店数据结束. size:%s", rtnMap != null ? rtnMap.size() : 0));
 			} else {
 				logger.info("指定hotelid，返回酒店数据开始...");
 				rtnMap = this.readonlyOtsHotelFromEsStore(params);
@@ -1138,7 +1138,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				String es_hotelid = String.valueOf(result.get("hotelid"));
 
 				String isonpromo = (String) result.get("isonpromo");
-				if (StringUtils.isBlank(isonpromo) || "1".equals(isonpromo)) {
+				if (StringUtils.isBlank(isonpromo) || "0".equals(isonpromo)) {
 					logger.warn(String.format("hotelid %s doesn't belong to promo", es_hotelid));
 					continue;
 				}
@@ -1342,8 +1342,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						reqentity.getStartdateday(), reqentity.getEnddateday());
 				Integer promoType = Integer.parseInt(reqentity.getPromotype());
 
-				Integer vacants = hotelService.calPromoVacants(promoType, Long.valueOf(hotelid), p_isnewpms, p_visible,
-						p_online, reqentity.getStartdateday(), reqentity.getEnddateday());
+				Integer vacants = hotelService.calPromoVacants(promoType, p_hotelid, p_isnewpms, p_visible, p_online,
+						reqentity.getStartdateday(), reqentity.getEnddateday());
 				result.put("roomvacancy", vacants);
 
 				endTime = new Date().getTime();
@@ -1620,9 +1620,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 */
 	private void makePromoFilter(HotelQuerylistReqEntity reqentity, List<FilterBuilder> filterBuilders) {
 		Boolean isPromoOnly = reqentity.getIspromoonly();
-		String callVersion = reqentity.getCallversion();
+		String callVersion = reqentity.getCallversion() == null ? "" : reqentity.getCallversion().trim();
 		Integer callEntry = reqentity.getCallentry();
-		String callMethod = reqentity.getCallmethod();
+		String callMethod = reqentity.getCallmethod() == null ? "" : reqentity.getCallmethod().trim();
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("callEntry:%s; callMethod:%s; callVersion:%s; isPromoOnly:%s", callEntry,
@@ -1639,7 +1639,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			return;
 		} else if (isPromoOnly) {
-			if ("3.1".compareTo(callVersion.trim()) > 0) {
+			if ("3.1".compareTo(callVersion) > 0) {
 				logger.warn("version before 3.1 shouldn't access this attribute isonpromo...");
 			}
 

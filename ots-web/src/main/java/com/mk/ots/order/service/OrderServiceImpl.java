@@ -2143,7 +2143,7 @@ public class OrderServiceImpl implements OrderService {
   	  checkMidIsBlack(order.getToken(),"您的账号存在异常，如有疑问请拨打客服电话4001-888-733");
 
       // 提交订单
-      OtaOrder returnOrder = null;
+        OtaOrder returnOrder = null;
         /*******************订单返现*************/
         Long roomTypeId=order.getRoomOrderList().get(0).getRoomTypeId();
        //判断房间类型
@@ -3166,11 +3166,20 @@ public class OrderServiceImpl implements OrderService {
             if("T".equals(order.getPromotion())){
                 throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能与其他促销一起使用");
             }
-            if("T".equals(order.getCouponNo())){
+            if("T".equals(order.getCoupon())){
                 throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能使用优惠券");
             }
             if(OrderTypeEnum.YF.getId() != order.getOrderType()){
-                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能使用房券");
+                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房只能使用在线支付");
+            }
+            try {
+                Date begin = DateUtils.parseDate(DateUtils.formatDateTime(order.getBeginTime()), DateUtils.FORMATDATETIME);
+                Date end = DateUtils.parseDate(DateUtils.formatDateTime(order.getEndTime()), DateUtils.FORMATDATETIME);
+                if(DateUtils.diffDay(begin,end) >= 2){
+                    throw MyErrorEnum.customError.getMyException("很抱歉，特价房只能入住一天");
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
         }
     }

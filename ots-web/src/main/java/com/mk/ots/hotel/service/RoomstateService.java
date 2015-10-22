@@ -1007,21 +1007,24 @@ public class RoomstateService {
 
 					// mike3.1 特价房型
 
+					if (StringUtils.isNotBlank(callMethod)){
+						callMethod = callMethod.trim();
+					}
+
+					TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
+					Integer roomTypeId = Integer.valueOf(troomType.getId().toString());
+					tRoomSaleConfig.setRoomTypeId(roomTypeId);
+
+					Boolean isPromo = roomSaleService.checkRoomSale(tRoomSaleConfig);
 					if (StringUtils.isNotBlank(callVersionStr)) {
 
 						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
-								&& !"3".equals(callMethod.trim())) {
+								&& !"3".equals(callMethod)) {
 
-							TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
-							Integer roomTypeId = Integer.valueOf(troomType.getId().toString());
-							tRoomSaleConfig.setRoomTypeId(roomTypeId);
-
-							Boolean isPromo = roomSaleService.checkRoomSale(tRoomSaleConfig);
 							List<RoomPromoDto> list =  roomSaleService.queryRoomPromoByHotel(tRoomSaleConfig);
 							String isonpromo = "0";
 
 							if (isPromo != null && isPromo) { // isBack
-																					// ==
 
 								isonpromo = "1";
 
@@ -1264,7 +1267,17 @@ public class RoomstateService {
 					// 眯客3.0 只显示<=5个可预定房间
 					roomtype.setRooms(vcRooms5);
 					// roomtype.setRooms(rooms);//所有可预定房间
-					roomtypes.add(roomtype);
+
+					//兼容老版本
+					if (isPromo != null && isPromo) {
+						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
+								&& !"3".equals(callMethod)) {
+
+							roomtypes.add(roomtype);
+						}
+					} else {
+						roomtypes.add(roomtype);
+					}
 				}
 			} catch (Exception e) {
 				t.setStatus(e);

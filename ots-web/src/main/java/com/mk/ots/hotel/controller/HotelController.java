@@ -1,6 +1,5 @@
 package com.mk.ots.hotel.controller;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,8 +11,6 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.joda.time.LocalDateTime;
-import org.joda.time.Seconds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +29,10 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.google.common.collect.Maps;
 import com.mk.framework.AppUtils;
-import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.common.bean.ParamBaseBean;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.service.CashBackService;
 import com.mk.ots.hotel.service.HotelPriceService;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomstateService;
@@ -47,7 +41,6 @@ import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
-import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
@@ -69,34 +62,18 @@ public class HotelController {
 	private HotelService hotelService;
 
 	@Autowired
-	private RoomSaleService roomSaleService;
-
-	@Autowired
 	private RoomstateService roomstateService;
 
 	@Autowired
 	private HotelPriceService hotelPriceService;
-	/**
-	 * 日志类
-	 */
-	// @Autowired
-	// private RoomStateLogUtil roomStateLogUtil;
-	@Autowired
-	private ElasticsearchProxy esProxy;
-
-	// 返现服务类
-	@Autowired
-	private CashBackService cashBackService;
 
 	/**
 	 * 注入搜索服务类对象实例
 	 */
 	@Autowired
 	private ISearchService searchService;
-    @Autowired
-    private IPromoSearchService promoSearchService;
-
-	private final SimpleDateFormat defaultFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+	@Autowired
+	private IPromoSearchService promoSearchService;
 
 	/**
 	 * 
@@ -156,63 +133,6 @@ public class HotelController {
 		return new ResponseEntity<ServiceOutput>(output, HttpStatus.OK);
 	}
 
-	/**
-	 * 酒店综合查询接口 根据参数信息，获取酒店的集合 眯客2.1需求: 2015-07-15 处理方法都是
-	 * 按照屏幕坐标找酒店，按照用户坐标与酒店坐标排序。 具体传值方法，都是客户端灵活处理的。 例如： 有关键字 1. 有用户坐标点
-	 * 按默认坐标点周边60km半径查酒店 按用户与酒店距离排序 （Android 之前是将 默认坐标点当做屏幕坐标点传值，排序按照用户坐标与酒店坐标。）
-	 * （微信是 将用户坐标当做 屏幕坐标以及用户坐标传值，排序按照用户坐标与酒店坐标。） 2. 无用户坐标点 按默认坐标点60km半径查酒店
-	 * 按默认坐标点与酒店距离排序 （Android 是讲默认坐标当做 屏幕坐标和用户坐标传值，排序按照用户坐标与酒店坐标。 微信同样处理）
-	 * 
-	 * @param hotel
-	 * @return
-	 */
-	private ResponseEntity<Map<String, Object>> getHotelList(ParamBaseBean pbb, THotel hotel,
-			HttpServletRequest request) throws Exception {
-		ObjectMapper objectMapper = new ObjectMapper();
-		String params = objectMapper.writeValueAsString(request.getParameterMap());
-		// 日志
-		// roomStateLogUtil.sendLog(pbb.getHardwarecode(),pbb.getCallmethod(),
-		// pbb.getCallversion(), pbb.getIp(), "/hotel/querylist", params,"ots");
-
-		logger.info("【/hotel/auerylist】 begin...");
-		logger.info("remote client request ui is: {}", request.getRequestURI());
-		logger.info("【/hotel/querylist】 params is : {}--{}", params, pbb.toString());
-		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		try {
-			Date day = new Date();
-			long starttime = day.getTime();
-			String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
-			// search hotel from elasticsearch
-			if (StringUtils.isBlank(hotel.getStartdateday())) {
-				hotel.setStartdateday(strCurDay);
-			}
-
-			if (StringUtils.isBlank(hotel.getEnddateday())) {
-				hotel.setEnddateday(strCurDay);
-			}
-
-			Map<String, Object> resultMap = hotelService.readonlyFromEsStore(hotel);
-			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(resultMap,
-					HttpStatus.OK);
-			if (AppUtils.DEBUG_MODE) {
-				long endtime = new Date().getTime();
-				resultResponse.getBody().put("$times$", endtime - starttime + " ms");
-			}
-
-			logger.info("【/hotel/querylist】 end...");
-			logger.info("【/hotel/querylist】response data:success::{} , count::{}\n",
-					objectMapper.writeValueAsString(resultResponse.getBody().get("success")),
-					resultResponse.getBody().get("count"));
-			return resultResponse;
-		} catch (Exception e) {
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
-			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
-			logger.error("【/hotel/querylist】 is error: {} ", e.getMessage());
-		}
-		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
-	}
-
 	private String countErrors(Errors errors) {
 		StringBuffer bfErrors = new StringBuffer();
 		for (ObjectError error : errors.getAllErrors()) {
@@ -253,6 +173,38 @@ public class HotelController {
 		return resultMap;
 	}
 
+	private boolean validateAccessibility(HotelQuerylistReqEntity reqentity) {
+		String callVersion = reqentity.getCallversion() == null ? "" : reqentity.getCallversion().trim();
+		Integer callEntry = reqentity.getCallentry();
+		String callMethod = reqentity.getCallmethod() == null ? "" : reqentity.getCallmethod().trim();
+
+		if (logger.isInfoEnabled()) {
+			logger.info(
+					String.format("callEntry:%s; callMethod:%s; callVersion:%s; ", callEntry, callMethod, callVersion));
+		}
+
+		/**
+		 * old version compatible, promo types won't show
+		 */
+		if (StringUtils.isBlank(callVersion) || "3.1".compareTo(callVersion.trim()) > 0) {
+			return false;
+		} else if (callEntry != null && callEntry != 2) {
+			if (callEntry == 1) {
+				Cat.logEvent("摇一摇", Event.SUCCESS);
+			} else if (callEntry == 3) {
+				Cat.logEvent("切客", Event.SUCCESS);
+			}
+
+			return false;
+		} else if (StringUtils.isNotEmpty(callMethod) && "3".equalsIgnoreCase(callMethod)) {
+			Cat.logEvent("wechat", Event.SUCCESS);
+
+			return false;
+		}
+
+		return true;
+	}
+
 	@RequestMapping(value = { "/hotel/querypromolist" })
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> searchPromoHotels(HttpServletRequest request,
@@ -272,6 +224,18 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
 			logger.error(String.format("parameters validation failed with error %s", errorMessage));
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+
+		boolean isAccessible = validateAccessibility(reqentity);
+
+		if (!isAccessible) {
+			logger.warn("not allowed to access");
+
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "not allowed to access");
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
@@ -303,48 +267,15 @@ public class HotelController {
 				long endtime = new Date().getTime();
 				resultResponse.getBody().put("$times$", endtime - starttime + " ms");
 			}
-			
-			/**
-			 * TODO: waiting for long's interface to get the times
-			 */
-			String startInternalTime = "2015-10-17 16:00";
-			String endInternalTime = "2015-10-17 18:30";
-
-			if (roomSaleService != null) {
-				List<String> times = roomSaleService.queryPromoTime();
-				startInternalTime = times.get(0);
-				endInternalTime = times.get(1);
-			}
 
 			if (logger.isInfoEnabled()) {
-				logger.info(String.format("promo time received, startTime:%s; endTime:%s", startInternalTime,
-						endInternalTime));
-			}
-
-			LocalDateTime startExTime = LocalDateTime.fromDateFields(defaultFormatter.parse(startInternalTime));
-			LocalDateTime endExTime = LocalDateTime.fromDateFields(defaultFormatter.parse(endInternalTime));
-
-			resultResponse.getBody().put("ispromoting", searchService.isInPromoPeriod() ? 1 : 0);
-
-			resultResponse.getBody().put("promostarttime",
-					String.format("%s:%s", startExTime.getHourOfDay(), startExTime.getMinuteOfHour()));
-			resultResponse.getBody().put("promoendtime",
-					String.format("%s:%s", endExTime.getHourOfDay(), endExTime.getMinuteOfHour()));
-
-			if (rtnMap.size() == 0) {
-				resultResponse.getBody().put("promosec", 0);
-			} else {
-				LocalDateTime currentTime = LocalDateTime.now();
-				Integer seconds = Seconds.secondsBetween(currentTime, endExTime).getSeconds();
-
-				resultResponse.getBody().put("promosec", seconds);
+				logger.info(String.format("searchPromoHotels-> rtnMap: %s", rtnMap == null ? 0 : rtnMap.size()));
 			}
 
 			logger.info("【/hotel/querypromolist】 end...");
-			logger.info("【/hotel/querypromolist】response data:success::{} , count::{}\n",
-					objectMapper.writeValueAsString(resultResponse.getBody().get("success")),
-					resultResponse.getBody().get("count"));
-			return resultResponse;
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		} catch (Exception e) {
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
@@ -884,15 +815,15 @@ public class HotelController {
 	 * @return
 	 */
 	@RequestMapping(value = "/hotel/updatemikepricecache")
-	public ResponseEntity<Map<String, Object>> updateMikePriceCache(String citycode,String hotelid) {
+	public ResponseEntity<Map<String, Object>> updateMikePriceCache(String citycode, String hotelid) {
 		logger.info("updateMikePriceCache method begin...");
 		long startTime = new Date().getTime();
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		try {
-			if(StringUtils.isNotBlank(hotelid)){
+			if (StringUtils.isNotBlank(hotelid)) {
 				Long thotelId = Long.valueOf(hotelid);
 				hotelService.updateRedisMikePrice(thotelId);
-			}else if (StringUtils.isNotBlank(citycode)) {
+			} else if (StringUtils.isNotBlank(citycode)) {
 				hotelService.batchUpdateRedisMikePrice(citycode);
 			}
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
