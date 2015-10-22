@@ -1733,6 +1733,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 *            参数：参数数据
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private Object queryTransferData(Map<String, Object> data, HotelQuerylistReqEntity reqentity) {
 		// 是否考虑优惠价格: 非必填(T/F)，值为T，则最低价取优惠活动最低价，空或F则最低价取ota最低门市价
 		boolean isDiscount = Constant.STR_TRUE.equals(reqentity.getIsdiscount());
@@ -1810,7 +1811,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					}
 				}
 			}
-
 		}
 		// 不返回酒店设施信息，从结果集中删除
 		if (!isFacility) {
@@ -1869,10 +1869,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			data.put("teambuying", teambuyinfos);
 		}
 
-		// TODO: 是否推荐，无数据来源，暂定为F
+		// 是否推荐，无数据来源，暂定为F
 		data.put("isrecommend", Constant.STR_FALSE);
 
-		// TODO: hotel score: 移到listOtsHotel和getOtsHotel方法里.
+		// hotel score: 移到listOtsHotel和getOtsHotel方法里.
 		logger.info("--================================== 查询酒店评价信息开始： ==================================-- ");
 		Long startTime = new Date().getTime();
 		List<Map<String, String>> scores = thotelscoreMapper.findHotelScoresByHotelid(Long.valueOf(hotelid));
@@ -1892,7 +1892,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		logger.info("查询酒店: {}评价信息耗时: {}ms.", hotelid, times);
 		logger.info("--================================== 查询酒店评价信息结束： ==================================-- ");
 
-		// TODO: hotel base info
+		// hotel base info
 		logger.info("--================================== 查询酒店省份区县信息开始： ==================================-- ");
 		startTime = new Date().getTime();
 		THotelModel hotelInfo = thotelMapper.findHotelInfoById(Long.valueOf(hotelid));
@@ -1910,11 +1910,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		// room type
 		// 如果返回房型信息，查询房型信息放到data结果集中
 		if (isRoomType) {
+			Map<String, Object> promoInfo = (Map<String, Object>) data.get("promoinfo");
+			
 			List<Map<String, Object>> roomtypeList = this.readonlyRoomtypeList(data, bedtype);
 			for (Map<String, Object> roomtypeItem : roomtypeList) {
 				logger.info("--================================== 查询房型是否可用信息开始： ==================================-- ");
 				// roomtypevc
-				// TODO: 获取房态信息:
+				// 获取房态信息:
 				// 该房间是否有可售.(由于现在房态信息缓存到redis，不再存储到mysql中间表，所以这里从缓存取.)
 				String roomtypevc = this.readonlyRoomtypevc(roomtypeItem, reqentity);
 				logger.info("--================================== 查询房型是否可用信息结束： ==================================-- ");
@@ -2008,9 +2010,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					"select a.id as roomtypeid, a.name as roomtypename, a.cost as roomtypepmsprice, a.bednum,a.roomnum, "
 							+ "a.cost as roomtypeprice,b.maxarea,b.minarea,b.pics,b.bedtype,b.bedsize as bedlength, d.name as bedtypename")
 					.append("  from t_roomtype a ")
-					.append("    left outer join t_roomtype_info b on a.id = b.roomtypeid")
-					.append("      left outer join t_bedtype d on b.bedtype = d.id")
-					.append("        where a.thotelid='" + hotelid + "'");
+					.append(" join t_roomtype_info b on a.id = b.roomtypeid")
+					.append(" join t_bedtype d on b.bedtype = d.id")
+					.append(" where a.thotelid='" + hotelid + "'");
 			if (!StringUtils.isBlank(bedtype)) {
 				bfSql.append(" and b.bedtype='" + bedtype + "'");
 			}

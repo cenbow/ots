@@ -544,7 +544,7 @@ public class RoomstateService {
 			this.logger.info("{}新房态酒店房态信息已缓存到redis。", hotelid);
 		} catch (Exception e) {
 			lockRoomsCache = null;
-			this.logger.error("新房态findRoomstatesByHotelId has error: {}", e.getMessage());
+			this.logger.error("新房态findRoomstatesByHotelId has error: {}", e);
 			throw e;
 		} finally {
 			if (jedis != null) {
