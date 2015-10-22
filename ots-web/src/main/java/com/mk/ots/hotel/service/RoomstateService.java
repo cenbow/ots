@@ -1287,21 +1287,53 @@ public class RoomstateService {
 			/** 房型显示逻辑：1、价格从低到高；2、满房的在最下面； */
 			// 眯客价排序
 			Object[] roomtypesArr = roomtypes.toArray();
-			Arrays.sort(roomtypesArr, this.new RoomTypesComparator());
-			// 重新构建List
-			roomtypes.clear();
+
 			// 把满房状态的房间类型放入临时List中
 			List<RoomstateQuerylistRespEntity.Roomtype> tempRoomTypes = Lists.newArrayList();
+
+			//特价房型
+			List<RoomstateQuerylistRespEntity.Roomtype> promoRoomTypes = Lists.newArrayList();
+			//普通房型
+			List<RoomstateQuerylistRespEntity.Roomtype> normalRoomTypes = Lists.newArrayList();
+
 			for (int i = 0; i < roomtypesArr.length; i++) {
 				if (roomtypesArr[i] instanceof RoomstateQuerylistRespEntity.Roomtype) {
 					RoomstateQuerylistRespEntity.Roomtype rt = (RoomstateQuerylistRespEntity.Roomtype) roomtypesArr[i];
 					if (rt.getVcroomnum() <= 0)
 						tempRoomTypes.add(rt);
-					else
-						roomtypes.add(rt);
+					else if("1".equals(rt.getIsonpromo())){
+						promoRoomTypes.add(rt);
+					}
+
+					normalRoomTypes.add(rt);
 
 				}
 			}
+
+			Object[] promoRoomtypesArr = promoRoomTypes.toArray();
+			Arrays.sort(promoRoomtypesArr, this.new RoomTypesComparator());
+
+			Object[] normalRoomtypesArr = normalRoomTypes.toArray();
+			Arrays.sort(normalRoomtypesArr, this.new RoomTypesComparator());
+
+			roomtypes.clear();
+
+			for (int i = 0; i < promoRoomtypesArr.length; i++) {
+				if (promoRoomtypesArr[i] instanceof RoomstateQuerylistRespEntity.Roomtype) {
+					RoomstateQuerylistRespEntity.Roomtype rt = (RoomstateQuerylistRespEntity.Roomtype) promoRoomtypesArr[i];
+					roomtypes.add(rt);
+
+				}
+			}
+
+			for (int i = 0; i < normalRoomtypesArr.length; i++) {
+				if (normalRoomtypesArr[i] instanceof RoomstateQuerylistRespEntity.Roomtype) {
+					RoomstateQuerylistRespEntity.Roomtype rt = (RoomstateQuerylistRespEntity.Roomtype) normalRoomtypesArr[i];
+					roomtypes.add(rt);
+
+				}
+			}
+
 			roomtypes.addAll(tempRoomTypes); // 把满房状态的房间类型排在可定房间类型的后面
 			/** 房型排序 end */
 
@@ -1385,25 +1417,16 @@ public class RoomstateService {
 		public int compare(Object obj1, Object obj2) {
 			RoomstateQuerylistRespEntity.Roomtype roomtype1 = (RoomstateQuerylistRespEntity.Roomtype) obj1;
 			RoomstateQuerylistRespEntity.Roomtype roomtype2 = (RoomstateQuerylistRespEntity.Roomtype) obj2;
-			String roomtypepromo1 = roomtype1.getIsonpromo();
 
-			String roomtypepromo2 = roomtype1.getIsonpromo();
-			if(StringUtils.isNotBlank(roomtypepromo1) && StringUtils.isNotBlank(roomtypepromo2)&&roomtypepromo1.compareTo(roomtypepromo2) <= 0){
-				return -1;
-			}else if (StringUtils.isNotBlank(roomtypepromo1) && StringUtils.isNotBlank(roomtypepromo2)){
-				if (roomtype1.getRoomtypeprice().compareTo(roomtype2.getRoomtypeprice()) > 0) {
-					return 1;
-				} else if (roomtype1.getRoomtypeprice().compareTo(roomtype2.getRoomtypeprice()) < 0) {
-					return -1;
-				} else {
-					// 如果眯客价相同 则按照门市价排序
-					return roomtype1.getRoomtypepmsprice().compareTo(roomtype2.getRoomtypepmsprice());
-				}
-			}else if (StringUtils.isNotBlank(roomtypepromo1)){
-				return -1;
-			}else {
+			if (roomtype1.getRoomtypeprice().compareTo(roomtype2.getRoomtypeprice()) > 0) {
 				return 1;
+			} else if (roomtype1.getRoomtypeprice().compareTo(roomtype2.getRoomtypeprice()) < 0) {
+				return -1;
+			} else {
+				// 如果眯客价相同 则按照门市价排序
+				return roomtype1.getRoomtypepmsprice().compareTo(roomtype2.getRoomtypepmsprice());
 			}
+
 
 		}
 	}
