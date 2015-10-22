@@ -1918,6 +1918,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		// room type
 		// 如果返回房型信息，查询房型信息放到data结果集中
+		Double minPromoprice = null;
+
 		if (isRoomType) {
 			logger.info(String.format("promoinfo:%s", data == null ? "" : data.get("promoinfo").toString()));
 
@@ -1926,13 +1928,21 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			for (int i = 0; promoInfoList != null && i < promoInfoList.size(); i++) {
 				Integer promotype = 0;
 				String promoprice = "";
-				
+
 				try {
 					if (promoInfoList.get(i) != null && promoInfoList.get(i).containsKey("promotype")) {
 						promotype = promoInfoList.get(i).get("promotype") == null ? 0
 								: (Integer) promoInfoList.get(i).get("promotype");
 						promoprice = promoInfoList.get(i).get("promopice") == null ? ""
 								: (String) promoInfoList.get(i).get("promopice");
+
+						if (StringUtils.isNotEmpty(promoprice)) {
+							if (minPromoprice == null) {
+								minPromoprice = Double.parseDouble(promoprice);
+							} else if (Double.parseDouble(promoprice) < minPromoprice) {
+								minPromoprice = Double.parseDouble(promoprice);
+							}
+						}
 
 						promoMap.put(promotype == null ? 0 : promotype, promoprice);
 					}
@@ -2018,7 +2028,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					roomtypeItem.put("promotype", "");
 				}
 			}
+
 			data.put("roomtype", roomtypeList);
+
+			if (minPromoprice != null) {
+				data.put("promoprice", minPromoprice);
+			} else {
+				data.put("promoprice", minPromoprice);
+			}
 		}
 
 		// 是否返现（T/F）
