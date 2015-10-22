@@ -1387,14 +1387,19 @@ public class RoomstateService {
 		public int compare(Object obj1, Object obj2) {
 			RoomstateQuerylistRespEntity.Roomtype roomtype1 = (RoomstateQuerylistRespEntity.Roomtype) obj1;
 			RoomstateQuerylistRespEntity.Roomtype roomtype2 = (RoomstateQuerylistRespEntity.Roomtype) obj2;
-			if (roomtype1.getRoomtypeprice().compareTo(roomtype2.getRoomtypeprice()) > 0) {
-				return 1;
-			} else if (roomtype1.getRoomtypeprice().compareTo(roomtype2.getRoomtypeprice()) < 0) {
+			if(roomtype1.getIsonpromo().compareTo(roomtype2.getIsonpromo()) <= 0){
 				return -1;
-			} else {
-				// 如果眯客价相同 则按照门市价排序
-				return roomtype1.getRoomtypepmsprice().compareTo(roomtype2.getRoomtypepmsprice());
+			}else {
+				if (roomtype1.getRoomtypeprice().compareTo(roomtype2.getRoomtypeprice()) > 0) {
+					return 1;
+				} else if (roomtype1.getRoomtypeprice().compareTo(roomtype2.getRoomtypeprice()) < 0) {
+					return -1;
+				} else {
+					// 如果眯客价相同 则按照门市价排序
+					return roomtype1.getRoomtypepmsprice().compareTo(roomtype2.getRoomtypepmsprice());
+				}
 			}
+
 		}
 	}
 
