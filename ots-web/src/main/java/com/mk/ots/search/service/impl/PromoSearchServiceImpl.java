@@ -186,6 +186,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	private final SimpleDateFormat defaultFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 
+	private final int minItemCount = 5;
+
 	/*
 	 * 获取 区域位置类型
 	 * 
@@ -328,6 +330,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				try {
 					Integer.parseInt(params.getPromotype());
 				} catch (Exception ex) {
+					logger.warn(String.format("failed to parse promotype %s", params.getPromotype()), ex);
 					validateStr = String.format("活动类型非法 %s", params.getPromotype());
 					return validateStr;
 				}
@@ -1628,6 +1631,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		String callVersion = reqentity.getCallversion() == null ? "" : reqentity.getCallversion().trim();
 		Integer callEntry = reqentity.getCallentry();
 		String callMethod = reqentity.getCallmethod() == null ? "" : reqentity.getCallmethod().trim();
+		String promoType = reqentity.getPromotype() == null ? "" : reqentity.getPromotype().trim();
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("callEntry:%s; callMethod:%s; callVersion:%s; isPromoOnly:%s", callEntry,
@@ -1663,6 +1667,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			} else {
 				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
 			}
+		}
+
+		if (StringUtils.isNotBlank(promoType)) {
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", promoType)));
 		}
 	}
 
