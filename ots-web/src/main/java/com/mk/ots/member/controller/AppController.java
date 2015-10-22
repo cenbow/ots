@@ -339,6 +339,7 @@ public class AppController {
 			regMem.setComefromtype(comefromtype);
 			regMem.setHotelid(hotelid);
 			regMem.setUnionid(unionid);
+			regMem.setCitycode(citycode);
 			iMemberService.saveOrUpdate(regMem);
 			logger.info("微信注册用户. member:{}", regMem.toString());
 			ofMember = Optional.fromNullable(regMem);
@@ -371,6 +372,7 @@ public class AppController {
 						upMem.setAppversion(appversion);
 						upMem.setOstype(ostype);
 						upMem.setOsver(osver);
+						upMem.setCitycode(citycode);
 						iMemberService.saveOrUpdate(upMem);
 						ofMember = Optional.fromNullable(upMem);
 						isCheck = true;
@@ -399,6 +401,7 @@ public class AppController {
 					regMem.setComefromtype(comefromtype);
 					regMem.setHotelid(hotelid);
 					regMem.setUnionid(unionid);
+					regMem.setCitycode(citycode);
 					iMemberService.saveOrUpdate(regMem);
 					ofMember = Optional.fromNullable(regMem);
 
@@ -433,6 +436,7 @@ public class AppController {
 						upMem.setAppversion(appversion);
 						upMem.setOstype(ostype);
 						upMem.setOsver(osver);
+						upMem.setCitycode(citycode);
 						iMemberService.saveOrUpdate(upMem);
 						ofMember = Optional.fromNullable(upMem);
 					}
