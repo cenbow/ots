@@ -1303,9 +1303,10 @@ public class RoomstateService {
 						tempRoomTypes.add(rt);
 					else if("1".equals(rt.getIsonpromo())){
 						promoRoomTypes.add(rt);
+					}else {
+						normalRoomTypes.add(rt);
 					}
 
-					normalRoomTypes.add(rt);
 
 				}
 			}
