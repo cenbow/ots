@@ -734,6 +734,12 @@ public class OrderServiceImpl implements OrderService {
       addOrder.put("function", "addorder");
       addOrder.put("timestamp ", DateUtils.formatDateTime(new Date()));
       addOrder.put("otaorderid", order.getId());
+      if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
+          addOrder.put("ispromo", "T");
+      }else {
+          addOrder.put("ispromo", "F");
+      }
+
       if (OrderTypeEnum.PT.getId().intValue() == order.getOrderType()) {
           addOrder.put("ordertype", 1);
       } else {
@@ -2875,6 +2881,11 @@ public class OrderServiceImpl implements OrderService {
           addOrder.put("contact", otaRoomOrder.getStr("contacts"));
           addOrder.put("phone", otaRoomOrder.getStr("contactsphone"));
           addOrder.put("memo", otaRoomOrder.getStr("note"));
+          if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
+              addOrder.put("ispromo", "T");
+          }else {
+              addOrder.put("ispromo", "F");
+          }
           List<OtaRoomPrice> otaRoomPrices = priceService.findOtaRoomPriceByOrder(order);
           JSONObject customerno = new JSONObject();
           customerno.put("customerid", otaRoomOrder.get("id"));
