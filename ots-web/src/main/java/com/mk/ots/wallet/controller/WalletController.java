@@ -212,26 +212,26 @@ public class WalletController {
             throw MyErrorEnum.errorParm.getMyException("充值密码为空.");
         }
 
-        String result = "F";
+        boolean result = false;
         String errMsg = "";
         BigDecimal price = null;
         try {
             BCard card = this.iBCardService.recharge(mid, chargeno);
-            result = "T";
+            result = true;
             price = card.getPrice();
         } catch (MyException e) {
-            result = "F";
+            result = false;
             errMsg = e.getMessage();
         }
         //组织数据响应
         Map<String, Object> rtnMap = Maps.newHashMap();
         rtnMap.put("success", result);
 
-        if ("T".equals(result)) {
+        if (result) {
             rtnMap.put("chargeprice", price);
             return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
         } else {
-            rtnMap.put("errcode", HttpStatus.BAD_REQUEST);
+            rtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
             rtnMap.put("errmsg", errMsg);
             return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.BAD_REQUEST);
         }
