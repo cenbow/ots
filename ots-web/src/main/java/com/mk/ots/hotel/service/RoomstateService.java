@@ -911,9 +911,9 @@ public class RoomstateService {
 	public List<RoomstateQuerylistRespEntity> findHotelRoomState(String roomno, RoomstateQuerylistReqEntity params)
 			throws Exception {
 		List<RoomstateQuerylistRespEntity> respEntityList = Lists.newArrayList();
-		String callMethod = params.getCallmethod();
+		String callMethod = StringUtils.isNotBlank(params.getCallmethod()) ? params.getCallmethod().trim(): "" ;
 		Integer callEntry = params.getCallentry();
-		String callVersionStr = params.getCallversion();
+		String callVersionStr = StringUtils.isNotBlank(params.getCallversion()) ? params.getCallversion().trim(): "" ;
 
 		try {
 			Long hotelid = params.getHotelid();
@@ -1007,9 +1007,7 @@ public class RoomstateService {
 
 					// mike3.1 特价房型
 
-					if (StringUtils.isNotBlank(callMethod)){
-						callMethod = callMethod.trim();
-					}
+
 
 					TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
 					Integer roomTypeId = Integer.valueOf(troomType.getId().toString());
@@ -1387,9 +1385,12 @@ public class RoomstateService {
 		public int compare(Object obj1, Object obj2) {
 			RoomstateQuerylistRespEntity.Roomtype roomtype1 = (RoomstateQuerylistRespEntity.Roomtype) obj1;
 			RoomstateQuerylistRespEntity.Roomtype roomtype2 = (RoomstateQuerylistRespEntity.Roomtype) obj2;
-			if(roomtype1.getIsonpromo().compareTo(roomtype2.getIsonpromo()) <= 0){
+			String roomtypepromo1 = roomtype1.getIsonpromo();
+
+			String roomtypepromo2 = roomtype1.getIsonpromo();
+			if(StringUtils.isNotBlank(roomtypepromo1) && StringUtils.isNotBlank(roomtypepromo2)&&roomtypepromo1.compareTo(roomtypepromo2) <= 0){
 				return -1;
-			}else {
+			}else if (StringUtils.isNotBlank(roomtypepromo1) && StringUtils.isNotBlank(roomtypepromo2)){
 				if (roomtype1.getRoomtypeprice().compareTo(roomtype2.getRoomtypeprice()) > 0) {
 					return 1;
 				} else if (roomtype1.getRoomtypeprice().compareTo(roomtype2.getRoomtypeprice()) < 0) {
@@ -1398,6 +1399,10 @@ public class RoomstateService {
 					// 如果眯客价相同 则按照门市价排序
 					return roomtype1.getRoomtypepmsprice().compareTo(roomtype2.getRoomtypepmsprice());
 				}
+			}else if (StringUtils.isNotBlank(roomtypepromo1)){
+				return -1;
+			}else {
+				return 1;
 			}
 
 		}
