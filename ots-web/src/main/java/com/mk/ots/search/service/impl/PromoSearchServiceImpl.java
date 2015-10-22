@@ -891,6 +891,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			String hotelid = reqentity.getHotelid();
 
+			if (logger.isInfoEnabled()) {
+				logger.info(String.format("about to search for cityid: %s; hotelid: %s", cityid, hotelid));
+			}
+
 			// page参数校验：如果page小于等于0，默认为1.
 			int page = reqentity.getPage().intValue();
 			if (page <= 0) {
@@ -1771,6 +1775,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		// 床型：1单床房，2双床房，3其它房，空不限制
 		String bedtype = reqentity.getBednum();
 
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("queryTransferData with parameters, isRoomType:%s", isRoomType));
+		}
+
 		// 不返回酒店图片信息，从结果集中删除
 		if (!isHotelPic) {
 			data.remove("hotelpic");
@@ -1910,8 +1918,21 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		// room type
 		// 如果返回房型信息，查询房型信息放到data结果集中
 		if (isRoomType) {
-			Map<String, Object> promoInfo = (Map<String, Object>) data.get("promoinfo");
-			
+			logger.info(String.format("promoinfo:%s", data == null ? "" : data.get("promoinfo").toString()));
+
+			List<Map<String, Object>> promoInfoList = (List<Map<String, Object>>) data.get("promoinfo");
+			final Map<String, String> promoMap = new HashMap<String, String>();
+			for (int i = 0; promoInfoList != null && i < promoInfoList.size(); i++) {
+				Integer promotype = 0;
+				String promoprice = "";
+				if (promoInfoList.get(i) != null && promoInfoList.get(i).containsKey("promotype")) {
+					promotype = (Integer) promoInfoList.get(i).get("promotype");
+					promoprice = (String) promoInfoList.get(i).get("promopice");
+				}
+
+				promoMap.put(String.valueOf(promotype), promoprice);
+			}
+
 			List<Map<String, Object>> roomtypeList = this.readonlyRoomtypeList(data, bedtype);
 			for (Map<String, Object> roomtypeItem : roomtypeList) {
 				logger.info("--================================== 查询房型是否可用信息开始： ==================================-- ");
@@ -1974,6 +1995,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				BigDecimal roomtypeprice = roomstateService.getRoomPrice(Long.valueOf(hotelid),
 						Long.valueOf(strRoomtypeid), beginDate, endDate);
 				roomtypeItem.put("roomtypeprice", roomtypeprice);
+
+				roomtypeItem.put("promoprice", "");
+				String roomPromotype = (String) roomtypeItem.get("promotype");
+				if (StringUtils.isNotBlank(roomPromotype)) {
+					String promoPrice = promoMap.get(roomPromotype);
+					roomtypeItem.put("promoprice", promoPrice);
+				}
+				
+				if (roomtypeItem.get("promotype") == null) {
+					roomtypeItem.put("promotype", "");
+				}
 			}
 			data.put("roomtype", roomtypeList);
 		}
@@ -2009,9 +2041,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			bfSql.append(
 					"select a.id as roomtypeid, a.name as roomtypename, a.cost as roomtypepmsprice, a.bednum,a.roomnum, "
 							+ "a.cost as roomtypeprice,b.maxarea,b.minarea,b.pics,b.bedtype,b.bedsize as bedlength, d.name as bedtypename")
-					.append("  from t_roomtype a ")
+					.append(", config.saleType as promotype  ").append("  from t_roomtype a ")
 					.append(" join t_roomtype_info b on a.id = b.roomtypeid")
 					.append(" join t_bedtype d on b.bedtype = d.id")
+					.append(" left join t_room_sale_config config on b.roomtypeid = config.roomtypeid ")
 					.append(" where a.thotelid='" + hotelid + "'");
 			if (!StringUtils.isBlank(bedtype)) {
 				bfSql.append(" and b.bedtype='" + bedtype + "'");
