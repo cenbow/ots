@@ -240,7 +240,7 @@ public class WalletController {
         } else {
             rtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
             rtnMap.put("errmsg", errMsg);
-            return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
         }
     }
 }
