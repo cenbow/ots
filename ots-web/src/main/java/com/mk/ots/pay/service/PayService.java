@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+
+import com.mk.ots.common.enums.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -32,24 +34,6 @@ import com.google.common.collect.Lists;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.util.MyTokenUtils;
 import com.mk.orm.kit.JsonKit;
-import com.mk.ots.common.enums.ManualLuzhuRstEnum;
-import com.mk.ots.common.enums.MessageTypeEnum;
-import com.mk.ots.common.enums.NeedReturnEnum;
-import com.mk.ots.common.enums.OrderTypeEnum;
-import com.mk.ots.common.enums.OtaOrderFlagEnum;
-import com.mk.ots.common.enums.OtaOrderStatusEnum;
-import com.mk.ots.common.enums.PPayInfoOtherTypeEnum;
-import com.mk.ots.common.enums.PPayInfoTypeEnum;
-import com.mk.ots.common.enums.PayLogOtherTypeEnum;
-import com.mk.ots.common.enums.PayLogTypeEnum;
-import com.mk.ots.common.enums.PaySrcEnum;
-import com.mk.ots.common.enums.PayStatusEnum;
-import com.mk.ots.common.enums.PayTaskStatusEnum;
-import com.mk.ots.common.enums.PayTaskTypeEnum;
-import com.mk.ots.common.enums.PayTypeEnum;
-import com.mk.ots.common.enums.PmsSendEnum;
-import com.mk.ots.common.enums.RuleEnum;
-import com.mk.ots.common.enums.TokenTypeEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.SysConfig;
 import com.mk.ots.hotel.dao.HotelDAO;
@@ -1365,6 +1349,19 @@ public class PayService implements IPayService {
         if (order == null) {
         	logger.error("订单:" + longorderId +"未查询到.");
         	return wrapFailResult(MyErrorEnum.errorParm);
+        }
+        //check pay
+        if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())) {
+            //如果选择了今夜特价房则只能使用在线支付或房券支付 其他都不能使用
+            if (StringUtils.isNotEmpty(promotionno)) {
+                return wrapFailResult(MyErrorEnum.promotionError);
+            }
+            if (StringUtils.isNotEmpty(couponno)) {
+                return wrapFailResult(MyErrorEnum.couponNoError);
+            }
+            if (OrderTypeEnum.YF.getId() != order.getOrderType()) {
+                return wrapFailResult(MyErrorEnum.OrderTypeError);
+            }
         }
         //已经取消的订单不能支付
         if (order.getOrderStatus() >= 510 ) {
