@@ -814,8 +814,9 @@ public class SearchService implements ISearchService {
 	 * 
 	 * @param searchBuilder
 	 */
-	private void sortByPromo(SearchRequestBuilder searchBuilder, String version) {
-		if (StringUtils.isNotEmpty(version) && ("3.1".compareTo(version) <= 0)) {
+	private void sortByPromo(SearchRequestBuilder searchBuilder, String version, Boolean isPromoOnly) {
+
+		if (isPromoOnly != null && isPromoOnly && StringUtils.isNotEmpty(version) && ("3.1".compareTo(version) <= 0)) {
 			searchBuilder.addSort("isonpromo", SortOrder.DESC);
 		}
 	}
@@ -970,7 +971,7 @@ public class SearchService implements ISearchService {
 				/**
 				 * added in Mike3.1
 				 */
-				makePromoFilter(reqentity, filterBuilders);
+     				makePromoFilter(reqentity, filterBuilders);
 
 				double distance = Double.valueOf(reqentity.getRange());
 				GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
@@ -1063,7 +1064,7 @@ public class SearchService implements ISearchService {
 				/**
 				 * added in mike3.1, lift up promo as the top search variable
 				 */
-				sortByPromo(searchBuilder, reqentity.getCallversion());
+				sortByPromo(searchBuilder, reqentity.getCallversion(), reqentity.getIspromoonly());
 
 				if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
 					// 距离排序
