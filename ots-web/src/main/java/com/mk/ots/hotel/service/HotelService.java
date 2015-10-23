@@ -1414,19 +1414,6 @@ public class HotelService {
 	}
 
 	/**
-	 * 月销量查询
-	 *
-	 * @param hotelId
-	 * @return
-	 */
-	public Long getOrderNumMon(long hotelId) {
-		// 月销量记录 显示近30天内的销量数据，数据每日更新。若 销量<10 不显示该数据信息若 销量>= 10 显示 “月销xxx单 ”
-		Long sales = orderService.findMonthlySales(hotelId);
-		logger.info("getOrderNumMon hotelId: {}, get月销量: {}", hotelId, sales);
-		return sales;
-	}
-
-	/**
 	 * 房满状态查询
 	 *
 	 * @param freeRoomCount
@@ -1451,6 +1438,19 @@ public class HotelService {
 			fullState.put("descolor", "989898");
 		}
 		return fullState;
+	}
+
+	/**
+	 * 月销量查询
+	 *
+	 * @param hotelId
+	 * @return
+	 */
+	public Long getOrderNumMon(long hotelId) {
+		// 月销量记录 显示近30天内的销量数据，数据每日更新。若 销量<10 不显示该数据信息若 销量>= 10 显示 “月销xxx单 ”
+		Long sales = orderService.findMonthlySales(hotelId);
+		logger.info("getOrderNumMon hotelId: {}, get月销量: {}", hotelId, sales);
+		return sales;
 	}
 
 	/**
