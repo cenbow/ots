@@ -1242,8 +1242,7 @@ public class PayService implements IPayService {
                 TRoomSale tRoomSale = new TRoomSale();
                 tRoomSale.setRoomId((int)otaRoomOrder.getRoomId());
                 TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
-                //TODO
-//                allcost = allcost.add(resultRoomSale.getSetTleValue());
+                allcost = allcost.add(resultRoomSale.getSettleValue());
             }
         }else{
             for (OtaRoomOrder otaRoomOrder : roomOrdrs) {
