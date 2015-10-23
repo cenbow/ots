@@ -766,7 +766,7 @@ public class OrderUtil {
 		this.logger.info("setUserMessage::now:{},createTime:{},endTime:{}", now, createTime, endTime);
 		// 凌晨23:56-2:00下单，可当天办理入住，提示“您最晚可在xxxx年xx月xx日12：00办理退房哦”
 		if(PromoTypeEnum.TJ.getCode().toString().equals(returnOrder.getPromoType())){
-			jsonObj.put("usermessage", "今夜特价房付款完成后不可以修改订单或者退款");
+			jsonObj.put("usermessage", "该订单付款完成后不可以修改或者退款。");
 			return;
 		}
 		if (now && (DateUtils.getStringFromDate(calNow.getTime(), "HH:mm").compareTo("23:56") >= 0
