@@ -1586,7 +1586,7 @@ public class DateUtils extends Object {
         java.util.Date sysTime = cal.getTime();
 
         cal.setTime(startDate);
-        getCalTime(startTime, cal);
+        //getCalTime(startTime, cal);
 
         LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
         LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
@@ -1595,7 +1595,7 @@ public class DateUtils extends Object {
 
         cal.clear();
         cal.setTime(endDate);
-        getCalTime(endTime, cal);
+        //getCalTime(endTime, cal);
 
         LocalDateTime endExTime = LocalDateTime.fromDateFields(cal.getTime());
         long enddiff = Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
@@ -1603,7 +1603,23 @@ public class DateUtils extends Object {
         if (startdiff > 0){
             return Constant.PROMO_NOT_START;
         }else if (enddiff > 0){
-            return Constant.PROMOING;
+            cal.clear();
+            getCalTime(startTime, cal);
+            LocalDateTime startPromoTime = LocalDateTime.fromDateFields(cal.getTime());
+            long startPromodiff = Seconds.secondsBetween(sysExTime, startPromoTime).getSeconds();
+            cal.clear();
+            getCalTime(endTime, cal);
+            LocalDateTime endPromoTime = LocalDateTime.fromDateFields(cal.getTime());
+            long endPromodiff = Seconds.secondsBetween(sysExTime, endPromoTime).getSeconds();
+
+            if (startPromodiff > 0 ){
+                return Constant.PROMO_NOT_START;
+            }else if (endPromodiff > 0 ){
+                return Constant.PROMOING;
+            }else {
+                return Constant.PROMO_FININSHED;
+            }
+
         }else {
             return Constant.PROMO_FININSHED;
         }

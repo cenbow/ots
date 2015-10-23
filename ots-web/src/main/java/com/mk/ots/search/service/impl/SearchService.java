@@ -754,26 +754,26 @@ public class SearchService implements ISearchService {
 	 * 
 	 * @param searchBuilder
 	 */
-	// private void sortByPrice(List<Map<String, Object>> hotels) {
-	// //
-	// Collections.sort(hotels, new Comparator<Map<String, Object>>(){
-	// @Override
-	// public int compare(Map<String, Object> hotel1, Map<String, Object>
-	// hotel2) {
-	// int val = 0;
-	// try {
-	// BigDecimal price1 =
-	// BigDecimal.valueOf(Double.valueOf(String.valueOf(hotel1.get("minprice"))));
-	// BigDecimal price2 =
-	// BigDecimal.valueOf(Double.valueOf(String.valueOf(hotel2.get("minprice"))));
-	// val = price1.compareTo(price2);
-	// } catch (Exception e) {
-	// val = 0;
-	// }
-	// return val;
-	// }
-	// });
-	// }
+//	private void sortByPrice(List<Map<String, Object>> hotels) {
+//	//
+//	Collections.sort(hotels, new Comparator<Map<String, Object>>(){
+//	@Override
+//	public int compare(Map<String, Object> hotel1, Map<String, Object>
+//	hotel2) {
+//	int val = 0;
+//	try {
+//	BigDecimal price1 =
+//	BigDecimal.valueOf(Double.valueOf(String.valueOf(hotel1.get("minprice"))));
+//	BigDecimal price2 =
+//	BigDecimal.valueOf(Double.valueOf(String.valueOf(hotel2.get("minprice"))));
+//	val = price1.compareTo(price2);
+//	} catch (Exception e) {
+//	val = 0;
+//	}
+//	return val;
+//	}
+//	});
+//	}
 	/**
 	 * 人气排序（月销量由高到低）
 	 * 
@@ -816,7 +816,7 @@ public class SearchService implements ISearchService {
 	 * 
 	 * @param searchBuilder
 	 */
-	private void sortByPromo(SearchRequestBuilder searchBuilder, String version, Boolean isPromoOnly) {
+	private void sortByPromo(SearchRequestBuilder searchBuilder, String version, Boolean isPromoOnly,Integer paramOrderby ) {
 
 		Map<String, Object> roomPromoDto = null;
 		try {
@@ -828,8 +828,9 @@ public class SearchService implements ISearchService {
 												(java.sql.Date)roomPromoDto.get("enddate"),
 												(java.sql.Time)roomPromoDto.get("starttime"),
 												(java.sql.Time)roomPromoDto.get("endtime"));
+		if (HotelSortEnum.PRICE.getId() == paramOrderby && (isPromoOnly == null ||!isPromoOnly) ){
 
-		if ((promostaus == Constant.PROMOING)||
+		}else if ((promostaus == Constant.PROMOING)||
 				(isPromoOnly != null && isPromoOnly &&
 						StringUtils.isNotEmpty(version)
 						&& ("3.1".compareTo(version) <= 0))) {
@@ -1081,7 +1082,7 @@ public class SearchService implements ISearchService {
 				 * added in mike3.1, lift up promo as the top search variable
 				 */
 
-				sortByPromo(searchBuilder, reqentity.getCallversion(), reqentity.getIspromoonly());
+				sortByPromo(searchBuilder, reqentity.getCallversion(), reqentity.getIspromoonly(), paramOrderby);
 
 				if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
 					// 距离排序
@@ -1308,6 +1309,7 @@ public class SearchService implements ISearchService {
 				BigDecimal minPrice = new BigDecimal(prices[0]);
 				result.put("minprice", minPrice);
 				result.put("minpmsprice", new BigDecimal(prices[1]));
+
 				logger.info("酒店: {}眯客价: {}", es_hotelid, prices[0]);
 				logger.info("酒店: {}门市价: {}", es_hotelid, prices[1]);
 				logger.info("--================================== 查询酒店眯客价结束： ==================================-- ");
