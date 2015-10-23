@@ -824,10 +824,14 @@ public class SearchService implements ISearchService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Integer promostaus = DateUtils.promoStatus((java.sql.Date)roomPromoDto.get("startdate"),
-												(java.sql.Date)roomPromoDto.get("enddate"),
-												(java.sql.Time)roomPromoDto.get("starttime"),
-												(java.sql.Time)roomPromoDto.get("endtime"));
+		Integer promostaus = null;
+		if (roomPromoDto != null){
+			promostaus = DateUtils.promoStatus((java.sql.Date)roomPromoDto.get("startdate"),
+					(java.sql.Date)roomPromoDto.get("enddate"),
+					(java.sql.Time)roomPromoDto.get("starttime"),
+					(java.sql.Time)roomPromoDto.get("endtime"));
+		}
+
 		if (HotelSortEnum.PRICE.getId() == paramOrderby && (isPromoOnly == null ||!isPromoOnly) ){
 
 		}else if ((promostaus == Constant.PROMOING)||
