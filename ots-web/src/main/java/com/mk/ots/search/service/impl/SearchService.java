@@ -1151,7 +1151,6 @@ public class SearchService implements ISearchService {
 				}
 
 
-				System.out.println(result);
 				Map<String, Object> pin = (Map<String, Object>) result.get("pin");
 				// hotel latitude and longitude
 				double hotelLongitude = Double.valueOf(String.valueOf(pin.get("lon")));
