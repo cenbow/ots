@@ -987,7 +987,7 @@ public class SearchService implements ISearchService {
 				/**
 				 * added in Mike3.1
 				 */
-     				makePromoFilter(reqentity, filterBuilders);
+				makePromoFilter(reqentity, filterBuilders);
 
 				double distance = Double.valueOf(reqentity.getRange());
 				GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
@@ -1609,9 +1609,7 @@ public class SearchService implements ISearchService {
 			/**
 			 * old version compatible, promo types won't show
 			 */
-			if (StringUtils.isBlank(callVersion) || "3.1".compareTo(callVersion.trim()) > 0) {
-				//filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
-			} else if (callEntry != null && callEntry != 2) {
+			if (callEntry != null && callEntry != 2) {
 				if (callEntry == 1) {
 					Cat.logEvent("摇一摇", Event.SUCCESS);
 				} else if (callEntry == 3) {
@@ -1621,9 +1619,10 @@ public class SearchService implements ISearchService {
 				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
 			} else if (StringUtils.isNotEmpty(callMethod) && "3".equalsIgnoreCase(callMethod)) {
 				Cat.logEvent("wechat", Event.SUCCESS);
-				
+
 				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "0")));
 			}
+
 			return;
 		}
 	}

@@ -186,6 +186,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	private final SimpleDateFormat defaultFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 
+	private final int minItemCount = 5;
+
 	/*
 	 * 获取 区域位置类型
 	 * 
@@ -328,6 +330,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				try {
 					Integer.parseInt(params.getPromotype());
 				} catch (Exception ex) {
+					logger.warn(String.format("failed to parse promotype %s", params.getPromotype()), ex);
 					validateStr = String.format("活动类型非法 %s", params.getPromotype());
 					return validateStr;
 				}
@@ -655,7 +658,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				try {
 					queryTransferData(result, reqentity);
 				} catch (Exception e) {
-					logger.error("酒店处理出错: {}", e.getMessage());
+					logger.error(String.format("failed to queryTransferData with hotelid %s..., ignore and continue...",
+							reqentity.getHotelid()), e);
 				}
 
 				// 添加到酒店列表
@@ -1627,6 +1631,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		String callVersion = reqentity.getCallversion() == null ? "" : reqentity.getCallversion().trim();
 		Integer callEntry = reqentity.getCallentry();
 		String callMethod = reqentity.getCallmethod() == null ? "" : reqentity.getCallmethod().trim();
+		String promoType = reqentity.getPromotype() == null ? "" : reqentity.getPromotype().trim();
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("callEntry:%s; callMethod:%s; callVersion:%s; isPromoOnly:%s", callEntry,
@@ -1662,6 +1667,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			} else {
 				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
 			}
+		}
+
+		if (StringUtils.isNotBlank(promoType)) {
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", promoType)));
 		}
 	}
 
@@ -1738,7 +1747,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private Object queryTransferData(Map<String, Object> data, HotelQuerylistReqEntity reqentity) {
+	private Object queryTransferData(Map<String, Object> data, HotelQuerylistReqEntity reqentity) throws Exception {
 		// 是否考虑优惠价格: 非必填(T/F)，值为T，则最低价取优惠活动最低价，空或F则最低价取ota最低门市价
 		boolean isDiscount = Constant.STR_TRUE.equals(reqentity.getIsdiscount());
 
@@ -1917,20 +1926,38 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		// room type
 		// 如果返回房型信息，查询房型信息放到data结果集中
+		Double minPromoprice = null;
+
 		if (isRoomType) {
 			logger.info(String.format("promoinfo:%s", data == null ? "" : data.get("promoinfo").toString()));
 
 			List<Map<String, Object>> promoInfoList = (List<Map<String, Object>>) data.get("promoinfo");
-			final Map<String, String> promoMap = new HashMap<String, String>();
+			final Map<Integer, String> promoMap = new HashMap<Integer, String>();
 			for (int i = 0; promoInfoList != null && i < promoInfoList.size(); i++) {
 				Integer promotype = 0;
 				String promoprice = "";
-				if (promoInfoList.get(i) != null && promoInfoList.get(i).containsKey("promotype")) {
-					promotype = (Integer) promoInfoList.get(i).get("promotype");
-					promoprice = (String) promoInfoList.get(i).get("promopice");
-				}
 
-				promoMap.put(String.valueOf(promotype), promoprice);
+				try {
+					if (promoInfoList.get(i) != null && promoInfoList.get(i).containsKey("promotype")) {
+						promotype = promoInfoList.get(i).get("promotype") == null ? 0
+								: (Integer) promoInfoList.get(i).get("promotype");
+						promoprice = promoInfoList.get(i).get("promopice") == null ? ""
+								: (String) promoInfoList.get(i).get("promopice");
+
+						if (StringUtils.isNotEmpty(promoprice)) {
+							if (minPromoprice == null) {
+								minPromoprice = Double.parseDouble(promoprice);
+							} else if (Double.parseDouble(promoprice) < minPromoprice) {
+								minPromoprice = Double.parseDouble(promoprice);
+							}
+						}
+
+						promoMap.put(promotype == null ? 0 : promotype, promoprice);
+					}
+				} catch (Exception ex) {
+					logger.warn("invalid dateformat for promotype and promopice", ex);
+					continue;
+				}
 			}
 
 			List<Map<String, Object>> roomtypeList = this.readonlyRoomtypeList(data, bedtype);
@@ -1997,17 +2024,26 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				roomtypeItem.put("roomtypeprice", roomtypeprice);
 
 				roomtypeItem.put("promoprice", "");
-				String roomPromotype = (String) roomtypeItem.get("promotype");
-				if (StringUtils.isNotBlank(roomPromotype)) {
+				Integer roomPromotype = (Integer) roomtypeItem.get("promotype");
+				if (roomPromotype != null) {
 					String promoPrice = promoMap.get(roomPromotype);
-					roomtypeItem.put("promoprice", promoPrice);
+					if (StringUtils.isNotBlank(promoPrice)) {
+						roomtypeItem.put("promoprice", promoPrice);
+					}
 				}
-				
+
 				if (roomtypeItem.get("promotype") == null) {
 					roomtypeItem.put("promotype", "");
 				}
 			}
+
 			data.put("roomtype", roomtypeList);
+
+			if (minPromoprice != null) {
+				data.put("promoprice", minPromoprice);
+			} else {
+				data.put("promoprice", minPromoprice);
+			}
 		}
 
 		// 是否返现（T/F）
