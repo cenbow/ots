@@ -89,7 +89,7 @@ public class HotelPromoController {
 					ptype1.put("promotypetext", saleConfigInfo.getSaleLabel());
 					ptype1.put("promotypeprice", saleConfigInfo.getSaleValue());
 					ptype1.put("promosec", sec / 1000); // 秒
-					ptype1.put("promoendsec", endSec / 1000); //距离结束时间（s）
+					ptype1.put("promosecend", endSec / 1000); //距离结束时间（s）
 					list.add(ptype1);
 				}
 			}

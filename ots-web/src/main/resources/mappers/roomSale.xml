@@ -197,7 +197,7 @@
          SELECT info.startTime as starttime, info.endTime as endtime,   info.startDate as startdate, info.enddate as enddate
         FROM t_room_sale_config config
         join t_room_sale_config_info info on config.saleconfiginfoid = info.id
-        <![CDATA[  where info.startdate < now()  and info.enddate > now() and time(now()) > info.starttime and time(now()) < info.endtime ]]>
+        <![CDATA[  where info.startdate < date(now())  and info.enddate > date(now()) and time(now()) > info.starttime and time(now()) < info.endtime ]]>
 
         limit 1
     </select>
