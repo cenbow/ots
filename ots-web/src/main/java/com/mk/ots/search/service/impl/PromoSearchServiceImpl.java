@@ -1,5 +1,46 @@
 package com.mk.ots.search.service.impl;
 
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.common.geo.GeoDistance;
+import org.elasticsearch.common.geo.GeoPoint;
+import org.elasticsearch.common.unit.DistanceUnit;
+import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.GeoDistanceFilterBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryFilterBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.script.ScriptScoreFunctionBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
+import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
@@ -20,9 +61,21 @@ import com.mk.ots.hotel.comm.enums.HotelTypeEnum;
 import com.mk.ots.hotel.model.TCityModel;
 import com.mk.ots.hotel.model.TDistrictModel;
 import com.mk.ots.hotel.model.THotelModel;
-import com.mk.ots.hotel.service.*;
+import com.mk.ots.hotel.service.CashBackService;
+import com.mk.ots.hotel.service.CityService;
+import com.mk.ots.hotel.service.HotelPriceService;
+import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.inner.service.IOtsAdminService;
-import com.mk.ots.mapper.*;
+import com.mk.ots.mapper.PositionMapper;
+import com.mk.ots.mapper.PositionTypeMapper;
+import com.mk.ots.mapper.SAreaInfoMapper;
+import com.mk.ots.mapper.SLandMarkMapper;
+import com.mk.ots.mapper.SSubwayMapper;
+import com.mk.ots.mapper.SSubwayStationMapper;
+import com.mk.ots.mapper.TDistrictMapper;
+import com.mk.ots.mapper.THotelMapper;
+import com.mk.ots.mapper.THotelScoreMapper;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
@@ -30,36 +83,14 @@ import com.mk.ots.restful.output.SearchPositionsDistanceRespEntity;
 import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.enums.PositionTypeEnum;
-import com.mk.ots.search.model.*;
+import com.mk.ots.search.model.PositionTypeModel;
+import com.mk.ots.search.model.SAreaInfo;
+import com.mk.ots.search.model.SLandMark;
+import com.mk.ots.search.model.SSubway;
+import com.mk.ots.search.model.SSubwayStation;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.ots.web.ServiceOutput;
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.common.geo.GeoDistance;
-import org.elasticsearch.common.geo.GeoPoint;
-import org.elasticsearch.common.unit.DistanceUnit;
-import org.elasticsearch.index.query.*;
-import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
-import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
-import org.elasticsearch.index.query.functionscore.script.ScriptScoreFunctionBuilder;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
-import org.joda.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 @Service
 public class PromoSearchServiceImpl implements IPromoSearchService {
@@ -1955,7 +1986,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		// room type
 		// 如果返回房型信息，查询房型信息放到data结果集中
-		Double minPromoprice = null;
 
 		if (isRoomType) {
 			logger.info(String.format("promoinfo:%s", data == null ? "" : data.get("promoinfo").toString()));
@@ -1972,14 +2002,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 								: (Integer) promoInfoList.get(i).get("promotype");
 						promoprice = promoInfoList.get(i).get("promoprice") == null ? ""
 								: (String) promoInfoList.get(i).get("promoprice");
-
-						if (StringUtils.isNotEmpty(promoprice)) {
-							if (minPromoprice == null) {
-								minPromoprice = Double.parseDouble(promoprice);
-							} else if (Double.parseDouble(promoprice) < minPromoprice) {
-								minPromoprice = Double.parseDouble(promoprice);
-							}
-						}
 
 						promoMap.put(promotype == null ? 0 : promotype, promoprice);
 					}
