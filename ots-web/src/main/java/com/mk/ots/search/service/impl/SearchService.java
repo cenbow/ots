@@ -1407,6 +1407,23 @@ public class SearchService implements ISearchService {
 				}
 				logger.info("--================================== 查询酒店是否有返现结束: ==================================-- ");
 
+
+				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype()) ? Integer.valueOf(reqentity.getPromotype()):null;
+				if (promoType != null){
+					List<Map<String, Integer>> promoList = (List)result.get("promoinfo");
+					if (promoList!= null){
+						for (Map<String, Integer> promoinfo : promoList){
+							Integer hotelPromoType = promoinfo.get("promotype");
+							if (hotelPromoType == promoType){
+								result.put("promoprice",promoinfo.get("promoprice"));
+							}
+						}
+					}
+				}
+
+
+
+
 				// 添加接口返回数据到结果集
 				hotels.add(result);
 			}

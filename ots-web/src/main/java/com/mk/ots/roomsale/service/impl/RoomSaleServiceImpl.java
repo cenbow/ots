@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -106,6 +107,15 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 			logger.error(String.format("failed to queryRoomPromoInfoByHotel %s", hotelId), ex);
 			throw new Exception(String.format("failed to queryRoomPromoInfoByHotel %s", hotelId), ex);
 		}
+	}
+
+	@Override
+	public List<Map<String, Object>> queryRoomPromoInfoByHotelAndPromoType(String hotelId, Integer promoType) throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("hotelId", hotelId);
+		map.put("promoType", promoType);
+		return roomSaleMapper.queryRoomPromoInfoByHotelAndPromoType(map);
+
 	}
 
 	@Override

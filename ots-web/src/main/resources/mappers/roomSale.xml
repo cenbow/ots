@@ -185,6 +185,14 @@
         GROUP  BY promotype
     </select>
 
+    <select id="queryRoomPromoInfoByHotelAndPromoType" resultType="map" parameterType="map">
+        SELECT info.id as promotype, info.salevalue as promoprice
+        FROM t_room_sale_config config
+        join t_room_sale_config_info info on config.saleconfiginfoid = info.id
+        WHERE config.hotelId = #{hotelId} and info.id = #{promoType}
+        GROUP  BY promotype
+    </select>
+
     <select id="queryRoomPromoInfo" resultType="map" parameterType="String">
          SELECT info.startTime as starttime, info.endTime as endtime,   info.startDate as startdate, info.enddate as enddate
         FROM t_room_sale_config config
