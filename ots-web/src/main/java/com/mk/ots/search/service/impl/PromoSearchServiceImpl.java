@@ -1156,6 +1156,20 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 
 				result.put("$sortScore", hit.getScore());
+
+				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype()) ? Integer.valueOf(reqentity.getPromotype()):null;
+				if (promoType != null){
+					List<Map<String, Integer>> promoList = (List)result.get("promoinfo");
+					if (promoList!= null){
+						for (Map<String, Integer> promoinfo : promoList){
+							Integer hotelPromoType = promoinfo.get("promotype");
+							if (hotelPromoType == promoType){
+								result.put("promoprice",promoinfo.get("promoprice"));
+							}
+						}
+					}
+				}
+
 				// 根据用户经纬度来计算两个经纬度坐标距离（单位：米）
 				Map<String, Object> pin = (Map<String, Object>) result.get("pin");
 				// hotel latitude and longitude
@@ -1352,7 +1366,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				Integer avlblroomnum = hotelService.getAvlblRoomNum(p_hotelid, p_isnewpms, p_visible, p_online,
 						reqentity.getStartdateday(), reqentity.getEnddateday());
-				Integer promoType = Integer.parseInt(reqentity.getPromotype());
+
 
 				Integer vacants = hotelService.calPromoVacants(promoType, p_hotelid, p_isnewpms, p_visible, p_online,
 						reqentity.getStartdateday(), reqentity.getEnddateday());
@@ -1972,7 +1986,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		// room type
 		// 如果返回房型信息，查询房型信息放到data结果集中
-		Double minPromoprice = null;
 
 		if (isRoomType) {
 			logger.info(String.format("promoinfo:%s", data == null ? "" : data.get("promoinfo").toString()));
@@ -1989,14 +2002,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 								: (Integer) promoInfoList.get(i).get("promotype");
 						promoprice = promoInfoList.get(i).get("promoprice") == null ? ""
 								: (String) promoInfoList.get(i).get("promoprice");
-
-						if (StringUtils.isNotEmpty(promoprice)) {
-							if (minPromoprice == null) {
-								minPromoprice = Double.parseDouble(promoprice);
-							} else if (Double.parseDouble(promoprice) < minPromoprice) {
-								minPromoprice = Double.parseDouble(promoprice);
-							}
-						}
 
 						promoMap.put(promotype == null ? 0 : promotype, promoprice);
 					}
@@ -2085,11 +2090,24 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			data.put("roomtype", roomtypeList);
 
-			if (minPromoprice != null) {
-				data.put("promoprice", minPromoprice);
-			} else {
-				data.put("promoprice", minPromoprice);
+			Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype()) ? Integer.valueOf(reqentity.getPromotype()):null;
+			if (promoType != null){
+				List<Map<String, Integer>> promoList = (List)data.get("promoinfo");
+				if (promoList!= null){
+					for (Map<String, Integer> promoinfo : promoList){
+						Integer hotelPromoType = promoinfo.get("promotype");
+						if (hotelPromoType == promoType){
+							data.put("promoprice",promoinfo.get("promoprice"));
+						}
+					}
+				}
 			}
+//
+//			if (minPromoprice != null) {
+//				data.put("promoprice", minPromoprice);
+//			} else {
+//				data.put("promoprice", minPromoprice);
+//			}
 		}
 
 		// 是否返现（T/F）

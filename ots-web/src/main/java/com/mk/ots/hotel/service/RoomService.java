@@ -192,7 +192,7 @@ public class RoomService {
     				}
     			}
     		}
-    		cost = cost.setScale(0, BigDecimal.ROUND_UP);
+    		cost = cost.setScale(0, BigDecimal.ROUND_DOWN);
     		msg.append("::算完策略后时间："+dateformat.format(date)+"房价："+cost.intValue());
     		costMap.put(dateformat.format(date), cost);
     	}
