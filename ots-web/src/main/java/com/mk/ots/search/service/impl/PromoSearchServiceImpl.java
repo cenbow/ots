@@ -1987,8 +1987,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					if (promoInfoList.get(i) != null && promoInfoList.get(i).containsKey("promotype")) {
 						promotype = promoInfoList.get(i).get("promotype") == null ? 0
 								: (Integer) promoInfoList.get(i).get("promotype");
-						promoprice = promoInfoList.get(i).get("promopice") == null ? ""
-								: (String) promoInfoList.get(i).get("promopice");
+						promoprice = promoInfoList.get(i).get("promoprice") == null ? ""
+								: (String) promoInfoList.get(i).get("promoprice");
 
 						if (StringUtils.isNotEmpty(promoprice)) {
 							if (minPromoprice == null) {
@@ -2001,7 +2001,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						promoMap.put(promotype == null ? 0 : promotype, promoprice);
 					}
 				} catch (Exception ex) {
-					logger.warn("invalid dateformat for promotype and promopice", ex);
+					logger.warn("invalid dateformat for promotype and promoprice", ex);
 					continue;
 				}
 			}
