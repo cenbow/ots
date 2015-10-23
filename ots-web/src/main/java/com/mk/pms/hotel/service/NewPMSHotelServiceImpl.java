@@ -2,12 +2,12 @@ package com.mk.pms.hotel.service;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import com.mk.ots.mapper.*;
+import com.mk.ots.roomsale.model.TRoomSaleConfig;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mortbay.log.Log;
 import org.slf4j.Logger;
@@ -38,12 +38,6 @@ import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.hotel.service.THotelBaseTrackService;
 import com.mk.ots.manager.RedisCacheName;
 import com.mk.ots.manager.SysConfigManager;
-import com.mk.ots.mapper.EHotelMapper;
-import com.mk.ots.mapper.ERoomtypeFacilityMapper;
-import com.mk.ots.mapper.ERoomtypeInfoMapper;
-import com.mk.ots.mapper.TFacilityMapper;
-import com.mk.ots.mapper.THotelMapper;
-import com.mk.ots.mapper.TRoomtypeInfoMapper;
 import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.ots.rpc.service.PmsSoapServiceImpl;
 import com.mk.pms.hotel.bean.PMSHotelInfoJSONBean;
@@ -71,7 +65,13 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 
 	@Autowired
 	private RoomService roomService;
-	
+
+	@Autowired
+	private RoomSaleConfigMapper roomSaleConfigMapper;
+
+	@Autowired
+	private RoomSaleConfigInfoMapper roomSaleConfigInfoMapper;
+
 	@Autowired
 	private HotelService hotelService;
 	@Autowired
@@ -259,10 +259,15 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 		changemap.put("addRoomNoLog", new ArrayList());//记录添加的房间号
 		changemap.put("delRoomTypeLog", new ArrayList());//记录删除的房型
 		
-		List<TRoomTypeModel> tRoomTypeListExits = new ArrayList<TRoomTypeModel>(); 
+		List<TRoomTypeModel> tRoomTypeListExits = new ArrayList<TRoomTypeModel>();
+		Map<Integer, TRoomTypeModel> roomTypeMap = new HashMap<Integer, TRoomTypeModel>();
+
 		// 遍历tRoomType数据 如果传入参数中不存在则删除OTS中的房型数据
 		for (TRoomTypeModel tRoomType : tRoomTypeList) {
 			String otsPms = tRoomType.getPms();
+			Long roomTypeId = tRoomType.getId();
+			roomTypeMap.put(roomTypeId.intValue(), tRoomType);
+
 			boolean isExits = false;
 			for (PMSRoomTypeBean pmsRoomType : roomTypeList) {
 				String pms = String.valueOf(pmsRoomType.getId());
@@ -282,12 +287,57 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 		// 获取OTS的所有房间
 		// 房间list 转换为Map<roomtypeid, roomBean>
 		Map<Long, List<TRoomModel>> roomsMap = this.roomListTOMap(tRoomTypeList, tRoomList);
+		/*
+			为重庆特价房，增加。若是特价房，不更新
+		 */
 
+		//先取可用configInfo
+		List<TRoomSaleConfigInfo> infoList = roomSaleConfigInfoMapper.queryRoomSaleConfigInfoList();
+		Set<String> onSaleRoomTypePms = new HashSet<String>();
+		for (TRoomSaleConfigInfo info : infoList) {
+			String infoValid = info.getValid();
+			Integer infoId = info.getId();
+
+			if ("T".equals(infoValid)) {
+				//再取可用 TRoomSaleConfig
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("saleRoomTypeId",infoId);
+				List<TRoomSaleConfig> configList = roomSaleConfigMapper.queryRoomSaleConfigByParams(map);
+				for (TRoomSaleConfig config : configList) {
+					String configValid = config.getValid();
+					if ("T".equals(configValid)) {
+						Integer roomTypeId  = config.getRoomTypeId();
+
+						//获取房型相关pms
+						TRoomTypeModel roomTypeModel = roomTypeMap.get(roomTypeId);
+						if(null != roomTypeModel) {
+							String pmsId = roomTypeModel.getPms();
+							onSaleRoomTypePms.add(pmsId);
+						}
+					}
+				}
+			}
+		}
+		/*
+			end
+		 */
 		// tRoomtypeList 转为 map<pms,TRoomType>,直接使用参数pms号取map key 如果取到就是更新，如果没有就新增
 		Map<String, TRoomTypeModel> tRoomTypesMap = this.roomTypeListTOMap(tRoomTypeListExits);
 		for (PMSRoomTypeBean pmsRoomTypeBean : roomTypeList) {
 			// PMS2.0中的ID与OTS中的pms字段对应
 			String pms = String.valueOf(pmsRoomTypeBean.getId());
+			/*
+				为重庆特价房，增加。若是特价房，不更新
+			 */
+			if (onSaleRoomTypePms.contains(pms)) {
+				logger.info("PMS2.0 不同步房间数据：参数{} ", pms);
+				continue;
+			} else {
+				logger.info("PMS2.0 同步房间数据：参数{} ", pms);
+			}
+			/*
+
+			 */
 			TRoomTypeModel tRoomType = tRoomTypesMap.get(pms);
 			if (tRoomType == null) {
 				logger.info( "PMS2.0 同步房型数据-->开始添加房型：参数roomtype:{} ", JsonKit.toJson(pmsRoomTypeBean));
@@ -307,7 +357,9 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 				}
 			}
 		}
-		
+
+
+
 		List delRoomNoLog = (List) changemap.get("delRoomNoLog");
 	    List addRoomNoLog = (List) changemap.get("addRoomNoLog");
 	    List delRoomTypeLog =(List) changemap.get("delRoomTypeLog");
