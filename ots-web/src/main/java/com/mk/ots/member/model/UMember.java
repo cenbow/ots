@@ -141,7 +141,17 @@ public class UMember extends BizModel<UMember> {
     private String unionid;
     
     private String regostype;
-    
+
+    private String citycode;
+
+    public String getCitycode() {
+        return citycode;
+    }
+
+    public void setCitycode(String citycode) {
+        this.citycode = citycode;
+    }
+
     public String getRegostype() {
 		return regostype;
 	}

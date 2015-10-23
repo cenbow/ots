@@ -1560,6 +1560,22 @@ public class DateUtils extends Object {
         return 0;
     }
 
+    public static long calEndDiffTime(Date startDate,Date endDate, Time endTime) {
+        Calendar cal=Calendar.getInstance();
+        java.util.Date sysTime = cal.getTime();
+
+        if (DateUtils.addDays(endDate,1).before(sysTime)){
+            return Constant.PROMO_FININSHED;  //活动已结束
+        } else if (startDate.after(sysTime)){    //活動未開始
+            cal.setTime(endDate);
+            return timeDiff(endTime, cal, sysTime);
+        }else if (DateUtils.addDays(endDate,1).after(sysTime)&&startDate.before(sysTime)){
+            cal.setTime(sysTime);
+            return timeDiff(endTime, cal, sysTime);
+        }
+        return 0;
+    }
+
     public static long timeDiff(Time startTime, Calendar cal, java.util.Date sysTime) {
         getCalTime(startTime, cal);
         long diff= DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime), DateUtils.formatDatetime(cal.getTime()));
@@ -1578,12 +1594,16 @@ public class DateUtils extends Object {
         int hour= cal.get(Calendar.HOUR_OF_DAY);
         int min= cal.get(Calendar.MINUTE);
         int sec = cal.get(Calendar.SECOND);
-        cal.set(year,month,day,hour,min,sec);
+        cal.set(year, month, day, hour, min, sec);
     }
 
-    public static long promoStatus(Date startDate, Date endDate, Time startTime, Time endTime) {
+    public static Integer promoStatus(Date startDate, Date endDate, Time startTime, Time endTime) {
+
         Calendar cal = Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
+        Date [] startEndTime = getStartEndDate(sysTime, startTime, endTime);
+        Date startPromoTime = startEndTime[0];
+        Date endPromoTime = startEndTime[1];
 
         cal.setTime(startDate);
         getCalTime(startTime, cal);
@@ -1603,19 +1623,24 @@ public class DateUtils extends Object {
         if (startdiff > 0){
             return Constant.PROMO_NOT_START;
         }else if (enddiff > 0){
-            return Constant.PROMOING;
+            if (sysTime.before(startDate) || sysTime.after(endDate)){
+                return Constant.PROMO_NOT_START;
+            }else{
+                if (sysTime.before(startPromoTime) || sysTime.after(endPromoTime)){
+                    return Constant.PROMO_NOT_START;
+                }else {
+                    return Constant.PROMOING;
+                }
+            }
         }else {
             return Constant.PROMO_FININSHED;
         }
 
-
     }
 
-    public static long promoStartDueTime(Date startDate, Time startTime) {
+    public static long promoStartDueTime(Time startTime) {
         Calendar cal = Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
-        cal.clear();
-        cal.setTime(startDate);
         getCalTime(startTime, cal);
 
         LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
@@ -1623,20 +1648,90 @@ public class DateUtils extends Object {
         return Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
     }
 
-    public static long promoEndDueTime( Date endDate, Time endTime) {
+    public static long promoEndDueTime(Date endDate,Time startTime, Time endTime) {
+
         Calendar cal = Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
 
-        LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
+        if (sysTime.after(endDate)){
+            cal.clear();
+            cal.setTime(endDate);
+            getCalTime(endTime,cal);
+        }
 
-        cal.clear();
-        cal.setTime(endDate);
+        LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
+        if (startTime.after(endTime)){
+            cal.add(cal.DATE,1);
+        }
+
+
         getCalTime(endTime, cal);
 
         LocalDateTime endExTime = LocalDateTime.fromDateFields(cal.getTime());
         return Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
     }
 
+    private static Date[] getStartEndDate (Date runTime, Date startTime, Date endTime) {
+        if (null == runTime || null == startTime || null == endTime) {
+            return new Date[]{new Date(),new Date()};
+        }
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat datetimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+        try {
+            String strMidTime = dateFormat.format(runTime);
+            Date midTime = dateFormat.parse(strMidTime + " 12:00:00");
+
+            Date startDate = null;
+            Date endDate = null;
+            //若当前时间晚于中午12点,住房时间为今日到明日。若早于12点，住房时间为昨日到今日
+            if (runTime.after(midTime)) {
+                startDate = runTime;
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(startDate);
+                calendar.add(calendar.DATE,1);
+                endDate = calendar.getTime();
+            } else {
+                endDate = runTime;
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(endDate);
+                calendar.add(calendar.DATE,-1);
+                startDate = calendar.getTime();
+            }
+
+            //若开始时间早于endTime，当日时间，
+            if (startTime.before(endTime)) {
+
+                //若是晚于中午12点，
+                if (midTime.after(startTime)) {
+                    String strStartDate = dateFormat.format(startDate) + " " + timeFormat.format(startTime);
+                    startDate = datetimeFormat.parse(strStartDate);
+
+                    String strEndDate = dateFormat.format(startDate) +  " " + timeFormat.format(endTime);
+                    endDate = datetimeFormat.parse(strEndDate);
+                } else {
+                    String strStartDate = dateFormat.format(endDate) +  " " + timeFormat.format(startTime);
+                    startDate = datetimeFormat.parse(strStartDate);
+
+                    String strEndDate = dateFormat.format(endDate) +  " " + timeFormat.format(endTime);
+                    endDate = datetimeFormat.parse(strEndDate);
+                }
+            } else {
+                String strStartDate = dateFormat.format(startDate) +  " " + timeFormat.format(startTime);
+                startDate = datetimeFormat.parse(strStartDate);
+
+                String strEndDate = dateFormat.format(endDate) +  " " + timeFormat.format(endTime);
+                endDate = datetimeFormat.parse(strEndDate);
+            }
+            return new Date[]{startDate,endDate};
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return new Date[]{runTime,runTime};
+    }
     
 }

@@ -72,6 +72,9 @@ public class HotelPromoController {
 				for (TRoomSaleConfigInfo saleConfigInfo : roomSaleConfigInfoList) {
 					long sec = DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
 							saleConfigInfo.getStartTime());
+
+					long endSec = DateUtils.calEndDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
+							saleConfigInfo.getEndTime());
 					if (sec < 0) {
 						continue;
 					}
@@ -86,6 +89,7 @@ public class HotelPromoController {
 					ptype1.put("promotypetext", saleConfigInfo.getSaleLabel());
 					ptype1.put("promotypeprice", saleConfigInfo.getSaleValue());
 					ptype1.put("promosec", sec / 1000); // 秒
+					ptype1.put("promoendsec", endSec / 1000); //距离结束时间（s）
 					list.add(ptype1);
 				}
 			}

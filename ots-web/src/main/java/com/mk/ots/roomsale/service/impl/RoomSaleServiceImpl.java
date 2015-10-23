@@ -96,6 +96,7 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		return roomPromoDtoList;
 	}
 
+
 	@Override
 	public List<Map<String, Object>> queryRoomPromoInfoByHotel(String hotelId) throws Exception {
 		try {
@@ -104,6 +105,17 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		} catch (Exception ex) {
 			logger.error(String.format("failed to queryRoomPromoInfoByHotel %s", hotelId), ex);
 			throw new Exception(String.format("failed to queryRoomPromoInfoByHotel %s", hotelId), ex);
+		}
+	}
+
+	@Override
+	public Map<String, Object> queryRoomPromoInfo() throws Exception {
+		try {
+			Map<String, Object>saleRoomList = roomSaleMapper.queryRoomPromoInfo();
+			return saleRoomList;
+		} catch (Exception ex) {
+			logger.error(String.format("failed to queryRoomPromoInfo %s"), ex);
+			throw new Exception(String.format("failed to queryRoomPromoInfo %s"), ex);
 		}
 	}
 	public Boolean checkRoomSale(TRoomSaleConfig bean){

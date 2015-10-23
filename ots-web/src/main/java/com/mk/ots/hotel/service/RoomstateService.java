@@ -1030,7 +1030,7 @@ public class RoomstateService {
 								if (list != null && list.size() > 0){
 									RoomPromoDto roomPromoDto = list.get(0);
 
-									long promostaus = DateUtils.promoStatus(roomPromoDto.getStartDate(),roomPromoDto.getEndDate(),roomPromoDto.getStartTime(),roomPromoDto.getEndTime());
+									Integer promostaus = DateUtils.promoStatus(roomPromoDto.getStartDate(),roomPromoDto.getEndDate(),roomPromoDto.getStartTime(),roomPromoDto.getEndTime());
 									roomtype.setPromostatus(promostaus);
 									roomtype.setPromotype(roomPromoDto.getPromoType());
 									roomtype.setPromotext(roomPromoDto.getTypeDesc());
@@ -1042,8 +1042,8 @@ public class RoomstateService {
 										roomtype.setPromostarttime(promoStartTime);
 									}
 
-									Long promodustartsec = DateUtils.promoStartDueTime(roomPromoDto.getStartDate(),roomPromoDto.getStartTime());
-									Long promoduendsec = DateUtils.promoEndDueTime(roomPromoDto.getEndDate(), roomPromoDto.getEndTime());
+									Long promodustartsec = DateUtils.promoStartDueTime(roomPromoDto.getStartTime());
+									Long promoduendsec = DateUtils.promoEndDueTime(roomPromoDto.getEndDate(),roomPromoDto.getStartTime(), roomPromoDto.getEndTime());
 									if(promostaus == Constant.PROMOING){
 										roomtype.setPromodustartsec("0");
 										roomtype.setPromoduendsec(promoduendsec.toString());

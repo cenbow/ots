@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.mk.ots.roomsale.model.TRoomSale;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -145,8 +146,6 @@ public class SearchService implements ISearchService {
 	@Autowired
 	private RoomstateService roomstateService;
 
-	@Autowired
-	private RoomSaleService roomSaleService;
 
 	/**
 	 * 注入酒店信息mapper
@@ -186,6 +185,9 @@ public class SearchService implements ISearchService {
 
 	@Autowired
 	private SSubwayStationMapper subwayStationMapper;
+
+	@Autowired
+	private RoomSaleService roomSaleService;
 
 	private LocalDateTime promoStartTime;
 	private LocalDateTime promoEndTime;
@@ -752,26 +754,26 @@ public class SearchService implements ISearchService {
 	 * 
 	 * @param searchBuilder
 	 */
-	// private void sortByPrice(List<Map<String, Object>> hotels) {
-	// //
-	// Collections.sort(hotels, new Comparator<Map<String, Object>>(){
-	// @Override
-	// public int compare(Map<String, Object> hotel1, Map<String, Object>
-	// hotel2) {
-	// int val = 0;
-	// try {
-	// BigDecimal price1 =
-	// BigDecimal.valueOf(Double.valueOf(String.valueOf(hotel1.get("minprice"))));
-	// BigDecimal price2 =
-	// BigDecimal.valueOf(Double.valueOf(String.valueOf(hotel2.get("minprice"))));
-	// val = price1.compareTo(price2);
-	// } catch (Exception e) {
-	// val = 0;
-	// }
-	// return val;
-	// }
-	// });
-	// }
+//	private void sortByPrice(List<Map<String, Object>> hotels) {
+//	//
+//	Collections.sort(hotels, new Comparator<Map<String, Object>>(){
+//	@Override
+//	public int compare(Map<String, Object> hotel1, Map<String, Object>
+//	hotel2) {
+//	int val = 0;
+//	try {
+//	BigDecimal price1 =
+//	BigDecimal.valueOf(Double.valueOf(String.valueOf(hotel1.get("minprice"))));
+//	BigDecimal price2 =
+//	BigDecimal.valueOf(Double.valueOf(String.valueOf(hotel2.get("minprice"))));
+//	val = price1.compareTo(price2);
+//	} catch (Exception e) {
+//	val = 0;
+//	}
+//	return val;
+//	}
+//	});
+//	}
 	/**
 	 * 人气排序（月销量由高到低）
 	 * 
@@ -814,9 +816,28 @@ public class SearchService implements ISearchService {
 	 * 
 	 * @param searchBuilder
 	 */
-	private void sortByPromo(SearchRequestBuilder searchBuilder, String version, Boolean isPromoOnly) {
+	private void sortByPromo(SearchRequestBuilder searchBuilder, String version, Boolean isPromoOnly,Integer paramOrderby ) {
 
-		if (isPromoOnly != null && isPromoOnly && StringUtils.isNotEmpty(version) && ("3.1".compareTo(version) <= 0)) {
+		Map<String, Object> roomPromoDto = null;
+		try {
+			roomPromoDto = roomSaleService.queryRoomPromoInfo();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Integer promostaus = null;
+		if (roomPromoDto != null){
+			promostaus = DateUtils.promoStatus((java.sql.Date)roomPromoDto.get("startdate"),
+					(java.sql.Date)roomPromoDto.get("enddate"),
+					(java.sql.Time)roomPromoDto.get("starttime"),
+					(java.sql.Time)roomPromoDto.get("endtime"));
+		}
+
+		if (HotelSortEnum.PRICE.getId() == paramOrderby && (isPromoOnly == null ||!isPromoOnly) ){
+
+		}else if ((promostaus == Constant.PROMOING)||
+				(isPromoOnly != null && isPromoOnly &&
+						StringUtils.isNotEmpty(version)
+						&& ("3.1".compareTo(version) <= 0))) {
 			searchBuilder.addSort("isonpromo", SortOrder.DESC);
 		}
 	}
@@ -1064,7 +1085,8 @@ public class SearchService implements ISearchService {
 				/**
 				 * added in mike3.1, lift up promo as the top search variable
 				 */
-				sortByPromo(searchBuilder, reqentity.getCallversion(), reqentity.getIspromoonly());
+
+				sortByPromo(searchBuilder, reqentity.getCallversion(), reqentity.getIspromoonly(), paramOrderby);
 
 				if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
 					// 距离排序
@@ -1291,6 +1313,7 @@ public class SearchService implements ISearchService {
 				BigDecimal minPrice = new BigDecimal(prices[0]);
 				result.put("minprice", minPrice);
 				result.put("minpmsprice", new BigDecimal(prices[1]));
+
 				logger.info("酒店: {}眯客价: {}", es_hotelid, prices[0]);
 				logger.info("酒店: {}门市价: {}", es_hotelid, prices[1]);
 				logger.info("--================================== 查询酒店眯客价结束： ==================================-- ");

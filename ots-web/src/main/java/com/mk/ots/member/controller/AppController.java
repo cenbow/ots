@@ -248,7 +248,7 @@ public class AppController {
 	public ResponseEntity<Map<String, Object>> binding(String unionid,
 			String phone, String sysno, String devicetype, String marketsource,
 			String appversion, String ostype, String osver, String weixinname,
-			String comefrom, String comefromtype, Long hotelid, String channelid) {
+			String comefrom, String comefromtype, Long hotelid, String channelid, String citycode) {
 		logger.info("/unionidandphone/binding...  unionid:{} phone:{} sysno:{} devicetype:{} marketsource:{} appversion:{} ostype:{} osver:{} weixinname:{} comefrom:{} comefromtype:{} hotelid:{} channelid:{}",
 				unionid, phone,  sysno,  devicetype,  marketsource,appversion,  ostype,  osver,  weixinname, comefrom,  comefromtype,  hotelid,  channelid
 				);
@@ -308,6 +308,7 @@ public class AppController {
 			regMem.setComefrom(comefrom);
 			regMem.setComefromtype(comefromtype);
 			regMem.setHotelid(hotelid);
+			regMem.setCitycode(citycode);
 			iMemberService.saveOrUpdate(regMem);
 			logger.info("手机注册用户. member:{}", regMem.toString());
 			ofMember = Optional.fromNullable(regMem);
@@ -338,6 +339,7 @@ public class AppController {
 			regMem.setComefromtype(comefromtype);
 			regMem.setHotelid(hotelid);
 			regMem.setUnionid(unionid);
+			regMem.setCitycode(citycode);
 			iMemberService.saveOrUpdate(regMem);
 			logger.info("微信注册用户. member:{}", regMem.toString());
 			ofMember = Optional.fromNullable(regMem);
@@ -370,6 +372,7 @@ public class AppController {
 						upMem.setAppversion(appversion);
 						upMem.setOstype(ostype);
 						upMem.setOsver(osver);
+						upMem.setCitycode(citycode);
 						iMemberService.saveOrUpdate(upMem);
 						ofMember = Optional.fromNullable(upMem);
 						isCheck = true;
@@ -398,6 +401,7 @@ public class AppController {
 					regMem.setComefromtype(comefromtype);
 					regMem.setHotelid(hotelid);
 					regMem.setUnionid(unionid);
+					regMem.setCitycode(citycode);
 					iMemberService.saveOrUpdate(regMem);
 					ofMember = Optional.fromNullable(regMem);
 
@@ -432,6 +436,7 @@ public class AppController {
 						upMem.setAppversion(appversion);
 						upMem.setOstype(ostype);
 						upMem.setOsver(osver);
+						upMem.setCitycode(citycode);
 						iMemberService.saveOrUpdate(upMem);
 						ofMember = Optional.fromNullable(upMem);
 					}
