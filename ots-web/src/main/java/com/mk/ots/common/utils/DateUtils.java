@@ -1578,10 +1578,10 @@ public class DateUtils extends Object {
         int hour= cal.get(Calendar.HOUR_OF_DAY);
         int min= cal.get(Calendar.MINUTE);
         int sec = cal.get(Calendar.SECOND);
-        cal.set(year,month,day,hour,min,sec);
+        cal.set(year, month, day, hour, min, sec);
     }
 
-    public static long promoStatus(Date startDate, Date endDate, Time startTime, Time endTime) {
+    public static Integer promoStatus(Date startDate, Date endDate, Time startTime, Time endTime) {
         Calendar cal = Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
 

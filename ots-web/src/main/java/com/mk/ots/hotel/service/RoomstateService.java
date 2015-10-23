@@ -1030,7 +1030,7 @@ public class RoomstateService {
 								if (list != null && list.size() > 0){
 									RoomPromoDto roomPromoDto = list.get(0);
 
-									long promostaus = DateUtils.promoStatus(roomPromoDto.getStartDate(),roomPromoDto.getEndDate(),roomPromoDto.getStartTime(),roomPromoDto.getEndTime());
+									Integer promostaus = DateUtils.promoStatus(roomPromoDto.getStartDate(),roomPromoDto.getEndDate(),roomPromoDto.getStartTime(),roomPromoDto.getEndTime());
 									roomtype.setPromostatus(promostaus);
 									roomtype.setPromotype(roomPromoDto.getPromoType());
 									roomtype.setPromotext(roomPromoDto.getTypeDesc());

@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.mk.ots.roomsale.model.TRoomSale;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -145,8 +146,6 @@ public class SearchService implements ISearchService {
 	@Autowired
 	private RoomstateService roomstateService;
 
-	@Autowired
-	private RoomSaleService roomSaleService;
 
 	/**
 	 * 注入酒店信息mapper
@@ -186,6 +185,9 @@ public class SearchService implements ISearchService {
 
 	@Autowired
 	private SSubwayStationMapper subwayStationMapper;
+
+	@Autowired
+	private RoomSaleService roomSaleService;
 
 	private LocalDateTime promoStartTime;
 	private LocalDateTime promoEndTime;
@@ -816,7 +818,21 @@ public class SearchService implements ISearchService {
 	 */
 	private void sortByPromo(SearchRequestBuilder searchBuilder, String version, Boolean isPromoOnly) {
 
-		if (isPromoOnly != null && isPromoOnly && StringUtils.isNotEmpty(version) && ("3.1".compareTo(version) <= 0)) {
+		Map<String, Object> roomPromoDto = null;
+		try {
+			roomPromoDto = roomSaleService.queryRoomPromoInfo();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Integer promostaus = DateUtils.promoStatus((java.sql.Date)roomPromoDto.get("startdate"),
+												(java.sql.Date)roomPromoDto.get("enddate"),
+												(java.sql.Time)roomPromoDto.get("starttime"),
+												(java.sql.Time)roomPromoDto.get("endtime"));
+
+		if ((promostaus == Constant.PROMOING)||
+				(isPromoOnly != null && isPromoOnly &&
+						StringUtils.isNotEmpty(version)
+						&& ("3.1".compareTo(version) <= 0))) {
 			searchBuilder.addSort("isonpromo", SortOrder.DESC);
 		}
 	}
@@ -1064,6 +1080,7 @@ public class SearchService implements ISearchService {
 				/**
 				 * added in mike3.1, lift up promo as the top search variable
 				 */
+
 				sortByPromo(searchBuilder, reqentity.getCallversion(), reqentity.getIspromoonly());
 
 				if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
