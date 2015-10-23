@@ -1560,6 +1560,22 @@ public class DateUtils extends Object {
         return 0;
     }
 
+    public static long calEndDiffTime(Date startDate,Date endDate, Time endTime) {
+        Calendar cal=Calendar.getInstance();
+        java.util.Date sysTime = cal.getTime();
+
+        if (DateUtils.addDays(endDate,1).before(sysTime)){
+            return Constant.PROMO_FININSHED;  //活动已结束
+        } else if (startDate.after(sysTime)){    //活動未開始
+            cal.setTime(endDate);
+            return timeDiff(endTime, cal, sysTime);
+        }else if (DateUtils.addDays(endDate,1).after(sysTime)&&startDate.before(sysTime)){
+            cal.setTime(sysTime);
+            return timeDiff(endTime, cal, sysTime);
+        }
+        return 0;
+    }
+
     public static long timeDiff(Time startTime, Calendar cal, java.util.Date sysTime) {
         getCalTime(startTime, cal);
         long diff= DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime), DateUtils.formatDatetime(cal.getTime()));
