@@ -383,6 +383,7 @@ public class HotelService {
 					for (Bean item : facilities) {
 						facies.add(item.getColumns());
 					}
+
 					OtsHotel hotel = new OtsHotel();
 					hotel.setHotelid(bean.getId().toString());
 					hotel.setHotelname(bean.getHotelname() == null ? "" : bean.getHotelname());
@@ -433,8 +434,30 @@ public class HotelService {
 					// mike3.0 添加月销量
 					hotel.setOrdernummon(getOrderNumMon(Long.valueOf(hotelid)));
 
-					// mike3.1 添加特价房
+					/**
+					 * add bedtype
+					 */
+					List<Map<String, Object>> bedtypes = new ArrayList<Map<String, Object>>();
+					try {
+						List<Map<String, Object>> bedtypeList = (List<Map<String, Object>>) readonlyRoomtypeList(
+								bean.getId().toString(), "");
+						for (Map<String, Object> bedtype : bedtypeList) {
+							Map<String, Object> bed = new HashMap<String, Object>();
+							bed.put("bedtype", bedtype.get("bedtype"));
+							bed.put("bedtypename", bedtype.get("bedtypename"));
+							bedtypes.add(bed);
+						}
+					} catch (Exception ex) {
+						logger.warn(String.format("failed to add bedtype for hotelid:%s...", hotelid), ex);
+					}
 
+					if (bedtypes != null && bedtypes.size() > 0) {
+						if (logger.isInfoEnabled()) {
+							logger.info("bedtypes added for hotelid {}", hotelid);
+						}
+						hotel.setBedtypes(bedtypes);
+					}
+					// mike3.1 添加特价房
 
 					TRoomSale roomSale = new TRoomSale();
 					Integer hotelId = Integer.valueOf(bean.getId().toString());
@@ -443,19 +466,18 @@ public class HotelService {
 
 					if (result != null) {
 						hotel.setIsonpromo("1");
-					}else {
+					} else {
 						hotel.setIsonpromo("0");
 					}
-
 
 					List<Map<String, Object>> promoinfo;
 
 					promoinfo = roomSaleService.queryRoomPromoInfoByHotel(hotelid);
-					if (promoinfo == null){
+					if (promoinfo == null) {
 						promoinfo = new ArrayList<>();
 					}
 
-                    hotel.setPromoinfo(promoinfo);
+					hotel.setPromoinfo(promoinfo);
 
 					// 先把新的酒店放到集合中，后面做批量添加
 					coll.add(hotel);
@@ -628,7 +650,7 @@ public class HotelService {
 				 * added in mike3.1
 				 */
 				hotel.setIsonpromo("0");
-				
+
 				// 先把新的酒店放到集合中，后面做批量添加
 				addList.add(hotel);
 				logger.info("not pms hotelid: {} added in collections and will be add in elasticsearch document.",
@@ -1616,6 +1638,7 @@ public class HotelService {
 
 		return vacants;
 	}
+
 	/**
 	 * make es term filter
 	 *
@@ -1871,10 +1894,9 @@ public class HotelService {
 	 * @param eshotel
 	 * @return
 	 */
-	private List<Map<String, Object>> readonlyRoomtypeList(Map<String, Object> eshotel, String bedtype) {
+	private List<Map<String, Object>> readonlyRoomtypeList(String hotelid, String bedtype) {
 		List<Map<String, Object>> roomtypelist = new ArrayList<Map<String, Object>>();
-		String hotelid = String.valueOf(eshotel.get("hotelid"));
-		if (eshotel == null || StringUtils.isBlank(hotelid)) {
+		if (hotelid == null || StringUtils.isBlank(hotelid)) {
 			return roomtypelist;
 		}
 		try {
@@ -2141,7 +2163,8 @@ public class HotelService {
 		// room type
 		// 如果返回房型信息，查询房型信息放到data结果集中
 		if (isRoomType) {
-			List<Map<String, Object>> roomtypeList = this.readonlyRoomtypeList(data, bedtype);
+			List<Map<String, Object>> roomtypeList = this.readonlyRoomtypeList(String.valueOf(data.get("hotelid")),
+					bedtype);
 			for (Map<String, Object> roomtypeItem : roomtypeList) {
 				logger.info("--================================== 查询房型是否可用信息开始： ==================================-- ");
 				// roomtypevc
