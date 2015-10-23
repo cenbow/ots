@@ -80,7 +80,7 @@ public class RecommendController {
                 if (StringUtils.isNotBlank(cityid) && cityItemAreaList != null) {
 
                     for (int i = 0; i < cityItemAreaList.size(); i++) {
-                        if (cityItemAreaList.get(i) != null && city_recommend_count < Constant.CITY_RECOMMEND_ITEM_LIMT) {
+                        if (cityItemAreaList.get(i) != null && city_recommend_count <= Constant.CITY_RECOMMEND_ITEM_LIMT) {
                             TRecommenditem tRecommendItem = recommenditemHashMap.get(cityItemAreaList.get(i).getItemid());
 
 
@@ -119,7 +119,7 @@ public class RecommendController {
                             TRecommenditem tRecommendItem = recommenditemHashMap.get(itemAreaList.get(i).getItemid());
 
 
-                            if (tRecommendItem != null && global_count < Constant.RECOMMEND_ITEM_LIMT - city_recommend_count) {
+                            if (tRecommendItem != null && global_count <= Constant.RECOMMEND_ITEM_LIMT - city_recommend_count) {
 
                                 if (Constant.WEIXIN_CALLMETHOD.equals(callmethod) && tRecommendItem.getViewtype() == Constant.TONIGHT_PROMO_VIEWTYPE) {
                                     continue;
