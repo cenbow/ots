@@ -1455,7 +1455,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 
 				HotelQuerylistReqEntity queryEntity = new HotelQuerylistReqEntity();
-
+				queryEntity.setStartdateday(reqentity.getStartdateday());
+				queryEntity.setEnddateday(reqentity.getEnddateday());
 				queryEntity.setCallversion(reqentity.getCallversion());
 				queryEntity.setCityid(reqentity.getCityid());
 				Integer supplementcount = searchAround(hotels, queryEntity, this.minItemCount - hotels.size());
