@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.mk.ots.roomsale.model.TRoomSale;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -145,7 +144,6 @@ public class SearchService implements ISearchService {
 	 */
 	@Autowired
 	private RoomstateService roomstateService;
-
 
 	/**
 	 * 注入酒店信息mapper
@@ -754,26 +752,24 @@ public class SearchService implements ISearchService {
 	 * 
 	 * @param searchBuilder
 	 */
-//	private void sortByPrice(List<Map<String, Object>> hotels) {
-//	//
-//	Collections.sort(hotels, new Comparator<Map<String, Object>>(){
-//	@Override
-//	public int compare(Map<String, Object> hotel1, Map<String, Object>
-//	hotel2) {
-//	int val = 0;
-//	try {
-//	BigDecimal price1 =
-//	BigDecimal.valueOf(Double.valueOf(String.valueOf(hotel1.get("minprice"))));
-//	BigDecimal price2 =
-//	BigDecimal.valueOf(Double.valueOf(String.valueOf(hotel2.get("minprice"))));
-//	val = price1.compareTo(price2);
-//	} catch (Exception e) {
-//	val = 0;
-//	}
-//	return val;
-//	}
-//	});
-//	}
+	private void sortByPrice(List<Map<String, Object>> hotels) {
+		//
+		Collections.sort(hotels, new Comparator<Map<String, Object>>() {
+			@Override
+			public int compare(Map<String, Object> hotel1, Map<String, Object> hotel2) {
+				int val = 0;
+				try {
+					BigDecimal price1 = BigDecimal.valueOf(Double.valueOf(String.valueOf(hotel1.get("minprice"))));
+					BigDecimal price2 = BigDecimal.valueOf(Double.valueOf(String.valueOf(hotel2.get("minprice"))));
+					val = price1.compareTo(price2);
+				} catch (Exception e) {
+					val = 0;
+				}
+				return val;
+			}
+		});
+	}
+
 	/**
 	 * 人气排序（月销量由高到低）
 	 * 
@@ -816,7 +812,8 @@ public class SearchService implements ISearchService {
 	 * 
 	 * @param searchBuilder
 	 */
-	private void sortByPromo(SearchRequestBuilder searchBuilder, String version, Boolean isPromoOnly,Integer paramOrderby ) {
+	private void sortByPromo(SearchRequestBuilder searchBuilder, String version, Boolean isPromoOnly,
+			Integer paramOrderby) {
 
 		Map<String, Object> roomPromoDto = null;
 		try {
@@ -825,19 +822,16 @@ public class SearchService implements ISearchService {
 			e.printStackTrace();
 		}
 		Integer promostaus = null;
-		if (roomPromoDto != null){
-			promostaus = DateUtils.promoStatus((java.sql.Date)roomPromoDto.get("startdate"),
-					(java.sql.Date)roomPromoDto.get("enddate"),
-					(java.sql.Time)roomPromoDto.get("starttime"),
-					(java.sql.Time)roomPromoDto.get("endtime"));
+		if (roomPromoDto != null) {
+			promostaus = DateUtils.promoStatus((java.sql.Date) roomPromoDto.get("startdate"),
+					(java.sql.Date) roomPromoDto.get("enddate"), (java.sql.Time) roomPromoDto.get("starttime"),
+					(java.sql.Time) roomPromoDto.get("endtime"));
 		}
 
-		if (HotelSortEnum.PRICE.getId() == paramOrderby && (isPromoOnly == null ||!isPromoOnly) ){
+		if (HotelSortEnum.PRICE.getId() == paramOrderby && (isPromoOnly == null || !isPromoOnly)) {
 
-		}else if ((promostaus == Constant.PROMOING)||
-				(isPromoOnly != null && isPromoOnly &&
-						StringUtils.isNotEmpty(version)
-						&& ("3.1".compareTo(version) <= 0))) {
+		} else if ((promostaus == Constant.PROMOING) || (isPromoOnly != null && isPromoOnly
+				&& StringUtils.isNotEmpty(version) && ("3.1".compareTo(version) <= 0))) {
 			searchBuilder.addSort("isonpromo", SortOrder.DESC);
 		}
 	}
@@ -957,7 +951,12 @@ public class SearchService implements ISearchService {
 			// 屏幕地图经纬度，根据它按照范围来搜索酒店
 			double lat = reqentity.getPillowlatitude() == null ? cityLat_default : reqentity.getPillowlatitude();
 			double lon = reqentity.getPillowlongitude() == null ? cityLon_default : reqentity.getPillowlongitude();
-
+			
+			Integer paramOrderby = reqentity.getOrderby();
+			if (paramOrderby == null) {
+				paramOrderby = 0;
+			}
+			
 			SearchRequestBuilder searchBuilder = esProxy.prepareSearch();
 			if (StringUtils.isBlank(hotelid)) {
 				// 设置查询类型 1.SearchType.DFS_QUERY_THEN_FETCH = 精确查询
@@ -1077,10 +1076,7 @@ public class SearchService implements ISearchService {
 				// (2)按价格排序：按照价格从低到高排序
 				// (3)按人气排序：按照OTS上近30天的订单量从高到低排序
 				// (4)默认排序（酒店权重分数）：按照酒店权重估值从高到低排序
-				Integer paramOrderby = reqentity.getOrderby();
-				if (paramOrderby == null) {
-					paramOrderby = 0;
-				}
+
 
 				/**
 				 * added in mike3.1, lift up promo as the top search variable
@@ -1096,7 +1092,8 @@ public class SearchService implements ISearchService {
 					String startdateday = reqentity.getStartdateday();
 					String enddateday = reqentity.getEnddateday();
 					List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
-					setMikepriceScriptSort(searchBuilder, boolFilter, mkPriceDateList);
+					// setMikepriceScriptSort(searchBuilder, boolFilter,
+					// mkPriceDateList);
 				} else if (HotelSortEnum.RECOMMEND.getId() == paramOrderby) {
 					// 推荐排序(暂未使用)
 					this.sortByRecommend(searchBuilder);
@@ -1415,6 +1412,10 @@ public class SearchService implements ISearchService {
 
 			// 重新按照是否可售分组排序
 			this.sortByVcState(hotels);
+
+			if (HotelSortEnum.PRICE.getId() == paramOrderby) {
+				this.sortByPrice(hotels);
+			}
 
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 			rtnMap.put("count", totalHits);
