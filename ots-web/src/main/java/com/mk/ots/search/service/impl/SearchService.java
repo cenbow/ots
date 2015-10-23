@@ -1135,6 +1135,22 @@ public class SearchService implements ISearchService {
 				result.put("$sortScore", hit.getScore());
 				String es_hotelid = String.valueOf(result.get("hotelid"));
 				// 根据用户经纬度来计算两个经纬度坐标距离（单位：米）
+
+				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype()) ? Integer.valueOf(reqentity.getPromotype()):null;
+				if (promoType != null){
+					List<Map<String, Integer>> promoList = (List)result.get("promoinfo");
+					if (promoList!= null){
+						for (Map<String, Integer> promoinfo : promoList){
+							Integer hotelPromoType = promoinfo.get("promotype");
+							if (hotelPromoType == promoType){
+								result.put("promoprice",promoinfo.get("promoprice"));
+							}
+						}
+					}
+				}
+
+
+				System.out.println(result);
 				Map<String, Object> pin = (Map<String, Object>) result.get("pin");
 				// hotel latitude and longitude
 				double hotelLongitude = Double.valueOf(String.valueOf(pin.get("lon")));
@@ -1407,18 +1423,6 @@ public class SearchService implements ISearchService {
 				logger.info("--================================== 查询酒店是否有返现结束: ==================================-- ");
 
 
-				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype()) ? Integer.valueOf(reqentity.getPromotype()):null;
-				if (promoType != null){
-					List<Map<String, Integer>> promoList = (List)result.get("promoinfo");
-					if (promoList!= null){
-						for (Map<String, Integer> promoinfo : promoList){
-							Integer hotelPromoType = promoinfo.get("promotype");
-							if (hotelPromoType == promoType){
-								result.put("promoprice",promoinfo.get("promoprice"));
-							}
-						}
-					}
-				}
 
 
 
