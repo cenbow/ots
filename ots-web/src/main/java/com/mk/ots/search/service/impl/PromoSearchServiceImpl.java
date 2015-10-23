@@ -1454,12 +1454,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					logger.info("about to add supplement hotels");
 				}
 
-				HotelQuerylistReqEntity queryEntity = new HotelQuerylistReqEntity();
-				queryEntity.setStartdateday(reqentity.getStartdateday());
-				queryEntity.setEnddateday(reqentity.getEnddateday());
-				queryEntity.setCallversion(reqentity.getCallversion());
-				queryEntity.setCityid(reqentity.getCityid());
-				Integer supplementcount = searchAround(rtnMap, queryEntity, this.minItemCount - hotels.size());
+				Integer supplementcount = searchAround(rtnMap, reqentity, this.minItemCount - hotels.size());
 				rtnMap.put("supplementcount", supplementcount);
 			}
 
