@@ -160,6 +160,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	@Autowired
 	private CashBackService cashBackService;
 
+	@Autowired
+	private SearchService searchService;
+
 	/**
 	 * 注入新酒店价格服务
 	 */
@@ -1140,6 +1143,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			SearchHit[] hits = searchHits.getHits();
 			logger.info("search hotel success: total {} found. current pagesize:{}", totalHits, hits.length);
+
 			for (int i = 0; i < hits.length; i++) {
 				SearchHit hit = hits[i];
 				Map<String, Object> result = hit.getSource();
@@ -1442,6 +1446,23 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			 */
 			this.resortPromo(hotels);
 
+			/**
+			 * add hotel supplement to be bottom
+			 */
+			if (hotels.size() < this.minItemCount) {
+				if (logger.isInfoEnabled()) {
+					logger.info("about to add supplement hotels");
+				}
+
+				HotelQuerylistReqEntity queryEntity = new HotelQuerylistReqEntity();
+				queryEntity.setStartdateday(reqentity.getStartdateday());
+				queryEntity.setEnddateday(reqentity.getEnddateday());
+				queryEntity.setCallversion(reqentity.getCallversion());
+				queryEntity.setCityid(reqentity.getCityid());
+				Integer supplementcount = searchAround(rtnMap, queryEntity, this.minItemCount - hotels.size());
+				rtnMap.put("supplementcount", supplementcount);
+			}
+
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 			rtnMap.put("count", totalHits);
 			rtnMap.put("hotel", hotels);
@@ -1453,6 +1474,35 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 		}
 		return rtnMap;
+	}
+
+	/**
+	 * search hotels by around when supplement is required
+	 * 
+	 * @param hotels
+	 * @param params
+	 * @param hotelAroundCounter
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	private Integer searchAround(Map<String, Object> response, HotelQuerylistReqEntity params,
+			Integer hotelAroundCounter) throws Exception {
+		Map<String, Object> hotelsAround = searchService.readonlySearchHotels(params);
+
+		if (hotelsAround != null & hotelsAround.get("hotel") != null) {
+			List<Map<String, Object>> aroundHotels = (List<Map<String, Object>>) hotelsAround.get("hotel");
+			List<Map<String,Object>> supplementhotel = new ArrayList<Map<String, Object>>();
+			
+			for (int i = 0; i < (aroundHotels.size() < hotelAroundCounter ? aroundHotels.size()
+					: hotelAroundCounter); i++) {
+				supplementhotel.add(aroundHotels.get(i));
+			}
+			response.put("supplementhotel", supplementhotel);
+			
+			return aroundHotels.size() < hotelAroundCounter ? aroundHotels.size() : hotelAroundCounter;
+		} else {
+			return 0;
+		}
 	}
 
 	/**
