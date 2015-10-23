@@ -1482,18 +1482,19 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	@SuppressWarnings("unchecked")
 	private Integer searchAround(Map<String, Object> response, HotelQuerylistReqEntity params,
 			Integer hotelAroundCounter) throws Exception {
+		params.setCallentry(1);
 		Map<String, Object> hotelsAround = searchService.readonlySearchHotels(params);
 
 		if (hotelsAround != null & hotelsAround.get("hotel") != null) {
 			List<Map<String, Object>> aroundHotels = (List<Map<String, Object>>) hotelsAround.get("hotel");
-			List<Map<String,Object>> supplementhotel = new ArrayList<Map<String, Object>>();
-			
+			List<Map<String, Object>> supplementhotel = new ArrayList<Map<String, Object>>();
+
 			for (int i = 0; i < (aroundHotels.size() < hotelAroundCounter ? aroundHotels.size()
 					: hotelAroundCounter); i++) {
 				supplementhotel.add(aroundHotels.get(i));
 			}
 			response.put("supplementhotel", supplementhotel);
-			
+
 			return aroundHotels.size() < hotelAroundCounter ? aroundHotels.size() : hotelAroundCounter;
 		} else {
 			return 0;
@@ -1986,8 +1987,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					if (promoInfoList.get(i) != null && promoInfoList.get(i).containsKey("promotype")) {
 						promotype = promoInfoList.get(i).get("promotype") == null ? 0
 								: (Integer) promoInfoList.get(i).get("promotype");
-						promoprice = promoInfoList.get(i).get("promopice") == null ? ""
-								: (String) promoInfoList.get(i).get("promopice");
+						promoprice = promoInfoList.get(i).get("promoprice") == null ? ""
+								: (String) promoInfoList.get(i).get("promoprice");
 
 						if (StringUtils.isNotEmpty(promoprice)) {
 							if (minPromoprice == null) {
@@ -2000,7 +2001,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						promoMap.put(promotype == null ? 0 : promotype, promoprice);
 					}
 				} catch (Exception ex) {
-					logger.warn("invalid dateformat for promotype and promopice", ex);
+					logger.warn("invalid dateformat for promotype and promoprice", ex);
 					continue;
 				}
 			}
