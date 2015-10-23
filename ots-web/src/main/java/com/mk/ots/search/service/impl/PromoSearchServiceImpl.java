@@ -1459,7 +1459,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				queryEntity.setEnddateday(reqentity.getEnddateday());
 				queryEntity.setCallversion(reqentity.getCallversion());
 				queryEntity.setCityid(reqentity.getCityid());
-				Integer supplementcount = searchAround(hotels, queryEntity, this.minItemCount - hotels.size());
+				Integer supplementcount = searchAround(rtnMap, queryEntity, this.minItemCount - hotels.size());
 				rtnMap.put("supplementcount", supplementcount);
 			}
 
@@ -1485,18 +1485,20 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	private Integer searchAround(List<Map<String, Object>> hotels, HotelQuerylistReqEntity params,
+	private Integer searchAround(Map<String, Object> response, HotelQuerylistReqEntity params,
 			Integer hotelAroundCounter) throws Exception {
 		Map<String, Object> hotelsAround = searchService.readonlySearchHotels(params);
 
 		if (hotelsAround != null & hotelsAround.get("hotel") != null) {
 			List<Map<String, Object>> aroundHotels = (List<Map<String, Object>>) hotelsAround.get("hotel");
-
+			List<Map<String,Object>> supplementhotel = new ArrayList<Map<String, Object>>();
+			
 			for (int i = 0; i < (aroundHotels.size() < hotelAroundCounter ? aroundHotels.size()
 					: hotelAroundCounter); i++) {
-				hotels.add(aroundHotels.get(i));
+				supplementhotel.add(aroundHotels.get(i));
 			}
-
+			response.put("supplementhotel", supplementhotel);
+			
 			return aroundHotels.size() < hotelAroundCounter ? aroundHotels.size() : hotelAroundCounter;
 		} else {
 			return 0;
