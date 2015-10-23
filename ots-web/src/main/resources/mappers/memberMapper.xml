@@ -60,6 +60,7 @@
 	    <result column="comefromtype" jdbcType="VARCHAR" property="comefromtype" />
    		<result column="hotelid" jdbcType="BIGINT" property="hotelid" />
    		<result column="unionid" property="unionid" jdbcType="VARCHAR" />
+        <result column="citycode" property="citycode" jdbcType="VARCHAR" />
 	  </resultMap>
 	  
 	  <sql id="Base_Column_List">
@@ -68,7 +69,7 @@
     interests, cardtype, Idcard, Idcardapplytime, source, regcode, cardorg, score1, score2, 
     score3, level, address, signature, longitude, latitude, lastpostime, footprint, version, 
     enable, createtime, givescore3, openid, channelid, devicetype, marketsource, appversion, 
-    ostype, osver, weixinname, comefrom, comefromtype, hotelid, unionid, regostype
+    ostype, osver, weixinname, comefrom, comefromtype, hotelid, unionid, regostype,citycode
   	 </sql>
 
 	<select id="findMemberByLoginName" resultType="com.mk.ots.member.model.UMember" parameterType="java.util.Map">
@@ -317,6 +318,9 @@
        <if test="regostype != null">
         regostype,
       </if>
+      <if test="citycode != null">
+        citycode,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="loginname != null">
@@ -483,6 +487,9 @@
       </if>
         <if test="regostype != null">
         #{regostype,jdbcType=VARCHAR},
+      </if>
+      <if test="citycode != null">
+        #{citycode,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -656,6 +663,9 @@
       </if>
        <if test="regostype != null">
         regostype = #{regostype,jdbcType=VARCHAR},
+      </if>
+      <if test="citycode != null">
+        citycode = #{citycode,jdbcType=VARCHAR},
       </if>
     </set>
     where mid = #{mid,jdbcType=BIGINT}
