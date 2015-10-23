@@ -301,7 +301,7 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 			if ("T".equals(infoValid)) {
 				//再取可用 TRoomSaleConfig
 				Map<String, Object> map = new HashMap<String, Object>();
-				map.put("saleRoomTypeId",infoId);
+				map.put("saleConfigInfoId",infoId);
 				List<TRoomSaleConfig> configList = roomSaleConfigMapper.queryRoomSaleConfigByParams(map);
 				for (TRoomSaleConfig config : configList) {
 					String configValid = config.getValid();
