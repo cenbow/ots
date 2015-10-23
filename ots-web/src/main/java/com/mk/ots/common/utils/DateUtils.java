@@ -1571,6 +1571,7 @@ public class DateUtils extends Object {
             return timeDiff(endTime, cal, sysTime);
         }else if (DateUtils.addDays(endDate,1).after(sysTime)&&startDate.before(sysTime)){
             cal.setTime(sysTime);
+            cal.add(cal.DATE, 1);
             return timeDiff(endTime, cal, sysTime);
         }
         return 0;
