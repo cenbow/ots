@@ -1605,7 +1605,6 @@ public class DateUtils extends Object {
         Date startPromoTime = startEndTime[0];
         Date endPromoTime = startEndTime[1];
 
-        cal.setTime(startDate);
         getCalTime(startTime, cal);
 
         LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
@@ -1638,17 +1637,25 @@ public class DateUtils extends Object {
 
     }
 
-    public static long promoStartDueTime(Time startTime) {
+    public static long promoStartDueTime(Time startTime, Integer promoStatus) {
         Calendar cal = Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
         getCalTime(startTime, cal);
 
         LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
         LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
-        return Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
+        long diff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
+
+        if (diff < 0 && promoStatus == Constant.PROMO_NOT_START){
+            cal.add(cal.DATE, 1);
+            startExTime = LocalDateTime.fromDateFields(cal.getTime());
+            diff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
+        }
+
+        return diff;
     }
 
-    public static long promoEndDueTime(Date endDate,Time startTime, Time endTime) {
+    public static long promoEndDueTime(Date endDate,Time startTime, Time endTime, Integer promoStatus) {
 
         Calendar cal = Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
@@ -1668,7 +1675,16 @@ public class DateUtils extends Object {
         getCalTime(endTime, cal);
 
         LocalDateTime endExTime = LocalDateTime.fromDateFields(cal.getTime());
-        return Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
+        long diff =  Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
+
+
+        if (diff < 0 && promoStatus == Constant.PROMO_NOT_START){
+            cal.add(cal.DATE, 1);
+            endExTime = LocalDateTime.fromDateFields(cal.getTime());
+            diff = Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
+        }
+
+        return diff;
     }
 
     private static Date[] getStartEndDate (Date runTime, Date startTime, Date endTime) {
