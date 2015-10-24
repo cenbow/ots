@@ -75,6 +75,29 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 	}
 
 	@Override
+	public List<RoomPromoDto> queryRoomPromoByHotelNew(TRoomSaleConfig bean) {
+		List<TRoomSaleConfig> roomSaleConfig = roomSaleConfigMapper.getRoomSaleByParamsNew(bean);
+		List<RoomPromoDto> roomPromoDtoList = new ArrayList<RoomPromoDto>();
+		for (TRoomSaleConfig rooms : roomSaleConfig) {
+			RoomPromoDto roomPromo = new RoomPromoDto();
+			roomPromo.setRoomId(rooms.getRoomId());
+			roomPromo.setRoomTypeId(rooms.getSaleRoomTypeId());
+			roomPromo.setSaleName(rooms.getSaleName());
+			roomPromo.setStartTime(rooms.getStartTime());
+			roomPromo.setEndTime(rooms.getEndTime());
+			roomPromo.setNameFontColor(rooms.getFontColor());
+			roomPromo.setTypeDesc(rooms.getDescription());
+			roomPromo.setStartDate(rooms.getStartDate());
+			roomPromo.setEndDate(rooms.getEndDate());
+			roomPromo.setPromoType(rooms.getPromoType());
+			roomPromo.setPromoValue(rooms.getSaleTypeValue());
+			roomPromo.setPromoLabel(rooms.getSaleLabel());
+			roomPromoDtoList.add(roomPromo);
+		}
+		return roomPromoDtoList;
+	}
+	
+	@Override
 	public List<RoomPromoDto> queryRoomPromoByHotel(TRoomSaleConfig bean) {
 		List<TRoomSaleConfig> roomSaleConfig = roomSaleConfigMapper.getRoomSaleByParams(bean);
 		List<RoomPromoDto> roomPromoDtoList = new ArrayList<RoomPromoDto>();
@@ -155,6 +178,15 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		}
 	}
 
+	public Boolean checkRoomSaleWithOldRoomType(TRoomSaleConfig bean) {
+		TRoomSaleConfig roomSaleConfig = roomSaleConfigMapper.checkRoomSaleWithOldRoomType(bean);
+		if (roomSaleConfig == null || roomSaleConfig.getId() == null) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
 	public List<RoomSaleToIndexDto> getUpdateIndexList(TRoomSaleConfig bean) {
 		List<TRoomSaleConfig> roomSaleConfig = roomSaleConfigMapper.getRoomSaleByParams(bean);
 		List<RoomSaleToIndexDto> roomSaleToIndexList = new ArrayList<RoomSaleToIndexDto>();
