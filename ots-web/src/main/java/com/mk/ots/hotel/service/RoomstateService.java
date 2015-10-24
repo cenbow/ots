@@ -1053,10 +1053,10 @@ public class RoomstateService {
 										roomtype.setPromostarttime(promoStartTime);
 									}
 
-									Long promodustartsec = DateUtils.promoStartDueTime(roomPromoDto.getStartTime(),
-											promostaus);
 									Long promoduendsec = DateUtils.promoEndDueTime(roomPromoDto.getEndDate(),
 											roomPromoDto.getStartTime(), roomPromoDto.getEndTime(), promostaus);
+									Long promodustartsec = DateUtils.promoStartDueTime(promoduendsec,
+											roomPromoDto.getStartTime(), promostaus);
 
 									if (promostaus == Constant.PROMOING) {
 										roomtype.setPromodustartsec("0");
