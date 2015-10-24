@@ -491,16 +491,6 @@ public class HotelService {
 					output.setSuccess(true);
 					output.setMsgAttr("count", coll.size());
 
-					/**
-					 * only process when hotel-id passed in
-					 */
-					if (StringUtils.isNotBlank(thotelid)) {
-						updateEsMikePrice(Long.valueOf(thotelid));
-					}
-
-					if (logger.isInfoEnabled()) {
-						logger.info("mikePrice has been updated for hotelId {}", thotelid);
-					}
 				} else {
 					output.setSuccess(true);
 				}
@@ -2897,6 +2887,7 @@ public class HotelService {
 		String hid = hotelid.toString();
 		try {
 			SearchHit[] searchHits = esProxy.searchHotelByHotelId(hid);
+			logger.info("眯客价查询到酒店个数: {}", searchHits.length);
 			for (int i = 0; i < searchHits.length; i++) {
 				SearchHit searchHit = searchHits[i];
 				String _id = searchHit.getId();
