@@ -1014,6 +1014,7 @@ public class RoomstateService {
 							TRoomSaleConfig hotelRoomSaleConfig = new TRoomSaleConfig();
 							Integer thotelId = hotelid != null ? hotelid.intValue() : null;
 							hotelRoomSaleConfig.setHotelId(thotelId);
+							hotelRoomSaleConfig.setRoomTypeId(roomTypeId);
 							List<RoomPromoDto> list = roomSaleService.queryRoomPromoByHotelNew(hotelRoomSaleConfig);
 							String isonpromo = "0";
 
