@@ -1497,6 +1497,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private Integer searchAround(Map<String, Object> response, HotelQuerylistReqEntity params,
 			Integer hotelAroundCounter) throws Exception {
 		params.setCallentry(1);
+		params.setIspromoonly(null);
+		params.setHotelid("");
+		params.setPromotype("");
+		
 		Map<String, Object> hotelsAround = searchService.readonlySearchHotels(params);
 
 		if (hotelsAround != null & hotelsAround.get("hotel") != null) {
