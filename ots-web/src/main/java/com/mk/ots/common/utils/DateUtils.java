@@ -984,6 +984,23 @@ public class DateUtils extends Object {
     }
 
     /**
+     * 当得到两个日期相差天数.<br>
+     * <br>
+     * @param first 第一个日期.
+     * @param second 第二个日期.
+     * @return 相差的天数
+     */
+    public static int selectDateDiff(Date first, Date second) {
+        int dif = 0;
+        try {
+            dif = (int) ((first.getTime() - second.getTime()) / 86400000);
+        } catch (Exception e) {
+            dif = 0;
+        }
+        return dif;
+    }
+
+    /**
      * 两个时间相差小时数
      * @param beginTime 开始时间
      * @param endTime 结束时间
