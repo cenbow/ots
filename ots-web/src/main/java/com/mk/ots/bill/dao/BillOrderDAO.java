@@ -44,8 +44,98 @@ public class BillOrderDAO {
 	NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	
 	private static final long TIME_FOR_FIFTEEN = 15 * 60 * 1000L;
-	
-	/**
+
+
+    /**
+     * 生成所有酒店的周账单数据
+     * @param nowTime
+     */
+    public List<Map<String, Object>> getWeekClearing(Date nowTime){
+
+        String sql="SELECT "
+                + " bce.hotelid, "
+                + " h.hotelname, "
+                + " sum(bce.cutofforders) * 5 AS cutoffcost, "
+                + " sum(toPayDiscount) AS toPayDiscount, "
+                + " sum(prepaymentDiscount) AS prepaymentDiscount, "
+                + " - ( IFNULL(sum(bce.cutofforders) * 5,0) + IFNULL(sum(toPayDiscount),0) + IFNULL(sum(prepaymentDiscount),0) ) AS billcost, "
+                + " DATE_ADD(DATE(:nowTime), INTERVAL - 7 DAY) as starttime, "
+                + " DATE_ADD(DATE(:nowTime), INTERVAL - 1 second) as endtime "
+                + " FROM "
+                + " b_bill_confirm_everyday bce "
+                + " LEFT JOIN t_hotel h ON h.id = bce.hotelid "
+                + " WHERE "
+                + " begintime >= DATE_ADD(DATE(:nowTime), INTERVAL - 7 DAY) "
+                + " AND begintime < DATE(:nowTime) "
+                + " AND hotelid not in( "
+                + " select distinct hotelid from weekclearing where starttime=DATE_ADD(DATE(:nowTime), INTERVAL - 7 DAY)) "
+                + " GROUP BY hotelid";
+        Map<String,Date>paramMap =new HashMap<String, Date>();
+        paramMap.put("nowTime", nowTime);
+        List<Map<String, Object>> list=namedParameterJdbcTemplate.queryForList(sql, paramMap);
+        return list;
+    }
+    /**
+     * 根据酒店id生成周账单数据
+     * @param nowTime
+     * @param HotelId
+     * @return
+     */
+    public List<Map<String, Object>> getWeekClearingByHotelId(Date nowTime,long hotelId){
+
+        String sql="SELECT "
+                + " bce.hotelid, "
+                + " h.hotelname, "
+                + " sum(bce.cutofforders) * 5 AS cutoffcost, "
+                + " sum(toPayDiscount) AS toPayDiscount, "
+                + " sum(prepaymentDiscount) AS prepaymentDiscount, "
+                + " - ( IFNULL(sum(bce.cutofforders) * 5,0) + IFNULL(sum(toPayDiscount),0) + IFNULL(sum(prepaymentDiscount),0) ) AS billcost, "
+                + " DATE_ADD(DATE(:nowTime), INTERVAL - 7 DAY) as starttime, "
+                + " DATE_ADD(DATE(:nowTime), INTERVAL - 1 second) as endtime "
+                + " FROM "
+                + " b_bill_confirm_everyday bce "
+                + " LEFT JOIN t_hotel h ON h.id = bce.hotelid "
+                + " WHERE "
+                + " begintime >= DATE_ADD(DATE(:nowTime), INTERVAL - 7 DAY) "
+                + " AND begintime < DATE(:nowTime) "
+                + " AND hotelid =:hotelId";
+        Map<String,Object>paramMap =new HashMap<String, Object>();
+        paramMap.put("nowTime", nowTime);
+        paramMap.put("hotelId", hotelId);
+        List<Map<String, Object>> list=namedParameterJdbcTemplate.queryForList(sql, paramMap);
+        return list;
+    }
+
+    /**
+     * 插入周账单
+     * @param batchValues
+     */
+    public void insertWeekClearing(Map<String, ?>[] batchValues){
+        String insertSql="INSERT INTO weekclearing ( "
+                + " billcost, "
+                + " hotelid, "
+                + " hotelname, "
+                + " checkstatus, "
+                + " starttime, "
+                + " endtime, "
+                + " cutoffcost, "
+                + " topaydiscount, "
+                + " prepaymentdiscount ) "
+                + " VALUES( "
+                + " :billcost, "
+                + " :hotelid, "
+                + " :hotelname, "
+                + " 0, "
+                + " :starttime, "
+                + " :endtime, "
+                + " :cutoffcost, "
+                + " :toPayDiscount, "
+                + " :prepaymentDiscount);";
+        this.logger.info("周结算插入{}tiao",batchValues.length);
+        namedParameterJdbcTemplate.batchUpdate(insertSql, batchValues);
+    }
+
+    /**
 	 * 生成每日账单管理的订单数据
 	 * 每天查询本月内的没有插入到billorder里的数据
 	 * @param beginTime
