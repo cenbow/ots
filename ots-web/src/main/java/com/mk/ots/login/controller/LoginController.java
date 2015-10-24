@@ -52,7 +52,7 @@ public class LoginController {
 			throw new IllegalArgumentException("手机号为空.");
 		}
 		String verifyCode = verifyCodeService.generatePhoneVerifyCode(phonenum, VerifyEnum.LOGIN);
-		String msgcontent = verifyCodeService.generateMsgContent(verifyCode, VerifyEnum.LOGIN);
+		String msgcontent = verifyCodeService.generateMsgContent(verifyCode, VerifyEnum.LOGIN, null);
 		return new ResponseEntity<String>("验证码已发送. testmsg:"+msgcontent, HttpStatus.OK);
 	}
 	

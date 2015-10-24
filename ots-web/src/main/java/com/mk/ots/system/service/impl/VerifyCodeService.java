@@ -70,11 +70,16 @@ public class VerifyCodeService {
 		return betweenMin;
 	}
 	
-	public String generateMsgContent(String verifyCode, VerifyEnum codeEnum) {
+	public String generateMsgContent(String verifyCode, VerifyEnum codeEnum, String citycode) {
 		if(VerifyEnum.REG.equals(codeEnum)){
 			return "您的眯客登录验证码为"+verifyCode+"，请于10分钟内填写。";
 		}
-		return "您的眯客验证码为"+verifyCode+"，请于10分钟内填写。";
+		//重庆 500000特殊关怀
+		if ("500000".equals(citycode)) {
+			return "您的眯客验证码为"+verifyCode+"，请于10分钟内填写。";
+		} else {
+			return "您的眯客验证码为"+verifyCode+"，请于10分钟内填写。";
+		}
 	}
 
 	static class CacheVerifyCodeUtils {
