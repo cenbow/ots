@@ -459,12 +459,11 @@ public class HotelService {
 					}
 					// mike3.1 添加特价房
 
-					TRoomSale roomSale = new TRoomSale();
+					TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
 					Integer hotelId = Integer.valueOf(bean.getId().toString());
-					roomSale.setHotelId(hotelId);
-					TRoomSale result = roomSaleService.getOneRoomSale(roomSale);
-
-					if (result != null) {
+					tRoomSaleConfig.setHotelId(hotelId);
+					Boolean isPromo = roomSaleService.checkRoomSale(tRoomSaleConfig);
+					if (isPromo != null && isPromo) {
 						hotel.setIsonpromo("1");
 					} else {
 						hotel.setIsonpromo("0");

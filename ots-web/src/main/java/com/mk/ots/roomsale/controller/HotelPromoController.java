@@ -74,7 +74,7 @@ public class HotelPromoController {
 							saleConfigInfo.getStartTime());
 
 					long endSec = DateUtils.calEndDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
-							saleConfigInfo.getEndTime());
+							saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
 					if (sec < 0) {
 						continue;
 					}

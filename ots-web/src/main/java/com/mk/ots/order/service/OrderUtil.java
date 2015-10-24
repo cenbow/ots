@@ -217,8 +217,8 @@ public class OrderUtil {
 		jsonObj.put("checkcnt", checkcnt);
 		jsonObj.put("tickets", getJsonByTicketInfo(tickes));
 
-		jsonObj.put("totalprice", returnOrder.getTotalPrice().setScale(0, BigDecimal.ROUND_UP));// 向上取整数
-		jsonObj.put("price", returnOrder.getPrice().setScale(0, BigDecimal.ROUND_UP));// 向上取整数
+		jsonObj.put("totalprice", returnOrder.getTotalPrice().setScale(0, BigDecimal.ROUND_DOWN));// 向上取整数
+		jsonObj.put("price", returnOrder.getPrice().setScale(0, BigDecimal.ROUND_DOWN));// 向上取整数
 		jsonObj.put("breakfastnum", returnOrder.getBreakfastNum());
 		jsonObj.put("contacts", returnOrder.get("Contacts", ""));
 		jsonObj.put("contactsphone", returnOrder.get("ContactsPhone", ""));

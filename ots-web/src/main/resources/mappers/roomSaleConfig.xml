@@ -90,6 +90,9 @@
             <if test="saleRoomTypeIdIsNull != null">
                 AND saleRoomTypeId is null
             </if>
+            <if test="saleConfigInfoId != null">
+                AND saleConfigInfoId = #{saleConfigInfoId}
+            </if>
         </where>
     </sql>
 

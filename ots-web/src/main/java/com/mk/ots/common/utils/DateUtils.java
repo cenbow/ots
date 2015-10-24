@@ -1560,7 +1560,7 @@ public class DateUtils extends Object {
         return 0;
     }
 
-    public static long calEndDiffTime(Date startDate,Date endDate, Time endTime) {
+    public static long calEndDiffTime(Date startDate,Date endDate, Time startTime,Time endTime) {
         Calendar cal=Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
 
@@ -1571,7 +1571,11 @@ public class DateUtils extends Object {
             return timeDiff(endTime, cal, sysTime);
         }else if (DateUtils.addDays(endDate,1).after(sysTime)&&startDate.before(sysTime)){
             cal.setTime(sysTime);
-            cal.add(cal.DATE, 1);
+
+            if(startTime.after(endTime)){
+                cal.add(cal.DATE, 1);
+            }
+
             return timeDiff(endTime, cal, sysTime);
         }
         return 0;
