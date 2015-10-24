@@ -42,7 +42,8 @@
 				<ref bean="autoSendLeZhuTrigger"/>
 				<!-- 用户关怀推送 -->
 				<ref bean="orderPushMessTrigger"/>
-				<ref bean="SendCouponsTrigger"/>
+                <!--  暂时停掉  -->
+				<!-- <ref bean="SendCouponsTrigger"/>      -->
                 <!--<ref bean="SendLiveThreeCouponsTrigger" />-->
 				<!-- B规则：查询创建时间大于15分钟的订单 -->
 				<ref bean="orderCreatetimegt15Trigger"/>
@@ -51,8 +52,9 @@
                 <ref bean="refreshEsMikePriceTrigger"/>
                 <ref bean="confirmedPayingOrderTrigger"/>
                 <ref bean="payStatusErrorOrderTrigger"/>
-                
-                <ref bean="SendTicketJobTrigger"/>
+
+                <!--  暂时停掉  -->
+                <!--<ref bean="SendTicketJobTrigger"/>-->
 			</list>
 		</property>
 	</bean>
