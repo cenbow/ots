@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2011 Ruaho All rights reserved.
  */
@@ -1662,7 +1663,14 @@ public class DateUtils extends Object {
 
     }
 
-    public static long promoStartDueTime(Time startTime, Integer promoStatus) {
+    public static long promoStartDueTime(Long promoduendsec, Time startTime, Integer promoStatus) {
+        /**
+         * in the middle of game
+         */
+        if (promoduendsec != null && promoduendsec > 0 && promoStatus == Constant.PROMOING) {
+            return 0L;
+        }
+
         Calendar cal = Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
         getCalTime(startTime, cal);
@@ -1671,8 +1679,8 @@ public class DateUtils extends Object {
         LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
         long diff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
 
-        if (diff < 0 && promoStatus == Constant.PROMO_NOT_START){
-            cal.add(cal.DATE, 1);
+        if (diff < 0 && promoStatus == Constant.PROMO_NOT_START) {
+            cal.add(Calendar.DATE, 1);
             startExTime = LocalDateTime.fromDateFields(cal.getTime());
             diff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
         }
@@ -1790,6 +1798,65 @@ public class DateUtils extends Object {
             return true;
         } else {
             return false;
+        }
+
+    }
+
+    public static Integer calPromoStatus(Date startDate, Date endDate, Time startTime, Time endTime) {
+        Calendar cal = Calendar.getInstance();
+        java.util.Date sysTime = cal.getTime();
+
+        LocalDateTime localStartDate = null;
+        if (startDate != null) {
+            Calendar startCal = Calendar.getInstance();
+
+            startCal.set(startDate.getYear(), startDate.getMonth(), startDate.getDay(), 0, 0, 0);
+            localStartDate = LocalDateTime.fromCalendarFields(startCal);
+        }
+
+        LocalDateTime localSysDate = LocalDateTime.now();
+
+        Date[] startEndTime = getStartEndDate(sysTime, startTime, endTime);
+        Date startPromoTime = startEndTime[0];
+        Date endPromoTime = startEndTime[1];
+
+
+
+        LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
+        LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
+        long startdiff = 0;
+        /**
+         * checks if over day
+         */
+        if (localStartDate != null && localSysDate.getDayOfMonth() != localStartDate.getDayOfMonth()) {
+            return Constant.PROMOING;
+        } else if (localStartDate != null && localSysDate.getDayOfMonth() == localStartDate.getDayOfMonth()) {
+            getCalTime(startTime, cal);
+
+            startdiff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
+        }
+
+        cal.clear();
+        cal.setTime(endDate);
+        getCalTime(endTime, cal);
+
+        LocalDateTime endExTime = LocalDateTime.fromDateFields(cal.getTime());
+        long enddiff = Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
+
+        if (startdiff > 0) {
+            return Constant.PROMO_NOT_START;
+        } else if (enddiff > 0) {
+            if (sysTime.before(startDate) || sysTime.after(endDate)) {
+                return Constant.PROMO_NOT_START;
+            } else {
+                if (sysTime.before(startPromoTime) || sysTime.after(endPromoTime)) {
+                    return Constant.PROMO_NOT_START;
+                } else {
+                    return Constant.PROMOING;
+                }
+            }
+        } else {
+            return Constant.PROMO_FININSHED;
         }
 
     }

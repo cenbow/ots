@@ -629,10 +629,12 @@ public class OrderController {
 		UToken uToken = MyTokenUtils.getToken(token);
 		if (uToken!=null && uToken.getOstype() != null) {
 			order.set("ostype", MyTokenUtils.getToken(token).getOstype());
-			order.setMid(uToken.getMid());
+
 		} else {
 			order.set("ostype", OSTypeEnum.OTHER.getId());
 		}
+
+		order.setMid(uToken.getMid());
 
 		List<OtaRoomOrder> roomOrderList = new ArrayList<>();
 		{// Begin 客单信息

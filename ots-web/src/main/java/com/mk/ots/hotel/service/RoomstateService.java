@@ -1,6 +1,22 @@
 
 package com.mk.ots.hotel.service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.google.common.collect.Lists;
@@ -608,14 +624,10 @@ public class RoomstateService {
 	/**
 	 * OTS（C端）解锁处理：仅对指定酒店、房间、起始、截止日期进行解锁处理. 注：OTS解锁处理，直接对redis缓存进行操作，删除对应的缓存key.
 	 * 
-	 * @param
-	 *            参数：酒店id
-	 * @param
-	 *            参数：酒店房间id
-	 * @param
-	 *            参数：酒店预定开始日期（格式为yyyy-MM-dd）
-	 * @param
-	 *            参数：酒店预定结束日期（格式为yyyy-MM-dd）
+	 * @param 参数：酒店id
+	 * @param 参数：酒店房间id
+	 * @param 参数：酒店预定开始日期（格式为yyyy-MM-dd）
+	 * @param 参数：酒店预定结束日期（格式为yyyy-MM-dd）
 	 * @return Map
 	 */
 	public Map<String, Object> unlockRoomInOTS(OtaOrder otaorder) {
@@ -884,9 +896,9 @@ public class RoomstateService {
 	public List<RoomstateQuerylistRespEntity> findHotelRoomState(String roomno, RoomstateQuerylistReqEntity params)
 			throws Exception {
 		List<RoomstateQuerylistRespEntity> respEntityList = Lists.newArrayList();
-		String callMethod = StringUtils.isNotBlank(params.getCallmethod()) ? params.getCallmethod().trim(): "" ;
+		String callMethod = StringUtils.isNotBlank(params.getCallmethod()) ? params.getCallmethod().trim() : "";
 		Integer callEntry = params.getCallentry();
-		String callVersionStr = StringUtils.isNotBlank(params.getCallversion()) ? params.getCallversion().trim(): "" ;
+		String callVersionStr = StringUtils.isNotBlank(params.getCallversion()) ? params.getCallversion().trim() : "";
 
 		try {
 			Long hotelid = params.getHotelid();
@@ -932,7 +944,8 @@ public class RoomstateService {
 					t.complete();
 				}
 			}
-			this.logger.info("hotelid: " + hotelid + ",begindate: " + begindate + ",enddate: " + enddate);
+			logger.info(String.format("hotelid:%s; begindate:%s; enddate:%s; roomtypeid:%s", hotelid, begindate,
+					enddate, roomtypeid));
 			this.logger.info(JsonKit.toJson(lockRoomsCache));
 			Transaction other = Cat.newTransaction("RoomState", "roomtype-sql");
 			// 酒店房态信息map
@@ -966,6 +979,11 @@ public class RoomstateService {
 				// 返回酒店下的所有房型返现
 				Map<Long, Object> cashBackMap = cashBackService.getCashBackByHotelId(hotelid, begindate, enddate);
 
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("cashBackMap:%s; troomTypes:%s",
+							cashBackMap == null ? 0 : cashBackMap.size(), troomTypes == null ? 0 : troomTypes.size()));
+				}
+
 				for (TRoomTypeModel troomType : troomTypes) {
 					// 如果按照床型查询
 					if (bednum != null) {
@@ -980,64 +998,70 @@ public class RoomstateService {
 
 					// mike3.1 特价房型
 
-
-
 					TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
 					Integer roomTypeId = Integer.valueOf(troomType.getId().toString());
 					tRoomSaleConfig.setRoomTypeId(roomTypeId);
 
-					Boolean isPromo = roomSaleService.checkRoomSale(tRoomSaleConfig);
-					if (StringUtils.isNotBlank(callVersionStr)) {
+					Boolean isPromo = roomSaleService.checkRoomSaleWithOldRoomType(tRoomSaleConfig);
+					if (logger.isInfoEnabled()) {
+						logger.info(String.format("isPromo:%s; roomTypeId:%s; callVersionStr:%s", isPromo, roomTypeId,
+								callVersionStr));
+					}
 
+					if (StringUtils.isNotBlank(callVersionStr)) {
 						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
 								&& !"3".equals(callMethod)) {
-
-							List<RoomPromoDto> list =  roomSaleService.queryRoomPromoByHotel(tRoomSaleConfig);
+							List<RoomPromoDto> list = roomSaleService.queryRoomPromoByHotelNew(tRoomSaleConfig);
 							String isonpromo = "0";
 
+							if (logger.isInfoEnabled()) {
+								logger.info(String.format("isPromo:%s; callVersionStr:%s; rooms:%s", isPromo,
+										callVersionStr, list == null ? 0 : list.size()));
+							}
+
 							if (isPromo != null && isPromo) { // isBack
-
 								isonpromo = "1";
-
-								//long sec=DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),saleConfigInfo.getStartTime());
-								if (list != null && list.size() > 0){
+								if (list != null && list.size() > 0) {
 									RoomPromoDto roomPromoDto = list.get(0);
 
-									Integer promostaus = DateUtils.promoStatus(roomPromoDto.getStartDate(),roomPromoDto.getEndDate(),roomPromoDto.getStartTime(),roomPromoDto.getEndTime());
+									Integer promostaus = DateUtils.calPromoStatus(roomPromoDto.getStartDate(),
+											roomPromoDto.getEndDate(), roomPromoDto.getStartTime(),
+											roomPromoDto.getEndTime());
 									roomtype.setPromostatus(promostaus);
 									roomtype.setPromotype(roomPromoDto.getPromoType());
 									roomtype.setPromotext(roomPromoDto.getTypeDesc());
 
+									if (logger.isInfoEnabled()) {
+										logger.info(String.format("promostatus:%s; promotext:%s; promotype:%s",
+												promostaus, roomPromoDto.getTypeDesc(), roomPromoDto.getPromoType()));
+									}
+
 									String promoStartTime = roomPromoDto.getStartTime().toString();
-									if (StringUtils.isNotBlank(promoStartTime)){
-										String [] tmp = promoStartTime.split(":");
+									if (StringUtils.isNotBlank(promoStartTime)) {
+										String[] tmp = promoStartTime.split(":");
 										promoStartTime = tmp[0] + ":" + tmp[1];
 										roomtype.setPromostarttime(promoStartTime);
 									}
 
-									Long promodustartsec = DateUtils.promoStartDueTime(roomPromoDto.getStartTime(), promostaus);
 									Long promoduendsec = DateUtils.promoEndDueTime(roomPromoDto.getEndDate(),
-											roomPromoDto.getStartTime(),
-											roomPromoDto.getEndTime(),
-											promostaus);
+											roomPromoDto.getStartTime(), roomPromoDto.getEndTime(), promostaus);
+									Long promodustartsec = DateUtils.promoStartDueTime(promoduendsec,
+											roomPromoDto.getStartTime(), promostaus);
 
-									if(promostaus == Constant.PROMOING){
+									if (promostaus == Constant.PROMOING) {
 										roomtype.setPromodustartsec("0");
 										roomtype.setPromoduendsec(promoduendsec.toString());
 
-									}else{
+									} else {
 										roomtype.setPromodustartsec(promodustartsec.toString());
 										roomtype.setPromoduendsec(promoduendsec.toString());
 									}
 
 								}
 
-
 							}
 
 							roomtype.setIsonpromo(isonpromo);
-
-
 						}
 					}
 
@@ -1198,10 +1222,10 @@ public class RoomstateService {
 							}
 							rooms.add(room);
 
-							if("T".equals(params.getIsShowAllRoom())){
+							if ("T".equals(params.getIsShowAllRoom())) {
 								vcRooms5.add(room);
-							}else{
-								//眯客3.0 只显示<=5个可预定房间
+							} else {
+								// 眯客3.0 只显示<=5个可预定房间
 								if (vcRoomCount < 5) {
 									vcRooms5.add(room);
 									vcRoomCount++;
@@ -1228,8 +1252,6 @@ public class RoomstateService {
 						}
 					}
 
-
-
 					// 将tempList添加至roomList之后,实现锁房集合 已预订与可预订分类排序
 					// rooms.addAll(tempRooms);//不可预定房间
 
@@ -1243,7 +1265,7 @@ public class RoomstateService {
 					roomtype.setRooms(vcRooms5);
 					// roomtype.setRooms(rooms);//所有可预定房间
 
-					//兼容老版本
+					// 兼容老版本
 					if (isPromo != null && isPromo) {
 						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
 								&& !"3".equals(callMethod)) {
@@ -1255,6 +1277,7 @@ public class RoomstateService {
 					}
 				}
 			} catch (Exception e) {
+				logger.error("failed to find rooms...", e);
 				t.setStatus(e);
 				throw e;
 			} finally {
@@ -1268,9 +1291,9 @@ public class RoomstateService {
 			// 把满房状态的房间类型放入临时List中
 			List<RoomstateQuerylistRespEntity.Roomtype> tempRoomTypes = Lists.newArrayList();
 
-			//特价房型
+			// 特价房型
 			List<RoomstateQuerylistRespEntity.Roomtype> promoRoomTypes = Lists.newArrayList();
-			//普通房型
+			// 普通房型
 			List<RoomstateQuerylistRespEntity.Roomtype> normalRoomTypes = Lists.newArrayList();
 
 			for (int i = 0; i < roomtypesArr.length; i++) {
@@ -1278,12 +1301,11 @@ public class RoomstateService {
 					RoomstateQuerylistRespEntity.Roomtype rt = (RoomstateQuerylistRespEntity.Roomtype) roomtypesArr[i];
 					if (rt.getVcroomnum() <= 0)
 						tempRoomTypes.add(rt);
-					else if("1".equals(rt.getIsonpromo())){
+					else if ("1".equals(rt.getIsonpromo())) {
 						promoRoomTypes.add(rt);
-					}else {
+					} else {
 						normalRoomTypes.add(rt);
 					}
-
 
 				}
 			}
@@ -1318,7 +1340,7 @@ public class RoomstateService {
 			respEntity.setRoomtype(roomtypes);
 			respEntityList.add(respEntity);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("", e);
 			throw e;
 		}
 		return respEntityList;
@@ -1404,7 +1426,6 @@ public class RoomstateService {
 				// 如果眯客价相同 则按照门市价排序
 				return roomtype1.getRoomtypepmsprice().compareTo(roomtype2.getRoomtypepmsprice());
 			}
-
 
 		}
 	}
@@ -1571,41 +1592,28 @@ public class RoomstateService {
 				return rtnPrice;
 			}
 
-          /*   //    刷门市价缓存bug修改
-			BigDecimal price = troomtype.getPrice();
-			BigDecimal subprice = troomtype.getSubprice();
-			BigDecimal subper = troomtype.getSubper();
-			if ((price == null) && (subprice == null) && (subper == null)) {
-				// 没有设置对应的基本价格，直接返回门市价
-				rtnPrice = troomtype.getCost();
-				return rtnPrice;
-			}
-
-			// 没有设置基本价格
-			if (price == null) {
-				// 设置了减价
-				if ((subprice != null) && (subprice.compareTo(BigDecimal.ZERO) == 1)) {
-					rtnPrice = BigDecimal.valueOf(cost.doubleValue() - subprice.doubleValue());
-					if (rtnPrice.compareTo(BigDecimal.ZERO) == -1) {
-						rtnPrice = BigDecimal.ZERO;
-						return rtnPrice;
-					}
-				}
-
-				// 设置了减幅
-				if ((subper != null) && (subper.compareTo(BigDecimal.ZERO) == 1)) {
-					double dbl = troomtype.getCost().doubleValue() * (1d - subper.doubleValue());
-					rtnPrice = BigDecimal.valueOf(dbl).setScale(0, BigDecimal.ROUND_HALF_UP);
-					return rtnPrice;
-				}
-			}
-
-			if (price.compareTo(BigDecimal.ZERO) == 1) {
-				// 设置了基本价
-				rtnPrice = troomtype.getPrice();
-				return rtnPrice;
-			}
-				*/
+			/*
+			 * BigDecimal price = troomtype.getPrice(); BigDecimal subprice =
+			 * troomtype.getSubprice(); BigDecimal subper =
+			 * troomtype.getSubper(); if ((price == null) && (subprice == null)
+			 * && (subper == null)) { // 没有设置对应的基本价格，直接返回门市价 rtnPrice =
+			 * troomtype.getCost(); return rtnPrice; }
+			 * 
+			 * // 没有设置基本价格 if (price == null) { // 设置了减价 if ((subprice != null)
+			 * && (subprice.compareTo(BigDecimal.ZERO) == 1)) { rtnPrice =
+			 * BigDecimal.valueOf(cost.doubleValue() - subprice.doubleValue());
+			 * if (rtnPrice.compareTo(BigDecimal.ZERO) == -1) { rtnPrice =
+			 * BigDecimal.ZERO; return rtnPrice; } }
+			 * 
+			 * // 设置了减幅 if ((subper != null) &&
+			 * (subper.compareTo(BigDecimal.ZERO) == 1)) { double dbl =
+			 * troomtype.getCost().doubleValue() * (1d - subper.doubleValue());
+			 * rtnPrice = BigDecimal.valueOf(dbl).setScale(0,
+			 * BigDecimal.ROUND_HALF_UP); return rtnPrice; } }
+			 * 
+			 * if (price.compareTo(BigDecimal.ZERO) == 1) { // 设置了基本价 rtnPrice =
+			 * troomtype.getPrice(); return rtnPrice; }
+			 */
 
 			// 放入redis缓存
 			jedis.hset(key, field, rtnPrice.toString());
