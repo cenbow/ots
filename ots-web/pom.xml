@@ -1450,7 +1450,55 @@
 				<black_Switch>1</black_Switch>
 			</properties>
 		</profile>
-		
+        <profile>
+            <id>bgp-clu</id>
+            <properties>
+                <label>product</label>
+                <jdbc.driver>com.mk.jdbc.MonitorDriver</jdbc.driver>
+                <master.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://10.10.119.90:3306/ots?autoReconnect=true&zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+                <master.jdbc.user>imike-writer</master.jdbc.user>
+                <master.jdbc.password>Imike-writer</master.jdbc.password>
+                <slave.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://10.10.141.244:3306/ots?autoReconnect=true&zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+                <slave.jdbc.user>imike-reader</slave.jdbc.user>
+                <slave.jdbc.password>Imike-reader!@#$</slave.jdbc.password>
+                <spring.redis.sentinel.master>ots-redis</spring.redis.sentinel.master>
+                <spring.redis.sentinel.nodes>10.10.103.141:26379,10.10.104.151:26379</spring.redis.sentinel.nodes>
+                <synserver.ip>10.10.108.139</synserver.ip>
+                <synserver.port>8000</synserver.port>
+                <elasticsearch.clusterhosts>10.10.96.147:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>ots-production-elasticsearch</elasticsearch.clustername>
+                <elasticsearch.index>ots</elasticsearch.index>
+                <elasticsearch.type>hotel</elasticsearch.type>
+                <hessian_soap>http://10.10.108.139:8080/soap/hessian</hessian_soap>
+                <hessian_bms>http://sale.imike.com</hessian_bms>
+                <newpms.url>https://otai.imike.com/otai/ots2pms</newpms.url>
+
+                <jedis.pool.maxidl>20</jedis.pool.maxidl>
+                <jedis.pool.minidl>8</jedis.pool.minidl>
+                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+
+                <addpay>http://hotel.imike.com/ots2pms/addpay</addpay>
+                <cancelpay>http://hotel.imike.com/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>http://hotel.imike.com/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>http://hotel.imike.com/ots2pms/cancelpaybyerror</cancelpaybyerror>
+
+                <inform_sale_url><![CDATA[http://sale.imike.com/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <wx_type>wechat</wx_type>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>2</baidumessage_DeployStatus>
+                <SendCouponsJob_datelimit>-1</SendCouponsJob_datelimit>
+                <liveHotelNum>3</liveHotelNum>
+                <!-- kafka start -->
+                <zk_connect>10.10.105.143:2181,10.10.106.212:2181,10.10.103.91:2181</zk_connect>
+                <!-- kafka end -->
+
+                <!-- BMS黑名单验证接口 -->
+                <blacklist.url>http://10.10.109.192:8080/check</blacklist.url>
+                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
+                <sendmess.testorformal>1</sendmess.testorformal>
+                <black_Switch>0</black_Switch>
+            </properties>
+        </profile>
 		<profile>
 			<id>shanghai-simulation2</id>
 			<properties>
