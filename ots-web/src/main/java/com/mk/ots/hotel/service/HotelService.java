@@ -491,16 +491,7 @@ public class HotelService {
 					output.setSuccess(true);
 					output.setMsgAttr("count", coll.size());
 
-					/**
-					 * only process when hotel-id passed in
-					 */
-					if (StringUtils.isNotBlank(thotelid)) {
-						updateEsMikePrice(Long.valueOf(thotelid));
-					}
 
-					if (logger.isInfoEnabled()) {
-						logger.info("mikePrice has been updated for hotelId {}", thotelid);
-					}
 				} else {
 					output.setSuccess(true);
 				}
