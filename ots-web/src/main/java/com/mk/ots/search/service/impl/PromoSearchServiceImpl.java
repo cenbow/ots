@@ -664,7 +664,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					logger.error(String.format("failed to queryTransferData with hotelid %s..., ignore and continue...",
 							reqentity.getHotelid()), e);
 				}
-
+				
 				// 添加到酒店列表
 				hotels.add(result);
 
@@ -2022,6 +2022,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				// 获取房态信息:
 				// 该房间是否有可售.(由于现在房态信息缓存到redis，不再存储到mysql中间表，所以这里从缓存取.)
 				String roomtypevc = this.readonlyRoomtypevc(roomtypeItem, reqentity);
+				String roomtypevacancy;
+				
 				logger.info("--================================== 查询房型是否可用信息结束： ==================================-- ");
 				roomtypeItem.put("roomtypevc", roomtypevc);
 				// 床型
@@ -2106,12 +2108,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					}
 				}
 			}
-//
-//			if (minPromoprice != null) {
-//				data.put("promoprice", minPromoprice);
-//			} else {
-//				data.put("promoprice", minPromoprice);
-//			}
 		}
 
 		// 是否返现（T/F）

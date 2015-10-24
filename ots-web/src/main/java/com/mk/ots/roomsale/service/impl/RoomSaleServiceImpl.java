@@ -75,11 +75,11 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 	}
 
 	@Override
-	public List<RoomPromoDto> queryRoomPromoByHotel(TRoomSaleConfig bean){
+	public List<RoomPromoDto> queryRoomPromoByHotel(TRoomSaleConfig bean) {
 		List<TRoomSaleConfig> roomSaleConfig = roomSaleConfigMapper.getRoomSaleByParams(bean);
 		List<RoomPromoDto> roomPromoDtoList = new ArrayList<RoomPromoDto>();
-		for (TRoomSaleConfig rooms:roomSaleConfig){
-			RoomPromoDto roomPromo=new RoomPromoDto();
+		for (TRoomSaleConfig rooms : roomSaleConfig) {
+			RoomPromoDto roomPromo = new RoomPromoDto();
 			roomPromo.setRoomId(rooms.getRoomId());
 			roomPromo.setRoomTypeId(rooms.getSaleRoomTypeId());
 			roomPromo.setSaleName(rooms.getSaleName());
@@ -97,6 +97,20 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		return roomPromoDtoList;
 	}
 
+	@Override
+	public List<Map<String, Object>> queryRoomByHotelAndRoomType(String hotelId, String roomTypeId) throws Exception {
+		try {
+			Map<String, Object> parameters = new HashMap<>();
+			parameters.put("hotelId", hotelId);
+			parameters.put("roomTypeId", roomTypeId);
+
+			List<Map<String, Object>> saleRoomList = roomSaleMapper.queryRoomByHotelAndRoomType(parameters);
+			return saleRoomList;
+		} catch (Exception ex) {
+			logger.error(String.format("failed to queryRoomByHotelAndRoomType %s", hotelId), ex);
+			throw new Exception(String.format("failed to queryRoomByHotelAndRoomType %s", hotelId), ex);
+		}
+	}
 
 	@Override
 	public List<Map<String, Object>> queryRoomPromoInfoByHotel(String hotelId) throws Exception {
@@ -110,7 +124,8 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 	}
 
 	@Override
-	public List<Map<String, Object>> queryRoomPromoInfoByHotelAndPromoType(String hotelId, Integer promoType) throws Exception {
+	public List<Map<String, Object>> queryRoomPromoInfoByHotelAndPromoType(String hotelId, Integer promoType)
+			throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("hotelId", hotelId);
 		map.put("promoType", promoType);
@@ -121,26 +136,28 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 	@Override
 	public Map<String, Object> queryRoomPromoInfo() throws Exception {
 		try {
-			Map<String, Object>saleRoomList = roomSaleMapper.queryRoomPromoInfo();
+			Map<String, Object> saleRoomList = roomSaleMapper.queryRoomPromoInfo();
 			return saleRoomList;
 		} catch (Exception ex) {
 			logger.error(String.format("failed to queryRoomPromoInfo %s"), ex);
 			throw new Exception(String.format("failed to queryRoomPromoInfo %s"), ex);
 		}
 	}
-	public Boolean checkRoomSale(TRoomSaleConfig bean){
+
+	public Boolean checkRoomSale(TRoomSaleConfig bean) {
 		TRoomSaleConfig roomSaleConfig = roomSaleConfigMapper.checkRoomSale(bean);
-		if (roomSaleConfig==null||roomSaleConfig.getId()==null){
-			return  false;
-		}else {
-			return  true;
+		if (roomSaleConfig == null || roomSaleConfig.getId() == null) {
+			return false;
+		} else {
+			return true;
 		}
 	}
-	public List<RoomSaleToIndexDto> getUpdateIndexList(TRoomSaleConfig bean){
+
+	public List<RoomSaleToIndexDto> getUpdateIndexList(TRoomSaleConfig bean) {
 		List<TRoomSaleConfig> roomSaleConfig = roomSaleConfigMapper.getRoomSaleByParams(bean);
 		List<RoomSaleToIndexDto> roomSaleToIndexList = new ArrayList<RoomSaleToIndexDto>();
-		for (TRoomSaleConfig rooms:roomSaleConfig){
-			RoomSaleToIndexDto saleIndex=new RoomSaleToIndexDto();
+		for (TRoomSaleConfig rooms : roomSaleConfig) {
+			RoomSaleToIndexDto saleIndex = new RoomSaleToIndexDto();
 			saleIndex.setPromoType(rooms.getSaleType());
 			saleIndex.setPromoPrice(rooms.getSaleValue());
 		}
