@@ -1628,8 +1628,8 @@ public class SearchService implements ISearchService {
 		Integer callEntry = reqentity.getCallentry();
 		String callMethod = reqentity.getCallmethod() == null ? "" : reqentity.getCallmethod().trim();
 
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("callEntry:%s; callMethod:%s; callVersion:%s; isPromoOnly:%s", callEntry,
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("callEntry:%s; callMethod:%s; callVersion:%s; isPromoOnly:%s", callEntry,
 					callMethod, callVersion, isPromoOnly));
 		}
 

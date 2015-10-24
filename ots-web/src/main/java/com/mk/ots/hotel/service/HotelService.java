@@ -91,7 +91,6 @@ import com.mk.ots.order.service.OrderService;
 import com.mk.ots.price.dao.BasePriceDAO;
 import com.mk.ots.price.dao.PriceDAO;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
-import com.mk.ots.roomsale.model.RoomPromoDto;
 import com.mk.ots.roomsale.model.TRoomSale;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.ots.roomsale.service.RoomSaleService;
@@ -1583,8 +1582,7 @@ public class HotelService {
 	 * @param lockRoomsCache
 	 * @return
 	 */
-	public Integer calPromoVacants(Integer promoType, Long hotelid, String isnewpms, String isvisible, String isonline,
-			String starttime, String endtime) throws Exception {
+	public Integer calPromoVacants(Integer promoType, Long hotelid, String starttime, String endtime) throws Exception {
 		Integer vacants = 0;
 
 		List<TRoomModel> roomModels = tRoomMapper.findRoomsByHotelId(hotelid);
@@ -1599,21 +1597,22 @@ public class HotelService {
 			Long curRoomTypeId = roomModel.getRoomtypeid();
 			Long roomid = roomModel.getId();
 
-			TRoomSaleConfig config = new TRoomSaleConfig();
-			config.setHotelId(hotelid == null ? 0 : hotelid.intValue());
-			config.setRoomId(roomid == null ? 0 : roomid.intValue());
-			config.setRoomTypeId(curRoomTypeId == null ? 0 : curRoomTypeId.intValue());
-
 			Integer curPromoType = 0;
 			try {
-				List<RoomPromoDto> promo = roomSaleService.queryRoomPromoByHotel(config);
+				List<Map<String, Object>> rooms = roomSaleService.queryRoomByHotelAndRoomType(String.valueOf(hotelid),
+						String.valueOf(curRoomTypeId));
 
-				if (promo.size() > 0) {
-					curPromoType = Integer.parseInt(promo.get(0).getPromoType());
+				if (rooms.size() > 0) {
+					curPromoType = (Integer) rooms.get(0).get("promotype");
 				}
 			} catch (Exception ex) {
-				logger.warn(String.format("failed to queryRoomPromoByHotel, roomid:%s; roomtypeid:%s", roomid,
-						curRoomTypeId), ex);
+				logger.warn(String.format("failed to queryRoomByHotelAndRoomType, hotelid:%s; roomid:%s; roomtypeid:%s",
+						hotelid, roomid, curRoomTypeId), ex);
+			}
+
+			if (logger.isInfoEnabled()) {
+				logger.info(String.format("queried for roomid:%s->curPromoType:%s; promoType:%s; roomtype:%s", roomid,
+						curPromoType, promoType, curRoomTypeId));
 			}
 
 			if (curPromoType != null && promoType == curPromoType) {

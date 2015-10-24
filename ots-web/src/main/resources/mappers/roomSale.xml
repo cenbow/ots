@@ -84,6 +84,9 @@
         LEFT JOIN t_room_sale_config config ON config.saleConfigInfoId = b.id and config.valid = 'T'
     <include refid="Base_Query_List"/>
     </select>
+    
+    
+    
     <select id="getSaleRoomListByHotel" resultMap="BaseResultMap" >
 
         SELECT
@@ -183,6 +186,14 @@
         join t_room_sale_config_info info on config.saleconfiginfoid = info.id
         WHERE config.hotelId = #{hotelId}
         GROUP  BY promotype
+    </select>
+
+    <select id="queryRoomByHotelAndRoomType" resultType="map" parameterType="map">
+        SELECT info.id as promotype, info.salevalue as promoprice, config.roomTypeid as roomtypeid
+        FROM t_room_sale_config config
+        join t_room_sale_config_info info on config.saleconfiginfoid = info.id
+        join t_room_sale sale on config.roomtypeid = sale.oldroomtypeid
+        WHERE config.hotelId = #{hotelId} and config.roomtypeid = #{roomTypeId} 
     </select>
 
     <select id="queryRoomPromoInfoByHotelAndPromoType" resultType="map" parameterType="map">
