@@ -2185,10 +2185,10 @@ public class OrderServiceImpl implements OrderService {
         TRoomSale tRoomSale = new TRoomSale();
         tRoomSale.setRoomId(roomId.intValue());
         TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
-        if(resultRoomSale == null || PromoTypeEnum.OTHER.getCode().equals(resultRoomSale.getSaleType())){
+        if(resultRoomSale == null || "T".equals(resultRoomSale.getIsBack())){
             return PromoTypeEnum.OTHER.getCode().toString();
         }else{
-            return resultRoomSale.getSaleType().toString();
+            return PromoTypeEnum.TJ.getCode().toString();
         }
     }
 
