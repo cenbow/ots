@@ -346,7 +346,38 @@ public class OtsCacheManager {
 		return map;
 	}
 
-	/**
+
+    public String set(String key, String value) {
+        Jedis jedis = this.getNewJedis();
+        try {
+            jedis.set(key, value);
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+        return "OK";
+    }
+
+    public String getbykey(String key){
+        String s = null;
+        Jedis jedis = this.getNewJedis();
+        try {
+            s = jedis.get(key);
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+        return s;
+    }
+
+
+    /**
 	 * 得到指定名称的所有缓存信息
 	 *
 	 * @param cacheName
