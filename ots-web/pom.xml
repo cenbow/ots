@@ -1,1504 +1,1525 @@
 <?xml version="1.0"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>com.mk</groupId>
-		<artifactId>ots-all-parent</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-	</parent>
-	<artifactId>ots-web</artifactId>
-	<name>ots-web</name>
-	<url>http://maven.apache.org</url>
-	<packaging>war</packaging>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<cxf.version>2.2.5</cxf.version>
-		<java.version>1.7</java.version>
-		<slf4j.version>1.7.12</slf4j.version>
-		<logback.version>1.1.2</logback.version>
-		<spring.version>4.1.5.RELEASE</spring.version>
-		<spring-session.version>1.0.0.RELEASE</spring-session.version>
-		<spring-security.version>3.2.6.RELEASE</spring-security.version>
-		<hibernate.version>4.2.18.Final</hibernate.version>
-		<aspectj.version>1.6.12.M2</aspectj.version>
-		<hamcrest.core.version>1.3</hamcrest.core.version>
-		<junit.version>4.11</junit.version>
-		<mockito.core.version>1.9.5</mockito.core.version>
-		<commons-configuration.version>1.6</commons-configuration.version>
-
-		<kafka.version>1.0.2</kafka.version>
-		<care-kafka.version>1.0.0</care-kafka.version>
-	</properties>
-
-	<repositories>
-		<repository>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<id>public</id>
-			<name>Public Repositories</name>
-			<url>http://10.4.4.228:8081/nexus/content/repositories/releases/</url>
-		</repository>
-	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>public</id>
-			<name>Public Repositories</name>
-			<url>http://10.4.4.228:8081/nexus/content/repositories/releases/</url>
-		</pluginRepository>
-	</pluginRepositories>
-
-	<dependencies>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>mk-kafka</artifactId>
-			<version>${kafka.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>mk-care-kafka</artifactId>
-			<version>${care-kafka.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>xmlpull</groupId>
-			<artifactId>xmlpull</artifactId>
-			<version>1.1.3.1</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>xpp3</groupId>
-			<artifactId>xpp3</artifactId>
-			<version>1.1.4c</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.thoughtworks.xstream</groupId>
-			<artifactId>xstream</artifactId>
-			<version>1.4.7</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>stringtemplate</artifactId>
-			<version>4.0.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.groovy</groupId>
-			<artifactId>groovy-all</artifactId>
-			<version>2.0.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-exec</artifactId>
-			<version>1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.5</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.xml.ws</groupId>
-			<artifactId>jaxws-rt</artifactId>
-			<version>2.1.3</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-impl</artifactId>
-			<version>2.1.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.xbean</groupId>
-			<artifactId>xbean-spring</artifactId>
-			<version>3.6</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-			<version>1.1.0.Final</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.javassist</groupId>
-			<artifactId>javassist</artifactId>
-			<version>3.18.1-GA</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml</artifactId>
-			<version>3.8-beta5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi</artifactId>
-			<version>3.8-beta5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.9.13</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>2.2.3</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.2.3</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>2.2.3</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet.jsp</groupId>
-			<artifactId>jsp-api</artifactId>
-			<version>2.1</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
-			<version>1.2</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet.jsp.jstl</groupId>
-			<artifactId>jstl-api</artifactId>
-			<version>1.2</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>servlet-api</artifactId>
-					<groupId>javax.servlet</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.jdom</groupId>
-			<artifactId>jdom</artifactId>
-			<version>1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.json-lib</groupId>
-			<artifactId>json-lib</artifactId>
-			<version>2.4</version>
-			<classifier>jdk15</classifier>
-		</dependency>
-		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>fastjson</artifactId>
-			<version>1.2.5</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-			<version>1.2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.ant</groupId>
-			<artifactId>ant</artifactId>
-			<version>1.8.2</version>
-		</dependency>
-		<dependency>
-			<groupId>jfree</groupId>
-			<artifactId>jfreechart</artifactId>
-			<version>0.9.21</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>fluent-hc</artifactId>
-			<version>4.3.5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient-cache</artifactId>
-			<version>4.3.5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<version>4.3.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-net</groupId>
-			<artifactId>commons-net</artifactId>
-			<version>3.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.jcraft</groupId>
-			<artifactId>jsch</artifactId>
-			<version>0.1.46</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-			<version>3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-web</artifactId>
-			<version>${spring-security.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-web</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-config</artifactId>
-			<version>${spring-security.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context-support</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-web</artifactId> <version>${spring.version}</version> </dependency> -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<version>${spring.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-orm</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<version>${spring.version}</version>
-			<exclusions>
-				<!-- Exclude Commons Logging in favor of SLF4j -->
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-aop</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-aspects</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-jdbc</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-expression</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-jms</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-tx</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
-			<version>${slf4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>${logback.version}</version>
-		</dependency>
-		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-log4j12</artifactId> <version>${slf4j.version}</version> </dependency> -->
-		<dependency>
-			<groupId>org.apache.ws.commons.schema</groupId>
-			<artifactId>XmlSchema</artifactId>
-			<version>1.4.7</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-frontend-jaxws</artifactId>
-			<version>${cxf.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-transports-http</artifactId>
-			<version>${cxf.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-transports-http-jetty</artifactId>
-			<version>${cxf.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-jdk14</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-access</artifactId>
-			<version>${logback.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-dbcp</groupId>
-			<artifactId>commons-dbcp</artifactId>
-			<version>1.4</version>
-		</dependency>
-
-		<dependency>
-			<groupId>net.sourceforge.jtds</groupId>
-			<artifactId>jtds</artifactId>
-			<version>1.2.4</version>
-		</dependency>
-		<!-- spring timmer -->
-		<dependency>
-			<groupId>org.quartz-scheduler</groupId>
-			<artifactId>quartz</artifactId>
-			<version>2.2.1</version>
-		</dependency>
-		<!-- <dependency> <groupId>opensymphony</groupId> <artifactId>quartz-all</artifactId> <version>1.6.0</version> </dependency> -->
-		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>persistence-api</artifactId>
-			<version>1.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra-thrift</artifactId>
-			<version>2.0.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>aspectjweaver</artifactId>
-			<version>1.8.1</version>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-core</artifactId>
-			<version>${hamcrest.core.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>${mockito.core.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<version>${spring.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.jayway.jsonpath</groupId>
-			<artifactId>json-path</artifactId>
-			<version>1.2.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.drewnoakes</groupId>
-			<artifactId>metadata-extractor</artifactId>
-			<version>2.7.2</version>
-		</dependency>
-		<dependency>
-			<groupId>net.spy</groupId>
-			<artifactId>spymemcached</artifactId>
-			<version>2.11.6</version>
-		</dependency>
-		<dependency>
-			<groupId>cn.jpush.api</groupId>
-			<artifactId>jpush-client</artifactId>
-			<version>3.1.3</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-log4j12</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.3.5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpmime</artifactId>
-			<version>4.4</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jodd</groupId>
-			<artifactId>jodd-proxetta</artifactId>
-			<version>3.6.5</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis-spring</artifactId>
-			<version>1.2.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis</artifactId>
-			<version>3.2.8</version>
-		</dependency>
-
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-websocket</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-messaging</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>redis.clients</groupId>
-			<artifactId>jedis</artifactId>
-			<version>2.6.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>jdom</groupId>
-			<artifactId>jdom</artifactId>
-			<version>1.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.easyrules</groupId>
-			<artifactId>easyrules-core</artifactId>
-			<version>1.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mybatis.generator</groupId>
-			<artifactId>mybatis-generator-core</artifactId>
-			<version>1.3.2</version>
-		</dependency>
-
-		<!-- hessian -->
-		<dependency>
-			<groupId>com.caucho</groupId>
-			<artifactId>hessian</artifactId>
-			<version>3.1.3</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.3.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.elasticsearch</groupId>
-			<artifactId>elasticsearch</artifactId>
-			<version>1.5.1</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-elasticsearch</artifactId>
-			<version>1.2.0.RELEASE</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-redis</artifactId>
-			<version>1.5.0.RELEASE</version>
-		</dependency>
-
-		<dependency>
-			<groupId>baidu.yun</groupId>
-			<artifactId>baidu.yun</artifactId>
-			<version>3.0.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>18.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>mike.web</artifactId>
-			<version>1.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>old_pms_hessian</artifactId>
-			<version>1.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.esotericsoftware.yamlbeans</groupId>
-			<artifactId>yamlbeans</artifactId>
-			<version>1.09</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.yaml</groupId>
-			<artifactId>snakeyaml</artifactId>
-			<version>1.15</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.qiniu</groupId>
-			<artifactId>qiniu-java-sdk</artifactId>
-			<version>[7.0.0, 7.0.99]</version>
-		</dependency>
-
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-all</artifactId>
-			<version>4.0.27.Final</version>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-			<version>1.4.7</version>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>activation</artifactId>
-			<version>1.1.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<version>5.1.3.Final</version>
-		</dependency>
-
-		<!-- <dependency> <groupId>message.voice</groupId> <artifactId>CCP_REST_SDK_JAVA_v2.7r</artifactId> <version>0.0.1</version> </dependency> <dependency> <groupId>message.sms</groupId> <artifactId>CCP_REST_SMS_SDK_JAVA_v2.6.3r</artifactId> <version>0.0.1</version> </dependency> -->
-
-		<dependency>
-			<groupId>com.cloopen</groupId>
-			<artifactId>CCP_REST_SDK_JAVA</artifactId>
-			<version>v2.7r</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.cloopen</groupId>
-			<artifactId>CCP_REST_SMS_SDK_JAVA</artifactId>
-			<version>v2.6.3r</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.5.6</version>
-		</dependency>
-
-
-
-		<dependency>
-			<groupId>commons-configuration</groupId>
-			<artifactId>commons-configuration</artifactId>
-			<version>${commons-configuration.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.unidal.framework</groupId>
-			<artifactId>foundation-service</artifactId>
-			<version>2.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.dianping.cat</groupId>
-			<artifactId>cat-client</artifactId>
-			<version>1.3.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.plexus</groupId>
-			<artifactId>plexus-utils</artifactId>
-			<version>3.0.8</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.codehaus.plexus</groupId>
-			<artifactId>plexus-container-default</artifactId>
-			<version>1.5.5</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>google-collections</artifactId>
-					<groupId>com.google.collections</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.codehaus.plexus</groupId>
-			<artifactId>plexus-classworlds</artifactId>
-			<version>2.2.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>monitor-connector</artifactId>
-			<version>0.0.4</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.integration</groupId>
-			<artifactId>spring-integration-kafka</artifactId>
-			<version>1.2.1.RELEASE</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.kafka</groupId>
-			<artifactId>kafka_2.10</artifactId>
-			<version>0.8.2.1</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>slf4j-log4j12</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-				<exclusion>
-
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.avro</groupId>
-			<artifactId>avro</artifactId>
-			<version>1.7.7</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-fun-face</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-fun-biz</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-ord-face</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-ord-biz</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-pay-face</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-pay-biz</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-pro-face</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-pro-biz</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mk</groupId>
-			<artifactId>ots-commons</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
-	</dependencies>
-	<build>
-		<finalName>ots</finalName>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-				<includes>
-					<include>**/*.properties</include>
-				</includes>
-			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>false</filtering>
-				<excludes>
-					<exclude>**/*.properties</exclude>
-				</excludes>
-			</resource>
-			<resource>
-				<directory>src/main/resources/logback/${label}</directory>
-			</resource>
-		</resources>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>aspectj-maven-plugin</artifactId>
-				<version>1.2</version>
-				<!-- NB: do not use 1.3 or 1.3.x due to MASPECTJ-90 and do not use 1.4 due to declare parents issue -->
-				<dependencies>
-					<!-- NB: You must use Maven 2.0.9 or above or these are ignored (see MNG-2972) -->
-					<dependency>
-						<groupId>org.aspectj</groupId>
-						<artifactId>aspectjrt</artifactId>
-						<version>${aspectj.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.aspectj</groupId>
-						<artifactId>aspectjtools</artifactId>
-						<version>${aspectj.version}</version>
-					</dependency>
-				</dependencies>
-				<!-- <executions> <execution> <goals> <goal>compile</goal> <goal>test-compile</goal> </goals> </execution> </executions> -->
-				<configuration>
-					<outxml>true</outxml>
-					<aspectLibraries>
-						<aspectLibrary>
-							<groupId>org.springframework</groupId>
-							<artifactId>spring-aspects</artifactId>
-						</aspectLibrary>
-					</aspectLibraries>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1.1</version>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<SVN-Revision>${SVN.revision}</SVN-Revision>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-					<encoding>${project.build.sourceEncoding}</encoding>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.5</version>
-				<configuration>
-					<encoding>${project.build.sourceEncoding}</encoding>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<printSummary>false</printSummary>
-					<redirectTestOutputToFile>true</redirectTestOutputToFile>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.7</version>
-			</plugin>
-			<!-- IDE -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.7</version>
-				<!-- Note 2.8 does not work with AspectJ aspect path -->
-				<configuration>
-					<downloadSources>true</downloadSources>
-					<downloadJavadocs>false</downloadJavadocs>
-					<wtpversion>2.0</wtpversion>
-					<additionalBuildcommands>
-						<buildCommand>
-							<name>org.eclipse.ajdt.core.ajbuilder</name>
-							<arguments>
-								<aspectPath>org.springframework.aspects</aspectPath>
-							</arguments>
-						</buildCommand>
-						<buildCommand>
-							<name>org.springframework.ide.eclipse.core.springbuilder</name>
-						</buildCommand>
-					</additionalBuildcommands>
-					<additionalProjectnatures>
-						<projectnature>org.eclipse.ajdt.ui.ajnature</projectnature>
-						<projectnature>com.springsource.sts.roo.core.nature</projectnature>
-						<projectnature>org.springframework.ide.eclipse.core.springnature</projectnature>
-					</additionalProjectnatures>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
-				<version>2.2</version>
-			</plugin>
-			<plugin>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.2.1.v20140609</version>
-				<configuration>
-					<webApp>
-						<contextPath>/ots</contextPath>
-						<!-- <contextPath>/${project.artifactId}</contextPath> -->
-					</webApp>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.liquibase</groupId>
-				<artifactId>liquibase-maven-plugin</artifactId>
-				<version>3.0.5</version>
-				<configuration>
-					<changeLogFile>src/main/resources/db/liquibase/liquibase.xml</changeLogFile>
-					<driver>${jdbc.driver}</driver>
-					<url>${master.jdbc.url}</url>
-					<username>${master.jdbc.user}</username>
-					<password>${master.jdbc.password}</password>
-					<promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.mybatis.generator</groupId>
-				<artifactId>mybatis-generator-maven-plugin</artifactId>
-				<version>1.3.2</version>
-				<configuration>
-					<verbose>true</verbose>
-					<overwrite>true</overwrite>
-				</configuration>
-			</plugin>
-		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
-			</plugins>
-		</pluginManagement>
-	</build>
-	<profiles>
-		<profile>
-			<id>dev</id>
-			<properties>
-				<label>local</label>
-				<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
-				<master.jdbc.url><![CDATA[jdbc:mysql://192.168.70.98:3306/hms_new?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
-				<master.jdbc.user>root</master.jdbc.user>
-				<master.jdbc.password>imike@2015</master.jdbc.password>
-				<slave.jdbc.url><![CDATA[jdbc:mysql://192.168.70.98:3306/hms_new?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
-				<slave.jdbc.user>root</slave.jdbc.user>
-				<slave.jdbc.password>imike@2015</slave.jdbc.password>
-				<spring.redis.sentinel.master>ots-redis</spring.redis.sentinel.master>
-				<spring.redis.sentinel.nodes>10.4.1.14:26379,10.4.1.210:26379</spring.redis.sentinel.nodes>
-				<synserver.ip>192.168.81.45</synserver.ip>
-				<synserver.port>8000</synserver.port>
-				<elasticsearch.clusterhosts>192.168.81.45:9300</elasticsearch.clusterhosts>
-				<elasticsearch.clustername>ota2-test-elastic</elasticsearch.clustername>
-				<elasticsearch.index>ots</elasticsearch.index>
-				<elasticsearch.type>hotel</elasticsearch.type>
-				<hessian_soap>http://10.4.25.248:8082/soap/hessian</hessian_soap>
-				<hessian_bms>http://sms.imike.cn</hessian_bms>
-				<newpms.url>http://10.4.17.121:8083/otai/ots2pms/</newpms.url>
-				<jedis.pool.maxidl>20</jedis.pool.maxidl>
-				<jedis.pool.minidl>8</jedis.pool.minidl>
-				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
-				<addpay>https://otai.imike.com/otai/ots2pms/addpay</addpay>
-				<cancelpay>https://otai.imike.com/otai/ots2pms/cancelpay</cancelpay>
-				<selectCustomerpay>https://otai.imike.com/otai/ots2pms/selectcustomerpay</selectCustomerpay>
-				<cancelpaybyerror>https://otai.imike.com/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
-				<inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-				<wx_type>test_wechat</wx_type>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
-				<liveHotelNum>3</liveHotelNum>
-				<!-- kafka start -->
-				<zk_connect>10.4.31.46:2181</zk_connect>
-				<!-- kafka end -->
-
-				<!-- BMS黑名单验证接口 -->
-				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
-
-				<!-- 特价房查询接口 -->
-				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
-				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
-				<sendmess.testorformal>0</sendmess.testorformal>
-				<black_Switch>1</black_Switch>
-			</properties>
-		</profile>
-
-		<profile>
-			<id>pro</id>
-			<properties>
-				<label>product</label>
-				<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
-				<master.jdbc.url><![CDATA[jdbc:mysql://10.4.17.242:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
-				<master.jdbc.user>ota2developer</master.jdbc.user>
-				<master.jdbc.password>www.imike.com</master.jdbc.password>
-				<slave.jdbc.url><![CDATA[jdbc:mysql://10.4.17.242:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
-				<slave.jdbc.user>ota2developer</slave.jdbc.user>
-				<slave.jdbc.password>www.imike.com</slave.jdbc.password>
-				<spring.redis.sentinel.master>ots-redis</spring.redis.sentinel.master>
-				<spring.redis.sentinel.nodes>10.4.1.14:26379,10.4.1.210:26379</spring.redis.sentinel.nodes>
-				<synserver.ip>10.4.25.248</synserver.ip>
-				<synserver.port>8000</synserver.port>
-				<elasticsearch.clusterhosts>10.4.31.237:9300</elasticsearch.clusterhosts>
-				<elasticsearch.clustername>ota2-test-elastic</elasticsearch.clustername>
-				<elasticsearch.index>ots</elasticsearch.index>
-				<elasticsearch.type>hotel</elasticsearch.type>
-				<hessian_soap>http://10.4.25.248:8082/soap/hessian</hessian_soap>
-				<hessian_bms>http://sale.imike.com</hessian_bms>
-				<newpms.url>http://10.4.17.121:8083/otai/ots2pms/</newpms.url>
-				<jedis.pool.maxidl>20</jedis.pool.maxidl>
-				<jedis.pool.minidl>8</jedis.pool.minidl>
-				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
-
-				<inform_sale_url><![CDATA[http://sale.imike.com/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-				<wx_type>wechat</wx_type>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
-				<liveHotelNum>3</liveHotelNum>
-				<!-- kafka start -->
-				<zk_connect>10.4.31.46:2181</zk_connect>
-				<!-- kafka end -->
-
-				<!-- BMS黑名单验证接口 -->
-				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
-
-				<!-- 特价房查询接口 -->
-				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
-				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
-				<sendmess.testorformal>0</sendmess.testorformal>
-				<black_Switch>1</black_Switch>
-			</properties>
-		</profile>
-
-		<profile>
-			<id>clu</id>
-			<properties>
-				<label>product</label>
-				<jdbc.driver>com.mk.jdbc.MonitorDriver</jdbc.driver>
-				<master.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://10.4.1.242:3306/ots?autoReconnect=true&zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
-				<master.jdbc.user>imike-writer</master.jdbc.user>
-				<master.jdbc.password>Imike-writer</master.jdbc.password>
-				<slave.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://10.4.17.67:3306/ots?autoReconnect=true&zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
-				<slave.jdbc.user>imike-reader</slave.jdbc.user>
-				<slave.jdbc.password>Imike-reader!@#$</slave.jdbc.password>
-				<spring.redis.sentinel.master>ots-redis</spring.redis.sentinel.master>
-				<spring.redis.sentinel.nodes>10.4.1.14:26379,10.4.1.210:26379</spring.redis.sentinel.nodes>
-				<synserver.ip>10.4.15.193</synserver.ip>
-				<synserver.port>8000</synserver.port>
-				<elasticsearch.clusterhosts>10.4.2.94:9300</elasticsearch.clusterhosts>
-				<elasticsearch.clustername>ots-production-elasticsearch</elasticsearch.clustername>
-				<elasticsearch.index>ots</elasticsearch.index>
-				<elasticsearch.type>hotel</elasticsearch.type>
-				<hessian_soap>http://123.58.131.40:8080/soap/hessian</hessian_soap>
-				<hessian_bms>http://sale.imike.com</hessian_bms>
-				<newpms.url>https://otai.imike.com/otai/ots2pms</newpms.url>
-
-				<jedis.pool.maxidl>20</jedis.pool.maxidl>
-				<jedis.pool.minidl>8</jedis.pool.minidl>
-				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
-
-				<addpay>http://hotel.imike.com/ots2pms/addpay</addpay>
-				<cancelpay>http://hotel.imike.com/ots2pms/cancelpay</cancelpay>
-				<selectCustomerpay>http://hotel.imike.com/ots2pms/selectcustomerpay</selectCustomerpay>
-				<cancelpaybyerror>http://hotel.imike.com/ots2pms/cancelpaybyerror</cancelpaybyerror>
-
-				<inform_sale_url><![CDATA[http://sale.imike.com/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-				<wx_type>wechat</wx_type>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>2</baidumessage_DeployStatus>
-				<SendCouponsJob_datelimit>-1</SendCouponsJob_datelimit>
-				<liveHotelNum>3</liveHotelNum>
-				<!-- kafka start -->
-				<zk_connect>10.4.36.125:2181,10.4.37.39:2181,10.4.39.92:2181</zk_connect>
-				<!-- kafka end -->
-
-				<!-- BMS黑名单验证接口 -->
-				<blacklist.url>http://10.4.36.210:8080/check</blacklist.url>
-
-				<!-- 特价房查询接口 -->
-				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
-				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
-				<sendmess.testorformal>1</sendmess.testorformal>
-				<black_Switch>0</black_Switch>
-			</properties>
-		</profile>
-
-		<profile>
-			<id>test</id>
-
-			<properties>
-				<label>product</label>
-				<jdbc.driver>com.mk.jdbc.MonitorDriver</jdbc.driver>
-				<master.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://10.4.17.242:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
-				<master.jdbc.user>ota2developer</master.jdbc.user>
-				<master.jdbc.password>www.imike.com</master.jdbc.password>
-				<slave.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://10.4.17.242:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
-				<slave.jdbc.user>ota2developer</slave.jdbc.user>
-				<slave.jdbc.password>www.imike.com</slave.jdbc.password>
-				<spring.redis.sentinel.master>ota2-test-redis</spring.redis.sentinel.master>
-				<spring.redis.sentinel.nodes>10.4.27.128:26379</spring.redis.sentinel.nodes>
-				<synserver.ip>10.4.10.190</synserver.ip>
-				<synserver.port>8000</synserver.port>
-				<elasticsearch.clusterhosts>10.4.17.242:9300</elasticsearch.clusterhosts>
-				<elasticsearch.clustername>ota2-test-es-on-mysql</elasticsearch.clustername>
-				<elasticsearch.index>ots</elasticsearch.index>
-				<elasticsearch.type>hotel</elasticsearch.type>
-				<hessian_soap>http://10.4.10.190:8080/soap/hessian</hessian_soap>
-				<hessian_bms>http://sms.imike.cn</hessian_bms>
-				<newpms.url>http://10.4.17.121:8083/otai/ots2pms</newpms.url>
-				<jedis.pool.maxidl>20</jedis.pool.maxidl>
-				<jedis.pool.minidl>8</jedis.pool.minidl>
-				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
-				<addpay>https://smlt-otai.imike.cn/otai/ots2pms/addpay</addpay>
-				<cancelpay>https://smlt-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
-				<selectCustomerpay>https://smlt-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
-				<cancelpaybyerror>https://smlt-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-				<wx_type>test_wechat</wx_type>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
-				<liveHotelNum>1</liveHotelNum>
-				<!-- kafka start -->
-				<zk_connect>10.4.31.46:2181</zk_connect>
-				<!-- kafka end -->
-
-				<!-- BMS黑名单验证接口 -->
-				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
-				<!-- taskfactory url -->
-				<taskfactory.url>http://192.168.70.183:8080</taskfactory.url>
-				<!-- 特价房查询接口 -->
-				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
-				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
-				<sendmess.testorformal>0</sendmess.testorformal>
-				<black_Switch>1</black_Switch>
-			</properties>
-		</profile>
-		<profile>
-			<id>shanghai-dev</id>
-			<properties>
-				<label>product</label>
-				<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
-				<master.jdbc.url><![CDATA[jdbc:mysql://10.4.17.242:3306/dev_ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
-				<master.jdbc.user>ota2developer</master.jdbc.user>
-				<master.jdbc.password>www.imike.com</master.jdbc.password>
-				<slave.jdbc.url><![CDATA[jdbc:mysql://10.4.17.242:3306/dev_ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
-				<slave.jdbc.user>ota2developer</slave.jdbc.user>
-				<slave.jdbc.password>www.imike.com</slave.jdbc.password>
-				<spring.redis.sentinel.master>ota2-test-redis</spring.redis.sentinel.master>
-				<spring.redis.sentinel.nodes>10.4.27.128:26379</spring.redis.sentinel.nodes>
-				<synserver.ip>10.4.10.190</synserver.ip>
-				<synserver.port>8000</synserver.port>
-				<elasticsearch.clusterhosts>10.4.17.242:9300</elasticsearch.clusterhosts>
-				<elasticsearch.clustername>ota2-test-es-on-mysql</elasticsearch.clustername>
-				<elasticsearch.index>ots</elasticsearch.index>
-				<elasticsearch.type>hotel</elasticsearch.type>
-				<hessian_soap>http://10.4.10.190:8080/soap/hessian</hessian_soap>
-				<hessian_bms>http://sms.imike.cn</hessian_bms>
-				<newpms.url>http://10.4.17.121:8083/otai/ots2pms</newpms.url>
-				<jedis.pool.maxidl>20</jedis.pool.maxidl>
-				<jedis.pool.minidl>8</jedis.pool.minidl>
-				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
-				<addpay>https://otai.imike.com/otai/ots2pms/addpay</addpay>
-				<cancelpay>https://otai.imike.com/otai/ots2pms/cancelpay</cancelpay>
-				<selectCustomerpay>https://otai.imike.com/otai/ots2pms/selectcustomerpay</selectCustomerpay>
-				<cancelpaybyerror>https://otai.imike.com/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
-				<inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-				<wx_type>test_wechat</wx_type>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
-				<liveHotelNum>1</liveHotelNum>
-				<!-- kafka start -->
-				<zk_connect>10.4.31.46:2181</zk_connect>
-				<!-- kafka end -->
-
-				<!-- BMS黑名单验证接口 -->
-				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
-
-				<!-- 特价房查询接口 -->
-				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
-				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
-				<sendmess.testorformal>0</sendmess.testorformal>
-				<black_Switch>1</black_Switch>
-			</properties>
-		</profile>
-
-		<profile>
-			<id>shanghai-simulation</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<properties>
-				<label>product</label>
-				<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
-				<master.jdbc.url><![CDATA[jdbc:mysql://10.4.24.11:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
-				<master.jdbc.user>smlt-writer</master.jdbc.user>
-				<master.jdbc.password>j9bcyZ5U5LQp7xxEomsu</master.jdbc.password>
-				<slave.jdbc.url><![CDATA[jdbc:mysql://10.4.24.11:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
-				<slave.jdbc.user>smlt-writer</slave.jdbc.user>
-				<slave.jdbc.password>j9bcyZ5U5LQp7xxEomsu</slave.jdbc.password>
-				<!-- <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.28.44:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url> <slave.jdbc.user>smlt-reader</slave.jdbc.user> <slave.jdbc.password>ims8LfQKTBs6gj79TdgB</slave.jdbc.password> -->
-				<spring.redis.sentinel.master>ota2-test-redis</spring.redis.sentinel.master>
-				<spring.redis.sentinel.nodes>10.4.20.206:26379</spring.redis.sentinel.nodes>
-				<synserver.ip>10.4.17.121</synserver.ip>
-				<synserver.port>8000</synserver.port>
-				<elasticsearch.clusterhosts>10.4.32.10:9300</elasticsearch.clusterhosts>
-				<elasticsearch.clustername>smlt-elasticsearch</elasticsearch.clustername>
-				<elasticsearch.index>ots</elasticsearch.index>
-				<elasticsearch.type>hotel</elasticsearch.type>
-				<hessian_soap>http://10.4.26.201:8082/soap/hessian</hessian_soap>
-				<hessian_bms>http://sms.imike.cn/</hessian_bms>
-				<newpms.url>https://smlt-otai.imike.cn/otai/ots2pms</newpms.url>
-				<jedis.pool.maxidl>20</jedis.pool.maxidl>
-				<jedis.pool.minidl>8</jedis.pool.minidl>
-				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
-				<addpay>https://smlt-otai.imike.cn/otai/ots2pms/addpay</addpay>
-				<cancelpay>https://smlt-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
-				<selectCustomerpay>https://smlt-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
-				<cancelpaybyerror>https://smlt-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-				<wx_type>test_app</wx_type>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
-				<liveHotelNum>3</liveHotelNum>
-				<!-- kafka start -->
-				<zk_connect>10.4.31.46:2181</zk_connect>
-				<!-- kafka end -->
-
-				<!-- BMS黑名单验证接口 -->
-				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
-
-				<!-- 特价房查询接口 -->
-				<roomsale.url>http://192.168.70.183:8080/roomsale/querysaleroom</roomsale.url>
-				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
-				<sendmess.testorformal>0</sendmess.testorformal>
-				<black_Switch>1</black_Switch>
-			</properties>
-		</profile>
-
-		<profile>
-			<id>hotfix</id>
-			<properties>
-				<label>product</label>
-				<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
-				<master.jdbc.url><![CDATA[jdbc:mysql://10.4.24.11:3306/hotfix_ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
-				<master.jdbc.user>hotfix-writer</master.jdbc.user>
-				<master.jdbc.password>5A6QG9Y8Ol</master.jdbc.password>
-				<slave.jdbc.url><![CDATA[jdbc:mysql://10.4.24.11:3306/hotfix_ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
-				<slave.jdbc.user>hotfix-reader</slave.jdbc.user>
-				<slave.jdbc.password>1fn1CTw9O4</slave.jdbc.password>
-				<spring.redis.sentinel.master>ota2-test-redis</spring.redis.sentinel.master>
-				<spring.redis.sentinel.nodes>10.4.20.206:26379</spring.redis.sentinel.nodes>
-				<synserver.ip>10.4.11.218</synserver.ip>
-				<synserver.port>8000</synserver.port>
-				<elasticsearch.clusterhosts>10.4.32.10:9300</elasticsearch.clusterhosts>
-				<elasticsearch.clustername>smlt-elasticsearch</elasticsearch.clustername>
-				<elasticsearch.index>ots</elasticsearch.index>
-				<elasticsearch.type>hotel</elasticsearch.type>
-				<hessian_soap>http://10.4.11.218:8083/soap/hessian</hessian_soap>
-				<hessian_bms>http://sms.imike.cn/</hessian_bms>
-				<jedis.pool.maxidl>20</jedis.pool.maxidl>
-				<jedis.pool.minidl>8</jedis.pool.minidl>
-				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
-				<inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-				<wx_type>test_wechat</wx_type>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
-
-				<newpms.url>https://10.4.11.218:8443/otai/ots2pms</newpms.url>
-				<addpay>https://10.4.11.218:8443/otai/ots2pms/addpay</addpay>
-				<cancelpay>https://10.4.11.218:8443/otai/ots2pms/cancelpay</cancelpay>
-				<selectCustomerpay>https://10.4.11.218:8443/otai/ots2pms/selectcustomerpay</selectCustomerpay>
-				<cancelpaybyerror>https://10.4.11.218:8443/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
-				<!-- kafka start -->
-				<zk_connect>10.4.31.46:2181</zk_connect>
-				<!-- kafka end -->
-
-				<!-- BMS黑名单验证接口 -->
-				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
-
-				<!-- 特价房查询接口 -->
-				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
-				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
-				<sendmess.testorformal>0</sendmess.testorformal>
-				<black_Switch>1</black_Switch>
-			</properties>
-		</profile>
-
-		<profile>
-			<id>bjtest</id>
-			<properties>
-				<label>bjtest</label>
-				<jdbc.driver>com.mk.jdbc.MonitorDriver</jdbc.driver>
-				<master.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://192.168.199.10:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
-				<master.jdbc.user>root</master.jdbc.user>
-				<master.jdbc.password>imike@2015</master.jdbc.password>
-				<slave.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://192.168.199.10:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
-				<slave.jdbc.user>root</slave.jdbc.user>
-				<slave.jdbc.password>imike@2015</slave.jdbc.password>
-				<spring.redis.sentinel.master>mymaster</spring.redis.sentinel.master>
-				<spring.redis.sentinel.nodes>192.168.199.10:26379</spring.redis.sentinel.nodes>
-				<synserver.ip>192.168.199.10</synserver.ip>
-				<synserver.port>8000</synserver.port>
-				<elasticsearch.clusterhosts>192.168.199.10:9300</elasticsearch.clusterhosts>
-				<elasticsearch.clustername>ota2-test-es-on-mysql</elasticsearch.clustername>
-				<elasticsearch.index>ots</elasticsearch.index>
-				<elasticsearch.type>hotel</elasticsearch.type>
-				<hessian_soap>http://192.168.199.10:8010/soap/hessian</hessian_soap>
-				<hessian_bms>http://sms.imike.cn</hessian_bms>
-				<jedis.pool.maxidl>20</jedis.pool.maxidl>
-				<jedis.pool.minidl>8</jedis.pool.minidl>
-				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
-				<inform_sale_url><![CDATA[http://bmstest.imike.cn:8080/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-				<wx_type>test_wechat</wx_type>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
-				<liveHotelNum>3</liveHotelNum>
-
-				<newpms.url>https://192.168.0.21:8443/otai/ots2pms</newpms.url>
-				<addpay>https://192.168.0.21:8443/otai/ots2pms/addpay</addpay>
-				<cancelpay>https://192.168.0.21:8443/otai/ots2pms/cancelpay</cancelpay>
-				<selectCustomerpay>https://192.168.0.21:8443/otai/ots2pms/selectcustomerpay</selectCustomerpay>
-				<cancelpaybyerror>https://192.168.0.21:8443/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
-
-				<!-- kafka start -->
-				<zk_connect>192.168.0.17:2181</zk_connect>
-				<!-- <zk_connect>10.4.36.125:2181,10.4.37.39:2181,10.4.39.92:2181</zk_connect> -->
-				<!-- kafka end -->
-				<!-- BMS黑名单验证接口 -->
-				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
-
-				<!-- 特价房查询接口 -->
-				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
-				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
-				<sendmess.testorformal>0</sendmess.testorformal>
-				<black_Switch>1</black_Switch>
-			</properties>
-		</profile>
-
-		<profile>
-			<id>bgp-simulation</id>
-			<properties>
-				<label>product</label>
-				<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
-				<master.jdbc.url><![CDATA[jdbc:mysql://10.10.187.189:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
-				<master.jdbc.user>smlt-writer</master.jdbc.user>
-				<master.jdbc.password>j9bcyZ5U5LQp7xxEomsu</master.jdbc.password>
-				<slave.jdbc.url><![CDATA[jdbc:mysql://10.10.187.189:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
-				<slave.jdbc.user>smlt-writer</slave.jdbc.user>
-				<slave.jdbc.password>j9bcyZ5U5LQp7xxEomsu</slave.jdbc.password>
-				<!-- <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.28.44:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url> <slave.jdbc.user>smlt-reader</slave.jdbc.user> <slave.jdbc.password>ims8LfQKTBs6gj79TdgB</slave.jdbc.password> -->
-				<spring.redis.sentinel.master>ots-smlt-bj-redis</spring.redis.sentinel.master>
-				<spring.redis.sentinel.nodes>10.10.115.57:26379</spring.redis.sentinel.nodes>
-				<synserver.ip>10.10.124.247</synserver.ip>
-				<synserver.port>8000</synserver.port>
-				<elasticsearch.clusterhosts>10.10.118.60:9300</elasticsearch.clusterhosts>
-				<elasticsearch.clustername>ots-smlt-bj-elastic-1</elasticsearch.clustername>
-				<elasticsearch.index>ots</elasticsearch.index>
-				<elasticsearch.type>hotel</elasticsearch.type>
-				<hessian_soap>http://10.10.131.104:8085/soap/hessian</hessian_soap>
-				<hessian_bms>http://bj-smlt-sms.imike.cn/</hessian_bms>
-				<newpms.url>https://bj-smlt-otai.imike.cn/otai/ots2pms</newpms.url>
-				<jedis.pool.maxidl>20</jedis.pool.maxidl>
-				<jedis.pool.minidl>8</jedis.pool.minidl>
-				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
-				<addpay>https://bj-smlt-otai.imike.cn/otai/ots2pms/addpay</addpay>
-				<cancelpay>https://bj-smlt-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
-				<selectCustomerpay>https://bj-smlt-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
-				<cancelpaybyerror>https://bj-smlt-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<inform_sale_url><![CDATA[http://bj-smlt-sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-				<wx_type>test_wechat</wx_type>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
-				<liveHotelNum>3</liveHotelNum>
-
-				<!-- kafka start -->
-				<zk_connect>10.10.144.40:2181,10.10.136.210:2181,10.10.115.52:2181</zk_connect>
-				<!-- kafka end -->
-
-				<!-- BMS黑名单验证接口 -->
-				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
-
-				<!-- 特价房查询接口 -->
-				<roomsale.url>http://127.0.0.1:8080/taskfactory/roomsale/querysaleroom</roomsale.url>
-				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
-				<sendmess.testorformal>0</sendmess.testorformal>
-				<black_Switch>1</black_Switch>
-			</properties>
-		</profile>
-		
-		<profile>
-			<id>shanghai-simulation2</id>
-			<properties>
-				<label>product</label>
-				<jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
-				<master.jdbc.url><![CDATA[jdbc:mysql://10.4.24.11:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
-				<master.jdbc.user>smlt-writer</master.jdbc.user>
-				<master.jdbc.password>j9bcyZ5U5LQp7xxEomsu</master.jdbc.password>
-				<slave.jdbc.url><![CDATA[jdbc:mysql://10.4.24.11:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
-				<slave.jdbc.user>smlt-writer</slave.jdbc.user>
-				<slave.jdbc.password>j9bcyZ5U5LQp7xxEomsu</slave.jdbc.password>
-				<!-- <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.28.44:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url> <slave.jdbc.user>smlt-reader</slave.jdbc.user> <slave.jdbc.password>ims8LfQKTBs6gj79TdgB</slave.jdbc.password> -->
-				<spring.redis.sentinel.master>ota2-test-redis</spring.redis.sentinel.master>
-				<spring.redis.sentinel.nodes>10.4.20.206:26379</spring.redis.sentinel.nodes>
-				<synserver.ip>10.4.17.121</synserver.ip>
-				<synserver.port>8000</synserver.port>
-				<elasticsearch.clusterhosts>10.4.32.10:9300</elasticsearch.clusterhosts>
-				<elasticsearch.clustername>smlt-elasticsearch</elasticsearch.clustername>
-				<elasticsearch.index>ots</elasticsearch.index>
-				<elasticsearch.type>hotel</elasticsearch.type>
-				<hessian_soap>http://10.4.26.201:8082/soap/hessian</hessian_soap>
-				<hessian_bms>http://sms.imike.cn/</hessian_bms>
-				<newpms.url>https://smlt-otai.imike.cn/otai/ots2pms</newpms.url>
-				<jedis.pool.maxidl>20</jedis.pool.maxidl>
-				<jedis.pool.minidl>8</jedis.pool.minidl>
-				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
-				<addpay>https://smlt-otai.imike.cn/otai/ots2pms/addpay</addpay>
-				<cancelpay>https://smlt-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
-				<selectCustomerpay>https://smlt-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
-				<cancelpaybyerror>https://smlt-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-				<wx_type>test_app</wx_type>
-				<!-- 1：开发状态 2：生产状态 -->
-				<baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-				<SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
-				<liveHotelNum>3</liveHotelNum>
-				<!-- kafka start -->
-				<zk_connect>10.4.31.46:2181</zk_connect>
-				<!-- kafka end -->
-
-				<!-- BMS黑名单验证接口 -->
-				<blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
-				<!-- 推送消息配置 0：测试环境 1：生产环境 -->
-				<sendmess.testorformal>0</sendmess.testorformal>
-				<black_Switch>1</black_Switch>
-			</properties>
-		</profile>		
-	</profiles>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.mk</groupId>
+        <artifactId>ots-all-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <artifactId>ots-web</artifactId>
+    <name>ots-web</name>
+    <url>http://maven.apache.org</url>
+    <packaging>war</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <cxf.version>2.2.5</cxf.version>
+        <java.version>1.7</java.version>
+        <slf4j.version>1.7.12</slf4j.version>
+        <logback.version>1.1.2</logback.version>
+        <spring.version>4.1.5.RELEASE</spring.version>
+        <spring-session.version>1.0.0.RELEASE</spring-session.version>
+        <spring-security.version>3.2.6.RELEASE</spring-security.version>
+        <hibernate.version>4.2.18.Final</hibernate.version>
+        <aspectj.version>1.6.12.M2</aspectj.version>
+        <hamcrest.core.version>1.3</hamcrest.core.version>
+        <junit.version>4.11</junit.version>
+        <mockito.core.version>1.9.5</mockito.core.version>
+        <commons-configuration.version>1.6</commons-configuration.version>
+
+        <kafka.version>1.0.2</kafka.version>
+        <care-kafka.version>1.0.0</care-kafka.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>public</id>
+            <name>Public Repositories</name>
+            <url>http://10.4.4.228:8081/nexus/content/repositories/releases/</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>public</id>
+            <name>Public Repositories</name>
+            <url>http://10.4.4.228:8081/nexus/content/repositories/releases/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>mk-kafka</artifactId>
+            <version>${kafka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>mk-care-kafka</artifactId>
+            <version>${care-kafka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>xmlpull</groupId>
+            <artifactId>xmlpull</artifactId>
+            <version>1.1.3.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>xpp3</groupId>
+            <artifactId>xpp3</artifactId>
+            <version>1.1.4c</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>stringtemplate</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-exec</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+            <version>2.1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xbean</groupId>
+            <artifactId>xbean-spring</artifactId>
+            <version>3.6</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>1.1.0.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.18.1-GA</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>3.8-beta5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>3.8-beta5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.13</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.2.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>jsp-api</artifactId>
+            <version>2.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet.jsp.jstl</groupId>
+            <artifactId>jstl-api</artifactId>
+            <version>1.2</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>servlet-api</artifactId>
+                    <groupId>javax.servlet</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>2.4</version>
+            <classifier>jdk15</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.8.2</version>
+        </dependency>
+        <dependency>
+            <groupId>jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>0.9.21</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>fluent-hc</artifactId>
+            <version>4.3.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient-cache</artifactId>
+            <version>4.3.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.3.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.46</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <version>${spring-security.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-web</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+            <version>${spring-security.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-web</artifactId> <version>${spring.version}</version> </dependency> -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+            <exclusions>
+                <!-- Exclude Commons Logging in favor of SLF4j -->
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-log4j12</artifactId> <version>${slf4j.version}</version> </dependency> -->
+        <dependency>
+            <groupId>org.apache.ws.commons.schema</groupId>
+            <artifactId>XmlSchema</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+            <version>${cxf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-transports-http</artifactId>
+            <version>${cxf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-transports-http-jetty</artifactId>
+            <version>${cxf.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-access</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sourceforge.jtds</groupId>
+            <artifactId>jtds</artifactId>
+            <version>1.2.4</version>
+        </dependency>
+        <!-- spring timmer -->
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+        <!-- <dependency> <groupId>opensymphony</groupId> <artifactId>quartz-all</artifactId> <version>1.6.0</version> </dependency> -->
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.cassandra</groupId>
+            <artifactId>cassandra-thrift</artifactId>
+            <version>2.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <version>${hamcrest.core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.core.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>1.2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.drewnoakes</groupId>
+            <artifactId>metadata-extractor</artifactId>
+            <version>2.7.2</version>
+        </dependency>
+        <dependency>
+            <groupId>net.spy</groupId>
+            <artifactId>spymemcached</artifactId>
+            <version>2.11.6</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.jpush.api</groupId>
+            <artifactId>jpush-client</artifactId>
+            <version>3.1.3</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jodd</groupId>
+            <artifactId>jodd-proxetta</artifactId>
+            <version>3.6.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.2.8</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-messaging</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>jdom</groupId>
+            <artifactId>jdom</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.easyrules</groupId>
+            <artifactId>easyrules-core</artifactId>
+            <version>1.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis.generator</groupId>
+            <artifactId>mybatis-generator-core</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+
+        <!-- hessian -->
+        <dependency>
+            <groupId>com.caucho</groupId>
+            <artifactId>hessian</artifactId>
+            <version>3.1.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.3.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>1.5.1</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-elasticsearch</artifactId>
+            <version>1.2.0.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+            <version>1.5.0.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>baidu.yun</groupId>
+            <artifactId>baidu.yun</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>mike.web</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>old_pms_hessian</artifactId>
+            <version>1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.esotericsoftware.yamlbeans</groupId>
+            <artifactId>yamlbeans</artifactId>
+            <version>1.09</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.15</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.qiniu</groupId>
+            <artifactId>qiniu-java-sdk</artifactId>
+            <version>[7.0.0, 7.0.99]</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.0.27.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>5.1.3.Final</version>
+        </dependency>
+
+        <!-- <dependency> <groupId>message.voice</groupId> <artifactId>CCP_REST_SDK_JAVA_v2.7r</artifactId> <version>0.0.1</version> </dependency> <dependency> <groupId>message.sms</groupId> <artifactId>CCP_REST_SMS_SDK_JAVA_v2.6.3r</artifactId> <version>0.0.1</version> </dependency> -->
+
+        <dependency>
+            <groupId>com.cloopen</groupId>
+            <artifactId>CCP_REST_SDK_JAVA</artifactId>
+            <version>v2.7r</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cloopen</groupId>
+            <artifactId>CCP_REST_SMS_SDK_JAVA</artifactId>
+            <version>v2.6.3r</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+
+
+
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>${commons-configuration.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.unidal.framework</groupId>
+            <artifactId>foundation-service</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dianping.cat</groupId>
+            <artifactId>cat-client</artifactId>
+            <version>1.3.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>3.0.8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-container-default</artifactId>
+            <version>1.5.5</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>google-collections</artifactId>
+                    <groupId>com.google.collections</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-classworlds</artifactId>
+            <version>2.2.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>monitor-connector</artifactId>
+            <version>0.0.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-kafka</artifactId>
+            <version>1.2.1.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka_2.10</artifactId>
+            <version>0.8.2.1</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>ots-fun-face</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>ots-fun-biz</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>ots-ord-face</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>ots-ord-biz</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>ots-pay-face</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>ots-pay-biz</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>ots-pro-face</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>ots-pro-biz</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mk</groupId>
+            <artifactId>ots-commons</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+    </dependencies>
+    <build>
+        <finalName>ots</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/*.properties</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources/logback/${label}</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>aspectj-maven-plugin</artifactId>
+                <version>1.2</version>
+                <!-- NB: do not use 1.3 or 1.3.x due to MASPECTJ-90 and do not use 1.4 due to declare parents issue -->
+                <dependencies>
+                    <!-- NB: You must use Maven 2.0.9 or above or these are ignored (see MNG-2972) -->
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjrt</artifactId>
+                        <version>${aspectj.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjtools</artifactId>
+                        <version>${aspectj.version}</version>
+                    </dependency>
+                </dependencies>
+                <!-- <executions> <execution> <goals> <goal>compile</goal> <goal>test-compile</goal> </goals> </execution> </executions> -->
+                <configuration>
+                    <outxml>true</outxml>
+                    <aspectLibraries>
+                        <aspectLibrary>
+                            <groupId>org.springframework</groupId>
+                            <artifactId>spring-aspects</artifactId>
+                        </aspectLibrary>
+                    </aspectLibraries>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1.1</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <SVN-Revision>${SVN.revision}</SVN-Revision>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <printSummary>false</printSummary>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.7</version>
+            </plugin>
+            <!-- IDE -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <version>2.7</version>
+                <!-- Note 2.8 does not work with AspectJ aspect path -->
+                <configuration>
+                    <downloadSources>true</downloadSources>
+                    <downloadJavadocs>false</downloadJavadocs>
+                    <wtpversion>2.0</wtpversion>
+                    <additionalBuildcommands>
+                        <buildCommand>
+                            <name>org.eclipse.ajdt.core.ajbuilder</name>
+                            <arguments>
+                                <aspectPath>org.springframework.aspects</aspectPath>
+                            </arguments>
+                        </buildCommand>
+                        <buildCommand>
+                            <name>org.springframework.ide.eclipse.core.springbuilder</name>
+                        </buildCommand>
+                    </additionalBuildcommands>
+                    <additionalProjectnatures>
+                        <projectnature>org.eclipse.ajdt.ui.ajnature</projectnature>
+                        <projectnature>com.springsource.sts.roo.core.nature</projectnature>
+                        <projectnature>org.springframework.ide.eclipse.core.springnature</projectnature>
+                    </additionalProjectnatures>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.2.1.v20140609</version>
+                <configuration>
+                    <webApp>
+                        <contextPath>/ots</contextPath>
+                        <!-- <contextPath>/${project.artifactId}</contextPath> -->
+                    </webApp>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>3.0.5</version>
+                <configuration>
+                    <changeLogFile>src/main/resources/db/liquibase/liquibase.xml</changeLogFile>
+                    <driver>${jdbc.driver}</driver>
+                    <url>${master.jdbc.url}</url>
+                    <username>${master.jdbc.user}</username>
+                    <password>${master.jdbc.password}</password>
+                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.mybatis.generator</groupId>
+                <artifactId>mybatis-generator-maven-plugin</artifactId>
+                <version>1.3.2</version>
+                <configuration>
+                    <verbose>true</verbose>
+                    <overwrite>true</overwrite>
+                </configuration>
+            </plugin>
+        </plugins>
+        <pluginManagement>
+            <plugins>
+                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
+            </plugins>
+        </pluginManagement>
+    </build>
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <label>local</label>
+                <jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+                <master.jdbc.url><![CDATA[jdbc:mysql://192.168.70.98:3306/hms_new?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+                <master.jdbc.user>root</master.jdbc.user>
+                <master.jdbc.password>imike@2015</master.jdbc.password>
+                <slave.jdbc.url><![CDATA[jdbc:mysql://192.168.70.98:3306/hms_new?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+                <slave.jdbc.user>root</slave.jdbc.user>
+                <slave.jdbc.password>imike@2015</slave.jdbc.password>
+                <spring.redis.sentinel.master>ots-redis</spring.redis.sentinel.master>
+                <spring.redis.sentinel.nodes>10.4.1.14:26379,10.4.1.210:26379</spring.redis.sentinel.nodes>
+                <synserver.ip>192.168.81.45</synserver.ip>
+                <synserver.port>8000</synserver.port>
+                <elasticsearch.clusterhosts>192.168.81.45:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>ota2-test-elastic</elasticsearch.clustername>
+                <elasticsearch.index>ots</elasticsearch.index>
+                <elasticsearch.type>hotel</elasticsearch.type>
+                <hessian_soap>http://10.4.25.248:8082/soap/hessian</hessian_soap>
+                <hessian_bms>http://sms.imike.cn</hessian_bms>
+                <newpms.url>http://10.4.17.121:8083/otai/ots2pms/</newpms.url>
+                <jedis.pool.maxidl>20</jedis.pool.maxidl>
+                <jedis.pool.minidl>8</jedis.pool.minidl>
+                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+                <addpay>https://otai.imike.com/otai/ots2pms/addpay</addpay>
+                <cancelpay>https://otai.imike.com/otai/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>https://otai.imike.com/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>https://otai.imike.com/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+                <inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <wx_type>test_wechat</wx_type>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
+                <liveHotelNum>3</liveHotelNum>
+                <!-- kafka start -->
+                <zk_connect>10.4.31.46:2181</zk_connect>
+                <!-- kafka end -->
+
+                <!-- BMS黑名单验证接口 -->
+                <blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
+                <sendmess.testorformal>0</sendmess.testorformal>
+                <black_Switch>1</black_Switch>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>pro</id>
+            <properties>
+                <label>product</label>
+                <jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+                <master.jdbc.url><![CDATA[jdbc:mysql://10.4.17.242:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+                <master.jdbc.user>ota2developer</master.jdbc.user>
+                <master.jdbc.password>www.imike.com</master.jdbc.password>
+                <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.17.242:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+                <slave.jdbc.user>ota2developer</slave.jdbc.user>
+                <slave.jdbc.password>www.imike.com</slave.jdbc.password>
+                <spring.redis.sentinel.master>ots-redis</spring.redis.sentinel.master>
+                <spring.redis.sentinel.nodes>10.4.1.14:26379,10.4.1.210:26379</spring.redis.sentinel.nodes>
+                <synserver.ip>10.4.25.248</synserver.ip>
+                <synserver.port>8000</synserver.port>
+                <elasticsearch.clusterhosts>10.4.31.237:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>ota2-test-elastic</elasticsearch.clustername>
+                <elasticsearch.index>ots</elasticsearch.index>
+                <elasticsearch.type>hotel</elasticsearch.type>
+                <hessian_soap>http://10.4.25.248:8082/soap/hessian</hessian_soap>
+                <hessian_bms>http://sale.imike.com</hessian_bms>
+                <newpms.url>http://10.4.17.121:8083/otai/ots2pms/</newpms.url>
+                <jedis.pool.maxidl>20</jedis.pool.maxidl>
+                <jedis.pool.minidl>8</jedis.pool.minidl>
+                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+
+                <inform_sale_url><![CDATA[http://sale.imike.com/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <wx_type>wechat</wx_type>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
+                <liveHotelNum>3</liveHotelNum>
+                <!-- kafka start -->
+                <zk_connect>10.4.31.46:2181</zk_connect>
+                <!-- kafka end -->
+
+                <!-- BMS黑名单验证接口 -->
+                <blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
+                <sendmess.testorformal>0</sendmess.testorformal>
+                <black_Switch>1</black_Switch>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>clu</id>
+            <properties>
+                <label>product</label>
+                <jdbc.driver>com.mk.jdbc.MonitorDriver</jdbc.driver>
+                <master.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://10.4.1.242:3306/ots?autoReconnect=true&zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+                <master.jdbc.user>imike-writer</master.jdbc.user>
+                <master.jdbc.password>Imike-writer</master.jdbc.password>
+                <slave.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://10.4.17.67:3306/ots?autoReconnect=true&zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+                <slave.jdbc.user>imike-reader</slave.jdbc.user>
+                <slave.jdbc.password>Imike-reader!@#$</slave.jdbc.password>
+                <spring.redis.sentinel.master>ots-redis</spring.redis.sentinel.master>
+                <spring.redis.sentinel.nodes>10.4.1.14:26379,10.4.1.210:26379</spring.redis.sentinel.nodes>
+                <synserver.ip>10.4.15.193</synserver.ip>
+                <synserver.port>8000</synserver.port>
+                <elasticsearch.clusterhosts>10.4.2.94:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>ots-production-elasticsearch</elasticsearch.clustername>
+                <elasticsearch.index>ots</elasticsearch.index>
+                <elasticsearch.type>hotel</elasticsearch.type>
+                <hessian_soap>http://123.58.131.40:8080/soap/hessian</hessian_soap>
+                <hessian_bms>http://sale.imike.com</hessian_bms>
+                <newpms.url>https://otai.imike.com/otai/ots2pms</newpms.url>
+
+                <jedis.pool.maxidl>20</jedis.pool.maxidl>
+                <jedis.pool.minidl>8</jedis.pool.minidl>
+                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+
+                <addpay>https://otai.imike.com/otai/ots2pms/addpay</addpay>
+                <cancelpay>https://otai.imike.com/otai/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>https://otai.imike.com/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>https://otai.imike.com/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+
+                <inform_sale_url><![CDATA[http://sale.imike.com/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <wx_type>wechat</wx_type>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>2</baidumessage_DeployStatus>
+                <SendCouponsJob_datelimit>-1</SendCouponsJob_datelimit>
+                <liveHotelNum>3</liveHotelNum>
+                <!-- kafka start -->
+                <zk_connect>10.4.36.125:2181,10.4.37.39:2181,10.4.39.92:2181</zk_connect>
+                <!-- kafka end -->
+
+                <!-- BMS黑名单验证接口 -->
+                <blacklist.url>http://10.4.36.210:8080/check</blacklist.url>
+                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
+                <sendmess.testorformal>1</sendmess.testorformal>
+                <black_Switch>0</black_Switch>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>test</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <label>product</label>
+                <jdbc.driver>com.mk.jdbc.MonitorDriver</jdbc.driver>
+                <master.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://10.4.17.242:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+                <master.jdbc.user>ota2developer</master.jdbc.user>
+                <master.jdbc.password>www.imike.com</master.jdbc.password>
+                <slave.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://10.4.17.242:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+                <slave.jdbc.user>ota2developer</slave.jdbc.user>
+                <slave.jdbc.password>www.imike.com</slave.jdbc.password>
+                <spring.redis.sentinel.master>ota2-test-redis</spring.redis.sentinel.master>
+                <spring.redis.sentinel.nodes>10.4.27.128:26379</spring.redis.sentinel.nodes>
+                <synserver.ip>10.4.10.190</synserver.ip>
+                <synserver.port>8000</synserver.port>
+                <elasticsearch.clusterhosts>10.4.17.242:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>ota2-test-es-on-mysql</elasticsearch.clustername>
+                <elasticsearch.index>ots</elasticsearch.index>
+                <elasticsearch.type>hotel</elasticsearch.type>
+                <hessian_soap>http://10.4.10.190:8080/soap/hessian</hessian_soap>
+                <hessian_bms>http://sms.imike.cn</hessian_bms>
+                <newpms.url>http://10.4.17.121:8083/otai/ots2pms</newpms.url>
+                <jedis.pool.maxidl>20</jedis.pool.maxidl>
+                <jedis.pool.minidl>8</jedis.pool.minidl>
+                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+                <addpay>https://smlt-otai.imike.cn/otai/ots2pms/addpay</addpay>
+                <cancelpay>https://smlt-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>https://smlt-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>https://smlt-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <wx_type>test_wechat</wx_type>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
+                <liveHotelNum>1</liveHotelNum>
+                <!-- kafka start -->
+                <zk_connect>10.4.31.46:2181</zk_connect>
+                <!-- kafka end -->
+
+                <!-- BMS黑名单验证接口 -->
+                <blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
+                <sendmess.testorformal>0</sendmess.testorformal>
+                <black_Switch>1</black_Switch>
+            </properties>
+        </profile>
+        <profile>
+            <id>shanghai-dev</id>
+            <properties>
+                <label>product</label>
+                <jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+                <master.jdbc.url><![CDATA[jdbc:mysql://10.4.17.242:3306/dev_ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+                <master.jdbc.user>ota2developer</master.jdbc.user>
+                <master.jdbc.password>www.imike.com</master.jdbc.password>
+                <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.17.242:3306/dev_ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+                <slave.jdbc.user>ota2developer</slave.jdbc.user>
+                <slave.jdbc.password>www.imike.com</slave.jdbc.password>
+                <spring.redis.sentinel.master>ota2-test-redis</spring.redis.sentinel.master>
+                <spring.redis.sentinel.nodes>10.4.27.128:26379</spring.redis.sentinel.nodes>
+                <synserver.ip>10.4.10.190</synserver.ip>
+                <synserver.port>8000</synserver.port>
+                <elasticsearch.clusterhosts>10.4.17.242:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>ota2-test-es-on-mysql</elasticsearch.clustername>
+                <elasticsearch.index>ots</elasticsearch.index>
+                <elasticsearch.type>hotel</elasticsearch.type>
+                <hessian_soap>http://10.4.10.190:8080/soap/hessian</hessian_soap>
+                <hessian_bms>http://sms.imike.cn</hessian_bms>
+                <newpms.url>http://10.4.17.121:8083/otai/ots2pms</newpms.url>
+                <jedis.pool.maxidl>20</jedis.pool.maxidl>
+                <jedis.pool.minidl>8</jedis.pool.minidl>
+                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+                <addpay>https://otai.imike.com/otai/ots2pms/addpay</addpay>
+                <cancelpay>https://otai.imike.com/otai/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>https://otai.imike.com/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>https://otai.imike.com/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+                <inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <wx_type>test_wechat</wx_type>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
+                <liveHotelNum>1</liveHotelNum>
+                <!-- kafka start -->
+                <zk_connect>10.4.31.46:2181</zk_connect>
+                <!-- kafka end -->
+
+                <!-- BMS黑名单验证接口 -->
+                <blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
+                <sendmess.testorformal>0</sendmess.testorformal>
+                <black_Switch>1</black_Switch>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>shanghai-simulation</id>
+            <properties>
+                <label>product</label>
+                <jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+                <master.jdbc.url><![CDATA[jdbc:mysql://10.4.24.11:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+                <master.jdbc.user>smlt-writer</master.jdbc.user>
+                <master.jdbc.password>j9bcyZ5U5LQp7xxEomsu</master.jdbc.password>
+                <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.24.11:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+                <slave.jdbc.user>smlt-writer</slave.jdbc.user>
+                <slave.jdbc.password>j9bcyZ5U5LQp7xxEomsu</slave.jdbc.password>
+                <!-- <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.28.44:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url> <slave.jdbc.user>smlt-reader</slave.jdbc.user> <slave.jdbc.password>ims8LfQKTBs6gj79TdgB</slave.jdbc.password> -->
+                <spring.redis.sentinel.master>ota2-test-redis</spring.redis.sentinel.master>
+                <spring.redis.sentinel.nodes>10.4.20.206:26379</spring.redis.sentinel.nodes>
+                <synserver.ip>10.4.17.121</synserver.ip>
+                <synserver.port>8000</synserver.port>
+                <elasticsearch.clusterhosts>10.4.32.10:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>smlt-elasticsearch</elasticsearch.clustername>
+                <elasticsearch.index>ots</elasticsearch.index>
+                <elasticsearch.type>hotel</elasticsearch.type>
+                <hessian_soap>http://10.4.26.201:8082/soap/hessian</hessian_soap>
+                <hessian_bms>http://sms.imike.cn/</hessian_bms>
+                <newpms.url>https://smlt-otai.imike.cn/otai/ots2pms</newpms.url>
+                <jedis.pool.maxidl>20</jedis.pool.maxidl>
+                <jedis.pool.minidl>8</jedis.pool.minidl>
+                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+                <addpay>https://smlt-otai.imike.cn/otai/ots2pms/addpay</addpay>
+                <cancelpay>https://smlt-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>https://smlt-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>https://smlt-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <wx_type>test_app</wx_type>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
+                <liveHotelNum>3</liveHotelNum>
+                <!-- kafka start -->
+                <zk_connect>10.4.31.46:2181</zk_connect>
+                <!-- kafka end -->
+
+                <!-- BMS黑名单验证接口 -->
+                <blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
+                <sendmess.testorformal>0</sendmess.testorformal>
+                <black_Switch>1</black_Switch>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>hotfix</id>
+            <properties>
+                <label>product</label>
+                <jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+                <master.jdbc.url><![CDATA[jdbc:mysql://10.4.24.11:3306/hotfix_ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+                <master.jdbc.user>hotfix-writer</master.jdbc.user>
+                <master.jdbc.password>5A6QG9Y8Ol</master.jdbc.password>
+                <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.24.11:3306/hotfix_ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+                <slave.jdbc.user>hotfix-reader</slave.jdbc.user>
+                <slave.jdbc.password>1fn1CTw9O4</slave.jdbc.password>
+                <spring.redis.sentinel.master>ota2-test-redis</spring.redis.sentinel.master>
+                <spring.redis.sentinel.nodes>10.4.20.206:26379</spring.redis.sentinel.nodes>
+                <synserver.ip>10.4.11.218</synserver.ip>
+                <synserver.port>8000</synserver.port>
+                <elasticsearch.clusterhosts>10.4.32.10:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>smlt-elasticsearch</elasticsearch.clustername>
+                <elasticsearch.index>ots</elasticsearch.index>
+                <elasticsearch.type>hotel</elasticsearch.type>
+                <hessian_soap>http://10.4.11.218:8083/soap/hessian</hessian_soap>
+                <hessian_bms>http://sms.imike.cn/</hessian_bms>
+                <jedis.pool.maxidl>20</jedis.pool.maxidl>
+                <jedis.pool.minidl>8</jedis.pool.minidl>
+                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+                <inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <wx_type>test_wechat</wx_type>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
+
+                <newpms.url>https://10.4.11.218:8443/otai/ots2pms</newpms.url>
+                <addpay>https://10.4.11.218:8443/otai/ots2pms/addpay</addpay>
+                <cancelpay>https://10.4.11.218:8443/otai/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>https://10.4.11.218:8443/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>https://10.4.11.218:8443/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+                <!-- kafka start -->
+                <zk_connect>10.4.31.46:2181</zk_connect>
+                <!-- kafka end -->
+
+                <!-- BMS黑名单验证接口 -->
+                <blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
+                <sendmess.testorformal>0</sendmess.testorformal>
+                <black_Switch>1</black_Switch>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>bjtest</id>
+            <properties>
+                <label>bjtest</label>
+                <jdbc.driver>com.mk.jdbc.MonitorDriver</jdbc.driver>
+                <master.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://192.168.0.21:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+                <master.jdbc.user>root</master.jdbc.user>
+                <master.jdbc.password>imike@2015</master.jdbc.password>
+                <slave.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://192.168.0.21:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+                <slave.jdbc.user>root</slave.jdbc.user>
+                <slave.jdbc.password>imike@2015</slave.jdbc.password>
+                <spring.redis.sentinel.master>mymaster</spring.redis.sentinel.master>
+                <spring.redis.sentinel.nodes>192.168.0.21:26379</spring.redis.sentinel.nodes>
+                <synserver.ip>192.168.0.21</synserver.ip>
+                <synserver.port>8000</synserver.port>
+                <elasticsearch.clusterhosts>192.168.0.21:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>ota2-test-es-on-mysql</elasticsearch.clustername>
+                <elasticsearch.index>ots</elasticsearch.index>
+                <elasticsearch.type>hotel</elasticsearch.type>
+                <hessian_soap>http://192.168.0.21:8010/soap/hessian</hessian_soap>
+                <hessian_bms>http://sms.imike.cn</hessian_bms>
+                <jedis.pool.maxidl>20</jedis.pool.maxidl>
+                <jedis.pool.minidl>8</jedis.pool.minidl>
+                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+                <inform_sale_url><![CDATA[http://bmstest.imike.cn:8080/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <wx_type>test_wechat</wx_type>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
+                <liveHotelNum>3</liveHotelNum>
+
+                <newpms.url>https://192.168.0.21:8443/otai/ots2pms</newpms.url>
+                <addpay>https://192.168.0.21:8443/otai/ots2pms/addpay</addpay>
+                <cancelpay>https://192.168.0.21:8443/otai/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>https://192.168.0.21:8443/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>https://192.168.0.21:8443/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+
+                <!-- kafka start -->
+                <zk_connect>192.168.0.17:2181</zk_connect>
+                <!-- <zk_connect>10.4.36.125:2181,10.4.37.39:2181,10.4.39.92:2181</zk_connect> -->
+                <!-- kafka end -->
+                <!-- BMS黑名单验证接口 -->
+                <blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
+                <sendmess.testorformal>0</sendmess.testorformal>
+                <black_Switch>1</black_Switch>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>bgp-simulation</id>
+            <properties>
+                <label>product</label>
+                <jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+                <master.jdbc.url><![CDATA[jdbc:mysql://10.10.187.189:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+                <master.jdbc.user>smlt-writer</master.jdbc.user>
+                <master.jdbc.password>j9bcyZ5U5LQp7xxEomsu</master.jdbc.password>
+                <slave.jdbc.url><![CDATA[jdbc:mysql://10.10.187.189:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+                <slave.jdbc.user>smlt-writer</slave.jdbc.user>
+                <slave.jdbc.password>j9bcyZ5U5LQp7xxEomsu</slave.jdbc.password>
+                <!-- <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.28.44:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url> <slave.jdbc.user>smlt-reader</slave.jdbc.user> <slave.jdbc.password>ims8LfQKTBs6gj79TdgB</slave.jdbc.password> -->
+                <spring.redis.sentinel.master>ots-smlt-bj-redis</spring.redis.sentinel.master>
+                <spring.redis.sentinel.nodes>10.10.115.57:26379</spring.redis.sentinel.nodes>
+                <synserver.ip>10.10.124.247</synserver.ip>
+                <synserver.port>8000</synserver.port>
+                <elasticsearch.clusterhosts>10.10.118.60:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>ots-smlt-bj-elastic-1</elasticsearch.clustername>
+                <elasticsearch.index>ots</elasticsearch.index>
+                <elasticsearch.type>hotel</elasticsearch.type>
+                <hessian_soap>http://10.10.131.104:8085/soap/hessian</hessian_soap>
+                <hessian_bms>http://bj-smlt-sms.imike.cn/</hessian_bms>
+                <newpms.url>https://bj-smlt-otai.imike.cn/otai/ots2pms</newpms.url>
+                <jedis.pool.maxidl>20</jedis.pool.maxidl>
+                <jedis.pool.minidl>8</jedis.pool.minidl>
+                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+                <addpay>https://bj-smlt-otai.imike.cn/otai/ots2pms/addpay</addpay>
+                <cancelpay>https://bj-smlt-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>https://bj-smlt-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>https://bj-smlt-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <inform_sale_url><![CDATA[http://bj-smlt-sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <wx_type>test_wechat</wx_type>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
+                <liveHotelNum>3</liveHotelNum>
+
+                <!-- kafka start -->
+                <zk_connect>10.10.144.40:2181,10.10.136.210:2181,10.10.115.52:2181</zk_connect>
+                <!-- kafka end -->
+
+                <!-- BMS黑名单验证接口 -->
+                <blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
+                <sendmess.testorformal>0</sendmess.testorformal>
+                <black_Switch>1</black_Switch>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>bgp-clu</id>
+            <properties>
+                <label>product</label>
+                <jdbc.driver>com.mk.jdbc.MonitorDriver</jdbc.driver>
+                <master.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://10.10.119.90:3306/ots?autoReconnect=true&zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+                <master.jdbc.user>imike-writer</master.jdbc.user>
+                <master.jdbc.password>Imike-writer</master.jdbc.password>
+                <slave.jdbc.url><![CDATA[jdbc:monitor4jdbc:mysql://10.10.141.244:3306/ots?autoReconnect=true&zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+                <slave.jdbc.user>imike-reader</slave.jdbc.user>
+                <slave.jdbc.password>Imike-reader!@#$</slave.jdbc.password>
+                <spring.redis.sentinel.master>ots-redis</spring.redis.sentinel.master>
+                <spring.redis.sentinel.nodes>10.10.103.141:26379,10.10.104.151:26379</spring.redis.sentinel.nodes>
+                <synserver.ip>10.10.108.139</synserver.ip>
+                <synserver.port>8000</synserver.port>
+                <elasticsearch.clusterhosts>10.10.96.147:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>ots-production-elasticsearch</elasticsearch.clustername>
+                <elasticsearch.index>ots</elasticsearch.index>
+                <elasticsearch.type>hotel</elasticsearch.type>
+                <hessian_soap>http://10.10.108.139:8080/soap/hessian</hessian_soap>
+                <hessian_bms>http://sale.imike.com</hessian_bms>
+                <newpms.url>https://otai.imike.com/otai/ots2pms</newpms.url>
+
+                <jedis.pool.maxidl>20</jedis.pool.maxidl>
+                <jedis.pool.minidl>8</jedis.pool.minidl>
+                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+
+                <addpay>http://hotel.imike.com/ots2pms/addpay</addpay>
+                <cancelpay>http://hotel.imike.com/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>http://hotel.imike.com/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>http://hotel.imike.com/ots2pms/cancelpaybyerror</cancelpaybyerror>
+
+                <inform_sale_url><![CDATA[http://sale.imike.com/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <wx_type>wechat</wx_type>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>2</baidumessage_DeployStatus>
+                <SendCouponsJob_datelimit>-1</SendCouponsJob_datelimit>
+                <liveHotelNum>3</liveHotelNum>
+                <!-- kafka start -->
+                <zk_connect>10.10.105.143:2181,10.10.106.212:2181,10.10.103.91:2181</zk_connect>
+                <!-- kafka end -->
+
+                <!-- BMS黑名单验证接口 -->
+                <blacklist.url>http://10.10.109.192:8080/check</blacklist.url>
+                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
+                <sendmess.testorformal>1</sendmess.testorformal>
+                <black_Switch>0</black_Switch>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>bgp-test</id>
+            <properties>
+                <label>product</label>
+                <jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+                <master.jdbc.url><![CDATA[jdbc:mysql://10.10.119.90:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+                <master.jdbc.user>imike-writer</master.jdbc.user>
+                <master.jdbc.password>Imike-writer</master.jdbc.password>
+                <slave.jdbc.url><![CDATA[jdbc:mysql://10.10.141.244:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+                <slave.jdbc.user>imike-reader</slave.jdbc.user>
+                <slave.jdbc.password>Imike-reader!@#$</slave.jdbc.password>
+                <spring.redis.sentinel.master>ots-redis</spring.redis.sentinel.master>
+                <spring.redis.sentinel.nodes>10.10.103.141:26379,10.10.104.151:26379</spring.redis.sentinel.nodes>
+                <synserver.ip>10.10.108.139</synserver.ip>
+                <synserver.port>8000</synserver.port>
+                <elasticsearch.clusterhosts>10.10.96.147:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>ots-production-bj-elasticsearch</elasticsearch.clustername>
+                <elasticsearch.index>ots</elasticsearch.index>
+                <elasticsearch.type>hotel</elasticsearch.type>
+                <hessian_soap>http://10.10.108.139:8080/soap/hessian</hessian_soap>
+                <hessian_bms>http://trans-sale.imike.cn/</hessian_bms>
+                <newpms.url>https://trans-otai.imike.cn/otai/ots2pms</newpms.url>
+                <jedis.pool.maxidl>20</jedis.pool.maxidl>
+                <jedis.pool.minidl>8</jedis.pool.minidl>
+                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+                <addpay>https://trans-otai.imike.cn/otai/ots2pms/addpay</addpay>
+                <cancelpay>https://trans-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>https://trans-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>https://trans-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <inform_sale_url><![CDATA[http://trans-sale.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <wx_type>test_wechat</wx_type>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
+                <liveHotelNum>3</liveHotelNum>
+
+                <!-- kafka start -->
+                <zk_connect>10.10.105.143:2181,10.10.106.212:2181,10.10.103.91:2181</zk_connect>
+                <!-- kafka end -->
+
+                <!-- BMS黑名单验证接口 -->
+                <blacklist.url>http://10.10.109.192:8080/check</blacklist.url>
+                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
+                <sendmess.testorformal>0</sendmess.testorformal>
+                <black_Switch>1</black_Switch>
+            </properties>
+        </profile>
+    </profiles>
 </project>

@@ -41,6 +41,9 @@ public class DateUtils extends Object {
     /** 纯时间格式. */
     public static final String FORMAT_TIME = "HH:mm:ss";
 
+    public static final String FORMAT_HOURMIN = "HHmm";
+
+
     public static final String FORMATDATETIME = "yyyyMMddHHmmss";
     
     public static final String FORMATSHORTDATETIME = "yyyyMMdd";
@@ -984,6 +987,23 @@ public class DateUtils extends Object {
     }
 
     /**
+     * 当得到两个日期相差天数.<br>
+     * <br>
+     * @param first 第一个日期.
+     * @param second 第二个日期.
+     * @return 相差的天数
+     */
+    public static int selectDateDiff(Date first, Date second) {
+        int dif = 0;
+        try {
+            dif = (int) ((first.getTime() - second.getTime()) / 86400000);
+        } catch (Exception e) {
+            dif = 0;
+        }
+        return dif;
+    }
+
+    /**
      * 两个时间相差小时数
      * @param beginTime 开始时间
      * @param endTime 结束时间
@@ -1754,5 +1774,23 @@ public class DateUtils extends Object {
 
         return new Date[]{runTime,runTime};
     }
-    
+
+    /**
+     * 计算两个时间的时分，是否第一个时间的时分在第二个时间之前
+     * @param firstDate
+     * @param secondDate
+     * @return
+     */
+    public static boolean timeBefore(Date firstDate, Date secondDate) {
+
+        int fisrtTime = Integer.parseInt(getStringFromDate(firstDate, FORMAT_HOURMIN).toString());
+        int secondTime = Integer.parseInt(getStringFromDate(secondDate, FORMAT_HOURMIN).toString());
+
+        if (fisrtTime < secondTime) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
 }

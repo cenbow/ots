@@ -1,24 +1,6 @@
 
 package com.mk.ots.hotel.service;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import com.mk.ots.roomsale.model.RoomPromoDto;
-import com.mk.ots.roomsale.model.TRoomSaleConfig;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.google.common.collect.Lists;
@@ -31,41 +13,32 @@ import com.mk.orm.kit.JsonKit;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.hotel.model.TFacilityModel;
-import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.model.THotelModel;
-import com.mk.ots.hotel.model.TPricetimeWithPrices;
-import com.mk.ots.hotel.model.TRoomModel;
-import com.mk.ots.hotel.model.TRoomRepairModel;
-import com.mk.ots.hotel.model.TRoomTypeInfoModel;
-import com.mk.ots.hotel.model.TRoomTypeModel;
-import com.mk.ots.hotel.model.TRoomTypeWithBasePrice;
+import com.mk.ots.hotel.model.*;
 import com.mk.ots.manager.OtsCacheManager;
-import com.mk.ots.mapper.PmsRoomOrderMapper;
-import com.mk.ots.mapper.RoomCensusMapper;
-import com.mk.ots.mapper.RoomLockPoMapper;
-import com.mk.ots.mapper.TFacilityMapper;
-import com.mk.ots.mapper.THotelMapper;
-import com.mk.ots.mapper.TPricetimeMapper;
-import com.mk.ots.mapper.TRoomMapper;
-import com.mk.ots.mapper.TRoomRepairMapper;
-import com.mk.ots.mapper.TRoomTypeMapper;
-import com.mk.ots.mapper.TRoomtypeInfoMapper;
+import com.mk.ots.mapper.*;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.OtaRoomOrder;
 import com.mk.ots.order.model.PmsRoomOrderModel;
 import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.room.bean.RoomCensus;
-import com.mk.ots.roomsale.model.TRoomSale;
+import com.mk.ots.roomsale.model.RoomPromoDto;
+import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.web.ServiceOutput;
 import com.mk.pms.myenum.PmsRoomOrderStatusEnum;
 import com.mk.pms.room.bean.RoomLockJsonBean;
 import com.mk.pms.room.bean.RoomLockPo;
 import com.mk.pms.room.service.PmsRoomService;
-
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * 房态服务类(git测试5)
@@ -1597,7 +1570,8 @@ public class RoomstateService {
 				rtnPrice = troomtype.getCost();
 				return rtnPrice;
 			}
-/*
+
+          /*   //    刷门市价缓存bug修改
 			BigDecimal price = troomtype.getPrice();
 			BigDecimal subprice = troomtype.getSubprice();
 			BigDecimal subper = troomtype.getSubper();
@@ -1632,6 +1606,7 @@ public class RoomstateService {
 				return rtnPrice;
 			}
 				*/
+
 			// 放入redis缓存
 			jedis.hset(key, field, rtnPrice.toString());
 			this.logger.info("roomtype: {} price cache to redis, cache value is {}", roomtypeid, rtnPrice);
