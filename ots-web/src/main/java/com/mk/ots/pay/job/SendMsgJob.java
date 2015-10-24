@@ -1,14 +1,5 @@
 package com.mk.ots.pay.job;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
@@ -18,6 +9,14 @@ import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.service.OrderService;
 import com.mk.ots.pay.model.PPayTask;
 import com.mk.ots.pay.service.IPayService;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service("sendMsgJob")
 public class SendMsgJob implements PayJob {
@@ -45,7 +44,7 @@ public class SendMsgJob implements PayJob {
 			
 			OtaOrder order = orderService.findOtaOrderById(task.getOrderId());
 			
-			if(order.getOrderStatus() >= OtaOrderStatusEnum.CheckIn.getId().intValue()) {
+			if(order != null && order.getOrderStatus() >= OtaOrderStatusEnum.CheckIn.getId().intValue()) {
 				
 				logger.info("订单:" + task.getOrderId() + "已经是" + OtaOrderStatusEnum.getByID(order.getOrderStatus()).name() + "状态,不需要再发送短信.");
 				
