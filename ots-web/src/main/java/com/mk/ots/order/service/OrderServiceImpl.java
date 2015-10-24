@@ -1,44 +1,7 @@
 package com.mk.ots.order.service;
 
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.ws.http.HTTPException;
-
-import com.mk.framework.util.*;
-import com.mk.ots.common.enums.*;
-import com.mk.ots.roomsale.model.TRoomSale;
-import com.mk.ots.roomsale.service.RoomSaleService;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import redis.clients.jedis.Jedis;
 import cn.com.winhoo.mikeweb.myenum.PmsRoomOrderStatusEnum;
-import cn.com.winhoo.pms.webout.service.bean.CancelOrder;
-import cn.com.winhoo.pms.webout.service.bean.PmsCheckinPerson;
-import cn.com.winhoo.pms.webout.service.bean.PmsOtaAddOrder;
-import cn.com.winhoo.pms.webout.service.bean.PmsRCost;
-import cn.com.winhoo.pms.webout.service.bean.PmsUpdateOrder;
-import cn.com.winhoo.pms.webout.service.bean.ReturnObject;
-
+import cn.com.winhoo.pms.webout.service.bean.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dianping.cat.Cat;
@@ -52,31 +15,22 @@ import com.mk.care.kafka.model.Message;
 import com.mk.framework.AppUtils;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
+import com.mk.framework.util.Cast;
+import com.mk.framework.util.MyTokenUtils;
+import com.mk.framework.util.PayUtil;
+import com.mk.framework.util.UrlUtils;
 import com.mk.orm.kit.JsonKit;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
 import com.mk.ots.common.bean.PageObject;
-import com.mk.ots.common.utils.Constant;
-import com.mk.ots.common.utils.DateTools;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.common.utils.NumUtils;
-import com.mk.ots.common.utils.SysConfig;
-import com.mk.ots.hotel.bean.HQrCode;
-import com.mk.ots.hotel.bean.RoomTypePriceBean;
-import com.mk.ots.hotel.bean.TRoom;
-import com.mk.ots.hotel.bean.TRoomType;
-import com.mk.ots.hotel.bean.TRoomTypeInfo;
+import com.mk.ots.common.enums.*;
+import com.mk.ots.common.utils.*;
+import com.mk.ots.hotel.bean.*;
 import com.mk.ots.hotel.dao.HotelDAO;
 import com.mk.ots.hotel.dao.RoomDAO;
 import com.mk.ots.hotel.dao.RoomTypeDAO;
 import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.service.CashBackService;
-import com.mk.ots.hotel.service.HotelPriceService;
-import com.mk.ots.hotel.service.HotelService;
-import com.mk.ots.hotel.service.RoomService;
-import com.mk.ots.hotel.service.RoomTypeInfoService;
-import com.mk.ots.hotel.service.RoomTypeService;
-import com.mk.ots.hotel.service.RoomstateService;
+import com.mk.ots.hotel.service.*;
 import com.mk.ots.kafka.message.OtsCareProducer;
 import com.mk.ots.manager.HotelPMSManager;
 import com.mk.ots.manager.OtsCacheManager;
@@ -85,26 +39,10 @@ import com.mk.ots.mapper.OtaOrderTastsMapper;
 import com.mk.ots.member.model.UMember;
 import com.mk.ots.member.service.IMemberService;
 import com.mk.ots.message.service.impl.MessageService;
-import com.mk.ots.order.bean.BHotelPromotionPrice;
-import com.mk.ots.order.bean.OrderLog;
-import com.mk.ots.order.bean.OtaCheckInUser;
-import com.mk.ots.order.bean.OtaOrder;
-import com.mk.ots.order.bean.OtaRoomOrder;
-import com.mk.ots.order.bean.OtaRoomPrice;
-import com.mk.ots.order.bean.PmsRoomOrder;
-import com.mk.ots.order.bean.PushMessage;
-import com.mk.ots.order.bean.UUseTicketRecord;
+import com.mk.ots.order.bean.*;
 import com.mk.ots.order.common.PropertyConfigurer;
-import com.mk.ots.order.dao.CheckInUserDAO;
-import com.mk.ots.order.dao.OrderDAO;
-import com.mk.ots.order.dao.OtaOrderDAO;
-import com.mk.ots.order.dao.PmsRoomOrderDao;
-import com.mk.ots.order.dao.RoomOrderDAO;
-import com.mk.ots.order.model.BOrderBusinessLog;
-import com.mk.ots.order.model.BOtaorder;
-import com.mk.ots.order.model.FirstOrderModel;
-import com.mk.ots.order.model.OtaOrderMac;
-import com.mk.ots.order.model.OtaOrderTasts;
+import com.mk.ots.order.dao.*;
+import com.mk.ots.order.model.*;
 import com.mk.ots.pay.dao.IPOrderLogDao;
 import com.mk.ots.pay.dao.impl.POrderLogDAO;
 import com.mk.ots.pay.model.PMSCancelParam;
@@ -123,6 +61,8 @@ import com.mk.ots.promo.model.BPromotionPrice;
 import com.mk.ots.promo.service.IPromotionPriceService;
 import com.mk.ots.promo.service.impl.PromoService;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
+import com.mk.ots.roomsale.model.TRoomSale;
+import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.score.model.THotelScore;
 import com.mk.ots.score.service.ScoreService;
 import com.mk.ots.ticket.dao.UTicketDao;
@@ -137,6 +77,22 @@ import com.mk.ots.web.ServiceOutput;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.myenum.PmsErrorEnum;
 import com.mk.sever.ServerChannel;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.ws.http.HTTPException;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -2387,6 +2343,7 @@ public class OrderServiceImpl implements OrderService {
        t.setStatus(Transaction.SUCCESS);
       } catch (Exception e) {
            t.setStatus(e);
+            Cat.logError("Create Order Exception", e);
              throw e;
       }finally {
             t.complete();
@@ -2495,7 +2452,11 @@ public class OrderServiceImpl implements OrderService {
       int ruleCode=Integer.parseInt(hotel.get("rulecode").toString());
       order.setRuleCode(ruleCode);
       // session 获取会员id
+
       member = MyTokenUtils.getMemberByToken(order.getToken());
+
+      logger.info("======= Get order's member info {}, order info {} , token: {}", member, order.toJson(), order.getToken());
+
       if (member == null) {
           // 会员不存在
           throw MyErrorEnum.memberNotExist.getMyException("");
