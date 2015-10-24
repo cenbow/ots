@@ -1795,19 +1795,45 @@ public class DateUtils extends Object {
 		cal.set(year, month, day, hour, min, sec);
 	}
 
-	public static Integer promoStatus(Date startDate, Date endDate, Time startTime, Time endTime) {
-
+	public static Integer calPromoStatus(Date startDate, Date endDate, Time startTime, Time endTime) {
 		Calendar cal = Calendar.getInstance();
 		java.util.Date sysTime = cal.getTime();
+
+		LocalDateTime localStartDate = null;
+		if (startDate != null) {
+			Calendar startCal = Calendar.getInstance();
+			
+			startCal.set(startDate.getYear(), startDate.getMonth(), startDate.getDay(), 0, 0, 0);
+			localStartDate = LocalDateTime.fromCalendarFields(startCal);
+		}
+
+		LocalDateTime localSysDate = LocalDateTime.now();
+
 		Date[] startEndTime = getStartEndDate(sysTime, startTime, endTime);
 		Date startPromoTime = startEndTime[0];
 		Date endPromoTime = startEndTime[1];
 
-		getCalTime(startTime, cal);
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("startPromoTime:%s; endPromoTime:%s", startPromoTime, endPromoTime));
+		}
 
 		LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
 		LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
-		long startdiff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
+		long startdiff = 0;
+		/**
+		 * checks if over day
+		 */
+		if (localStartDate != null && localSysDate.getDayOfMonth() != localStartDate.getDayOfMonth()) {
+			return Constant.PROMOING;
+		} else if (localStartDate != null && localSysDate.getDayOfMonth() == localStartDate.getDayOfMonth()) {
+			getCalTime(startTime, cal);
+
+			if (logger.isInfoEnabled()) {
+				logger.info(String.format("promoStatus->sysExTime:%s; startExTime:%s", sysExTime, startExTime));
+			}
+
+			startdiff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
+		}
 
 		cal.clear();
 		cal.setTime(endDate);
@@ -1834,11 +1860,51 @@ public class DateUtils extends Object {
 
 	}
 
-	public static long promoStartDueTime(Long endDueTime, Time startTime, Integer promoStatus) {
+    public static Integer promoStatus(Date startDate, Date endDate, Time startTime, Time endTime) {
+
+        Calendar cal = Calendar.getInstance();
+        java.util.Date sysTime = cal.getTime();
+        Date [] startEndTime = getStartEndDate(sysTime, startTime, endTime);
+        Date startPromoTime = startEndTime[0];
+        Date endPromoTime = startEndTime[1];
+
+        getCalTime(startTime, cal);
+
+        LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
+        LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
+        long startdiff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
+
+
+        cal.clear();
+        cal.setTime(endDate);
+        getCalTime(endTime, cal);
+
+        LocalDateTime endExTime = LocalDateTime.fromDateFields(cal.getTime());
+        long enddiff = Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
+
+        if (startdiff > 0){
+            return Constant.PROMO_NOT_START;
+        }else if (enddiff > 0){
+            if (sysTime.before(startDate) || sysTime.after(endDate)){
+                return Constant.PROMO_NOT_START;
+            }else{
+                if (sysTime.before(startPromoTime) || sysTime.after(endPromoTime)){
+                    return Constant.PROMO_NOT_START;
+                }else {
+                    return Constant.PROMOING;
+                }
+            }
+        }else {
+            return Constant.PROMO_FININSHED;
+        }
+
+    }
+
+	public static long promoStartDueTime(Long promoduendsec, Time startTime, Integer promoStatus) {
 		/**
 		 * in the middle of game
 		 */
-		if (endDueTime != null && endDueTime > 0 && promoStatus == Constant.PROMOING) {
+		if (promoduendsec != null && promoduendsec > 0 && promoStatus == Constant.PROMOING) {
 			return 0L;
 		}
 
