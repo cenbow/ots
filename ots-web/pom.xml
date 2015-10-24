@@ -1107,10 +1107,10 @@
 				<jedis.pool.minidl>8</jedis.pool.minidl>
 				<jedis.pool.maxtotal>500</jedis.pool.maxtotal>
 
-				<addpay>http://hotel.imike.com/ots2pms/addpay</addpay>
-				<cancelpay>http://hotel.imike.com/ots2pms/cancelpay</cancelpay>
-				<selectCustomerpay>http://hotel.imike.com/ots2pms/selectcustomerpay</selectCustomerpay>
-				<cancelpaybyerror>http://hotel.imike.com/ots2pms/cancelpaybyerror</cancelpaybyerror>
+                <addpay>https://otai.imike.com/otai/ots2pms/addpay</addpay>
+                <cancelpay>https://otai.imike.com/otai/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>https://otai.imike.com/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>https://otai.imike.com/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
 
 				<inform_sale_url><![CDATA[http://sale.imike.com/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
 				<wx_type>wechat</wx_type>
