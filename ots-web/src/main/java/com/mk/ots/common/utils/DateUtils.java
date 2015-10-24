@@ -41,6 +41,9 @@ public class DateUtils extends Object {
     /** 纯时间格式. */
     public static final String FORMAT_TIME = "HH:mm:ss";
 
+    public static final String FORMAT_HOURMIN = "HHmm";
+
+
     public static final String FORMATDATETIME = "yyyyMMddHHmmss";
     
     public static final String FORMATSHORTDATETIME = "yyyyMMdd";
@@ -1771,5 +1774,23 @@ public class DateUtils extends Object {
 
         return new Date[]{runTime,runTime};
     }
-    
+
+    /**
+     * 计算两个时间的时分，是否第一个时间的时分在第二个时间之前
+     * @param firstDate
+     * @param secondDate
+     * @return
+     */
+    public static boolean timeBefore(Date firstDate, Date secondDate) {
+
+        int fisrtTime = Integer.parseInt(getStringFromDate(firstDate, FORMAT_HOURMIN).toString());
+        int secondTime = Integer.parseInt(getStringFromDate(secondDate, FORMAT_HOURMIN).toString());
+
+        if (fisrtTime < secondTime) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
 }
