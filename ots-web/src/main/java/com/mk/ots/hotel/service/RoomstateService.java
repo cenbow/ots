@@ -1002,7 +1002,7 @@ public class RoomstateService {
 					Integer roomTypeId = Integer.valueOf(troomType.getId().toString());
 					tRoomSaleConfig.setRoomTypeId(roomTypeId);
 
-					Boolean isPromo = roomSaleService.checkRoomSaleWithOldRoomType(tRoomSaleConfig);
+					Boolean isPromo = roomSaleService.checkRoomSale(tRoomSaleConfig);
 					if (logger.isInfoEnabled()) {
 						logger.info(String.format("isPromo:%s; roomTypeId:%s; callVersionStr:%s", isPromo, roomTypeId,
 								callVersionStr));
@@ -1011,7 +1011,7 @@ public class RoomstateService {
 					if (StringUtils.isNotBlank(callVersionStr)) {
 						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
 								&& !"3".equals(callMethod)) {
-							List<RoomPromoDto> list = roomSaleService.queryRoomPromoByHotelNew(tRoomSaleConfig);
+							List<RoomPromoDto> list = roomSaleService.queryRoomPromoByHotel(tRoomSaleConfig);
 							String isonpromo = "0";
 
 							if (logger.isInfoEnabled()) {
