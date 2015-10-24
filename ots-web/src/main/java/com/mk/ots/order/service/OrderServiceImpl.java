@@ -2269,6 +2269,8 @@ public class OrderServiceImpl implements OrderService {
       //设置规则
       int ruleCode=Integer.parseInt(hotel.get("rulecode").toString());
       order.setRuleCode(ruleCode);
+
+       logger.info("======= Get order info {} , token: {}", order.toJson(), order.getToken());
       if (order.getMid() == null) {
           throw MyErrorEnum.notfindUser.getMyException();
       }
@@ -2455,7 +2457,7 @@ public class OrderServiceImpl implements OrderService {
 
       member = MyTokenUtils.getMemberByToken(order.getToken());
 
-      logger.info("======= Get order's member info {}, order info {} , token: {}", member, order.toJson(), order.getToken());
+
 
       if (member == null) {
           // 会员不存在
