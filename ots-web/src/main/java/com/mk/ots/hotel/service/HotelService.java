@@ -1582,8 +1582,7 @@ public class HotelService {
 	 * @param lockRoomsCache
 	 * @return
 	 */
-	public Integer calPromoVacants(Integer promoType, Long hotelid, String isnewpms, String isvisible, String isonline,
-			String starttime, String endtime) throws Exception {
+	public Integer calPromoVacants(Integer promoType, Long hotelid, String starttime, String endtime) throws Exception {
 		Integer vacants = 0;
 
 		List<TRoomModel> roomModels = tRoomMapper.findRoomsByHotelId(hotelid);
@@ -1602,18 +1601,18 @@ public class HotelService {
 			try {
 				List<Map<String, Object>> rooms = roomSaleService.queryRoomByHotelAndRoomType(String.valueOf(hotelid),
 						String.valueOf(curRoomTypeId));
-				
+
 				if (rooms.size() > 0) {
-					curPromoType = Integer.parseInt((String) rooms.get(0).get("promotype"));
+					curPromoType = (Integer) rooms.get(0).get("promotype");
 				}
 			} catch (Exception ex) {
-				logger.warn(String.format("failed to queryRoomByHotelAndRoomType, roomid:%s; roomtypeid:%s", roomid,
-						curRoomTypeId), ex);
+				logger.warn(String.format("failed to queryRoomByHotelAndRoomType, hotelid:%s; roomid:%s; roomtypeid:%s",
+						hotelid, roomid, curRoomTypeId), ex);
 			}
 
 			if (logger.isInfoEnabled()) {
-				logger.info(String.format("queried for roomid:%s->curPromoType:%s; promoType:%s", roomid, curPromoType,
-						promoType));
+				logger.info(String.format("queried for roomid:%s->curPromoType:%s; promoType:%s; roomtype:%s", roomid,
+						curPromoType, promoType, curRoomTypeId));
 			}
 
 			if (curPromoType != null && promoType == curPromoType) {

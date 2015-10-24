@@ -107,8 +107,10 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 			List<Map<String, Object>> saleRoomList = roomSaleMapper.queryRoomByHotelAndRoomType(parameters);
 			return saleRoomList;
 		} catch (Exception ex) {
-			logger.error(String.format("failed to queryRoomByHotelAndRoomType %s", hotelId), ex);
-			throw new Exception(String.format("failed to queryRoomByHotelAndRoomType %s", hotelId), ex);
+			logger.error(String.format("failed to queryRoomByHotelAndRoomType hotelId:%s; roomTypeId:%s", hotelId,
+					roomTypeId), ex);
+			throw new Exception(String.format("failed to queryRoomByHotelAndRoomType hotelId:%s; roomTypeId:%s",
+					hotelId, roomTypeId), ex);
 		}
 	}
 

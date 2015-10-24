@@ -533,6 +533,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			logger.info("getOtsHotel method params: {}\n", objectMapper.writeValueAsString(reqentity));
 
 			String hotelid = reqentity.getHotelid();
+			String promotype = reqentity.getPromotype();
+
 			// added by chuaiqing
 			THotelModel thotelModel = thotelMapper.selectById(Long.valueOf(hotelid));
 			if (thotelModel == null) {
@@ -664,7 +666,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					logger.error(String.format("failed to queryTransferData with hotelid %s..., ignore and continue...",
 							reqentity.getHotelid()), e);
 				}
-				
+
+				Integer vacants = hotelService.calPromoVacants(Integer.parseInt(promotype), Long.parseLong(hotelid),
+						reqentity.getStartdateday(), reqentity.getEnddateday());
+				result.put("roomvacancy", vacants);
+
 				// 添加到酒店列表
 				hotels.add(result);
 
@@ -1157,14 +1163,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				result.put("$sortScore", hit.getScore());
 
-				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype()) ? Integer.valueOf(reqentity.getPromotype()):null;
-				if (promoType != null){
-					List<Map<String, Integer>> promoList = (List)result.get("promoinfo");
-					if (promoList!= null){
-						for (Map<String, Integer> promoinfo : promoList){
+				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype())
+						? Integer.valueOf(reqentity.getPromotype()) : null;
+				if (promoType != null) {
+					List<Map<String, Integer>> promoList = (List) result.get("promoinfo");
+					if (promoList != null) {
+						for (Map<String, Integer> promoinfo : promoList) {
 							Integer hotelPromoType = promoinfo.get("promotype");
-							if (hotelPromoType == promoType){
-								result.put("promoprice",promoinfo.get("promoprice"));
+							if (hotelPromoType == promoType) {
+								result.put("promoprice", promoinfo.get("promoprice"));
 							}
 						}
 					}
@@ -1367,9 +1374,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Integer avlblroomnum = hotelService.getAvlblRoomNum(p_hotelid, p_isnewpms, p_visible, p_online,
 						reqentity.getStartdateday(), reqentity.getEnddateday());
 
-
-				Integer vacants = hotelService.calPromoVacants(promoType, p_hotelid, p_isnewpms, p_visible, p_online,
-						reqentity.getStartdateday(), reqentity.getEnddateday());
+				Integer vacants = hotelService.calPromoVacants(promoType, p_hotelid, reqentity.getStartdateday(),
+						reqentity.getEnddateday());
 				result.put("roomvacancy", vacants);
 
 				endTime = new Date().getTime();
@@ -1500,7 +1506,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		params.setIspromoonly(null);
 		params.setHotelid("");
 		params.setPromotype("");
-		
+
 		Map<String, Object> hotelsAround = searchService.readonlySearchHotels(params);
 
 		if (hotelsAround != null & hotelsAround.get("hotel") != null) {
@@ -2023,7 +2029,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				// 该房间是否有可售.(由于现在房态信息缓存到redis，不再存储到mysql中间表，所以这里从缓存取.)
 				String roomtypevc = this.readonlyRoomtypevc(roomtypeItem, reqentity);
 				String roomtypevacancy;
-				
+
 				logger.info("--================================== 查询房型是否可用信息结束： ==================================-- ");
 				roomtypeItem.put("roomtypevc", roomtypevc);
 				// 床型
@@ -2096,14 +2102,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			data.put("roomtype", roomtypeList);
 
-			Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype()) ? Integer.valueOf(reqentity.getPromotype()):null;
-			if (promoType != null){
-				List<Map<String, Integer>> promoList = (List)data.get("promoinfo");
-				if (promoList!= null){
-					for (Map<String, Integer> promoinfo : promoList){
+			Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype())
+					? Integer.valueOf(reqentity.getPromotype()) : null;
+			if (promoType != null) {
+				List<Map<String, Integer>> promoList = (List) data.get("promoinfo");
+				if (promoList != null) {
+					for (Map<String, Integer> promoinfo : promoList) {
 						Integer hotelPromoType = promoinfo.get("promotype");
-						if (hotelPromoType == promoType){
-							data.put("promoprice",promoinfo.get("promoprice"));
+						if (hotelPromoType == promoType) {
+							data.put("promoprice", promoinfo.get("promoprice"));
 						}
 					}
 				}
