@@ -1453,7 +1453,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					result.put("iscashback", Constant.STR_FALSE);
 				}
 				logger.info("--================================== 查询酒店是否有返现结束: ==================================-- ");
-
+				
+				String hotelvc = Constant.STR_TRUE;
+				result.put("hotelvc", hotelvc);
+				
 				// 添加接口返回数据到结果集
 				hotels.add(result);
 			}
