@@ -1597,7 +1597,7 @@ public class RoomstateService {
 				rtnPrice = troomtype.getCost();
 				return rtnPrice;
 			}
-
+          /*   //    刷门市价缓存bug修改
 			BigDecimal price = troomtype.getPrice();
 			BigDecimal subprice = troomtype.getSubprice();
 			BigDecimal subper = troomtype.getSubper();
@@ -1631,7 +1631,7 @@ public class RoomstateService {
 				rtnPrice = troomtype.getPrice();
 				return rtnPrice;
 			}
-
+              */
 			// 放入redis缓存
 			jedis.hset(key, field, rtnPrice.toString());
 			this.logger.info("roomtype: {} price cache to redis, cache value is {}", roomtypeid, rtnPrice);
