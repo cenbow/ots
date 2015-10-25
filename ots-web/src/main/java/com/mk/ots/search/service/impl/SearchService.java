@@ -1140,11 +1140,11 @@ public class SearchService implements ISearchService {
 				Map<String, Object> result = hit.getSource();
 
 				if (makePromoPostFilter(result)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("hotelid {} has been exampted from result for not in sale reason",
+					if (logger.isInfoEnabled()) {
+						logger.info("hotelid {} has been exampted from result for not in sale reason",
 								result.get("hotelid"));
 					}
-					continue;
+					result.put("isonpromo", "0");
 				}
 
 				result.put("$sortScore", hit.getScore());
@@ -1639,7 +1639,15 @@ public class SearchService implements ISearchService {
 						TRoomSaleConfigInfo info = roomSaleConfigInfoMapper.queryRoomSaleConfigById(promoType);
 						Calendar endCalendar = Calendar.getInstance();
 
-						endCalendar.setTime(info.getEndDate());
+						if (logger.isInfoEnabled()) {
+							logger.info(
+									String.format("promo enddate:%s; currenttime:%s", info.getEndDate(), currentTime));
+						}
+
+						endCalendar.set(Calendar.YEAR, info.getEndDate().getYear());
+						endCalendar.set(Calendar.MONTH, info.getEndDate().getMonth());
+						endCalendar.set(Calendar.DAY_OF_YEAR, info.getEndDate().getDay());
+
 						endCalendar.set(Calendar.HOUR_OF_DAY, 23);
 						endCalendar.set(Calendar.MINUTE, 59);
 						endCalendar.set(Calendar.SECOND, 59);
