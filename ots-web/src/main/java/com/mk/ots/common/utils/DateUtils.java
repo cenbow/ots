@@ -1658,10 +1658,11 @@ public class DateUtils extends Object {
         Date endPromoTime;
 
         if (startTime.after(endTime)){
+            cal.add(cal.DATE, 1);
             getCalTime(endTime, cal);
             endPromoTime = cal.getTime();
         }else {
-            cal.add(cal.DATE, 1);
+            getCalTime(endTime, cal);
             endPromoTime = cal.getTime();
         }
 
