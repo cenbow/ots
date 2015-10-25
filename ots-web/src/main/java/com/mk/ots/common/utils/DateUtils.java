@@ -1584,8 +1584,9 @@ public class DateUtils extends Object {
     public static long calNextDiffTime(Date startDate,Time startTime) {
         Calendar cal=Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
-        cal.setTime(startDate);
+        cal.setTime(sysTime);
         cal.add(cal.DATE, 1);
+
         return timeDiff(startTime, cal, sysTime);
 
     }
