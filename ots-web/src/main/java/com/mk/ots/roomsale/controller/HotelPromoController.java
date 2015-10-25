@@ -18,10 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -73,6 +70,10 @@ public class HotelPromoController {
 					long sec = DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
 							saleConfigInfo.getStartTime());
 
+
+					long nextsec = DateUtils.calNextDiffTime(saleConfigInfo.getStartDate(),
+							saleConfigInfo.getStartTime());
+
 					long endSec = DateUtils.calEndDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
 							saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
 					if (sec < 0) {
@@ -90,6 +91,7 @@ public class HotelPromoController {
 					ptype1.put("promotypeprice", saleConfigInfo.getSaleValue());
 					ptype1.put("promosec", sec / 1000); // 秒
 					ptype1.put("promosecend", endSec / 1000); //距离结束时间（s）
+					ptype1.put("nextpromosec", nextsec / 1000); //距离下一段结束时间（s）
 					list.add(ptype1);
 				}
 			}
