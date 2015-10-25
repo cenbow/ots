@@ -164,8 +164,8 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 			Map<String, Object> saleRoomList = roomSaleMapper.queryRoomPromoInfo();
 			return saleRoomList;
 		} catch (Exception ex) {
-			logger.error(String.format("failed to queryRoomPromoInfo %s"), ex);
-			throw new Exception(String.format("failed to queryRoomPromoInfo %s"), ex);
+			logger.error("failed to queryRoomPromoInfo", ex);
+			throw new Exception("failed to queryRoomPromoInfo ", ex);
 		}
 	}
 

@@ -197,7 +197,8 @@
         FROM t_room_sale_config config
         join t_room_sale_config_info info on config.saleconfiginfoid = info.id
         join t_room_sale sale on config.roomtypeid = sale.oldroomtypeid
-        WHERE config.hotelId = #{hotelId} and config.roomtypeid = #{roomTypeId} 
+        WHERE config.hotelId = #{hotelId} and config.saleRoomTypeId = #{roomTypeId}
+        and config.valid = 'T' 
     </select>
 
     <select id="queryRoomPromoInfoByHotelAndPromoType" resultType="map" parameterType="map">

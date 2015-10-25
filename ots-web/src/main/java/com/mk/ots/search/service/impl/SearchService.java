@@ -69,6 +69,7 @@ import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.inner.service.IOtsAdminService;
 import com.mk.ots.mapper.PositionMapper;
 import com.mk.ots.mapper.PositionTypeMapper;
+import com.mk.ots.mapper.RoomSaleConfigInfoMapper;
 import com.mk.ots.mapper.SAreaInfoMapper;
 import com.mk.ots.mapper.SLandMarkMapper;
 import com.mk.ots.mapper.SSubwayMapper;
@@ -81,6 +82,7 @@ import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
 import com.mk.ots.restful.output.SearchPositionsDistanceRespEntity;
 import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.enums.PositionTypeEnum;
 import com.mk.ots.search.model.PositionTypeModel;
@@ -132,6 +134,9 @@ public class SearchService implements ISearchService {
 	 */
 	@Autowired
 	private THotelScoreMapper thotelscoreMapper;
+
+	@Autowired
+	private RoomSaleConfigInfoMapper roomSaleConfigInfoMapper;
 
 	/**
 	 * 注入酒店服务
@@ -1133,9 +1138,19 @@ public class SearchService implements ISearchService {
 			for (int i = 0; i < hits.length; i++) {
 				SearchHit hit = hits[i];
 				Map<String, Object> result = hit.getSource();
+
+				if (makePromoPostFilter(result)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("hotelid {} has been exampted from result for not in sale reason",
+								result.get("hotelid"));
+					}
+					continue;
+				}
+
 				result.put("$sortScore", hit.getScore());
 				String es_hotelid = String.valueOf(result.get("hotelid"));
 				// 根据用户经纬度来计算两个经纬度坐标距离（单位：米）
+
 
 				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype()) ? Integer.valueOf(reqentity.getPromotype()):null;
 				if (promoType == null){
@@ -1423,11 +1438,6 @@ public class SearchService implements ISearchService {
 				}
 				logger.info("--================================== 查询酒店是否有返现结束: ==================================-- ");
 
-
-
-
-
-
 				// 添加接口返回数据到结果集
 				hotels.add(result);
 			}
@@ -1616,6 +1626,47 @@ public class SearchService implements ISearchService {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private boolean makePromoPostFilter(Map<String, Object> hitSource) {
+		boolean isFiltered = true;
+
+		List<Map<String, Integer>> promoInfoList = (List<Map<String, Integer>>) hitSource.get("promoinfo");
+		LocalDateTime currentTime = LocalDateTime.now();
+		if (promoInfoList != null && promoInfoList.size() > 0) {
+			for (Map<String, Integer> promoInfo : promoInfoList) {
+				Integer promoType = promoInfo.get("promotype");
+
+				if (promoType != null && promoType > 0) {
+					try {
+						TRoomSaleConfigInfo info = roomSaleConfigInfoMapper.queryRoomSaleConfigById(promoType);
+						Calendar endCalendar = Calendar.getInstance();
+
+						endCalendar.setTime(info.getEndDate());
+						endCalendar.set(Calendar.HOUR_OF_DAY, 23);
+						endCalendar.set(Calendar.MINUTE, 59);
+						endCalendar.set(Calendar.SECOND, 59);
+						LocalDateTime endDate = LocalDateTime.fromCalendarFields(endCalendar);
+
+						if (currentTime.isBefore(endDate)) {
+							isFiltered = false;
+							break;
+						}
+
+						info.getEndDate();
+					} catch (Exception ex) {
+						logger.warn("failed to query configInfo for promotype:{}", promoType);
+						continue;
+					}
+				}
+
+			}
+		} else {
+			isFiltered = false;
+		}
+
+		return isFiltered;
+	}
+
 	/**
 	 * added in mike3.1, promo filter will be added in version 3.1
 	 * 
@@ -1653,7 +1704,7 @@ public class SearchService implements ISearchService {
 			}
 
 			return;
-		} 
+		}
 	}
 
 	/**
