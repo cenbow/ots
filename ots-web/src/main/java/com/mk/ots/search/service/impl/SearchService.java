@@ -1138,18 +1138,19 @@ public class SearchService implements ISearchService {
 				// 根据用户经纬度来计算两个经纬度坐标距离（单位：米）
 
 				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype()) ? Integer.valueOf(reqentity.getPromotype()):null;
-				if (promoType != null){
-					List<Map<String, Integer>> promoList = (List)result.get("promoinfo");
-					if (promoList!= null){
-						for (Map<String, Integer> promoinfo : promoList){
-							Integer hotelPromoType = promoinfo.get("promotype");
-							if (hotelPromoType == promoType){
-								result.put("promoprice",promoinfo.get("promoprice"));
-							}
+				if (promoType == null){
+					promoType = 1;
+				}
+
+				List<Map<String, Integer>> promoList = (List)result.get("promoinfo");
+				if (promoList!= null){
+					for (Map<String, Integer> promoinfo : promoList){
+						Integer hotelPromoType = promoinfo.get("promotype");
+						if (hotelPromoType == promoType){
+							result.put("promoprice",promoinfo.get("promoprice"));
 						}
 					}
 				}
-
 
 				Map<String, Object> pin = (Map<String, Object>) result.get("pin");
 				// hotel latitude and longitude
