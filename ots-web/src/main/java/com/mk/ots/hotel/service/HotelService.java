@@ -28,6 +28,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.common.geo.GeoDistance;
 import org.elasticsearch.common.geo.GeoPoint;
+import org.elasticsearch.common.joda.time.Seconds;
 import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -41,6 +42,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -207,6 +209,7 @@ public class HotelService {
 	private List<FilterBuilder> keywordBuilders = new ArrayList<FilterBuilder>();
 	@Autowired
 	private TRoomtypeInfoMapper tRoomtypeInfoMapper;
+	private final ExecutorService exService = Executors.newFixedThreadPool(2);
 
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -481,6 +484,7 @@ public class HotelService {
 					coll.add(hotel);
 					logger.info("hotelid: {} added in collections and will be add in elasticsearch document.", hotelid);
 				}
+
 				if (coll.size() > 0) {
 					esProxy.batchAddDocument(coll);
 
@@ -491,7 +495,11 @@ public class HotelService {
 					output.setSuccess(true);
 					output.setMsgAttr("count", coll.size());
 
+					if (logger.isInfoEnabled()) {
+						logger.info("fire the task which updates bedtypes...");
+					}
 
+					asyncBatchUpdateHotelBedtypes(cityid);
 				} else {
 					output.setSuccess(true);
 				}
@@ -500,14 +508,12 @@ public class HotelService {
 				output.setErrcode("-1");
 				output.setErrmsg(e.getMessage());
 				logger.error("post es error: {} " + e.getMessage());
-				e.printStackTrace();
 			}
 		} catch (Exception e) {
 			output.setSuccess(false);
 			output.setErrcode("-1");
 			output.setErrmsg(e.getMessage());
 			logger.error("post es error: {} " + e.getMessage());
-			e.printStackTrace();
 		} finally {
 			if (session != null) {
 				session.close();
@@ -2961,6 +2967,67 @@ public class HotelService {
 			datas.add(rm);
 		}
 		return datas;
+	}
+
+	public void asyncBatchUpdateHotelBedtypes(final String citycode) {
+		this.exService.submit(new Runnable() {
+			@Override
+			public void run() {
+				Integer hitCounter = 0;
+
+				try {
+					LocalDateTime startTime = LocalDateTime.now();
+					// 更新酒店床型。
+					SearchRequestBuilder searchBuilder = esProxy.prepareSearch(ElasticsearchProxy.OTS_INDEX_DEFAULT,
+							ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
+
+					List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
+					if (!Strings.isNullOrEmpty(citycode)) {
+						filterBuilders.add(FilterBuilders.termFilter("hotelcity", citycode));
+					}
+					filterBuilders.add(FilterBuilders.termFilter("ispms", 1));
+					FilterBuilder[] builders = new FilterBuilder[] {};
+
+					BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
+					searchBuilder.setFrom(0).setSize(10000).setExplain(true);
+					searchBuilder.setPostFilter(boolFilter);
+
+					SearchResponse searchResponse = searchBuilder.execute().actionGet();
+					SearchHits searchHits = searchResponse.getHits();
+					SearchHit[] hits = searchHits.getHits();
+					logger.info("开始更新酒店床型...");
+					for (int i = 0; i < hits.length; i++) {
+						SearchHit hit = hits[i];
+						Map<String, Object> result = hit.getSource();
+						String hotelid = result.get("hotelid") == null ? "" : String.valueOf(result.get("hotelid"));
+						logger.info("更新酒店{}床型...", hotelid);
+						if (StringUtils.isBlank(hotelid)) {
+							continue;
+						}
+						List<Map<String, Object>> bedtypes = bedTypeMapper.selectBedtypesByHotelId(hotelid);
+						for (Map<String, Object> bedtype : bedtypes) {
+							if (bedtype.get("bedtype") == null) {
+								continue;
+							}
+							String field = "bedtype" + bedtype.get("bedtype");
+							esProxy.updateDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT,
+									ElasticsearchProxy.HOTEL_TYPE_DEFAULT, hit.getId(), field, 1);
+							logger.info("酒店{}有床型{}", hotelid, bedtype.get("bedtype"));
+						}
+					}
+					hitCounter = hits.length;
+					LocalDateTime endTime = LocalDateTime.now();
+
+					logger.info("更新酒店床型完成.{}", org.joda.time.Seconds.secondsBetween(startTime, endTime));
+				} catch (Exception e) {
+					logger.error("failed to update bedtypes in batch", e);
+				}
+
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("counts:%s", (Integer) hitCounter));
+				}
+			}
+		});
 	}
 
 	/**
