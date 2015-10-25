@@ -1565,29 +1565,105 @@ public class DateUtils extends Object {
 	    return days.intValue();
 	}
 
-    public static long calDiffTime(Date startDate,Date endDate, Time startTime) {
+    public static long calDiffTime(Date startDate,Date endDate, Time startTime, Time endTime) {
         Calendar cal=Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
 
-        if (DateUtils.addDays(endDate,1).before(sysTime)){
-            return Constant.PROMO_FININSHED;  //活动已结束
-        } else if (startDate.after(sysTime)){    //活動未開始
-            cal.setTime(startDate);
-            return timeDiff(startTime, cal, sysTime);
-        }else if (DateUtils.addDays(endDate,1).after(sysTime)&&startDate.before(sysTime)){
-            cal.setTime(sysTime);
-            return timeDiff(startTime, cal, sysTime);
+        cal.clear();
+        cal.setTime(sysTime);
+        getCalTime(endTime, cal);
+        Date tmpEndTime =  cal.getTime();
+        Date startPromoTime;
+
+        if (startTime.after(endTime) && tmpEndTime.after(sysTime)) {
+            getCalTime(startTime, cal);
+            cal.add(cal.DATE, -1);
+            startPromoTime = cal.getTime();
+        }else {
+            getCalTime(startTime, cal);
+            startPromoTime = cal.getTime();
         }
-        return 0;
+        cal.clear();
+        cal.setTime(sysTime);
+        Date endPromoTime;
+
+        if (startTime.after(endTime)){
+            cal.add(cal.DATE, 1);
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }else {
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }
+        long diff= DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime), DateUtils.formatDatetime(startPromoTime));
+        if (diff < 0){
+            return 0;
+        }
+
+        if (sysTime.before(startPromoTime)){
+
+
+            return  diff;
+
+        }else if (sysTime.after(endPromoTime)){
+            if (sysTime.before(startDate) || sysTime.after(endDate)){
+                return 0;
+            }else {
+                return  diff;
+            }
+        }else {
+            return 0;
+        }
+
     }
 
-    public static long calNextDiffTime(Date startDate,Time startTime) {
+    public static long calNextDiffTime(Date startDate,Date endDate, Time startTime,Time endTime) {
         Calendar cal=Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
-        cal.setTime(sysTime);
-        cal.add(cal.DATE, 1);
 
-        return timeDiff(startTime, cal, sysTime);
+        cal.clear();
+        cal.setTime(sysTime);
+        getCalTime(endTime, cal);
+        Date tmpEndTime =  cal.getTime();
+        Date startPromoTime;
+
+        if (startTime.after(endTime) && tmpEndTime.after(sysTime)) {
+            getCalTime(startTime, cal);
+            cal.add(cal.DATE, -1);
+            startPromoTime = cal.getTime();
+        }else {
+            getCalTime(startTime, cal);
+            startPromoTime = cal.getTime();
+        }
+        cal.clear();
+        cal.setTime(sysTime);
+        Date endPromoTime;
+
+        if (startTime.after(endTime)){
+            cal.add(cal.DATE, 2);
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }else {
+            cal.add(cal.DATE, 2);
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }
+
+        long diff= DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime), DateUtils.formatDatetime(endPromoTime));
+        if (diff < 0){
+            return 0;
+        }
+
+        if (sysTime.before(startPromoTime)){
+            return diff;
+        }else if (sysTime.after(endPromoTime)){
+            if (sysTime.before(startDate) || sysTime.after(endDate)){
+                return 0;
+            }
+        }
+
+
+        return diff;
 
     }
 
@@ -1595,21 +1671,49 @@ public class DateUtils extends Object {
         Calendar cal=Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
 
-        if (DateUtils.addDays(endDate,1).before(sysTime)){
-            return Constant.PROMO_FININSHED;  //活动已结束
-        } else if (startDate.after(sysTime)){    //活動未開始
-            cal.setTime(endDate);
-            return timeDiff(endTime, cal, sysTime);
-        }else if (DateUtils.addDays(endDate,1).after(sysTime)&&startDate.before(sysTime)){
-            cal.setTime(sysTime);
+        cal.clear();
+        cal.setTime(sysTime);
+        getCalTime(endTime, cal);
+        Date tmpEndTime =  cal.getTime();
+        Date startPromoTime;
 
-            if(startTime.after(endTime)){
-                cal.add(cal.DATE, 1);
-            }
-
-            return timeDiff(endTime, cal, sysTime);
+        if (startTime.after(endTime) && tmpEndTime.after(sysTime)) {
+            getCalTime(startTime, cal);
+            cal.add(cal.DATE, -1);
+            startPromoTime = cal.getTime();
+        }else {
+            getCalTime(startTime, cal);
+            startPromoTime = cal.getTime();
         }
-        return 0;
+        cal.clear();
+        cal.setTime(sysTime);
+        Date endPromoTime;
+
+        if (startTime.after(endTime)){
+            cal.add(cal.DATE, 1);
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }else {
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }
+
+        long diff= DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime), DateUtils.formatDatetime(endPromoTime));
+        if (diff < 0){
+            return 0;
+        }
+
+        if (sysTime.before(startPromoTime)){
+            return diff;
+        }else if (sysTime.after(endPromoTime)){
+            if (sysTime.before(startDate) || sysTime.after(endDate)){
+                return 0;
+            }
+        }
+
+
+        return diff;
+
     }
 
     public static long timeDiff(Time startTime, Calendar cal, java.util.Date sysTime) {

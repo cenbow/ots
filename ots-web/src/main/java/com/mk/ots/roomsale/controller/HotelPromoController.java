@@ -68,11 +68,11 @@ public class HotelPromoController {
 			if (CollectionUtils.isNotEmpty(roomSaleConfigInfoList)) {
 				for (TRoomSaleConfigInfo saleConfigInfo : roomSaleConfigInfoList) {
 					long sec = DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
-							saleConfigInfo.getStartTime());
+							saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
 
 
-					long nextsec = DateUtils.calNextDiffTime(saleConfigInfo.getStartDate(),
-							saleConfigInfo.getStartTime());
+					long nextsec = DateUtils.calNextDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
+							saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
 
 					long endSec = DateUtils.calEndDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
 							saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
