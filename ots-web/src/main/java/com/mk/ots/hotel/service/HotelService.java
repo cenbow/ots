@@ -499,7 +499,7 @@ public class HotelService {
 						logger.info("fire the task which updates bedtypes...");
 					}
 
-					asyncBatchUpdateHotelBedtypes(cityid);
+//					asyncBatchUpdateHotelBedtypes(cityid);
 				} else {
 					output.setSuccess(true);
 				}
