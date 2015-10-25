@@ -1638,25 +1638,30 @@ public class DateUtils extends Object {
         Calendar cal = Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
 
-        java.sql.Time midTime = java.sql.Time.valueOf("12:00:00");
-
-        getCalTime(midTime,cal);
-        java.util.Date midDate = cal.getTime();
 
         cal.clear();
         cal.setTime(sysTime);
-        getCalTime(startTime, cal);
-        Date startPromoTime =cal.getTime();
+        getCalTime(endTime, cal);
+        Date tmpEndTime =  cal.getTime();
+        Date startPromoTime;
 
+        if (startTime.after(endTime) && tmpEndTime.after(sysTime)) {
+            getCalTime(startTime, cal);
+            cal.add(cal.DATE, -1);
+           startPromoTime = cal.getTime();
+        }else {
+            getCalTime(startTime, cal);
+            startPromoTime = cal.getTime();
+        }
         cal.clear();
         cal.setTime(sysTime);
         Date endPromoTime;
-        if (endTime.after(midDate)){
+
+        if (startTime.after(endTime)){
+            getCalTime(endTime, cal);
             endPromoTime = cal.getTime();
         }else {
-
             cal.add(cal.DATE, 1);
-            getCalTime(endTime, cal);
             endPromoTime = cal.getTime();
         }
 
