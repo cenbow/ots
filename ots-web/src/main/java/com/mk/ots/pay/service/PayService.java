@@ -317,6 +317,9 @@ public class PayService implements IPayService {
             // 已经支付的，加上在线支付的钱
             if (payStatus.getId().intValue() == PayStatusEnum.alreadyPay.getId().intValue()) {
                 price = orderLog.getRealallcost();
+                if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
+                    price = pay.getLezhu();
+                }
             } else if (payStatus.getId().intValue() == PayStatusEnum.doNotPay.getId().intValue()) {
             	price = orderLog.getRealotagive();
                 if(PayTools.isPositive(orderLog.getRealaccountcost())){
@@ -670,9 +673,6 @@ public class PayService implements IPayService {
 		
 		POrderLog pOrderLog = ipOrderLogDao.findPOrderLogByPay(payid);
         PPay pay = this.iPayDAO.getPayByOrderId(order.getId());
-        if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
-            price = pay.getLezhu();
-        }
 		try {
 			String request = wrapPMSRequest(order, pmsSendId, price,"addpay");
 			
