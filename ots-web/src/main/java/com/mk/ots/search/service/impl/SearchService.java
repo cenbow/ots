@@ -1151,18 +1151,18 @@ public class SearchService implements ISearchService {
 				String es_hotelid = String.valueOf(result.get("hotelid"));
 				// 根据用户经纬度来计算两个经纬度坐标距离（单位：米）
 
-
-				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype()) ? Integer.valueOf(reqentity.getPromotype()):null;
-				if (promoType == null){
+				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype())
+						? Integer.valueOf(reqentity.getPromotype()) : null;
+				if (promoType == null) {
 					promoType = 1;
 				}
 
-				List<Map<String, Integer>> promoList = (List)result.get("promoinfo");
-				if (promoList!= null){
-					for (Map<String, Integer> promoinfo : promoList){
+				List<Map<String, Integer>> promoList = (List) result.get("promoinfo");
+				if (promoList != null) {
+					for (Map<String, Integer> promoinfo : promoList) {
 						Integer hotelPromoType = promoinfo.get("promotype");
-						if (hotelPromoType == promoType){
-							result.put("promoprice",promoinfo.get("promoprice"));
+						if (hotelPromoType == promoType) {
+							result.put("promoprice", promoinfo.get("promoprice"));
 						}
 					}
 				}
@@ -1640,15 +1640,12 @@ public class SearchService implements ISearchService {
 					try {
 						TRoomSaleConfigInfo info = roomSaleConfigInfoMapper.queryRoomSaleConfigById(promoType);
 						Calendar endCalendar = Calendar.getInstance();
-
+						endCalendar.setTime(info.getEndDate());
+						
 						if (logger.isInfoEnabled()) {
 							logger.info(
 									String.format("promo enddate:%s; currenttime:%s", info.getEndDate(), currentTime));
 						}
-
-						endCalendar.set(Calendar.YEAR, info.getEndDate().getYear());
-						endCalendar.set(Calendar.MONTH, info.getEndDate().getMonth());
-						endCalendar.set(Calendar.DAY_OF_YEAR, info.getEndDate().getDay());
 
 						endCalendar.set(Calendar.HOUR_OF_DAY, 23);
 						endCalendar.set(Calendar.MINUTE, 59);
