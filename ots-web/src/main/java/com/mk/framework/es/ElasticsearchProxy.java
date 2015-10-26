@@ -414,6 +414,7 @@ public class ElasticsearchProxy {
 	 * @return UpdateRequestBuilder
 	 */
 	private UpdateRequestBuilder prepareUpdate(String indexName, String typeName) {
+
 		return this.getClient().prepareUpdate().setIndex(indexName).setType(typeName);
 	}
 
@@ -584,6 +585,48 @@ public class ElasticsearchProxy {
 		} catch (Exception e) {
 			this.logger.error("searchHotelByHotelId method error:\n" + e.getMessage());
 		}
+		return hits;
+	}
+
+	/**
+	 *
+	 * @param hotelid
+	 * @return
+	 */
+	public SearchHit[] searchHotelByHotelIdWithRetry(String hotelid, Integer retryCount) {
+		SearchHit[] hits = null;
+
+		if (retryCount == null || retryCount < 1) {
+			retryCount = 1;
+		}
+
+		Integer failureCounter = 0;
+		while (failureCounter < retryCount) {
+			try {
+				SearchRequestBuilder searchBuilder = this.prepareSearch();
+				FilterBuilder termFilter = FilterBuilders.termFilter("hotelid", hotelid);
+				BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(termFilter);
+				searchBuilder.setPostFilter(boolFilter);
+
+				SearchResponse searchResponse = searchBuilder.execute().actionGet();
+				SearchHits searchHits = searchResponse.getHits();
+				hits = searchHits.getHits();
+			} catch (Exception e) {
+				this.logger.error(String.format("searchHotelByHotelId method error, retry at count %s, maxAllowed %s",
+						failureCounter++, retryCount), e);
+				if (failureCounter < retryCount) {
+					try {
+						Thread.sleep(1L);
+					} catch (Exception ex) {
+						/**
+						 * ignore this intentionally
+						 */
+					}
+
+				}
+			}
+		}
+
 		return hits;
 	}
 

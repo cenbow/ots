@@ -1,6 +1,51 @@
 
 package com.mk.ots.hotel.service;
 
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.common.geo.GeoDistance;
+import org.elasticsearch.common.geo.GeoPoint;
+import org.elasticsearch.common.unit.DistanceUnit;
+import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.GeoDistanceFilterBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryFilterBuilder;
+import org.elasticsearch.index.query.QueryStringQueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
+import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
@@ -20,10 +65,28 @@ import com.mk.ots.hotel.bean.EHotel;
 import com.mk.ots.hotel.comm.enums.HotelPictureEnum;
 import com.mk.ots.hotel.comm.enums.HotelTypeEnum;
 import com.mk.ots.hotel.comm.enums.RoomTypePictureEnum;
-import com.mk.ots.hotel.dao.*;
+import com.mk.ots.hotel.dao.CityDAO;
+import com.mk.ots.hotel.dao.CostTempDAO;
+import com.mk.ots.hotel.dao.HotelDAO;
+import com.mk.ots.hotel.dao.RoomDAO;
+import com.mk.ots.hotel.dao.RoomRepairDAO;
+import com.mk.ots.hotel.dao.RoomTypeDAO;
 import com.mk.ots.hotel.jsonbean.HotelPicJsonBean;
-import com.mk.ots.hotel.model.*;
-import com.mk.ots.mapper.*;
+import com.mk.ots.hotel.model.TBusinesszoneModel;
+import com.mk.ots.hotel.model.TCityModel;
+import com.mk.ots.hotel.model.TDistrictModel;
+import com.mk.ots.hotel.model.TFacilityModel;
+import com.mk.ots.hotel.model.THotel;
+import com.mk.ots.hotel.model.THotelModel;
+import com.mk.ots.hotel.model.TRoomModel;
+import com.mk.ots.hotel.model.TRoomTypeInfoModel;
+import com.mk.ots.mapper.BedTypeMapper;
+import com.mk.ots.mapper.TBusinesszoneMapper;
+import com.mk.ots.mapper.TDistrictMapper;
+import com.mk.ots.mapper.TFacilityMapper;
+import com.mk.ots.mapper.THotelMapper;
+import com.mk.ots.mapper.TRoomMapper;
+import com.mk.ots.mapper.TRoomtypeInfoMapper;
 import com.mk.ots.order.dao.OrderDAO;
 import com.mk.ots.order.service.OrderService;
 import com.mk.ots.price.dao.BasePriceDAO;
@@ -39,35 +102,6 @@ import com.mk.ots.web.ServiceOutput;
 import com.mk.pms.order.dao.PmsOrderDAO;
 import com.mk.pms.order.dao.PmsRoomOrderDAO;
 import com.mk.sever.ServerChannel;
-import org.apache.commons.lang.StringUtils;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.common.geo.GeoDistance;
-import org.elasticsearch.common.geo.GeoPoint;
-import org.elasticsearch.common.unit.DistanceUnit;
-import org.elasticsearch.index.query.*;
-import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
-import org.joda.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 酒店服务类
@@ -2862,7 +2896,7 @@ public class HotelService {
 		logger.info("updateEsMikePrice method parameters hotelid:{}, startdate:{}, days:{}", hotelid, startdate, days);
 		String hid = hotelid.toString();
 		try {
-			SearchHit[] searchHits = esProxy.searchHotelByHotelId(hid);
+			SearchHit[] searchHits = esProxy.searchHotelByHotelIdWithRetry(hid, 2);
 			logger.info("眯客价查询到酒店个数: {}", searchHits.length);
 			for (int i = 0; i < searchHits.length; i++) {
 				SearchHit searchHit = searchHits[i];
@@ -2939,6 +2973,10 @@ public class HotelService {
 		return datas;
 	}
 
+	private void removeObsoleteBedtypes() {
+		
+	}
+
 	public void asyncBatchUpdateHotelBedtypes(final String citycode) {
 		this.exService.submit(new Runnable() {
 			@Override
@@ -2980,6 +3018,7 @@ public class HotelService {
 								continue;
 							}
 							String field = "bedtype" + bedtype.get("bedtype");
+
 							esProxy.updateDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT,
 									ElasticsearchProxy.HOTEL_TYPE_DEFAULT, hit.getId(), field, 1);
 							logger.info("酒店{}有床型{}", hotelid, bedtype.get("bedtype"));
