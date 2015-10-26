@@ -465,7 +465,7 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 	}
 
 	private void updateRoomType(TRoomTypeModel tRoomType, PMSRoomTypeBean pmsRoomTypeBean, List<TRoomModel> tRoomList,Map changemap, boolean isOnSaleRoomType) {
-		//非特价房不更新房型名称
+		//非特价房更新房型名称
 		if (!isOnSaleRoomType) {
 			tRoomType.setName(pmsRoomTypeBean.getName());
 		}
