@@ -611,6 +611,7 @@ public class ElasticsearchProxy {
 				SearchResponse searchResponse = searchBuilder.execute().actionGet();
 				SearchHits searchHits = searchResponse.getHits();
 				hits = searchHits.getHits();
+				break;
 			} catch (Exception e) {
 				this.logger.error(String.format("searchHotelByHotelId method error, retry at count %s, maxAllowed %s",
 						failureCounter++, retryCount), e);
