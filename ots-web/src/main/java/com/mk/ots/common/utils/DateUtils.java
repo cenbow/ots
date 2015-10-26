@@ -1637,39 +1637,42 @@ public class DateUtils extends Object {
 
         Calendar cal = Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
-        Date [] startEndTime = getStartEndDate(sysTime, startTime, endTime);
-        Date startPromoTime = startEndTime[0];
-        Date endPromoTime = startEndTime[1];
 
-        getCalTime(startTime, cal);
+        java.sql.Time midTime = java.sql.Time.valueOf("12:00:00");
 
-        LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
-        LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
-        long startdiff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
-
+        getCalTime(midTime,cal);
+        java.util.Date midDate = cal.getTime();
 
         cal.clear();
-        cal.setTime(endDate);
-        getCalTime(endTime, cal);
+        cal.setTime(sysTime);
+        getCalTime(startTime, cal);
+        Date startPromoTime =cal.getTime();
 
-        LocalDateTime endExTime = LocalDateTime.fromDateFields(cal.getTime());
-        long enddiff = Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
+        cal.clear();
+        cal.setTime(sysTime);
+        Date endPromoTime;
+        if (endTime.after(midDate)){
+            endPromoTime = cal.getTime();
+        }else {
 
-        if (startdiff > 0){
+            cal.add(cal.DATE, 1);
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }
+
+
+        if (sysTime.before(startPromoTime)){
             return Constant.PROMO_NOT_START;
-        }else if (enddiff > 0){
+        }else if (sysTime.after(endPromoTime)){
             if (sysTime.before(startDate) || sysTime.after(endDate)){
+                return Constant.PROMO_FININSHED;
+            }else {
                 return Constant.PROMO_NOT_START;
-            }else{
-                if (sysTime.before(startPromoTime) || sysTime.after(endPromoTime)){
-                    return Constant.PROMO_NOT_START;
-                }else {
-                    return Constant.PROMOING;
-                }
             }
         }else {
-            return Constant.PROMO_FININSHED;
+            return Constant.PROMOING;
         }
+
 
     }
 
@@ -1730,7 +1733,7 @@ public class DateUtils extends Object {
         return diff;
     }
 
-    private static Date[] getStartEndDate (Date runTime, Date startTime, Date endTime) {
+    public static Date[] getStartEndDate(Date runTime, Date startTime, Date endTime) {
         if (null == runTime || null == startTime || null == endTime) {
             return new Date[]{new Date(),new Date()};
         }
