@@ -663,7 +663,7 @@ public class PayService implements IPayService {
 	 * 通过url发送支付信息到PMS2.0
 	 */
 	private  boolean  pmsAddpayV2(OtaOrder order, long payid, long pmsSendId, BigDecimal price, String operateName) {
-		
+
 		String mark = "订单[" + order.getId() + "]PayId[" + payid + "]";
 		
 		logger.info(mark + "开始向PMS2.0发送支付信息流程...");
@@ -1616,6 +1616,9 @@ public class PayService implements IPayService {
 		// 计算用户实际支付
 		BigDecimal realCost = new BigDecimal(0);
 		// 保存对账信息
+        if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
+            allcost = pay.getLezhu();
+        }
 		this.logger.info("订单:" + orderId + "保存porderlog流水:payid}" + pay.getId() + ",allcost:" + allcost + ",realCost:" + realCost + ",promotionPayInfos的长度:" + promotionPayInfos.size()
 				+ ",promotionParses的 长度:" + promotionParses.size() + ",ticketParses的长度:" + ticketParses.size() + ",promotionParses的 长度:" + promotionParses.size());
 		BigDecimal otaGive = this.saveOrderLog(pay, allcost, realCost, ticketParses, promotionParses,order.getAvailableMoney());
