@@ -43,55 +43,11 @@
         </where>
     </sql>
 
-    <select id="queryRoomSaleType" resultMap="tRoomSaleType" parameterType="com.mk.taskfactory.api.dtos.TRoomSaleTypeDto">
+    <select id="queryRoomSaleType" resultMap="tRoomSaleType" parameterType="java.util.Map">
         SELECT
         <include refid="Base_Column_List"/>
         FROM  t_room_sale_type
         <include refid="Base_Query_List"/>
     </select>
 
-    <insert id="saveRoomSaleType"  parameterType="com.mk.taskfactory.api.dtos.TRoomSaleTypeDto"
-            useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO t_room_sale_type
-       (<include refid="Base_Column_List"/>)
-         VALUE
-         (
-          #{id},#{saleName}, #{fontColor}, #{description}, #{valid}, #{createTime}, #{createBy}, #{updateTime}, #{updateBy}
-         )
-    </insert>
-
-    <delete id="deleteRoomSaleType" parameterType="Integer">
-         delete from t_room_sale_type where id = #{id}
-    </delete>
-
-    <update id="updateRoomSaleType" parameterType="com.mk.taskfactory.api.dtos.TRoomSaleTypeDto" >
-        update t_room_sale_type
-        <set >
-            <if test="saleName != null">
-                saleName = #{saleName},
-            </if>
-            <if test="fontColor != null">
-                fontColor = #{fontColor},
-            </if>
-            <if test="description != null">
-                description = #{description},
-            </if>
-            <if test="valid != null">
-                valid = #{valid},
-            </if>
-            <if test="createTime != null">
-                createTime = #{createTime},
-            </if>
-            <if test="createBy != null">
-                createBy = #{createBy},
-            </if>
-            <if test="updateTime != null">
-                updateTime = #{updateTime},
-            </if>
-            <if test="updateBy != null">
-                updateBy = #{updateBy}
-            </if>
-        </set>
-        where id = #{id}
-    </update>
 </mapper>
