@@ -1,44 +1,7 @@
 package com.mk.ots.order.service;
 
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.ws.http.HTTPException;
-
-import com.mk.framework.util.*;
-import com.mk.ots.common.enums.*;
-import com.mk.ots.roomsale.model.TRoomSale;
-import com.mk.ots.roomsale.service.RoomSaleService;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import redis.clients.jedis.Jedis;
 import cn.com.winhoo.mikeweb.myenum.PmsRoomOrderStatusEnum;
-import cn.com.winhoo.pms.webout.service.bean.CancelOrder;
-import cn.com.winhoo.pms.webout.service.bean.PmsCheckinPerson;
-import cn.com.winhoo.pms.webout.service.bean.PmsOtaAddOrder;
-import cn.com.winhoo.pms.webout.service.bean.PmsRCost;
-import cn.com.winhoo.pms.webout.service.bean.PmsUpdateOrder;
-import cn.com.winhoo.pms.webout.service.bean.ReturnObject;
-
+import cn.com.winhoo.pms.webout.service.bean.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dianping.cat.Cat;
@@ -52,31 +15,22 @@ import com.mk.care.kafka.model.Message;
 import com.mk.framework.AppUtils;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
+import com.mk.framework.util.Cast;
+import com.mk.framework.util.MyTokenUtils;
+import com.mk.framework.util.PayUtil;
+import com.mk.framework.util.UrlUtils;
 import com.mk.orm.kit.JsonKit;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
 import com.mk.ots.common.bean.PageObject;
-import com.mk.ots.common.utils.Constant;
-import com.mk.ots.common.utils.DateTools;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.common.utils.NumUtils;
-import com.mk.ots.common.utils.SysConfig;
-import com.mk.ots.hotel.bean.HQrCode;
-import com.mk.ots.hotel.bean.RoomTypePriceBean;
-import com.mk.ots.hotel.bean.TRoom;
-import com.mk.ots.hotel.bean.TRoomType;
-import com.mk.ots.hotel.bean.TRoomTypeInfo;
+import com.mk.ots.common.enums.*;
+import com.mk.ots.common.utils.*;
+import com.mk.ots.hotel.bean.*;
 import com.mk.ots.hotel.dao.HotelDAO;
 import com.mk.ots.hotel.dao.RoomDAO;
 import com.mk.ots.hotel.dao.RoomTypeDAO;
 import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.service.CashBackService;
-import com.mk.ots.hotel.service.HotelPriceService;
-import com.mk.ots.hotel.service.HotelService;
-import com.mk.ots.hotel.service.RoomService;
-import com.mk.ots.hotel.service.RoomTypeInfoService;
-import com.mk.ots.hotel.service.RoomTypeService;
-import com.mk.ots.hotel.service.RoomstateService;
+import com.mk.ots.hotel.service.*;
 import com.mk.ots.kafka.message.OtsCareProducer;
 import com.mk.ots.manager.HotelPMSManager;
 import com.mk.ots.manager.OtsCacheManager;
@@ -85,26 +39,10 @@ import com.mk.ots.mapper.OtaOrderTastsMapper;
 import com.mk.ots.member.model.UMember;
 import com.mk.ots.member.service.IMemberService;
 import com.mk.ots.message.service.impl.MessageService;
-import com.mk.ots.order.bean.BHotelPromotionPrice;
-import com.mk.ots.order.bean.OrderLog;
-import com.mk.ots.order.bean.OtaCheckInUser;
-import com.mk.ots.order.bean.OtaOrder;
-import com.mk.ots.order.bean.OtaRoomOrder;
-import com.mk.ots.order.bean.OtaRoomPrice;
-import com.mk.ots.order.bean.PmsRoomOrder;
-import com.mk.ots.order.bean.PushMessage;
-import com.mk.ots.order.bean.UUseTicketRecord;
+import com.mk.ots.order.bean.*;
 import com.mk.ots.order.common.PropertyConfigurer;
-import com.mk.ots.order.dao.CheckInUserDAO;
-import com.mk.ots.order.dao.OrderDAO;
-import com.mk.ots.order.dao.OtaOrderDAO;
-import com.mk.ots.order.dao.PmsRoomOrderDao;
-import com.mk.ots.order.dao.RoomOrderDAO;
-import com.mk.ots.order.model.BOrderBusinessLog;
-import com.mk.ots.order.model.BOtaorder;
-import com.mk.ots.order.model.FirstOrderModel;
-import com.mk.ots.order.model.OtaOrderMac;
-import com.mk.ots.order.model.OtaOrderTasts;
+import com.mk.ots.order.dao.*;
+import com.mk.ots.order.model.*;
 import com.mk.ots.pay.dao.IPOrderLogDao;
 import com.mk.ots.pay.dao.impl.POrderLogDAO;
 import com.mk.ots.pay.model.PMSCancelParam;
@@ -123,6 +61,8 @@ import com.mk.ots.promo.model.BPromotionPrice;
 import com.mk.ots.promo.service.IPromotionPriceService;
 import com.mk.ots.promo.service.impl.PromoService;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
+import com.mk.ots.roomsale.model.TRoomSale;
+import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.score.model.THotelScore;
 import com.mk.ots.score.service.ScoreService;
 import com.mk.ots.ticket.dao.UTicketDao;
@@ -137,6 +77,22 @@ import com.mk.ots.web.ServiceOutput;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.myenum.PmsErrorEnum;
 import com.mk.sever.ServerChannel;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.ws.http.HTTPException;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -3459,7 +3415,7 @@ public class OrderServiceImpl implements OrderService {
       order.update();
       //修改已使用券状态
 
-      orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.CANCELBYSYSTEM.getId(), "", "系统取消订单成功,orderid:"+order.getId(), "");
+      orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.CANCELBYSYSTEM.getId(), "", "系统取消订单成功,orderid:" + order.getId(), "");
   }
 
   /**
@@ -3930,7 +3886,7 @@ public class OrderServiceImpl implements OrderService {
             return;
         }
         // 封装orderTasks 加到任务表中 status= 0初始化, taskType= 101push类型,
-        OtaOrderTasts  otaOrderTasts= this.getMessageToC(pOrder, begintimeBefore1, true,CopywriterTypeEnum.order_reach);
+        OtaOrderTasts  otaOrderTasts= this.getMessageToC(pOrder, begintimeBefore1, true, CopywriterTypeEnum.order_reach);
 
         int result = this.otaOrderTastsMapper.insertSelective(otaOrderTasts);
         if (result == 0) {
@@ -3949,7 +3905,6 @@ public class OrderServiceImpl implements OrderService {
      * @param otaorder
      * @param executeTime
      * @param isSms
-     * @return
      */
     private OtaOrderTasts getMessageToC(OtaOrder otaorder,Date executeTime,Boolean isSms,CopywriterTypeEnum copywriterTypeEnum){
     	  
@@ -3972,15 +3927,69 @@ public class OrderServiceImpl implements OrderService {
           orderTasts.setHotelid(otaorder.getHotelId());
           //推迟十分钟执行
           orderTasts.setExecuteTime(executeTime);
-          
+
           orderTasts.setOtaorderid(otaorder.getId());
           orderTasts.setTasktype(OrderTasksTypeEnum.ORDERPUSH.getId());
           orderTasts.setStatus(OrderTasksStatusEnum.INITIALIZE.getId());
-          this.logger.info("生成手机信息推送，订单号：{}，详细信息：{}",otaorder.getId(),gson.toJson(orderTasts));
+          this.logger.info("生成手机信息推送，订单号：{}，详细信息：{}", otaorder.getId(), gson.toJson(orderTasts));
           return orderTasts;
     }
 
-    
+
+    /**
+     *
+     * @param order
+     * @param minute  下发红包后延迟发送短信时间
+     * @param backcost  红吧发放金额
+     */
+    public Boolean  afterScoreSendMessage(OtaOrder otaorder,int  minute,BigDecimal  backcost){
+        this.logger.info("开始生成手机信息推送，延迟时间" + minute + "订单号：{}，详细信息：{}", otaorder.getId(), gson.toJson(otaorder));
+        Date  planSendTime =   DateUtils.addMinutes(new  Date(),minute);
+
+        // 封装orderTasks 加到任务表中 status= 0初始化, taskType= 101push类型,
+        OtaOrderTasts  otaOrderTasts= this.getMessageToC(otaorder, planSendTime, true
+                ,CopywriterTypeEnum.order_comment_done, OrderTasksTypeEnum.ORDERCREATETIMEGT15,backcost);
+        int result = this.otaOrderTastsMapper.insertSelective(otaOrderTasts);
+        if(result>0){
+            this.logger.info("开始生成手机信息推送成功，延迟时间" + minute + "订单号：{}，详细信息：{}", otaorder.getId(), gson.toJson(otaorder));
+            return  true;
+        }else{
+            this.logger.info("开始生成手机信息推送失败，延迟时间" + minute + "订单号：{}，详细信息：{}", otaorder.getId(), gson.toJson(otaorder));
+           return   false;
+        }
+    }
+    private  OtaOrderTasts getMessageToC(OtaOrder otaorder,Date executeTime,Boolean isSms,CopywriterTypeEnum copywriterTypeEnum,
+                                        OrderTasksTypeEnum   orderTasksTypeEnum,BigDecimal  backcost){
+        Message message=new Message();
+        message.setCopywriterTypeEnum(copywriterTypeEnum);
+        message.setMid(otaorder.getMid());
+        message.setOrderId(otaorder.getId());
+        message.setPhone(otaorder.getContactsPhone());
+
+        PushMessage pushMessage= new PushMessage();
+        pushMessage.setMessage(message);
+        pushMessage.setIsSms(isSms);
+        pushMessage.setTitle(backcost+"");
+
+        //发送信息
+        OtaOrderTasts orderTasts=new OtaOrderTasts();
+        orderTasts.setCount(0);
+        orderTasts.setCreatetime(new Date());
+        orderTasts.setUpdatetime(new Date());
+        orderTasts.setContent(gson.toJson(pushMessage));
+        orderTasts.setHotelid(otaorder.getHotelId());
+        //推迟十分钟执行
+        orderTasts.setExecuteTime(executeTime);
+
+        orderTasts.setOtaorderid(otaorder.getId());
+        orderTasts.setTasktype(orderTasksTypeEnum.getId());
+        orderTasts.setStatus(OrderTasksStatusEnum.INITIALIZE.getId());
+        this.logger.info("生成手机信息推送，订单号：{}，详细信息：{}",otaorder.getId(),gson.toJson(orderTasts));
+        return orderTasts;
+    }
+
+
+
     // 在取消订单的时候 修改任务表中 status为2 不发送 ==用户取消. pms取消. 系统自动取消 （没有）. 客服取消.
     // 支付失败的时候（待定），不用调用该方法？？？
     public void pushMsgNo(OtaOrder pOrder) {
