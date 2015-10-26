@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.mapper.RoomSaleTypeMapper">
+	<resultMap id="tRoomSaleType" type="com.mk.ots.roomsale.model.TRoomSaleType">
+	    <result property="id" column="id" />
+        <result property="saleName" column="saleName" />
+        <result property="fontColor" column="fontColor" />
+        <result property="description" column="description" />
+        <result property="valid" column="valid" />
+        <result property="createTime" column="createTime" />
+        <result property="createBy" column="createBy" />
+        <result property="updateTime" column="updateTime" />
+        <result property="updateBy" column="updateBy" />
+	</resultMap>
+
+    <sql id="Base_Column_List" >
+        id,saleName,fontColor,description,valid,createTime,createBy,updateTime,updateBy
+    </sql>
+
+    <sql id="Base_Query_List" >
+        <where>
+            <if test="id != null">
+                 id = #{id}
+            </if>
+            <if test="saleName != null">
+                saleName = #{saleName}
+            </if>
+            <if test="fontColor != null">
+                fontColor = #{fontColor}
+            </if>
+            <if test="description != null">
+                description = #{description}
+            </if>
+            <if test="valid != null">
+                valid = #{valid}
+            </if>
+            <if test="createBy != null">
+                createBy = #{createBy}
+            </if>
+            <if test="updateBy != null">
+                updateBy = #{updateBy}
+            </if>
+        </where>
+    </sql>
+
+    <select id="queryRoomSaleType" resultMap="tRoomSaleType" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM  t_room_sale_type
+        <include refid="Base_Query_List"/>
+    </select>
+
+</mapper>
