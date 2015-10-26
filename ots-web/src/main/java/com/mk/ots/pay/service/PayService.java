@@ -317,9 +317,6 @@ public class PayService implements IPayService {
             // 已经支付的，加上在线支付的钱
             if (payStatus.getId().intValue() == PayStatusEnum.alreadyPay.getId().intValue()) {
                 price = orderLog.getRealallcost();
-                if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
-                    price = pay.getLezhu();
-                }
             } else if (payStatus.getId().intValue() == PayStatusEnum.doNotPay.getId().intValue()) {
             	price = orderLog.getRealotagive();
                 if(PayTools.isPositive(orderLog.getRealaccountcost())){
@@ -333,6 +330,9 @@ public class PayService implements IPayService {
         
         if (price.compareTo(BigDecimal.ZERO) == 0) {
             return false;
+        }
+        if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
+            price = pay.getLezhu();
         }
         this.logger.info("订单:" + orderId + "payService类中调用ticket:pay支付--end--price:" + price);
         return this.pmsAddpay(order,pay.getId(),pmsSendId, price, member.getName(),null);
