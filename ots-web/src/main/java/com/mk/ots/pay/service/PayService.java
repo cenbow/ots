@@ -669,7 +669,10 @@ public class PayService implements IPayService {
 		logger.info(mark + "开始向PMS2.0发送支付信息流程...");
 		
 		POrderLog pOrderLog = ipOrderLogDao.findPOrderLogByPay(payid);
-
+        PPay pay = this.iPayDAO.getPayByOrderId(order.getId());
+        if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
+            price = pay.getLezhu();
+        }
 		try {
 			String request = wrapPMSRequest(order, pmsSendId, price,"addpay");
 			
@@ -1616,9 +1619,6 @@ public class PayService implements IPayService {
 		// 计算用户实际支付
 		BigDecimal realCost = new BigDecimal(0);
 		// 保存对账信息
-        if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
-            allcost = pay.getLezhu();
-        }
 		this.logger.info("订单:" + orderId + "保存porderlog流水:payid}" + pay.getId() + ",allcost:" + allcost + ",realCost:" + realCost + ",promotionPayInfos的长度:" + promotionPayInfos.size()
 				+ ",promotionParses的 长度:" + promotionParses.size() + ",ticketParses的长度:" + ticketParses.size() + ",promotionParses的 长度:" + promotionParses.size());
 		BigDecimal otaGive = this.saveOrderLog(pay, allcost, realCost, ticketParses, promotionParses,order.getAvailableMoney());
