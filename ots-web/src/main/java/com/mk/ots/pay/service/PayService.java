@@ -1242,7 +1242,7 @@ public class PayService implements IPayService {
                 TRoomSale tRoomSale = new TRoomSale();
                 tRoomSale.setRoomId((int)otaRoomOrder.getRoomId());
                 TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
-                allcost = allcost.add(resultRoomSale.getSettleValue());
+                allcost = allcost.add(new BigDecimal(resultRoomSale.getSalePrice()));
             }
         }else{
             for (OtaRoomOrder otaRoomOrder : roomOrdrs) {
