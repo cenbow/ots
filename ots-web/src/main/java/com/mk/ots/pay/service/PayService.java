@@ -1207,7 +1207,8 @@ public class PayService implements IPayService {
         pPay.setHotel(hotel);
         pPay.setOrderid(order.getId());
         pPay.setOrderprice(allcost);
-        pPay.setLezhu(allcost);
+        BigDecimal lezhuBi = getLezhuBi(order);
+        pPay.setLezhu(lezhuBi);
         pPay.setMember(member);
         pPay.setNeedreturn(NeedReturnEnum.ok);
         pPay.setNeworderid(null);
@@ -1234,6 +1235,33 @@ public class PayService implements IPayService {
      * @return
      */
     private BigDecimal caculateAllCost(OtaOrder order) {
+        BigDecimal allcost = BigDecimal.ZERO;
+        List<OtaRoomOrder> roomOrdrs = order.getRoomOrderList();
+        //判断特价房
+        if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
+            for (OtaRoomOrder otaRoomOrder : roomOrdrs) {
+                TRoomSale tRoomSale = new TRoomSale();
+                tRoomSale.setRoomId((int)otaRoomOrder.getRoomId());
+                TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
+                allcost = allcost.add(new BigDecimal(resultRoomSale.getSalePrice()));
+            }
+        }else{
+            for (OtaRoomOrder otaRoomOrder : roomOrdrs) {
+                allcost = allcost.add(otaRoomOrder.getTotalPrice());
+            }
+        }
+
+        return allcost;
+    }
+
+    /**
+     * 计算乐住币
+     *
+     * @param order
+     * @param allcost
+     * @return
+     */
+    private BigDecimal getLezhuBi(OtaOrder order) {
         BigDecimal allcost = BigDecimal.ZERO;
         List<OtaRoomOrder> roomOrdrs = order.getRoomOrderList();
         //判断特价房

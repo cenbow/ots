@@ -8,7 +8,7 @@ import java.util.Map;
 
 public interface RoomSaleConfigInfoMapper {
 
-    public List<TRoomSaleConfigInfo> queryRoomSaleConfigInfoList();
+    public List<TRoomSaleConfigInfo> queryRoomSaleConfigInfoList(Map<String, Object> map);
 
     public int saveRoomSaleConfigInfo(Map<String, Object> map );
 
