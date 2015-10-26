@@ -1634,7 +1634,7 @@ public class DateUtils extends Object {
 
         if (startTime.after(endTime) && tmpEndTime.after(sysTime)) {
             getCalTime(startTime, cal);
-            cal.add(cal.DATE, -1);
+            cal.add(Calendar.DATE, -1);
             startPromoTime = cal.getTime();
         }else {
             getCalTime(startTime, cal);
@@ -1643,20 +1643,26 @@ public class DateUtils extends Object {
         cal.clear();
         cal.setTime(sysTime);
         Date endPromoTime;
+
         if (sysTime.before(tmpEndTime)) {
             getCalTime(endTime, cal);
             endPromoTime = cal.getTime();
         }else if (startTime.after(endTime)){
             cal.add(cal.DATE, 2);
+
             getCalTime(endTime, cal);
             endPromoTime = cal.getTime();
         }else {
-            cal.add(cal.DATE, 1);
+            cal.add(Calendar.DATE, 1);
             getCalTime(endTime, cal);
             endPromoTime = cal.getTime();
         }
-
-        long diff= DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime), DateUtils.formatDatetime(endPromoTime));
+        
+        Calendar calStartPromoTime = Calendar.getInstance();
+        calStartPromoTime.setTime(startPromoTime);
+        calStartPromoTime.add(Calendar.DATE, 1);
+        
+        long diff= DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime), DateUtils.formatDatetime(calStartPromoTime.getTime()));
         if (diff < 0){
             return 0;
         }

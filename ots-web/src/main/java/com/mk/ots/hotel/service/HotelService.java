@@ -464,7 +464,7 @@ public class HotelService {
 						logger.info("fire the task which updates bedtypes...");
 					}
 
-//					asyncBatchUpdateHotelBedtypes(cityid);
+					// asyncBatchUpdateHotelBedtypes(cityid);
 
 				} else {
 					output.setSuccess(true);
@@ -1567,6 +1567,9 @@ public class HotelService {
 
 				if (rooms.size() > 0) {
 					curPromoType = (Integer) rooms.get(0).get("promotype");
+				} else {
+					logger.warn(String.format("no roomtype have been found for hotelid:%s; roomtypeid:%s", hotelid,
+							curRoomTypeId));
 				}
 			} catch (Exception ex) {
 				logger.warn(String.format("failed to queryRoomByHotelAndRoomType, hotelid:%s; roomid:%s; roomtypeid:%s",
