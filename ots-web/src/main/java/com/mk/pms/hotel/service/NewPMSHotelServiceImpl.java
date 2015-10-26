@@ -67,6 +67,9 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 	private RoomService roomService;
 
 	@Autowired
+	private RoomSaleTypeMapper roomSaleTypeMapper;
+
+	@Autowired
 	private RoomSaleConfigMapper roomSaleConfigMapper;
 
 	@Autowired
@@ -290,9 +293,16 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 		/*
 			为重庆特价房，增加。若是特价房，不更新
 		 */
+		//
+		Map<String,Object> saleTypeParam = new HashMap<>();
+		saleTypeParam.put("valid","T");
+		roomSaleTypeMapper.queryRoomSaleType(saleTypeParam);
 
 		//先取可用configInfo
-		List<TRoomSaleConfigInfo> infoList = roomSaleConfigInfoMapper.queryRoomSaleConfigInfoList();
+		Map<String,Object> saleConfigParam = new HashMap<>();
+		saleConfigParam.put("valid","T");
+
+		List<TRoomSaleConfigInfo> infoList = roomSaleConfigInfoMapper.queryRoomSaleConfigInfoList(saleConfigParam);
 		Set<String> onSaleRoomTypePms = new HashSet<String>();
 		for (TRoomSaleConfigInfo info : infoList) {
 			String infoValid = info.getValid();
