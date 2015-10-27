@@ -303,37 +303,26 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 		for (PMSRoomTypeBean pmsRoomTypeBean : pmsRoomTypeList) {
 			// PMS2.0中的ID与OTS中的pms字段对应
 			String pms = String.valueOf(pmsRoomTypeBean.getId());
-//			/*
-//				为重庆特价房，增加。若是特价房，不更新
-//			 */
-//			if (onSaleRoomTypePms.contains(pms)) {
-//				logger.info("PMS2.0 不同步房间数据：参数{} ", pms);
-//				continue;
-//			} else {
-//				logger.info("PMS2.0 同步房间数据：参数{} ", pms);
-//			}
-//			/*
-//
-//			 */
 
 			List<TRoomTypeModel> tRoomTypes = tRoomTypesMap.get(pms);
 			//活动 特价和一般房型的所有房间
-			List<TRoomModel> roomList = new ArrayList<>();
-			for (TRoomTypeModel tRoomType : tRoomTypes) {
-				Long roomId = tRoomType.getId();
-				roomList.addAll(roomsMap.get(roomId));
-			}
-
-			for (TRoomTypeModel tRoomType : tRoomTypes) {
-				if (tRoomType == null) {
-					logger.info("PMS2.0 同步房型数据-->开始添加房型：参数roomtype:{} ", JsonKit.toJson(pmsRoomTypeBean));
-					roomCount = roomCount + pmsRoomTypeBean.getRoom().size();
-					if (pmsRoomTypeBean.getRoom() == null || pmsRoomTypeBean.getRoom().size() == 0) {
-						logger.info("PMS2.0 同步房型数据-->开始添加房型：参数roomtype:{} 房间数为0 ,此房型不做同步", JsonKit.toJson(pmsRoomTypeBean.getId()));
-					} else {
-						this.addRoomType(hotelId, pmsRoomTypeBean, hotelName, changemap);
-					}
+			if (null == tRoomTypes) {
+				logger.info("PMS2.0 同步房型数据-->开始添加房型：参数roomtype:{} ", JsonKit.toJson(pmsRoomTypeBean));
+				roomCount = roomCount + pmsRoomTypeBean.getRoom().size();
+				if (pmsRoomTypeBean.getRoom() == null || pmsRoomTypeBean.getRoom().size() == 0) {
+					logger.info("PMS2.0 同步房型数据-->开始添加房型：参数roomtype:{} 房间数为0 ,此房型不做同步", JsonKit.toJson(pmsRoomTypeBean.getId()));
 				} else {
+					this.addRoomType(hotelId, pmsRoomTypeBean, hotelName, changemap);
+				}
+			} else {
+
+				List<TRoomModel> roomList = new ArrayList<>();
+				for (TRoomTypeModel tRoomType : tRoomTypes) {
+					Long roomId = tRoomType.getId();
+					roomList.addAll(roomsMap.get(roomId));
+				}
+
+				for (TRoomTypeModel tRoomType : tRoomTypes) {
 					logger.info("PMS2.0 同步房型数据-->开始更新房型：参数roomtype:{},tRoomType:{}", JsonKit.toJson(pmsRoomTypeBean), JsonKit.toJson(tRoomType));
 					roomCount = roomCount + pmsRoomTypeBean.getRoom().size();
 					if (pmsRoomTypeBean.getRoom() == null || pmsRoomTypeBean.getRoom().size() == 0) {
@@ -356,6 +345,7 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 					}
 				}
 			}
+
 		}
 
 
@@ -475,7 +465,7 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 	}
 
 	private void updateRoomType(TRoomTypeModel tRoomType, PMSRoomTypeBean pmsRoomTypeBean, List<TRoomModel> tRoomList,Map changemap, boolean isOnSaleRoomType) {
-		//非特价房不更新房型名称
+		//非特价房更新房型名称
 		if (!isOnSaleRoomType) {
 			tRoomType.setName(pmsRoomTypeBean.getName());
 		}

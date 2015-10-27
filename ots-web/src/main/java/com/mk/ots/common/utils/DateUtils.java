@@ -1586,15 +1586,20 @@ public class DateUtils extends Object {
         cal.clear();
         cal.setTime(sysTime);
         Date endPromoTime;
-
-        if (startTime.after(endTime)){
+        if (sysTime.before(tmpEndTime)) {
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }else if (startTime.after(endTime)){
             cal.add(cal.DATE, 1);
             getCalTime(endTime, cal);
             endPromoTime = cal.getTime();
-        }else {
+        }
+        else
+        {
             getCalTime(endTime, cal);
             endPromoTime = cal.getTime();
         }
+
         long diff= DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime), DateUtils.formatDatetime(startPromoTime));
         if (diff < 0){
             return 0;
@@ -1639,8 +1644,12 @@ public class DateUtils extends Object {
         cal.setTime(sysTime);
         Date endPromoTime;
 
-        if (startTime.after(endTime)){
-            cal.add(Calendar.DATE, 2);
+        if (sysTime.before(tmpEndTime)) {
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }else if (startTime.after(endTime)){
+            cal.add(cal.DATE, 2);
+
             getCalTime(endTime, cal);
             endPromoTime = cal.getTime();
         }else {
@@ -1692,8 +1701,10 @@ public class DateUtils extends Object {
         cal.clear();
         cal.setTime(sysTime);
         Date endPromoTime;
-
-        if (startTime.after(endTime)){
+        if (sysTime.before(tmpEndTime)) {
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }else if (startTime.after(endTime)){
             cal.add(cal.DATE, 1);
             getCalTime(endTime, cal);
             endPromoTime = cal.getTime();
@@ -1731,9 +1742,9 @@ public class DateUtils extends Object {
     }
 
     public static void getCalTime(Time startTime, Calendar cal) {
-        int year=cal.get(Calendar.YEAR);
-        int month=cal.get(Calendar.MONTH);
-        int day=cal.get(Calendar.DAY_OF_MONTH);
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH);
+        int day = cal.get(Calendar.DAY_OF_MONTH);
         cal.setTime(startTime);
         int hour= cal.get(Calendar.HOUR_OF_DAY);
         int min= cal.get(Calendar.MINUTE);

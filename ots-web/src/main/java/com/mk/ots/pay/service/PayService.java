@@ -331,6 +331,9 @@ public class PayService implements IPayService {
         if (price.compareTo(BigDecimal.ZERO) == 0) {
             return false;
         }
+        if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
+            price = pay.getLezhu();
+        }
         this.logger.info("订单:" + orderId + "payService类中调用ticket:pay支付--end--price:" + price);
         return this.pmsAddpay(order,pay.getId(),pmsSendId, price, member.getName(),null);
     }
@@ -663,13 +666,13 @@ public class PayService implements IPayService {
 	 * 通过url发送支付信息到PMS2.0
 	 */
 	private  boolean  pmsAddpayV2(OtaOrder order, long payid, long pmsSendId, BigDecimal price, String operateName) {
-		
+
 		String mark = "订单[" + order.getId() + "]PayId[" + payid + "]";
 		
 		logger.info(mark + "开始向PMS2.0发送支付信息流程...");
 		
 		POrderLog pOrderLog = ipOrderLogDao.findPOrderLogByPay(payid);
-
+        PPay pay = this.iPayDAO.getPayByOrderId(order.getId());
 		try {
 			String request = wrapPMSRequest(order, pmsSendId, price,"addpay");
 			
