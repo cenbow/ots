@@ -239,7 +239,7 @@ public class HmsHotelService implements IHotelService {
             hotel.setHotelphone(thotelModel.getHotelphone());
 
             // mike3.1 新增酒店默认isonpromo 为0
-            hotel.setIsonpromo("0");
+
             boolean sucess = this.save(hotel);
             if (sucess) {
                 rtnMap.put("success", true);
@@ -647,24 +647,7 @@ public class HmsHotelService implements IHotelService {
                 logger.info("HMS更新酒店{}床型{}", hotelid, bedtype.get("bedtype"));
             }
 
-            TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
-            Integer hotelId = Integer.valueOf(hotelid);
-            tRoomSaleConfig.setHotelId(hotelId);
-            Boolean isPromo = roomSaleService.checkRoomSale(tRoomSaleConfig);
-            if (isPromo != null && isPromo) {
-                otsHotelMap.put("isonpromo", "1");
-            } else {
-                otsHotelMap.put("isonpromo", "0");
-            }
 
-            List<Map<String, Object>> promoinfo;
-
-            promoinfo = roomSaleService.queryRoomPromoInfoByHotel(hotelid);
-            if (promoinfo == null) {
-                promoinfo = new ArrayList<>();
-            }
-
-            otsHotelMap.put("promoinfo", promoinfo);
 
             // add es hotel data
             esProxy.signleAddDocument(otsHotelMap);
