@@ -76,9 +76,11 @@ public class VerifyCodeService {
 		}
 		//重庆 500000特殊关怀
 		if ("500000".equals(citycode)) {
-			return "您的眯客验证码为"+verifyCode+"，请于10分钟内填写。";
+			return "【眯客】您的验证码为："+verifyCode+"，有效时间为1分钟。\n" +
+					"眯客，弹指间有房间。每日20:00点后眯客酒店4折起，评价还有返现！";
 		} else {
-			return "您的眯客验证码为"+verifyCode+"，请于10分钟内填写。";
+			return "【眯客】您的验证码为："+verifyCode+"，有效时间为1分钟。\n" +
+					"眯客，弹指间有房间。";
 		}
 	}
 
