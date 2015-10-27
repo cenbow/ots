@@ -672,7 +672,6 @@ public class PayService implements IPayService {
 		logger.info(mark + "开始向PMS2.0发送支付信息流程...");
 		
 		POrderLog pOrderLog = ipOrderLogDao.findPOrderLogByPay(payid);
-        PPay pay = this.iPayDAO.getPayByOrderId(order.getId());
 		try {
 			String request = wrapPMSRequest(order, pmsSendId, price,"addpay");
 			
