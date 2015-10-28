@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -33,29 +34,34 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 	private RoomSaleForPmsMapper roomSaleForPmsMapper;
 	public String updateTRoomSaleConfig(TRoomSaleConfigForPms bean){
 		if (bean.getRoomTypeId()==null&&bean.getNewCount()==null){
-			return "提交参数不完整";
+			return "ERROR,提交参数不完整";
 		}
 		TRoomSaleConfig roomSaleConfig=roomSaleForPmsMapper.getRoomTypeByPms(bean.getRoomTypeId());
 		if(roomSaleConfig==null){
-			return  "房型不存在";
+			return  "ERROR,房型不存在";
 		}
 		TRoomSaleConfig newConfig =new TRoomSaleConfig();
 		newConfig.setRoomTypeId(roomSaleConfig.getId());
 		newConfig.setValid("T");
 		List<TRoomSaleConfig> roomSaleConfigList=roomSaleForPmsMapper.queryRoomSaleConfigByParams(newConfig);
 		if(CollectionUtils.isEmpty(roomSaleConfigList)){
-			return  "修改房型不在活动配置表中";
+			return  "ERROR,修改房型不在活动配置表中";
 		}
 		TRoomSaleConfig configToUpdate=roomSaleConfigList.get(0);
 		if (bean.getNewCount()<configToUpdate.getDealCount()){
-			return  "修改数量小于协议数量";
+			return  "ERROR,修改数量小于协议数量";
 		}
 		configToUpdate.setNum(bean.getNewCount());
 		Integer result= roomSaleForPmsMapper.updateRoomSaleNum(configToUpdate);
 		if (result>0){
-			return  null;
+			TRoomSaleConfig configInfo=roomSaleForPmsMapper.getConfigInfoById(configToUpdate.getSaleConfigInfoId());
+			Time nowTime = Time.valueOf(DateTools.getTime("HH:mm:ss")) ;
+			if (nowTime.compareTo(configInfo.getStartTime())>=0){
+				return "OK,变更次日生效";
+			}
+			return  "OK,变更已生效";
 		}else{
-			return  "更新失败";
+			return  "ERROR,更新失败";
 		}
 	}
 	public TRoomSaleForPms getHotelRoomSale(TRoomSaleConfigForPms bean){

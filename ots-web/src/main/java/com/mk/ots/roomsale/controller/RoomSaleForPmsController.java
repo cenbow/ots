@@ -41,11 +41,7 @@ public class RoomSaleForPmsController {
 	public ResponseEntity<Map<String, Object>> updateTRoomSaleConfig(TRoomSaleConfigForPms bean) {
 		String rs=roomSaleForPmsService.updateTRoomSaleConfig(bean);
 		Map<String, Object> rtnMap = Maps.newHashMap();
-		if(rs==null){
-			rtnMap.put("msg", "OK");
-		}else{
-			rtnMap.put("msg", "ERROR,"+rs);
-		}
+		  rtnMap.put("msg", rs);
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 

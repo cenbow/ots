@@ -97,6 +97,13 @@
         WHERE b.Started = #{started}
     </select>
 
+    <select id="getConfigInfoById" resultMap="roomSaleConfig" parameterType="java.lang.Integer">
+        SELECT
+        id,startDate,endDate,startTime,endTime
+        FROM  t_room_sale_config_info
+        WHERE id = #{id}
+    </select>
+
     <insert id="saveRoomSaleConfig"  parameterType="map"
             useGeneratedKeys="true" keyProperty="id" >
         INSERT INTO t_room_sale_config
