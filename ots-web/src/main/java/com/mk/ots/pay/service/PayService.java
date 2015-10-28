@@ -1279,7 +1279,7 @@ public class PayService implements IPayService {
                 allcost = allcost.add(otaRoomOrder.getTotalPrice());
             }
         }
-        allcost = allcost.setScale(2, BigDecimal.ROUND_UP).setScale(0, BigDecimal.ROUND_HALF_DOWN);
+        allcost = allcost.setScale(0, BigDecimal.ROUND_HALF_UP);
         return allcost;
     }
 
