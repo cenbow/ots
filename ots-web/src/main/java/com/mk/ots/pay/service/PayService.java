@@ -1210,6 +1210,7 @@ public class PayService implements IPayService {
         pPay.setOrderid(order.getId());
         pPay.setOrderprice(allcost);
         BigDecimal lezhuBi = getLezhuBi(order);
+        logger.info(String.format("===chenqi create pay lezhu[%s]=="), lezhuBi);
         pPay.setLezhu(lezhuBi);
         pPay.setMember(member);
         pPay.setNeedreturn(NeedReturnEnum.ok);
