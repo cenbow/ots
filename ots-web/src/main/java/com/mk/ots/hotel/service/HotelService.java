@@ -28,7 +28,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.common.geo.GeoDistance;
 import org.elasticsearch.common.geo.GeoPoint;
-import org.elasticsearch.common.joda.time.Seconds;
 import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -499,7 +498,8 @@ public class HotelService {
 						logger.info("fire the task which updates bedtypes...");
 					}
 
-//					asyncBatchUpdateHotelBedtypes(cityid);
+					// asyncBatchUpdateHotelBedtypes(cityid);
+
 				} else {
 					output.setSuccess(true);
 				}
@@ -1601,6 +1601,9 @@ public class HotelService {
 
 				if (rooms.size() > 0) {
 					curPromoType = (Integer) rooms.get(0).get("promotype");
+				} else {
+					logger.warn(String.format("no roomtype have been found for hotelid:%s; roomtypeid:%s", hotelid,
+							curRoomTypeId));
 				}
 			} catch (Exception ex) {
 				logger.warn(String.format("failed to queryRoomByHotelAndRoomType, hotelid:%s; roomid:%s; roomtypeid:%s",
@@ -2893,7 +2896,8 @@ public class HotelService {
 		logger.info("updateEsMikePrice method parameters hotelid:{}, startdate:{}, days:{}", hotelid, startdate, days);
 		String hid = hotelid.toString();
 		try {
-			SearchHit[] searchHits = esProxy.searchHotelByHotelId(hid);
+			SearchHit[] searchHits = esProxy.searchHotelByHotelIdWithRetry(hid, 2);
+			logger.info("眯客价查询到酒店个数: {}", searchHits.length);
 			for (int i = 0; i < searchHits.length; i++) {
 				SearchHit searchHit = searchHits[i];
 				String _id = searchHit.getId();
@@ -2969,6 +2973,10 @@ public class HotelService {
 		return datas;
 	}
 
+	private void removeObsoleteBedtypes() {
+		
+	}
+
 	public void asyncBatchUpdateHotelBedtypes(final String citycode) {
 		this.exService.submit(new Runnable() {
 			@Override
@@ -3010,6 +3018,7 @@ public class HotelService {
 								continue;
 							}
 							String field = "bedtype" + bedtype.get("bedtype");
+
 							esProxy.updateDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT,
 									ElasticsearchProxy.HOTEL_TYPE_DEFAULT, hit.getId(), field, 1);
 							logger.info("酒店{}有床型{}", hotelid, bedtype.get("bedtype"));

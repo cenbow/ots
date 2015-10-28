@@ -171,13 +171,17 @@
 
 
     <select id="queryRoomPromoByHotel" resultType="map" parameterType="String">
-        SELECT config.roomId as roomid, config.roomTypeId as roomtypeid, config.saleName as salename,
+        SELECT config.roomId as roomid, config.saleRoomTypeId as roomtypeid, config.saleName as salename,
         info.startTime as starttime, info.endTime as endtime, info.fontColor as namefontcolor,
         type.fontColor as typefontcolor, type.description as typedesc
         FROM t_room_sale_config config
-        join t_room_sale_config_info info on config.saleroomtypeid = info.id
+        join t_room_sale_config_info info on config.saleconfiginfoid = info.id
         join t_room_sale_type type on info.saletypeid = type.id
-        where config.hotelId = #{hotelId}
+        where
+        config.valid = 'T' and info.valid = 'T' and type.valid = 'T'
+        <if test="hotelId != null">
+            AND config.hotelId = #{hotelId}
+        </if>
     </select>
 
     <select id="queryRoomPromoInfoByHotel" resultType="map" parameterType="String">
@@ -192,7 +196,6 @@
         SELECT info.id as promotype, info.salevalue as promoprice, config.roomTypeid as roomtypeid
         FROM t_room_sale_config config
         join t_room_sale_config_info info on config.saleconfiginfoid = info.id
-        join t_room_sale sale on config.roomtypeid = sale.oldroomtypeid
         WHERE config.hotelId = #{hotelId} and config.saleRoomTypeId = #{roomTypeId}
         and config.valid = 'T' 
     </select>

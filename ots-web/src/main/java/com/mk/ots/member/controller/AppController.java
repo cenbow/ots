@@ -313,8 +313,8 @@ public class AppController {
 			logger.info("手机注册用户. member:{}", regMem.toString());
 			ofMember = Optional.fromNullable(regMem);
 
-			// 调用发放券接口：发放新用户礼包
-			iPromoService.genTicketByAllRegNewMember(regMem.getMid());
+			// 调用发放券接口：发放新用户礼包 暂时停掉
+			//iPromoService.genTicketByAllRegNewMember(regMem.getMid());
 			logger.info("手机注册发放新用户礼包. mid:{}", regMem.getMid());
 			isRegister = true;
 		} else if (Strings.isNullOrEmpty(phone) && !Strings.isNullOrEmpty(unionid)) { // 微信注册
@@ -344,8 +344,8 @@ public class AppController {
 			logger.info("微信注册用户. member:{}", regMem.toString());
 			ofMember = Optional.fromNullable(regMem);
 
-			// 调用发放券接口：发放新用户礼包
-			iPromoService.genTicketByAllRegNewMember(regMem.getMid());
+			// 调用发放券接口：发放新用户礼包  暂时停掉
+			//iPromoService.genTicketByAllRegNewMember(regMem.getMid());
 			logger.info("微信注册发放新用户礼包. mid:{}", regMem.getMid());
 			isRegister = true;
 		} else if (!Strings.isNullOrEmpty(phone) && !Strings.isNullOrEmpty(unionid)) {
@@ -405,7 +405,8 @@ public class AppController {
 					iMemberService.saveOrUpdate(regMem);
 					ofMember = Optional.fromNullable(regMem);
 
-					iPromoService.genTicketByAllRegNewMember(regMem.getMid());
+                    //  暂时停掉
+					// iPromoService.genTicketByAllRegNewMember(regMem.getMid());
 					logger.info("微信注册发放新用户礼包. mid:{}", regMem.getMid());
 					isRegister = true;
 				}

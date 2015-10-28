@@ -91,5 +91,15 @@
   <select id="selectCityCodeByOrderId"  resultType="java.lang.String" parameterType="java.lang.Long">
 	select t.citycode from t_hotel t join b_otaorder b on t.id = b.HotelId where b.id = #{orderId}
   </select>
-  
+
+  <select id="findHotelIsNewPms"  resultType="java.lang.String" parameterType="java.lang.Long">
+	SELECT
+		isNewPms
+	FROM
+		t_hotel
+	WHERE
+		id = #{hotelid}
+  </select>
+
+
 </mapper>

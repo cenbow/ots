@@ -1,11 +1,10 @@
 package com.mk.ots.roomsale.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
-import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
-import com.mk.ots.web.ServiceOutput;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -18,10 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.alibaba.fastjson.JSONObject;
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
+import com.mk.ots.web.ServiceOutput;
 
 /**
  *
@@ -71,7 +72,10 @@ public class HotelPromoController {
 			if (CollectionUtils.isNotEmpty(roomSaleConfigInfoList)) {
 				for (TRoomSaleConfigInfo saleConfigInfo : roomSaleConfigInfoList) {
 					long sec = DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
-							saleConfigInfo.getStartTime());
+							saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
+
+					long nextsec = DateUtils.calNextDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
+							saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
 
 					long endSec = DateUtils.calEndDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
 							saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
@@ -89,7 +93,8 @@ public class HotelPromoController {
 					ptype1.put("promotypetext", saleConfigInfo.getSaleLabel());
 					ptype1.put("promotypeprice", saleConfigInfo.getSaleValue());
 					ptype1.put("promosec", sec / 1000); // 秒
-					ptype1.put("promosecend", endSec / 1000); //距离结束时间（s）
+					ptype1.put("promosecend", endSec / 1000); // 距离结束时间（s）
+					ptype1.put("nextpromosec", nextsec / 1000); // 距离下一段结束时间（s）
 					list.add(ptype1);
 				}
 			}

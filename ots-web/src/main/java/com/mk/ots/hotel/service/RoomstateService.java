@@ -29,26 +29,9 @@ import com.mk.orm.kit.JsonKit;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.hotel.model.TFacilityModel;
-import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.model.THotelModel;
-import com.mk.ots.hotel.model.TPricetimeWithPrices;
-import com.mk.ots.hotel.model.TRoomModel;
-import com.mk.ots.hotel.model.TRoomRepairModel;
-import com.mk.ots.hotel.model.TRoomTypeInfoModel;
-import com.mk.ots.hotel.model.TRoomTypeModel;
-import com.mk.ots.hotel.model.TRoomTypeWithBasePrice;
+import com.mk.ots.hotel.model.*;
 import com.mk.ots.manager.OtsCacheManager;
-import com.mk.ots.mapper.PmsRoomOrderMapper;
-import com.mk.ots.mapper.RoomCensusMapper;
-import com.mk.ots.mapper.RoomLockPoMapper;
-import com.mk.ots.mapper.TFacilityMapper;
-import com.mk.ots.mapper.THotelMapper;
-import com.mk.ots.mapper.TPricetimeMapper;
-import com.mk.ots.mapper.TRoomMapper;
-import com.mk.ots.mapper.TRoomRepairMapper;
-import com.mk.ots.mapper.TRoomTypeMapper;
-import com.mk.ots.mapper.TRoomtypeInfoMapper;
+import com.mk.ots.mapper.*;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.OtaRoomOrder;
 import com.mk.ots.order.model.PmsRoomOrderModel;
@@ -63,8 +46,15 @@ import com.mk.pms.myenum.PmsRoomOrderStatusEnum;
 import com.mk.pms.room.bean.RoomLockJsonBean;
 import com.mk.pms.room.bean.RoomLockPo;
 import com.mk.pms.room.service.PmsRoomService;
-
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * 房态服务类(git测试5)
@@ -1012,7 +1002,7 @@ public class RoomstateService {
 					Integer roomTypeId = Integer.valueOf(troomType.getId().toString());
 					tRoomSaleConfig.setRoomTypeId(roomTypeId);
 
-					Boolean isPromo = roomSaleService.checkRoomSaleWithOldRoomType(tRoomSaleConfig);
+					Boolean isPromo = roomSaleService.checkRoomSale(tRoomSaleConfig);
 					if (logger.isInfoEnabled()) {
 						logger.info(String.format("isPromo:%s; roomTypeId:%s; callVersionStr:%s", isPromo, roomTypeId,
 								callVersionStr));
@@ -1021,7 +1011,11 @@ public class RoomstateService {
 					if (StringUtils.isNotBlank(callVersionStr)) {
 						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
 								&& !"3".equals(callMethod)) {
-							List<RoomPromoDto> list = roomSaleService.queryRoomPromoByHotelNew(tRoomSaleConfig);
+							TRoomSaleConfig hotelRoomSaleConfig = new TRoomSaleConfig();
+							Integer thotelId = hotelid != null ? hotelid.intValue() : null;
+							hotelRoomSaleConfig.setHotelId(thotelId);
+							hotelRoomSaleConfig.setRoomTypeId(roomTypeId);
+							List<RoomPromoDto> list = roomSaleService.queryRoomPromoByHotelNew(hotelRoomSaleConfig);
 							String isonpromo = "0";
 
 							if (logger.isInfoEnabled()) {
@@ -1034,7 +1028,7 @@ public class RoomstateService {
 								if (list != null && list.size() > 0) {
 									RoomPromoDto roomPromoDto = list.get(0);
 
-									Integer promostaus = DateUtils.calPromoStatus(roomPromoDto.getStartDate(),
+									Integer promostaus = DateUtils.promoStatus(roomPromoDto.getStartDate(),
 											roomPromoDto.getEndDate(), roomPromoDto.getStartTime(),
 											roomPromoDto.getEndTime());
 									roomtype.setPromostatus(promostaus);
@@ -1601,6 +1595,7 @@ public class RoomstateService {
 				rtnPrice = troomtype.getCost();
 				return rtnPrice;
 			}
+
 			/*
 			 * BigDecimal price = troomtype.getPrice(); BigDecimal subprice =
 			 * troomtype.getSubprice(); BigDecimal subper =
@@ -1623,6 +1618,7 @@ public class RoomstateService {
 			 * if (price.compareTo(BigDecimal.ZERO) == 1) { // 设置了基本价 rtnPrice =
 			 * troomtype.getPrice(); return rtnPrice; }
 			 */
+
 			// 放入redis缓存
 			jedis.hset(key, field, rtnPrice.toString());
 			this.logger.info("roomtype: {} price cache to redis, cache value is {}", roomtypeid, rtnPrice);
