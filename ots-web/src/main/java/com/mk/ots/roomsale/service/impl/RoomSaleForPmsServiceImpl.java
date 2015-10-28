@@ -115,7 +115,7 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 		}
 		long timeOne = dateOne.getTimeInMillis();
 		long timeTwo = dateTwo.getTimeInMillis();
-		long minute = (timeOne - timeTwo) / (1000 * 60);//转化minute
+		long minute = (timeTwo - timeOne) / (1000 * 60);//转化minute
 		return minute;
 	}
 }
