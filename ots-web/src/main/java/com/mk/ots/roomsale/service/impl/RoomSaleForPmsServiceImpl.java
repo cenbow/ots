@@ -31,31 +31,31 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 	private HotelService hotelService;
 	@Autowired
 	private RoomSaleForPmsMapper roomSaleForPmsMapper;
-	public Boolean updateTRoomSaleConfig(TRoomSaleConfigForPms bean){
+	public String updateTRoomSaleConfig(TRoomSaleConfigForPms bean){
 		if (bean.getRoomTypeId()==null&&bean.getNewCount()==null){
-			return false;
+			return "提交参数不完整";
 		}
 		TRoomSaleConfig roomSaleConfig=roomSaleForPmsMapper.getRoomTypeByPms(bean.getRoomTypeId());
 		if(roomSaleConfig==null){
-			return  false;
+			return  "房型不存在";
 		}
 		TRoomSaleConfig newConfig =new TRoomSaleConfig();
 		newConfig.setRoomTypeId(roomSaleConfig.getId());
 		newConfig.setValid("T");
 		List<TRoomSaleConfig> roomSaleConfigList=roomSaleForPmsMapper.queryRoomSaleConfigByParams(newConfig);
 		if(CollectionUtils.isEmpty(roomSaleConfigList)){
-			return  false;
+			return  "修改房型不在活动配置表中";
 		}
 		TRoomSaleConfig configToUpdate=roomSaleConfigList.get(0);
-		if (bean.getNewCount()<=configToUpdate.getDealCount()){
-			return  false;
+		if (bean.getNewCount()<configToUpdate.getDealCount()){
+			return  "修改数量小于协议数量";
 		}
 		configToUpdate.setNum(bean.getNewCount());
 		Integer result= roomSaleForPmsMapper.updateRoomSaleNum(configToUpdate);
 		if (result>0){
-			return  true;
+			return  null;
 		}else{
-			return  false;
+			return  "更新失败";
 		}
 	}
 	public TRoomSaleForPms getHotelRoomSale(TRoomSaleConfigForPms bean){

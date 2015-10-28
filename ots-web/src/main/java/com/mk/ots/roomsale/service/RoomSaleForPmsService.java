@@ -9,6 +9,6 @@ import com.mk.ots.roomsale.model.TRoomSaleForPms;
  * @author kangxiaolong.
  */
 public interface RoomSaleForPmsService {
-	public Boolean updateTRoomSaleConfig(TRoomSaleConfigForPms bean);
+	public String updateTRoomSaleConfig(TRoomSaleConfigForPms bean);
 	public TRoomSaleForPms getHotelRoomSale(TRoomSaleConfigForPms bean);
 }

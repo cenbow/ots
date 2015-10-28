@@ -39,12 +39,12 @@ public class RoomSaleForPmsController {
 	}
 	@RequestMapping("/updatesalecount")
 	public ResponseEntity<Map<String, Object>> updateTRoomSaleConfig(TRoomSaleConfigForPms bean) {
-		boolean rs=roomSaleForPmsService.updateTRoomSaleConfig(bean);
+		String rs=roomSaleForPmsService.updateTRoomSaleConfig(bean);
 		Map<String, Object> rtnMap = Maps.newHashMap();
-		if(rs){
+		if(rs==null){
 			rtnMap.put("msg", "OK");
 		}else{
-			rtnMap.put("msg", "ERROR");
+			rtnMap.put("msg", "ERROR,"+rs);
 		}
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
