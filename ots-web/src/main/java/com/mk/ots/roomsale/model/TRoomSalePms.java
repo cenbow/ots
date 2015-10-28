@@ -1,9 +1,11 @@
 package com.mk.ots.roomsale.model;
 
+import java.sql.Time;
+
 public class TRoomSalePms {
     private Integer id;
     private String text;
-    private String showBegin;
+    private Time showBegin;
     private Integer showContinue;
     private Integer type;
 
@@ -23,11 +25,11 @@ public class TRoomSalePms {
         this.text = text;
     }
 
-    public String getShowBegin() {
+    public Time getShowBegin() {
         return showBegin;
     }
 
-    public void setShowBegin(String showBegin) {
+    public void setShowBegin(Time showBegin) {
         this.showBegin = showBegin;
     }
 

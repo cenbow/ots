@@ -74,7 +74,7 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 		for (TRoomSalePms roomSalePms:roomSalePmsList){
 			if (roomSalePms.getType()==1){
 				confShow=roomSalePms.getText();
-				showBegin=roomSalePms.getShowBegin();
+				showBegin=DateTools.dateToString(roomSalePms.getShowBegin(), "HH:mm");
 				showContinue=roomSalePms.getShowContinue();
 			}else if(roomSalePms.getType()==2){
 				noConfShow=roomSalePms.getText();
@@ -90,8 +90,8 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 		int i=0;
 		for (TRoomSaleConfig roomSaleConfig:roomSaleConfigList){
 			if (i==0) {
-				roomSaleForPms.setType(Integer.valueOf(roomSaleConfig.getPromoType()));
-				roomSaleForPms.setBegin(DateTools.dateToString(roomSaleConfig.getStartTime(), "HH:mm:ss"));
+				roomSaleForPms.setType(Integer.valueOf(roomSaleConfig.getSaleType()));
+				roomSaleForPms.setBegin(DateTools.dateToString(roomSaleConfig.getStartTime(), "HH:mm"));
 				Long continues = getBetweenTime(roomSaleConfig.getStartTime(), roomSaleConfig.getEndTime());
 				roomSaleForPms.setContinues(continues);
 				i++;
