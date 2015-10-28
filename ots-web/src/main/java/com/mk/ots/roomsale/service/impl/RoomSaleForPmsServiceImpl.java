@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,31 +32,36 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 	private HotelService hotelService;
 	@Autowired
 	private RoomSaleForPmsMapper roomSaleForPmsMapper;
-	public Boolean updateTRoomSaleConfig(TRoomSaleConfigForPms bean){
+	public String updateTRoomSaleConfig(TRoomSaleConfigForPms bean){
 		if (bean.getRoomTypeId()==null&&bean.getNewCount()==null){
-			return false;
+			return "ERROR,提交参数不完整";
 		}
 		TRoomSaleConfig roomSaleConfig=roomSaleForPmsMapper.getRoomTypeByPms(bean.getRoomTypeId());
 		if(roomSaleConfig==null){
-			return  false;
+			return  "ERROR,房型不存在";
 		}
 		TRoomSaleConfig newConfig =new TRoomSaleConfig();
 		newConfig.setRoomTypeId(roomSaleConfig.getId());
 		newConfig.setValid("T");
 		List<TRoomSaleConfig> roomSaleConfigList=roomSaleForPmsMapper.queryRoomSaleConfigByParams(newConfig);
 		if(CollectionUtils.isEmpty(roomSaleConfigList)){
-			return  false;
+			return  "ERROR,修改房型不在活动配置表中";
 		}
 		TRoomSaleConfig configToUpdate=roomSaleConfigList.get(0);
-		if (bean.getNewCount()<=configToUpdate.getDealCount()){
-			return  false;
+		if (bean.getNewCount()<configToUpdate.getDealCount()){
+			return  "ERROR,修改数量小于协议数量";
 		}
 		configToUpdate.setNum(bean.getNewCount());
 		Integer result= roomSaleForPmsMapper.updateRoomSaleNum(configToUpdate);
 		if (result>0){
-			return  true;
+			TRoomSaleConfig configInfo=roomSaleForPmsMapper.getConfigInfoById(configToUpdate.getSaleConfigInfoId());
+			Time nowTime = Time.valueOf(DateTools.getTime("HH:mm:ss")) ;
+			if (nowTime.compareTo(configInfo.getStartTime())>=0){
+				return "OK,变更次日生效";
+			}
+			return  "OK,变更已生效";
 		}else{
-			return  false;
+			return  "ERROR,更新失败";
 		}
 	}
 	public TRoomSaleForPms getHotelRoomSale(TRoomSaleConfigForPms bean){
@@ -74,7 +80,7 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 		for (TRoomSalePms roomSalePms:roomSalePmsList){
 			if (roomSalePms.getType()==1){
 				confShow=roomSalePms.getText();
-				showBegin=roomSalePms.getShowBegin();
+				showBegin=DateTools.dateToString(roomSalePms.getShowBegin(), "HH:mm");
 				showContinue=roomSalePms.getShowContinue();
 			}else if(roomSalePms.getType()==2){
 				noConfShow=roomSalePms.getText();
@@ -90,8 +96,8 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 		int i=0;
 		for (TRoomSaleConfig roomSaleConfig:roomSaleConfigList){
 			if (i==0) {
-				roomSaleForPms.setType(Integer.valueOf(roomSaleConfig.getPromoType()));
-				roomSaleForPms.setBegin(DateTools.dateToString(roomSaleConfig.getStartTime(), "HH:mm:ss"));
+				roomSaleForPms.setType(Integer.valueOf(roomSaleConfig.getSaleType()));
+				roomSaleForPms.setBegin(DateTools.dateToString(roomSaleConfig.getStartTime(), "HH:mm"));
 				Long continues = getBetweenTime(roomSaleConfig.getStartTime(), roomSaleConfig.getEndTime());
 				roomSaleForPms.setContinues(continues);
 				i++;
