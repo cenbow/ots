@@ -717,7 +717,7 @@ public class MessageService implements IMessageService {
 						record.setMsgType(1);
 						BMessageCopywriter bMessageCopywriter = bMessageCopywriterMapper.selectByType(record);
 						if(bMessageCopywriter!=null && StringUtils.isNotBlank(bMessageCopywriter.getCopywriter())){
-							msgContent = MessageFormat.format(bMessageCopywriter.getCopywriter(), msgContent);
+//							msgContent = MessageFormat.format(bMessageCopywriter.getCopywriter(), msgContent);
 
 							//重庆 500000特殊关怀
 							if ("500000".equals(citycode)) {
