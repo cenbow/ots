@@ -721,10 +721,10 @@ public class MessageService implements IMessageService {
 
 							//重庆 500000特殊关怀
 							if ("500000".equals(citycode)) {
-								msgContent = "【眯客】您的验证码为："+msgContent+"，有效时间为1分钟。\n" +
+								msgContent = "您的验证码为："+msgContent+"，有效时间为1分钟。\n" +
 										"眯客，弹指间有房间。每日20:00点后眯客酒店4折起，评价还有返现！";
 							} else {
-								msgContent = "【眯客】您的验证码为："+msgContent+"，有效时间为1分钟。\n" +
+								msgContent = "您的验证码为："+msgContent+"，有效时间为1分钟。\n" +
 										"眯客，弹指间有房间。";
 							}
 						}else{
