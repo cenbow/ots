@@ -692,7 +692,7 @@ public class MessageService implements IMessageService {
 
 	@Override
 	public boolean sendCode(Long msgid, String phone, String msgContent,
-			MessageTypeEnum messageTypeEnum, String ip) {
+			MessageTypeEnum messageTypeEnum, String ip, String citycode) {
 		logger.info("send code: {}, {}, {}", phone, msgContent, messageTypeEnum);
 		Date sendDate=new Date();
 		if (messageTypeEnum == null) {
@@ -718,6 +718,15 @@ public class MessageService implements IMessageService {
 						BMessageCopywriter bMessageCopywriter = bMessageCopywriterMapper.selectByType(record);
 						if(bMessageCopywriter!=null && StringUtils.isNotBlank(bMessageCopywriter.getCopywriter())){
 							msgContent = MessageFormat.format(bMessageCopywriter.getCopywriter(), msgContent);
+
+							//重庆 500000特殊关怀
+							if ("500000".equals(citycode)) {
+								msgContent = "【眯客】您的验证码为："+msgContent+"，有效时间为1分钟。\n" +
+										"眯客，弹指间有房间。每日20:00点后眯客酒店4折起，评价还有返现！";
+							} else {
+								msgContent = "【眯客】您的验证码为："+msgContent+"，有效时间为1分钟。\n" +
+										"眯客，弹指间有房间。";
+							}
 						}else{
 							msgContent="验证码："+msgContent+"（眯客弹指间有房间，保证低价、快速入住)";
 						}

@@ -49,7 +49,7 @@ public class MemberController {
 	 * @return
 	 */
 	@RequestMapping("/verifycode/send")
-	public ResponseEntity<String> genRegisterVerifyCode(String phonenum, String messagetype, String citycode){
+	public ResponseEntity<String> genRegisterVerifyCode(String phonenum, String messagetype){
 		//1. 参数校验及缺省参数处理
 		if(Strings.isNullOrEmpty(phonenum)){
 			throw MyErrorEnum.errorParm.getMyException("手机号为空.");
@@ -61,7 +61,7 @@ public class MemberController {
 		
 		//2. 验证码生成
 		String verifyCode = verifyCodeService.generatePhoneVerifyCode(phonenum, VerifyEnum.REBIND);
-		String msgcontent = verifyCodeService.generateMsgContent(verifyCode, VerifyEnum.REBIND, citycode);
+		String msgcontent = verifyCodeService.generateMsgContent(verifyCode, VerifyEnum.REBIND);
 		
 		//3. 调用消息接口发送数据
 		messageService.sendMsg(null, phonenum,msgcontent, msgType, null);
