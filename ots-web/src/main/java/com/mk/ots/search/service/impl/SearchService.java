@@ -872,6 +872,7 @@ public class SearchService implements ISearchService {
 	 *            参数: 酒店搜索入参Bean对象
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private Map<String, Object> readonlyOtsHotelListFromEsStore(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		try {
@@ -1154,15 +1155,23 @@ public class SearchService implements ISearchService {
 				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype())
 						? Integer.valueOf(reqentity.getPromotype()) : null;
 				if (promoType == null) {
-					promoType = 1;
+					if (result.get("promoinfo") != null
+							&& ((List<Map<String, Integer>>) result.get("promoinfo")).size() > 0) {
+						promoType = findMinPromoType((List<Map<String, Integer>>) result.get("promoinfo"));
+					} else {
+						promoType = 0;
+					}
 				}
 
-				List<Map<String, Integer>> promoList = (List) result.get("promoinfo");
+				List<Map<String, Integer>> promoList = (List<Map<String, Integer>>) result.get("promoinfo");
 				if (promoList != null) {
 					for (Map<String, Integer> promoinfo : promoList) {
 						Integer hotelPromoType = promoinfo.get("promotype");
 						if (hotelPromoType == promoType) {
 							result.put("promoprice", promoinfo.get("promoprice"));
+						} else {
+							logger.warn(String.format(
+									"promoprice for hotelid:%s hasn't been found, use minprice instead...", hotelid));
 						}
 					}
 				}
@@ -1463,6 +1472,28 @@ public class SearchService implements ISearchService {
 		return rtnMap;
 	}
 
+	private Integer findMinPromoType(List<Map<String, Integer>> promoInfoList) {
+		Integer minTypeId = 0;
+		Integer minPrice = 0;
+		for (int i = 0; (promoInfoList != null && i < promoInfoList.size()); i++) {
+			Map<String, Integer> promoInfo = promoInfoList.get(i);
+
+			Integer promoType = promoInfo.get("promotype");
+			Integer promoPrice = promoInfo.get("promoprice");
+
+			if (minPrice == 0 || (promoPrice < minPrice)) {
+				minPrice = promoPrice;
+				minTypeId = promoType;
+			}
+		}
+
+		if (minTypeId == 0) {
+			logger.warn("default promotype not found right after...");
+		}
+
+		return minTypeId;
+	}
+
 	/**
 	 * make es term filter
 	 * 
@@ -1642,7 +1673,7 @@ public class SearchService implements ISearchService {
 						TRoomSaleConfigInfo info = roomSaleConfigInfoMapper.queryRoomSaleConfigById(promoType);
 						Calendar endCalendar = Calendar.getInstance();
 						endCalendar.setTime(info.getEndDate());
-						
+
 						if (logger.isInfoEnabled()) {
 							logger.info(
 									String.format("promo enddate:%s; currenttime:%s", info.getEndDate(), currentTime));
@@ -2325,7 +2356,7 @@ public class SearchService implements ISearchService {
 	 * @param keyword
 	 * @return
 	 */
-	private List<SearchPositionsCoordinateRespEntity> 	readonlyHotelListFromES(String citycode, String keyword) {
+	private List<SearchPositionsCoordinateRespEntity> readonlyHotelListFromES(String citycode, String keyword) {
 		int limit = 5;
 		SearchRequestBuilder searchBuilder = esProxy.prepareSearch();
 		List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
