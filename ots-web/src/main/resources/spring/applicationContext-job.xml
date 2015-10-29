@@ -167,7 +167,7 @@
 	<!-- 每30分钟执行一次，房量调度 -->
 	<bean id="roomCensusTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="roomCensusJobDetail" />
-		<property name="cronExpression" value="0 0/1 * * * ?" />
+		<property name="cronExpression" value="0 0/30 * * * ?" />
 	</bean>
 	<bean id="roomCensusJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
 		<property name="name" value="roomCensusJob" />
