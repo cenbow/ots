@@ -37,10 +37,28 @@
 			<pattern>%-20(%d{HH:mm:ss.SSS} [%thread][line:%L]) %-5level %logger{80} - %msg%n</pattern>
 		</layout>
 	</appender>
-	
+
+
+	<appender name="roomCensusJobLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<Encoding>UTF-8</Encoding>
+		<file>${catalina.base}/logs/roomCensus/job.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>${catalina.base}/logs/roomCensus/job.%d{yyyy-MM-dd}.log.zip</FileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<pattern>%-20(%d{HH:mm:ss.SSS} [%thread][line:%L]) %-5level %logger{80} - %msg%n</pattern>
+		</layout>
+	</appender>
+	<logger name="com.mk.ots.job.RoomCensusJob" level="INFO">
+		<appender-ref ref="roomCensusJobLog" />
+	</logger>
+
 	<logger name="com.mk.ots.job.AutoSendLeZhuJob" level="INFO">
 		<appender-ref ref="payLog" />
 	</logger>
+
+
 
 
 	<logger name="com.ibatis" additivity="true">
