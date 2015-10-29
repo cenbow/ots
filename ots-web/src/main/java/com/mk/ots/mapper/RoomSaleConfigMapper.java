@@ -19,6 +19,7 @@ public interface RoomSaleConfigMapper {
     public List<TRoomSaleConfig> queryRoomSaleConfigByStarted(String started);
     public TRoomSaleConfig queryRoomSaleConfigById(Integer id);
     public TRoomSaleConfig checkRoomSale(TRoomSaleConfig bean);
+    public TRoomSaleConfig checkRoomSaleWithOldRoomType(TRoomSaleConfig bean);
     public List<TRoomSaleConfig> getRoomSaleByParams(TRoomSaleConfig bean);
-
+    public List<TRoomSaleConfig> getRoomSaleByParamsNew(TRoomSaleConfig bean);
 }

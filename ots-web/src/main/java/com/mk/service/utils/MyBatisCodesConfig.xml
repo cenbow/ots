@@ -32,7 +32,8 @@
 			<property name="enableSubPackages" value="true" />
 		</javaClientGenerator>
 
-		<table tableName="t_setting_mike_rate" domainObjectName="TSettingMikeRate"></table>
+
+        <table tableName="t_test_hotel" domainObjectName="TestHotel"></table>
 
 
 	</context>

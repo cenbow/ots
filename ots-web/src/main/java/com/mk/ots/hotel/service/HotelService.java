@@ -41,6 +41,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -91,7 +92,6 @@ import com.mk.ots.order.service.OrderService;
 import com.mk.ots.price.dao.BasePriceDAO;
 import com.mk.ots.price.dao.PriceDAO;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
-import com.mk.ots.roomsale.model.RoomPromoDto;
 import com.mk.ots.roomsale.model.TRoomSale;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.ots.roomsale.service.RoomSaleService;
@@ -208,6 +208,7 @@ public class HotelService {
 	private List<FilterBuilder> keywordBuilders = new ArrayList<FilterBuilder>();
 	@Autowired
 	private TRoomtypeInfoMapper tRoomtypeInfoMapper;
+	private final ExecutorService exService = Executors.newFixedThreadPool(2);
 
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -482,6 +483,7 @@ public class HotelService {
 					coll.add(hotel);
 					logger.info("hotelid: {} added in collections and will be add in elasticsearch document.", hotelid);
 				}
+
 				if (coll.size() > 0) {
 					esProxy.batchAddDocument(coll);
 
@@ -492,16 +494,12 @@ public class HotelService {
 					output.setSuccess(true);
 					output.setMsgAttr("count", coll.size());
 
-					/**
-					 * only process when hotel-id passed in
-					 */
-					if (StringUtils.isNotBlank(thotelid)) {
-						updateEsMikePrice(Long.valueOf(thotelid));
+					if (logger.isInfoEnabled()) {
+						logger.info("fire the task which updates bedtypes...");
 					}
 
-					if (logger.isInfoEnabled()) {
-						logger.info("mikePrice has been updated for hotelId {}", thotelid);
-					}
+					// asyncBatchUpdateHotelBedtypes(cityid);
+
 				} else {
 					output.setSuccess(true);
 				}
@@ -510,14 +508,12 @@ public class HotelService {
 				output.setErrcode("-1");
 				output.setErrmsg(e.getMessage());
 				logger.error("post es error: {} " + e.getMessage());
-				e.printStackTrace();
 			}
 		} catch (Exception e) {
 			output.setSuccess(false);
 			output.setErrcode("-1");
 			output.setErrmsg(e.getMessage());
 			logger.error("post es error: {} " + e.getMessage());
-			e.printStackTrace();
 		} finally {
 			if (session != null) {
 				session.close();
@@ -1583,8 +1579,7 @@ public class HotelService {
 	 * @param lockRoomsCache
 	 * @return
 	 */
-	public Integer calPromoVacants(Integer promoType, Long hotelid, String isnewpms, String isvisible, String isonline,
-			String starttime, String endtime) throws Exception {
+	public Integer calPromoVacants(Integer promoType, Long hotelid, String starttime, String endtime) throws Exception {
 		Integer vacants = 0;
 
 		List<TRoomModel> roomModels = tRoomMapper.findRoomsByHotelId(hotelid);
@@ -1599,21 +1594,25 @@ public class HotelService {
 			Long curRoomTypeId = roomModel.getRoomtypeid();
 			Long roomid = roomModel.getId();
 
-			TRoomSaleConfig config = new TRoomSaleConfig();
-			config.setHotelId(hotelid == null ? 0 : hotelid.intValue());
-			config.setRoomId(roomid == null ? 0 : roomid.intValue());
-			config.setRoomTypeId(curRoomTypeId == null ? 0 : curRoomTypeId.intValue());
-
 			Integer curPromoType = 0;
 			try {
-				List<RoomPromoDto> promo = roomSaleService.queryRoomPromoByHotel(config);
+				List<Map<String, Object>> rooms = roomSaleService.queryRoomByHotelAndRoomType(String.valueOf(hotelid),
+						String.valueOf(curRoomTypeId));
 
-				if (promo.size() > 0) {
-					curPromoType = Integer.parseInt(promo.get(0).getPromoType());
+				if (rooms.size() > 0) {
+					curPromoType = (Integer) rooms.get(0).get("promotype");
+				} else {
+					logger.warn(String.format("no roomtype have been found for hotelid:%s; roomtypeid:%s", hotelid,
+							curRoomTypeId));
 				}
 			} catch (Exception ex) {
-				logger.warn(String.format("failed to queryRoomPromoByHotel, roomid:%s; roomtypeid:%s", roomid,
-						curRoomTypeId), ex);
+				logger.warn(String.format("failed to queryRoomByHotelAndRoomType, hotelid:%s; roomid:%s; roomtypeid:%s",
+						hotelid, roomid, curRoomTypeId), ex);
+			}
+
+			if (logger.isInfoEnabled()) {
+				logger.info(String.format("queried for roomid:%s->curPromoType:%s; promoType:%s; roomtype:%s", roomid,
+						curPromoType, promoType, curRoomTypeId));
 			}
 
 			if (curPromoType != null && promoType == curPromoType) {
@@ -2897,7 +2896,8 @@ public class HotelService {
 		logger.info("updateEsMikePrice method parameters hotelid:{}, startdate:{}, days:{}", hotelid, startdate, days);
 		String hid = hotelid.toString();
 		try {
-			SearchHit[] searchHits = esProxy.searchHotelByHotelId(hid);
+			SearchHit[] searchHits = esProxy.searchHotelByHotelIdWithRetry(hid, 2);
+			logger.info("眯客价查询到酒店个数: {}", searchHits.length);
 			for (int i = 0; i < searchHits.length; i++) {
 				SearchHit searchHit = searchHits[i];
 				String _id = searchHit.getId();
@@ -2971,6 +2971,72 @@ public class HotelService {
 			datas.add(rm);
 		}
 		return datas;
+	}
+
+	private void removeObsoleteBedtypes() {
+		
+	}
+
+	public void asyncBatchUpdateHotelBedtypes(final String citycode) {
+		this.exService.submit(new Runnable() {
+			@Override
+			public void run() {
+				Integer hitCounter = 0;
+
+				try {
+					LocalDateTime startTime = LocalDateTime.now();
+					// 更新酒店床型。
+					SearchRequestBuilder searchBuilder = esProxy.prepareSearch(ElasticsearchProxy.OTS_INDEX_DEFAULT,
+							ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
+
+					List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
+					if (!Strings.isNullOrEmpty(citycode)) {
+						filterBuilders.add(FilterBuilders.termFilter("hotelcity", citycode));
+					}
+					filterBuilders.add(FilterBuilders.termFilter("ispms", 1));
+					FilterBuilder[] builders = new FilterBuilder[] {};
+
+					BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
+					searchBuilder.setFrom(0).setSize(10000).setExplain(true);
+					searchBuilder.setPostFilter(boolFilter);
+
+					SearchResponse searchResponse = searchBuilder.execute().actionGet();
+					SearchHits searchHits = searchResponse.getHits();
+					SearchHit[] hits = searchHits.getHits();
+					logger.info("开始更新酒店床型...");
+					for (int i = 0; i < hits.length; i++) {
+						SearchHit hit = hits[i];
+						Map<String, Object> result = hit.getSource();
+						String hotelid = result.get("hotelid") == null ? "" : String.valueOf(result.get("hotelid"));
+						logger.info("更新酒店{}床型...", hotelid);
+						if (StringUtils.isBlank(hotelid)) {
+							continue;
+						}
+						List<Map<String, Object>> bedtypes = bedTypeMapper.selectBedtypesByHotelId(hotelid);
+						for (Map<String, Object> bedtype : bedtypes) {
+							if (bedtype.get("bedtype") == null) {
+								continue;
+							}
+							String field = "bedtype" + bedtype.get("bedtype");
+
+							esProxy.updateDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT,
+									ElasticsearchProxy.HOTEL_TYPE_DEFAULT, hit.getId(), field, 1);
+							logger.info("酒店{}有床型{}", hotelid, bedtype.get("bedtype"));
+						}
+					}
+					hitCounter = hits.length;
+					LocalDateTime endTime = LocalDateTime.now();
+
+					logger.info("更新酒店床型完成.{}", org.joda.time.Seconds.secondsBetween(startTime, endTime));
+				} catch (Exception e) {
+					logger.error("failed to update bedtypes in batch", e);
+				}
+
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("counts:%s", (Integer) hitCounter));
+				}
+			}
+		});
 	}
 
 	/**

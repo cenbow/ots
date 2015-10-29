@@ -75,11 +75,34 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 	}
 
 	@Override
-	public List<RoomPromoDto> queryRoomPromoByHotel(TRoomSaleConfig bean){
+	public List<RoomPromoDto> queryRoomPromoByHotelNew(TRoomSaleConfig bean) {
+		List<TRoomSaleConfig> roomSaleConfig = roomSaleConfigMapper.getRoomSaleByParamsNew(bean);
+		List<RoomPromoDto> roomPromoDtoList = new ArrayList<RoomPromoDto>();
+		for (TRoomSaleConfig rooms : roomSaleConfig) {
+			RoomPromoDto roomPromo = new RoomPromoDto();
+			roomPromo.setRoomId(rooms.getRoomId());
+			roomPromo.setRoomTypeId(rooms.getSaleRoomTypeId());
+			roomPromo.setSaleName(rooms.getSaleName());
+			roomPromo.setStartTime(rooms.getStartTime());
+			roomPromo.setEndTime(rooms.getEndTime());
+			roomPromo.setNameFontColor(rooms.getFontColor());
+			roomPromo.setTypeDesc(rooms.getDescription());
+			roomPromo.setStartDate(rooms.getStartDate());
+			roomPromo.setEndDate(rooms.getEndDate());
+			roomPromo.setPromoType(rooms.getPromoType());
+			roomPromo.setPromoValue(rooms.getSaleTypeValue());
+			roomPromo.setPromoLabel(rooms.getSaleLabel());
+			roomPromoDtoList.add(roomPromo);
+		}
+		return roomPromoDtoList;
+	}
+	
+	@Override
+	public List<RoomPromoDto> queryRoomPromoByHotel(TRoomSaleConfig bean) {
 		List<TRoomSaleConfig> roomSaleConfig = roomSaleConfigMapper.getRoomSaleByParams(bean);
 		List<RoomPromoDto> roomPromoDtoList = new ArrayList<RoomPromoDto>();
-		for (TRoomSaleConfig rooms:roomSaleConfig){
-			RoomPromoDto roomPromo=new RoomPromoDto();
+		for (TRoomSaleConfig rooms : roomSaleConfig) {
+			RoomPromoDto roomPromo = new RoomPromoDto();
 			roomPromo.setRoomId(rooms.getRoomId());
 			roomPromo.setRoomTypeId(rooms.getSaleRoomTypeId());
 			roomPromo.setSaleName(rooms.getSaleName());
@@ -97,6 +120,22 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		return roomPromoDtoList;
 	}
 
+	@Override
+	public List<Map<String, Object>> queryRoomByHotelAndRoomType(String hotelId, String roomTypeId) throws Exception {
+		try {
+			Map<String, Object> parameters = new HashMap<>();
+			parameters.put("hotelId", hotelId);
+			parameters.put("roomTypeId", roomTypeId);
+
+			List<Map<String, Object>> saleRoomList = roomSaleMapper.queryRoomByHotelAndRoomType(parameters);
+			return saleRoomList;
+		} catch (Exception ex) {
+			logger.error(String.format("failed to queryRoomByHotelAndRoomType hotelId:%s; roomTypeId:%s", hotelId,
+					roomTypeId), ex);
+			throw new Exception(String.format("failed to queryRoomByHotelAndRoomType hotelId:%s; roomTypeId:%s",
+					hotelId, roomTypeId), ex);
+		}
+	}
 
 	@Override
 	public List<Map<String, Object>> queryRoomPromoInfoByHotel(String hotelId) throws Exception {
@@ -110,7 +149,8 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 	}
 
 	@Override
-	public List<Map<String, Object>> queryRoomPromoInfoByHotelAndPromoType(String hotelId, Integer promoType) throws Exception {
+	public List<Map<String, Object>> queryRoomPromoInfoByHotelAndPromoType(String hotelId, Integer promoType)
+			throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("hotelId", hotelId);
 		map.put("promoType", promoType);
@@ -121,26 +161,37 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 	@Override
 	public Map<String, Object> queryRoomPromoInfo() throws Exception {
 		try {
-			Map<String, Object>saleRoomList = roomSaleMapper.queryRoomPromoInfo();
+			Map<String, Object> saleRoomList = roomSaleMapper.queryRoomPromoInfo();
 			return saleRoomList;
 		} catch (Exception ex) {
-			logger.error(String.format("failed to queryRoomPromoInfo %s"), ex);
-			throw new Exception(String.format("failed to queryRoomPromoInfo %s"), ex);
+			logger.error("failed to queryRoomPromoInfo", ex);
+			throw new Exception("failed to queryRoomPromoInfo ", ex);
 		}
 	}
-	public Boolean checkRoomSale(TRoomSaleConfig bean){
+
+	public Boolean checkRoomSale(TRoomSaleConfig bean) {
 		TRoomSaleConfig roomSaleConfig = roomSaleConfigMapper.checkRoomSale(bean);
-		if (roomSaleConfig==null||roomSaleConfig.getId()==null){
-			return  false;
-		}else {
-			return  true;
+		if (roomSaleConfig == null || roomSaleConfig.getId() == null) {
+			return false;
+		} else {
+			return true;
 		}
 	}
-	public List<RoomSaleToIndexDto> getUpdateIndexList(TRoomSaleConfig bean){
+
+	public Boolean checkRoomSaleWithOldRoomType(TRoomSaleConfig bean) {
+		TRoomSaleConfig roomSaleConfig = roomSaleConfigMapper.checkRoomSaleWithOldRoomType(bean);
+		if (roomSaleConfig == null || roomSaleConfig.getId() == null) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	public List<RoomSaleToIndexDto> getUpdateIndexList(TRoomSaleConfig bean) {
 		List<TRoomSaleConfig> roomSaleConfig = roomSaleConfigMapper.getRoomSaleByParams(bean);
 		List<RoomSaleToIndexDto> roomSaleToIndexList = new ArrayList<RoomSaleToIndexDto>();
-		for (TRoomSaleConfig rooms:roomSaleConfig){
-			RoomSaleToIndexDto saleIndex=new RoomSaleToIndexDto();
+		for (TRoomSaleConfig rooms : roomSaleConfig) {
+			RoomSaleToIndexDto saleIndex = new RoomSaleToIndexDto();
 			saleIndex.setPromoType(rooms.getSaleType());
 			saleIndex.setPromoPrice(rooms.getSaleValue());
 		}

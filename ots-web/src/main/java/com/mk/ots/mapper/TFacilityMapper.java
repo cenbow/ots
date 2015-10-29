@@ -1,9 +1,9 @@
 package com.mk.ots.mapper;
 
-import java.util.List;
 
 import com.mk.ots.hotel.model.TFacilityModel;
 
+import java.util.List;
 public interface TFacilityMapper {
 	
     int deleteByPrimaryKey(Long id);

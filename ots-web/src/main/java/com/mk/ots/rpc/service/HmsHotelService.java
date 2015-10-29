@@ -15,6 +15,8 @@ import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.mapper.BedTypeMapper;
 import com.mk.ots.mapper.EHotelMapper;
 import com.mk.ots.mapper.THotelMapper;
+import com.mk.ots.roomsale.model.TRoomSaleConfig;
+import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.rpc.IHotelService;
 import com.mk.ots.web.ServiceOutput;
 import com.mk.pms.hotel.service.NewPMSHotelService;
@@ -67,6 +69,10 @@ public class HmsHotelService implements IHotelService {
     
     @Autowired
     private BedTypeMapper bedTypeMapper;
+
+
+    @Autowired
+    private RoomSaleService roomSaleService;
     
     /**
      * 
@@ -233,7 +239,7 @@ public class HmsHotelService implements IHotelService {
             hotel.setHotelphone(thotelModel.getHotelphone());
 
             // mike3.1 新增酒店默认isonpromo 为0
-            hotel.setIsonpromo("0");
+
             boolean sucess = this.save(hotel);
             if (sucess) {
                 rtnMap.put("success", true);
@@ -331,6 +337,26 @@ public class HmsHotelService implements IHotelService {
                 logger.info("HMS更新酒店{}床型{}", hotelid, bedtype.get("bedtype"));
             }
 
+
+            TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
+            Integer hotelId = Integer.valueOf(hotelid);
+            tRoomSaleConfig.setHotelId(hotelId);
+            Boolean isPromo = roomSaleService.checkRoomSale(tRoomSaleConfig);
+            if (isPromo != null && isPromo) {
+                otsHotelMap.put("isonpromo", "1");
+            } else {
+                otsHotelMap.put("isonpromo", "0");
+            }
+
+            List<Map<String, Object>> promoinfo;
+
+            promoinfo = roomSaleService.queryRoomPromoInfoByHotel(hotelid);
+            if (promoinfo == null) {
+                promoinfo = new ArrayList<>();
+            }
+
+            otsHotelMap.put("promoinfo", promoinfo);
+
             // save es hotel data
             esProxy.signleAddDocument(otsHotelMap);
 
@@ -340,7 +366,8 @@ public class HmsHotelService implements IHotelService {
         } catch (Exception e) {
             result = false;
             logger.error("HmsHotelService save hotel is error:\n" + e.getMessage());
-            throw e;
+            e.printStackTrace();
+
         }
         logger.info("--=================  HmsHotelService save method end ... =================--");
         return result;
@@ -508,9 +535,27 @@ public class HmsHotelService implements IHotelService {
 			hotel.setHotelprovince(thotelModel.getProvince());
 			// 酒店电话
 			hotel.setHotelphone(thotelModel.getHotelphone());
+// mike3.1 添加特价房
 
-            // mike3.1 新增酒店默认isonpromo 为0
-            hotel.setIsonpromo("0");
+            TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
+            Integer hotelId = Integer.valueOf(hotelid);
+            tRoomSaleConfig.setHotelId(hotelId);
+            Boolean isPromo = roomSaleService.checkRoomSale(tRoomSaleConfig);
+            if (isPromo != null && isPromo) {
+                hotel.setIsonpromo("1");
+            } else {
+                hotel.setIsonpromo("0");
+            }
+
+            List<Map<String, Object>> promoinfo;
+
+            promoinfo = roomSaleService.queryRoomPromoInfoByHotel(hotelid);
+            if (promoinfo == null) {
+                promoinfo = new ArrayList<>();
+            }
+
+            hotel.setPromoinfo(promoinfo);
+
             
             boolean success = update(hotel);
             if (success) {
@@ -524,7 +569,7 @@ public class HmsHotelService implements IHotelService {
             rtnMap.put("success", false);
             rtnMap.put("errcode", "-1");
             rtnMap.put("errmsg", e.getMessage());
-            throw e;
+            e.printStackTrace();
         } finally {
             if (session != null) {
                 session.close();
@@ -601,7 +646,9 @@ public class HmsHotelService implements IHotelService {
                 otsHotelMap.put(field, 1);
                 logger.info("HMS更新酒店{}床型{}", hotelid, bedtype.get("bedtype"));
             }
-            
+
+
+
             // add es hotel data
             esProxy.signleAddDocument(otsHotelMap);
             logger.info("hotelid: "+ hotelid + " has added.");
@@ -609,7 +656,7 @@ public class HmsHotelService implements IHotelService {
         } catch (Exception e) {
             result = false;
             logger.error("HmsHotelService update method is error:\n" + e.getMessage());
-            throw e;
+            e.printStackTrace();
         }
         return result;
     }

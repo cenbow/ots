@@ -1,12 +1,11 @@
 package com.mk.ots.mapper;
 
-import java.util.List;
-import java.util.Map;
-
+import com.mk.ots.hotel.model.THotelModel;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
-import com.mk.ots.hotel.model.THotelModel;
+import java.util.List;
+import java.util.Map;
 
 /**
  * THotelMapper.
@@ -61,4 +60,11 @@ public interface THotelMapper {
 	public String getLatestOrderTime(Long hotelid);
 	
 	public String selectCityCodeByOrderId(Long orderId);
+
+    /**
+     * 酒店是否是新pms创建
+     * @param hotelid
+     * @return
+     */
+    public String findHotelIsNewPms(Long hotelid);
 }

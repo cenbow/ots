@@ -31,6 +31,7 @@
 				<!-- 酒店结算调度 -->
 				<ref bean="billOrdersTrigger"/>
 				<ref bean="billConfirmTrigger"/>
+                <ref bean="changeNoShowTrigger"/>
 				<ref bean="pushMessageTrigger"/>
 				<ref bean="dealUnsynedOrderTrigger"/>
 				<!-- 房量调度 -->
@@ -41,7 +42,8 @@
 				<ref bean="autoSendLeZhuTrigger"/>
 				<!-- 用户关怀推送 -->
 				<ref bean="orderPushMessTrigger"/>
-				<ref bean="SendCouponsTrigger"/>
+                <!--  暂时停掉  -->
+				<!-- <ref bean="SendCouponsTrigger"/>      -->
                 <!--<ref bean="SendLiveThreeCouponsTrigger" />-->
 				<!-- B规则：查询创建时间大于15分钟的订单 -->
 				<ref bean="orderCreatetimegt15Trigger"/>
@@ -50,8 +52,9 @@
                 <ref bean="refreshEsMikePriceTrigger"/>
                 <ref bean="confirmedPayingOrderTrigger"/>
                 <ref bean="payStatusErrorOrderTrigger"/>
-                
-                <ref bean="SendTicketJobTrigger"/>
+
+                <!--  暂时停掉  -->
+                <!--<ref bean="SendTicketJobTrigger"/>-->
 			</list>
 		</property>
 	</bean>
@@ -85,7 +88,28 @@
 		<property name="name" value="billDetailJob" />
 		<property name="jobClassName" value="com.mk.ots.job.BillDetailQuartzJob" />
 	</bean>
-	
+
+
+    <!-- 每周一早上6：00进行周结算 -->
+    <bean id="weekClearingTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="weekClearingJobDetail" />
+        <property name="cronExpression" value="0 0 6 ? * MON" />
+    </bean>
+    <bean id="weekClearingJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+        <property name="name" value="weekClearingJob" />
+        <property name="jobClassName" value="com.mk.ots.job.weekClearingJob" />
+    </bean>
+
+    <!-- 每天晚上11点，修改从当天算起前3天的订单 支付成功未入住的订单为noshow状态 -->
+    <bean id="changeNoShowTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="changeNoShowJobDetail" />
+        <property name="cronExpression" value="1 0 23 * * ?" />
+    </bean>
+    <bean id="changeNoShowJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+        <property name="name" value="changeNoShowJob" />
+        <property name="jobClassName" value="com.mk.ots.job.ChangeOrderNoShowQuartzJob" />
+    </bean>
+
 	<!-- 评分批处理-->
 	<bean id="scoreTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="scoreJobDetail" />

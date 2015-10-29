@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2011 Ruaho All rights reserved.
  */
@@ -40,6 +41,9 @@ public class DateUtils extends Object {
     public static final String FORMAT_YEARMONTH = "yyyy-MM";
     /** 纯时间格式. */
     public static final String FORMAT_TIME = "HH:mm:ss";
+
+    public static final String FORMAT_HOURMIN = "HHmm";
+
 
     public static final String FORMATDATETIME = "yyyyMMddHHmmss";
     
@@ -984,6 +988,23 @@ public class DateUtils extends Object {
     }
 
     /**
+     * 当得到两个日期相差天数.<br>
+     * <br>
+     * @param first 第一个日期.
+     * @param second 第二个日期.
+     * @return 相差的天数
+     */
+    public static int selectDateDiff(Date first, Date second) {
+        int dif = 0;
+        try {
+            dif = (int) ((first.getTime() - second.getTime()) / 86400000);
+        } catch (Exception e) {
+            dif = 0;
+        }
+        return dif;
+    }
+
+    /**
      * 两个时间相差小时数
      * @param beginTime 开始时间
      * @param endTime 结束时间
@@ -1544,37 +1565,170 @@ public class DateUtils extends Object {
 	    return days.intValue();
 	}
 
-    public static long calDiffTime(Date startDate,Date endDate, Time startTime) {
+    public static long calDiffTime(Date startDate,Date endDate, Time startTime, Time endTime) {
         Calendar cal=Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
 
-        if (DateUtils.addDays(endDate,1).before(sysTime)){
-            return Constant.PROMO_FININSHED;  //活动已结束
-        } else if (startDate.after(sysTime)){    //活動未開始
-            cal.setTime(startDate);
-            return timeDiff(startTime, cal, sysTime);
-        }else if (DateUtils.addDays(endDate,1).after(sysTime)&&startDate.before(sysTime)){
-            cal.setTime(sysTime);
-            return timeDiff(startTime, cal, sysTime);
+        cal.clear();
+        cal.setTime(sysTime);
+        getCalTime(endTime, cal);
+        Date tmpEndTime =  cal.getTime();
+        Date startPromoTime;
+
+        if (startTime.after(endTime) && tmpEndTime.after(sysTime)) {
+            getCalTime(startTime, cal);
+            cal.add(cal.DATE, -1);
+            startPromoTime = cal.getTime();
+        }else {
+            getCalTime(startTime, cal);
+            startPromoTime = cal.getTime();
         }
-        return 0;
+        cal.clear();
+        cal.setTime(sysTime);
+        Date endPromoTime;
+        if (sysTime.before(tmpEndTime)) {
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }else if (startTime.after(endTime)){
+            cal.add(cal.DATE, 1);
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }
+        else
+        {
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }
+
+        long diff= DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime), DateUtils.formatDatetime(startPromoTime));
+        if (diff < 0){
+            return 0;
+        }
+
+        if (sysTime.before(startPromoTime)){
+
+
+            return  diff;
+
+        }else if (sysTime.after(endPromoTime)){
+            if (sysTime.before(startDate) || sysTime.after(endDate)){
+                return 0;
+            }else {
+                return  diff;
+            }
+        }else {
+            return 0;
+        }
+
     }
 
-    public static long calEndDiffTime(Date startDate,Date endDate, Time endTime) {
+    public static long calNextDiffTime(Date startDate,Date endDate, Time startTime,Time endTime) {
         Calendar cal=Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
 
-        if (DateUtils.addDays(endDate,1).before(sysTime)){
-            return Constant.PROMO_FININSHED;  //活动已结束
-        } else if (startDate.after(sysTime)){    //活動未開始
-            cal.setTime(endDate);
-            return timeDiff(endTime, cal, sysTime);
-        }else if (DateUtils.addDays(endDate,1).after(sysTime)&&startDate.before(sysTime)){
-            cal.setTime(sysTime);
-            cal.add(cal.DATE, 1);
-            return timeDiff(endTime, cal, sysTime);
+        cal.clear();
+        cal.setTime(sysTime);
+        getCalTime(endTime, cal);
+        Date tmpEndTime =  cal.getTime();
+        Date startPromoTime;
+
+        if (startTime.after(endTime) && tmpEndTime.after(sysTime)) {
+            getCalTime(startTime, cal);
+            cal.add(Calendar.DATE, -1);
+            startPromoTime = cal.getTime();
+        }else {
+            getCalTime(startTime, cal);
+            startPromoTime = cal.getTime();
         }
-        return 0;
+        cal.clear();
+        cal.setTime(sysTime);
+        Date endPromoTime;
+
+        if (sysTime.before(tmpEndTime)) {
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }else if (startTime.after(endTime)){
+            cal.add(cal.DATE, 2);
+
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }else {
+            cal.add(Calendar.DATE, 1);
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }
+        
+        Calendar calStartPromoTime = Calendar.getInstance();
+        calStartPromoTime.setTime(startPromoTime);
+        calStartPromoTime.add(Calendar.DATE, 1);
+        
+        long diff= DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime), DateUtils.formatDatetime(calStartPromoTime.getTime()));
+        if (diff < 0){
+            return 0;
+        }
+
+        if (sysTime.before(startPromoTime)){
+            return diff;
+        }else if (sysTime.after(endPromoTime)){
+            if (sysTime.before(startDate) || sysTime.after(endDate)){
+                return 0;
+            }
+        }
+
+
+        return diff;
+
+    }
+
+    public static long calEndDiffTime(Date startDate,Date endDate, Time startTime,Time endTime) {
+        Calendar cal=Calendar.getInstance();
+        java.util.Date sysTime = cal.getTime();
+
+        cal.clear();
+        cal.setTime(sysTime);
+        getCalTime(endTime, cal);
+        Date tmpEndTime =  cal.getTime();
+        Date startPromoTime;
+
+        if (startTime.after(endTime) && tmpEndTime.after(sysTime)) {
+            getCalTime(startTime, cal);
+            cal.add(cal.DATE, -1);
+            startPromoTime = cal.getTime();
+        }else {
+            getCalTime(startTime, cal);
+            startPromoTime = cal.getTime();
+        }
+        cal.clear();
+        cal.setTime(sysTime);
+        Date endPromoTime;
+        if (sysTime.before(tmpEndTime)) {
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }else if (startTime.after(endTime)){
+            cal.add(cal.DATE, 1);
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }else {
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }
+
+        long diff= DateUtils.getDiffTime(DateUtils.formatDatetime(sysTime), DateUtils.formatDatetime(endPromoTime));
+        if (diff < 0){
+            return 0;
+        }
+
+        if (sysTime.before(startPromoTime)){
+            return diff;
+        }else if (sysTime.after(endPromoTime)){
+            if (sysTime.before(startDate) || sysTime.after(endDate)){
+                return 0;
+            }
+        }
+
+
+        return diff;
+
     }
 
     public static long timeDiff(Time startTime, Calendar cal, java.util.Date sysTime) {
@@ -1588,9 +1742,9 @@ public class DateUtils extends Object {
     }
 
     public static void getCalTime(Time startTime, Calendar cal) {
-        int year=cal.get(Calendar.YEAR);
-        int month=cal.get(Calendar.MONTH);
-        int day=cal.get(Calendar.DAY_OF_MONTH);
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH);
+        int day = cal.get(Calendar.DAY_OF_MONTH);
         cal.setTime(startTime);
         int hour= cal.get(Calendar.HOUR_OF_DAY);
         int min= cal.get(Calendar.MINUTE);
@@ -1602,43 +1756,59 @@ public class DateUtils extends Object {
 
         Calendar cal = Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
-        Date [] startEndTime = getStartEndDate(sysTime, startTime, endTime);
-        Date startPromoTime = startEndTime[0];
-        Date endPromoTime = startEndTime[1];
-
-        getCalTime(startTime, cal);
-
-        LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
-        LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
-        long startdiff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
 
 
         cal.clear();
-        cal.setTime(endDate);
+        cal.setTime(sysTime);
         getCalTime(endTime, cal);
+        Date tmpEndTime =  cal.getTime();
+        Date startPromoTime;
 
-        LocalDateTime endExTime = LocalDateTime.fromDateFields(cal.getTime());
-        long enddiff = Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
+        if (startTime.after(endTime) && tmpEndTime.after(sysTime)) {
+            getCalTime(startTime, cal);
+            cal.add(cal.DATE, -1);
+           startPromoTime = cal.getTime();
+        }else {
+            getCalTime(startTime, cal);
+            startPromoTime = cal.getTime();
+        }
+        cal.clear();
+        cal.setTime(sysTime);
+        Date endPromoTime;
 
-        if (startdiff > 0){
+        if (startTime.after(endTime)){
+            cal.add(cal.DATE, 1);
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }else {
+            getCalTime(endTime, cal);
+            endPromoTime = cal.getTime();
+        }
+
+
+        if (sysTime.before(startPromoTime)){
             return Constant.PROMO_NOT_START;
-        }else if (enddiff > 0){
+        }else if (sysTime.after(endPromoTime)){
             if (sysTime.before(startDate) || sysTime.after(endDate)){
+                return Constant.PROMO_FININSHED;
+            }else {
                 return Constant.PROMO_NOT_START;
-            }else{
-                if (sysTime.before(startPromoTime) || sysTime.after(endPromoTime)){
-                    return Constant.PROMO_NOT_START;
-                }else {
-                    return Constant.PROMOING;
-                }
             }
         }else {
-            return Constant.PROMO_FININSHED;
+            return Constant.PROMOING;
         }
+
 
     }
 
-    public static long promoStartDueTime(Time startTime, Integer promoStatus) {
+    public static long promoStartDueTime(Long promoduendsec, Time startTime, Integer promoStatus) {
+        /**
+         * in the middle of game
+         */
+        if (promoduendsec != null && promoduendsec > 0 && promoStatus == Constant.PROMOING) {
+            return 0L;
+        }
+
         Calendar cal = Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();
         getCalTime(startTime, cal);
@@ -1647,8 +1817,8 @@ public class DateUtils extends Object {
         LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
         long diff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
 
-        if (diff < 0 && promoStatus == Constant.PROMO_NOT_START){
-            cal.add(cal.DATE, 1);
+        if (diff < 0 && promoStatus == Constant.PROMO_NOT_START) {
+            cal.add(Calendar.DATE, 1);
             startExTime = LocalDateTime.fromDateFields(cal.getTime());
             diff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
         }
@@ -1688,7 +1858,7 @@ public class DateUtils extends Object {
         return diff;
     }
 
-    private static Date[] getStartEndDate (Date runTime, Date startTime, Date endTime) {
+    public static Date[] getStartEndDate(Date runTime, Date startTime, Date endTime) {
         if (null == runTime || null == startTime || null == endTime) {
             return new Date[]{new Date(),new Date()};
         }
@@ -1750,5 +1920,82 @@ public class DateUtils extends Object {
 
         return new Date[]{runTime,runTime};
     }
-    
+
+    /**
+     * 计算两个时间的时分，是否第一个时间的时分在第二个时间之前
+     * @param firstDate
+     * @param secondDate
+     * @return
+     */
+    public static boolean timeBefore(Date firstDate, Date secondDate) {
+
+        int fisrtTime = Integer.parseInt(getStringFromDate(firstDate, FORMAT_HOURMIN).toString());
+        int secondTime = Integer.parseInt(getStringFromDate(secondDate, FORMAT_HOURMIN).toString());
+
+        if (fisrtTime < secondTime) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    public static Integer calPromoStatus(Date startDate, Date endDate, Time startTime, Time endTime) {
+        Calendar cal = Calendar.getInstance();
+        java.util.Date sysTime = cal.getTime();
+
+        LocalDateTime localStartDate = null;
+        if (startDate != null) {
+            Calendar startCal = Calendar.getInstance();
+
+            startCal.set(startDate.getYear(), startDate.getMonth(), startDate.getDay(), 0, 0, 0);
+            localStartDate = LocalDateTime.fromCalendarFields(startCal);
+        }
+
+        LocalDateTime localSysDate = LocalDateTime.now();
+
+        Date[] startEndTime = getStartEndDate(sysTime, startTime, endTime);
+        Date startPromoTime = startEndTime[0];
+        Date endPromoTime = startEndTime[1];
+
+
+
+        LocalDateTime sysExTime = LocalDateTime.fromDateFields(sysTime);
+        LocalDateTime startExTime = LocalDateTime.fromDateFields(cal.getTime());
+        long startdiff = 0;
+        /**
+         * checks if over day
+         */
+        if (localStartDate != null && localSysDate.getDayOfMonth() != localStartDate.getDayOfMonth()) {
+            return Constant.PROMOING;
+        } else if (localStartDate != null && localSysDate.getDayOfMonth() == localStartDate.getDayOfMonth()) {
+            getCalTime(startTime, cal);
+
+            startdiff = Seconds.secondsBetween(sysExTime, startExTime).getSeconds();
+        }
+
+        cal.clear();
+        cal.setTime(endDate);
+        getCalTime(endTime, cal);
+
+        LocalDateTime endExTime = LocalDateTime.fromDateFields(cal.getTime());
+        long enddiff = Seconds.secondsBetween(sysExTime, endExTime).getSeconds();
+
+        if (startdiff > 0) {
+            return Constant.PROMO_NOT_START;
+        } else if (enddiff > 0) {
+            if (sysTime.before(startDate) || sysTime.after(endDate)) {
+                return Constant.PROMO_NOT_START;
+            } else {
+                if (sysTime.before(startPromoTime) || sysTime.after(endPromoTime)) {
+                    return Constant.PROMO_NOT_START;
+                } else {
+                    return Constant.PROMOING;
+                }
+            }
+        } else {
+            return Constant.PROMO_FININSHED;
+        }
+
+    }
 }
