@@ -1341,6 +1341,7 @@ public class SearchService implements ISearchService {
 				logger.info("查询酒店: {}眯客价耗时: {}ms.", es_hotelid, times);
 				BigDecimal minPrice = new BigDecimal(prices[0]);
 				result.put("minprice", minPrice);
+				result.put("promoprice", minPrice);
 				result.put("minpmsprice", new BigDecimal(prices[1]));
 
 				logger.info("酒店: {}眯客价: {}", es_hotelid, prices[0]);
@@ -2324,7 +2325,7 @@ public class SearchService implements ISearchService {
 	 * @param keyword
 	 * @return
 	 */
-	private List<SearchPositionsCoordinateRespEntity> readonlyHotelListFromES(String citycode, String keyword) {
+	private List<SearchPositionsCoordinateRespEntity> 	readonlyHotelListFromES(String citycode, String keyword) {
 		int limit = 5;
 		SearchRequestBuilder searchBuilder = esProxy.prepareSearch();
 		List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
