@@ -1156,8 +1156,8 @@ public class SearchService implements ISearchService {
 						? Integer.valueOf(reqentity.getPromotype()) : null;
 				if (promoType == null) {
 					if (result.get("promoinfo") != null
-							&& ((List<Map<String, Integer>>) result.get("promoinfo")).size() > 0) {
-						promoType = findMinPromoType((List<Map<String, Integer>>) result.get("promoinfo"));
+							&& ((List<Map<String, Object>>) result.get("promoinfo")).size() > 0) {
+						promoType = findMinPromoType((List<Map<String, Object>>) result.get("promoinfo"));
 					} else {
 						promoType = 0;
 					}
@@ -1472,14 +1472,21 @@ public class SearchService implements ISearchService {
 		return rtnMap;
 	}
 
-	private Integer findMinPromoType(List<Map<String, Integer>> promoInfoList) {
+	private Integer findMinPromoType(List<Map<String, Object>> promoInfoList) {
 		Integer minTypeId = 0;
 		Integer minPrice = 0;
 		for (int i = 0; (promoInfoList != null && i < promoInfoList.size()); i++) {
-			Map<String, Integer> promoInfo = promoInfoList.get(i);
+			Map<String, Object> promoInfo = promoInfoList.get(i);
 
-			Integer promoType = promoInfo.get("promotype");
-			Integer promoPrice = promoInfo.get("promoprice");
+			Integer promoType = (Integer) promoInfo.get("promotype");
+			String promoPriceTxt = (String) promoInfo.get("promoprice");
+
+			Integer promoPrice = 0;
+			try {
+				promoPrice = Integer.valueOf(promoPriceTxt);
+			} catch (Exception ex) {
+				logger.warn(String.format("promotype is invalid %s", promoPriceTxt), ex);
+			}
 
 			if (minPrice == 0 || (promoPrice < minPrice)) {
 				minPrice = promoPrice;
