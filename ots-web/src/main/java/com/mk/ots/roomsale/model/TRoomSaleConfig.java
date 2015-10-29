@@ -37,6 +37,8 @@ public class TRoomSaleConfig {
     private String saleTypeName;
     private String saleTypeValue;
     private String promoType;
+    private Integer dealCount;
+    private String pms;
 
     public Integer getId() {
         return id;
@@ -292,5 +294,21 @@ public class TRoomSaleConfig {
 
     public void setPromoType(String promoType) {
         this.promoType = promoType;
+    }
+
+    public Integer getDealCount() {
+        return dealCount;
+    }
+
+    public void setDealCount(Integer dealCount) {
+        this.dealCount = dealCount;
+    }
+
+    public String getPms() {
+        return pms;
+    }
+
+    public void setPms(String pms) {
+        this.pms = pms;
     }
 }

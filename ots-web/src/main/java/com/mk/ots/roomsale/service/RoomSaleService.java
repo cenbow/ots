@@ -46,7 +46,6 @@ public interface RoomSaleService {
 	 */
 	public List<RoomPromoDto> queryRoomPromoByHotel(TRoomSaleConfig bean);
 	public List<RoomPromoDto> queryRoomPromoByHotelNew(TRoomSaleConfig bean);
-	
 	public List<Map<String, Object>> queryRoomPromoInfoByHotel(String hotelId) throws Exception;
 	public List<Map<String, Object>> queryRoomPromoInfoByHotelAndPromoType(String hotelId, Integer promoType) throws Exception;
 	public Map<String, Object> queryRoomPromoInfo() throws Exception;
