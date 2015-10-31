@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.mk.care.kafka.common.CopywriterTypeEnum;
+import com.mk.care.kafka.common.MessageTypeEnum;
 import com.mk.care.kafka.model.Message;
 import com.mk.ots.kafka.message.OtsCareProducer;
 import net.sf.json.JSONArray;
