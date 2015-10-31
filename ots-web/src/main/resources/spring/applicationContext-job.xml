@@ -178,9 +178,9 @@
 		<property name="jobDetail" ref="roomCensusBackUpJobDetail" />
 		<property name="cronExpression" value="0 15 0 * * ?" />
 	</bean>
-	<bean id="orderPushMessJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
-		<property name="name" value="orderPushMess"></property>
-		<property name="jobClassName" value="com.mk.ots.job.OrderPushMessageJob"></property>
+	<bean id="roomCensusBackUpJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="roomCensusBackUpJob" />
+		<property name="jobClassName" value="com.mk.ots.job.RoomCensusBackUpJob" />
 	</bean>
 	
 	<!-- 每天00:05执行一次，缓存酒店月销量纪录  显示近30天内的销量数据(不包含current date) -->
@@ -197,11 +197,11 @@
 	<!-- 用户关怀推送 -->
 	<bean id="orderPushMessTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean"> 
 		<property name="jobDetail" ref="orderPushMessJobDetail" />
-		<property name="cronExpression" value="0 0/1 * * * ?" />
+		<property name="cronExpression" value="0 */1 * * * ?" />
 	</bean>
-	<bean id="roomCensusBackUpJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
-		<property name="name" value="roomCensusBackUpJob" />
-		<property name="jobClassName" value="com.mk.ots.job.RoomCensusBackUpJob" />
+	<bean id="orderPushMessJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="orderPushMess"></property>
+		<property name="jobClassName" value="com.mk.ots.job.OrderPushMessageJob"></property>
 	</bean>
     
 	<!--  每5分钟执行一次，自动重发下发失败的乐住币 -->

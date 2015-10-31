@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.mk.care.kafka.common.CopywriterTypeEnum;
+import com.mk.care.kafka.common.MessageTypeEnum;
+import com.mk.care.kafka.model.Message;
+import com.mk.ots.kafka.message.OtsCareProducer;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -59,6 +63,11 @@ public class ScoreService {
 	
 	@Autowired
 	private OrderBusinessLogService orderBusinessLogService;
+
+	@Autowired
+	private OtsCareProducer careProducer;
+
+	private Gson gson = new Gson();
 
 	/**
 	 * 保存分数
@@ -613,11 +622,26 @@ public class ScoreService {
 		tHotelScore.setIscashbacked("T");
 		tHotelScore.setBackcashcost(backcost);
 		
-		orderBusinessLogService.saveLog(tHotelScore.getOrderid(), OtaOrderFlagEnum.SCORE_CASHBACK.getId(),  "点评返现, ¥" + backcost + "红包已放入您的账户");
+		orderBusinessLogService.saveLog(tHotelScore.getOrderid(), OtaOrderFlagEnum.SCORE_CASHBACK.getId(), "点评返现, ¥" + backcost + "红包已放入您的账户");
+//		this.logger.info("返现开始下发乐住币，延迟时间【" + 10 + "】分钟订单号：{}，详细信息：{}", tHotelScore.getId(), gson.toJson(tHotelScore));
+		OtaOrder  order  = orderService.findOtaOrderById(tHotelScore.getOrderid());
+//		Boolean bl = orderService.afterScoreSendMessage(order,10,backcost);
+		Message message=  new  Message();
+		message.setMid(tHotelScore.getMid());
+		message.setOrderId(tHotelScore.getOrderid());
+		message.setMessageTypeEnum(MessageTypeEnum.sms);
+		message.setCopywriterTypeEnum(CopywriterTypeEnum.order_comment_return);
+		message.setPhone(order.getContactsPhone());
+		careProducer.sendSmsMsg(message);
+
+		//发送app消息
+		message.setMessageTypeEnum(MessageTypeEnum.app);
+		careProducer.sendAppMsg(message);
+
 
 		int changecount = tHotelScoreMapper.updateByPrimaryKey(tHotelScore);
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap.put("success", true);	
+		resultMap.put("success", true);
 		resultMap.put("cashbackcost", backcost);
 		return resultMap;
 	}

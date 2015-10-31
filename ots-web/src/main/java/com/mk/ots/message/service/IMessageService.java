@@ -137,5 +137,5 @@ public interface IMessageService {
 	
 	boolean reSendMsg(Long msgid,String phone, String msgContent, MessageTypeEnum messageTypeEnum, String ip,Date sendDate,String ExceptProvider);
 	
-	public boolean sendCode(Long msgid, String phone, String msgContent, MessageTypeEnum messageTypeEnum, String ip);
+	public boolean sendCode(Long msgid, String phone, String msgContent, MessageTypeEnum messageTypeEnum, String ip, String citycode);
 }
