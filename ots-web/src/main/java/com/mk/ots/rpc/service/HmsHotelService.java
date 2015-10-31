@@ -309,15 +309,15 @@ public class HmsHotelService implements IHotelService {
             	else
                 	prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), startdateday, enddateday);
             	
-            	// added begin: 没有价格眯客价设置为111.
-            	BigDecimal mikePriceValue = new BigDecimal("111");
+            	// added begin: 没有价格眯客价设置为9999.
+            	BigDecimal mikePriceValue = new BigDecimal("9999");
             	if (prices == null || prices.length == 0 || StringUtils.isBlank(prices[0])) {
-            	    mikePriceValue = new BigDecimal("111");
+            	    mikePriceValue = new BigDecimal("9999");
             	} else {
                     mikePriceValue = new BigDecimal(prices[0]);
             	}
             	if (mikePriceValue.compareTo(BigDecimal.ONE) == -1) {
-            	    mikePriceValue = new BigDecimal("111");
+            	    mikePriceValue = new BigDecimal("9999");
             	}
             	// added end:
             	
@@ -620,14 +620,14 @@ public class HmsHotelService implements IHotelService {
                 	prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), startdateday, enddateday);
                 
                 // added begin: 没有价格眯客价设置为111.
-                BigDecimal mikePriceValue = new BigDecimal("111");
+                BigDecimal mikePriceValue = new BigDecimal("9999");
                 if (prices == null || prices.length == 0 || StringUtils.isBlank(prices[0])) {
-                    mikePriceValue = new BigDecimal("111");
+                    mikePriceValue = new BigDecimal("9999");
                 } else {
                     mikePriceValue = new BigDecimal(prices[0]);
                 }
                 if (mikePriceValue.compareTo(BigDecimal.ONE) == -1) {
-                    mikePriceValue = new BigDecimal("111");
+                    mikePriceValue = new BigDecimal("9999");
                 }
                 // added end:
                 
