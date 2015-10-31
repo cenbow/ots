@@ -1,7 +1,9 @@
 package com.mk.ots.order.service;
 
 import cn.com.winhoo.pms.webout.service.bean.PmsOtaAddOrder;
+import com.mk.care.kafka.common.CopywriterTypeEnum;
 import com.mk.ots.common.bean.PageObject;
+import com.mk.ots.common.enums.OrderTasksTypeEnum;
 import com.mk.ots.common.enums.OrderTypeEnum;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.enums.PayStatusEnum;
@@ -12,10 +14,12 @@ import com.mk.ots.order.bean.OtaRoomPrice;
 import com.mk.ots.order.bean.PmsRoomOrder;
 import com.mk.ots.order.model.BOtaorder;
 import com.mk.ots.order.model.FirstOrderModel;
+import com.mk.ots.order.model.OtaOrderTasts;
 import com.mk.ots.promo.model.BPromotionPrice;
 import com.mk.ots.ticket.model.TicketInfo;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -145,4 +149,5 @@ public interface OrderService {
 
 	public void callChangeOrderStatusByPmsIN(OtaOrder pOrder);
 
+    public Boolean  afterScoreSendMessage(OtaOrder order,int  minute,BigDecimal  backcost);
 }
