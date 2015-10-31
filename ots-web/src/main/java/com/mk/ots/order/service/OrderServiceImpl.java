@@ -3422,7 +3422,7 @@ public class OrderServiceImpl implements OrderService {
       order.update();
       //修改已使用券状态
 
-      orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.CANCELBYSYSTEM.getId(), "", "系统取消订单成功,orderid:"+order.getId(), "");
+      orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.CANCELBYSYSTEM.getId(), "", "系统取消订单成功,orderid:" + order.getId(), "");
   }
 
   /**
@@ -3893,7 +3893,7 @@ public class OrderServiceImpl implements OrderService {
             return;
         }
         // 封装orderTasks 加到任务表中 status= 0初始化, taskType= 101push类型,
-        OtaOrderTasts  otaOrderTasts= this.getMessageToC(pOrder, begintimeBefore1, true,CopywriterTypeEnum.order_reach);
+        OtaOrderTasts  otaOrderTasts= this.getMessageToC(pOrder, begintimeBefore1, true, CopywriterTypeEnum.order_reach);
 
         int result = this.otaOrderTastsMapper.insertSelective(otaOrderTasts);
         if (result == 0) {
@@ -3912,7 +3912,6 @@ public class OrderServiceImpl implements OrderService {
      * @param otaorder
      * @param executeTime
      * @param isSms
-     * @return
      */
     private OtaOrderTasts getMessageToC(OtaOrder otaorder,Date executeTime,Boolean isSms,CopywriterTypeEnum copywriterTypeEnum){
     	  
@@ -3935,15 +3934,69 @@ public class OrderServiceImpl implements OrderService {
           orderTasts.setHotelid(otaorder.getHotelId());
           //推迟十分钟执行
           orderTasts.setExecuteTime(executeTime);
-          
+
           orderTasts.setOtaorderid(otaorder.getId());
           orderTasts.setTasktype(OrderTasksTypeEnum.ORDERPUSH.getId());
           orderTasts.setStatus(OrderTasksStatusEnum.INITIALIZE.getId());
-          this.logger.info("生成手机信息推送，订单号：{}，详细信息：{}",otaorder.getId(),gson.toJson(orderTasts));
+          this.logger.info("生成手机信息推送，订单号：{}，详细信息：{}", otaorder.getId(), gson.toJson(orderTasts));
           return orderTasts;
     }
 
-    
+
+    /**
+     *
+     * @param order
+     * @param minute  下发红包后延迟发送短信时间
+     * @param backcost  红吧发放金额
+     */
+    public Boolean  afterScoreSendMessage(OtaOrder otaorder,int  minute,BigDecimal  backcost){
+        this.logger.info("开始生成手机信息推送，延迟时间" + minute + "订单号：{}，详细信息：{}", otaorder.getId(), gson.toJson(otaorder));
+        Date  planSendTime =   DateUtils.addMinutes(new  Date(),minute);
+
+        // 封装orderTasks 加到任务表中 status= 0初始化, taskType= 101push类型,
+        OtaOrderTasts  otaOrderTasts= this.getMessageToC(otaorder, planSendTime, true
+                ,CopywriterTypeEnum.order_comment_done, OrderTasksTypeEnum.ORDERCREATETIMEGT15,backcost);
+        int result = this.otaOrderTastsMapper.insertSelective(otaOrderTasts);
+        if(result>0){
+            this.logger.info("开始生成手机信息推送成功，延迟时间" + minute + "订单号：{}，详细信息：{}", otaorder.getId(), gson.toJson(otaorder));
+            return  true;
+        }else{
+            this.logger.info("开始生成手机信息推送失败，延迟时间" + minute + "订单号：{}，详细信息：{}", otaorder.getId(), gson.toJson(otaorder));
+           return   false;
+        }
+    }
+    private  OtaOrderTasts getMessageToC(OtaOrder otaorder,Date executeTime,Boolean isSms,CopywriterTypeEnum copywriterTypeEnum,
+                                        OrderTasksTypeEnum   orderTasksTypeEnum,BigDecimal  backcost){
+        Message message=new Message();
+        message.setCopywriterTypeEnum(copywriterTypeEnum);
+        message.setMid(otaorder.getMid());
+        message.setOrderId(otaorder.getId());
+        message.setPhone(otaorder.getContactsPhone());
+
+        PushMessage pushMessage= new PushMessage();
+        pushMessage.setMessage(message);
+        pushMessage.setIsSms(isSms);
+        pushMessage.setTitle(backcost+"");
+
+        //发送信息
+        OtaOrderTasts orderTasts=new OtaOrderTasts();
+        orderTasts.setCount(0);
+        orderTasts.setCreatetime(new Date());
+        orderTasts.setUpdatetime(new Date());
+        orderTasts.setContent(gson.toJson(pushMessage));
+        orderTasts.setHotelid(otaorder.getHotelId());
+        //推迟十分钟执行
+        orderTasts.setExecuteTime(executeTime);
+
+        orderTasts.setOtaorderid(otaorder.getId());
+        orderTasts.setTasktype(orderTasksTypeEnum.getId());
+        orderTasts.setStatus(OrderTasksStatusEnum.INITIALIZE.getId());
+        this.logger.info("生成手机信息推送，订单号：{}，详细信息：{}",otaorder.getId(),gson.toJson(orderTasts));
+        return orderTasts;
+    }
+
+
+
     // 在取消订单的时候 修改任务表中 status为2 不发送 ==用户取消. pms取消. 系统自动取消 （没有）. 客服取消.
     // 支付失败的时候（待定），不用调用该方法？？？
     public void pushMsgNo(OtaOrder pOrder) {
