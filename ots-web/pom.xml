@@ -27,7 +27,7 @@
         <mockito.core.version>1.9.5</mockito.core.version>
         <commons-configuration.version>1.6</commons-configuration.version>
 
-        <kafka.version>1.0.2</kafka.version>
+        <kafka.version>1.0.3</kafka.version>
         <care-kafka.version>1.0.0</care-kafka.version>
     </properties>
 
