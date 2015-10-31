@@ -234,7 +234,11 @@ public class PayService implements IPayService {
             ppi.setEnable(b);
             this.logger.info(" 增加支付流水：" + ppi.toString());
             ppi = this.ipPayInfoDao.saveOrUpdate(ppi);
-            pay.setLezhu(price);
+
+            OtaOrder otaOrder = orderDAO.findOtaOrderById(orderid);
+            if(PromoTypeEnum.TJ.getCode().equals(otaOrder.getPromoType())){
+                pay.setLezhu(pay.getLezhu());
+            }
             this.logger.info("更新pay--------");
             this.iPayDAO.saveOrUpdate(pay);
             return ppi.getId();
@@ -1210,7 +1214,6 @@ public class PayService implements IPayService {
         pPay.setOrderid(order.getId());
         pPay.setOrderprice(allcost);
         BigDecimal lezhuBi = getLezhuBi(order);
-        logger.info(String.format("===chenqi create pay lezhu[%s]==", lezhuBi));
         pPay.setLezhu(lezhuBi);
         pPay.setMember(member);
         pPay.setNeedreturn(NeedReturnEnum.ok);
