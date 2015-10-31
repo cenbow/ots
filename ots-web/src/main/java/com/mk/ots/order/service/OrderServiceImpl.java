@@ -3798,17 +3798,17 @@ public class OrderServiceImpl implements OrderService {
         for(OtaOrderTasts orderTasts:list){
             PushMessage pushMessage=gson.fromJson(orderTasts.getContent(),PushMessage.class);
             
-            // 防重处理,失效时间一天
-         String key = MD5Util.md5Hex(orderTasts.getOtaorderid()+"-"+orderTasts.getContent());
-            String lockValue = DistributedLockUtil.tryLock(key, 86400);
-                if (lockValue == null) {
-                logger.info("此订单已经发过push消息，无需再发,orderid = {}", orderTasts.getOtaorderid());
+//            // 防重处理,失效时间一天
+//         String key = MD5Util.md5Hex(orderTasts.getOtaorderid()+"-"+orderTasts.getContent());
+//            String lockValue = DistributedLockUtil.tryLock(key, 86400);
+//                if (lockValue == null) {
+//                logger.info("此订单已经发过push消息，无需再发,orderid = {}", orderTasts.getOtaorderid());
 //                // 修改任务状态为成功
 //                orderTasts.setStatus(OrderTasksStatusEnum.CHANGE.getId());
 //                orderTasts.setUpdatetime(new Date());
 //                orderTastsMapper.updateByPrimaryKeySelective(orderTasts);
-                continue;
-            }
+//                continue;
+//            }
             
             logger.info("用户关怀消息推送,orderid = {} , content = {}",orderTasts.getOtaorderid(),orderTasts.getContent());
             start = System.currentTimeMillis();
@@ -3831,8 +3831,8 @@ public class OrderServiceImpl implements OrderService {
                 orderTasts.setCount(count);
                 orderTasts.setUpdatetime(new Date());
                 orderTastsMapper.updateByPrimaryKeySelective(orderTasts);
-                // 推送失败释放防重锁
-                DistributedLockUtil.releaseLock(key, lockValue);
+//                // 推送失败释放防重锁
+//                DistributedLockUtil.releaseLock(key, lockValue);
                 logger.info("用户关怀消息推送失败,orderid = {},错误消息：{}",orderTasts.getOtaorderid(),e.getLocalizedMessage());
 			}
 
