@@ -12,8 +12,8 @@ import com.mk.ots.order.service.OrderServiceImpl;
 
 public class OrderPushMessageJob  extends QuartzJobBean{
 
-	@Autowired
-	private OrderServiceImpl orderService;
+	private OrderServiceImpl orderService = AppUtils.getBean(OrderServiceImpl.class);
+
 	private static Logger logger = LoggerFactory.getLogger(OrderPushMessageJob.class);
 	@Override
 	protected void executeInternal(JobExecutionContext context)
