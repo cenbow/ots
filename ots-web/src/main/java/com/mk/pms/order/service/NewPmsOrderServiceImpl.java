@@ -109,7 +109,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		// PM【挂账】 Account
 		try {
 			Long hotelId = (Long) param.get("hotelid");
-			Map<Long, Set<Long>> map = (Map<Long, Set<Long>>) param.get("set") == null ? new HashMap<Long, Set<Long>>() : (Map<Long, Set<Long>>) param.get("set");
+			Map<Long, Set<Long>> map = (Map<Long, Set<Long>>) param.get("set") == null ? new HashMap<Long, Set<Long>>()
+					: (Map<Long, Set<Long>>) param.get("set");
 			EHotel hotel = this.eHotelDAO.findEHotelByid(hotelId);
 			String cityCode = this.eHotelDAO.getCityIdByHotelId(hotel.getLong("disId"));
 			NewPmsOrderServiceImpl.logger.info("更新[" + hotel.getHotelName() + "]酒店的客单记录");
@@ -119,7 +120,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			for (int i = 0; i < datalist.size(); i++) {
 				JSONObject customNo = datalist.getJSONObject(i);
 
-				PmsRoomOrder order = this.hotelDAO.findPmsRoomOrderByHotelIdAndCustomno(hotelId, (String) customNo.get("customeno"));
+				PmsRoomOrder order = this.hotelDAO.findPmsRoomOrderByHotelIdAndCustomno(hotelId,
+						(String) customNo.get("customeno"));
 				try {
 					order = this.updatePmsRoomOrder(hotel, order, customNo, hotelId);
 					if (order == null) {
@@ -128,7 +130,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 				} catch (MySQLIntegrityConstraintViolationException e) {
 					// 对插入数据报索引异常的进行重新更新
 					order = this.updatePmsRoomOrder(hotel, null, customNo, hotelId);
-					NewPmsOrderServiceImpl.logger.info("PmsOrderServiceImpl::saveCustomerNo::updatePmsRoomOrder重复数据插入:orderid:{}" + order);
+					NewPmsOrderServiceImpl.logger
+							.info("PmsOrderServiceImpl::saveCustomerNo::updatePmsRoomOrder重复数据插入:orderid:{}" + order);
 				}
 
 				returnlist.add(order);
@@ -148,14 +151,18 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 						checkinUser.set("Hotelid", hotelId);
 
 						checkinService.saveOrUpdatePmsInCheckUser(checkinUser);
-						NewPmsOrderServiceImpl.logger.info("OTSMessage::PmsOrderServiceImpl::checkinService::saveOrUpdatePmsInCheckUser::参数::" + checkinUser.getAttrs());
+						NewPmsOrderServiceImpl.logger
+								.info("OTSMessage::PmsOrderServiceImpl::checkinService::saveOrUpdatePmsInCheckUser::参数::"
+										+ checkinUser.getAttrs());
 					}
 				}
 				/**
 				 * 同步day的值
 				 */
-				logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:day:{}",order.get("id"),customNo.getJSONArray("day"));
-				logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:bolean:{}",order.get("id"),(customNo.getJSONArray("day") != null) && (customNo.getJSONArray("day").size() > 0));
+				logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:day:{}", order.get("id"),
+						customNo.getJSONArray("day"));
+				logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:bolean:{}", order.get("id"),
+						(customNo.getJSONArray("day") != null) && (customNo.getJSONArray("day").size() > 0));
 				if ((customNo.getJSONArray("day") != null) && (customNo.getJSONArray("day").size() > 0)) {
 					JSONArray days = customNo.getJSONArray("day");
 					long pmsorderid = order.get("id");
@@ -163,7 +170,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 					int time;
 					RoomLockPo roomLockPo = null;
 					String price;
-					
+
 					for (int j = 0; j < days.size(); j++) {
 						object = days.getJSONObject(j);
 						time = object.getInteger("time");
@@ -171,38 +178,45 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 						price = object.getString("price");
 						// 查询是否存在
 						roomLockPo = this.pmsRoomService.queryRoomLockByConds(pmsorderid);
-						logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:roomLockPo:{}",order.get("id"),roomLockPo);
+						logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:roomLockPo:{}", order.get("id"), roomLockPo);
 						// 判断是否存在
 						if (roomLockPo == null) {
 							// 如果不存在就添加房态 增加房态
 							roomLockPo = new RoomLockPo();
 							roomLockPo.setPmsorderid(pmsorderid);
 							roomLockPo.setRoomjson(customNo.getString("day"));
-							logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:roomLockPo:{}",order.get("id"),JsonKit.toJson(roomLockPo));
+							logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:roomLockPo:{}", order.get("id"),
+									JsonKit.toJson(roomLockPo));
 							this.pmsRoomService.saveRoomLock(roomLockPo);
 						} else {
 							try {
-								//释放原来的房态 add jianghe
-								//根据pmsroomorder找order
-								OtaRoomOrder roomOrder = AppUtils.getBean(OrderServiceImpl.class).findRoomOrderByPmsRoomOrderNoAndHotelId((String) customNo.get("customeno"), hotelId);
-								if(roomOrder!=null){
+								// 释放原来的房态 add jianghe
+								// 根据pmsroomorder找order
+								OtaRoomOrder roomOrder = AppUtils.getBean(OrderServiceImpl.class)
+										.findRoomOrderByPmsRoomOrderNoAndHotelId((String) customNo.get("customeno"),
+												hotelId);
+								if (roomOrder != null) {
 									OtaOrder otaorder = new OtaOrder();
 									otaorder.setId(roomOrder.getLong("otaorderid"));
 									otaorder.setHotelId(hotelId);
 									roomstateService.unlockRoomInOTS(otaorder);
-									logger.info("huangfang:otaorderid:"+roomOrder.getLong("otaorderid")+",hotelid:"+hotelId);
+									logger.info("huangfang:otaorderid:" + roomOrder.getLong("otaorderid") + ",hotelid:"
+											+ hotelId);
 								}
-								//end
+								// end
 							} catch (Exception e) {
 								e.printStackTrace();
-								logger.error("pms2.0换房失败：{},{},{}",(String) customNo.get("customeno"),hotelId,e.getMessage());
-								logger.error("huangfang:otaorderid:"+(String) customNo.get("customeno")+",hotelid:"+hotelId);
+								logger.error("pms2.0换房失败：{},{},{}", (String) customNo.get("customeno"), hotelId,
+										e.getMessage());
+								logger.error("huangfang:otaorderid:" + (String) customNo.get("customeno") + ",hotelid:"
+										+ hotelId);
 							}
-							
+
 							// 修改房态
 							roomLockPo.setRoomjson(customNo.getString("day"));
 							this.pmsRoomService.updateRoomLock(roomLockPo);
-							logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:roomLockPo:{}",order.get("id"),JsonKit.toJson(roomLockPo));
+							logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:roomLockPo:{}", order.get("id"),
+									JsonKit.toJson(roomLockPo));
 						}
 					}
 				}
@@ -225,7 +239,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			data.put("set", map);
 		} catch (Exception e) {
 			e.printStackTrace();
-			NewPmsOrderServiceImpl.logger.info("OTSMessage::NewPmsOrderServiceImpl::saveCustomerNo::error:{}", e.getMessage());
+			NewPmsOrderServiceImpl.logger.info("OTSMessage::NewPmsOrderServiceImpl::saveCustomerNo::error:{}",
+					e.getMessage());
 			// data.put("success", false);
 			// data.put("errorcode", PmsErrorEnum.noknowError.getErrorCode());
 			// data.put("errormsg", e.getLocalizedMessage());
@@ -235,7 +250,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		return data;
 	}
 
-	private PmsRoomOrder updatePmsRoomOrder(EHotel hotel, PmsRoomOrder newOrder, JSONObject customNo, Long hotelId) throws Exception {
+	private PmsRoomOrder updatePmsRoomOrder(EHotel hotel, PmsRoomOrder newOrder, JSONObject customNo, Long hotelId)
+			throws Exception {
 		String pmsStates = "RE,RX,IN,IX,PM,OK";
 		PmsRoomOrder order = null;
 		if (newOrder != null) {
@@ -254,7 +270,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 
 		if (StringUtils.isNotBlank(order.getStr("Status")) && StringUtils.isNotBlank((String) customNo.get("status"))
 				&& (pmsStates.indexOf((String) customNo.get("status")) < pmsStates.indexOf(order.getStr("Status")))) {
-			NewPmsOrderServiceImpl.logger.info("NewPmsOrderServiceImpl::saveCustomerNo::错误PMS状态，当前客单状态已经是{},不能再{}", order.getStr("Status"), customNo.get("status"));
+			NewPmsOrderServiceImpl.logger.info("NewPmsOrderServiceImpl::saveCustomerNo::错误PMS状态，当前客单状态已经是{},不能再{}",
+					order.getStr("Status"), customNo.get("status"));
 			return null;
 		}
 		if (PmsRoomOrderStatusEnum.RE.getId().equals(customNo.get("status"))) {
@@ -269,10 +286,12 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 				order.set("CheckInTime", DateUtils.getDateFromString(customNo.getString("checkintime")));
 			}
 			// 续住的场景
-			if ((customNo.getString("checkouttime") != null) && !customNo.getString("checkouttime").equals(order.get("EndTime"))) {
+			if ((customNo.getString("checkouttime") != null)
+					&& !customNo.getString("checkouttime").equals(order.get("EndTime"))) {
 				order.set("EndTime", DateUtils.getDateFromString(customNo.getString("checkouttime")));
 			}
-		} else if (PmsRoomOrderStatusEnum.OK.getId().equals(customNo.get("status")) || PmsRoomOrderStatusEnum.PM.getId().equals(customNo.get("status"))) {
+		} else if (PmsRoomOrderStatusEnum.OK.getId().equals(customNo.get("status"))
+				|| PmsRoomOrderStatusEnum.PM.getId().equals(customNo.get("status"))) {
 			if (customNo.getString("checkouttime") != null) {
 				order.set("CheckOutTime", DateUtils.getDateFromString(customNo.getString("checkouttime")));
 			}
@@ -354,7 +373,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			ChangeRoomOrderBean changeRoomOrderBean = new ChangeRoomOrderBean();
 			changeRoomOrderBean.setHotelId(pmsRoomOrder.getLong("HotelId"));
 			hotelId.append(pmsRoomOrder.getLong("HotelId")).append(",");
-			if ((pmsRoomOrder.get("OldRoomId") != null) && !pmsRoomOrder.get("OldRoomId").equals(pmsRoomOrder.get("RoomId"))) {
+			if ((pmsRoomOrder.get("OldRoomId") != null)
+					&& !pmsRoomOrder.get("OldRoomId").equals(pmsRoomOrder.get("RoomId"))) {
 				changeRoomOrderBean.setOldRoomId(pmsRoomOrder.getLong("OldRoomId"));
 				changeRoomOrderBean.setOldRoomNo(pmsRoomOrder.getStr("OldRoomNo"));
 				changeRoomOrderBean.setOldRoomTypeId(pmsRoomOrder.getLong("OldRoomTypeId"));
@@ -370,18 +390,22 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			changeRoomOrderBean.setStatus(pmsRoomOrder.getStr("Status"));
 			NewPmsOrderServiceImpl.logger.info("OTSMessage::roomOrderList::换房::pmsRoomOrder::{}", pmsRoomOrder);
 			// 1,修改ota客单
-			OtaRoomOrder roomOrder = AppUtils.getBean(OrderServiceImpl.class).findRoomOrderByPmsRoomOrderNoAndHotelId(changeRoomOrderBean.getPmsRoomOrderNo(), changeRoomOrderBean.getHotelId());
+			OtaRoomOrder roomOrder = AppUtils.getBean(OrderServiceImpl.class).findRoomOrderByPmsRoomOrderNoAndHotelId(
+					changeRoomOrderBean.getPmsRoomOrderNo(), changeRoomOrderBean.getHotelId());
 			Long otaorderid = (roomOrder != null) ? roomOrder.getLong("otaorderid") : -111l;
-			NewPmsOrderServiceImpl.logger.info("OTSMessage::changePmsRoomOrder-修改ota客单:orderid:{}-{}", otaorderid, roomOrder);
+			NewPmsOrderServiceImpl.logger.info("OTSMessage::changePmsRoomOrder-修改ota客单:orderid:{}-{}", otaorderid,
+					roomOrder);
 			if (roomOrder != null) {
 				roomOrder.set("BeginTime", changeRoomOrderBean.getBeginTime());
 				roomOrder.set("EndTime", changeRoomOrderBean.getEndTime());
 				// 保存orderlog
-				this.orderLogService.findOrderLog(roomOrder.getLong("otaorderid")).set("checkinTime", changeRoomOrderBean.getBeginTime()).set("checkoutTime", changeRoomOrderBean.getEndTime())
-						.saveOrUpdate();
+				this.orderLogService.findOrderLog(roomOrder.getLong("otaorderid"))
+						.set("checkinTime", changeRoomOrderBean.getBeginTime())
+						.set("checkoutTime", changeRoomOrderBean.getEndTime()).saveOrUpdate();
 				if (!roomOrder.get("Id").equals(changeRoomOrderBean.getRoomId())) {
 					roomOrder.set("RoomId", changeRoomOrderBean.getRoomId().toString());
-					NewPmsOrderServiceImpl.logger.info("OTSMessage::changePmsRoomOrder-换房otaorderid::{},ota客单-{}", roomOrder.get("otaorderid"), roomOrder);
+					NewPmsOrderServiceImpl.logger.info("OTSMessage::changePmsRoomOrder-换房otaorderid::{},ota客单-{}",
+							roomOrder.get("otaorderid"), roomOrder);
 					ChangeRoom changeRoom = new ChangeRoom();
 					changeRoom.set("changetime", new Date());
 					changeRoom.set("hotelid", changeRoomOrderBean.getHotelId());
@@ -400,14 +424,18 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 					String pmsRoomOrderNo = changeRoomOrderBean.getPmsRoomOrderNo();
 
 					changeRoom.set("roomOrderId", pmsRoomOrder.get("id"));
-					if ((changeRoomOrderBean.getOldRoomId() != null) && !ObjectUtils.equals(changeRoomOrderBean.getRoomId(), changeRoomOrderBean.getOldRoomId())) {
-						NewPmsOrderServiceImpl.logger.info("OTSMessage::changePmsRoomOrder::changeRoom.saveOrUpdate.otaorderid:{},换房信息:changeRoom:", roomOrder.get("otaorderid"), changeRoom);
+					if ((changeRoomOrderBean.getOldRoomId() != null) && !ObjectUtils
+							.equals(changeRoomOrderBean.getRoomId(), changeRoomOrderBean.getOldRoomId())) {
+						NewPmsOrderServiceImpl.logger.info(
+								"OTSMessage::changePmsRoomOrder::changeRoom.saveOrUpdate.otaorderid:{},换房信息:changeRoom:",
+								roomOrder.get("otaorderid"), changeRoom);
 						changeRoom.saveOrUpdate();
 					}
 				}
 				String status = changeRoomOrderBean.getStatus();
 				NewPmsOrderServiceImpl.logger.info("OTSMessage::changePmsRoomOrder---status:{}", status);
-				this.orderService.changeOrderStatusByPms(roomOrder.getLong("otaorderid"), pmsRoomOrder, pmsRoomOrder.getStr("freqtrv"));
+				this.orderService.changeOrderStatusByPms(roomOrder.getLong("otaorderid"), pmsRoomOrder,
+						pmsRoomOrder.getStr("freqtrv"));
 			}
 
 			// 2,记录 酒店ID和对应的房型IDs,提供下面计算缓存
@@ -427,17 +455,19 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			}
 			hotelid = changeRoomOrderBean.getHotelId();
 		}
-		/*NewPmsOrderServiceImpl.logger.info("OTSMessage::cancelBookedRoomFromPMS::{}", unlockParam);
-		if (unlockParam.size() == 3) {
-			String cityCode = (String) unlockParam.get("cityCode");
-			Long roomId = (Long) unlockParam.get("roomId");
-			String[] checkInDate = (String[]) unlockParam.get("checkInDate");
-			NewPmsOrderServiceImpl.logger.info("OTSMessage::cancelBookedRoomFromPMS::checkInDate::{}", checkInDate);
-			this.roomService.cancelBookedRoomFromPMS(cityCode, roomId, checkInDate);
-			NewPmsOrderServiceImpl.logger.info("OTSMessage::cancelBookedRoomFromPMS::ok");
-		} else {
-			this.roomService.readonlyCalCacheByHotelidBatch(hotelid);
-		}*/
+		/*
+		 * NewPmsOrderServiceImpl.logger.info(
+		 * "OTSMessage::cancelBookedRoomFromPMS::{}", unlockParam); if
+		 * (unlockParam.size() == 3) { String cityCode = (String)
+		 * unlockParam.get("cityCode"); Long roomId = (Long)
+		 * unlockParam.get("roomId"); String[] checkInDate = (String[])
+		 * unlockParam.get("checkInDate"); NewPmsOrderServiceImpl.logger.info(
+		 * "OTSMessage::cancelBookedRoomFromPMS::checkInDate::{}", checkInDate);
+		 * this.roomService.cancelBookedRoomFromPMS(cityCode, roomId,
+		 * checkInDate); NewPmsOrderServiceImpl.logger.info(
+		 * "OTSMessage::cancelBookedRoomFromPMS::ok"); } else {
+		 * this.roomService.readonlyCalCacheByHotelidBatch(hotelid); }
+		 */
 		NewPmsOrderServiceImpl.logger.info("OTSMessage::changePmsRoomOrder---end");
 	}
 
@@ -459,7 +489,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		String synLockValue = null;
 		try {
 			SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
-			NewPmsOrderServiceImpl.logger.info("synOrder::synLockKey:" + synLockKey + "-----currentDate:" + sdf.format(new Date()));
+			NewPmsOrderServiceImpl.logger
+					.info("synOrder::synLockKey:" + synLockKey + "-----currentDate:" + sdf.format(new Date()));
 			// 加redis锁，防止重复请求
 			if ((synLockValue = DistributedLockUtil.tryLock(synLockKey, 60)) == null) {
 				NewPmsOrderServiceImpl.logger.info("NewPmsOrderServiceImpl::synOrder::" + hotelId + "-----正在进行中,重复请求");
@@ -469,10 +500,10 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 
 			EHotel hotel = this.eHotelDAO.findEHotelByid(hotelId);
 			if (hotel == null) {
-				 data.put("success", false);
-				 data.put("errorcode", PmsErrorEnum.noknowError.getErrorCode());
-				 data.put("errormsg", "OTS里没有这个id" + hotelId + "的酒店");
-				 return data;
+				data.put("success", false);
+				data.put("errorcode", PmsErrorEnum.noknowError.getErrorCode());
+				data.put("errormsg", "OTS里没有这个id" + hotelId + "的酒店");
+				return data;
 			}
 			NewPmsOrderServiceImpl.logger.info("同步[" + hotel.getHotelName() + "]酒店的所有有效清单");
 			this.hotelDAO.resetAllOrder(hotelId);
@@ -487,31 +518,32 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 				map = (Map<Long, Set<Long>>) customerNoMap.get("set");
 			}
 
-			/*NewPmsOrderServiceImpl.logger.info("OTSMessage::resetRoomStatusByHotelidFromPMS::synOrder::全量更新::hotelid:{}", hotelId);
-			this.roomService.resetRoomStatusByHotelidFromPMS(hotelId);*/
+			/*
+			 * NewPmsOrderServiceImpl.logger.info(
+			 * "OTSMessage::resetRoomStatusByHotelidFromPMS::synOrder::全量更新::hotelid:{}",
+			 * hotelId);
+			 * this.roomService.resetRoomStatusByHotelidFromPMS(hotelId);
+			 */
 
-			/*if (param.containsKey("lock")) {
-				JSONArray lock = param.getJSONArray("lock");
-				for (int i = 0; i < lock.size(); i++) {
-					JSONObject lc = lock.getJSONObject(i);
-					TRoom room = this.hotelDAO.findTRoomByHotelIdAndPmsno(hotelId, lc.getString("roomid"));
-					Long roomid = room.getLong("id");
-					Date bg = DateUtils.getDateFromString(lc.getString("begintime"));
-					Date ed = DateUtils.getDateFromString(lc.getString("endtime"));
-					Set<String> times = new HashSet();
-					while (bg.before(ed)) {
-						times.add(DateUtils.getStringFromDate(bg, DateUtils.FORMATSHORTDATETIME));
-						bg = DateUtils.addDays(bg, 1);
-					}
-					Date curDate = new Date();
-					if (curDate.getHours() > 12) {// 解决延住的问题
-						times.add(DateUtils.getStringFromDate(new Date(), DateUtils.FORMATSHORTDATETIME));
-					}
-					String[] checkInDate = times.toArray(new String[] {});
-					String cityCode = hotel.getCityCode();
-					this.roomService.cancelBookedRoomFromPMS(cityCode, roomid, checkInDate);
-				}
-			}*/
+			/*
+			 * if (param.containsKey("lock")) { JSONArray lock =
+			 * param.getJSONArray("lock"); for (int i = 0; i < lock.size(); i++)
+			 * { JSONObject lc = lock.getJSONObject(i); TRoom room =
+			 * this.hotelDAO.findTRoomByHotelIdAndPmsno(hotelId,
+			 * lc.getString("roomid")); Long roomid = room.getLong("id"); Date
+			 * bg = DateUtils.getDateFromString(lc.getString("begintime")); Date
+			 * ed = DateUtils.getDateFromString(lc.getString("endtime"));
+			 * Set<String> times = new HashSet(); while (bg.before(ed)) {
+			 * times.add(DateUtils.getStringFromDate(bg,
+			 * DateUtils.FORMATSHORTDATETIME)); bg = DateUtils.addDays(bg, 1); }
+			 * Date curDate = new Date(); if (curDate.getHours() > 12) {//
+			 * 解决延住的问题 times.add(DateUtils.getStringFromDate(new Date(),
+			 * DateUtils.FORMATSHORTDATETIME)); } String[] checkInDate =
+			 * times.toArray(new String[] {}); String cityCode =
+			 * hotel.getCityCode();
+			 * this.roomService.cancelBookedRoomFromPMS(cityCode, roomid,
+			 * checkInDate); } }
+			 */
 			// // 同步订单客单数据，清楚缓存
 			// for (Long hotelid : map.keySet()) {
 			// EventBusHelper.getEventBus().post(new
@@ -551,9 +583,11 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			JSONArray customerno = param.getJSONArray("customerno");
 			for (int i = 0; i < customerno.size(); i++) {
 				JSONObject orderCharge = customerno.getJSONObject(i);
-				PmsRoomOrder order = this.hotelDAO.findPmsRoomOrderByHotelIdAndCustomno(hotelId, orderCharge.getString("customeno"));
+				PmsRoomOrder order = this.hotelDAO.findPmsRoomOrderByHotelIdAndCustomno(hotelId,
+						orderCharge.getString("customeno"));
 				if (order == null) {
-					NewPmsOrderServiceImpl.logger.warn("PMS要求结算一条不存在的客单记录，酒店id：" + hotelId + "中 酒店客单号为：" + orderCharge.get("custmoerid") + "");
+					NewPmsOrderServiceImpl.logger.warn(
+							"PMS要求结算一条不存在的客单记录，酒店id：" + hotelId + "中 酒店客单号为：" + orderCharge.get("custmoerid") + "");
 				} else {
 					order.set("OtherCost", orderCharge.get("othercost"));
 					order.set("MikePay", orderCharge.get("mikepay"));
@@ -623,14 +657,18 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 					}
 					cost.setCustomerno((String) pmsCostData.get("customeno"));
 					cost.setCosttime(DateUtils.getDateFromString(pmsCostData.getString("bizday")));
-					PmsCostTypeEnum costType = PmsCostTypeEnum.findPmsCostTypeEnumById(pmsCostData.getString("costtype"));
+					PmsCostTypeEnum costType = PmsCostTypeEnum
+							.findPmsCostTypeEnumById(pmsCostData.getString("costtype"));
 					if (costType != null) {
 						cost.setCostType(costType.getId());
+					} else {
+						cost.setCostType("");
 					}
 					cost.setOpuser((String) pmsCostData.get("opuser"));
 					cost.setRoomCost((BigDecimal) pmsCostData.get("roomcost"));
 					cost.setOtherCost((BigDecimal) pmsCostData.get("price"));
-					PmsCostSourceEnum source = PmsCostSourceEnum.findPmsCostSourceEnumById(pmsCostData.getString("source"));
+					PmsCostSourceEnum source = PmsCostSourceEnum
+							.findPmsCostSourceEnumById(pmsCostData.getString("source"));
 					if (source != null) {
 						cost.setSource(source.getId());
 					}
@@ -672,7 +710,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			return;
 		}
 		for (PmsOrder pmsOrder : oldlist) {
-			PmsOrder old = this.hotelDAO.findPmsOrderByHotelIdAndPmsOrderNo(Long.parseLong(String.valueOf(pmsOrder.get("hotelid"))), String.valueOf(pmsOrder.get("pmsorderno")),
+			PmsOrder old = this.hotelDAO.findPmsOrderByHotelIdAndPmsOrderNo(
+					Long.parseLong(String.valueOf(pmsOrder.get("hotelid"))), String.valueOf(pmsOrder.get("pmsorderno")),
 					String.valueOf(pmsOrder.get("pmsroomtypeorderno")));
 			if (old != null) {
 				old.set("visible", "T");
@@ -685,11 +724,14 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 	private void flushCacheByHotelidAndRoomTypeId(List<PmsOrder> returnlist) {
 		// 需要刷新缓存，更新房态
 		for (PmsOrder pmsOrder : returnlist) {
-			NewPmsOrderServiceImpl.logger.info("savePmsRoomTypeOrder清楚缓存：hotelid:" + pmsOrder.getLong("HotelId") + "roomtypeid:" + pmsOrder.getLong("RoomTypeId"));
+			NewPmsOrderServiceImpl.logger.info("savePmsRoomTypeOrder清楚缓存：hotelid:" + pmsOrder.getLong("HotelId")
+					+ "roomtypeid:" + pmsOrder.getLong("RoomTypeId"));
 			try {
-				EventBusHelper.getEventBus().post(new PmsCalCacheEvent(pmsOrder.getLong("HotelId"), pmsOrder.getLong("RoomTypeId")));
+				EventBusHelper.getEventBus()
+						.post(new PmsCalCacheEvent(pmsOrder.getLong("HotelId"), pmsOrder.getLong("RoomTypeId")));
 			} catch (Exception e) {
-				NewPmsOrderServiceImpl.logger.error("savePmsRoomTypeOrder清楚缓存：hotelid:" + pmsOrder.getLong("HotelId") + "roomtypeid:" + pmsOrder.getLong("RoomTypeId"));
+				NewPmsOrderServiceImpl.logger.error("savePmsRoomTypeOrder清楚缓存：hotelid:" + pmsOrder.getLong("HotelId")
+						+ "roomtypeid:" + pmsOrder.getLong("RoomTypeId"));
 			}
 		}
 	}
@@ -716,7 +758,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 					Long roomtypeid = this.eHotelDAO.findRoomTypeIdByPms(hotelId, (String) customNo.get("roomtypeid"));
 					NewPmsOrderServiceImpl.logger.info("saveCustomerNo::roomtypeid:{}", roomtypeid);
 					if (roomtypeid == null) {
-						throw MyErrorEnum.customError.getMyException("找不到roomtype信息，hotelid:" + hotelId + "，pmsroomtypeid:" + (String) customNo.get("roomtypeid"));
+						throw MyErrorEnum.customError.getMyException("找不到roomtype信息，hotelid:" + hotelId
+								+ "，pmsroomtypeid:" + (String) customNo.get("roomtypeid"));
 					}
 					customNo.put("roomtypeid", String.valueOf(roomtypeid.intValue()));
 				}
@@ -799,7 +842,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			if (customNo.containsKey("roomtypeid")) {
 				Long roomtypeid = this.eHotelDAO.findRoomTypeIdByPms(hotelId, (String) customNo.get("roomtypeid"));
 				if (roomtypeid == null) {
-					throw MyErrorEnum.customError.getMyException("找不到roomtype信息，hotelid:" + hotelId + "，pmsroomtypeid:" + (String) customNo.get("roomtypeid"));
+					throw MyErrorEnum.customError.getMyException("找不到roomtype信息，hotelid:" + hotelId + "，pmsroomtypeid:"
+							+ (String) customNo.get("roomtypeid"));
 				}
 				customNo.put("roomtypeid", String.valueOf(roomtypeid.intValue()));
 				customNo.put("Pms", hotelid);

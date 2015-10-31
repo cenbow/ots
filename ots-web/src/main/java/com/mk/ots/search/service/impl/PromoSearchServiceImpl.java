@@ -884,6 +884,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 *            参数: 酒店搜索入参Bean对象
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private Map<String, Object> readonlyOtsHotelListFromEsStore(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		try {
@@ -1165,6 +1166,16 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype())
 						? Integer.valueOf(reqentity.getPromotype()) : null;
+
+				if (promoType == null) {
+					if (result.get("promoinfo") != null
+							&& ((List<Map<String, Object>>) result.get("promoinfo")).size() > 0) {
+						promoType = findMinPromoType((List<Map<String, Object>>) result.get("promoinfo"));
+					} else {
+						promoType = 0;
+					}
+				}
+
 				if (promoType != null) {
 					List<Map<String, Integer>> promoList = (List) result.get("promoinfo");
 					if (promoList != null) {
@@ -1453,10 +1464,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					result.put("iscashback", Constant.STR_FALSE);
 				}
 				logger.info("--================================== 查询酒店是否有返现结束: ==================================-- ");
-				
+
 				String hotelvc = Constant.STR_TRUE;
 				result.put("hotelvc", hotelvc);
-				
+
 				// 添加接口返回数据到结果集
 				hotels.add(result);
 			}
@@ -1492,6 +1503,35 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 		}
 		return rtnMap;
+	}
+
+	private Integer findMinPromoType(List<Map<String, Object>> promoInfoList) {
+		Integer minTypeId = 0;
+		Integer minPrice = 0;
+		for (int i = 0; (promoInfoList != null && i < promoInfoList.size()); i++) {
+			Map<String, Object> promoInfo = promoInfoList.get(i);
+
+			Integer promoType = (Integer) promoInfo.get("promotype");
+			String promoPriceTxt = (String) promoInfo.get("promoprice");
+
+			Integer promoPrice = 0;
+			try {
+				promoPrice = Integer.valueOf(promoPriceTxt);
+			} catch (Exception ex) {
+				logger.warn(String.format("promotype is invalid %s", promoPriceTxt), ex);
+			}
+
+			if (minPrice == 0 || (promoPrice < minPrice)) {
+				minPrice = promoPrice;
+				minTypeId = promoType;
+			}
+		}
+
+		if (minTypeId == 0) {
+			logger.warn("default promotype not found right after...");
+		}
+
+		return minTypeId;
 	}
 
 	/**
@@ -1705,7 +1745,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Integer callEntry = reqentity.getCallentry();
 		String callMethod = reqentity.getCallmethod() == null ? "" : reqentity.getCallmethod().trim();
 		String promoType = reqentity.getPromotype() == null ? "" : reqentity.getPromotype().trim();
-
+		
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("callEntry:%s; callMethod:%s; callVersion:%s; isPromoOnly:%s", callEntry,
 					callMethod, callVersion, isPromoOnly));
