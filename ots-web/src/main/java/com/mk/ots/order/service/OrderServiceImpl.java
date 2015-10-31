@@ -3803,10 +3803,10 @@ public class OrderServiceImpl implements OrderService {
             String lockValue = DistributedLockUtil.tryLock(key, 86400);
                 if (lockValue == null) {
                 logger.info("此订单已经发过push消息，无需再发,orderid = {}", orderTasts.getOtaorderid());
-                // 修改任务状态为成功
-                orderTasts.setStatus(OrderTasksStatusEnum.CHANGE.getId());
-                orderTasts.setUpdatetime(new Date());
-                orderTastsMapper.updateByPrimaryKeySelective(orderTasts);
+//                // 修改任务状态为成功
+//                orderTasts.setStatus(OrderTasksStatusEnum.CHANGE.getId());
+//                orderTasts.setUpdatetime(new Date());
+//                orderTastsMapper.updateByPrimaryKeySelective(orderTasts);
                 continue;
             }
             
