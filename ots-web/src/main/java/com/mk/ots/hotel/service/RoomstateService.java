@@ -2126,7 +2126,7 @@ public class RoomstateService {
 	 * @return String[] 返回值
 	 */
 	public String[] getHotelMikePrices(Long hotelid, String startdateday, String enddateday) {
-		String[] resultVal = new String[] { "111", "111" };
+		String[] resultVal = new String[] { "9999", "9999" };
 		try {
 			Map<String, Object> rtnMap = updateHotelMikepricesCache(hotelid, null, false);
 			if (rtnMap == null || rtnMap.size() == 0) {
@@ -2246,7 +2246,7 @@ public class RoomstateService {
 	 * @return String[] 返回值
 	 */
 	public String[] getRoomtypeMikePrices(Long hotelid, Long roomtypeid, String startdateday, String enddateday) {
-		String[] resultVal = new String[] { "111", "111" };
+		String[] resultVal = new String[] { "9999", "9999" };
 		try {
 			Map<String, Object> rtnMap = updateHotelMikepricesCache(hotelid, null, false);
 			if (rtnMap == null || rtnMap.size() == 0) {

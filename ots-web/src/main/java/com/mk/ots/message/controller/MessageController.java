@@ -147,7 +147,7 @@ public class MessageController {
 	
 	
 	@RequestMapping("/verifycode/sendcode")
-	public ResponseEntity<Map<String,Object>> sendVerifyCode(String phone, String type, String callmethod, String callversion, String ip) throws Exception {
+	public ResponseEntity<Map<String,Object>> sendVerifyCode(String phone, String type, String callmethod, String callversion, String ip,String citycode) throws Exception {
 		//1. 校验参数
         if(Strings.isNullOrEmpty(phone)){
             throw MyErrorEnum.errorParm.getMyException("[手机号码] 不允许为空.");
@@ -186,7 +186,7 @@ public class MessageController {
 			 //写log
 			 Long msgid = iMessageService.logsms(phone, message, messageTypeEnum, source, ip,null,null);
 			 //message="您的眯客验证码是："+message+"（眯客弹指间有房间，保证低价、快速入住)";
-		     boolean sendMsg = iMessageService.sendCode(msgid, phone, message.trim(), messageTypeEnum,ip);
+		     boolean sendMsg = iMessageService.sendCode(msgid, phone, message.trim(), messageTypeEnum,ip,citycode);
 		     logger.info("发送短信: phone:{}, message:{}, messagetype:{}, success:{}", phone, message.trim(), messageTypeEnum.getName(), sendMsg);
 		     //3. 组织参数
 			rtnMap.put("success", sendMsg);

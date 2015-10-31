@@ -57,7 +57,7 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 			TRoomSaleConfig configInfo=roomSaleForPmsMapper.getConfigInfoById(configToUpdate.getSaleConfigInfoId());
 			Time nowTime = Time.valueOf(DateTools.getTime("HH:mm:ss")) ;
 			if (nowTime.compareTo(configInfo.getStartTime())>=0){
-				return "OK,变更次日生效";
+				return "OK,变更次日生效ke";
 			}
 			return  "OK,变更已生效";
 		}else{
@@ -68,10 +68,7 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 		if (bean.getHotelId()==null){
 			return null;
 		}
-		List<TRoomSaleConfig> roomSaleConfigList=roomSaleForPmsMapper.getRoomSaleByPmsHotel(bean.getHotelId());
-		if(CollectionUtils.isEmpty(roomSaleConfigList)){
-			return null;
-		}
+
 		List<TRoomSalePms> roomSalePmsList= roomSaleForPmsMapper.getRoomSalePms();
 		String confShow ="";
 		String showBegin="";
@@ -86,13 +83,17 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 				noConfShow=roomSalePms.getText();
 			}
 		}
-
-		List<TRoomTypeForPms> roomTypeForPmsList=new ArrayList<>();
 		TRoomSaleForPms roomSaleForPms=new TRoomSaleForPms();
 		roomSaleForPms.setConfShow(confShow);
 		roomSaleForPms.setShowBegin(showBegin);
 		roomSaleForPms.setShowContinue(showContinue);
 		roomSaleForPms.setNoConfShow(noConfShow);
+		List<TRoomSaleConfig> roomSaleConfigList=roomSaleForPmsMapper.getRoomSaleByPmsHotel(bean.getHotelId());
+		if(CollectionUtils.isEmpty(roomSaleConfigList)){
+			return roomSaleForPms;
+		}
+		List<TRoomTypeForPms> roomTypeForPmsList=new ArrayList<>();
+
 		int i=0;
 		for (TRoomSaleConfig roomSaleConfig:roomSaleConfigList){
 			if (i==0) {

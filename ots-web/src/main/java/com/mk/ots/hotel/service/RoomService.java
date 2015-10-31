@@ -264,5 +264,5 @@ public class RoomService {
 	public void deleteAllRoomRepairs(Long hotelid){
     	roomRepairDAO.deleteAllRoomRepairs(hotelid);
     }
-		
+
 }
