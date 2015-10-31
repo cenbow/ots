@@ -628,10 +628,15 @@ public class ScoreService {
 		Message message=  new  Message();
 		message.setMid(tHotelScore.getMid());
 		message.setOrderId(tHotelScore.getOrderid());
+		message.setMessageTypeEnum(MessageTypeEnum.sms);
 		message.setCopywriterTypeEnum(CopywriterTypeEnum.order_comment_return);
 		message.setPhone(order.getContactsPhone());
-		careProducer.sendAppMsg(message);
 		careProducer.sendSmsMsg(message);
+
+		//发送app消息
+		message.setMessageTypeEnum(MessageTypeEnum.app);
+		careProducer.sendAppMsg(message);
+
 
 		int changecount = tHotelScoreMapper.updateByPrimaryKey(tHotelScore);
 		Map<String, Object> resultMap = new HashMap<String, Object>();
