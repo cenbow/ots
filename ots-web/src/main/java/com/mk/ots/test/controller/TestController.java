@@ -1,13 +1,12 @@
 package com.mk.ots.test.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import com.mk.ots.bill.service.BillOrderService;
+import com.mk.ots.common.utils.DateUtils;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.search.SearchHit;
@@ -56,7 +55,9 @@ public class TestController {
     @Autowired
     private IPmsSoapService pmsSoapService;
     @Autowired
-    private ITicketService iTicketService;
+	private ITicketService iTicketService;
+	@Autowired
+	private BillOrderService billOrderService;
 
     // @Autowired
     // private KafkaProducer kafkaProducer = null;
@@ -222,6 +223,17 @@ public class TestController {
     	map.put("couponParam", couponParam);
     	return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
     }
+
+
+	@RequestMapping("/genBillOrdersV2")
+	public ResponseEntity<Map<String, Object>> genBillOrdersV2(HttpServletRequest request) {
+		Date begintime = DateUtils.getDateFromString(request.getParameter("beginTime"), DateUtils.FORMAT_DATE);
+		Date endTime = DateUtils.getDateFromString(request.getParameter("endTime"), DateUtils.FORMAT_DATE);
+		billOrderService.genBillOrdersV2(begintime , endTime);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("couponParam", "ok");
+		return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
+	}
 
     public TestService getTestService() {
         return this.testService;
