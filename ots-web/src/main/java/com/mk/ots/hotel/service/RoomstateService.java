@@ -1094,16 +1094,23 @@ public class RoomstateService {
 
 					if (prices == null || prices.length == 0) {
 
-						// 眯客价
 
-						if (troomType.getCost().equals(new BigDecimal(0))){
+
+						if (troomType.getCost().equals(BigDecimal.ZERO)){
+							// 眯客价
 							roomtype.setRoomtypeprice(defenseZeroPrice);
+							// 门市价
+							roomtype.setRoomtypepmsprice(defenseZeroPrice);
 						}else{
+							// 眯客价
 							roomtype.setRoomtypeprice(troomType.getCost());
+							// 门市价
+							roomtype.setRoomtypepmsprice(troomType.getCost());
 						}
 
-						// 门市价
-						roomtype.setRoomtypepmsprice(troomType.getCost());
+
+
+
 					} else {
 						// 眯客价
 						if (prices[0] != null) {
@@ -1114,14 +1121,21 @@ public class RoomstateService {
 							}
 
 						} else {
-							if (troomType.getCost().equals(new BigDecimal(0))){
+							if (troomType.getCost().equals(BigDecimal.ZERO)){
 								roomtype.setRoomtypeprice(defenseZeroPrice);
 							}else{
 								roomtype.setRoomtypeprice(troomType.getCost());
 							}
 						}
-						// 门市价
-						roomtype.setRoomtypepmsprice(troomType.getCost());
+
+						if (troomType.getCost().equals(BigDecimal.ZERO)){
+							// 门市价
+							roomtype.setRoomtypepmsprice(defenseZeroPrice);
+						}else{
+							// 门市价
+							roomtype.setRoomtypepmsprice(troomType.getCost());
+						}
+
 					}
 
 					// 查询房型信息t_roomtype_info
@@ -1723,6 +1737,9 @@ public class RoomstateService {
 				} else {
 					// 设置了基本价
 					rtnPrice = troomtype.getPrice();
+					if (rtnPrice.equals(BigDecimal.ZERO)){
+						rtnPrice = new BigDecimal(9999);
+					}
 					jedis.hset(key, field, rtnPrice.toString());
 					continue;
 				}
@@ -1802,7 +1819,14 @@ public class RoomstateService {
 			price = this.findRoomtypePrice(roomtypeid, false);
 			this.logger.info("房型价格, price is {}", price);
 
+
+
 		}
+
+		if (price.equals(BigDecimal.ZERO)){
+			return new BigDecimal(9999);
+		}
+
 		return price;
 	}
 
