@@ -1707,7 +1707,12 @@ public class RoomstateService {
 				BigDecimal subper = troomtype.getSubper();
 				if ((price == null) && (subprice == null) && (subper == null)) {
 					// 没有设置对应的基本价格，直接返回门市价
-					rtnPrice = troomtype.getCost();
+					if (troomtype.getCost().compareTo(BigDecimal.ZERO) <= 0){
+						rtnPrice =  new BigDecimal(9999);
+					}else {
+						rtnPrice = troomtype.getCost();
+					}
+
 					jedis.hset(key, field, rtnPrice.toString());
 					this.logger.info("没有设置对应的基本价格，直接返回门市价: {}", rtnPrice);
 					continue;
@@ -1719,7 +1724,7 @@ public class RoomstateService {
 					if ((subprice != null) && (subprice.compareTo(BigDecimal.ZERO) == 1)) {
 						rtnPrice = BigDecimal.valueOf(cost.doubleValue() - subprice.doubleValue());
 						if (rtnPrice.compareTo(BigDecimal.ZERO) == -1) {
-							rtnPrice = BigDecimal.ZERO;
+							rtnPrice  = new BigDecimal(9999); //BigDecimal.ZERO;
 							jedis.hset(key, field, rtnPrice.toString());
 							this.logger.info("基本价未设置, 设置了下浮: {}, 基本价为: {}", subprice, rtnPrice);
 							continue;
@@ -1730,6 +1735,11 @@ public class RoomstateService {
 					if ((subper != null) && (subper.compareTo(BigDecimal.ZERO) == 1)) {
 						double dbl = troomtype.getCost().doubleValue() * (1d - subper.doubleValue());
 						rtnPrice = BigDecimal.valueOf(dbl).setScale(0, BigDecimal.ROUND_HALF_UP);
+
+						if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0){
+							rtnPrice = new BigDecimal(9999);
+						}
+
 						jedis.hset(key, field, rtnPrice.toString());
 						this.logger.info("基本价未设置, 设置了下浮百分比: {}%, 基本价为: {}", subper, rtnPrice);
 						continue;
@@ -1737,7 +1747,7 @@ public class RoomstateService {
 				} else {
 					// 设置了基本价
 					rtnPrice = troomtype.getPrice();
-					if (rtnPrice.equals(BigDecimal.ZERO)){
+					if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0){
 						rtnPrice = new BigDecimal(9999);
 					}
 					jedis.hset(key, field, rtnPrice.toString());
@@ -1823,7 +1833,7 @@ public class RoomstateService {
 
 		}
 
-		if (price.equals(BigDecimal.ZERO)){
+		if (price.compareTo(BigDecimal.ZERO) <= 0){
 			return new BigDecimal(9999);
 		}
 
@@ -1914,7 +1924,7 @@ public class RoomstateService {
 					if ((subprice != null) && (subprice.compareTo(BigDecimal.ZERO) == 1)) {
 						rtnPrice = BigDecimal.valueOf(cost.doubleValue() - subprice.doubleValue());
 						if (rtnPrice.compareTo(BigDecimal.ZERO) == -1) {
-							rtnPrice = BigDecimal.ZERO;
+							rtnPrice = new BigDecimal(9999) ;  //BigDecimal.ZERO;
 							jedis.hset(keyMikeRoomprice, field, rtnPrice.toString());
 							this.logger.info("基本价未设置, 设置了下浮: {}, 基本价为: {}", subprice, rtnPrice);
 							continue;
@@ -1932,12 +1942,20 @@ public class RoomstateService {
 				} else {
 					// 设置了基本价
 					rtnPrice = troomtype.getPrice();
+					if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0){
+						rtnPrice = new BigDecimal(9999);
+					}
 					jedis.hset(keyMikeRoomprice, field, rtnPrice.toString());
 					this.logger.info("设置了基本价为: {}", rtnPrice);
 					continue;
 				}
 
 				// 放入redis缓存
+
+				if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0){
+					rtnPrice = new BigDecimal(9999);
+				}
+
 				jedis.hset(keyMikeRoomprice, field, rtnPrice.toString());
 				this.logger.info("roomtype: {} price cache to redis, cache value is {}", field, rtnPrice);
 			}
@@ -2116,6 +2134,7 @@ public class RoomstateService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		return minTimeprice;
 	}
 
@@ -2153,11 +2172,15 @@ public class RoomstateService {
 				}
 			}
 			if (minkey != null && minval != null) {
+				if ("0".equals(minval)){
+					minval = "9999";
+				}
 				minRoomprice.put(minkey, minval);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		return minRoomprice;
 	}
 
