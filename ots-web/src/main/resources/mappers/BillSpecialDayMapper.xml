@@ -24,91 +24,88 @@
   <insert id="insertBillSpecialDay" parameterType="com.mk.ots.bill.model.BillSpecialDay" >
     insert into b_bill_special_day
     (
-      id
-      promoType
-      hotelId
-      beginTime
-      endTime
-      orderId
-      onlinePaied
-      aliPaied
-      wechatPaied
-      billCost
-      changeCost
-      finalCost
-      income
-      createTime
-      financeStatus
+      id,
+      promoType,
+      hotelId,
+      beginTime,
+      endTime,
+      orderId,
+      onlinePaied,
+      aliPaied,
+      wechatPaied,
+      billCost,
+      changeCost,
+      finalCost,
+      income,
+      createTime,
+      financeStatus,
       availableMoney
     )
     values(
-      #{id}
-      #{promoType}
-      #{hotelId}
-      #{beginTime}
-      #{endTime}
-      #{orderId}
-      #{onlinePaied}
-      #{aliPaied}
-      #{wechatPaied}
-      #{billCost}
-      #{changeCost}
-      #{finalCost}
-      #{income}
-      #{createTime}
-      #{financeStatus}
+      #{id},
+      #{promoType},
+      #{hotelId},
+      #{beginTime},
+      #{endTime},
+      #{orderId},
+      #{onlinePaied},
+      #{aliPaied},
+      #{wechatPaied},
+      #{billCost},
+      #{changeCost},
+      #{finalCost},
+      #{income},
+      #{createTime},
+      #{financeStatus},
       #{availableMoney}
     )
   </insert>
 
 
-  <insert id="insertBillSpecialDayBatch" parameterType="java.util.List" >
-    <selectKey resultType="long" keyProperty="id">
-      SELECT
-      LAST_INSERT_ID()
-    </selectKey>
+  <insert id="insertBillSpecialDayBatch" parameterType="java.util.Map">
     insert into b_bill_special_day
     (
-    id
-    promoType
-    hotelId
-    beginTime
-    endTime
-    orderId
-    onlinePaied
-    aliPaied
-    wechatPaied
-    billCost
-    changeCost
-    finalCost
-    income
-    createTime
-    financeStatus
+    id,
+    promoType,
+    hotelId,
+    beginTime,
+    endTime,
+    orderId,
+    onlinePaied,
+    aliPaied,
+    wechatPaied,
+    billCost,
+    changeCost,
+    finalCost,
+    income,
+    createTime,
+    financeStatus,
     availableMoney
     )
-    <foreach collection="list" item="item" index="index" separator="," >
+    values
+    <foreach collection="billSpecialDayList" item="item" index="index" separator=",">
     (
-      #{item.id}
-      #{item.promoType}
-      #{item.hotelId}
-      #{item.beginTime}
-      #{item.endTime}
-      #{item.orderId}
-      #{item.onlinePaied}
-      #{item.aliPaied}
-      #{item.wechatPaied}
-      #{item.billCost}
-      #{item.changeCost}
-      #{item.finalCost}
-      #{item.income}
-      #{item.createTime}
-      #{item.financeStatus}
+      #{item.id},
+      #{item.promoType},
+      #{item.hotelId},
+      #{item.beginTime},
+      #{item.endTime},
+      #{item.orderId},
+      #{item.onlinePaied},
+      #{item.aliPaied},
+      #{item.wechatPaied},
+      #{item.billCost},
+      #{item.changeCost},
+      #{item.finalCost},
+      #{item.income},
+      #{item.createTime},
+      #{item.financeStatus},
       #{item.availableMoney}
     )
     </foreach>
   </insert>
 
-  <update id="updateBillSpecialDay">
+  <update id="updateBillSpecialDay" parameterType="com.mk.ots.bill.model.BillSpecialDay">
     update b_bill_special_day
     <set>
       <if test="id != null" >
@@ -211,7 +208,7 @@
     </if>
   </update>
 
-  <select id="findBillSpecialDayById" parameterType="java.lang.Long" resultType="BaseResultMap">
+  <select id="findBillSpecialDayById" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select
       id,
       promoType,
@@ -234,7 +231,7 @@
   </select>
 
 
-  <select id="findBillSpecialDayByParams" parameterType="com.mk.ots.bill.model.BillSpecialDay" resultType="BaseResultMap">
+  <select id="findBillSpecialDayByParams" parameterType="com.mk.ots.bill.model.BillSpecialDay" resultMap="BaseResultMap">
     select
       id,
       promoType,

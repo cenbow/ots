@@ -229,7 +229,7 @@ public class TestController {
 	public ResponseEntity<Map<String, Object>> genBillOrdersV2(HttpServletRequest request) {
 		Date begintime = DateUtils.getDateFromString(request.getParameter("beginTime"), DateUtils.FORMAT_DATE);
 		Date endTime = DateUtils.getDateFromString(request.getParameter("endTime"), DateUtils.FORMAT_DATE);
-		billOrderService.genBillOrdersV2(begintime , endTime);
+		billOrderService.genBillOrdersV2(begintime, endTime);
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("couponParam", "ok");
 		return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);

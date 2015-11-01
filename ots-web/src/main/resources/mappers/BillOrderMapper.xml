@@ -36,7 +36,7 @@
     o.promoType = 1
     AND o.orderStatus IN (180, 190, 200)
     AND o.updatetime >= #{beginTime}
-    <![CDATA[ AND o.updatetime < #{endTime}}]]>
+    <![CDATA[ AND o.updatetime < #{endTime} ]]>
     AND NOT EXISTS (select 1 from b_bill_special_day billDay where billDay.orderid = o.id)
   </select>
 
@@ -63,8 +63,8 @@
     ol.realotagive AS realotagive,
     ol.qiekeIncome AS qiekeIncome,
     o.availablemoney AS availablemoney,
-    pinfo.type type as payType,
-    pinfo.cost as onlinePaied
+    pinfo.type AS payType,
+    pinfo.cost AS onlinePaied
     FROM
     b_otaorder o
     LEFT JOIN p_pay p ON o.id = p.orderid

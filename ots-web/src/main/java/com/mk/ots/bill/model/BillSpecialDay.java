@@ -10,7 +10,7 @@ public class BillSpecialDay {
     private Long id;
     private Long promoType;
     private Long hotelId;
-    private Date beinTime;
+    private Date beginTime;
     private Date endTime;
     private Long orderId;
     private BigDecimal onlinePaied;
@@ -48,12 +48,12 @@ public class BillSpecialDay {
         this.hotelId = hotelId;
     }
 
-    public Date getBeinTime() {
-        return beinTime;
+    public Date getBeginTime() {
+        return beginTime;
     }
 
-    public void setBeinTime(Date beinTime) {
-        this.beinTime = beinTime;
+    public void setBeginTime(Date beginTime) {
+        this.beginTime = beginTime;
     }
 
     public Date getEndTime() {

@@ -4,6 +4,7 @@ import com.mk.ots.bill.model.BillSpecialDay;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Thinkpad on 2015/10/29.
@@ -18,5 +19,5 @@ public interface BillSpecialDayMapper {
 
     public int insertBillSpecialDay(BillSpecialDay billSpecialDay);
 
-    public int insertBillSpecialDayBatch(List<BillSpecialDay> billSpecialDayList);
+    public int insertBillSpecialDayBatch(Map params);
 }

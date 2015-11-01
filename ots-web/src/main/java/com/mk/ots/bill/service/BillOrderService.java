@@ -1,10 +1,7 @@
 package com.mk.ots.bill.service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.mk.ots.bill.model.BillSpecialDay;
 import com.mk.ots.common.enums.PPayInfoOtherTypeEnum;
@@ -17,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mk.ots.bill.dao.BillOrderDAO;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BillOrderService {
@@ -39,6 +37,7 @@ public class BillOrderService {
      * 特价账单-每天跑
      * @return
      */
+    @Transactional
     public void genBillOrdersV2(Date beginTime, Date endTime){
         //查询订单数据
         List<Map> billOrderList = billOrderDAO.getBillOrderList(beginTime, endTime);
@@ -48,7 +47,7 @@ public class BillOrderService {
         }
         int batchSize = 50;
         int listIndex = 0;
-        List<BillSpecialDay> billSpecialDayList = new ArrayList();
+        List<BillSpecialDay> billSpecialDayList = new ArrayList<>();
         for (Map billOrderMap : billOrderList){
             listIndex++;
             Long orderId = (Long) billOrderMap.get("orderId");
@@ -63,7 +62,9 @@ public class BillOrderService {
             billSpecialDayList.add(billSpecialDay);
             //将数据insert到b_bill_special_day
             if(listIndex % batchSize == 0 || billOrderList.size() == listIndex){
-                billSpecialDayMapper.insertBillSpecialDayBatch(billSpecialDayList);
+                Map params = new HashMap();
+                params.put("billSpecialDayList", billSpecialDayList);
+                billSpecialDayMapper.insertBillSpecialDayBatch(params);
                 logger.info(String.format("genBillOrdersV2 insertBillSpecialDayBatch. params listIndex[%s]", listIndex));
                 billSpecialDayList.clear();
             }
@@ -72,7 +73,7 @@ public class BillOrderService {
 
     private BillSpecialDay convertBillSpecialDay(Date beginTime, Date endTime,Map billOrderMap, Map financeOrder) {
         BillSpecialDay billSpecialDay = new BillSpecialDay();
-        billSpecialDay.setBeinTime(beginTime);
+        billSpecialDay.setBeginTime(beginTime);
         billSpecialDay.setEndTime(endTime);
         billSpecialDay.setPromoType(Long.valueOf(PromoTypeEnum.TJ.getCode()));
         Long hotelId = (Long)billOrderMap.get("hotelId");
@@ -95,7 +96,7 @@ public class BillOrderService {
         billSpecialDay.setBillCost(lezhuCoins);
         billSpecialDay.setChangeCost(new BigDecimal(0));
         billSpecialDay.setFinalCost(lezhuCoins);
-        BigDecimal mikePrice = (BigDecimal)billOrderMap.get("mikePrice");
+        BigDecimal mikePrice = billOrderMap.get("mikePrice") == null? new BigDecimal(0):(BigDecimal)billOrderMap.get("mikePrice");
         BigDecimal income = mikePrice.subtract(lezhuCoins);
         billSpecialDay.setIncome(income);
         BigDecimal availableMoney = (BigDecimal)financeOrder.get("availablemoney");
