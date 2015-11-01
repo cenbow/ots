@@ -228,4 +228,5 @@ public class Constant {
 	public static final Integer PROMOING = 1;
 
 	public static final Integer PROMO_NOT_START = 0;
+	public static final Integer DEFENSE_ZERO_PRICE = 9999;
 }
