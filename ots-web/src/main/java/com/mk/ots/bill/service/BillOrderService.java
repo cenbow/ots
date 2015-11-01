@@ -6,7 +6,10 @@ import java.util.*;
 import com.mk.ots.bill.model.BillSpecialDay;
 import com.mk.ots.common.enums.PPayInfoOtherTypeEnum;
 import com.mk.ots.common.enums.PromoTypeEnum;
+import com.mk.ots.exception.BusinessException;
 import com.mk.ots.mapper.BillSpecialDayMapper;
+import com.mk.ots.mapper.RoomSaleMapper;
+import com.mk.ots.roomsale.model.TRoomSale;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +27,8 @@ public class BillOrderService {
     private BillOrderDAO billOrderDAO;
     @Autowired
     private BillSpecialDayMapper billSpecialDayMapper;
+    @Autowired
+    private RoomSaleMapper roomSaleMapper;
     /**
      * 账单明细表-每天跑 凌晨2点1分
      * @param request
@@ -58,8 +63,14 @@ public class BillOrderService {
                 continue;
             }
             //判断在b_bill_special_day中是否存在
-            BillSpecialDay billSpecialDay = convertBillSpecialDay(beginTime,endTime,billOrderMap, financeOrder);
-            billSpecialDayList.add(billSpecialDay);
+            try {
+                BillSpecialDay billSpecialDay = convertBillSpecialDay(beginTime,endTime,billOrderMap, financeOrder);
+                billSpecialDayList.add(billSpecialDay);
+            }catch (Exception e){
+                logger.info("convertBillSpecialDay Exception",e);
+                e.printStackTrace();
+                continue;
+            }
             //将数据insert到b_bill_special_day
             if(listIndex % batchSize == 0 || billOrderList.size() == listIndex){
                 Map params = new HashMap();
@@ -96,7 +107,15 @@ public class BillOrderService {
         billSpecialDay.setBillCost(lezhuCoins);
         billSpecialDay.setChangeCost(new BigDecimal(0));
         billSpecialDay.setFinalCost(lezhuCoins);
-        BigDecimal mikePrice = billOrderMap.get("mikePrice") == null? new BigDecimal(0):(BigDecimal)billOrderMap.get("mikePrice");
+        TRoomSale queryBean = new TRoomSale();
+        queryBean.setHotelId(hotelId.intValue());
+        String roomNo = (String)billOrderMap.get("roomNo");
+        queryBean.setRoomNo(roomNo);
+        TRoomSale tRooSmale = roomSaleMapper.queryRoomSaleByOriginal(queryBean);
+        if(tRooSmale == null ||tRooSmale.getId() == null){
+            throw new RuntimeException(String.format("TRoomSale is null params hotelId[%s],roomNo[%s]", hotelId, roomNo));
+        }
+        BigDecimal mikePrice = new BigDecimal(tRooSmale.getCostPrice());
         BigDecimal income = mikePrice.subtract(lezhuCoins);
         billSpecialDay.setIncome(income);
         BigDecimal availableMoney = (BigDecimal)financeOrder.get("availablemoney");

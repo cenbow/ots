@@ -221,5 +221,13 @@
         SELECT startTime, endTime
         FROM  t_room_sale_config where roomTypeId = #{roomTypeId}
     </select>
+
+    <select id="queryRoomSaleByOriginal" resultMap="BaseResultMap" parameterType="com.mk.ots.roomsale.model.TRoomSale">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM  t_room_sale a
+        where hotelId = #{hotelId} and roomNo = #{roomNo}
+        order by id desc limit 1
+    </select>
 </mapper>
 

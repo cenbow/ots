@@ -19,10 +19,7 @@
     po.checkintime AS checkinTime,
     po.checkouttime AS checkoutTime,
     pl.callbackFrom AS payMethod,
-    p.lezhu AS lezhuCoins,
-    ts.settleValue AS settleValue,
-    ts.costPrice AS mikePrice,
-    ts.settleValue/ts.costPrice AS discount
+    p.lezhu AS lezhuCoins
     FROM
     b_otaorder o
     INNER JOIN b_otaroomorder oo ON oo.OtaOrderId = o.id
@@ -30,7 +27,6 @@
     LEFT JOIN p_paycallback_log pl ON pl.orderid = o.id AND pl.payResult = 'Y'
     LEFT JOIN t_city c ON o.cityCode = c.code
     LEFT JOIN p_pay p ON p.orderid = o.id
-    LEFT JOIN t_room_sale ts ON ts.roomtypeid = oo.RoomTypeId AND ts.roomNo = oo.RoomNo
     LEFT JOIN t_hotel_bank tb ON tb.hotelId = o.HotelId
     WHERE
     o.promoType = 1
