@@ -1090,17 +1090,35 @@ public class RoomstateService {
 						priceTransaction.complete();
 					}
 
+					BigDecimal defenseZeroPrice = new BigDecimal(9999);
+
 					if (prices == null || prices.length == 0) {
+
 						// 眯客价
-						roomtype.setRoomtypeprice(troomType.getCost());
+
+						if (troomType.getCost().equals(new BigDecimal(0))){
+							roomtype.setRoomtypeprice(defenseZeroPrice);
+						}else{
+							roomtype.setRoomtypeprice(troomType.getCost());
+						}
+
 						// 门市价
 						roomtype.setRoomtypepmsprice(troomType.getCost());
 					} else {
 						// 眯客价
 						if (prices[0] != null) {
-							roomtype.setRoomtypeprice(new BigDecimal(prices[0]));
+							if ("0".equals(prices[0])){
+								roomtype.setRoomtypeprice(defenseZeroPrice);
+							}else{
+								roomtype.setRoomtypeprice(new BigDecimal(prices[0]));
+							}
+
 						} else {
-							roomtype.setRoomtypeprice(troomType.getCost());
+							if (troomType.getCost().equals(new BigDecimal(0))){
+								roomtype.setRoomtypeprice(defenseZeroPrice);
+							}else{
+								roomtype.setRoomtypeprice(troomType.getCost());
+							}
 						}
 						// 门市价
 						roomtype.setRoomtypepmsprice(troomType.getCost());
@@ -2309,12 +2327,15 @@ public class RoomstateService {
 				if (price == null) {
 					logger.info("未配置策略价格.");
 					String val = mikeRoompriceMap.get(roomtypeid.toString());
-					if (val == null) {
-						val = "0";
+					if (val == null || "0".equals(val)) {
+						val = "9999";
 						logger.info("房型价格error,酒店需要审核:{}--{}--{}--{}", hotelid, roomtypeid, startdateday, enddateday);
+						Cat.logEvent("ZeroPrice", "hotelid: " +hotelid + " roomtypeid: " + roomtypeid);
 						System.out.println("房型价格error,酒店需要审核:{" + hotelid + "}--{" + roomtypeid + "}--{" + startdateday
 								+ "}--{" + enddateday + "}");
 					}
+
+
 					price = new BigDecimal(val);
 					resultVal[0] = price.toString();
 					resultVal[1] = price.toString();
