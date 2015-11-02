@@ -1382,6 +1382,100 @@ public class RoomstateService {
 		return respEntityList;
 	}
 
+
+
+	public List<RoomstateQuerylistRespEntity> findHotelRoomPrice(String roomno, RoomstateQuerylistReqEntity params){
+		List<RoomstateQuerylistRespEntity> respEntityList = Lists.newArrayList();
+		List<TRoomTypeModel> troomTypes = new ArrayList<TRoomTypeModel>();
+		List<RoomstateQuerylistRespEntity.Roomtype> roomtypes = Lists.newArrayList();
+		Long hotelid = params.getHotelid();
+		Long roomtypeid = params.getRoomtypeid();
+		Integer bednum = params.getBednum();
+		String begindate = params.getStartdateday();
+		String enddate = params.getEnddateday();
+		// 查询t_roomtype表数据
+		try {
+			troomTypes = troomtypeMapper.findList(roomtypeid, hotelid, bednum);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		RoomstateQuerylistRespEntity respEntity = new RoomstateQuerylistRespEntity();
+
+		for (TRoomTypeModel troomType : troomTypes) {
+			RoomstateQuerylistRespEntity.Roomtype roomtype = respEntity.new Roomtype();
+			roomtype.setRoomtypeid(troomType.getId());
+			// 加埋点
+			String[] prices = null;
+			Transaction priceTransaction = Cat.newTransaction("RoomState", "mikeprice-redis");
+			try {
+				if (hotelPriceService.isUseNewPrice())
+					prices = hotelPriceService.getRoomtypeMikePrices(hotelid, troomType.getId(), begindate,
+							enddate);
+				else
+					prices = this.getRoomtypeMikePrices(hotelid, troomType.getId(), begindate, enddate);
+				priceTransaction.setStatus(Transaction.SUCCESS);
+			} catch (Exception e) {
+				priceTransaction.setStatus(e);
+				throw e;
+			} finally {
+				priceTransaction.complete();
+			}
+
+			BigDecimal defenseZeroPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
+
+			if (prices == null || prices.length == 0) {
+
+
+				if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
+					// 眯客价
+					roomtype.setRoomtypeprice(defenseZeroPrice);
+					// 门市价
+					roomtype.setRoomtypepmsprice(defenseZeroPrice);
+				} else {
+					// 眯客价
+					roomtype.setRoomtypeprice(troomType.getCost());
+					// 门市价
+					roomtype.setRoomtypepmsprice(troomType.getCost());
+				}
+
+
+			} else {
+				// 眯客价
+				if (prices[0] != null) {
+					if ("0".equals(prices[0])) {
+						roomtype.setRoomtypeprice(defenseZeroPrice);
+					} else {
+						roomtype.setRoomtypeprice(new BigDecimal(prices[0]));
+					}
+
+				} else {
+					if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
+						roomtype.setRoomtypeprice(defenseZeroPrice);
+					} else {
+						roomtype.setRoomtypeprice(troomType.getCost());
+					}
+				}
+
+				if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
+					// 门市价
+					roomtype.setRoomtypepmsprice(defenseZeroPrice);
+				} else {
+					// 门市价
+					roomtype.setRoomtypepmsprice(troomType.getCost());
+				}
+
+			}
+
+			roomtypes.add(roomtype);
+		}
+		respEntity.setRoomtype(roomtypes);
+		respEntityList.add(respEntity);
+		return respEntityList;
+
+	}
+
+
+
 	/**
 	 * 
 	 * @param hotelId

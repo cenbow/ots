@@ -1457,6 +1457,34 @@ public class HotelService {
 		return fullState;
 	}
 
+
+	/**
+	 * 特价房满状态查询
+	 *
+	 * @param freeRoomCount
+	 * @return
+	 */
+	public Map<String, String> getPromoFullState(Integer freeRoomCount) {
+		// avlblroomdes:可订房描述 若 可订总房间数<=3 显示 “仅剩x间”, 若 可订总房间数> 3 显示 “xx 间可订”
+		// 数据可以按房态实时更新； 若房间满房，显示“ 已满房”
+		// descolor:描述字体颜色 状态: “>3间房间” 绿色 32ab18 状态："<=仅剩3间" 红色 fb4b40 状态：满房 灰色
+		// 989898
+		Map<String, String> fullState = new HashMap<String, String>();
+		if (freeRoomCount > 3) {
+			// 大于3间不显示
+			//// fullState.put("avlblroomdes", freeRoomCount + "间可订");
+			fullState.put("avlblroomdes", "");
+			fullState.put("descolor", "32ab18");
+		} else if (freeRoomCount <= 3 && freeRoomCount > 0) {
+			fullState.put("avlblroomdes", "仅剩" + freeRoomCount + "间");
+			fullState.put("descolor", "fb4b40");
+		} else {
+			fullState.put("avlblroomdes", "");
+			fullState.put("descolor", "32ab18");
+		}
+		return fullState;
+	}
+
 	/**
 	 * 月销量查询
 	 *
