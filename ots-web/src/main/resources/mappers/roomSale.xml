@@ -109,8 +109,8 @@
         SELECT
         <include refid="Config_Column_List"/>
         FROM  t_room_sale a
-        LEFT JOIN t_room_sale_config_info b ON a.configId = b.id and a.isBack = 'F' and b.valid = 'T'
-        LEFT JOIN t_room_sale_config config ON config.saleConfigInfoId = b.id and config.valid = 'T'
+        inner JOIN t_room_sale_config config ON a.configId = config.id and config.valid = 'T' and a.isBack = 'F' and  a.isBack ='F'
+        inner JOIN t_room_sale_config_info b ON config.saleConfigInfoId = b.id and b.valid = 'T'
         <include refid="Base_Query_List"/>
         limit 1
     </select>
