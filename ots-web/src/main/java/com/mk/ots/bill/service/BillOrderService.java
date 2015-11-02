@@ -109,11 +109,11 @@ public class BillOrderService {
         billSpecialDay.setFinalCost(lezhuCoins);
         TRoomSale queryBean = new TRoomSale();
         queryBean.setHotelId(hotelId.intValue());
-        String roomNo = (String)billOrderMap.get("roomNo");
-        queryBean.setRoomNo(roomNo);
+        Long roomTypeId = (Long)billOrderMap.get("roomTypeId");
+        queryBean.setRoomTypeId(roomTypeId.intValue());
         TRoomSale tRooSmale = roomSaleMapper.queryRoomSaleByOriginal(queryBean);
         if(tRooSmale == null ||tRooSmale.getId() == null){
-            throw new RuntimeException(String.format("TRoomSale is null params hotelId[%s],roomNo[%s]", hotelId, roomNo));
+            throw new RuntimeException(String.format("TRoomSale is null params hotelId[%s],roomTypeId[%s]", hotelId, roomTypeId));
         }
         BigDecimal mikePrice = new BigDecimal(tRooSmale.getCostPrice());
         BigDecimal income = mikePrice.subtract(lezhuCoins);
