@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.mk.ots.bill.service.BillOrderService;
 import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.order.service.OrderServiceImpl;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.search.SearchHit;
@@ -58,6 +59,8 @@ public class TestController {
 	private ITicketService iTicketService;
 	@Autowired
 	private BillOrderService billOrderService;
+	@Autowired
+	private OrderServiceImpl orderService;
 
     // @Autowired
     // private KafkaProducer kafkaProducer = null;
@@ -227,11 +230,19 @@ public class TestController {
 
 	@RequestMapping("/genBillOrdersV2")
 	public ResponseEntity<Map<String, Object>> genBillOrdersV2(HttpServletRequest request) {
-		Date begintime = DateUtils.getDateFromString(request.getParameter("beginTime"), DateUtils.FORMAT_DATE);
+		Date beginTime = DateUtils.getDateFromString(request.getParameter("beginTime"), DateUtils.FORMAT_DATE);
 		Date endTime = DateUtils.getDateFromString(request.getParameter("endTime"), DateUtils.FORMAT_DATE);
-		billOrderService.genBillOrdersV2(begintime, endTime);
+		billOrderService.genBillOrdersV2(beginTime, endTime);
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("couponParam", "ok");
+		return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
+	}
+
+	@RequestMapping("/getPromoType")
+	public ResponseEntity<Map<String, Object>> getPromoType(String roomId) {
+		String promoType = orderService.getPromoType(Long.valueOf(roomId));
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("promoType", promoType);
 		return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
 	}
 

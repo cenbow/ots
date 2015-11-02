@@ -875,7 +875,7 @@ public class HotelPriceServiceImpl implements HotelPriceService {
 	    try {
 	        Map<String, Map<String,String>> rtnMap = getPriceConfigsFromCache(hotelid);
 	        if (rtnMap == null || rtnMap.size() == 0) {
-	        	resultVal = new String[]{"111", "111"};
+	        	resultVal = new String[]{"9999", "9999"};
 	            return resultVal;
 	        }
 	        // 酒店眯客特殊价格map
@@ -933,7 +933,7 @@ public class HotelPriceServiceImpl implements HotelPriceService {
 	        	
 	        	// 如果酒店也没有设置基本价和门市价
 	        	if (minRoompriceMap == null || minRoompriceMap.size() == 0) {
-	        		resultVal = new String[]{"111", "111"};
+	        		resultVal = new String[]{"9999", "9999"};
 	        		return resultVal;
 	        	}
 	        	Iterator<Entry<String, String>> iter = minRoompriceMap.entrySet().iterator();
@@ -976,7 +976,7 @@ public class HotelPriceServiceImpl implements HotelPriceService {
 	    try {
 	        Map<String, Map<String,String>> rtnMap = getPriceConfigsFromCache(hotelid);
 	        if (rtnMap == null || rtnMap.size() == 0) {
-	        	resultVal = new String[]{"111", "111"};
+	        	resultVal = new String[]{"9999", "9999"};
 	            return resultVal;
 	        }
 	        // 酒店眯客特殊价格map
@@ -1062,7 +1062,7 @@ public class HotelPriceServiceImpl implements HotelPriceService {
 	        if (resultVal[0] == null) {
 	    		// 如果酒店也没有设置基本价和门市价
 	    		if (StringUtils.isBlank(mikeRackMap.get(roomtypeid + ""))) {
-	    			resultVal = new String[]{"111", "111"};
+	    			resultVal = new String[]{"9999", "9999"};
 	    			return resultVal;
 	    		}
 		    	Calendar cal = Calendar.getInstance();
