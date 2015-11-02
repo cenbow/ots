@@ -1402,7 +1402,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					result.put("isfull", Constant.STR_FALSE);
 				}
 
-				Map<String, String> fullstate = hotelService.getFullState(vacants);
+				Map<String, String> fullstate = hotelService.getPromoFullState(vacants);
 				result.putAll(fullstate);
 				logger.info("--================================== 查询可订房间数结束： ==================================-- ");
 
