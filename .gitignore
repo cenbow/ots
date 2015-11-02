@@ -48,4 +48,5 @@ RemoteSystemsTempFiles/
 ots-web/pom.xml.bak
 ots-web/src/main/java/com/mk/ots/roomsale/service/impl/.gitignore
 *.swp
+/Servers
 *.swo
