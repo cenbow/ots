@@ -126,4 +126,13 @@
 		on a.id=b.roomtypeid
 		where a.thotelid = #{hotelid}
 	</select>
+	
+	<select id="findHotelMaxPrice" resultType="map"
+		parameterType="java.lang.Long">
+		select max(IF(price.price is null, price.subprice, price.price)) as maxprice, 
+		roomtype.thotelid from t_roomtype roomtype 
+		join t_baseprice price on roomtype.id = price.roomtypeid
+		where roomtype.thotelid = #{hotelid}
+		group by roomtype.thotelid 
+	</select>	
 </mapper>

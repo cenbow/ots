@@ -1,6 +1,7 @@
 package com.mk.ots.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -29,4 +30,6 @@ public interface TRoomTypeMapper {
     List<TRoomTypeModel> findList(@Param("id") Long id, @Param("hotelid") Long hotelid, @Param("bednum") Integer bednum) throws Exception;
     
     List<TRoomTypeWithBasePrice> findHotelPrices(@Param("hotelid") Long hotelid) throws Exception;
+    
+    Map<String, Object> findHotelMaxPrice(@Param("hotelid") Long hotelid) throws Exception;
 }

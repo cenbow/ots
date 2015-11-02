@@ -1363,9 +1363,18 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				logger.info("查询酒店: {}眯客价耗时: {}ms.", es_hotelid, times);
 				BigDecimal minPrice = new BigDecimal(prices[0]);
 				result.put("minprice", minPrice);
+
+				/**
+				 * use max price instead in promotion mode
+				 */
+				Long maxHotelPrice = roomstateService.findHotelMaxPrice(Long.parseLong(es_hotelid));
+				if (maxHotelPrice == null) {
+					maxHotelPrice = 0L;
+				}
+
 				result.put("minpmsprice", new BigDecimal(prices[1]));
 				logger.info("酒店: {}眯客价: {}", es_hotelid, prices[0]);
-				logger.info("酒店: {}门市价: {}", es_hotelid, prices[1]);
+				logger.info("酒店: {}门市价: {}", es_hotelid, maxHotelPrice == 0 ? prices[1] : maxHotelPrice);
 				logger.info("--================================== 查询酒店眯客价结束： ==================================-- ");
 
 				if (result.get("hotelpicnum") == null) {
@@ -1745,7 +1754,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Integer callEntry = reqentity.getCallentry();
 		String callMethod = reqentity.getCallmethod() == null ? "" : reqentity.getCallmethod().trim();
 		String promoType = reqentity.getPromotype() == null ? "" : reqentity.getPromotype().trim();
-		
+
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("callEntry:%s; callMethod:%s; callVersion:%s; isPromoOnly:%s", callEntry,
 					callMethod, callVersion, isPromoOnly));
