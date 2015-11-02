@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.BRPPromoDetailsMapper" >
+  <resultMap id="BaseResultMap"
+             type="com.mk.ots.bill.model.BillRPPromoDetails">
+    <result property="id" column="ID" />
+    <result property="hotelId" column="HOTELID" />
+    <result property="billId" column="BILLID" />
+	<result property="orderId" column="ORDERID" />
+    <result property="checkinTime" column="CHECKINTIME" />
+    <result property="checkoutTime" column="CHECKOUTTIME" />
+    <result property="beginTime" column="BEGINTIME" />
+    <result property="endTime" column="ENDTIME" />
+    <result property="orderTime" column="ORDERTIME" />
+	<result property="orderType" column="ORDERTYPE" />
+	<result property="promoType" column="PROMOTYPE" />
+    <result property="dayNumber" column="DAYNUMBER" />
+    <result property="roomTypeName" column="ROOMTYPENAME" />
+    <result property="roomTypeId" column="ROOMTYPEID" />
+    <result property="roomNo" column="ROOMNO" />
+    <result property="roomId" column="ROOMID" />
+    <result property="payMethod" column="PAYMETHOD" />
+    <result property="financeStatus" column="FINANCESTATUS" />
+    <result property="orderPrice" column="ORDERPRICE" />
+    <result property="userCost" column="USERCOST" />
+	<result property="availableMoney" column="AVAILABLEMONEY" />
+	<result property="mikePrice" column="MIKEPRICE" />
+	<result property="lezhuCoins" column="LEZHUCOINS" />
+    <result property="onlinePaied" column="ONLINEPAIED" />
+    <result property="aliPaied" column="ALIPAIED" />
+    <result property="wechatPaied" column="WECHATPAIED" />
+    <result property="billCost" column="BILLCOST" />
+    <result property="changeCost" column="CHANGECOST" />
+    <result property="finalCost" column="FINALCOST" />
+    <result property="income" column="INCOME" />
+    <result property="createTime" column="CREATETIME" />
+  </resultMap>
+
+
+  <insert id="insertBillRPPromoDetailsBatch" parameterType="java.util.Map">
+    insert into b_rp_promo_details
+    (
+    id,
+    hotelId,
+    billId,
+    orderId,
+    
+    promoType,
+    
+    beginTime,
+    endTime,
+    orderId,
+    onlinePaied,
+    aliPaied,
+    wechatPaied,
+    billCost,
+    changeCost,
+    finalCost,
+    income,
+    createTime,
+    financeStatus,
+    availableMoney
+    )
+    values
+    <foreach collection="billSpecialDayList" item="item" index="index" separator=",">
+    (
+      #{item.id},
+      #{item.promoType},
+      #{item.hotelId},
+      #{item.beginTime},
+      #{item.endTime},
+      #{item.orderId},
+      #{item.onlinePaied},
+      #{item.aliPaied},
+      #{item.wechatPaied},
+      #{item.billCost},
+      #{item.changeCost},
+      #{item.finalCost},
+      #{item.income},
+      #{item.createTime},
+      #{item.financeStatus},
+      #{item.availableMoney}
+    )
+    </foreach>
+  </insert>
+
+  <update id="updateBillSpecialDay" parameterType="com.mk.ots.bill.model.BillSpecialDay">
+    update b_bill_special_day
+    <set>
+      <if test="id != null" >
+        and id = #{id},
+      </if>
+      <if test="promoType != null" >
+        and promoType = #{promoType},
+      </if>
+      <if test="hotelId != null" >
+        and hotelId = #{hotelId},
+      </if>
+      <if test="beginTime != null" >
+        and beginTime = #{beginTime},
+      </if>
+      <if test="endTime != null" >
+        and endTime = #{endTime},
+      </if>
+      <if test="orderId != null" >
+        and orderId = #{orderId},
+      </if>
+      <if test="onlinePaied != null" >
+        and onlinePaied = #{onlinePaied},
+      </if>
+      <if test="aliPaied != null" >
+        and aliPaied = #{aliPaied},
+      </if>
+      <if test="wechatPaied != null" >
+        and wechatPaied = #{wechatPaied},
+      </if>
+      <if test="billCost != null" >
+        and billCost = #{billCost},
+      </if>
+      <if test="changeCost != null" >
+        and changeCost = #{changeCost},
+      </if>
+      <if test="finalCost != null" >
+        and finalCost = #{finalCost},
+      </if>
+      <if test="income != null" >
+        and income = #{income},
+      </if>
+      <if test="createTime != null" >
+        and createTime = #{createTime},
+      </if>
+      <if test="financeStatus != null" >
+        and financeStatus = #{financeStatus},
+      </if>
+      <if test="availableMoney != null" >
+        and availableMoney = #{availableMoney},
+      </if>
+    </set>
+    where 1=1
+    <if test="id != null" >
+      and id = #{id}
+    </if>
+    <if test="promoType != null" >
+      and promoType = #{promoType}
+    </if>
+    <if test="hotelId != null" >
+      and hotelId = #{hotelId}
+    </if>
+    <if test="beginTime != null" >
+      and beginTime = #{beginTime}
+    </if>
+    <if test="endTime != null" >
+      and endTime = #{endTime}
+    </if>
+    <if test="orderId != null" >
+      and orderId = #{orderId}
+    </if>
+    <if test="onlinePaied != null" >
+      and onlinePaied = #{onlinePaied}
+    </if>
+    <if test="aliPaied != null" >
+      and aliPaied = #{aliPaied}
+    </if>
+    <if test="wechatPaied != null" >
+      and wechatPaied = #{wechatPaied}
+    </if>
+    <if test="billCost != null" >
+      and billCost = #{billCost}
+    </if>
+    <if test="changeCost != null" >
+      and changeCost = #{changeCost}
+    </if>
+    <if test="finalCost != null" >
+      and finalCost = #{finalCost}
+    </if>
+    <if test="income != null" >
+      and income = #{income}
+    </if>
+    <if test="createTime != null" >
+      and createTime = #{createTime}
+    </if>
+    <if test="financeStatus != null" >
+      and financeStatus = #{financeStatus}
+    </if>
+    <if test="availableMoney != null" >
+      and availableMoney = #{availableMoney}
+    </if>
+  </update>
+
+  <select id="findBillSpecialDayById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+      id,
+      promoType,
+      hotelId,
+      beginTime,
+      endTime,
+      orderId,
+      onlinePaied,
+      aliPaied,
+      wechatPaied,
+      billCost,
+      changeCost,
+      finalCost,
+      income,
+      createTime,
+      financeStatus,
+      availableMoney
+      from b_bill_special_day t
+      where t.id = #{id}
+  </select>
+
+
+  <select id="findBillSpecialDayByParams" parameterType="com.mk.ots.bill.model.BillSpecialDay" resultMap="BaseResultMap">
+    select
+      id,
+      promoType,
+      hotelId,
+      beginTime,
+      endTime,
+      orderId,
+      onlinePaied,
+      aliPaied,
+      wechatPaied,
+      billCost,
+      changeCost,
+      finalCost,
+      income,
+      createTime,
+      financeStatus,
+      availableMoney
+      from b_bill_special_day t
+      where 1=1
+    <if test="id != null" >
+      and id = #{id}
+    </if>
+    <if test="promoType != null" >
+      and promoType = #{promoType}
+    </if>
+    <if test="hotelId != null" >
+      and hotelId = #{hotelId}
+    </if>
+    <if test="beginTime != null" >
+      and beginTime = #{beginTime}
+    </if>
+    <if test="endTime != null" >
+      and endTime = #{endTime}
+    </if>
+    <if test="orderId != null" >
+      and orderId = #{orderId}
+    </if>
+    <if test="onlinePaied != null" >
+      and onlinePaied = #{onlinePaied}
+    </if>
+    <if test="aliPaied != null" >
+      and aliPaied = #{aliPaied}
+    </if>
+    <if test="wechatPaied != null" >
+      and wechatPaied = #{wechatPaied}
+    </if>
+    <if test="billCost != null" >
+      and billCost = #{billCost}
+    </if>
+    <if test="changeCost != null" >
+      and changeCost = #{changeCost}
+    </if>
+    <if test="finalCost != null" >
+      and finalCost = #{finalCost}
+    </if>
+    <if test="income != null" >
+      and income = #{income}
+    </if>
+    <if test="createTime != null" >
+      and createTime = #{createTime}
+    </if>
+    <if test="financeStatus != null" >
+      and financeStatus = #{financeStatus}
+    </if>
+    <if test="availableMoney != null" >
+      and availableMoney = #{availableMoney}
+    </if>
+  </select>
+
+
+</mapper>
