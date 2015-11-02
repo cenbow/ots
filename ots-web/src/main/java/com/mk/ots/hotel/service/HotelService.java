@@ -1484,7 +1484,6 @@ public class HotelService {
 		}
 		return fullState;
 	}
-
 	/**
 	 * 月销量查询
 	 *
