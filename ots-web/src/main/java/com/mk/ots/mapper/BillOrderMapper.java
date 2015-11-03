@@ -13,4 +13,6 @@ public interface BillOrderMapper {
     public List<Map> findBillOrder(Map params);
 
     public Map findFinanceOrder(Map params);
+
+    public List<Long> findBillOrderHotelId(Map params);
 }

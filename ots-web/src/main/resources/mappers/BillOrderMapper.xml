@@ -12,14 +12,15 @@
     o.cityCode AS cityCode,
     c.CityName AS cityName,
     o.Createtime AS orderTime,
-		o.promoType AS promoType,
+    o.updatetime AS orderUpdateTime,
+    o.promoType AS promoType,
     o.daynumber AS dayNumber,
     oo.RoomTypeName AS roomTypeName,
     oo.RoomTypeId AS roomTypeId,
     oo.RoomNo AS roomNo,
-		oo.RoomId AS roomId,
-		po.begintime AS beginTime,
-		po.endtime AS endTime,
+    oo.RoomId AS roomId,
+    po.begintime AS beginTime,
+    po.endtime AS endTime,
     po.checkintime AS checkinTime,
     po.checkouttime AS checkoutTime,
     pl.callbackFrom AS payMethod,
@@ -36,8 +37,25 @@
     o.promoType = 1
     AND o.orderStatus IN (180, 190, 200)
     AND o.updatetime >= #{beginTime}
+    AND o.hotelId = #{hotelId}
     <![CDATA[ AND o.updatetime < #{endTime} ]]>
     AND NOT EXISTS (select 1 from b_bill_special_detail detail where detail.orderid = o.id)
+  </select>
+
+
+  <select id="findBillOrderHotelId" parameterType="java.util.Map" resultType="java.lang.Long">
+    SELECT
+    o.hotelid
+    FROM
+    b_otaorder o
+    INNER JOIN b_otaroomorder oo ON oo.OtaOrderId = o.id
+    WHERE
+    o.promoType = 1
+    AND o.orderStatus IN (180, 190, 200)
+    AND o.updatetime >= #{beginTime}
+    <![CDATA[ AND o.updatetime < #{endTime} ]]>
+    AND NOT EXISTS (select 1 from b_bill_special_detail detail where detail.orderid = o.id)
+    GROUP by o.hotelid
   </select>
 
 

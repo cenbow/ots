@@ -1,12 +1,20 @@
 package com.mk.ots.test.controller;
 
-import java.util.*;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.common.collect.Maps;
+import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.ots.bill.service.BillOrderService;
-import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.job.PushMessageJob;
+import com.mk.ots.job.SendCouponsJob;
+import com.mk.ots.job.SendLiveThreeCouponsJob;
+import com.mk.ots.job.SendTicketJob;
+import com.mk.ots.message.model.LPushLog;
+import com.mk.ots.message.model.MessageType;
+import com.mk.ots.message.service.IMessageService;
+import com.mk.ots.order.bean.OtaOrder;
+import com.mk.ots.pay.model.CouponParam;
+import com.mk.ots.rpc.IPmsSoapService;
+import com.mk.ots.test.service.TestService;
+import com.mk.ots.ticket.service.ITicketService;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.search.SearchHit;
@@ -20,20 +28,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.common.collect.Maps;
-import com.mk.framework.es.ElasticsearchProxy;
-import com.mk.ots.job.PushMessageJob;
-import com.mk.ots.job.SendCouponsJob;
-import com.mk.ots.job.SendLiveThreeCouponsJob;
-import com.mk.ots.job.SendTicketJob;
-import com.mk.ots.message.model.LPushLog;
-import com.mk.ots.message.model.MessageType;
-import com.mk.ots.message.service.IMessageService;
-import com.mk.ots.order.bean.OtaOrder;
-import com.mk.ots.pay.model.CouponParam;
-import com.mk.ots.rpc.IPmsSoapService;
-import com.mk.ots.test.service.TestService;
-import com.mk.ots.ticket.service.ITicketService;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/test", method = RequestMethod.POST)
@@ -224,16 +224,6 @@ public class TestController {
     	return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
     }
 
-
-	@RequestMapping("/genBillOrdersV2")
-	public ResponseEntity<Map<String, Object>> genBillOrdersV2(HttpServletRequest request) {
-		Date begintime = DateUtils.getDateFromString(request.getParameter("beginTime"), DateUtils.FORMAT_DATE);
-		Date endTime = DateUtils.getDateFromString(request.getParameter("endTime"), DateUtils.FORMAT_DATE);
-		billOrderService.genBillOrdersV2(begintime, endTime);
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("couponParam", "ok");
-		return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
-	}
 
     public TestService getTestService() {
         return this.testService;

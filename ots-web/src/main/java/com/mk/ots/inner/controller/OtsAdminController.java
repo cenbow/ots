@@ -190,18 +190,17 @@ public class OtsAdminController {
 	@RequestMapping(value = "/report/launchPromo", method = RequestMethod.POST)
 	public ResponseEntity<Map<String, Object>> launchBillRPPromotions(String startdateday, String enddateday) {
 		Map<String, Object> datas = new HashMap<String, Object>();
-
 		try {
 			Date beginTime = DateUtils.getDateFromString(startdateday, DateUtils.FORMAT_DATE);
 			Date endTime = DateUtils.getDateFromString(enddateday, DateUtils.FORMAT_DATE);
 			billService.createBillReport(beginTime, endTime);
 		} catch (Exception ex) {
-			logger.error("failed to createBillReport", ex);
+			logger.error("failed to createBillReportByHotelId", ex);
 			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			datas.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			datas.put(ServiceOutput.STR_MSG_ERRMSG, "failed to createBillReport");
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "failed to createBillReportByHotelId");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 		}
-
 		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
 		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 	}

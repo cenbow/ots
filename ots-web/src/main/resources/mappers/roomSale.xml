@@ -226,7 +226,7 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM  t_room_sale a
-        where hotelId = #{hotelId} and roomNo = #{roomNo}
+        where hotelId = #{hotelId} and roomtypeid = #{roomTypeId}
         order by id desc limit 1
     </select>
 </mapper>

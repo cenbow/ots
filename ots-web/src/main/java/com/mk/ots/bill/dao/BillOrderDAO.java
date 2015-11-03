@@ -1055,11 +1055,19 @@ public class BillOrderDAO {
 
     }
 
-    public List<Map> getBillOrderList(Date beginTime, Date endTime){
+    public List<Map> getBillOrderList(Long hotelId, Date beginTime, Date endTime){
         Map params = new HashMap();
         params.put("beginTime", beginTime);
         params.put("endTime", endTime);
+        params.put("hotelId", hotelId);
         return billOrderMapper.findBillOrder(params);
+    }
+
+    public List<Long> findBillOrderHotelId(Date beginTime, Date endTime){
+        Map params = new HashMap();
+        params.put("beginTime", beginTime);
+        params.put("endTime", endTime);
+        return billOrderMapper.findBillOrderHotelId(params);
     }
 
     public Map getFinanceOrder(Long orderId){
