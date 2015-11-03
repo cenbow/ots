@@ -34,6 +34,9 @@ public class WalletService implements IWalletService {
             uWallet.setLastmodify(new Date());
             iuWalletDAO.insert(uWallet);
         }
+
+        //金额取整
+        uWallet.setBalance(uWallet.getBalance().setScale(0,uWallet.getBalance().ROUND_HALF_UP));
         return uWallet != null && uWallet.getBalance().compareTo(BigDecimal.ZERO) > 0 ? uWallet.getBalance() : BigDecimal.ZERO;
     }
 
