@@ -1457,7 +1457,6 @@ public class HotelService {
 		return fullState;
 	}
 
-
 	/**
 	 * 特价房满状态查询
 	 *
@@ -1484,6 +1483,7 @@ public class HotelService {
 		}
 		return fullState;
 	}
+
 	/**
 	 * 月销量查询
 	 *
@@ -1606,15 +1606,27 @@ public class HotelService {
 	 * @param lockRoomsCache
 	 * @return
 	 */
-	public Integer calPromoVacants(Integer promoType, Long hotelid, String starttime, String endtime) throws Exception {
+	public Integer calPromoVacants(Integer promoType, Long hotelid, String starttime, String endtime, String isnewpms)
+			throws Exception {
 		Integer vacants = 0;
 
 		List<TRoomModel> roomModels = tRoomMapper.findRoomsByHotelId(hotelid);
 		Map<String, String> lockRoomsCache = null;
-		try {
-			lockRoomsCache = roomstateService.findBookedRoomsByHotelIdNewPms(hotelid, starttime, endtime);
-		} catch (Exception ex) {
-			throw new Exception(String.format("failed to load cache for hotelId %s", hotelid), ex);
+		if (Constant.STR_TRUE.equals(isnewpms)) {// 新pms
+			try {
+				lockRoomsCache = roomstateService.findBookedRoomsByHotelIdNewPms(hotelid, starttime, endtime);
+			} catch (Exception ex) {
+				throw new Exception(String.format(
+						"failed to load cache from findBookedRoomsByHotelIdNewPms for hotelId %s", hotelid), ex);
+			}
+		} else {
+			try {
+				lockRoomsCache = roomstateService.findBookedRoomsByHotelId(hotelid, starttime, endtime);
+			} catch (Exception ex) {
+				throw new Exception(
+						String.format("failed to load cache from findBookedRoomsByHotelId for hotelId %s", hotelid),
+						ex);
+			}
 		}
 
 		for (TRoomModel roomModel : roomModels) {
@@ -3001,7 +3013,7 @@ public class HotelService {
 	}
 
 	private void removeObsoleteBedtypes() {
-		
+
 	}
 
 	public void asyncBatchUpdateHotelBedtypes(final String citycode) {
