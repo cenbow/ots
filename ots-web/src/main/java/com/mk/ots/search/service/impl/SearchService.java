@@ -1140,7 +1140,7 @@ public class SearchService implements ISearchService {
 				SearchHit hit = hits[i];
 				Map<String, Object> result = hit.getSource();
 
-				if (makePromoPostFilter(result)) {
+				if ((HotelSortEnum.PRICE.getId() != paramOrderby) && makePromoPostFilter(result)) {
 					if (logger.isInfoEnabled()) {
 						logger.info("hotelid {} has been exampted from result for not in sale reason",
 								result.get("hotelid"));
