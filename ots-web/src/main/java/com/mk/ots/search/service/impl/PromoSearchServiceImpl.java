@@ -666,9 +666,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					logger.error(String.format("failed to queryTransferData with hotelid %s..., ignore and continue...",
 							reqentity.getHotelid()), e);
 				}
-
+				String p_isnewpms = Constant.STR_TRUE.equals(result.get("isnewpms")) ? Constant.STR_TRUE
+						: Constant.STR_FALSE;
+				
 				Integer vacants = hotelService.calPromoVacants(Integer.parseInt(promotype), Long.parseLong(hotelid),
-						reqentity.getStartdateday(), reqentity.getEnddateday());
+						reqentity.getStartdateday(), reqentity.getEnddateday(), p_isnewpms);
 				result.put("roomvacancy", vacants);
 
 				// 添加到酒店列表
@@ -1363,7 +1365,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				logger.info("查询酒店: {}眯客价耗时: {}ms.", es_hotelid, times);
 				BigDecimal minPrice = new BigDecimal(prices[0]);
 				result.put("minprice", minPrice);
-				
+
 				Long maxPrice = roomstateService.findHotelMaxPrice(Long.parseLong(es_hotelid));
 				result.put("minpmsprice", new BigDecimal(maxPrice));
 
@@ -1388,7 +1390,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						reqentity.getStartdateday(), reqentity.getEnddateday());
 
 				Integer vacants = hotelService.calPromoVacants(promoType, p_hotelid, reqentity.getStartdateday(),
-						reqentity.getEnddateday());
+						reqentity.getEnddateday(), p_isnewpms);
 				result.put("roomvacancy", vacants);
 
 				endTime = new Date().getTime();
@@ -1747,7 +1749,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Integer callEntry = reqentity.getCallentry();
 		String callMethod = reqentity.getCallmethod() == null ? "" : reqentity.getCallmethod().trim();
 		String promoType = reqentity.getPromotype() == null ? "" : reqentity.getPromotype().trim();
-		
+
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("callEntry:%s; callMethod:%s; callVersion:%s; isPromoOnly:%s", callEntry,
 					callMethod, callVersion, isPromoOnly));
