@@ -196,7 +196,7 @@ public class BillOrderDAO {
             sql0noshow.append(" AND o.hotelid = " + hotelid);
         }
         //普通订单参加结算
-        sql0noshow.append("  and o.clearingtype = "+ClearingTypeEnum.generalOrder.getId());
+        sql0noshow.append("  and o.promoType = 0 ");
         //每天查询订单信息sql 查询update时间是当天的 如果update时间是当天并且该订单没有在 结算的订单明细表中 则把这一类的订单添加到明细表中。
         String sql0updatetime1 = "SELECT "
                 + "o.id orderid, "
@@ -248,7 +248,7 @@ public class BillOrderDAO {
             sql0updatetime.append(" AND o.hotelid = " + hotelid);
         }
         //普通订单参加结算
-        sql0updatetime.append(" and o.clearingtype = "+ClearingTypeEnum.generalOrder.getId());
+        sql0updatetime.append(" and o.promoType = 0 ");
 
         String sql0 = "SELECT "
                 + "o.id orderid, "
@@ -298,7 +298,7 @@ public class BillOrderDAO {
             sql.append(" AND o.hotelid = " + hotelid);
         }
         //普通订单参加结算
-        sql.append("  and o.clearingtype = "+ClearingTypeEnum.generalOrder.getId());
+        sql.append("  and o.promoType = 0 ");
 
         //每天查询 订单各种金额 sql
         String sql2 = "SELECT "
