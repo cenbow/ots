@@ -43,26 +43,24 @@ public class BillOrderLogicService {
     @Transactional
     public void createBillReportByHotelId(Long hotelId, Date beginTime, Date endTime) throws HmsException {
         logger.info(String.format("createBillReportByHotelId by hotelId[%s]",hotelId));
-        try{
-            BillSpecial record = new BillSpecial();
-            record.setHotelid(hotelId);
-            int billSpecialId = billSpecialMapper.insertHotelId(record);
-            // 查询订单数据
-            List<Map> billOrderList = billOrderDAO.getBillOrderList(hotelId, beginTime, endTime);
-            if (CollectionUtils.isEmpty(billOrderList)) {
-                logger.info(String.format("createBillReportByHotelId billOrderList is empty. params hotelId[%s],beginTime[%s],endTime[%s]",
-                        hotelId, beginTime, endTime));
-                return;
-            }
-            createBillSpecialDetailList(billOrderList, billSpecialId);
-            //执行update b_bill_special
-            String billTime = DateUtils.formatDateTime(beginTime, DateUtils.FORMATSHORTDATETIME);
-            billSpecialMapper.updateBillSpecial(hotelId, beginTime, endTime, billTime);
-        }catch (Exception e){
-            e.printStackTrace();
-            throw new HmsException("createBillReportByHotelId error");
+        int billSpecialId = insertHotelId(hotelId);
+        // 查询订单数据
+        List<Map> billOrderList = billOrderDAO.getBillOrderList(hotelId, beginTime, endTime);
+        if (CollectionUtils.isEmpty(billOrderList)) {
+            logger.info(String.format("createBillReportByHotelId billOrderList is empty. params hotelId[%s],beginTime[%s],endTime[%s]",
+                    hotelId, beginTime, endTime));
+            return;
         }
+        createBillSpecialDetailList(billOrderList, billSpecialId);
+        //执行update b_bill_special
+        String billTime = DateUtils.formatDateTime(beginTime, DateUtils.FORMATSHORTDATETIME);
+        billSpecialMapper.updateBillSpecial(hotelId, beginTime, endTime, billTime);
+    }
 
+    public int insertHotelId(Long hotelId){
+        BillSpecial record = new BillSpecial();
+        record.setHotelid(hotelId);
+        return billSpecialMapper.insertHotelId(record);
     }
 
     private void createBillSpecialDetailList(List<Map> billOrderList, int billSpecialId) {
@@ -159,9 +157,8 @@ public class BillOrderLogicService {
         specialDetail.setBegintime((Date) billOrderMap.get("beginTime"));
         specialDetail.setEndtime((Date) billOrderMap.get("endTime"));
         specialDetail.setOrdertime((Date) billOrderMap.get("orderTime"));
-        specialDetail.setOrdertype(getMapValueToInteger(billOrderMap.get("orderType")));
         specialDetail.setDaynumber(getMapValueToInteger(billOrderMap.get("dayNumber")));
-        specialDetail.setOrderupdatetime((Date) billOrderMap.get("orderUpdateTime"));
+
 
         TRoomSale queryBean = new TRoomSale();
         queryBean.setHotelId(hotelId.intValue());
@@ -172,10 +169,10 @@ public class BillOrderLogicService {
                     String.format("TRoomSale is null params hotelId[%s],roomTypeId[%s]", hotelId, roomTypeId));
         }
         BigDecimal mikePrice = new BigDecimal(tRooSmale.getCostPrice());
-
         BigDecimal lezhuCoins = (BigDecimal) billOrderMap.get("lezhuCoins");
-        specialDetail.setMikeprice(getMapValueToBigDecimal(billOrderMap.get("")));
         BigDecimal discount = mikePrice.divide(new BigDecimal(tRooSmale.getSalePrice().toString()), 2, BigDecimal.ROUND_UP);
+
+        specialDetail.setMikeprice(mikePrice);
         specialDetail.setDiscount(discount);
         specialDetail.setLezhucoins(lezhuCoins);
         specialDetail.setOrderprice(getMapValueToBigDecimal(billOrderMap.get("totalPrice")));
@@ -185,6 +182,7 @@ public class BillOrderLogicService {
         specialDetail.setPaymethod((String) billOrderMap.get("payMethod"));
         specialDetail.setUsercost(getMapValueToBigDecimal(financeOrder.get("usercost")));
         specialDetail.setAvailablemoney(getMapValueToBigDecimal(financeOrder.get("availablemoney")));
+        specialDetail.setOrderupdatetime((Date) billOrderMap.get("orderUpdateTime"));
         specialDetail.setCreatetime(new Date());
         return specialDetail;
     }

@@ -1,6 +1,6 @@
 package com.mk.ots.exception;
 
-public class HmsException extends Exception {
+public class HmsException extends RuntimeException {
 
 	private static final long serialVersionUID = 2626908725247678135L;
 
