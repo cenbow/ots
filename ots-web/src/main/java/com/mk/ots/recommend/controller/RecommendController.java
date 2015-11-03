@@ -125,6 +125,13 @@ public class RecommendController {
                                     continue;
                                 }
 
+                                if (StringUtils.isNotBlank(cityid)){
+                                    if (Constant.PROMO_BANNER_PROMO.equals(tRecommendItem.getViewtype()) || Constant.PROMO_BANNER_ONE_PROMO.equals(tRecommendItem.getViewtype())){
+                                        continue;
+                                    }
+                                }
+
+
                                 if (global_count <= Constant.RECOMMEND_ITEM_LIMT - city_recommend_count) {
 
                                     RecommendList recommendList = new RecommendList();
