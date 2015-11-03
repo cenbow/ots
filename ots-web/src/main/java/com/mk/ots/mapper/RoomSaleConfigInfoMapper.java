@@ -1,6 +1,7 @@
 package com.mk.ots.mapper;
 
 
+import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface RoomSaleConfigInfoMapper {
     public int updateTRoomSaleConfigInfo(Map<String, Object> map);
 
     List<TRoomSaleConfigInfo>queryListBySaleTypeId(Map<String,Object>map);
+
+    public TRoomSaleConfigInfo getRoomSaleConfigInfoByConfigId(TRoomSaleConfig tRoomSaleConfig);
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import com.mk.ots.order.service.OrderServiceImpl;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.search.SearchHit;
@@ -57,6 +58,8 @@ public class TestController {
     private IPmsSoapService pmsSoapService;
     @Autowired
     private ITicketService iTicketService;
+	@Autowired
+	private OrderServiceImpl orderService;
 
     // @Autowired
     // private KafkaProducer kafkaProducer = null;
@@ -222,6 +225,14 @@ public class TestController {
     	map.put("couponParam", couponParam);
     	return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
     }
+
+	@RequestMapping("/getPromoType")
+	public ResponseEntity<Map<String, Object>> getPromoType(String roomId) {
+		String promoType = orderService.getPromoType(Long.valueOf(roomId));
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("promoType", promoType);
+		return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
+	}
 
     public TestService getTestService() {
         return this.testService;

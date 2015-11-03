@@ -1249,6 +1249,9 @@ public class PayService implements IPayService {
                 TRoomSale tRoomSale = new TRoomSale();
                 tRoomSale.setRoomId((int)otaRoomOrder.getRoomId());
                 TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
+                if(resultRoomSale == null ){
+                    throw MyErrorEnum.alreadyEndPromo.getMyException("今夜特价活动已结束");
+                }
                 allcost = allcost.add(new BigDecimal(resultRoomSale.getSalePrice()));
             }
         }else{
@@ -1276,6 +1279,9 @@ public class PayService implements IPayService {
                 TRoomSale tRoomSale = new TRoomSale();
                 tRoomSale.setRoomId((int)otaRoomOrder.getRoomId());
                 TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
+                if(resultRoomSale == null ){
+                    throw MyErrorEnum.alreadyEndPromo.getMyException("今夜特价活动已结束");
+                }
                 allcost = allcost.add(resultRoomSale.getSettleValue());
             }
         }else{

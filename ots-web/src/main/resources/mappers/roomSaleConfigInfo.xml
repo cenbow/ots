@@ -85,6 +85,21 @@
         <include refid="Base_Query_List"/>
     </select>
 
+    <select id="getRoomSaleConfigInfoByConfigId" resultMap="BaseResultMap" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfig">
+        SELECT
+        a.id, a.saleTypeId,a.startDate,a.endDate,a.startTime,a.endTime,a.saleValue,a.saleLabel,a.description,
+        a.fontColor,a.valid,a.createTime,a.createBy,a.updateTime,a.updateBy
+        FROM  t_room_sale_config_info a INNER JOIN t_room_sale_config b ON a.id=b.saleConfigInfoId
+        <where>
+            1 = 1
+            <if test="id != null">
+                AND b.id = #{id}
+            </if>
+            AND b.valid = 'T' AND a.valid='T'
+        </where>
+        limit 1
+    </select>
+
     <update id="updateTRoomSaleConfigInfo" parameterType="map" >
         update t_room_sale_config_info
         <set>

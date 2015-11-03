@@ -1124,7 +1124,7 @@ public class RoomstateService {
 					} else {
 						// 眯客价
 						if (prices[0] != null) {
-							if ("0".equals(prices[0])){
+							if ("0".equals(prices[0]) || Double.valueOf(prices[0]) <=0){
 								roomtype.setRoomtypeprice(defenseZeroPrice);
 							}else{
 								roomtype.setRoomtypeprice(new BigDecimal(prices[0]));
@@ -1345,11 +1345,12 @@ public class RoomstateService {
 			for (int i = 0; i < roomtypesArr.length; i++) {
 				if (roomtypesArr[i] instanceof RoomstateQuerylistRespEntity.Roomtype) {
 					RoomstateQuerylistRespEntity.Roomtype rt = (RoomstateQuerylistRespEntity.Roomtype) roomtypesArr[i];
-					if (rt.getVcroomnum() <= 0)
-						tempRoomTypes.add(rt);
-					else if ("1".equals(rt.getIsonpromo())) {
+					if ("1".equals(rt.getIsonpromo())) {
 						promoRoomTypes.add(rt);
-					} else {
+					} 
+					else if (rt.getVcroomnum() <= 0)
+						tempRoomTypes.add(rt);
+					else {
 						normalRoomTypes.add(rt);
 					}
 
@@ -1452,7 +1453,7 @@ public class RoomstateService {
 			} else {
 				// 眯客价
 				if (prices[0] != null) {
-					if ("0".equals(prices[0])) {
+					if ("0".equals(prices[0]) || Double.valueOf(prices[0]) < 0) {
 						roomtype.setRoomtypeprice(defenseZeroPrice);
 					} else {
 						roomtype.setRoomtypeprice(new BigDecimal(prices[0]));
@@ -2289,7 +2290,7 @@ public class RoomstateService {
 				}
 			}
 			if (minkey != null && minval != null) {
-				if ("0".equals(minval)){
+				if ("0".equals(minval)|| Double.valueOf(minval) < 0){
 					minval = Constant.DEFENSE_ZERO_PRICE.toString();
 				}
 				minRoomprice.put(minkey, minval);
@@ -2491,13 +2492,21 @@ public class RoomstateService {
 				if (price == null) {
 					logger.info("未配置策略价格.");
 					String val = mikeRoompriceMap.get(roomtypeid.toString());
-					if (val == null || "0".equals(val)) {
+					if (val == null || "0".equals(val) ) {
+						val = Constant.DEFENSE_ZERO_PRICE.toString();
+						logger.info("房型价格error,酒店需要审核:{}--{}--{}--{}", hotelid, roomtypeid, startdateday, enddateday);
+						Cat.logEvent("ZeroPrice", "hotelid: " +hotelid + " roomtypeid: " + roomtypeid);
+						System.out.println("房型价格error,酒店需要审核:{" + hotelid + "}--{" + roomtypeid + "}--{" + startdateday
+								+ "}--{" + enddateday + "}");
+					}else if (val != null && Double.valueOf(val) <= 0){
 						val = Constant.DEFENSE_ZERO_PRICE.toString();
 						logger.info("房型价格error,酒店需要审核:{}--{}--{}--{}", hotelid, roomtypeid, startdateday, enddateday);
 						Cat.logEvent("ZeroPrice", "hotelid: " +hotelid + " roomtypeid: " + roomtypeid);
 						System.out.println("房型价格error,酒店需要审核:{" + hotelid + "}--{" + roomtypeid + "}--{" + startdateday
 								+ "}--{" + enddateday + "}");
 					}
+
+
 
 
 					price = new BigDecimal(val);
