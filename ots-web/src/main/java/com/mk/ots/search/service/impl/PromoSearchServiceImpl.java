@@ -1484,6 +1484,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			 */
 			this.resortPromo(hotels);
 
+			rtnMap.put("supplementhotel", new ArrayList<Map<String, Object>>());
 			/**
 			 * add hotel supplement to be bottom
 			 */
@@ -1495,7 +1496,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Integer supplementcount = searchAround(rtnMap, reqentity, this.minItemCount - hotels.size());
 				rtnMap.put("supplementcount", supplementcount);
 			}
-
+			
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 			rtnMap.put("count", totalHits);
 			rtnMap.put("hotel", hotels);
