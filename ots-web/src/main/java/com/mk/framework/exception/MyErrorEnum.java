@@ -136,6 +136,8 @@ public enum MyErrorEnum {
 	couponNoError("-1009","很抱歉，今夜特价房不能使用优惠券"),
 	OrderTypeError("-1010","很抱歉，今夜特价房只能使用在线支付"),
 
+	alreadyEndPromo("-1011", "今夜特价活动已结束."),
+
 	// -----------------------------
 	customError("0000","");
 	;
