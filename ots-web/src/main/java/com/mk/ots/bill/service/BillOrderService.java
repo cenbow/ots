@@ -60,7 +60,7 @@ public class BillOrderService {
 		// 查询订单数据
 		List<Map> billOrderList = billOrderDAO.getBillOrderList(beginTime, endTime);
 		if (CollectionUtils.isEmpty(billOrderList)) {
-			logger.info(String.format("genBillOrdersV2 billOrderList is empty. params beginTime[%s],endTime[%s]",
+			logger.info(String.format("createBillReport billOrderList is empty. params beginTime[%s],endTime[%s]",
 					beginTime, endTime));
 			return;
 		}
@@ -69,11 +69,11 @@ public class BillOrderService {
 		List<BillRPPromoDetails> billRPPromoDetailsList = new ArrayList<>();
 		for (Map billOrderMap : billOrderList) {
 			listIndex++;
-			Integer orderId = (Integer) billOrderMap.get("orderId");
+			Long orderId = (Long) billOrderMap.get("orderId");
 			// 根据订单查询订单金额
-			Map financeOrder = billOrderDAO.getFinanceOrder(orderId != null ? orderId.longValue() : 0L);
+			Map financeOrder = billOrderDAO.getFinanceOrder(orderId);
 			if (financeOrder.isEmpty()) {
-				logger.info(String.format("genBillOrdersV2 financeOrder is empty. params orderId[%s]", orderId));
+				logger.info(String.format("createBillReport financeOrder is empty. params orderId[%s]", orderId));
 				continue;
 			}
 
@@ -149,33 +149,25 @@ public class BillOrderService {
 	private BillRPPromoDetails convertPromoDetails(Map<String, Object> billOrderMap, Map<String, Object> financeOrder) {
 		BillRPPromoDetails rpPromo = new BillRPPromoDetails();
 
-		rpPromo.setOrderId(((Integer) billOrderMap.get("orderId")) == null ? 0L
-				: ((Integer) billOrderMap.get("orderId")).longValue());
-		rpPromo.setHotelId(((Integer) billOrderMap.get("hotelId")) == null ? 0L
-				: ((Integer) billOrderMap.get("hotelId")).longValue());
+		rpPromo.setOrderId(getMapValueToLong(billOrderMap.get("orderId")));
+		rpPromo.setHotelId(getMapValueToLong(billOrderMap.get("orderId")));
 		rpPromo.setCheckinTime((Date) billOrderMap.get("checkinTime"));
 		rpPromo.setCheckoutTime((Date) billOrderMap.get("checkoutTime"));
 		rpPromo.setBeginTime((Date) billOrderMap.get("beginTime"));
 		rpPromo.setEndTime((Date) billOrderMap.get("endTime"));
 		rpPromo.setOrderTime((Date) billOrderMap.get("orderTime"));
-		rpPromo.setOrderType(((Integer) billOrderMap.get("orderType")) == null ? 0L
-				: ((Integer) billOrderMap.get("orderType")).longValue());
-		rpPromo.setPromoType(((Integer) billOrderMap.get("promoType")) == null ? 0L
-				: ((Integer) billOrderMap.get("promoType")).longValue());
-		rpPromo.setDayNumber(((Integer) billOrderMap.get("dayNumber")) == null ? 0L
-				: ((Integer) billOrderMap.get("dayNumber")).longValue());
+		rpPromo.setOrderType(getMapValueToLong(billOrderMap.get("orderType")));
+		rpPromo.setPromoType(getMapValueToLong(billOrderMap.get("promoType")));
+		rpPromo.setDayNumber(getMapValueToLong(billOrderMap.get("dayNumber")));
 		rpPromo.setRoomTypeName((String) billOrderMap.get("roomTypeName"));
-		rpPromo.setRoomTypeId(((Integer) billOrderMap.get("roomTypeId")) == null ? 0L
-				: ((Integer) billOrderMap.get("roomTypeId")).longValue());
+		rpPromo.setRoomTypeId(getMapValueToLong(billOrderMap.get("roomTypeId")));
 		rpPromo.setRoomNo((String) billOrderMap.get("roomNo"));
-		rpPromo.setRoomId(((Integer) billOrderMap.get("roomId")) == null ? 0L
-				: ((Integer) billOrderMap.get("roomId")).longValue());
-
-		rpPromo.setPayMethod("");
+		rpPromo.setRoomId(getMapValueToLong(billOrderMap.get("roomId")));
+		rpPromo.setPayMethod((String)billOrderMap.get("payMethod"));
 		rpPromo.setFinanceStatus(0L);
 		rpPromo.setOrderPrice(null);
 		rpPromo.setUserCost(null);
-		rpPromo.setAvailableMoney(null);
+
 
 		BigDecimal mikePrice = (BigDecimal) billOrderMap.get("price");
 		BigDecimal lezhuCoins = (BigDecimal) billOrderMap.get("lezhuCoins");
@@ -183,7 +175,7 @@ public class BillOrderService {
 		rpPromo.setMikePrice((BigDecimal) billOrderMap.get("price"));
 		rpPromo.setLezhuCoins((BigDecimal) billOrderMap.get("lezhuCoins"));
 		rpPromo.setOnlinePaied((BigDecimal) financeOrder.get("onlinePaied"));
-
+		rpPromo.setAvailableMoney((BigDecimal) financeOrder.get("availablemoney"));
 		BigDecimal aliPaied = new BigDecimal(0);
 		BigDecimal wechatPaied = new BigDecimal(0);
 		final Integer payType = (Integer) financeOrder.get("payType");
@@ -211,6 +203,13 @@ public class BillOrderService {
 		rpPromo.setAvailableMoney(availableMoney);
 
 		return rpPromo;
+	}
+
+	private Long getMapValueToLong(Object value){
+		if(value == null){
+			return 0L;
+		}
+		return (Long)value;
 	}
 
 	private BillSpecialDay convertBillSpecialDay(Date beginTime, Date endTime, Map billOrderMap, Map financeOrder) {

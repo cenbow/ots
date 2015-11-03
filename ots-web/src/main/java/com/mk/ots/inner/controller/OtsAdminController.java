@@ -182,9 +182,9 @@ public class OtsAdminController {
 	}
 
 	/**
-	 * 
-	 * @param citycode
-	 * @param typeid
+	 * 特价房间跑财务对账数据
+	 * @param startdateday
+	 * @param enddateday
 	 * @return
 	 */
 	@RequestMapping(value = "/report/launchPromo", method = RequestMethod.POST)
@@ -192,9 +192,8 @@ public class OtsAdminController {
 		Map<String, Object> datas = new HashMap<String, Object>();
 
 		try {
-			Date beginTime = defaultDateFormatter.parse(startdateday);
-			Date endTime = defaultDateFormatter.parse(enddateday);
-
+			Date beginTime = DateUtils.getDateFromString(startdateday, DateUtils.FORMAT_DATE);
+			Date endTime = DateUtils.getDateFromString(enddateday, DateUtils.FORMAT_DATE);
 			billService.createBillReport(beginTime, endTime);
 		} catch (Exception ex) {
 			logger.error("failed to createBillReport", ex);
