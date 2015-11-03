@@ -32,10 +32,10 @@ public class BillOrderService {
 	private BillOrderDAO billOrderDAO;
 	@Autowired
 	private BillSpecialDayMapper billSpecialDayMapper;
-	
+
 	@Autowired
 	private BRPPromoDetailsMapper billPromoDetailsMapper;
-	
+
 	@Autowired
 	private RoomSaleMapper roomSaleMapper;
 
@@ -69,14 +69,14 @@ public class BillOrderService {
 		List<BillRPPromoDetails> billRPPromoDetailsList = new ArrayList<>();
 		for (Map billOrderMap : billOrderList) {
 			listIndex++;
-			Long orderId = (Long) billOrderMap.get("orderId");
+			Integer orderId = (Integer) billOrderMap.get("orderId");
 			// 根据订单查询订单金额
-			Map financeOrder = billOrderDAO.getFinanceOrder(orderId);
+			Map financeOrder = billOrderDAO.getFinanceOrder(orderId != null ? orderId.longValue() : 0L);
 			if (financeOrder.isEmpty()) {
 				logger.info(String.format("genBillOrdersV2 financeOrder is empty. params orderId[%s]", orderId));
 				continue;
 			}
-			
+
 			// 判断在b_bill_special_day中是否存在
 			try {
 				@SuppressWarnings("unchecked")
@@ -86,20 +86,19 @@ public class BillOrderService {
 				logger.warn("failed to convertPromoDetails...", e);
 				continue;
 			}
-			
+
 			// 将数据insert到b_bill_special_day
 			if (listIndex % batchSize == 0 || billOrderList.size() == listIndex) {
 				Map<String, Object> params = new HashMap<>();
-				params.put("billSpecialDayList", billRPPromoDetailsList);
-				
+				params.put("billRPPromoDetailsList", billRPPromoDetailsList);
+
 				billPromoDetailsMapper.insertBillRPPromoDetailsBatch(params);
-				logger.info(
-						String.format("createBillReport createBillReport. params listIndex[%s]", listIndex));
+				logger.info(String.format("createBillReport createBillReport. params listIndex[%s]", listIndex));
 				billRPPromoDetailsList.clear();
 			}
 		}
 	}
-	
+
 	/**
 	 * 特价账单-每天跑
 	 * 
@@ -150,20 +149,27 @@ public class BillOrderService {
 	private BillRPPromoDetails convertPromoDetails(Map<String, Object> billOrderMap, Map<String, Object> financeOrder) {
 		BillRPPromoDetails rpPromo = new BillRPPromoDetails();
 
-		rpPromo.setOrderId((Long) billOrderMap.get("orderId"));
-		rpPromo.setHotelId((Long) billOrderMap.get("hotelId"));
+		rpPromo.setOrderId(((Integer) billOrderMap.get("orderId")) == null ? 0L
+				: ((Integer) billOrderMap.get("orderId")).longValue());
+		rpPromo.setHotelId(((Integer) billOrderMap.get("hotelId")) == null ? 0L
+				: ((Integer) billOrderMap.get("hotelId")).longValue());
 		rpPromo.setCheckinTime((Date) billOrderMap.get("checkinTime"));
 		rpPromo.setCheckoutTime((Date) billOrderMap.get("checkoutTime"));
 		rpPromo.setBeginTime((Date) billOrderMap.get("beginTime"));
 		rpPromo.setEndTime((Date) billOrderMap.get("endTime"));
 		rpPromo.setOrderTime((Date) billOrderMap.get("orderTime"));
-		rpPromo.setOrderType((Long) billOrderMap.get("orderType"));
-		rpPromo.setPromoType((Long) billOrderMap.get("promoType"));
-		rpPromo.setDayNumber((Long) billOrderMap.get("dayNumber"));
+		rpPromo.setOrderType(((Integer) billOrderMap.get("orderType")) == null ? 0L
+				: ((Integer) billOrderMap.get("orderType")).longValue());
+		rpPromo.setPromoType(((Integer) billOrderMap.get("promoType")) == null ? 0L
+				: ((Integer) billOrderMap.get("promoType")).longValue());
+		rpPromo.setDayNumber(((Integer) billOrderMap.get("dayNumber")) == null ? 0L
+				: ((Integer) billOrderMap.get("dayNumber")).longValue());
 		rpPromo.setRoomTypeName((String) billOrderMap.get("roomTypeName"));
-		rpPromo.setRoomTypeId((Long) billOrderMap.get("roomTypeId"));
+		rpPromo.setRoomTypeId(((Integer) billOrderMap.get("roomTypeId")) == null ? 0L
+				: ((Integer) billOrderMap.get("roomTypeId")).longValue());
 		rpPromo.setRoomNo((String) billOrderMap.get("roomNo"));
-		rpPromo.setRoomId((Long) billOrderMap.get("roomId"));
+		rpPromo.setRoomId(((Integer) billOrderMap.get("roomId")) == null ? 0L
+				: ((Integer) billOrderMap.get("roomId")).longValue());
 
 		rpPromo.setPayMethod("");
 		rpPromo.setFinanceStatus(0L);
