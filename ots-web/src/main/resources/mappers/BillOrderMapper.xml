@@ -2,20 +2,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.mk.ots.mapper.BillOrderMapper" >
   <select id="findBillOrder" parameterType="java.util.Map" resultType="map">
-    SELECT
+ 	SELECT
     o.id AS orderId,
-    o.HotelId AS hotelId,
+    o.HotelId AS hotelId,    
     o.Hotelname AS hotelName,
     o.Ordertype AS orderType,
-    o.daynumber AS dayNumber,
     o.Price AS price,
     o.TotalPrice AS totalPrice,
     o.cityCode AS cityCode,
     c.CityName AS cityName,
     o.Createtime AS orderTime,
+		o.promoType AS promoType,
+    o.daynumber AS dayNumber,
     oo.RoomTypeName AS roomTypeName,
     oo.RoomTypeId AS roomTypeId,
     oo.RoomNo AS roomNo,
+		oo.RoomId AS roomId,
+		po.begintime AS beginTime,
+		po.endtime AS endTime,
     po.checkintime AS checkinTime,
     po.checkouttime AS checkoutTime,
     pl.callbackFrom AS payMethod,

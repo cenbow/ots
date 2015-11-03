@@ -74,225 +74,40 @@
     values
     <foreach collection="billRPPromoDetailsList" item="item" index="index" separator=",">
     (
-      #{detail.id},
-      #{detail.hotelId},
-      #{detail.billId},
-      #{detail.orderId},
-      #{detail.orderId},
-      
+      #{item.id},
       #{item.hotelId},
+      #{item.billId},
+      #{item.orderId},
+      #{item.checkinTime},
+      #{item.checkoutTime},
       #{item.beginTime},
       #{item.endTime},
-      #{item.orderId},
-      #{item.onlinePaied},
-      #{item.aliPaied},
-      #{item.wechatPaied},
-      #{item.billCost},
-      #{item.changeCost},
-      #{item.finalCost},
-      #{item.income},
-      #{item.createTime},
+      #{item.orderTime},
+      #{item.orderType},
+      #{item.promoType},
+      #{item.dayNumber},
+      #{item.roomTypeName},
+      #{item.roomTypeId},
+      #{item.roomNo},
+      #{item.roomId},
+      #{item.payMethod},
       #{item.financeStatus},
-      #{item.availableMoney}
+      #{item.orderprice},
+	  #{item.availableMoney},
+	  #{item.mikePrice},
+	  #{item.lezhuCoins},
+	  #{item.onlinePaied},
+	  #{item.aliPaied},
+	  #{item.wechatPaied},
+	  #{item.billCost},
+	  #{item.changeCost},
+	  #{item.finalCost},
+	  #{item.income},
+	  #{item.createTime}
     )
     </foreach>
   </insert>
 
-  <update id="updateBillSpecialDay" parameterType="com.mk.ots.bill.model.BillSpecialDay">
-    update b_bill_special_day
-    <set>
-      <if test="id != null" >
-        and id = #{id},
-      </if>
-      <if test="promoType != null" >
-        and promoType = #{promoType},
-      </if>
-      <if test="hotelId != null" >
-        and hotelId = #{hotelId},
-      </if>
-      <if test="beginTime != null" >
-        and beginTime = #{beginTime},
-      </if>
-      <if test="endTime != null" >
-        and endTime = #{endTime},
-      </if>
-      <if test="orderId != null" >
-        and orderId = #{orderId},
-      </if>
-      <if test="onlinePaied != null" >
-        and onlinePaied = #{onlinePaied},
-      </if>
-      <if test="aliPaied != null" >
-        and aliPaied = #{aliPaied},
-      </if>
-      <if test="wechatPaied != null" >
-        and wechatPaied = #{wechatPaied},
-      </if>
-      <if test="billCost != null" >
-        and billCost = #{billCost},
-      </if>
-      <if test="changeCost != null" >
-        and changeCost = #{changeCost},
-      </if>
-      <if test="finalCost != null" >
-        and finalCost = #{finalCost},
-      </if>
-      <if test="income != null" >
-        and income = #{income},
-      </if>
-      <if test="createTime != null" >
-        and createTime = #{createTime},
-      </if>
-      <if test="financeStatus != null" >
-        and financeStatus = #{financeStatus},
-      </if>
-      <if test="availableMoney != null" >
-        and availableMoney = #{availableMoney},
-      </if>
-    </set>
-    where 1=1
-    <if test="id != null" >
-      and id = #{id}
-    </if>
-    <if test="promoType != null" >
-      and promoType = #{promoType}
-    </if>
-    <if test="hotelId != null" >
-      and hotelId = #{hotelId}
-    </if>
-    <if test="beginTime != null" >
-      and beginTime = #{beginTime}
-    </if>
-    <if test="endTime != null" >
-      and endTime = #{endTime}
-    </if>
-    <if test="orderId != null" >
-      and orderId = #{orderId}
-    </if>
-    <if test="onlinePaied != null" >
-      and onlinePaied = #{onlinePaied}
-    </if>
-    <if test="aliPaied != null" >
-      and aliPaied = #{aliPaied}
-    </if>
-    <if test="wechatPaied != null" >
-      and wechatPaied = #{wechatPaied}
-    </if>
-    <if test="billCost != null" >
-      and billCost = #{billCost}
-    </if>
-    <if test="changeCost != null" >
-      and changeCost = #{changeCost}
-    </if>
-    <if test="finalCost != null" >
-      and finalCost = #{finalCost}
-    </if>
-    <if test="income != null" >
-      and income = #{income}
-    </if>
-    <if test="createTime != null" >
-      and createTime = #{createTime}
-    </if>
-    <if test="financeStatus != null" >
-      and financeStatus = #{financeStatus}
-    </if>
-    <if test="availableMoney != null" >
-      and availableMoney = #{availableMoney}
-    </if>
-  </update>
-
-  <select id="findBillSpecialDayById" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    select
-      id,
-      promoType,
-      hotelId,
-      beginTime,
-      endTime,
-      orderId,
-      onlinePaied,
-      aliPaied,
-      wechatPaied,
-      billCost,
-      changeCost,
-      finalCost,
-      income,
-      createTime,
-      financeStatus,
-      availableMoney
-      from b_bill_special_day t
-      where t.id = #{id}
-  </select>
-
-
-  <select id="findBillSpecialDayByParams" parameterType="com.mk.ots.bill.model.BillSpecialDay" resultMap="BaseResultMap">
-    select
-      id,
-      promoType,
-      hotelId,
-      beginTime,
-      endTime,
-      orderId,
-      onlinePaied,
-      aliPaied,
-      wechatPaied,
-      billCost,
-      changeCost,
-      finalCost,
-      income,
-      createTime,
-      financeStatus,
-      availableMoney
-      from b_bill_special_day t
-      where 1=1
-    <if test="id != null" >
-      and id = #{id}
-    </if>
-    <if test="promoType != null" >
-      and promoType = #{promoType}
-    </if>
-    <if test="hotelId != null" >
-      and hotelId = #{hotelId}
-    </if>
-    <if test="beginTime != null" >
-      and beginTime = #{beginTime}
-    </if>
-    <if test="endTime != null" >
-      and endTime = #{endTime}
-    </if>
-    <if test="orderId != null" >
-      and orderId = #{orderId}
-    </if>
-    <if test="onlinePaied != null" >
-      and onlinePaied = #{onlinePaied}
-    </if>
-    <if test="aliPaied != null" >
-      and aliPaied = #{aliPaied}
-    </if>
-    <if test="wechatPaied != null" >
-      and wechatPaied = #{wechatPaied}
-    </if>
-    <if test="billCost != null" >
-      and billCost = #{billCost}
-    </if>
-    <if test="changeCost != null" >
-      and changeCost = #{changeCost}
-    </if>
-    <if test="finalCost != null" >
-      and finalCost = #{finalCost}
-    </if>
-    <if test="income != null" >
-      and income = #{income}
-    </if>
-    <if test="createTime != null" >
-      and createTime = #{createTime}
-    </if>
-    <if test="financeStatus != null" >
-      and financeStatus = #{financeStatus}
-    </if>
-    <if test="availableMoney != null" >
-      and availableMoney = #{availableMoney}
-    </if>
-  </select>
 
 
 </mapper>
