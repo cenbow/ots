@@ -88,7 +88,7 @@
     where id = #{id,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="com.mk.ots.bill.model.BillSpecialDetail" >
-    insert into b_bill_special_detail (id, billId, orderId, 
+    insert into b_bill_special_detail (billId, orderId, 
       hotelId, checkinTime, checkoutTime, 
       beginTime, endTime, orderTime, 
       dayNumber, mikePrice, discount, 
@@ -96,7 +96,7 @@
       roomTypeName, roomNo, payMethod, 
       userCost, availableMoney, createTime
       )
-    values (#{id,jdbcType=BIGINT}, #{billid,jdbcType=BIGINT}, #{orderid,jdbcType=BIGINT}, 
+    values (#{billid,jdbcType=BIGINT}, #{orderid,jdbcType=BIGINT}, 
       #{hotelid,jdbcType=BIGINT}, #{checkintime,jdbcType=TIMESTAMP}, #{checkouttime,jdbcType=TIMESTAMP}, 
       #{begintime,jdbcType=TIMESTAMP}, #{endtime,jdbcType=TIMESTAMP}, #{ordertime,jdbcType=TIMESTAMP}, 
       #{daynumber,jdbcType=INTEGER}, #{mikeprice,jdbcType=DECIMAL}, #{discount,jdbcType=DECIMAL}, 
