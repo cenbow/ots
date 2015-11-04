@@ -362,7 +362,7 @@
   </update>
   <update id="updateBillSpecial" parameterType="java.util.Map">
     update b_bill_special inner join
-    (selects
+    (select
     hotelid,
     max(hotel.hotelname) hotelname,
     max(hotel.citycode) citycode,
