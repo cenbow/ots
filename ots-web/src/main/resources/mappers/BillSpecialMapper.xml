@@ -107,7 +107,7 @@
       #{availablemoney,jdbcType=DECIMAL}, #{isfreeze,jdbcType=VARCHAR})
   </insert>
 
-  <insert id="insertHotelId" parameterType="com.mk.ots.bill.model.BillSpecial" >
+  <insert id="insertHotelId"  useGeneratedKeys="true" keyProperty="id" parameterType="com.mk.ots.bill.model.BillSpecial">
     insert into b_bill_special (id,hotelId)
     values (#{id,jdbcType=BIGINT},#{hotelid,jdbcType=BIGINT})
   </insert>
@@ -364,20 +364,22 @@
     update b_bill_special inner join
     (select
     hotelid,
+    max(city.CityName) cityName,
     max(hotel.hotelname) hotelname,
     max(hotel.citycode) citycode,
     min(beginTime) beginTime,
     min(endTime) endTime,
     SUM(detail.orderid) orderNum,
     sum(userCost) onlinePaid,
-    sum(case when payMethod = 'WeChat_Callback' or payMethod = 'Ali_Callback' then 0 else userCost end) wechatPaid,
-    sum(case when payMethod = 'Ali_Callback' then 0 else userCost end) aliPaid,
+    sum(case when payMethod = 'Ali_Callback' then 0 else userCost end) wechatPaid,
+    sum(case when payMethod = 'WeChat_Callback' then 0 else userCost end) aliPaid,
     sum(mikePrice) billCost,
-    sum(mikePrice) changeCorrectCost,
+    0 changeCorrectCost,
     sum(lezhuCoins) finalCost,
-    sum(mikePrice)- sum(lezhuCoins) income,
+    sum(userCost)- sum(lezhuCoins) income,
     sum(availableMoney) availableMoney
     from b_bill_special_detail detail join t_hotel hotel on detail.hotelid = hotel.id
+    join t_city city on city.code = hotel.citycode
     where hotelid = #{hotelId}
     AND orderUpdateTime >= #{beginTime}
     <![CDATA[ AND orderUpdateTime < #{endTime} ]]>    
@@ -395,9 +397,12 @@
     b_bill_special.endTime = detailx.endTime,
     b_bill_special.hotelname = detailx.hotelname,
     b_bill_special.citycode = detailx.citycode,
+    b_bill_special.cityName = detailx.cityName,
     b_bill_special.financestatus = 1,
     b_bill_special.isFreeze = 'N',
     b_bill_special.checkstatus = '0',
-    b_bill_special.billtime = #{billTime}
+    b_bill_special.billtime = #{billTime},
+    b_bill_special.promotype = '1',
+    b_bill_special.createTime = NOW()
   </update>
 </mapper>

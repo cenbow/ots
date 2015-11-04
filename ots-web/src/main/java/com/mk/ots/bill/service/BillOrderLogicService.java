@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.mk.ots.common.enums.PayCallbackEnum;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,6 +126,11 @@ public class BillOrderLogicService {
 				billSpecialDetailsList.clear();
 			}
 		}
+		if (CollectionUtils.isNotEmpty(billSpecialDetailsList)) {
+			Map<String, Object> params = new HashMap<>();
+			params.put("billSpecialDetailsList", billSpecialDetailsList);
+			billSpecialDetailMapper.insertBatch(params);
+		}
 	}
 
 	/**
@@ -182,7 +188,7 @@ public class BillOrderLogicService {
 		BillSpecialDetail specialDetail = new BillSpecialDetail();
 		specialDetail.setBillid(billId);
 		specialDetail.setOrderid(getMapValueToLong(billOrderMap.get("orderId")));
-		specialDetail.setHotelid(getMapValueToLong(billOrderMap.get("orderId")));
+		specialDetail.setHotelid(hotelId);
 		specialDetail.setCheckintime((Date) billOrderMap.get("checkinTime"));
 		specialDetail.setCheckouttime((Date) billOrderMap.get("checkoutTime"));
 		specialDetail.setBegintime((Date) billOrderMap.get("beginTime"));
@@ -210,7 +216,15 @@ public class BillOrderLogicService {
 		specialDetail.setOrdertype(getMapValueToInteger(billOrderMap.get("orderType")));
 		specialDetail.setRoomtypename((String) billOrderMap.get("roomTypeName"));
 		specialDetail.setRoomno((String) billOrderMap.get("roomNo"));
-		specialDetail.setPaymethod((String) billOrderMap.get("payMethod"));
+
+		Integer payType = (Integer) financeOrder.get("payType");
+		String payMethod = "";
+		if (PPayInfoOtherTypeEnum.alipay.getId() == payType) {
+			payMethod = PayCallbackEnum.Ali_Callback.name();
+		} else {
+			payMethod = PayCallbackEnum.WeChat_Callback.name();
+		}
+		specialDetail.setPaymethod(payMethod);
 		specialDetail.setUsercost(getMapValueToBigDecimal(financeOrder.get("usercost")));
 		specialDetail.setAvailablemoney(getMapValueToBigDecimal(financeOrder.get("availablemoney")));
 		specialDetail.setOrderupdatetime((Date) billOrderMap.get("orderUpdateTime"));
