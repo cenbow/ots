@@ -97,7 +97,13 @@ public class BillOrderLogicService {
 			if (listIndex % batchSize == 0 || billOrderList.size() == listIndex) {
 				Map<String, Object> params = new HashMap<>();
 				params.put("billSpecialDetailsList", billSpecialDetailsList);
-				billSpecialDetailMapper.insertBatch(params);
+				try {
+					billSpecialDetailMapper.insertBatch(params);
+				} catch (Exception ex) {
+					logger.warn("failed to insertBatch...", ex);
+					continue;
+				}
+
 				logger.info(String.format("createBillReportByHotelId createBillReportByHotelId. params listIndex[%s]",
 						listIndex));
 				billSpecialDetailsList.clear();
