@@ -43,6 +43,7 @@ public class BillOrderService {
 		List<Long> hotelIdList = billOrderDAO.findBillOrderHotelId(beginTime, endTime);
 		if(CollectionUtils.isEmpty(hotelIdList)){
 			logger.info("createBillReport hotelIdList is empty");
+			return;
 		}
 		logger.info(String.format("createBillReport hotelIdList size is [%s]" , hotelIdList.size()+""));
 		for(Long hotelId : hotelIdList){
