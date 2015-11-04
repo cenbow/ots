@@ -104,6 +104,13 @@
         WHERE id = #{id}
     </select>
 
+    <select id="getConfigInfo" resultMap="roomSaleConfig" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfig">
+        SELECT
+        id,saleTypeId,startDate,endDate,startTime,endTime
+        FROM  t_room_sale_config_info
+        <include refid="Base_Query_List"/>
+    </select>
+
     <insert id="saveRoomSaleConfig"  parameterType="map"
             useGeneratedKeys="true" keyProperty="id" >
         INSERT INTO t_room_sale_config

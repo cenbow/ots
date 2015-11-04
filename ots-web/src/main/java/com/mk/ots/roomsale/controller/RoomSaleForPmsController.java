@@ -28,7 +28,7 @@ public class RoomSaleForPmsController {
 	 public ResponseEntity<Map<String, Object>> getHotelRoomSale(TRoomSaleConfigForPms bean) {
 		TRoomSaleForPms roomSaleForPms=roomSaleForPmsService.getHotelRoomSale(bean);
 		Map<String, Object> rtnMap = Maps.newHashMap();
-		if(roomSaleForPms!=null&&roomSaleForPms.getType()!=null){
+		if(roomSaleForPms!=null&&roomSaleForPms.getInfo()!=null){
 			rtnMap.put("isOpen", "T");
 		}else{
 			rtnMap.put("isOpen", "F");

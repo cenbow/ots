@@ -16,5 +16,6 @@ public interface RoomSaleForPmsMapper {
     public List<TRoomSalePms> getRoomSalePms();
     public List<TRoomSaleConfig> getRoomSaleByPmsHotel(String pmsHotelId);
     public TRoomSaleConfig getConfigInfoById(Integer id);
+    public List<TRoomSaleConfig> getConfigInfo(TRoomSaleConfig bean);
 
 }

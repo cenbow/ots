@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Time;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * RoomSaleMapper.
@@ -68,7 +65,6 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 		if (bean.getHotelId()==null){
 			return null;
 		}
-
 		List<TRoomSalePms> roomSalePmsList= roomSaleForPmsMapper.getRoomSalePms();
 		String confShow ="";
 		String showBegin="";
@@ -88,27 +84,32 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 		roomSaleForPms.setShowBegin(showBegin);
 		roomSaleForPms.setShowContinue(showContinue);
 		roomSaleForPms.setNoConfShow(noConfShow);
-		List<TRoomSaleConfig> roomSaleConfigList=roomSaleForPmsMapper.getRoomSaleByPmsHotel(bean.getHotelId());
-		if(CollectionUtils.isEmpty(roomSaleConfigList)){
+		TRoomSaleConfig saleConfigInfoBean=new TRoomSaleConfig();
+		saleConfigInfoBean.setValid("T");
+		saleConfigInfoBean.setSaleTypeId(1);
+		List<TRoomSaleConfig> roomSaleConfigInfoList=roomSaleForPmsMapper.getConfigInfo(saleConfigInfoBean);
+		if (CollectionUtils.isEmpty(roomSaleConfigInfoList)){
 			return roomSaleForPms;
 		}
+		TRoomSaleConfig roomSaleConfigInfo=roomSaleConfigInfoList.get(0);
+		roomSaleForPms.setType(Integer.valueOf(roomSaleConfigInfo.getSaleTypeId()));
+		roomSaleForPms.setBegin(DateTools.dateToString(roomSaleConfigInfo.getStartTime(), "HH:mm"));
+		Long continues = getBetweenTime(roomSaleConfigInfo.getStartTime(), roomSaleConfigInfo.getEndTime());
+		roomSaleForPms.setContinues(continues);
+		List<TRoomSaleConfig> roomSaleConfigList=roomSaleForPmsMapper.getRoomSaleByPmsHotel(bean.getHotelId());
 		List<TRoomTypeForPms> roomTypeForPmsList=new ArrayList<>();
-
-		int i=0;
+		Map<String,TRoomTypeForPms> roomTypeForPmsMap=new HashMap<String,TRoomTypeForPms>();
 		for (TRoomSaleConfig roomSaleConfig:roomSaleConfigList){
-			if (i==0) {
-				roomSaleForPms.setType(Integer.valueOf(roomSaleConfig.getSaleType()));
-				roomSaleForPms.setBegin(DateTools.dateToString(roomSaleConfig.getStartTime(), "HH:mm"));
-				Long continues = getBetweenTime(roomSaleConfig.getStartTime(), roomSaleConfig.getEndTime());
-				roomSaleForPms.setContinues(continues);
-				i++;
+			TRoomSaleConfig roomType = roomSaleForPmsMapper.getRoomTypeById(roomSaleConfig.getRoomTypeId());
+			if (roomTypeForPmsMap.get(roomType.getPms())==null) {
+				TRoomTypeForPms roomTypeForPms = new TRoomTypeForPms();
+				roomTypeForPms.setRoomTypeId(roomType.getPms());
+				roomTypeForPms.setCurrCount(roomSaleConfig.getNum());
+				roomTypeForPms.setMinCount(roomSaleConfig.getDealCount());
+				roomTypeForPmsList.add(roomTypeForPms);
+			}else {
+
 			}
-			TRoomSaleConfig roomType=roomSaleForPmsMapper.getRoomTypeById(roomSaleConfig.getRoomTypeId());
-			TRoomTypeForPms roomTypeForPms=new TRoomTypeForPms();
-			roomTypeForPms.setRoomTypeId(roomType.getPms());
-			roomTypeForPms.setCurrCount(roomSaleConfig.getNum());
-			roomTypeForPms.setMinCount(roomSaleConfig.getDealCount());
-			roomTypeForPmsList.add(roomTypeForPms);
 		}
 		roomSaleForPms.setInfo(roomTypeForPmsList);
 		return roomSaleForPms;
