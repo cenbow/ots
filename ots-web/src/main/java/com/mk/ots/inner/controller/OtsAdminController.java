@@ -191,8 +191,8 @@ public class OtsAdminController {
 	public ResponseEntity<Map<String, Object>> launchBillRPPromotions(String startdateday, String enddateday) {
 		Map<String, Object> datas = new HashMap<String, Object>();
 		try {
-			Date beginTime = DateUtils.getDateFromString(startdateday, DateUtils.FORMAT_DATE);
-			Date endTime = DateUtils.getDateFromString(enddateday, DateUtils.FORMAT_DATE);
+			Date beginTime = DateUtils.getDateFromString(startdateday, DateUtils.FORMATSHORTDATETIME);
+			Date endTime = DateUtils.getDateFromString(enddateday, DateUtils.FORMATSHORTDATETIME);
 			billService.createBillReport(beginTime, endTime);
 		} catch (Exception ex) {
 			logger.error("failed to createBillReportByHotelId", ex);
