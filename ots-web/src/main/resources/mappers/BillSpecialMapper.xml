@@ -360,9 +360,9 @@
       isFreeze = #{isfreeze,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateBillSpecial">
+  <update id="updateBillSpecial" parameterType="java.util.Map">
     update b_bill_special inner join
-    (select
+    (selects
     hotelid,
     max(hotel.hotelname) hotelname,
     max(hotel.citycode) citycode,
@@ -380,7 +380,7 @@
     from b_bill_special_detail detail join t_hotel hotel on detail.hotelid = hotel.id
     where hotelid = #{hotelId}
     AND orderUpdateTime >= #{beginTime}
-    <![CDATA[ AND orderUpdateTime < #{endTime} ]]>
+    <![CDATA[ AND orderUpdateTime < #{endTime} ]]>    
     GROUP BY detail.hotelid) detailx on b_bill_special.hotelid = detailx.hotelid
     set b_bill_special.ordernum = detailx.ordernum,
     b_bill_special.onlinePaid = detailx.onlinePaid,

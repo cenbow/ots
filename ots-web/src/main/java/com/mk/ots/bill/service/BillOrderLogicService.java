@@ -1,5 +1,19 @@
 package com.mk.ots.bill.service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.mk.ots.bill.dao.BillOrderDAO;
 import com.mk.ots.bill.model.BillSpecial;
 import com.mk.ots.bill.model.BillSpecialDay;
@@ -13,15 +27,6 @@ import com.mk.ots.mapper.BillSpecialDetailMapper;
 import com.mk.ots.mapper.BillSpecialMapper;
 import com.mk.ots.mapper.RoomSaleMapper;
 import com.mk.ots.roomsale.model.TRoomSale;
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.*;
 
 /**
  * Created by Thinkpad on 2015/11/3.
@@ -40,7 +45,6 @@ public class BillOrderLogicService {
 	@Autowired
 	private RoomSaleMapper roomSaleMapper;
 
-	@Transactional
 	public void createBillReportByHotelId(Long hotelId, Date beginTime, Date endTime) throws HmsException {
 		logger.info(String.format("createBillReportByHotelId by hotelId[%s]", hotelId));
 		int billSpecialId = insertHotelId(hotelId);
@@ -59,9 +63,21 @@ public class BillOrderLogicService {
 			throw new HmsException(-1, ex);
 		}
 
+		logger.info("about to updateBillSpecial with hotelid {}", hotelId);
+
 		// 执行update b_bill_special
 		String billTime = DateUtils.formatDateTime(beginTime, DateUtils.FORMATSHORTDATETIME);
-		billSpecialMapper.updateBillSpecial(hotelId, beginTime, endTime, billTime);
+		try {
+			Map<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put("hotelId", hotelId);
+			parameters.put("beginTime", beginTime);
+			parameters.put("endTime", endTime);
+			parameters.put("billTime", billTime);
+			
+			billSpecialMapper.updateBillSpecial(parameters);
+		} catch (Exception ex) {
+			throw new HmsException(-1, ex);
+		}
 	}
 
 	public int insertHotelId(Long hotelId) {
@@ -108,18 +124,6 @@ public class BillOrderLogicService {
 						listIndex));
 				billSpecialDetailsList.clear();
 			}
-		}
-		Map<String, Object> params = new HashMap<>();
-		params.put("billSpecialDetailsList", billSpecialDetailsList);
-
-		if (billSpecialDetailsList != null && billSpecialDetailsList.size() < 1) {
-			throw new Exception("no bill special details to insert");
-		}
-
-		try {
-			billSpecialDetailMapper.insertBatch(params);
-		} catch (Exception ex) {
-			throw new Exception("failed to billSpecialDetailMapper.insertBatch", ex);
 		}
 	}
 

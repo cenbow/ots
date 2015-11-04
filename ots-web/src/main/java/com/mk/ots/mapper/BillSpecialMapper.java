@@ -28,5 +28,5 @@ public interface BillSpecialMapper {
 
     int updateByPrimaryKey(BillSpecial record);
 
-    int updateBillSpecial(Long hotelId ,Date beginTime, Date endTime, String billTime);
+    int updateBillSpecial(Map<String, Object> parameters);
 }
