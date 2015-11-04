@@ -49,8 +49,8 @@ public class BillOrderService {
 			try {
 				billOrderLogicService.createBillReportByHotelId(hotelId, beginTime, endTime);
 			} catch (HmsException e) {
-				e.printStackTrace();
 				logger.error("createBillReportByHotelId error", e);
+				continue;
 			}
 		}
 

@@ -52,7 +52,13 @@ public class BillOrderLogicService {
 					hotelId, beginTime, endTime));
 			return;
 		}
-		createBillSpecialDetailList(billOrderList, billSpecialId);
+
+		try {
+			createBillSpecialDetailList(billOrderList, billSpecialId);
+		} catch (Exception ex) {
+			throw new HmsException(-1, ex);
+		}
+
 		// 执行update b_bill_special
 		String billTime = DateUtils.formatDateTime(beginTime, DateUtils.FORMATSHORTDATETIME);
 		billSpecialMapper.updateBillSpecial(hotelId, beginTime, endTime, billTime);
@@ -64,7 +70,7 @@ public class BillOrderLogicService {
 		return billSpecialMapper.insertHotelId(record);
 	}
 
-	private void createBillSpecialDetailList(List<Map> billOrderList, int billSpecialId) {
+	private void createBillSpecialDetailList(List<Map> billOrderList, int billSpecialId) throws Exception {
 		int batchSize = 50;
 		int listIndex = 0;
 		List<BillSpecialDetail> billSpecialDetailsList = new ArrayList<>();
@@ -99,12 +105,15 @@ public class BillOrderLogicService {
 		}
 		Map<String, Object> params = new HashMap<>();
 		params.put("billSpecialDetailsList", billSpecialDetailsList);
+
+		if (billSpecialDetailsList != null && billSpecialDetailsList.size() < 1) {
+			throw new Exception("no bill special details to insert");
+		}
+
 		try {
-			if (billSpecialDetailsList != null && billSpecialDetailsList.size() > 0) {
-				billSpecialDetailMapper.insertBatch(params);
-			}
+			billSpecialDetailMapper.insertBatch(params);
 		} catch (Exception ex) {
-			logger.error("failed to billSpecialDetailMapper.insertBatch", ex);
+			throw new Exception("failed to billSpecialDetailMapper.insertBatch", ex);
 		}
 	}
 
