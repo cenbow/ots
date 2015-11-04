@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.BillOrderMapper" >
+  <select id="findBillOrder" parameterType="java.util.Map" resultType="map">
+ 	SELECT
+    o.id AS orderId,
+    o.HotelId AS hotelId,    
+    o.Hotelname AS hotelName,
+    o.Ordertype AS orderType,
+    o.Price AS price,
+    o.TotalPrice AS totalPrice,
+    o.cityCode AS cityCode,
+    c.CityName AS cityName,
+    o.Createtime AS orderTime,
+    o.updatetime AS orderUpdateTime,
+    o.promoType AS promoType,
+    o.daynumber AS dayNumber,
+    oo.RoomTypeName AS roomTypeName,
+    oo.RoomTypeId AS roomTypeId,
+    oo.RoomNo AS roomNo,
+    oo.RoomId AS roomId,
+    po.begintime AS beginTime,
+    po.endtime AS endTime,
+    po.checkintime AS checkinTime,
+    po.checkouttime AS checkoutTime,
+    p.lezhu AS lezhuCoins
+    FROM
+    b_otaorder o
+    INNER JOIN b_otaroomorder oo ON oo.OtaOrderId = o.id
+    INNER JOIN b_pmsroomorder po ON po.Hotelid = oo.Hotelid AND po.PmsRoomOrderNo = oo.PMSRoomOrderNo
+    LEFT JOIN t_city c ON o.cityCode = c.code
+    LEFT JOIN p_pay p ON p.orderid = o.id
+    LEFT JOIN t_hotel_bank tb ON tb.hotelId = o.HotelId
+    WHERE
+    o.promoType = 1
+    AND o.orderStatus IN (180, 190, 200)
+    AND o.updatetime >= #{beginTime}
+    AND o.hotelId = #{hotelId}
+    <![CDATA[ AND o.updatetime < #{endTime} ]]>
+    AND NOT EXISTS (select 1 from b_bill_special_detail detail where detail.orderid = o.id)
+  </select>
+
+
+  <select id="findBillOrderHotelId" parameterType="java.util.Map" resultType="java.lang.Long">
+    SELECT
+    o.hotelid
+    FROM
+    b_otaorder o
+    INNER JOIN b_otaroomorder oo ON oo.OtaOrderId = o.id
+    WHERE
+    o.promoType = 1
+    AND o.orderStatus IN (180, 190, 200)
+    AND o.updatetime >= #{beginTime}
+    <![CDATA[ AND o.updatetime < #{endTime} ]]>
+    AND NOT EXISTS (select 1 from b_bill_special_detail detail where detail.orderid = o.id)
+    GROUP by o.hotelid
+  </select>
+
+
+  <select id="findFinanceOrder" parameterType="java.util.Map" resultType="map">
+    SELECT
+    o.id AS orderid,
+    ol.payid AS payid,
+    ol.realallcost AS allcost,
+    ol.hotelgive AS hotelgive,
+    ol.otagive AS otagive,
+    (
+    CASE
+    WHEN o.ordertype = 1
+    AND o.paystatus = 120 THEN
+    ol.realcost
+    WHEN o.ordertype = 2 THEN
+    0
+    ELSE
+    0
+    END
+    ) AS usercost,
+    ol.realcost AS realcost,
+    ol.realotagive AS realotagive,
+    ol.qiekeIncome AS qiekeIncome,
+    o.availablemoney AS availablemoney,
+    pinfo.type AS payType,
+    pinfo.cost AS onlinePaied
+    FROM
+    b_otaorder o
+    LEFT JOIN p_pay p ON o.id = p.orderid
+    LEFT JOIN p_payinfo pinfo ON p.id = pinfo.payid
+    LEFT JOIN p_orderlog ol ON p.id = ol.payid
+    WHERE
+    o.id = #{orderId}
+  </select>
+</mapper>

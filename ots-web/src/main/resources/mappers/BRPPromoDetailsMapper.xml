@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.BRPPromoDetailsMapper" >
+  <resultMap id="BaseResultMap"
+             type="com.mk.ots.bill.model.BillRPPromoDetails">
+    <result property="id" column="ID" />
+    <result property="hotelId" column="HOTELID" />
+    <result property="billId" column="BILLID" />
+	<result property="orderId" column="ORDERID" />
+    <result property="checkinTime" column="CHECKINTIME" />
+    <result property="checkoutTime" column="CHECKOUTTIME" />
+    <result property="beginTime" column="BEGINTIME" />
+    <result property="endTime" column="ENDTIME" />
+    <result property="orderTime" column="ORDERTIME" />
+	<result property="orderType" column="ORDERTYPE" />
+	<result property="promoType" column="PROMOTYPE" />
+    <result property="dayNumber" column="DAYNUMBER" />
+    <result property="roomTypeName" column="ROOMTYPENAME" />
+    <result property="roomTypeId" column="ROOMTYPEID" />
+    <result property="roomNo" column="ROOMNO" />
+    <result property="roomId" column="ROOMID" />
+    <result property="payMethod" column="PAYMETHOD" />
+    <result property="financeStatus" column="FINANCESTATUS" />
+    <result property="orderPrice" column="ORDERPRICE" />
+    <result property="userCost" column="USERCOST" />
+	<result property="availableMoney" column="AVAILABLEMONEY" />
+	<result property="mikePrice" column="MIKEPRICE" />
+	<result property="lezhuCoins" column="LEZHUCOINS" />
+    <result property="onlinePaied" column="ONLINEPAIED" />
+    <result property="aliPaied" column="ALIPAIED" />
+    <result property="wechatPaied" column="WECHATPAIED" />
+    <result property="billCost" column="BILLCOST" />
+    <result property="changeCost" column="CHANGECOST" />
+    <result property="finalCost" column="FINALCOST" />
+    <result property="income" column="INCOME" />
+    <result property="createTime" column="CREATETIME" />
+  </resultMap>
+
+
+  <insert id="insertBillRPPromoDetailsBatch" parameterType="java.util.Map">
+    insert into b_rp_promo_details
+    (
+    id,
+    hotelId,
+    billId,
+    orderId,
+    checkinTime,
+    checkoutTime,
+    beginTime,
+    endTime,
+    orderTime,
+    orderType,    
+    promoType,
+    dayNumber,
+	roomTypeName,
+	roomTypeId,
+	roomNo,
+	roomId,
+	payMethod,
+	financeStatus,
+	orderPrice,
+	availableMoney,
+	mikePrice,
+	lezhuCoins,
+	onlinePaied,
+	aliPaied,
+	wechatPaied,
+	billCost,
+	changeCost,
+	finalCost,
+	income,
+	createTime
+    )
+    values
+    <foreach collection="billRPPromoDetailsList" item="item" index="index" separator=",">
+    (
+      #{item.id},
+      #{item.hotelId},
+      #{item.billId},
+      #{item.orderId},
+      #{item.checkinTime},
+      #{item.checkoutTime},
+      #{item.beginTime},
+      #{item.endTime},
+      #{item.orderTime},
+      #{item.orderType},
+      #{item.promoType},
+      #{item.dayNumber},
+      #{item.roomTypeName},
+      #{item.roomTypeId},
+      #{item.roomNo},
+      #{item.roomId},
+      #{item.payMethod},
+      #{item.financeStatus},
+      #{item.orderprice},
+	  #{item.availableMoney},
+	  #{item.mikePrice},
+	  #{item.lezhuCoins},
+	  #{item.onlinePaied},
+	  #{item.aliPaied},
+	  #{item.wechatPaied},
+	  #{item.billCost},
+	  #{item.changeCost},
+	  #{item.finalCost},
+	  #{item.income},
+	  #{item.createTime}
+    )
+    </foreach>
+  </insert>
+
+
+
+</mapper>

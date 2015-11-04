@@ -1303,10 +1303,10 @@ public class RoomstateService {
 			for (int i = 0; i < roomtypesArr.length; i++) {
 				if (roomtypesArr[i] instanceof RoomstateQuerylistRespEntity.Roomtype) {
 					RoomstateQuerylistRespEntity.Roomtype rt = (RoomstateQuerylistRespEntity.Roomtype) roomtypesArr[i];
-					if (rt.getVcroomnum() <= 0)
-						tempRoomTypes.add(rt);
-					else if ("1".equals(rt.getIsonpromo())) {
+					if ("1".equals(rt.getIsonpromo()))
 						promoRoomTypes.add(rt);
+					else if (rt.getVcroomnum() <= 0) {
+						tempRoomTypes.add(rt);
 					} else {
 						normalRoomTypes.add(rt);
 					}

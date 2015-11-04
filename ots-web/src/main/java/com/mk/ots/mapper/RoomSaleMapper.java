@@ -30,4 +30,7 @@ public interface RoomSaleMapper {
 
 	public List<Map<String, Object>> queryRoomByHotelAndRoomType(Map<String, Object> map);
 
+	public TRoomSale queryRoomSaleByOriginal(TRoomSale bean);
+
+
 }
