@@ -29,9 +29,26 @@ import com.mk.orm.kit.JsonKit;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.hotel.model.*;
+import com.mk.ots.hotel.model.TFacilityModel;
+import com.mk.ots.hotel.model.THotel;
+import com.mk.ots.hotel.model.THotelModel;
+import com.mk.ots.hotel.model.TPricetimeWithPrices;
+import com.mk.ots.hotel.model.TRoomModel;
+import com.mk.ots.hotel.model.TRoomRepairModel;
+import com.mk.ots.hotel.model.TRoomTypeInfoModel;
+import com.mk.ots.hotel.model.TRoomTypeModel;
+import com.mk.ots.hotel.model.TRoomTypeWithBasePrice;
 import com.mk.ots.manager.OtsCacheManager;
-import com.mk.ots.mapper.*;
+import com.mk.ots.mapper.PmsRoomOrderMapper;
+import com.mk.ots.mapper.RoomCensusMapper;
+import com.mk.ots.mapper.RoomLockPoMapper;
+import com.mk.ots.mapper.TFacilityMapper;
+import com.mk.ots.mapper.THotelMapper;
+import com.mk.ots.mapper.TPricetimeMapper;
+import com.mk.ots.mapper.TRoomMapper;
+import com.mk.ots.mapper.TRoomRepairMapper;
+import com.mk.ots.mapper.TRoomTypeMapper;
+import com.mk.ots.mapper.TRoomtypeInfoMapper;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.OtaRoomOrder;
 import com.mk.ots.order.model.PmsRoomOrderModel;
@@ -46,15 +63,8 @@ import com.mk.pms.myenum.PmsRoomOrderStatusEnum;
 import com.mk.pms.room.bean.RoomLockJsonBean;
 import com.mk.pms.room.bean.RoomLockPo;
 import com.mk.pms.room.service.PmsRoomService;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import redis.clients.jedis.Jedis;
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.Map.Entry;
+import redis.clients.jedis.Jedis;
 
 /**
  * 房态服务类(git测试5)
@@ -1090,20 +1100,52 @@ public class RoomstateService {
 						priceTransaction.complete();
 					}
 
+					BigDecimal defenseZeroPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
+
 					if (prices == null || prices.length == 0) {
-						// 眯客价
-						roomtype.setRoomtypeprice(troomType.getCost());
-						// 门市价
-						roomtype.setRoomtypepmsprice(troomType.getCost());
+
+
+
+						if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0){
+							// 眯客价
+							roomtype.setRoomtypeprice(defenseZeroPrice);
+							// 门市价
+							roomtype.setRoomtypepmsprice(defenseZeroPrice);
+						}else{
+							// 眯客价
+							roomtype.setRoomtypeprice(troomType.getCost());
+							// 门市价
+							roomtype.setRoomtypepmsprice(troomType.getCost());
+						}
+
+
+
+
 					} else {
 						// 眯客价
 						if (prices[0] != null) {
-							roomtype.setRoomtypeprice(new BigDecimal(prices[0]));
+							if ("0".equals(prices[0])){
+								roomtype.setRoomtypeprice(defenseZeroPrice);
+							}else{
+								roomtype.setRoomtypeprice(new BigDecimal(prices[0]));
+							}
+
 						} else {
-							roomtype.setRoomtypeprice(troomType.getCost());
+							if (troomType.getCost().compareTo(BigDecimal.ZERO) <=0){
+								roomtype.setRoomtypeprice(defenseZeroPrice);
+							}else{
+								roomtype.setRoomtypeprice(troomType.getCost());
+							}
 						}
-						// 门市价
-						roomtype.setRoomtypepmsprice(troomType.getCost());
+
+						if (troomType.getCost().compareTo(BigDecimal.ZERO) <=0){
+							// 门市价
+							roomtype.setRoomtypepmsprice(defenseZeroPrice);
+						}else{
+							// 门市价
+							roomtype.setRoomtypepmsprice(troomType.getCost());
+						}
+
 					}
 
 					// 查询房型信息t_roomtype_info
@@ -1350,6 +1392,100 @@ public class RoomstateService {
 		return respEntityList;
 	}
 
+
+
+	public List<RoomstateQuerylistRespEntity> findHotelRoomPrice(String roomno, RoomstateQuerylistReqEntity params){
+		List<RoomstateQuerylistRespEntity> respEntityList = Lists.newArrayList();
+		List<TRoomTypeModel> troomTypes = new ArrayList<TRoomTypeModel>();
+		List<RoomstateQuerylistRespEntity.Roomtype> roomtypes = Lists.newArrayList();
+		Long hotelid = params.getHotelid();
+		Long roomtypeid = params.getRoomtypeid();
+		Integer bednum = params.getBednum();
+		String begindate = params.getStartdateday();
+		String enddate = params.getEnddateday();
+		// 查询t_roomtype表数据
+		try {
+			troomTypes = troomtypeMapper.findList(roomtypeid, hotelid, bednum);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		RoomstateQuerylistRespEntity respEntity = new RoomstateQuerylistRespEntity();
+
+		for (TRoomTypeModel troomType : troomTypes) {
+			RoomstateQuerylistRespEntity.Roomtype roomtype = respEntity.new Roomtype();
+			roomtype.setRoomtypeid(troomType.getId());
+			// 加埋点
+			String[] prices = null;
+			Transaction priceTransaction = Cat.newTransaction("RoomState", "mikeprice-redis");
+			try {
+				if (hotelPriceService.isUseNewPrice())
+					prices = hotelPriceService.getRoomtypeMikePrices(hotelid, troomType.getId(), begindate,
+							enddate);
+				else
+					prices = this.getRoomtypeMikePrices(hotelid, troomType.getId(), begindate, enddate);
+				priceTransaction.setStatus(Transaction.SUCCESS);
+			} catch (Exception e) {
+				priceTransaction.setStatus(e);
+				throw e;
+			} finally {
+				priceTransaction.complete();
+			}
+
+			BigDecimal defenseZeroPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
+
+			if (prices == null || prices.length == 0) {
+
+
+				if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
+					// 眯客价
+					roomtype.setRoomtypeprice(defenseZeroPrice);
+					// 门市价
+					roomtype.setRoomtypepmsprice(defenseZeroPrice);
+				} else {
+					// 眯客价
+					roomtype.setRoomtypeprice(troomType.getCost());
+					// 门市价
+					roomtype.setRoomtypepmsprice(troomType.getCost());
+				}
+
+
+			} else {
+				// 眯客价
+				if (prices[0] != null) {
+					if ("0".equals(prices[0])) {
+						roomtype.setRoomtypeprice(defenseZeroPrice);
+					} else {
+						roomtype.setRoomtypeprice(new BigDecimal(prices[0]));
+					}
+
+				} else {
+					if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
+						roomtype.setRoomtypeprice(defenseZeroPrice);
+					} else {
+						roomtype.setRoomtypeprice(troomType.getCost());
+					}
+				}
+
+				if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
+					// 门市价
+					roomtype.setRoomtypepmsprice(defenseZeroPrice);
+				} else {
+					// 门市价
+					roomtype.setRoomtypepmsprice(troomType.getCost());
+				}
+
+			}
+
+			roomtypes.add(roomtype);
+		}
+		respEntity.setRoomtype(roomtypes);
+		respEntityList.add(respEntity);
+		return respEntityList;
+
+	}
+
+
+
 	/**
 	 * 
 	 * @param hotelId
@@ -1464,6 +1600,19 @@ public class RoomstateService {
 				return;
 			}
 		}
+	}
+
+	public Long findHotelMaxPrice(Long hotelid) {
+		BigDecimal maxPrice = null;
+
+		try {
+			Map<String, Object> maxPrices = tRoomTypeMapper.findHotelMaxPrice(hotelid);
+			maxPrice = (BigDecimal) maxPrices.get("maxprice");
+		} catch (Exception ex) {
+			logger.error(String.format("failed to findHotelMaxPrice by hotelid:%s ", hotelid), ex);
+		}
+
+		return maxPrice == null ? 0L : maxPrice.longValue();
 	}
 
 	/**
@@ -1675,7 +1824,12 @@ public class RoomstateService {
 				BigDecimal subper = troomtype.getSubper();
 				if ((price == null) && (subprice == null) && (subper == null)) {
 					// 没有设置对应的基本价格，直接返回门市价
-					rtnPrice = troomtype.getCost();
+					if (troomtype.getCost().compareTo(BigDecimal.ZERO) <= 0){
+						rtnPrice =  new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
+					}else {
+						rtnPrice = troomtype.getCost();
+					}
+
 					jedis.hset(key, field, rtnPrice.toString());
 					this.logger.info("没有设置对应的基本价格，直接返回门市价: {}", rtnPrice);
 					continue;
@@ -1687,7 +1841,7 @@ public class RoomstateService {
 					if ((subprice != null) && (subprice.compareTo(BigDecimal.ZERO) == 1)) {
 						rtnPrice = BigDecimal.valueOf(cost.doubleValue() - subprice.doubleValue());
 						if (rtnPrice.compareTo(BigDecimal.ZERO) == -1) {
-							rtnPrice = BigDecimal.ZERO;
+							rtnPrice  = new BigDecimal(Constant.DEFENSE_ZERO_PRICE); //BigDecimal.ZERO;
 							jedis.hset(key, field, rtnPrice.toString());
 							this.logger.info("基本价未设置, 设置了下浮: {}, 基本价为: {}", subprice, rtnPrice);
 							continue;
@@ -1698,6 +1852,11 @@ public class RoomstateService {
 					if ((subper != null) && (subper.compareTo(BigDecimal.ZERO) == 1)) {
 						double dbl = troomtype.getCost().doubleValue() * (1d - subper.doubleValue());
 						rtnPrice = BigDecimal.valueOf(dbl).setScale(0, BigDecimal.ROUND_HALF_UP);
+
+						if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0){
+							rtnPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
+						}
+
 						jedis.hset(key, field, rtnPrice.toString());
 						this.logger.info("基本价未设置, 设置了下浮百分比: {}%, 基本价为: {}", subper, rtnPrice);
 						continue;
@@ -1705,6 +1864,9 @@ public class RoomstateService {
 				} else {
 					// 设置了基本价
 					rtnPrice = troomtype.getPrice();
+					if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0){
+						rtnPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
+					}
 					jedis.hset(key, field, rtnPrice.toString());
 					continue;
 				}
@@ -1784,7 +1946,14 @@ public class RoomstateService {
 			price = this.findRoomtypePrice(roomtypeid, false);
 			this.logger.info("房型价格, price is {}", price);
 
+
+
 		}
+
+		if (price.compareTo(BigDecimal.ZERO) <= 0){
+			return new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
+		}
+
 		return price;
 	}
 
@@ -1872,7 +2041,7 @@ public class RoomstateService {
 					if ((subprice != null) && (subprice.compareTo(BigDecimal.ZERO) == 1)) {
 						rtnPrice = BigDecimal.valueOf(cost.doubleValue() - subprice.doubleValue());
 						if (rtnPrice.compareTo(BigDecimal.ZERO) == -1) {
-							rtnPrice = BigDecimal.ZERO;
+							rtnPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE) ;  //BigDecimal.ZERO;
 							jedis.hset(keyMikeRoomprice, field, rtnPrice.toString());
 							this.logger.info("基本价未设置, 设置了下浮: {}, 基本价为: {}", subprice, rtnPrice);
 							continue;
@@ -1890,12 +2059,20 @@ public class RoomstateService {
 				} else {
 					// 设置了基本价
 					rtnPrice = troomtype.getPrice();
+					if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0){
+						rtnPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
+					}
 					jedis.hset(keyMikeRoomprice, field, rtnPrice.toString());
 					this.logger.info("设置了基本价为: {}", rtnPrice);
 					continue;
 				}
 
 				// 放入redis缓存
+
+				if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0){
+					rtnPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
+				}
+
 				jedis.hset(keyMikeRoomprice, field, rtnPrice.toString());
 				this.logger.info("roomtype: {} price cache to redis, cache value is {}", field, rtnPrice);
 			}
@@ -2074,6 +2251,7 @@ public class RoomstateService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		return minTimeprice;
 	}
 
@@ -2111,11 +2289,15 @@ public class RoomstateService {
 				}
 			}
 			if (minkey != null && minval != null) {
+				if ("0".equals(minval)){
+					minval = Constant.DEFENSE_ZERO_PRICE.toString();
+				}
 				minRoomprice.put(minkey, minval);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		return minRoomprice;
 	}
 
@@ -2126,7 +2308,7 @@ public class RoomstateService {
 	 * @return String[] 返回值
 	 */
 	public String[] getHotelMikePrices(Long hotelid, String startdateday, String enddateday) {
-		String[] resultVal = new String[] { "111", "111" };
+		String[] resultVal = new String[] { Constant.DEFENSE_ZERO_PRICE.toString(), Constant.DEFENSE_ZERO_PRICE.toString() };
 		try {
 			Map<String, Object> rtnMap = updateHotelMikepricesCache(hotelid, null, false);
 			if (rtnMap == null || rtnMap.size() == 0) {
@@ -2246,7 +2428,7 @@ public class RoomstateService {
 	 * @return String[] 返回值
 	 */
 	public String[] getRoomtypeMikePrices(Long hotelid, Long roomtypeid, String startdateday, String enddateday) {
-		String[] resultVal = new String[] { "111", "111" };
+		String[] resultVal = new String[] { Constant.DEFENSE_ZERO_PRICE.toString(), Constant.DEFENSE_ZERO_PRICE.toString() };
 		try {
 			Map<String, Object> rtnMap = updateHotelMikepricesCache(hotelid, null, false);
 			if (rtnMap == null || rtnMap.size() == 0) {
@@ -2309,12 +2491,15 @@ public class RoomstateService {
 				if (price == null) {
 					logger.info("未配置策略价格.");
 					String val = mikeRoompriceMap.get(roomtypeid.toString());
-					if (val == null) {
-						val = "0";
+					if (val == null || "0".equals(val)) {
+						val = Constant.DEFENSE_ZERO_PRICE.toString();
 						logger.info("房型价格error,酒店需要审核:{}--{}--{}--{}", hotelid, roomtypeid, startdateday, enddateday);
+						Cat.logEvent("ZeroPrice", "hotelid: " +hotelid + " roomtypeid: " + roomtypeid);
 						System.out.println("房型价格error,酒店需要审核:{" + hotelid + "}--{" + roomtypeid + "}--{" + startdateday
 								+ "}--{" + enddateday + "}");
 					}
+
+
 					price = new BigDecimal(val);
 					resultVal[0] = price.toString();
 					resultVal[1] = price.toString();

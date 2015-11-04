@@ -346,6 +346,50 @@ public class HotelController {
 	}
 
 	/**
+	 *  查询酒店房价信息
+	 *
+	 */
+	@RequestMapping(value = { "/roomstate/queryprice" })
+	public ResponseEntity<Map<String, Object>> getHotelRoomPrice(ParamBaseBean pbb, String roomno,
+																 @Valid RoomstateQuerylistReqEntity params, Errors errors) throws Exception {
+		logger.info("【/roomstate/queryprice】 params is : {}", pbb.toString());
+		// 办理再次入住传 roomno
+		// 调用service方法
+		long startTime = new Date().getTime();
+		Map<String, Object> rtnMap = Maps.newHashMap();
+		StringBuffer bfErrors = new StringBuffer();
+		for (ObjectError error : errors.getAllErrors()) {
+			bfErrors.append(error.getDefaultMessage()).append("; ");
+		}
+		if (bfErrors.length() > 0) {
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, bfErrors.toString());
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+		// 加埋点
+		Transaction t = Cat.newTransaction("RoomPrice", "getHotelRoomPrice");
+		t.setStatus(Transaction.SUCCESS);
+		try {
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
+			List<RoomstateQuerylistRespEntity> list = roomstateService.findHotelRoomPrice(roomno, params);
+			rtnMap.put("hotel", list);
+
+		} catch (Exception e) {
+			t.setStatus(e);
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
+			e.printStackTrace();
+			logger.info("查询房价报错:{}{}", params.getHotelid(), e.getMessage());
+			throw e;
+		} finally {
+			t.complete();
+		}
+		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+	}
+
+	/**
 	 * 查询酒店房态信息
 	 * 
 	 * @return

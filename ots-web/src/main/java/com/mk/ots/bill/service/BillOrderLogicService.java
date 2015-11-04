@@ -133,53 +133,6 @@ public class BillOrderLogicService {
 		}
 	}
 
-	/**
-	 * 特价账单-每天跑
-	 *
-	 * @return
-	 */
-	@Transactional
-	public void genBillOrdersV2(Date beginTime, Date endTime) {
-		// 查询订单数据
-		List<Map> billOrderList = null;// billOrderDAO.getBillOrderList(beginTime,
-										// endTime);
-		if (CollectionUtils.isEmpty(billOrderList)) {
-			logger.info(String.format("genBillOrdersV2 billOrderList is empty. params beginTime[%s],endTime[%s]",
-					beginTime, endTime));
-			return;
-		}
-		int batchSize = 50;
-		int listIndex = 0;
-		List<BillSpecialDay> billSpecialDayList = new ArrayList<>();
-		for (Map billOrderMap : billOrderList) {
-			listIndex++;
-			Long orderId = (Long) billOrderMap.get("orderId");
-			// 根据订单查询订单金额
-			Map financeOrder = billOrderDAO.getFinanceOrder(orderId);
-			if (financeOrder.isEmpty()) {
-				logger.info(String.format("genBillOrdersV2 financeOrder is empty. params orderId[%s]", orderId));
-				continue;
-			}
-			// 判断在b_bill_special_day中是否存在
-			try {
-				BillSpecialDay billSpecialDay = convertBillSpecialDay(beginTime, endTime, billOrderMap, financeOrder);
-				billSpecialDayList.add(billSpecialDay);
-			} catch (Exception e) {
-				logger.info("convertBillSpecialDay Exception", e);
-				e.printStackTrace();
-				continue;
-			}
-			// 将数据insert到b_bill_special_day
-			if (listIndex % batchSize == 0 || billOrderList.size() == listIndex) {
-				Map params = new HashMap();
-				params.put("billSpecialDayList", billSpecialDayList);
-				billSpecialDayMapper.insertBillSpecialDayBatch(params);
-				logger.info(
-						String.format("genBillOrdersV2 insertBillSpecialDayBatch. params listIndex[%s]", listIndex));
-				billSpecialDayList.clear();
-			}
-		}
-	}
 
 	private BillSpecialDetail convertPromoDetails(Long billId, Map<String, Object> billOrderMap,
 			Map<String, Object> financeOrder) {
@@ -253,47 +206,4 @@ public class BillOrderLogicService {
 		return (BigDecimal) value;
 	}
 
-	private BillSpecialDay convertBillSpecialDay(Date beginTime, Date endTime, Map billOrderMap, Map financeOrder) {
-		BillSpecialDay billSpecialDay = new BillSpecialDay();
-		billSpecialDay.setBeginTime(beginTime);
-		billSpecialDay.setEndTime(endTime);
-		billSpecialDay.setPromoType(Long.valueOf(PromoTypeEnum.TJ.getCode()));
-		Long hotelId = (Long) billOrderMap.get("hotelId");
-		billSpecialDay.setHotelId(hotelId);
-		Long orderId = (Long) billOrderMap.get("orderId");
-		billSpecialDay.setOrderId(orderId);
-		BigDecimal onlinePaied = (BigDecimal) financeOrder.get("onlinePaied");
-		billSpecialDay.setOnlinePaied(onlinePaied);
-		Integer payType = (Integer) financeOrder.get("payType");
-		BigDecimal aliPaied = new BigDecimal(0);
-		BigDecimal wechatPaied = new BigDecimal(0);
-		if (PPayInfoOtherTypeEnum.alipay.getId() == payType) {
-			aliPaied = onlinePaied;
-		} else {
-			wechatPaied = onlinePaied;
-		}
-		billSpecialDay.setAliPaied(aliPaied);
-		billSpecialDay.setWechatPaied(wechatPaied);
-		BigDecimal lezhuCoins = (BigDecimal) billOrderMap.get("lezhuCoins");
-		billSpecialDay.setBillCost(lezhuCoins);
-		billSpecialDay.setChangeCost(new BigDecimal(0));
-		billSpecialDay.setFinalCost(lezhuCoins);
-		TRoomSale queryBean = new TRoomSale();
-		queryBean.setHotelId(hotelId.intValue());
-		String roomNo = (String) billOrderMap.get("roomNo");
-		queryBean.setRoomNo(roomNo);
-		TRoomSale tRooSmale = roomSaleMapper.queryRoomSaleByOriginal(queryBean);
-		if (tRooSmale == null || tRooSmale.getId() == null) {
-			throw new RuntimeException(
-					String.format("TRoomSale is null params hotelId[%s],roomNo[%s]", hotelId, roomNo));
-		}
-		BigDecimal mikePrice = new BigDecimal(tRooSmale.getCostPrice());
-		BigDecimal income = mikePrice.subtract(lezhuCoins);
-		billSpecialDay.setIncome(income);
-		BigDecimal availableMoney = (BigDecimal) financeOrder.get("availablemoney");
-		billSpecialDay.setAvailableMoney(availableMoney);
-		billSpecialDay.setFinanceStatus(1L);
-		billSpecialDay.setCreateTime(new Date());
-		return billSpecialDay;
-	}
 }

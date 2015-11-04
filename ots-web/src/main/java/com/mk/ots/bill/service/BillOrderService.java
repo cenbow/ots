@@ -20,14 +20,11 @@ public class BillOrderService {
 	@Autowired
 	private BillOrderDAO billOrderDAO;
 	@Autowired
-	private RoomSaleMapper roomSaleMapper;
-	@Autowired
 	private BillOrderLogicService billOrderLogicService;
 
 	/**
 	 * 账单明细表-每天跑 凌晨2点1分
-	 * 
-	 * @param request
+	 *
 	 * @return
 	 */
 	public void genBillOrders(Date begintime, String hotelid, String orderidId) {
@@ -36,7 +33,7 @@ public class BillOrderService {
 
 	/**
 	 * 特价账单-每天跑
-	 * 
+	 *
 	 * @return
 	 */
 	public void createBillReport(Date beginTime, Date endTime) {
@@ -60,9 +57,8 @@ public class BillOrderService {
 
 	/**
 	 * 账单汇总 月表
-	 * 
+	 *
 	 * @param isThreshold
-	 * @param request
 	 * @return
 	 */
 	public void genBillConfirmChecks(Date begintime, String hotelid, String isThreshold) {
@@ -71,8 +67,7 @@ public class BillOrderService {
 
 	/**
 	 * 周账单 到付贴现，预付贴现
-	 * 
-	 * @param request
+	 *
 	 * @return
 	 */
 	public void runtWeekClearing(Date nowTime, String hotelid) {
@@ -112,8 +107,7 @@ public class BillOrderService {
 
 	/**
 	 * 修改订单noshow 状态
-	 * 
-	 * @param request
+	 *
 	 * @return
 	 */
 	public void changeOrderStatusNoshow(Date nowTime) {

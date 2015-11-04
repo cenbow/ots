@@ -36,6 +36,7 @@ import com.mk.ots.manager.HotelPMSManager;
 import com.mk.ots.manager.OtsCacheManager;
 import com.mk.ots.mapper.OtaOrderMacMapper;
 import com.mk.ots.mapper.OtaOrderTastsMapper;
+import com.mk.ots.mapper.RoomSaleConfigInfoMapper;
 import com.mk.ots.member.model.UMember;
 import com.mk.ots.member.service.IMemberService;
 import com.mk.ots.message.service.impl.MessageService;
@@ -62,6 +63,8 @@ import com.mk.ots.promo.service.IPromotionPriceService;
 import com.mk.ots.promo.service.impl.PromoService;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.roomsale.model.TRoomSale;
+import com.mk.ots.roomsale.model.TRoomSaleConfig;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.score.model.THotelScore;
 import com.mk.ots.score.service.ScoreService;
@@ -193,6 +196,8 @@ public class OrderServiceImpl implements OrderService {
     private OtsCareProducer careProducer;
     @Autowired
     private RoomSaleService roomSaleService;
+    @Autowired
+    private RoomSaleConfigInfoMapper roomSaleConfigInfoMapper;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
     private static final long TIME_FOR_FIFTEEN = Long.parseLong(PropertyConfigurer.getProperty("transferCheckinUsernameTime"));
@@ -2181,15 +2186,29 @@ public class OrderServiceImpl implements OrderService {
      * @param roomId
      * @return
      */
-    private String getPromoType(Long roomId) {
+    public String getPromoType(Long roomId) {
+        //先根据roo
         TRoomSale tRoomSale = new TRoomSale();
         tRoomSale.setRoomId(roomId.intValue());
         TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
-        if(resultRoomSale == null || "T".equals(resultRoomSale.getIsBack())){
+        if(resultRoomSale == null || resultRoomSale.getId() == null || resultRoomSale.getConfigId() == null){
             return PromoTypeEnum.OTHER.getCode().toString();
-        }else{
+        }
+        //判断对应的时间
+        TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
+        tRoomSaleConfig.setId(resultRoomSale.getConfigId());
+        TRoomSaleConfigInfo roomSaleConfigInfo = roomSaleConfigInfoMapper.getRoomSaleConfigInfoByConfigId(tRoomSaleConfig);
+        if(roomSaleConfigInfo == null || roomSaleConfigInfo.getId() == null){
+            return PromoTypeEnum.OTHER.getCode().toString();
+        }
+        Integer promoStatus = DateUtils.promoStatus(roomSaleConfigInfo.getStartDate(),
+                roomSaleConfigInfo.getEndDate(), roomSaleConfigInfo.getStartTime(),
+                roomSaleConfigInfo.getEndTime());
+        logger.info(String.format("getPromoType DateUtils.promoStatus promoStatus[%s]", promoStatus));
+        if(Constant.PROMOING == promoStatus){
             return PromoTypeEnum.TJ.getCode().toString();
         }
+        return PromoTypeEnum.OTHER.getCode().toString();
     }
 
     /**

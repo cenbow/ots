@@ -11,6 +11,7 @@ import com.mk.ots.message.model.LPushLog;
 import com.mk.ots.message.model.MessageType;
 import com.mk.ots.message.service.IMessageService;
 import com.mk.ots.order.bean.OtaOrder;
+import com.mk.ots.order.service.OrderServiceImpl;
 import com.mk.ots.pay.model.CouponParam;
 import com.mk.ots.rpc.IPmsSoapService;
 import com.mk.ots.test.service.TestService;
@@ -58,6 +59,8 @@ public class TestController {
 	private ITicketService iTicketService;
 	@Autowired
 	private BillOrderService billOrderService;
+	@Autowired
+	private OrderServiceImpl orderService;
 
     // @Autowired
     // private KafkaProducer kafkaProducer = null;
@@ -65,9 +68,7 @@ public class TestController {
 	/**
 	 * 意见反馈
 	 *
-	 * @param token
 	 *            ：用户
-	 * @param suggest
 	 *            ：意见
 	 * @return jeson
 	 */
@@ -89,9 +90,7 @@ public class TestController {
 	/**
 	 * 意见反馈
 	 *
-	 * @param token
 	 *            ：用户
-	 * @param suggest
 	 *            ：意见
 	 * @return jeson
 	 */
@@ -223,7 +222,6 @@ public class TestController {
     	map.put("couponParam", couponParam);
     	return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
     }
-
 
     public TestService getTestService() {
         return this.testService;
