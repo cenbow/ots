@@ -29,8 +29,8 @@ public class BillPromoOrdersJob extends QuartzJobBean {
 		String endTime = DateUtils.getDateAdded(0, DateUtils.getDate());
 		logger.info(String.format("BillPromoOrdersJob::genBillOrders::start params beginTime[%s], endTime[%s]",
 				beginTime, endTime));
-		Cat.logEvent("OtsJob", "BillPromoOrdersJob.executeInternal", Event.SUCCESS, "");
 		billOrderService.createBillReport(DateUtils.getDateFromString(beginTime), DateUtils.getDateFromString(endTime));
+		Cat.logEvent("OtsJob", "BillPromoOrdersJob.executeInternal", Event.SUCCESS, "");
 		logger.info("BillPromoOrdersJob::genBillOrders::end");
 	}
 }

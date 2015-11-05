@@ -32,8 +32,6 @@ public class BillOrderLogicService {
 	@Autowired
 	private BillOrderDAO billOrderDAO;
 	@Autowired
-	private BillSpecialDayMapper billSpecialDayMapper;
-	@Autowired
 	private BillSpecialMapper billSpecialMapper;
 	@Autowired
 	private BillSpecialDetailMapper billSpecialDetailMapper;
@@ -42,6 +40,7 @@ public class BillOrderLogicService {
 	@Autowired
 	private TRoomTypeMapper tRoomTypeMapper;
 
+	@Transactional
 	public void createBillReportByHotelId(Long hotelId, Date beginTime, Date endTime) throws HmsException {
 		logger.info(String.format("createBillReportByHotelId by hotelId[%s]", hotelId));
 		int billSpecialId = insertHotelId(hotelId);
@@ -74,7 +73,6 @@ public class BillOrderLogicService {
 			parameters.put("beginTime", beginTime);
 			parameters.put("endTime", endTime);
 			parameters.put("billTime", billTime);
-			
 			billSpecialMapper.updateBillSpecial(parameters);
 		} catch (Exception ex) {
 			throw new HmsException(-1, ex);
@@ -89,7 +87,7 @@ public class BillOrderLogicService {
 	}
 
 	private void createBillSpecialDetailList(List<Map> billOrderList, int billSpecialId) throws Exception {
-		int batchSize = 50;
+		int batchSize = 1000;
 		int listIndex = 0;
 		List<BillSpecialDetail> billSpecialDetailsList = new ArrayList<>();
 		for (Map billOrderMap : billOrderList) {
@@ -109,7 +107,7 @@ public class BillOrderLogicService {
 				billSpecialDetailsList.add(billSpecialDetail);
 			} catch (Exception e) {
 				logger.warn("failed to convertPromoDetails...", e);
-				continue;
+				throw new RuntimeException("failed to convertPromoDetails...", e);
 			}
 			// 将数据insert到b_bill_special_day
 			if (listIndex % batchSize == 0 || billOrderList.size() == listIndex) {
@@ -119,7 +117,7 @@ public class BillOrderLogicService {
 					billSpecialDetailMapper.insertBatch(params);
 				} catch (Exception ex) {
 					logger.warn("failed to insertBatch...", ex);
-					continue;
+					throw new RuntimeException("failed to insertBatch...", ex);
 				}
 
 				logger.info(String.format("createBillReportByHotelId createBillReportByHotelId. params listIndex[%s]",
@@ -156,7 +154,7 @@ public class BillOrderLogicService {
 		TRoomSale tRooSmale = roomSaleMapper.queryRoomSaleByOriginal(queryBean);
 		if (tRooSmale == null || tRooSmale.getId() == null) {
 			logger.info(String.format("TRoomSale is null params hotelId[%s],roomTypeId[%s]", hotelId, roomTypeId));
-			BigDecimal mikePrice = new BigDecimal("-1");
+			BigDecimal mikePrice = new BigDecimal("9999");
 			BigDecimal discount = new BigDecimal("0");
 			specialDetail.setMikeprice(mikePrice);
 			specialDetail.setDiscount(discount);
