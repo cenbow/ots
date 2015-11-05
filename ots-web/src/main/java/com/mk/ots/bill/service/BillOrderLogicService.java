@@ -84,7 +84,8 @@ public class BillOrderLogicService {
 	public int insertHotelId(Long hotelId) {
 		BillSpecial record = new BillSpecial();
 		record.setHotelid(hotelId);
-		return billSpecialMapper.insertHotelId(record);
+		billSpecialMapper.insertHotelId(record);
+		return record.getId().intValue();
 	}
 
 	private void createBillSpecialDetailList(List<Map> billOrderList, int billSpecialId) throws Exception {

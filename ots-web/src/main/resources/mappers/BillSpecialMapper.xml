@@ -108,8 +108,8 @@
   </insert>
 
   <insert id="insertHotelId"  useGeneratedKeys="true" keyProperty="id" parameterType="com.mk.ots.bill.model.BillSpecial">
-    insert into b_bill_special (id,hotelId)
-    values (#{id,jdbcType=BIGINT},#{hotelid,jdbcType=BIGINT})
+    insert into b_bill_special (hotelId)
+    values (#{hotelid,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.mk.ots.bill.model.BillSpecial" >
     insert into b_bill_special
