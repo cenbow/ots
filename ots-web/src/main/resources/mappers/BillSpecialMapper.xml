@@ -373,7 +373,7 @@
     sum(userCost) onlinePaid,
     sum(case when payMethod = 'Ali_Callback' then 0 else userCost end) wechatPaid,
     sum(case when payMethod = 'WeChat_Callback' then 0 else userCost end) aliPaid,
-    sum(mikePrice) billCost,
+    sum(lezhuCoins) billCost,
     0 changeCorrectCost,
     sum(lezhuCoins) finalCost,
     sum(userCost)- sum(lezhuCoins) income,

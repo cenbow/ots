@@ -1494,16 +1494,7 @@ public class DateUtils extends Object {
      * @param args 参数
      */
     public static void main(String[] args){
-        String format = "yyyy-MM-dd";
-        SimpleDateFormat dateParser = new SimpleDateFormat(format);
-        try {
-            Date bg = dateParser.parse("2015-10-22 02:00:00");
-            Date ed = dateParser.parse("2015-10-23 09:00:00");
-            System.out.print(diffDay(bg, ed));
-            DateUtils.parseDate(DateUtils.formatDateTime(new Date(),DateUtils.FORMAT_DATE));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        Date[]  d = DateUtils.getWeekStartAndEndDate(Calendar.getInstance());
     }
 
     
@@ -1997,5 +1988,28 @@ public class DateUtils extends Object {
             return Constant.PROMO_FININSHED;
         }
 
+    }
+
+    /**
+     * 获取给定时间所在周的第一天(Sunday)的日期和最后一天(Saturday)的日期
+     *
+     * @param calendar
+     * @return Date数组，[0]为第一天的日期，[1]最后一天的日期
+     */
+    public static Date[] getWeekStartAndEndDate(Calendar calendar) {
+        Date[] dates = new Date[2];
+        Date firstDateOfWeek, lastDateOfWeek;
+        // 得到当天是这周的第几天
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        // 减去dayOfWeek,得到第一天的日期，因为Calendar用０－６代表一周七天，所以要减一
+        calendar.add(Calendar.DAY_OF_WEEK, -(dayOfWeek - 2));
+        firstDateOfWeek = calendar.getTime();
+        // 每周7天，加６，得到最后一天的日子
+        calendar.add(Calendar.DAY_OF_WEEK, 6);
+        lastDateOfWeek = calendar.getTime();
+
+        dates[0] = firstDateOfWeek;
+        dates[1] = lastDateOfWeek;
+        return dates;
     }
 }

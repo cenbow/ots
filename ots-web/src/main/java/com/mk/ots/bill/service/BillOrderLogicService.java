@@ -1,11 +1,7 @@
 package com.mk.ots.bill.service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.mk.ots.common.enums.PayCallbackEnum;
 import org.apache.commons.collections.CollectionUtils;
@@ -67,7 +63,11 @@ public class BillOrderLogicService {
 		logger.info("about to updateBillSpecial with hotelid {}", hotelId);
 
 		// 执行update b_bill_special
-		String billTime = DateUtils.formatDateTime(beginTime, DateUtils.FORMATSHORTDATETIME);
+		Calendar beginTimeCalendar = Calendar.getInstance();
+		beginTimeCalendar.setTime(beginTime);
+		Date[] d = DateUtils.getWeekStartAndEndDate(beginTimeCalendar);
+		Date firstDateOfWeek = d[0], lastDateOfWeek = d[1];
+		String billTime = DateUtils.getStringFromDate(firstDateOfWeek, DateUtils.FORMAT_DATE) + "-" + DateUtils.getStringFromDate(lastDateOfWeek, DateUtils.FORMAT_DATE);
 		try {
 			Map<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("hotelId", hotelId);
