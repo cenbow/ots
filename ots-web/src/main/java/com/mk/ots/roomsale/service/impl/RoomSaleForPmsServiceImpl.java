@@ -57,7 +57,7 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 			TRoomSaleConfig configInfo=roomSaleForPmsMapper.getConfigInfoById(configToUpdate.getSaleConfigInfoId());
 			Time nowTime = Time.valueOf(DateTools.getTime("HH:mm:ss")) ;
 			if (nowTime.compareTo(configInfo.getStartTime())>=0){
-				return "OK,变更次日生效ke";
+				return "OK,变更次日生效";
 			}
 			return  "OK,变更已生效";
 		}else{

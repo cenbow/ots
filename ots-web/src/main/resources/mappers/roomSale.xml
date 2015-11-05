@@ -189,7 +189,7 @@
         SELECT info.id as promotype, info.salevalue as promoprice
         FROM t_room_sale_config config
         join t_room_sale_config_info info on config.saleconfiginfoid = info.id
-        WHERE config.hotelId = #{hotelId}
+        WHERE config.hotelId = #{hotelId} AND config.valid = 'T'
         GROUP  BY promotype
     </select>
 

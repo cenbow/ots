@@ -30,11 +30,11 @@ public class RoomSaleForPmsController {
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		if(roomSaleForPms!=null&&roomSaleForPms.getType()!=null){
 			rtnMap.put("isOpen", "T");
-			rtnMap.put("role",roomSaleForPms);
 		}else{
 			rtnMap.put("isOpen", "F");
 		}
-		rtnMap.put("msg", "OK");
+		rtnMap.put("role",roomSaleForPms);
+		rtnMap.put("msg", "OK,");
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 	@RequestMapping("/updatesalecount")
