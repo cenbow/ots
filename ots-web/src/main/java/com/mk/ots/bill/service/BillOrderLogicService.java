@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import com.mk.ots.common.enums.PayCallbackEnum;
+import com.mk.ots.hotel.model.TRoomTypeModel;
+import com.mk.ots.mapper.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +21,6 @@ import com.mk.ots.common.enums.PPayInfoOtherTypeEnum;
 import com.mk.ots.common.enums.PromoTypeEnum;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.exception.HmsException;
-import com.mk.ots.mapper.BillSpecialDayMapper;
-import com.mk.ots.mapper.BillSpecialDetailMapper;
-import com.mk.ots.mapper.BillSpecialMapper;
-import com.mk.ots.mapper.RoomSaleMapper;
 import com.mk.ots.roomsale.model.TRoomSale;
 
 /**
@@ -41,6 +39,8 @@ public class BillOrderLogicService {
 	private BillSpecialDetailMapper billSpecialDetailMapper;
 	@Autowired
 	private RoomSaleMapper roomSaleMapper;
+	@Autowired
+	private TRoomTypeMapper tRoomTypeMapper;
 
 	public void createBillReportByHotelId(Long hotelId, Date beginTime, Date endTime) throws HmsException {
 		logger.info(String.format("createBillReportByHotelId by hotelId[%s]", hotelId));
@@ -135,7 +135,7 @@ public class BillOrderLogicService {
 
 
 	private BillSpecialDetail convertPromoDetails(Long billId, Map<String, Object> billOrderMap,
-			Map<String, Object> financeOrder) {
+			Map<String, Object> financeOrder) throws Exception {
 		Long hotelId = (Long) billOrderMap.get("hotelId");
 		Long roomTypeId = getMapValueToLong(billOrderMap.get("roomTypeId"));
 		BillSpecialDetail specialDetail = new BillSpecialDetail();
@@ -154,16 +154,25 @@ public class BillOrderLogicService {
 		queryBean.setRoomTypeId(roomTypeId.intValue());
 		TRoomSale tRooSmale = roomSaleMapper.queryRoomSaleByOriginal(queryBean);
 		if (tRooSmale == null || tRooSmale.getId() == null) {
-			throw new RuntimeException(
-					String.format("TRoomSale is null params hotelId[%s],roomTypeId[%s]", hotelId, roomTypeId));
+			logger.info(String.format("TRoomSale is null params hotelId[%s],roomTypeId[%s]", hotelId, roomTypeId));
+			BigDecimal mikePrice = new BigDecimal("-1");
+			BigDecimal discount = new BigDecimal("0");
+			specialDetail.setMikeprice(mikePrice);
+			specialDetail.setDiscount(discount);
+		}else{
+			BigDecimal mikePrice = new BigDecimal(tRooSmale.getCostPrice());
+			//如果Mike价格为0的话则直接取对应T_base_price的数据
+			if(mikePrice.compareTo(new BigDecimal(0)) == 0){
+				TRoomTypeModel tRoomTypeModel = tRoomTypeMapper.selectByPrimaryKey(tRooSmale.getOldRoomTypeId().longValue());
+				mikePrice = tRoomTypeModel.getCost();
+			}
+			BigDecimal lezhuCoins = (BigDecimal) billOrderMap.get("lezhuCoins");
+			BigDecimal discount =lezhuCoins.divide(mikePrice, 2,
+					BigDecimal.ROUND_UP);
+			specialDetail.setMikeprice(mikePrice);
+			specialDetail.setDiscount(discount);
 		}
-		BigDecimal mikePrice = new BigDecimal(tRooSmale.getCostPrice());
 		BigDecimal lezhuCoins = (BigDecimal) billOrderMap.get("lezhuCoins");
-		BigDecimal discount = mikePrice.divide(new BigDecimal(tRooSmale.getSalePrice().toString()), 2,
-				BigDecimal.ROUND_UP);
-
-		specialDetail.setMikeprice(mikePrice);
-		specialDetail.setDiscount(discount);
 		specialDetail.setLezhucoins(lezhuCoins);
 		specialDetail.setOrderprice(getMapValueToBigDecimal(billOrderMap.get("totalPrice")));
 		specialDetail.setOrdertype(getMapValueToInteger(billOrderMap.get("orderType")));

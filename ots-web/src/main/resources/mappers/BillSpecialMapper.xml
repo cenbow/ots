@@ -369,7 +369,7 @@
     max(hotel.citycode) citycode,
     min(beginTime) beginTime,
     min(endTime) endTime,
-    SUM(detail.orderid) orderNum,
+    count(1) orderNum,
     sum(userCost) onlinePaid,
     sum(case when payMethod = 'Ali_Callback' then 0 else userCost end) wechatPaid,
     sum(case when payMethod = 'WeChat_Callback' then 0 else userCost end) aliPaid,

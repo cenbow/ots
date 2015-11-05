@@ -34,6 +34,7 @@
     WHERE
     o.promoType = 1
     AND o.orderStatus IN (180, 190, 200)
+    and o.paystatus = 120
     AND o.updatetime >= #{beginTime}
     AND o.hotelId = #{hotelId}
     <![CDATA[ AND o.updatetime < #{endTime} ]]>
