@@ -160,6 +160,7 @@ public class WalletController {
                 UWalletCashFlowExtend extend=new UWalletCashFlowExtend();
                 try{
                     BeanUtils.copyProperties(extend, uWalletCashFlow);
+                    extend.setPrice(extend.getPrice().setScale(0, extend.getPrice().ROUND_HALF_UP));
                 }catch (Exception e){
                     logger.error("uWalletCashFlow copy error:", e);
                 }
