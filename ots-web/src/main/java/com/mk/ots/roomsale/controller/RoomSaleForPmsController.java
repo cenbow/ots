@@ -28,11 +28,12 @@ public class RoomSaleForPmsController {
 	 public ResponseEntity<Map<String, Object>> getHotelRoomSale(TRoomSaleConfigForPms bean) {
 		TRoomSaleForPms roomSaleForPms=roomSaleForPmsService.getHotelRoomSale(bean);
 		Map<String, Object> rtnMap = Maps.newHashMap();
-		if(roomSaleForPms!=null&&roomSaleForPms.getInfo()!=null){
-			rtnMap.put("isOpen", "T");
-		}else{
-			rtnMap.put("isOpen", "F");
-		}
+//		if(roomSaleForPms!=null&&roomSaleForPms.getInfo()!=null){
+//			rtnMap.put("isOpen", "T");
+//		}else{
+//			rtnMap.put("isOpen", "F");
+//		}
+		rtnMap.put("isOpen", "T");
 		rtnMap.put("role",roomSaleForPms);
 		rtnMap.put("msg", "OK,");
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);

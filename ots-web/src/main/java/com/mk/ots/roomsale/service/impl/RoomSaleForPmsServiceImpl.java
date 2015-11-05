@@ -44,6 +44,11 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 		if(CollectionUtils.isEmpty(roomSaleConfigList)){
 			return  "ERROR,修改房型不在活动配置表中";
 		}
+		for (TRoomSaleConfig config:roomSaleConfigList){
+			if (config.getRoomId()!=null){
+				return  "ERROR,按协议该房型指定到房间号，不能变更协议量";
+			}
+		}
 		TRoomSaleConfig configToUpdate=roomSaleConfigList.get(0);
 		if (bean.getNewCount()<configToUpdate.getDealCount()){
 			return  "ERROR,修改数量小于协议数量";
@@ -96,7 +101,15 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 		roomSaleForPms.setBegin(DateTools.dateToString(roomSaleConfigInfo.getStartTime(), "HH:mm"));
 		Long continues = getBetweenTime(roomSaleConfigInfo.getStartTime(), roomSaleConfigInfo.getEndTime());
 		roomSaleForPms.setContinues(continues);
-		List<TRoomSaleConfig> roomSaleConfigList=roomSaleForPmsMapper.getRoomSaleByPmsHotel(bean.getHotelId());
+		List<TRoomTypeForPms> roomTypeForPmsList=getRoomTypeForPms(bean.getHotelId(),1);
+		roomSaleForPms.setInfo(roomTypeForPmsList);
+		return roomSaleForPms;
+	}
+	public List<TRoomTypeForPms> getRoomTypeForPms(String pmsHotelId , Integer saleType) {
+		TRoomSaleConfig roomSaleConfigBean=new TRoomSaleConfig();
+		roomSaleConfigBean.setPms(pmsHotelId);
+		roomSaleConfigBean.setSaleType(saleType);
+		List<TRoomSaleConfig> roomSaleConfigList=roomSaleForPmsMapper.getRoomSaleByPmsHotel(roomSaleConfigBean);
 		List<TRoomTypeForPms> roomTypeForPmsList=new ArrayList<>();
 		Map<String,TRoomTypeForPms> roomTypeForPmsMap=new HashMap<String,TRoomTypeForPms>();
 		for (TRoomSaleConfig roomSaleConfig:roomSaleConfigList){
@@ -104,15 +117,41 @@ public class RoomSaleForPmsServiceImpl implements RoomSaleForPmsService {
 			if (roomTypeForPmsMap.get(roomType.getPms())==null) {
 				TRoomTypeForPms roomTypeForPms = new TRoomTypeForPms();
 				roomTypeForPms.setRoomTypeId(roomType.getPms());
-				roomTypeForPms.setCurrCount(roomSaleConfig.getNum());
-				roomTypeForPms.setMinCount(roomSaleConfig.getDealCount());
-				roomTypeForPmsList.add(roomTypeForPms);
+				if (roomSaleConfig.getRoomId()==null){
+					roomTypeForPms.setCurrCount(roomSaleConfig.getNum());
+					roomTypeForPms.setMinCount(roomSaleConfig.getDealCount());
+					roomTypeForPms.setIsEdit("T");
+				}else {
+					roomTypeForPms.setCurrCount(1);
+					roomTypeForPms.setMinCount(1);
+					roomTypeForPms.setIsEdit("F");
+				}
+				roomTypeForPmsMap.put(roomType.getPms(),roomTypeForPms);
 			}else {
-
+				TRoomTypeForPms roomTypeForPms=roomTypeForPmsMap.get(roomType.getPms());
+				if (roomSaleConfig.getRoomId()==null){//如果房间号为空，则加上房型的数量
+					int currCount=roomTypeForPms.getCurrCount()+roomSaleConfig.getNum();
+					int dealCount=roomTypeForPms.getMinCount()+roomSaleConfig.getDealCount();
+					roomTypeForPms.setCurrCount(currCount);
+					roomTypeForPms.setMinCount(dealCount);
+					roomTypeForPmsMap.put(roomType.getPms(),roomTypeForPms);
+				}else{//如果房间号不为空，则加上活动数量1
+					int currCount=roomTypeForPms.getCurrCount()+1;
+					int dealCount=roomTypeForPms.getMinCount()+1;
+					roomTypeForPms.setCurrCount(currCount);
+					roomTypeForPms.setMinCount(dealCount);
+					roomTypeForPmsMap.put(roomType.getPms(),roomTypeForPms);
+				}
+				if (roomSaleConfig.getRoomId()!=null&&roomTypeForPms.getIsEdit()!="F"){
+					roomTypeForPms.setIsEdit("F");
+				}
 			}
 		}
-		roomSaleForPms.setInfo(roomTypeForPmsList);
-		return roomSaleForPms;
+		for(String key : roomTypeForPmsMap.keySet()){
+			TRoomTypeForPms roomTypeForPms =roomTypeForPmsMap.get(key);
+			roomTypeForPmsList.add(roomTypeForPms);
+		}
+		return roomTypeForPmsList;
 	}
 	public long getBetweenTime(Date beginTime, Date endTime) {
 		Calendar dateOne = Calendar.getInstance(), dateTwo = Calendar.getInstance();
