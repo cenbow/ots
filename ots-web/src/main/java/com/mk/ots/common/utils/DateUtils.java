@@ -1493,8 +1493,10 @@ public class DateUtils extends Object {
      * 执行测试方法
      * @param args 参数
      */
-    public static void main(String[] args){
-        Date[]  d = DateUtils.getWeekStartAndEndDate(Calendar.getInstance());
+    public static void main(String[] args) throws ParseException {
+        Calendar c = Calendar.getInstance();
+        c.setTime(DateUtils.addDays(DateUtils.parseDate("2015-11-02", DateUtils.FORMAT_DATE), -2));
+        Date[]  d = DateUtils.getWeekStartAndEndDate(c);
     }
 
     
