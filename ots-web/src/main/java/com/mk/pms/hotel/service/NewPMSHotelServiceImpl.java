@@ -357,7 +357,7 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 							 * 先判断是否是特价房型
 							 */
 							Long roomTypeId = onSaleRoomTypePms.get(pms);
-							if (tRoomType.getId() == roomTypeId) {
+							if (null == roomTypeId || tRoomType.getId() == roomTypeId) {
 								// 原房型
 								this.updateRoomType(tRoomType, pmsRoomTypeBean, roomList, changemap, false);
 							} else {
