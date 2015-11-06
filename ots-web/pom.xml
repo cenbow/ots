@@ -933,6 +933,17 @@
             </plugin>
 
 
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.2.1.v20140609</version>
+                <configuration>
+                    <webApp>
+                        <contextPath>/ots</contextPath>
+                        <!-- <contextPath>/${project.artifactId}</contextPath> -->
+                    </webApp>
+                </configuration>
+            </plugin>
 
             <plugin>
                 <groupId>org.liquibase</groupId>
@@ -955,6 +966,17 @@
                 <configuration>
                     <verbose>true</verbose>
                     <overwrite>true</overwrite>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.2.1.v20140609</version>
+                <configuration>
+                    <webApp>
+                        <contextPath>/ots</contextPath>
+                        <!-- <contextPath>/${project.artifactId}</contextPath> -->
+                    </webApp>
                 </configuration>
             </plugin>
         </plugins>
