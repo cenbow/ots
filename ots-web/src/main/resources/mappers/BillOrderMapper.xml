@@ -35,8 +35,8 @@
     o.promoType = 1
     AND o.orderStatus IN (180, 190, 200)
     and o.paystatus = 120
-    AND o.updatetime >= #{beginTime}
     AND o.hotelId = #{hotelId}
+    AND o.updatetime >= #{beginTime}
     <![CDATA[ AND o.updatetime < #{endTime} ]]>
     AND NOT EXISTS (select 1 from b_bill_special_detail detail where detail.orderid = o.id)
   </select>

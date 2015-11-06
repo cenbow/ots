@@ -1495,7 +1495,7 @@ public class DateUtils extends Object {
      */
     public static void main(String[] args) throws ParseException {
         Calendar c = Calendar.getInstance();
-        c.setTime(DateUtils.addDays(DateUtils.parseDate("2015-11-02", DateUtils.FORMAT_DATE), -2));
+        c.setTime(DateUtils.addDays(DateUtils.parseDate("2015-11-09", DateUtils.FORMAT_DATE), -2));
         Date[]  d = DateUtils.getWeekStartAndEndDate(c);
     }
 

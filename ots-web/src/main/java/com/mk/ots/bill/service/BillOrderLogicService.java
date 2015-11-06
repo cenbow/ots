@@ -3,6 +3,7 @@ package com.mk.ots.bill.service;
 import java.math.BigDecimal;
 import java.util.*;
 
+import com.mk.ots.bill.model.BillSpecialExample;
 import com.mk.ots.common.enums.PayCallbackEnum;
 import com.mk.ots.hotel.model.TRoomTypeModel;
 import com.mk.ots.mapper.*;
@@ -43,7 +44,24 @@ public class BillOrderLogicService {
 	@Transactional
 	public void createBillReportByHotelId(Long hotelId, Date beginTime, Date endTime) throws HmsException {
 		logger.info(String.format("createBillReportByHotelId by hotelId[%s]", hotelId));
-		int billSpecialId = insertHotelId(hotelId);
+		//根据开始时间得到账期
+		String billTime = getBillTime(beginTime);
+		//根据账期和酒店判断是否之前跑过账务
+		BillSpecialExample example = new BillSpecialExample();
+		example.createCriteria().andHotelidEqualTo(hotelId).andBilltimeEqualTo(billTime);
+		List<BillSpecial> billSpecialList = billSpecialMapper.selectByExample(example);
+		Integer billSpecialId;
+		if(CollectionUtils.isEmpty(billSpecialList)){
+			billSpecialId = insertHotelId(hotelId);
+		}else {
+			//判断数据是否有多个相同的账期脏数据
+			if(billSpecialList.size() > 1){
+				throw new HmsException(String.format("find billSpecial by billTime to many data. params hotelId[%s],billTime[%s]", hotelId, billTime));
+			}else {
+				BillSpecial billSpecial = billSpecialList.get(0);
+				billSpecialId = billSpecial.getId().intValue();
+			}
+		}
 		// 查询订单数据
 		List<Map> billOrderList = billOrderDAO.getBillOrderList(hotelId, beginTime, endTime);
 		if (CollectionUtils.isEmpty(billOrderList)) {
@@ -62,21 +80,26 @@ public class BillOrderLogicService {
 		logger.info("about to updateBillSpecial with hotelid {}", hotelId);
 
 		// 执行update b_bill_special
-		Calendar beginTimeCalendar = Calendar.getInstance();
-		beginTimeCalendar.setTime(beginTime);
-		Date[] d = DateUtils.getWeekStartAndEndDate(beginTimeCalendar);
-		Date firstDateOfWeek = d[0], lastDateOfWeek = d[1];
-		String billTime = DateUtils.getStringFromDate(firstDateOfWeek, DateUtils.FORMAT_DATE) + "-" + DateUtils.getStringFromDate(lastDateOfWeek, DateUtils.FORMAT_DATE);
 		try {
 			Map<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("hotelId", hotelId);
 			parameters.put("beginTime", beginTime);
 			parameters.put("endTime", endTime);
 			parameters.put("billTime", billTime);
+			parameters.put("id",billSpecialId);
 			billSpecialMapper.updateBillSpecial(parameters);
 		} catch (Exception ex) {
 			throw new HmsException(-1, ex);
 		}
+	}
+
+	private String getBillTime(Date beginTime) {
+		Calendar beginTimeCalendar = Calendar.getInstance();
+		beginTimeCalendar.setTime(beginTime);
+		Date[] d = DateUtils.getWeekStartAndEndDate(beginTimeCalendar);
+		Date firstDateOfWeek = d[0], lastDateOfWeek = d[1];
+		String billTime = DateUtils.getStringFromDate(firstDateOfWeek, DateUtils.FORMAT_DATE) + "-" + DateUtils.getStringFromDate(lastDateOfWeek, DateUtils.FORMAT_DATE);
+		return billTime;
 	}
 
 	public int insertHotelId(Long hotelId) {

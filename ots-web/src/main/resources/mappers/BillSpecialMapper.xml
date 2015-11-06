@@ -74,9 +74,6 @@
     <if test="orderByClause != null" >
       order by ${orderByClause} desc
     </if>
-    <if test="limitStart != null and limitStart>-1" >
-      limit ${limitStart} , ${limitEnd}
-    </if>
   </select>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
@@ -404,5 +401,6 @@
     b_bill_special.billtime = #{billTime},
     b_bill_special.promotype = '1',
     b_bill_special.createTime = NOW()
+    where b_bill_special.id=#{id}
   </update>
 </mapper>
