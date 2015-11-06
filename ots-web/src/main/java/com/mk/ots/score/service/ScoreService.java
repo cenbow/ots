@@ -626,12 +626,15 @@ public class ScoreService {
 //		this.logger.info("返现开始下发乐住币，延迟时间【" + 10 + "】分钟订单号：{}，详细信息：{}", tHotelScore.getId(), gson.toJson(tHotelScore));
 		OtaOrder  order  = orderService.findOtaOrderById(tHotelScore.getOrderid());
 //		Boolean bl = orderService.afterScoreSendMessage(order,10,backcost);
-		Message message=  new  Message();
+		int changecount = tHotelScoreMapper.updateByPrimaryKey(tHotelScore);
+
+		Message message=  new Message();
 		message.setMid(tHotelScore.getMid());
 		message.setOrderId(tHotelScore.getOrderid());
 		message.setMessageTypeEnum(MessageTypeEnum.sms);
 		message.setCopywriterTypeEnum(CopywriterTypeEnum.order_comment_return);
 		message.setPhone(order.getContactsPhone());
+
 		careProducer.sendSmsMsg(message);
 
 		//发送app消息
@@ -639,7 +642,6 @@ public class ScoreService {
 		careProducer.sendAppMsg(message);
 
 
-		int changecount = tHotelScoreMapper.updateByPrimaryKey(tHotelScore);
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("success", true);
 		resultMap.put("cashbackcost", backcost);
