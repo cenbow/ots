@@ -36,7 +36,7 @@ public class DictionaryUpdater {
         try {
             List<String> words = FileUtils.readLines(new File(DictionaryUpdater.class.getResource("/library/ban.txt").getFile()),"utf-8");
             for(String word:words){
-                addWord(word);
+                addWord(word.toLowerCase());
             }
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
