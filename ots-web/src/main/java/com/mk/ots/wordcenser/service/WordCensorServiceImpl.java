@@ -37,7 +37,7 @@ public class WordCensorServiceImpl implements IWordCensorService {
     @Override
     public boolean containsInvalidWord(String origin) {
         if(StringUtils.isNotBlank(origin)) {
-            List<Term> terms = NlpAnalysis.parse(origin);
+            List<Term> terms = NlpAnalysis.parse(origin.toLowerCase());
             terms = FilterModifWord.modifResult(terms);
             for(Term t:terms){
                 if(DictionaryUpdater.RUDELY_WORD_NATURE.equals(t.getNatureStr())){
