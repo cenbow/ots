@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mk.ots.common.enums.ClearingTypeEnum;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.home.util.HomeConst;
+import com.mk.ots.mapper.BillOrderMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,8 @@ public class BillOrderDAO {
     private static final Logger logger = LoggerFactory.getLogger(BillOrderDAO.class);
     @Autowired
     NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    @Autowired
+    private BillOrderMapper billOrderMapper;
 
     private static final long TIME_FOR_FIFTEEN = 15 * 60 * 1000L;
 
@@ -128,6 +131,7 @@ public class BillOrderDAO {
         namedParameterJdbcTemplate.batchUpdate(insertSql, batchValues);
     }
 
+
     /**
      * 生成每日账单管理的订单数据
      * 每天查询本月内的没有插入到billorder里的数据
@@ -182,7 +186,7 @@ public class BillOrderDAO {
                 + "WHERE "
                 + "o.updatetime >= :startTime "
                 + "AND o.updatetime < :endTime "
-                + "AND o.orderstatus = 520 AND o.Ordertype = 1 "
+                + "AND o.orderstatus = 520 AND o.Ordertype = 1 and o.promotype = 0"
                 + "AND NOT EXISTS ( "
                 + "SELECT "
                 + "	 orderid "
@@ -232,7 +236,7 @@ public class BillOrderDAO {
                 + "o.updatetime >= :startTime "
                 + "AND o.updatetime < :endTime "
                 + "AND ox.checkintime >= :theLastMonthFirstDay "
-                + "AND ox.checkintime < :startTime "
+                + "AND ox.checkintime < :startTime and o.promotype = 0"
                 + "AND ((o.orderstatus IN (180, 190, 200) AND o.Ordertype = 2) "
                 + "OR (o.Ordertype = 1 AND o.Paystatus = 120)) "
                 + "AND NOT EXISTS ( "
@@ -282,7 +286,7 @@ public class BillOrderDAO {
                 + "LEFT JOIN b_promotion_price bpp ON o.id = bpp.otaorderid "
                 + "WHERE "
                 + "ox.checkintime >= :startTime "
-                + "AND ox.checkintime < :endTime "
+                + "AND ox.checkintime < :endTime and o.promotype = 0"
                 + "AND ((o.orderstatus IN (180, 190, 200) AND o.Ordertype = 2) "
                 + "OR (o.Ordertype = 1 AND o.Paystatus = 120)) "
                 + "AND NOT EXISTS ( "
@@ -618,13 +622,7 @@ public class BillOrderDAO {
                 logger.info("BillOrderDAO::genBillOrdersDay,已经执行了{}个酒店",i);
             }
 
-            String uHotelBillSql = "INSERT INTO b_bill_confirm_everyday "
-                    + "(hotelid, ordernum, topaynum, topaymon, hoteldiscountcost, servicecost, otherdiscountcost, cutofforders, cutoffcost, prepaymentnum, prepaymentcost, invaildcutofforders, createtime, begintime, endtime, prepaymentDiscount, toPayDiscount, billcost,"
-                    //钱包字段
-                    + "availablemoney) VALUES "
-                    + "(:hotelid, :ordernum, :topaynum, :topaymon, :hoteldiscountcost, :servicecost, :otherdiscountcost, :cutofforders, :cutoffcost, :prepaymentnum, :prepaymentcost, :invaildcutofforders, :createtime, :begintime, :endtime, :prepaymentDiscount, :toPayDiscount, :billcost,"
-                    //钱包字段
-                    + ":availablemoney)";
+
 
             namedParameterJdbcTemplate.batchUpdate(insertHotelBillSql, resultDay.toArray(new Map[0]));
             resultDay.clear();
@@ -640,7 +638,6 @@ public class BillOrderDAO {
      * 每月1号对账单数据每个酒店生成一个审核数据
      *    默认调度 传时间参数 8月1号（下个月1号）
      * @param isThreshold
-     * @param theMonth
      */
     public void genBillConfirmChecks(Date begintime, String hotelid, String isThreshold){//默认传过来下个月第一天 //如果是用户传过来则为一个用户日期+hotelid
 
@@ -1056,6 +1053,27 @@ public class BillOrderDAO {
             logger.info("更新订单状态为520，订单号为：{}", orderid);
         }
 
+    }
+
+    public List<Map> getBillOrderList(Long hotelId, Date beginTime, Date endTime){
+        Map params = new HashMap();
+        params.put("beginTime", beginTime);
+        params.put("endTime", endTime);
+        params.put("hotelId", hotelId);
+        return billOrderMapper.findBillOrder(params);
+    }
+
+    public List<Long> findBillOrderHotelId(Date beginTime, Date endTime){
+        Map params = new HashMap();
+        params.put("beginTime", beginTime);
+        params.put("endTime", endTime);
+        return billOrderMapper.findBillOrderHotelId(params);
+    }
+
+    public Map getFinanceOrder(Long orderId){
+        Map params = new HashMap();
+        params.put("orderId", orderId);
+        return billOrderMapper.findFinanceOrder(params);
     }
 
 }

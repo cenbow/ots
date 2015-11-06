@@ -52,7 +52,7 @@
                 <ref bean="refreshEsMikePriceTrigger"/>
                 <ref bean="confirmedPayingOrderTrigger"/>
                 <ref bean="payStatusErrorOrderTrigger"/>
-
+				<ref bean="billPromoOrdersTrigger"/>
                 <!--  暂时停掉  -->
                 <!--<ref bean="SendTicketJobTrigger"/>-->
 			</list>
@@ -128,7 +128,7 @@
 		<property name="name" value="lockRoomInAt12PMJob" />
 		<property name="jobClassName" value="com.mk.ots.job.LockRoomSatusInAt12PMQuartzJob" />
 	</bean>
-	<!-- 每晚的4点10分开始 酒店结算的订单数据-->
+	<!-- 每晚的4点10分开始 酒店结算的非特价订单数据-->
 	<bean id="billOrdersTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="billOrdersJobDetail" />
 		<property name="cronExpression" value="0 10 4 * * ?" />
@@ -137,6 +137,17 @@
 		<property name="name" value="billOrderJob" />
 		<property name="jobClassName" value="com.mk.ots.job.BillOrdersJob" />
 	</bean>
+
+	<!-- Day-of-Week(每周)：可以用数字1-7表示（1 ＝ 星期日） 每周一的4点10分开始 酒店结算的特价订单数据-->
+	<bean id="billPromoOrdersTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="billPromoOrdersJobDetail" />
+		<property name="cronExpression" value="0 10 4 ? * MON" />
+	</bean>
+	<bean id="billPromoOrdersJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="billPromoOrdersJob" />
+		<property name="jobClassName" value="com.mk.ots.job.BillPromoOrdersJob" />
+	</bean>
+
 	<!-- 每月的1号6点1分执行 酒店结算的审核数据 -->
 	<bean id="billConfirmTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="billConfirmJobDetail" />

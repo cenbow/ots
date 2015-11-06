@@ -1,14 +1,21 @@
 package com.mk.ots.test.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.common.collect.Maps;
+import com.mk.framework.es.ElasticsearchProxy;
+import com.mk.ots.bill.service.BillOrderService;
+import com.mk.ots.job.PushMessageJob;
+import com.mk.ots.job.SendCouponsJob;
+import com.mk.ots.job.SendLiveThreeCouponsJob;
+import com.mk.ots.job.SendTicketJob;
+import com.mk.ots.message.model.LPushLog;
+import com.mk.ots.message.model.MessageType;
+import com.mk.ots.message.service.IMessageService;
+import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.service.OrderServiceImpl;
+import com.mk.ots.pay.model.CouponParam;
+import com.mk.ots.rpc.IPmsSoapService;
+import com.mk.ots.test.service.TestService;
+import com.mk.ots.ticket.service.ITicketService;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.search.SearchHit;
@@ -22,20 +29,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.common.collect.Maps;
-import com.mk.framework.es.ElasticsearchProxy;
-import com.mk.ots.job.PushMessageJob;
-import com.mk.ots.job.SendCouponsJob;
-import com.mk.ots.job.SendLiveThreeCouponsJob;
-import com.mk.ots.job.SendTicketJob;
-import com.mk.ots.message.model.LPushLog;
-import com.mk.ots.message.model.MessageType;
-import com.mk.ots.message.service.IMessageService;
-import com.mk.ots.order.bean.OtaOrder;
-import com.mk.ots.pay.model.CouponParam;
-import com.mk.ots.rpc.IPmsSoapService;
-import com.mk.ots.test.service.TestService;
-import com.mk.ots.ticket.service.ITicketService;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/test", method = RequestMethod.POST)
@@ -57,7 +56,9 @@ public class TestController {
     @Autowired
     private IPmsSoapService pmsSoapService;
     @Autowired
-    private ITicketService iTicketService;
+	private ITicketService iTicketService;
+	@Autowired
+	private BillOrderService billOrderService;
 	@Autowired
 	private OrderServiceImpl orderService;
 
@@ -67,9 +68,7 @@ public class TestController {
 	/**
 	 * 意见反馈
 	 *
-	 * @param token
 	 *            ：用户
-	 * @param suggest
 	 *            ：意见
 	 * @return jeson
 	 */
@@ -91,9 +90,7 @@ public class TestController {
 	/**
 	 * 意见反馈
 	 *
-	 * @param token
 	 *            ：用户
-	 * @param suggest
 	 *            ：意见
 	 * @return jeson
 	 */
@@ -225,14 +222,6 @@ public class TestController {
     	map.put("couponParam", couponParam);
     	return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
     }
-
-	@RequestMapping("/getPromoType")
-	public ResponseEntity<Map<String, Object>> getPromoType(String roomId) {
-		String promoType = orderService.getPromoType(Long.valueOf(roomId));
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("promoType", promoType);
-		return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
-	}
 
     public TestService getTestService() {
         return this.testService;

@@ -163,7 +163,6 @@ public class WalletController {
 
                     BigDecimal bd = extend.getPrice();
                     extend.setPrice(bd.setScale(0, bd.ROUND_HALF_UP));
-
                 }catch (Exception e){
                     logger.error("uWalletCashFlow copy error:", e);
                 }
