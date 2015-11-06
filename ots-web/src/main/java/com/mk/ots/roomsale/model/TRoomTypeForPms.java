@@ -4,6 +4,7 @@ public class TRoomTypeForPms {
     private String roomTypeId;
     private Integer minCount;
     private Integer currCount;
+    private String isEdit;
 
     public String getRoomTypeId() {
         return roomTypeId;
@@ -27,5 +28,13 @@ public class TRoomTypeForPms {
 
     public void setCurrCount(Integer currCount) {
         this.currCount = currCount;
+    }
+
+    public String getIsEdit() {
+        return isEdit;
+    }
+
+    public void setIsEdit(String isEdit) {
+        this.isEdit = isEdit;
     }
 }
