@@ -1,6 +1,7 @@
 package com.mk.ots.bill.service;
 
 import com.mk.ots.bill.dao.BillOrderDAO;
+import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.exception.HmsException;
 import com.mk.ots.mapper.RoomSaleMapper;
 import org.apache.commons.collections.CollectionUtils;
@@ -32,11 +33,12 @@ public class BillOrderService {
 	}
 
 	/**
-	 * 特价账单-每天跑
+	 * 特价账单
 	 *
 	 * @return
 	 */
 	public void createBillReport(Date beginTime, Date endTime) {
+		endTime = DateUtils.addDays(endTime, 1);
 		List<Long> hotelIdList = billOrderDAO.findBillOrderHotelId(beginTime, endTime);
 		if(CollectionUtils.isEmpty(hotelIdList)){
 			logger.info("createBillReport hotelIdList is empty");

@@ -16,7 +16,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * 构建账单的订单数据 每天
+ * 构建账单的订单数据 每周一4.10分跑
  * 
  * @author zzy
  *
