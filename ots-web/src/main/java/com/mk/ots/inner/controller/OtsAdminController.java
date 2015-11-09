@@ -1,10 +1,12 @@
 package com.mk.ots.inner.controller;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.mk.framework.AppUtils;
+import com.mk.ots.bill.dao.BillOrderDAO;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,6 +191,7 @@ public class OtsAdminController {
 	 */
 	@RequestMapping(value = "/report/launchPromo", method = RequestMethod.POST)
 	public ResponseEntity<Map<String, Object>> launchBillRPPromotions(String startdateday, String enddateday) {
+		logger.info(String.format("url /report/launchPromo params startdateday[%s],enddateday[%s]", startdateday, enddateday));
 		Map<String, Object> datas = new HashMap<String, Object>();
 		try {
 			Date beginTime = DateUtils.getDateFromString(startdateday, DateUtils.FORMATSHORTDATETIME);
@@ -204,4 +207,35 @@ public class OtsAdminController {
 		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
 		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 	}
+
+	@RequestMapping(value = "/report/genBillOrders", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> genBillOrders(String startdateday) {
+		logger.info(String.format("url /report/genBillOrders params startdateday[%s]", startdateday));
+		Map<String, Object> datas = new HashMap<String, Object>();
+		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		// 获取上个月
+		BillOrderDAO billOrderDAO = AppUtils.getBean(BillOrderDAO.class);
+		Date beginTime = DateUtils.getDateFromString(startdateday, DateUtils.FORMATSHORTDATETIME);
+		Cat.logEvent("OtsJob", "BillOrdersJob.executeInternal", Event.SUCCESS, "");
+		logger.info("BillOrdersJob::genBillOrders::{}", beginTime);
+		billOrderDAO.genBillOrders(beginTime, null, null);
+		logger.info("BillOrdersJob::genBillOrders::end");
+		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+	}
+
+
+	@RequestMapping(value = "/report/runtWeekClearing", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> runtWeekClearing(String startdateday) {
+		logger.info(String.format("url /report/runtWeekClearing params startdateday[%s]", startdateday));
+		Map<String, Object> datas = new HashMap<String, Object>();
+		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		logger.info("周结算开始");
+		Date beginTime = DateUtils.getDateFromString(startdateday, DateUtils.FORMATSHORTDATETIME);
+		BillOrderService billOrderDAO = AppUtils.getBean(BillOrderService.class);
+		billOrderDAO.runtWeekClearing(beginTime, null);
+		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+	}
+
+
+
 }
