@@ -76,8 +76,7 @@ import com.mk.ots.ticket.service.parse.ITicketParse;
 import com.mk.ots.wallet.service.IWalletCashflowService;
 import com.mk.ots.wallet.service.IWalletService;
 import com.mk.ots.web.ServiceOutput;
-import com.mk.ots.wordcenser.job.TextFilterUtil;
-import com.mk.ots.wordcenser.service.IWordCensorService;
+import com.mk.ots.wordcenser.job.TextFilterService;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.myenum.PmsErrorEnum;
 import com.mk.sever.ServerChannel;
@@ -201,7 +200,7 @@ public class OrderServiceImpl implements OrderService {
     private RoomSaleConfigInfoMapper roomSaleConfigInfoMapper;
 
     @Autowired
-    private IWordCensorService wordCensorService;
+    TextFilterService textFilterService;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
     private static final long TIME_FOR_FIFTEEN = Long.parseLong(PropertyConfigurer.getProperty("transferCheckinUsernameTime"));
@@ -3208,7 +3207,7 @@ public class OrderServiceImpl implements OrderService {
                   needCheckInvalidWord = log != null ? !"F".equals(log.get("needCheckInvalidWord")) : true;
               }
 
-              if (needCheckInvalidWord && inUser.getName() != null  && TextFilterUtil.checkSensitiveWord(inUser.getName()).size() > 0) {
+              if (needCheckInvalidWord && inUser.getName() != null  && textFilterService.checkSensitiveWord(inUser.getName()).size() > 0) {
                   throw MyErrorEnum.errorParm.getMyException("您好，由于入住人姓名包含敏感词，不能办理预定，如有疑问，请联系我们的客服400-188-8733，谢谢！");
               }
 

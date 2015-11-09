@@ -1,28 +1,28 @@
 package com.mk.ots.wordcenser.job;
 
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
-public class TextFilterUtil {
+@Service
+public class TextFilterService {
 	// 日志
-	private static final Logger LOG = LoggerFactory.getLogger(TextFilterUtil.class);
+	private static final Logger LOG = LoggerFactory.getLogger(TextFilterService.class);
 	// 敏感词库
 	private static HashMap sensitiveWordMap = null;
 	// 默认编码格式
 	private static final String ENCODING = "gbk";
 	// 敏感词库的路径
-
+	@Autowired
+	NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	/**
 	 * 初始化敏感词库
 	 */
-	private static void init() {
+	private void init() {
 		// 读取文件
 		Set<String> keyWords = readSensitiveWords();
 		// 创建敏感词库
@@ -62,19 +62,13 @@ public class TextFilterUtil {
 	 *
 	 * @return
 	 */
-	private static Set<String> readSensitiveWords() {
+	private Set<String> readSensitiveWords() {
 		Set<String> keyWords = new HashSet<>();
-		try {
-			List<String> words = FileUtils.readLines(new File(DictionaryUpdater.class.getResource("/library/ban.txt").getFile()),"utf-8");
-			for (String w : words) {
-				keyWords.add(w.trim().toLowerCase());
-			}
-		} catch (UnsupportedEncodingException e) {
-			LOG.error("敏感词库文件转码失败!");
-		} catch (FileNotFoundException e) {
-			LOG.error("敏感词库文件不存在!");
-		} catch (IOException e) {
-			LOG.error("敏感词库文件读取失败!");
+		String sql = "select id, word from t_sensitive_words order by id asc";
+		List<Map<String, Object>> words = namedParameterJdbcTemplate.queryForList(sql, new HashMap());
+		for (Map<String, Object> word : words) {
+			String s = (String)word.get("word");
+			keyWords.add(s.toLowerCase());
 		}
 		return keyWords;
 	}
@@ -84,7 +78,7 @@ public class TextFilterUtil {
 	 *
 	 * @return
 	 */
-	public static List<String> checkSensitiveWord(String text) {
+	public List<String> checkSensitiveWord(String text) {
 		text = text.toLowerCase();
 		if (sensitiveWordMap == null) {
 			init();
@@ -118,7 +112,14 @@ public class TextFilterUtil {
 		return sensitiveWords;
 	}
 	
+	public void reload(){
+		LOG.error("sensitiveWordMap reload!");
+		init();
+		LOG.error("sensitiveWordMap ok!");
+	}
+	
 	public static void main(String[] args) {
-		System.out.println(TextFilterUtil.checkSensitiveWord("艾滋鱼"));;
+		TextFilterService filter = new TextFilterService();
+		System.out.println(filter.checkSensitiveWord("油炸艾滋鱼艹哈哈逼"));
 	}
 }
