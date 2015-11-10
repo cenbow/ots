@@ -27,12 +27,8 @@ public class HotelFrontPageQueryReqEntity extends ParamBaseBean implements Seria
 
 
 	// 经度
-	@NotNull(message = "缺少参数-用户经度: userlongitude.")
-	@NotEmpty(message = "接口参数userlongitude不能为空.")
 	private Double userlongitude;
 	// 纬度
-	@NotNull(message = "缺少参数-用户纬度: userlatitude.")
-	@NotEmpty(message = "接口参数userlatitude不能为空.")
 	private Double userlatitude;
 
 
