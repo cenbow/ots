@@ -2651,7 +2651,11 @@ public class OrderServiceImpl implements OrderService {
               }
           } else { //预付单
               if(now) { //当天单
-                  beginTime = DateUtils.getStringFromDate(calNow.getTime(), "yyyyMMddHHmmss").substring(0, 12)+"00";
+                  if(DateUtils.getStringFromDate(createTime, "yyyyMMdd").equals(beginTime)){
+                      beginTime = DateUtils.getStringFromDate(calNow.getTime(), "yyyyMMddHHmmss").substring(0, 12)+"00";
+                  }else{
+                      beginTime = beginTime + "120000";
+                  }
               } else {
                   beginTime = beginTime + "120000";
               }
