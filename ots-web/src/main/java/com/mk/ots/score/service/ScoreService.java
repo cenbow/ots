@@ -47,6 +47,8 @@ public class ScoreService {
 	private static final int SCORE_TYPE_USER = 1;// 评价类型 1:用户评价
 	private static final int SCORE_TYPE_REPLY = 2;// 评价类型 2:评价回复
 
+	private static final String REPLY_USER = "眯客回复:"; //回复用户统一显示为 眯客
+
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
@@ -461,7 +463,7 @@ public class ScoreService {
 			midList.add(b.getLong("mid"));
 			mids.append("?,");
 		}
-		String midsWhere= mids.toString();
+
 		List<Bean> memberList = new ArrayList<Bean>();
 		List<Bean> replyList = new ArrayList<Bean>();
 		if(ids.length()>1){
@@ -517,6 +519,7 @@ public class ScoreService {
 					Date hotelreplytime = replyBean.getDate("createtime");
 					m.put("hotelreplytime", sdf.format(hotelreplytime));
 				}
+				m.put("replyuser",  REPLY_USER);
 			}else{
 				m.put("hotelreply", "");
 				m.put("hotelreplytime", "");
