@@ -221,8 +221,10 @@ public class ScoreDAO {
 				+ "select a.subjectid,sum(a.grade)/count(*) as av,now() from t_hotel_score b "
 				+ " inner join  t_hotel_subject_mx a  on a.orderid=b.orderid " 
 				//20150923 产品讨论，只展示状态为4的记录
-				+ " where b.status=4  and b.type=1 " 
-				//+ " where (b.status=4 or b.status=5) and b.type=1 " 
+				//+ " where b.status=4  and b.type=1 "
+
+				//20151012  4:通过审核,未回复，5:未通过审核,已回复，7:通过审核,已回复
+				+ " where (b.status=4 or b.status=7) and b.type=1 "
 				+	" group by a.subjectid ";
 		int count = Db.update(sql);
 		logger.info("评分-->计算平均分:sql{}", sql);
@@ -242,8 +244,9 @@ public class ScoreDAO {
 				+ "left join (select hotelid,subjectid,sum(grade)/count(id) as av,count(id) as citem from t_hotel_subject_mx "
 				+ " where  orderid in ( select b.orderid from t_hotel_score b where "
 				//20150923 产品讨论，只展示状态为4的记录
-				+ " b.status=4 and type=1 ) "
-				//+ " (b.status=4 or b.status=5) and type=1 ) "
+				//+ " b.status=4 and type=1 ) "
+				//20151012  4:通过审核,未回复，5:未通过审核,已回复，7:通过审核,已回复
+				+ " (b.status=4 or b.status=7) and type=1 ) "
 				+ " group by hotelid,subjectid) a on s.subjectid=a.subjectid) pr "
 				+ "order by hotelid,subjectid";
 		int count =Db.update(sql);
@@ -457,9 +460,12 @@ public class ScoreDAO {
 		//sqlBuffer.append( " left join t_hotel_subject s on a.hotelid=s.hotelid where");
 		List paramsList= new ArrayList();
 
+		//20151012  4:通过审核,未回复，5:未通过审核,已回复，7:通过审核,已回复
+		sqlBuffer.append(" type=1 and ((a.status=4 or a.status=7) or a.mid=?)");
+		paramsList.add(mid);
 		//20150923 产品讨论，只展示状态为4的记录
-		sqlBuffer.append(" type=1 and a.status=4 ");//4:待回复
-		//2015-08-21修改为只显示已审核，已经回复的评价 
+		//sqlBuffer.append(" type=1 and a.status=4 ");//4:待回复
+		//2015-08-21修改为只显示已审核，已经回复的评价
 		//sqlBuffer.append(" type=1 and (a.status=4 or a.status=5)");
 
 		if(StringUtils.isNotBlank(roomid)){
@@ -546,7 +552,7 @@ public class ScoreDAO {
 		}
 	}
 
-	public List<Bean> findScoreGroupByGrade(String hotelid, String gradetype, String startdate, String enddate) {
+	public List<Bean> findScoreGroupByGrade(String hotelid, String gradetype, String startdate, String enddate, Long mid) {
 		String[] gradetypes= gradetype.split(",");
 		StringBuffer sqlBuffer = new StringBuffer();
 		List params = new ArrayList();
@@ -570,8 +576,13 @@ public class ScoreDAO {
 				sqlBuffer.append(" and createtime<= ? ");
 				params.add(enddate);
 			}
+
+			//20151012  4:通过审核,未回复，5:未通过审核,已回复，7:通过审核,已回复
+			sqlBuffer.append(" and ((status=4 or status=7) or mid=?)");//4:待回复
+			params.add(mid);
+
 			//20150923 产品讨论，只展示状态为4的记录
-			sqlBuffer.append(" and status=4 ");//4:待回复
+			//sqlBuffer.append(" and status=4 ");//4:待回复
 			//2015-08-21修改为只显示已审核，已经回复的评价 
 			//sqlBuffer.append(" and ( status=4 or status=5 )");//4:待回复，5:已经回复
 		}

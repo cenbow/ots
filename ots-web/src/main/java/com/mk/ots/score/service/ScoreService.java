@@ -573,7 +573,7 @@ public class ScoreService {
 		if(StringUtils.isBlank(gradetype)){
 			resultList = scoreDAO.findScoreGroup(hotelid, scoregroups, startdate, enddate, mid);
 		}else{
-			resultList = scoreDAO.findScoreGroupByGrade(hotelid, gradetype, startdate, enddate);
+			resultList = scoreDAO.findScoreGroupByGrade(hotelid, gradetype, startdate, enddate, mid);
 		}
 		return resultList;
 	}
