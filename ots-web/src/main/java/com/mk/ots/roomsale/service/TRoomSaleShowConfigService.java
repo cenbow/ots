@@ -1,5 +1,6 @@
 package com.mk.ots.roomsale.service;
 
+import com.mk.ots.roomsale.model.TRoomSaleCity;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.model.TRoomSaleShowConfig;
 
@@ -11,5 +12,7 @@ public interface TRoomSaleShowConfigService {
      * @return
      */
 
-    public List<TRoomSaleShowConfig> queryTRoomSaleShowConfig(String cityid,String  showArea);
+    public List<TRoomSaleShowConfig> queryTRoomSaleShowConfig(String cityid);
+
+    public  List<TRoomSaleCity> queryTRoomSaleCity(String cityid);
 }

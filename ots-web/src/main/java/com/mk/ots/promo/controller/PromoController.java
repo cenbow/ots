@@ -84,7 +84,7 @@ public class PromoController {
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.SERVICE_UNAVAILABLE);
 		}
 
-		List<TRoomSaleShowConfig>   troomSaleShowConfigList= tRoomSaleShowConfigService.queryTRoomSaleShowConfig(cityid,"index_h");
+		List<TRoomSaleShowConfig>   troomSaleShowConfigList= tRoomSaleShowConfigService.queryTRoomSaleShowConfig(cityid);
 		if(CollectionUtils.isEmpty(troomSaleShowConfigList)) {
 			rtnMap.put("promo",null);
 			logger.info(" query  troomSaleShowConfigList  is  null");

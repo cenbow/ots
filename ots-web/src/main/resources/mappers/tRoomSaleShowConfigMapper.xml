@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.mapper.RoomSaleTypeMapper">
+	<resultMap id="tRoomSaleShowConfig" type="com.mk.ots.roomsale.model.TRoomSaleShowConfig">
+	    <result property="id" column="id" />
+        <result property="promoicon" column="picUrl" />
+        <result property="promoid" column="saleTypeId" />
+        <result property="promotext" column="saleName" />
+	</resultMap>
+    <resultMap id="tRoomSaleCity" type="com.mk.ots.roomsale.model.TRoomSaleCity">
+        <result property="id" column="id" />
+        <result property="saleTypeId" column="saleTypeId" />
+        <result property="provinceCode" column="provinceCode" />
+        <result property="cityCode" column="cityCode" />
+    </resultMap>
+
+    <select id="queryTRoomSaleCity" resultMap="tRoomSaleCity"  parameterType="java.util.Map">
+       select
+             trsc.*
+        FROM
+            t_room_sale_city    trsc
+        where  trsc.cityCode  =  #{cityCode}
+    </select>
+
+    <select id="queryTRoomSaleShowConfigById" resultMap="tRoomSaleShowConfig"  parameterType="java.lang.Long">
+        select
+        trssc.*
+        FROM
+        t_room_sale_show_config    trssc
+        where  trssc.id  =  #{roomSaleShowConfigId}
+    </select>
+
+    <select id="queryTRoomSaleShowConfigByIds" resultMap="tRoomSaleShowConfig"  parameterType="java.lang.String">
+        select
+        trssc.picUrl,trssc.saleTypeId,trssc.saleName
+        FROM
+        t_room_sale_show_config    trssc
+        where  trssc.id   in  #{ids}
+    </select>
+</mapper>
