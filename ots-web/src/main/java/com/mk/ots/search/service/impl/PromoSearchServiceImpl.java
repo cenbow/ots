@@ -394,6 +394,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				List<Map<String, Object>> promolist = new ArrayList<Map<String, Object>>();
 
 				String promoType = "2";
+				params.setIspromoonly(Boolean.TRUE);
 				params.setLimit(HOMEPAGE_MIN);
 				params.setPromotype(promoType);
 				Map<String, Object> rtnMap = null;
