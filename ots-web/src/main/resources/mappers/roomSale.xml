@@ -218,6 +218,15 @@
         limit 1
     </select>
 
+
+    <select id="checkPromoCity" resultType="map" parameterType="String">
+        SELECT *
+        FROM t_room_sale_city
+        WHERE citycode = #{citycode}
+
+        limit 1
+    </select>
+
     <select id="queryRoomPromoByType" resultType="map" parameterType="String">
         SELECT startTime, endTime
         FROM  t_room_sale_config where roomTypeId = #{roomTypeId}

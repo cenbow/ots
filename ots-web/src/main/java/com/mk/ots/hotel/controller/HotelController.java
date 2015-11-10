@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.mk.framework.AppUtils;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.enums.FrontPageEnum;
 import com.mk.ots.common.enums.HotelSortEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
@@ -19,6 +20,7 @@ import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
+import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
@@ -70,6 +72,9 @@ public class HotelController {
 	private ISearchService searchService;
 	@Autowired
 	private IPromoSearchService promoSearchService;
+
+	@Autowired
+	private RoomSaleService roomSaleService;
 
 	/**
 	 * 
@@ -202,6 +207,8 @@ public class HotelController {
 			distanceQueryList.setEnddateday(strNextDay);
 			distanceQueryList.setOrderby(HotelSortEnum.DISTANCE.getId());
 			distanceQueryList.setIspromoonly(false);
+			distanceQueryList.setPage(FrontPageEnum.page.getId());
+			distanceQueryList.setLimit(FrontPageEnum.limit.getId());
 
 			Map<String, Object> distanceResultMap = searchService.readonlySearchHotels(distanceQueryList);
 			distanceResultMap.put("normalid",HotelSortEnum.DISTANCE.getId());
@@ -222,6 +229,8 @@ public class HotelController {
 			priceQueryList.setEnddateday(strNextDay);
 			priceQueryList.setOrderby(HotelSortEnum.PRICE.getId());
 			priceQueryList.setIspromoonly(false);
+			priceQueryList.setPage(FrontPageEnum.page.getId());
+			priceQueryList.setLimit(FrontPageEnum.limit.getId());
 
 			Map<String, Object> priceResultMap = searchService.readonlySearchHotels(priceQueryList);
 
@@ -243,6 +252,8 @@ public class HotelController {
 			orderNumQueryList.setEnddateday(strNextDay);
 			orderNumQueryList.setOrderby(HotelSortEnum.ORDERNUMS.getId());
 			orderNumQueryList.setIspromoonly(false);
+			orderNumQueryList.setPage(FrontPageEnum.page.getId());
+			orderNumQueryList.setLimit(FrontPageEnum.limit.getId());
 
 			Map<String, Object> orderNumResultMap = searchService.readonlySearchHotels(orderNumQueryList);
 
@@ -439,6 +450,7 @@ public class HotelController {
 	}
 
 
+
 	/**
 	 * 首页查询接口 根据cityid 获得搜索获得信息.
 	 *
@@ -476,7 +488,8 @@ public class HotelController {
 			Date day = new Date();
 			long starttime = day.getTime();
 
-			if (reqentity.getCityid().equals("310000")){
+			Boolean isPromoCity = roomSaleService.checkPromoCity(reqentity.getCityid());
+			if (!isPromoCity){
 				List<Map<String, Object>> normalList = normalFrontPageList(reqentity);
 				rtnMap.put("promolist", normalList);
 			}else {

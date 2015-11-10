@@ -50,6 +50,7 @@ public interface RoomSaleService {
 	public List<Map<String, Object>> queryRoomPromoInfoByHotelAndPromoType(String hotelId, Integer promoType) throws Exception;
 	public Map<String, Object> queryRoomPromoInfo() throws Exception;
 	public Boolean checkRoomSale(TRoomSaleConfig bean);
+	public Boolean checkPromoCity(String cityCode);
 	public Boolean checkRoomSaleWithOldRoomType(TRoomSaleConfig bean);
 	public List<RoomSaleToIndexDto> getUpdateIndexList(TRoomSaleConfig bean);
 	public List<Map<String, Object>> queryRoomByHotelAndRoomType(String hotelId, String roomTypeId) throws Exception;
