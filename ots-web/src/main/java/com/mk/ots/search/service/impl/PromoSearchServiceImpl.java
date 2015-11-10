@@ -1323,7 +1323,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 
 				if (promoType != null) {
-					List<Map<String, Integer>> promoList = (List) result.get("promoinfo");
+					List<Map<String, Integer>> promoList = (List<Map<String, Integer>>) result.get("promoinfo");
 					if (promoList != null) {
 						for (Map<String, Integer> promoinfo : promoList) {
 							Integer hotelPromoType = promoinfo.get("promotype");
