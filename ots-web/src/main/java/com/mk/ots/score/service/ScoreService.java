@@ -506,7 +506,7 @@ public class ScoreService {
 			m.put("allgrade", gr);
 			Date createtime = bb.getDate("createtime");
 			m.put("createtime", sdf.format(createtime));
-			
+			m.put("userimage","http://7xn138.com2.z0.glb.qiniucdn.com/20151110_userimagedefault.png");
 			Long id= bb.getLong("id");
 			Bean replyBean = replyMap.get(id);
 			if( null != replyBean ){
