@@ -180,9 +180,9 @@ public class HotelController {
 		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(new Date(), 1),
 				DateUtils.FORMATSHORTDATETIME);
 		
-		hotelEntity.setCityid(hotelEntity.getCityid());
-		hotelEntity.setUserlatitude(hotelEntity.getUserlatitude());
-		hotelEntity.setUserlongitude(hotelEntity.getUserlongitude());
+		hotelEntity.setCityid(reqentity.getCityid());
+		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
+		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
 		hotelEntity.setStartdateday(strCurDay);
 		hotelEntity.setEnddateday(strNextDay);
 		hotelEntity.setIspromoonly(true);
