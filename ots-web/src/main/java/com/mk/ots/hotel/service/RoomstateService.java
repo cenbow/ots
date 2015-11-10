@@ -1250,6 +1250,7 @@ public class RoomstateService {
 						room.setRoomno(troom.getName());
 						room.setRoomname(roomtype.getRoomtypename());
 						room.setHaswindow(troom.getIsWindow() == null ? "" : troom.getIsWindow()); // TODO
+						room.setFloor(troom.getFloor() == null ? "" : troom.getFloor()); //显示楼层信息
 																									// t_room关联t_room_setting
 						// room.setBed(bed);
 						// 与redis房态缓存比较：vc可用，nvc不可用
