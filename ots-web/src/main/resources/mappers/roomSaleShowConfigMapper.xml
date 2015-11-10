@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.mapper.RoomSaleTypeMapper">
+	<resultMap id="tRoomSaleShowConfig" type="com.mk.ots.roomsale.model.TRoomSaleShowConfig">
+	    <result property="id" column="id" />
+        <result property="promoicon" column="picUrl" />
+        <result property="promoid" column="saleTypeId" />
+        <result property="promotext" column="saleTypeName" />
+	</resultMap>
+
+    <select id="queryTRoomSaleShowConfig" resultMap="tRoomSaleShowConfig" parameterType="java.util.Map">
+       select
+              trssc.id as  id,trssc.picUrl as  picUrl,trst.id  as  saleTypeId,trst.saleName  as  saleTypeName
+        FROM
+              T_ROOM_SALE_SHOW_CONFIG    trssc
+        INNER JOIN  t_room_sale_city    trsc
+             on   trssc.saleTypeId = saleTypeId
+        INNER  JOIN   t_room_sale_type    trst
+             on  trst.id = saleTypeId
+        where ( trsc.cityCode  =  #{cityCode}   or   trsc.cityCode  = -1 )
+        <if test="showArea != null">
+            trssc.showArea = #{showArea}
+        </if>
+         order    by    trssc.ord
+
+    </select>
+</mapper>

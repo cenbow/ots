@@ -1,7 +1,11 @@
 package com.mk.ots.promo.controller;
 
+import java.util.List;
 import java.util.Map;
 
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.roomsale.model.TRoomSaleShowConfig;
+import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import org.elasticsearch.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -36,6 +41,9 @@ public class PromoController {
 	
 	@Autowired
 	private IMemberService iMemberService;
+
+	@Autowired
+	private TRoomSaleShowConfigService tRoomSaleShowConfigService;
 	
 	@RequestMapping("/handgennewticket")
 	public ResponseEntity<Map<String, Object>> handGenTicket(String authcode, String regmid) {
@@ -63,5 +71,31 @@ public class PromoController {
 		rtnMap.put("success", true);
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
-	
+
+	@RequestMapping("/promo/queryinfo")
+	public ResponseEntity<Map<String, Object>>  queryActivityListByCity(ParamBaseBean pbb,String cityid) {
+		logger.info("【/promo/queryinfo】 begin...");
+		Map<String, Object> rtnMap = Maps.newHashMap();
+		if(Strings.isNullOrEmpty(cityid)){
+			rtnMap.put("success", false);
+			rtnMap.put("errcode", 503);
+			rtnMap.put("errmsg", "城市编码不能为空");
+			logger.error(" parme  cityid  is  null");
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.SERVICE_UNAVAILABLE);
+		}
+
+		List<TRoomSaleShowConfig>   troomSaleShowConfigList= tRoomSaleShowConfigService.queryTRoomSaleShowConfig(cityid,"index_h");
+		if(CollectionUtils.isEmpty(troomSaleShowConfigList)) {
+			rtnMap.put("promo",null);
+			logger.info(" query  troomSaleShowConfigList  is  null");
+		} else {
+			rtnMap.put("promo", troomSaleShowConfigList);
+			logger.info(" query  troomSaleShowConfigList ",troomSaleShowConfigList);
+		}
+		rtnMap.put("errmsg",null);
+		rtnMap.put("errcode",0);
+		rtnMap.put("success", true);
+		logger.info("【/promo/queryinfo】 end...");
+		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+	}
 }

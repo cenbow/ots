@@ -1056,4 +1056,5 @@ public class HotelController {
 	// return new
 	// ResponseEntity<Map<String,Object>>(hotelService.readonlyClearEsHotelNotInTHotel(citycode),HttpStatus.OK);
 	// }
+
 }
