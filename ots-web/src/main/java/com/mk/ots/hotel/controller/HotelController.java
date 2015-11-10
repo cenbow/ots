@@ -205,6 +205,36 @@ public class HotelController {
 		return true;
 	}
 
+	/**
+	 * 首页特价搜索API.
+	 * 
+	 * @param request
+	 * @param reqentity
+	 * @param errors
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = { "/hotel/front/querylist" })
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> searchFrontHotels(HttpServletRequest request,
+			@Valid HotelQuerylistReqEntity reqentity, Errors errors) throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		String params = objectMapper.writeValueAsString(request.getParameterMap());
+		logger.info("【/hotel/querylist】 begin...");
+		logger.info("remote client request ui is: {}", request.getRequestURI());
+		logger.info("【/hotel/querylist】 request params is : {}", params);
+		logger.info("【/hotel/querylist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
+
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		try {
+			rtnMap = promoSearchService.searchHomePromos(reqentity);
+		} catch (Exception ex) {
+			logger.error("", ex);
+		}
+
+		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+	}
+
 	@RequestMapping(value = { "/hotel/querypromolist" })
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> searchPromoHotels(HttpServletRequest request,
@@ -346,12 +376,12 @@ public class HotelController {
 	}
 
 	/**
-	 *  查询酒店房价信息
+	 * 查询酒店房价信息
 	 *
 	 */
 	@RequestMapping(value = { "/roomstate/queryprice" })
 	public ResponseEntity<Map<String, Object>> getHotelRoomPrice(ParamBaseBean pbb, String roomno,
-																 @Valid RoomstateQuerylistReqEntity params, Errors errors) throws Exception {
+			@Valid RoomstateQuerylistReqEntity params, Errors errors) throws Exception {
 		logger.info("【/roomstate/queryprice】 params is : {}", pbb.toString());
 		// 办理再次入住传 roomno
 		// 调用service方法

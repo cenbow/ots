@@ -183,13 +183,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	@Autowired
 	private SSubwayStationMapper subwayStationMapper;
-
+	
 	private LocalDateTime promoStartTime;
 	private LocalDateTime promoEndTime;
 
 	private final SimpleDateFormat defaultFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 
 	private final int minItemCount = 5;
+
+	private final int HOMEPAGE_MIN = 3;
 
 	/*
 	 * 获取 区域位置类型
@@ -350,6 +352,140 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return validateStr;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> searchHomePromos(HotelQuerylistReqEntity params) throws Exception{
+		Map<String, Object> rtnMap = Maps.newHashMap();
+
+		// 酒店搜索校验: 开始
+		String validateStr = this.getValidateSearchHotels(params);
+		if (StringUtils.isNotBlank(validateStr)) {
+			logger.error("readonlySearchHotels:: method error: {}", validateStr);
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, validateStr);
+			return rtnMap;
+		}
+		// 酒店搜索校验: 结束
+
+		if (StringUtils.isBlank(params.getHotelid())) {
+			// 必填参数默认值处理：开始
+			if (StringUtils.isBlank(params.getCityid())) {
+				params.setCityid(Constant.STR_CITYID_SHANGHAI);
+			}
+			// 用户坐标经纬度值没有,先判断屏幕坐标经纬度值，有的话用屏幕坐标经纬度，没有默认上海市中心位置
+			if (params.getUserlongitude() == null) {
+				if (params.getPillowlongitude() == null) {
+					params.setUserlongitude(Constant.LON_SHANGHAI);
+				} else {
+					params.setUserlongitude(params.getPillowlongitude());
+				}
+			}
+			if (params.getUserlatitude() == null) {
+				if (params.getPillowlatitude() == null) {
+					params.setUserlatitude(Constant.LAT_SHANGHAI);
+				} else {
+					params.setUserlatitude(params.getPillowlatitude());
+				}
+			}
+			if (params.getPage() == null || params.getPage() <= 0) {
+				params.setPage(SearchConst.SEARCH_PAGE_DEFAULT);
+			}
+			if (params.getLimit() == null || params.getLimit() <= 0) {
+				params.setLimit(SearchConst.SEARCH_LIMIT_DEFAULT);
+			}
+
+			// 眯客3.0：搜索酒店周边的酒店
+			if (StringUtils.isNotBlank(params.getExcludehotelid())) {
+				// 如果是酒店周边搜索，默认搜索半径为5000米
+				if (params.getRange() == null || params.getRange() <= 0) {
+					params.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
+				}
+			} else {
+				if (params.getRange() == null || params.getRange() <= 0) {
+					params.setRange(SearchConst.SEARCH_RANGE_MAX);
+				}
+			}
+			// 必填参数默认值处理：结束
+		}
+
+		try {
+			List<Map<String, Object>> promolist = new ArrayList<Map<String, Object>>();
+			
+			String promoType = "2";
+			params.setLimit(HOMEPAGE_MIN);
+			params.setPromotype(promoType);
+			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+
+			Map<String, Object> promoItem = new HashMap<String, Object>();
+			promolist.add(promoItem);
+
+			List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+			if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
+				promoItem.put("hotel", hotels);
+			}
+			promoItem.put("promoicon", "");
+			promoItem.put("promonote", "每天12: 00-18: 00，订房享受特价");
+			promoItem.put("promotext", "今日特价");			
+			promoItem.put("promotype", promoType);
+			
+			promoItem = new HashMap<String, Object>();
+			promolist.add(promoItem);			
+			promoType = "1";
+			params.setPromotype(promoType);
+			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+			if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
+				promoItem.put("hotel", hotels);
+			}
+			promoItem.put("promoicon", "");
+			promoItem.put("promonote", "每天20: 00-02: 00，订房30元起");
+			promoItem.put("promotext", "今夜特价");			
+			promoItem.put("promotype", promoType);
+			
+			promoItem = new HashMap<String, Object>();
+			promolist.add(promoItem);	
+			promoType = "3";
+			params.setPromotype(promoType);
+			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+			if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
+				promoItem.put("hotel", hotels);
+			}
+			promoItem.put("promoicon", "");
+			promoItem.put("promonote", "总有一款适合你");
+			promoItem.put("promotext", "主题酒店");			
+			promoItem.put("promotype", promoType);
+			
+			promoItem = new HashMap<String, Object>();
+			promolist.add(promoItem);	
+			promoType = "6";
+			params.setPromotype(promoType);
+			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+			if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
+				promoItem.put("hotel", hotels);
+			}
+			promoItem.put("promoicon", "");
+			promoItem.put("promonote", "一元秒杀， 先到先得");
+			promoItem.put("promotext", "一元体验");			
+			promoItem.put("promotype", promoType);
+			
+			rtnMap.put("promolist", promolist);
+			rtnMap.put("normalid", "0");
+			rtnMap.put("errcode", "0");
+			rtnMap.put("success", true);
+			return rtnMap;
+		} catch (Exception e) {
+			logger.error("search hotel error: {}\n", e.getMessage());
+			rtnMap.put("success", false);
+			rtnMap.put("errcode", "-1");
+			rtnMap.put("errmsg", e.getMessage());
+		}
+
+		return rtnMap;
+	}
+	
 	/**
 	 * 酒店搜索
 	 */
