@@ -434,7 +434,7 @@ public class ScoreService {
 	public List<Map<String,Object>> findScoreMxStatus(String hotelid,String roomtypeid,String roomid, String maxgrade, String mingrade,
 			String subjectid, String orderby, String startdateday,
 			String enddateday, String starttime, String endtime,String page,String limit, Long mid, String gradetype) {
-		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 		int pageInt=1;
 		int limitInt=10;
 		if(StringUtils.isNotBlank(page)){
