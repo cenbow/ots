@@ -55,5 +55,5 @@ public interface IPromoSearchService {
      */
     public boolean isInPromoPeriod();
     
-    public Map<String, Object> searchHomePromos(HotelQuerylistReqEntity params) throws Exception;
+    public List<Map<String, Object>> searchHomePromos(HotelQuerylistReqEntity params) throws Exception;
 }

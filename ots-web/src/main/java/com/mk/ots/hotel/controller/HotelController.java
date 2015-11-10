@@ -174,6 +174,23 @@ public class HotelController {
 		return resultMap;
 	}
 
+	private List<Map<String, Object>> promoFrontPageList(HotelFrontPageQueryReqEntity reqentity) throws Exception {
+		HotelQuerylistReqEntity hotelEntity = new HotelQuerylistReqEntity();
+		String strCurDay = DateUtils.getStringFromDate(new Date(), DateUtils.FORMATSHORTDATETIME);
+		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(new Date(), 1),
+				DateUtils.FORMATSHORTDATETIME);
+		
+		hotelEntity.setCityid(hotelEntity.getCityid());
+		hotelEntity.setUserlatitude(hotelEntity.getUserlatitude());
+		hotelEntity.setUserlongitude(hotelEntity.getUserlongitude());
+		hotelEntity.setStartdateday(strCurDay);
+		hotelEntity.setEnddateday(strNextDay);
+		hotelEntity.setIspromoonly(true);
+		hotelEntity.setPage(FrontPageEnum.page.getId());
+		hotelEntity.setLimit(FrontPageEnum.limit.getId());
+
+		return promoSearchService.searchHomePromos(hotelEntity);
+	}
 
 	/**
 	 *
@@ -182,8 +199,7 @@ public class HotelController {
 	 * @param
 	 * @return
 	 */
-	private List<Map<String, Object>>  normalFrontPageList(HotelFrontPageQueryReqEntity hotelEntity)
-			throws Exception {
+	private List<Map<String, Object>> normalFrontPageList(HotelFrontPageQueryReqEntity hotelEntity) throws Exception {
 
 		Map<String, Object> resultMap = new HashMap<>();
 		List<Map<String, Object>> normaList = new ArrayList<>();
@@ -211,11 +227,11 @@ public class HotelController {
 			distanceQueryList.setLimit(FrontPageEnum.limit.getId());
 
 			Map<String, Object> distanceResultMap = searchService.readonlySearchHotels(distanceQueryList);
-			distanceResultMap.put("normalid",HotelSortEnum.DISTANCE.getId());
-			distanceResultMap.put("promnote","");
-			distanceResultMap.put("promoicon","");
-			distanceResultMap.put("promotext","最近距离");
-			distanceResultMap.put("promotype",-1);
+			distanceResultMap.put("normalid", HotelSortEnum.DISTANCE.getId());
+			distanceResultMap.put("promnote", "");
+			distanceResultMap.put("promoicon", "");
+			distanceResultMap.put("promotext", "最近距离");
+			distanceResultMap.put("promotype", -1);
 
 			normaList.add(distanceResultMap);
 
@@ -234,11 +250,11 @@ public class HotelController {
 
 			Map<String, Object> priceResultMap = searchService.readonlySearchHotels(priceQueryList);
 
-			priceResultMap.put("normalid",HotelSortEnum.PRICE.getId());
-			priceResultMap.put("promnote","");
-			priceResultMap.put("promoicon","");
-			priceResultMap.put("promotext","最便宜");
-			priceResultMap.put("promotype",-1);
+			priceResultMap.put("normalid", HotelSortEnum.PRICE.getId());
+			priceResultMap.put("promnote", "");
+			priceResultMap.put("promoicon", "");
+			priceResultMap.put("promotext", "最便宜");
+			priceResultMap.put("promotype", -1);
 
 			normaList.add(priceResultMap);
 
@@ -257,11 +273,11 @@ public class HotelController {
 
 			Map<String, Object> orderNumResultMap = searchService.readonlySearchHotels(orderNumQueryList);
 
-			orderNumResultMap.put("normalid",HotelSortEnum.ORDERNUMS.getId());
-			orderNumResultMap.put("promnote","");
-			orderNumResultMap.put("promoicon","");
-			orderNumResultMap.put("promotext","最受欢迎");
-			orderNumResultMap.put("promotype",-1);
+			orderNumResultMap.put("normalid", HotelSortEnum.ORDERNUMS.getId());
+			orderNumResultMap.put("promnote", "");
+			orderNumResultMap.put("promoicon", "");
+			orderNumResultMap.put("promotext", "最受欢迎");
+			orderNumResultMap.put("promotype", -1);
 
 			normaList.add(orderNumResultMap);
 
@@ -271,11 +287,8 @@ public class HotelController {
 
 		}
 
-
 		return normaList;
 	}
-
-
 
 	private boolean validateAccessibility(HotelQuerylistReqEntity reqentity) {
 		String callVersion = reqentity.getCallversion() == null ? "" : reqentity.getCallversion().trim();
@@ -307,36 +320,6 @@ public class HotelController {
 		}
 
 		return true;
-	}
-
-	/**
-	 * 首页特价搜索API.
-	 * 
-	 * @param request
-	 * @param reqentity
-	 * @param errors
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = { "/hotel/front/querylist" })
-	@ResponseBody
-	public ResponseEntity<Map<String, Object>> searchFrontHotels(HttpServletRequest request,
-			@Valid HotelQuerylistReqEntity reqentity, Errors errors) throws Exception {
-		ObjectMapper objectMapper = new ObjectMapper();
-		String params = objectMapper.writeValueAsString(request.getParameterMap());
-		logger.info("【/hotel/querylist】 begin...");
-		logger.info("remote client request ui is: {}", request.getRequestURI());
-		logger.info("【/hotel/querylist】 request params is : {}", params);
-		logger.info("【/hotel/querylist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
-
-		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		try {
-			rtnMap = promoSearchService.searchHomePromos(reqentity);
-		} catch (Exception ex) {
-			logger.error("", ex);
-		}
-
-		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = { "/hotel/querypromolist" })
@@ -479,8 +462,6 @@ public class HotelController {
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 
-
-
 	/**
 	 * 首页查询接口 根据cityid 获得搜索获得信息.
 	 *
@@ -493,7 +474,7 @@ public class HotelController {
 	@RequestMapping(value = { "/hotel/front/querylist" })
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> searchFrontPage(HttpServletRequest request,
-														   @Valid HotelFrontPageQueryReqEntity reqentity, Errors errors) throws Exception {
+			@Valid HotelFrontPageQueryReqEntity reqentity, Errors errors) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String params = objectMapper.writeValueAsString(request.getParameterMap());
 		logger.info("【/hotel/querylist】 begin...");
@@ -519,12 +500,13 @@ public class HotelController {
 			long starttime = day.getTime();
 
 			Boolean isPromoCity = roomSaleService.checkPromoCity(reqentity.getCityid());
-			if (!isPromoCity){
-				List<Map<String, Object>> normalList = normalFrontPageList(reqentity);
-				rtnMap.put("promolist", normalList);
-			}else {
-
+			List<Map<String, Object>> promolist = null;
+			if (!isPromoCity) {
+				promolist = normalFrontPageList(reqentity);
+			} else {
+				promolist = promoFrontPageList(reqentity);
 			}
+			rtnMap.put("promolist", promolist);
 
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
 					HttpStatus.OK);
@@ -542,11 +524,10 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
-			logger.error("【/hotel/querylist】 is error: {} ", e.getMessage());
+			logger.error("【/hotel/querylist】 is error... ", e);
 		}
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
-
 
 	/**
 	 * 查询酒店房价信息
