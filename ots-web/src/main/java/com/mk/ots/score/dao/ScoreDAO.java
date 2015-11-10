@@ -11,21 +11,20 @@ import org.springframework.stereotype.Repository;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
 import com.mk.orm.plugin.bean.IAtom;
-
 /**
  * 评分
- * 
+ *
  * @author LYN
  *
  */
 @Repository
 public class ScoreDAO {
 
-    private Logger logger = org.slf4j.LoggerFactory.getLogger(ScoreDAO.class);
-    
+	private Logger logger = org.slf4j.LoggerFactory.getLogger(ScoreDAO.class);
+
 	/**
 	 * 插入评价信息,
-	 * 
+	 *
 	 * @param score
 	 * @return
 	 */
@@ -51,7 +50,7 @@ public class ScoreDAO {
 
 	/**
 	 * 插入评价信息,
-	 * 
+	 *
 	 * @param score
 	 * @return
 	 */
@@ -68,7 +67,7 @@ public class ScoreDAO {
 					sql="insert into t_hotel_subject_mx (roomid,roomtypeid,hotelid,grade,createtime,subjectid,orderid)values(?,?,?,?,now(),?,?)";
 				}
 				for (int i = 0; i < size; i++) {
-					List ss = (List) sList.get(i);					
+					List ss = (List) sList.get(i);
 					int c = Db.update(sql, ss.toArray());
 					cc += c;
 				}
@@ -78,7 +77,7 @@ public class ScoreDAO {
 		});
 		return true;
 	}
-	
+
 	public boolean isExistsGrade(String orderid){
 		String sql="select count(*) from t_hotel_subject_mx where orderid=?";
 		long count=Db.queryLong(sql,orderid);
@@ -93,7 +92,7 @@ public class ScoreDAO {
 		boolean succeed = Db.tx(new IAtom() {
 			public boolean run() throws SQLException {
 				String cSql = "delete from t_hotel_score where orderid=?";
-				int c = Db.update(cSql, orderid);	
+				int c = Db.update(cSql, orderid);
 				String sql = "delete from t_hotel_subject_mx where orderid=?";
 				int ccc = Db.update(sql, orderid);
 				return true;
@@ -103,7 +102,7 @@ public class ScoreDAO {
 	}
 	/**
 	 * 查询所有评分项
-	 * 
+	 *
 	 * @return
 	 */
 	public List<Bean> findSubject(String subjectid) {
@@ -125,9 +124,9 @@ public class ScoreDAO {
 	 */
 	public Bean findScoreSByHotelid(String hotelid){
 		Long mid=null;
-		return this.findScoreSByHotelid(hotelid,  mid);	
+		return this.findScoreSByHotelid(hotelid,  mid);
 	}
-	
+
 	/**
 	 * 查询酒店总评分
 	 * @param hotelid
@@ -136,31 +135,30 @@ public class ScoreDAO {
 	public Bean findScoreSByHotelid(String hotelid, Long mid){
 		Bean scoreS = null;
 		try {
-		    ////String sql="select * from (select hotelid,s from t_hotel_subject s where hotelid=?)ss,(select count(*) as itemc from t_hotel_score where hotelid=?) bb ";
-		    StringBuffer sql= new StringBuffer();
-//		    sql.append("select a.*,b.s as grade from ");
-//		    sql.append( " (select hotelid,count(id) as scorecount from t_hotel_score where type=1  group by hotelid) a ");
-//		    sql.append(" left join t_hotel_subject b on a.hotelid=b.hotelid where a.hotelid=?");
-		    List<Object> params = new ArrayList<Object>();
-		    params.add(hotelid);
-		    sql.append("select a.hotelid,count(*) as scorecount, b.s as grade from  t_hotel_score a left join t_hotel_subject b on a.hotelid=b.hotelid where a.hotelid=? and a.type=1 ");
-		    //20150923 产品讨论，只展示状态为4的记录
-			sql.append(" and a.status=4 ");//4:待回复
-		    //4:待回复，5:已经回复
+			StringBuffer sql= new StringBuffer();
+			List<Object> params = new ArrayList<Object>();
+			params.add(hotelid);
+			sql.append("select a.hotelid,count(*) as scorecount, b.s as grade from  t_hotel_score a left join t_hotel_subject b on a.hotelid=b.hotelid where a.hotelid=? and a.type=1 ");
+			//20151012  4:通过审核,未回复，5:未通过审核,已回复，7:通过审核,已回复
+			sql.append(" and ((a.status=4 or a.status=7) or a.mid=?)");
+			params.add(mid);
+			//20150923 产品讨论，只展示状态为4的记录
+			//sql.append(" and a.status=4 ");//4:待回复
+			//4:待回复，5:已经回复
 			//sql.append(" and ( a.status=4 or a.status=5 ) ");
-		    
-		    logger.info("findScoreSByHotelid method sql is：\n {}", sql.toString());
-		    logger.info("sql parameter hotelid value is: {} ", params.toString());
-		    scoreS = Db.findFirst(sql.toString(), params.toArray());
-		    if (scoreS != null) {
-		        logger.info("酒店评分数据信息：\n {}", scoreS.toJson());
-		    } else {
-		        logger.info("酒店hotelid: {} 没有评分数据.", hotelid);
-		    }
-        } catch (Exception e) {
-            logger.error("查询酒店评分信息出错：");
-            logger.error("findScoreSByHoetlid method is error:\n {}", e.getMessage());
-        }
+
+			logger.info("findScoreSByHotelid method sql is：\n {}", sql.toString());
+			logger.info("sql parameter hotelid value is: {} ", params.toString());
+			scoreS = Db.findFirst(sql.toString(), params.toArray());
+			if (scoreS != null) {
+				logger.info("酒店评分数据信息：\n {}", scoreS.toJson());
+			} else {
+				logger.info("酒店hotelid: {} 没有评分数据.", hotelid);
+			}
+		} catch (Exception e) {
+			logger.error("查询酒店评分信息出错：");
+			logger.error("findScoreSByHoetlid method is error:\n {}", e.getMessage());
+		}
 		return scoreS;
 	}
 	/**
@@ -175,20 +173,14 @@ public class ScoreDAO {
 		params.add(roomtypeid);
 		StringBuffer sql = new StringBuffer();
 		sql.append(" select hotelid,roomtypeid,sum(grade)/count(*) as grades,count(*) as itemc from t_hotel_score where hotelid=? and roomtypeid=? and type=1 ");
-		
+		//20151012  4:通过审核,未回复，5:未通过审核,已回复，7:通过审核,已回复
+		sql.append(" and ((status=4 or status=7) or mid=?)");
+		params.add(mid);
 		//20150923 产品讨论，只展示状态为4的记录
-		sql.append(" and status=4 ");//4:待回复
-		//2015-08-21修改为只显示已审核，已经回复的评价 
+		//sql.append(" and status=4 ");//4:待回复
+		//2015-08-21修改为只显示已审核，已经回复的评价
 		//sql.append(" and ( status=4 or status=5 )");//4:待回复，5:已经回复
-		/*
-		if(mid != null){
-		    	sql.append(" and (( status=4 or status=5 ) or mid=? )" );//4:待回复，5:已经回复
-				params.add(mid);
-			}else{
-				//4:待回复，5:已经回复
-				sql.append(" and ( status=4 or status=5 ) ");
-			}
-		*/
+
 		sql.append(" group by hotelid,roomtypeid");
 		Bean score= Db.findFirst(sql.toString(), params.toArray());
 		return score;
@@ -217,9 +209,9 @@ public class ScoreDAO {
 //		String sql = "insert into t_subject_c_his(subjectid,c,createdate) "
 //				+ "select subjectid,sum(grade)/count(*) as av,now() from "
 //				+ "t_hotel_subject_mx group by subjectid";
-		String sql = "insert into t_subject_c_his(subjectid,c,createdate) " 
+		String sql = "insert into t_subject_c_his(subjectid,c,createdate) "
 				+ "select a.subjectid,sum(a.grade)/count(*) as av,now() from t_hotel_score b "
-				+ " inner join  t_hotel_subject_mx a  on a.orderid=b.orderid " 
+				+ " inner join  t_hotel_subject_mx a  on a.orderid=b.orderid "
 				//20150923 产品讨论，只展示状态为4的记录
 				//+ " where b.status=4  and b.type=1 "
 
@@ -282,7 +274,7 @@ public class ScoreDAO {
 	 * @return
 	 */
 	public List<Bean> findScoreSubjectByHotelidRoomtypeid(String hotelid,
-			String roomtypeid) {
+														  String roomtypeid) {
 		String sql=" select a.subjectid,sum(grade)/count(*) as grades from  t_hotel_subject_mx a where a.hotelid=? and a.roomtypeid=? group by a.hotelid,a.roomtypeid,a.subjectid";
 		List<Bean> list= Db.find(sql,hotelid,roomtypeid);
 		return list;
@@ -324,32 +316,35 @@ public class ScoreDAO {
 	 * @return
 	 */
 	public List<Bean> findScoreMx2(String hotelid,String roomtypeid,
-			String roomid,String maxgrade,String mingrade,
-			String subjectid,String orderby,String startdateday,
-			String enddateday,String starttime,String endtime,int page,int limit, int type, Long mid, String gradetype) {
+								   String roomid,String maxgrade,String mingrade,
+								   String subjectid,String orderby,String startdateday,
+								   String enddateday,String starttime,String endtime,int page,int limit, int type, Long mid, String gradetype) {
 		StringBuffer sqlBuffer = new StringBuffer();
 		sqlBuffer.append("select a.id,a.hotelid,a.roomtypeid,a.roomid,a.score,a.createtime,a.pics,a.orderid,a.grade,a.hotelscore,a.hotelscoretime,a.servicescore,a.servicescoretime,a.isreply,a.isaduit,a.isvisible,a.status,a.type,a.mid ");
 		sqlBuffer.append(" from t_hotel_score a where ");
-		
+
 		List<Object> paramsList= new ArrayList<Object>();
 		sqlBuffer.append(" isvisible='T' ");
 		sqlBuffer.append(" and type=? ");
 		paramsList.add(type);
-		
+
 		String statusWhere ="";
 		switch( type){
-		case 1:
-			//20150923 产品讨论，只展示状态为4的记录
-			sqlBuffer.append(" and a.status=4 ");//4:待回复
-			//2015-08-21修改为只显示已审核，已经回复的评价 
-			//statusWhere = " and ( a.status=4 or a.status=5 )";//4:待回复，5:已经回复
-			break;
-		case 2:
-			statusWhere = " and a.status=6 ";
-			break;
+			case 1:
+				//20151012  4:通过审核,未回复，5:未通过审核,已回复，7:通过审核,已回复
+				sqlBuffer.append(" and ((a.status=4 or a.status=7) or a.mid=?)");
+				paramsList.add(mid);
+				//20150923 产品讨论，只展示状态为4的记录
+				//sqlBuffer.append(" and a.status=4 ");//4:待回复
+				//2015-08-21修改为只显示已审核，已经回复的评价
+				//statusWhere = " and ( a.status=4 or a.status=5 )";//4:待回复，5:已经回复
+				break;
+			case 2:
+				statusWhere = " and a.status=6 ";
+				break;
 		}
 		sqlBuffer.append( statusWhere );
-		
+
 		if(StringUtils.isNotBlank(roomid)){
 			sqlBuffer.append( " and a.roomid=? ");
 			paramsList.add(roomid);
@@ -384,19 +379,19 @@ public class ScoreDAO {
 			paramsList.add(enddateday);
 		}
 //		sqlBuffer.append(" and a.isaduit=2 or( (a.isaduit=1 or a.isaduit=3)  and o.mid=?) and isvisible='T' ");
-		
+
 		sqlBuffer.append(" order by a.createtime desc ");
 		sqlBuffer.append( " limit " + (page - 1) * limit + "," + limit);
 		logger.info("查询评价详细信息sql{}, params:{}:", sqlBuffer.toString(), paramsList.toString());
 		List<Bean> list=Db.find(sqlBuffer.toString(),paramsList.toArray());
 		return list;
 	}
-	
+
 	public List<Bean> findSubjectByOrderid(String orderid){
-	String sql="select a.hotelid,a.subjectid,b.subjectname,a.grade from t_hotel_subject_mx a  left join t_subject b on a.subjectid= b.subjectid where a.orderid=?";
-	List<Bean> list= Db.find(sql,orderid);
-	return list;
-	
+		String sql="select a.hotelid,a.subjectid,b.subjectname,a.grade from t_hotel_subject_mx a  left join t_subject b on a.subjectid= b.subjectid where a.orderid=?";
+		List<Bean> list= Db.find(sql,orderid);
+		return list;
+
 	}
 
 	/**
@@ -408,7 +403,7 @@ public class ScoreDAO {
 	 * @return
 	 */
 	public List<Bean> findScoreGroup(String hotelid, String scoregroups, String startdate,
-			String enddate, Long mid) {
+									 String enddate, Long mid) {
 		String[] groups= scoregroups.split(",");
 		StringBuffer sqlBuffer = new StringBuffer();
 		List params = new ArrayList();
@@ -417,7 +412,7 @@ public class ScoreDAO {
 			String[] grades= group.split("-");
 			Double min= Double.parseDouble(grades[0]);
 			Double max= Double.parseDouble(grades[1]);
-			
+
 			params.add(hotelid);
 			params.add(min);
 			params.add(max);
@@ -435,13 +430,15 @@ public class ScoreDAO {
 				sqlBuffer.append(" and createtime<= ? ");
 				params.add(enddate);
 			}
-			
+			//20151012  4:通过审核,未回复，5:未通过审核,已回复，7:通过审核,已回复
+			sqlBuffer.append(" and ((a.status=4 or a.status=7) or a.mid=?)");
+			params.add(mid);
 			//20150923 产品讨论，只展示状态为4的记录
-			sqlBuffer.append(" and status=4 ");//4:待回复
+			//sqlBuffer.append(" and status=4 ");//4:待回复
 			/*
 			if(mid != null){
-				//2015-08-21修改为只显示已审核，已经回复的评价 
-				//sqlBuffer.append(" and ( status=4 or status=5 )");//4:待回复，5:已经回复				
+				//2015-08-21修改为只显示已审核，已经回复的评价
+				//sqlBuffer.append(" and ( status=4 or status=5 )");//4:待回复，5:已经回复
 				//sqlBuffer.append(" and (( status=4 or status=5 ) or mid=? )");//4:待回复，5:已经回复
 				//params.add(mid);
 			}else{
@@ -452,9 +449,9 @@ public class ScoreDAO {
 	}
 
 	public long findScoreMxCount(String hotelid, String roomtypeid,
-			String roomid, String maxgrade, String mingrade, String subjectid,
-			String orderby, String startdateday, String enddateday,
-			String starttime, String endtime, Long mid, String gradetype) {
+								 String roomid, String maxgrade, String mingrade, String subjectid,
+								 String orderby, String startdateday, String enddateday,
+								 String starttime, String endtime, Long mid, String gradetype) {
 		StringBuffer sqlBuffer = new StringBuffer();
 		sqlBuffer.append("select count(*)   from t_hotel_score a  where ");
 		//sqlBuffer.append( " left join t_hotel_subject s on a.hotelid=s.hotelid where");
@@ -501,7 +498,7 @@ public class ScoreDAO {
 			sqlBuffer.append( " and a.createtime<=? ");
 			paramsList.add(enddateday);
 		}
-		
+
 		return Db.queryLong(sqlBuffer.toString(),paramsList.toArray());
 	}
 
@@ -512,7 +509,7 @@ public class ScoreDAO {
 	}
 
 	public Bean findScorebyOrderId(String orderid) {
-		String sql=" select * from t_hotel_score where orderid= ? and type=1";		
+		String sql=" select * from t_hotel_score where orderid= ? and type=1";
 		return Db.findFirst(sql, orderid);
 	}
 
@@ -520,12 +517,12 @@ public class ScoreDAO {
 		String sql=" select * from t_hotel_score where parentid in(" + replyIds + ") order by createtime desc";
 		return Db.find(sql, idList.toArray());
 	}
-	
+
 	public List<Bean> findMemberByIds(String ids, List<Long> midList){
 		String sql="select mid,loginname,phone from u_member where mid in(" + ids + ")";
 		return Db.find(sql, midList.toArray());
 	}
-	
+
 	/**
 	 * 组装评分分类
 	 * 眯客3.0
@@ -558,7 +555,7 @@ public class ScoreDAO {
 		List params = new ArrayList();
 		for(int i=0;i<gradetypes.length;i++){
 			String gt= gradetypes[i];
-			
+
 			params.add(hotelid);
 			if(i>0){
 				sqlBuffer.append(" union ");
@@ -567,7 +564,7 @@ public class ScoreDAO {
 			sqlBuffer.append(gt);
 			sqlBuffer.append("' as scoregroup,count(*) as scorecount from t_hotel_score a where  hotelid=? and type=1 ");
 			this.settingGradeType(gt, sqlBuffer, params);
-			
+
 			if(StringUtils.isNotBlank(startdate)){
 				sqlBuffer.append(" and createtime>= ? ");
 				params.add(startdate);
@@ -576,14 +573,13 @@ public class ScoreDAO {
 				sqlBuffer.append(" and createtime<= ? ");
 				params.add(enddate);
 			}
-
 			//20151012  4:通过审核,未回复，5:未通过审核,已回复，7:通过审核,已回复
 			sqlBuffer.append(" and ((status=4 or status=7) or mid=?)");//4:待回复
 			params.add(mid);
 
 			//20150923 产品讨论，只展示状态为4的记录
 			//sqlBuffer.append(" and status=4 ");//4:待回复
-			//2015-08-21修改为只显示已审核，已经回复的评价 
+			//2015-08-21修改为只显示已审核，已经回复的评价
 			//sqlBuffer.append(" and ( status=4 or status=5 )");//4:待回复，5:已经回复
 		}
 		return  Db.find(sqlBuffer.toString(),params.toArray());
