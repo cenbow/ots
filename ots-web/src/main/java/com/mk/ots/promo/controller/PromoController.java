@@ -74,20 +74,28 @@ public class PromoController {
 
 	@RequestMapping("/promo/queryinfo")
 	public ResponseEntity<Map<String, Object>>  queryActivityListByCity(ParamBaseBean pbb,String cityid) {
+		logger.info("【/promo/queryinfo】 begin...");
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		if(Strings.isNullOrEmpty(cityid)){
 			rtnMap.put("success", false);
 			rtnMap.put("errcode", 503);
 			rtnMap.put("errmsg", "城市编码不能为空");
+			logger.error(" parme  cityid  is  null");
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.SERVICE_UNAVAILABLE);
 		}
 
-
 		List<TRoomSaleShowConfig>   troomSaleShowConfigList= tRoomSaleShowConfigService.queryTRoomSaleShowConfig(cityid);
-		if(!CollectionUtils.isEmpty(troomSaleShowConfigList)) {
+		if(CollectionUtils.isEmpty(troomSaleShowConfigList)) {
+			rtnMap.put("promo",null);
+			logger.info(" query  troomSaleShowConfigList  is  null");
+		} else {
+			rtnMap.put("promo", troomSaleShowConfigList);
+			logger.info(" query  troomSaleShowConfigList ",troomSaleShowConfigList);
 		}
-
+		rtnMap.put("errmsg",null);
+		rtnMap.put("errcode",0);
 		rtnMap.put("success", true);
+		logger.info("【/promo/queryinfo】 end...");
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 }
