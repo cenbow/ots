@@ -233,4 +233,7 @@ public class Constant {
 
 	public static final Integer PROMO_BANNER_PROMO = 3;
 	public static final Integer PROMO_BANNER_ONE_PROMO = 6;
+
+
+
 }
