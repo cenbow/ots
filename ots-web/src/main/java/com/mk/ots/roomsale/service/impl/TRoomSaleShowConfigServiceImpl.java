@@ -6,6 +6,7 @@ import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.model.TRoomSaleShowConfig;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,9 +24,12 @@ public class TRoomSaleShowConfigServiceImpl implements TRoomSaleShowConfigServic
 	private RoomSaleShowConfigMapper roomSaleShowConfigMapper;
 
 
-    public List<TRoomSaleShowConfig> queryTRoomSaleShowConfig(String cityid){
+    public List<TRoomSaleShowConfig> queryTRoomSaleShowConfig(String cityid,String  showArea){
        HashMap  map=new HashMap<>();
-        map.put("citycode",cityid);
+        map.put("citycode", cityid);
+        if (!StringUtils.isEmpty(showArea)){
+            map.put("showArea", showArea);
+        }
         return roomSaleShowConfigMapper.queryTRoomSaleShowConfig(map);
     }
 }

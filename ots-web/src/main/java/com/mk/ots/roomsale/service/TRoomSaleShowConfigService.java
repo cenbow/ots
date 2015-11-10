@@ -11,5 +11,5 @@ public interface TRoomSaleShowConfigService {
      * @return
      */
 
-    public List<TRoomSaleShowConfig> queryTRoomSaleShowConfig(String cityid);
+    public List<TRoomSaleShowConfig> queryTRoomSaleShowConfig(String cityid,String  showArea);
 }
