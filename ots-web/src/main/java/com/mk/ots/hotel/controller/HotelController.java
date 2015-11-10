@@ -207,7 +207,7 @@ public class HotelController {
 			distanceResultMap.put("normalid",HotelSortEnum.DISTANCE.getId());
 			distanceResultMap.put("promnote","");
 			distanceResultMap.put("promoicon","");
-			distanceResultMap.put("promotext","");
+			distanceResultMap.put("promotext","最近距离");
 			distanceResultMap.put("promotype",-1);
 
 			normaList.add(distanceResultMap);
@@ -228,7 +228,7 @@ public class HotelController {
 			priceResultMap.put("normalid",HotelSortEnum.PRICE.getId());
 			priceResultMap.put("promnote","");
 			priceResultMap.put("promoicon","");
-			priceResultMap.put("promotext","");
+			priceResultMap.put("promotext","最便宜");
 			priceResultMap.put("promotype",-1);
 
 			normaList.add(priceResultMap);
@@ -249,7 +249,7 @@ public class HotelController {
 			orderNumResultMap.put("normalid",HotelSortEnum.ORDERNUMS.getId());
 			orderNumResultMap.put("promnote","");
 			orderNumResultMap.put("promoicon","");
-			orderNumResultMap.put("promotext","");
+			orderNumResultMap.put("promotext","最受欢迎");
 			orderNumResultMap.put("promotype",-1);
 
 			normaList.add(orderNumResultMap);
