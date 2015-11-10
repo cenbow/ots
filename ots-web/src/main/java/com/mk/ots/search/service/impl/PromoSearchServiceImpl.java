@@ -51,6 +51,8 @@ import com.mk.framework.AppUtils;
 import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
+import com.mk.ots.common.enums.FrontPageEnum;
+import com.mk.ots.common.enums.HotelPromoEnum;
 import com.mk.ots.common.enums.HotelSearchEnum;
 import com.mk.ots.common.enums.HotelSortEnum;
 import com.mk.ots.common.utils.Constant;
@@ -191,7 +193,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	private final int minItemCount = 5;
 
-	private final int HOMEPAGE_MIN = 3;
 
 	/*
 	 * 获取 区域位置类型
@@ -360,113 +361,98 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			throw new Exception(String.format("invalid paramters %s", validateStr));
 		}
 		// 酒店搜索校验: 结束
-
-		if (StringUtils.isBlank(params.getHotelid())) {
-			if (params.getPage() == null || params.getPage() <= 0) {
-				params.setPage(SearchConst.SEARCH_PAGE_DEFAULT);
-			}
-			if (params.getLimit() == null || params.getLimit() <= 0) {
-				params.setLimit(SearchConst.SEARCH_LIMIT_DEFAULT);
-			}
-
-			// 眯客3.0：搜索酒店周边的酒店
-			if (StringUtils.isNotBlank(params.getExcludehotelid())) {
-				// 如果是酒店周边搜索，默认搜索半径为5000米
-				if (params.getRange() == null || params.getRange() <= 0) {
-					params.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
-				}
-			} else {
-				if (params.getRange() == null || params.getRange() <= 0) {
-					params.setRange(SearchConst.SEARCH_RANGE_MAX);
-				}
-			}
-			// 必填参数默认值处理：结束
-		}
-
+		
 		List<Map<String, Object>> promolist = null;
 		try {
 			promolist = new ArrayList<Map<String, Object>>();
-
-			String promoType = "2";
-			params.setIspromoonly(Boolean.TRUE);
-			params.setLimit(HOMEPAGE_MIN);
-			params.setPromotype(promoType);
-			Map<String, Object> rtnMap = null;
-			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
-
 			Map<String, Object> promoItem = new HashMap<String, Object>();
-			promolist.add(promoItem);
-
-			List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-			if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
-				promoItem.put("hotel", hotels);
-			} else if (hotels != null && hotels.size() < HOMEPAGE_MIN) {
-				searchAround(rtnMap, params, HOMEPAGE_MIN - hotels.size());
-				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap.get("supplementhotel");
-				promoItem.put("hotel", supplementHotels);
-			}
-
-			promoItem.put("promoicon", "");
-			promoItem.put("promonote", "每天12: 00-18: 00，订房享受特价");
-			promoItem.put("promotext", "今日特价");
-			promoItem.put("promotype", promoType);
-
+			Map<String, Object> rtnMap = null;
+			List<Map<String, Object>> hotels = null;
+			
 			promoItem = new HashMap<String, Object>();
 			promolist.add(promoItem);
-			promoType = "1";
-			params.setPromotype(promoType);
+
+			params.setIspromoonly(Boolean.TRUE);
+			params.setLimit(FrontPageEnum.limit.getId());
+			params.setPromotype(HotelPromoEnum.OneDollar.getCode());
+
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
 			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-			if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
+			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
 				promoItem.put("hotel", hotels);
-			} else if (hotels != null && hotels.size() < HOMEPAGE_MIN) {
-				searchAround(rtnMap, params, HOMEPAGE_MIN - hotels.size());
-				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap.get("supplementhotel");
-				promoItem.put("hotel", supplementHotels);
-			}
-
-			promoItem.put("promoicon", "");
-			promoItem.put("promonote", "每天20: 00-02: 00，订房30元起");
-			promoItem.put("promotext", "今夜特价");
-			promoItem.put("promotype", promoType);
-
-			promoItem = new HashMap<String, Object>();
-			promolist.add(promoItem);
-			promoType = "3";
-			params.setPromotype(promoType);
-			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
-			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-			if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
-				promoItem.put("hotel", hotels);
-			} else if (hotels != null && hotels.size() < HOMEPAGE_MIN) {
-				searchAround(rtnMap, params, HOMEPAGE_MIN - hotels.size());
-				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap.get("supplementhotel");
-				promoItem.put("hotel", supplementHotels);
-			}
-
-			promoItem.put("promoicon", "");
-			promoItem.put("promonote", "总有一款适合你");
-			promoItem.put("promotext", "主题酒店");
-			promoItem.put("promotype", promoType);
-
-			promoItem = new HashMap<String, Object>();
-			promolist.add(promoItem);
-			promoType = "6";
-			params.setPromotype(promoType);
-			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
-			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-			if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
-				promoItem.put("hotel", hotels);
-			} else if (hotels != null && hotels.size() < HOMEPAGE_MIN) {
-				searchAround(rtnMap, params, HOMEPAGE_MIN - hotels.size());
+			} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
+				searchAround(rtnMap, params, FrontPageEnum.limit.getId() - hotels.size());
 				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap.get("supplementhotel");
 				promoItem.put("hotel", supplementHotels);
 			}
 
 			promoItem.put("promoicon", "");
 			promoItem.put("promonote", "一元秒杀， 先到先得");
-			promoItem.put("promotext", "一元体验");
-			promoItem.put("promotype", promoType);
+			promoItem.put("promotext", HotelPromoEnum.OneDollar.getText());
+			promoItem.put("promotype", HotelPromoEnum.OneDollar.getCode());
+			
+			params.setIspromoonly(Boolean.TRUE);
+			params.setLimit(FrontPageEnum.limit.getId());
+			params.setPromotype(HotelPromoEnum.Day.getCode());
+			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+
+			promoItem = new HashMap<String, Object>();
+			promolist.add(promoItem);
+			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
+				promoItem.put("hotel", hotels);
+			} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
+				searchAround(rtnMap, params, FrontPageEnum.limit.getId() - hotels.size());
+				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap.get("supplementhotel");
+				promoItem.put("hotel", supplementHotels);
+			}
+
+			promoItem.put("promoicon", "");
+			promoItem.put("promonote", "每天12: 00-18: 00，订房享受特价");
+			promoItem.put("promotext", HotelPromoEnum.Day.getText());
+			promoItem.put("promotype", HotelPromoEnum.Day.getCode());
+
+			promoItem = new HashMap<String, Object>();
+			promolist.add(promoItem);
+			params.setLimit(FrontPageEnum.limit.getId());
+			params.setIspromoonly(Boolean.TRUE);			
+			params.setPromotype(HotelPromoEnum.Night.getCode());
+			
+			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
+				promoItem.put("hotel", hotels);
+			} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
+				searchAround(rtnMap, params, FrontPageEnum.limit.getId() - hotels.size());
+				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap.get("supplementhotel");
+				promoItem.put("hotel", supplementHotels);
+			}
+
+			promoItem.put("promoicon", "");
+			promoItem.put("promonote", "每天20: 00-02: 00，订房30元起");
+			promoItem.put("promotext", HotelPromoEnum.Night.getText());
+			promoItem.put("promotype", HotelPromoEnum.Night.getCode());
+
+			promoItem = new HashMap<String, Object>();
+			promolist.add(promoItem);
+			params.setPromotype(HotelPromoEnum.Theme.getCode());
+			params.setIspromoonly(Boolean.TRUE);			
+			params.setLimit(FrontPageEnum.limit.getId());
+
+			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
+				promoItem.put("hotel", hotels);
+			} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
+				searchAround(rtnMap, params, FrontPageEnum.limit.getId() - hotels.size());
+				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap.get("supplementhotel");
+				promoItem.put("hotel", supplementHotels);
+			}
+
+			promoItem.put("promoicon", "");
+			promoItem.put("promonote", "总有一款适合你");
+			promoItem.put("promotext", HotelPromoEnum.Theme.getText());
+			promoItem.put("promotype", HotelPromoEnum.Theme.getCode());
 
 			return promolist;
 		} catch (Exception e) {

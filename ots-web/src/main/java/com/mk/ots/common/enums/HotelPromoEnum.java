@@ -9,7 +9,7 @@ package com.mk.ots.common.enums;
  *
  */
 public enum HotelPromoEnum {
-    Night("1","今夜特价"),OneDollar("6","一元特价"), Day("11", "白天特价"), Theme("16", "主题房");
+    Night("1","今夜特价"),OneDollar("6","一元特价"), Day("11", "白天特价"), Theme("16", "主题酒店");
     private String code;
     private String text;
 
