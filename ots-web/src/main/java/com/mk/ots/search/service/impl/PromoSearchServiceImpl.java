@@ -183,7 +183,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	@Autowired
 	private SSubwayStationMapper subwayStationMapper;
-	
+
 	private LocalDateTime promoStartTime;
 	private LocalDateTime promoEndTime;
 
@@ -328,17 +328,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				validateStr = "入住和离店不能是同一天.";
 				return validateStr;
 			}
-			if (StringUtils.isBlank(params.getPromotype())) {
-				validateStr = "活动类型必须传入";
-				return validateStr;
-			} else {
-				try {
-					Integer.parseInt(params.getPromotype());
-				} catch (Exception ex) {
-					logger.warn(String.format("failed to parse promotype %s", params.getPromotype()), ex);
-					validateStr = String.format("活动类型非法 %s", params.getPromotype());
-					return validateStr;
-				}
+			// 用户坐标经纬度值没有,先判断屏幕坐标经纬度值，有的话用屏幕坐标经纬度，没有默认上海市中心位置
+			if (params.getUserlongitude() == null) {
+				return "用户longitude必须传入";
+			}
+			if (params.getUserlatitude() == null) {
+				return "用户latitude必须传入";
+			}
+			if (StringUtils.isBlank(params.getCityid())) {
+				return "用户cityid必须传入";
 			}
 			Date startDate = DateUtils.getDateFromString(params.getStartdateday());
 			Date endDate = DateUtils.getDateFromString(params.getEnddateday());
@@ -354,40 +352,21 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Object> searchHomePromos(HotelQuerylistReqEntity params) throws Exception{
-		Map<String, Object> rtnMap = Maps.newHashMap();
+	public Map<String, Object> searchHomePromos(HotelQuerylistReqEntity params) throws Exception {
+		Map<String, Object> promoResults = Maps.newHashMap();
 
 		// 酒店搜索校验: 开始
 		String validateStr = this.getValidateSearchHotels(params);
 		if (StringUtils.isNotBlank(validateStr)) {
 			logger.error("readonlySearchHotels:: method error: {}", validateStr);
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
-			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, validateStr);
-			return rtnMap;
+			promoResults.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			promoResults.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			promoResults.put(ServiceOutput.STR_MSG_ERRMSG, validateStr);
+			return promoResults;
 		}
 		// 酒店搜索校验: 结束
 
 		if (StringUtils.isBlank(params.getHotelid())) {
-			// 必填参数默认值处理：开始
-			if (StringUtils.isBlank(params.getCityid())) {
-				params.setCityid(Constant.STR_CITYID_SHANGHAI);
-			}
-			// 用户坐标经纬度值没有,先判断屏幕坐标经纬度值，有的话用屏幕坐标经纬度，没有默认上海市中心位置
-			if (params.getUserlongitude() == null) {
-				if (params.getPillowlongitude() == null) {
-					params.setUserlongitude(Constant.LON_SHANGHAI);
-				} else {
-					params.setUserlongitude(params.getPillowlongitude());
-				}
-			}
-			if (params.getUserlatitude() == null) {
-				if (params.getPillowlatitude() == null) {
-					params.setUserlatitude(Constant.LAT_SHANGHAI);
-				} else {
-					params.setUserlatitude(params.getPillowlatitude());
-				}
-			}
 			if (params.getPage() == null || params.getPage() <= 0) {
 				params.setPage(SearchConst.SEARCH_PAGE_DEFAULT);
 			}
@@ -409,83 +388,111 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			// 必填参数默认值处理：结束
 		}
 
-		try {
-			List<Map<String, Object>> promolist = new ArrayList<Map<String, Object>>();
-			
-			String promoType = "2";
-			params.setLimit(HOMEPAGE_MIN);
-			params.setPromotype(promoType);
-			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+		String cityId = params.getCityid();
+		if (StringUtils.isNotEmpty(cityId) && "500000".equals(cityId)) {
+			try {
+				List<Map<String, Object>> promolist = new ArrayList<Map<String, Object>>();
 
-			Map<String, Object> promoItem = new HashMap<String, Object>();
-			promolist.add(promoItem);
+				String promoType = "2";
+				params.setLimit(HOMEPAGE_MIN);
+				params.setPromotype(promoType);
+				Map<String, Object> rtnMap = null;
+				rtnMap = this.readonlyOtsHotelListFromEsStore(params);
 
-			List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-			if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
-				promoItem.put("hotel", hotels);
+				Map<String, Object> promoItem = new HashMap<String, Object>();
+				promolist.add(promoItem);
+
+				List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+				if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
+					promoItem.put("hotel", hotels);
+				} else if (hotels != null && hotels.size() < HOMEPAGE_MIN) {
+					searchAround(rtnMap, params, HOMEPAGE_MIN - hotels.size());
+					List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap
+							.get("supplementhotel");
+					promoItem.put("hotel", supplementHotels);
+				}
+
+				promoItem.put("promoicon", "");
+				promoItem.put("promonote", "每天12: 00-18: 00，订房享受特价");
+				promoItem.put("promotext", "今日特价");
+				promoItem.put("promotype", promoType);
+
+				promoItem = new HashMap<String, Object>();
+				promolist.add(promoItem);
+				promoType = "1";
+				params.setPromotype(promoType);
+				rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+				hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+				if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
+					promoItem.put("hotel", hotels);
+				} else if (hotels != null && hotels.size() < HOMEPAGE_MIN) {
+					searchAround(rtnMap, params, HOMEPAGE_MIN - hotels.size());
+					List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap
+							.get("supplementhotel");
+					promoItem.put("hotel", supplementHotels);
+				}
+
+				promoItem.put("promoicon", "");
+				promoItem.put("promonote", "每天20: 00-02: 00，订房30元起");
+				promoItem.put("promotext", "今夜特价");
+				promoItem.put("promotype", promoType);
+
+				promoItem = new HashMap<String, Object>();
+				promolist.add(promoItem);
+				promoType = "3";
+				params.setPromotype(promoType);
+				rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+				hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+				if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
+					promoItem.put("hotel", hotels);
+				} else if (hotels != null && hotels.size() < HOMEPAGE_MIN) {
+					searchAround(rtnMap, params, HOMEPAGE_MIN - hotels.size());
+					List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap
+							.get("supplementhotel");
+					promoItem.put("hotel", supplementHotels);
+				}
+
+				promoItem.put("promoicon", "");
+				promoItem.put("promonote", "总有一款适合你");
+				promoItem.put("promotext", "主题酒店");
+				promoItem.put("promotype", promoType);
+
+				promoItem = new HashMap<String, Object>();
+				promolist.add(promoItem);
+				promoType = "6";
+				params.setPromotype(promoType);
+				rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+				hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+				if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
+					promoItem.put("hotel", hotels);
+				} else if (hotels != null && hotels.size() < HOMEPAGE_MIN) {
+					searchAround(rtnMap, params, HOMEPAGE_MIN - hotels.size());
+					List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap
+							.get("supplementhotel");
+					promoItem.put("hotel", supplementHotels);
+				}
+
+				promoItem.put("promoicon", "");
+				promoItem.put("promonote", "一元秒杀， 先到先得");
+				promoItem.put("promotext", "一元体验");
+				promoItem.put("promotype", promoType);
+
+				promoResults.put("promolist", promolist);
+				promoResults.put("normalid", "0");
+				promoResults.put("errcode", "0");
+				promoResults.put("success", true);
+				return promoResults;
+			} catch (Exception e) {
+				logger.error("search hotel error: {}\n", e.getMessage());
+				promoResults.put("success", false);
+				promoResults.put("errcode", "-1");
+				promoResults.put("errmsg", e.getMessage());
 			}
-			promoItem.put("promoicon", "");
-			promoItem.put("promonote", "每天12: 00-18: 00，订房享受特价");
-			promoItem.put("promotext", "今日特价");			
-			promoItem.put("promotype", promoType);
-			
-			promoItem = new HashMap<String, Object>();
-			promolist.add(promoItem);			
-			promoType = "1";
-			params.setPromotype(promoType);
-			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
-			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-			if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
-				promoItem.put("hotel", hotels);
-			}
-			promoItem.put("promoicon", "");
-			promoItem.put("promonote", "每天20: 00-02: 00，订房30元起");
-			promoItem.put("promotext", "今夜特价");			
-			promoItem.put("promotype", promoType);
-			
-			promoItem = new HashMap<String, Object>();
-			promolist.add(promoItem);	
-			promoType = "3";
-			params.setPromotype(promoType);
-			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
-			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-			if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
-				promoItem.put("hotel", hotels);
-			}
-			promoItem.put("promoicon", "");
-			promoItem.put("promonote", "总有一款适合你");
-			promoItem.put("promotext", "主题酒店");			
-			promoItem.put("promotype", promoType);
-			
-			promoItem = new HashMap<String, Object>();
-			promolist.add(promoItem);	
-			promoType = "6";
-			params.setPromotype(promoType);
-			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
-			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-			if (hotels != null && hotels.size() >= HOMEPAGE_MIN) {
-				promoItem.put("hotel", hotels);
-			}
-			promoItem.put("promoicon", "");
-			promoItem.put("promonote", "一元秒杀， 先到先得");
-			promoItem.put("promotext", "一元体验");			
-			promoItem.put("promotype", promoType);
-			
-			rtnMap.put("promolist", promolist);
-			rtnMap.put("normalid", "0");
-			rtnMap.put("errcode", "0");
-			rtnMap.put("success", true);
-			return rtnMap;
-		} catch (Exception e) {
-			logger.error("search hotel error: {}\n", e.getMessage());
-			rtnMap.put("success", false);
-			rtnMap.put("errcode", "-1");
-			rtnMap.put("errmsg", e.getMessage());
 		}
 
-		return rtnMap;
+		return promoResults;
 	}
-	
+
 	/**
 	 * 酒店搜索
 	 */
@@ -804,7 +811,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 				String p_isnewpms = Constant.STR_TRUE.equals(result.get("isnewpms")) ? Constant.STR_TRUE
 						: Constant.STR_FALSE;
-				
+
 				Integer vacants = hotelService.calPromoVacants(Integer.parseInt(promotype), Long.parseLong(hotelid),
 						reqentity.getStartdateday(), reqentity.getEnddateday(), p_isnewpms);
 				result.put("roomvacancy", vacants);
@@ -1632,7 +1639,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Integer supplementcount = searchAround(rtnMap, reqentity, this.minItemCount - hotels.size());
 				rtnMap.put("supplementcount", supplementcount);
 			}
-			
+
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 			rtnMap.put("count", totalHits);
 			rtnMap.put("hotel", hotels);
