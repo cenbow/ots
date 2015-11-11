@@ -2030,22 +2030,26 @@ public class OrderServiceImpl implements OrderService {
 				}
 		    }
 		} else if (otaorder.getInt("rulecode") == 1002) {// 重庆规则
-		    if(otaorder.getSpreadUser() != null){// 切客订单
-                String InvalidReason= otaorder.get("Invalidreason");
-		        if(StringUtils.isEmpty(InvalidReason)|| OtaFreqTrvEnum.CHECKIN_LESS4.getId().equals(InvalidReason)){// 非有效切客理由为空
-		            OrderServiceImpl.logger.info("重庆非有效切客理由为空" + otaorder.getId() + otaorder.getSpreadUser());
-		            Date bgtemp = pmsRoomOrder.getDate("CheckInTime");
-		            Date edtemp = pmsRoomOrder.getDate("CheckOutTime");
-		            double diffHours = DateUtils.getDiffHoure(DateUtils.getDatetime(bgtemp), DateUtils.getDatetime(edtemp));
-		            OrderServiceImpl.logger.info("离店时判断入住时间小于4小时?入住时间:{},离开时间:{},相差:{}", bgtemp, edtemp, diffHours);
-		            // 离店时如果订单是到付切客订单且离店时间减入住时间小于4小时，则订单表需修改标记位字段内容，将“无效切客订单原因Invalidreason”置为2
-		            if(diffHours < 4){
-		                OrderServiceImpl.logger.info("小于4小时非常住人" + otaorder.getId());
-		                otaorder.set("Invalidreason", OtaFreqTrvEnum.OK_LESS4.getId());
-		                //this.payService.leaveTimeLess(otaorderid);
-		            }
-		        }
-		    }
+            if(!qiekeRuleService.isOrderQiekeRuleCity(otaorder)) {
+                if (otaorder.getSpreadUser() != null) {// 切客订单
+                    String InvalidReason = otaorder.get("Invalidreason");
+                    if (StringUtils.isEmpty(InvalidReason)) {// 非有效切客理由为空
+                        OrderServiceImpl.logger.info("重庆非有效切客理由为空" + otaorder.getId() + otaorder.getSpreadUser());
+                        Date bgtemp = pmsRoomOrder.getDate("CheckInTime");
+                        Date edtemp = pmsRoomOrder.getDate("CheckOutTime");
+                        double diffHours = DateUtils.getDiffHoure(DateUtils.getDatetime(bgtemp), DateUtils.getDatetime(edtemp));
+                        OrderServiceImpl.logger.info("离店时判断入住时间小于4小时?入住时间:{},离开时间:{},相差:{}", bgtemp, edtemp, diffHours);
+                        // 离店时如果订单是到付切客订单且离店时间减入住时间小于4小时，则订单表需修改标记位字段内容，将“无效切客订单原因Invalidreason”置为2
+                        if (diffHours < 4) {
+                            OrderServiceImpl.logger.info("小于4小时非常住人" + otaorder.getId());
+                            otaorder.set("Invalidreason", OtaFreqTrvEnum.OK_LESS4.getId());
+                            //this.payService.leaveTimeLess(otaorderid);
+                        }
+                    }
+                }
+            } else {
+                // job 任务处理
+            }
 		}
 		// 住三送一活动，调用促销接口
 		logger.info("住三送一活动,调用促销接口,orderid = " + otaorderid);
@@ -2469,8 +2473,12 @@ public class OrderServiceImpl implements OrderService {
       if (hotel == null) {
           throw MyErrorEnum.saveOrder.getMyException("没有当前id的酒店");
       }
-            //设置cityCode
-            order.setCityCode(hotel.getTCityByDisId().getStr("code"));
+      //设置cityCode
+      order.setCityCode(hotel.getTCityByDisId().getStr("code"));
+      //符合B+规则的切客订单 在创建订单的时候将切客理由设置为未入住
+      if(qiekeRuleService.isOrderQiekeRuleCity(order)){
+          order.set("Invalidreason", OtaFreqTrvEnum.NOT_CHECKIN.getId());
+      }
       order.set("hotelname", hotel.get("hotelName"));
       order.set("hotelpms", hotel.get("pms"));
       order.put("hotelAddress", hotel.get("detailAddr"));
