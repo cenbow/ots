@@ -337,7 +337,6 @@ public class HotelController {
 
 		String errorMessage = "";
 		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
@@ -351,7 +350,6 @@ public class HotelController {
 		if (!isAccessible) {
 			logger.warn("not allowed to access");
 
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "not allowed to access");
 
@@ -386,6 +384,8 @@ public class HotelController {
 			} else {
 				rtnMap = promoSearchService.readonlySearchHotels(reqentity);
 			}
+			
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
 
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
 					HttpStatus.OK);
@@ -399,7 +399,6 @@ public class HotelController {
 			}
 
 			logger.info("【/hotel/querypromolist】 end...");
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		} catch (Exception e) {
@@ -495,7 +494,6 @@ public class HotelController {
 
 		String errorMessage = "";
 		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
@@ -516,7 +514,9 @@ public class HotelController {
 				promolist = promoFrontPageList(reqentity);
 			}
 			rtnMap.put("promolist", promolist);
-
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "succeed");
+			
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
 					HttpStatus.OK);
 			if (AppUtils.DEBUG_MODE) {
@@ -530,7 +530,6 @@ public class HotelController {
 					resultResponse.getBody().get("count"));
 			return resultResponse;
 		} catch (Exception e) {
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 			logger.error("【/hotel/querylist】 is error... ", e);
