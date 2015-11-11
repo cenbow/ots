@@ -113,6 +113,10 @@
 	<select id="findByOrderIdAndPaysrc" resultType="com.mk.ots.pay.model.PPay" resultMap="BaseResultMap"  parameterType="java.util.Map">
 		select * from p_pay where orderid = #{orderid}   and  paysrc = #{type} 
 	</select>
+
+	<select id="findByUserId"  resultMap="BaseResultMap"  parameterType="java.util.Map">
+		select * from p_pay where userId. = #{userId}
+	</select>
 	
 	<select id="findUMemberByMid" resultType="com.mk.ots.member.model.UMember" parameterType="long" >
 		select * from u_member where mid = #{mid}

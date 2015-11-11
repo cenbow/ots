@@ -2,6 +2,7 @@ package com.mk.ots.order.service;
 
 import com.google.common.base.Optional;
 import com.mk.ots.common.enums.OrderMethodEnum;
+import com.mk.ots.common.enums.OrderTypeEnum;
 import com.mk.ots.common.enums.OtaFreqTrvEnum;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.mapper.OtaOrderMacMapper;
@@ -9,6 +10,8 @@ import com.mk.ots.member.model.UMember;
 import com.mk.ots.member.service.IMemberService;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.model.OtaOrderMac;
+import com.mk.ots.pay.model.PPay;
+import com.mk.ots.pay.service.IPayService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,7 @@ public class QiekeRuleService {
     @Autowired
     private IMemberService iMemberService;
 
+    private IPayService iPayService;
     /**
      * 手机号必须是第一次，入住并离店的订单
      * @param otaOrder
@@ -202,7 +206,36 @@ public class QiekeRuleService {
      * @return
      */
     public OtaFreqTrvEnum checkPayAccount(OtaOrder otaOrder){
-        return OtaFreqTrvEnum.IN_FREQUSER;
+        if (null == otaOrder) {
+            return OtaFreqTrvEnum.NOT_CHECKIN;
+        }
+        //判断是否到付
+        Integer orderType = otaOrder.getOrderType();
+        if (orderType == OrderTypeEnum.PT.getId()) {
+            return OtaFreqTrvEnum.OFFLINE_PAY;
+        }
+
+        //
+
+        Long orderId = otaOrder.getId();
+        PPay pay = this.iPayService.findPayByOrderId(orderId);
+        String userId = pay.getUserid();
+
+        List<PPay> payList = this.iPayService.findByUserId(userId);
+        //去除本次账号
+        Set<Long> payIdSet = new HashSet<>();
+        for(PPay dbPay : payList) {
+            Long dbPayId = dbPay.getId();
+            payIdSet.add(dbPayId);
+        }
+        payIdSet.remove(pay.getId());
+
+        //
+        if (payIdSet.size() > 0) {
+            return OtaFreqTrvEnum.ZHIFU_NOT_FIRST;
+        } else {
+            return  OtaFreqTrvEnum.L1;
+        }
     }
 
     /**
