@@ -55,7 +55,7 @@ public class TRoomSaleShowConfigServiceImpl implements TRoomSaleShowConfigServic
     public  List<TRoomSaleCity> queryTRoomSaleCity(String cityid) {
         logger.info(" method queryTRoomSaleCity   parame  cityid   " +  cityid);
         HashMap  map=new HashMap<>();
-        map.put("citycode", cityid);
+        map.put("cityCode", cityid);
         return roomSaleShowConfigMapper.queryTRoomSaleCity(map);
     }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.mk.ots.mapper.RoomSaleTypeMapper">
+<mapper namespace="com.mk.ots.mapper.RoomSaleShowConfigMapper">
 	<resultMap id="tRoomSaleShowConfig" type="com.mk.ots.roomsale.model.TRoomSaleShowConfig">
 	    <result property="id" column="id" />
 	    <result property="saleName" column="saleName" />
@@ -32,10 +32,11 @@
 
     <select id="queryTRoomSaleCity" resultMap="tRoomSaleCity"  parameterType="java.util.Map">
        select
-             trsc.*
+             a.id,a.saleTypeId,a.provinceCode,a.cityCode
         FROM
-            t_room_sale_city    trsc
-        where  trsc.cityCode  =  #{cityCode}
+            t_room_sale_city a LEFT  JOIN  t_room_sale_type b
+            on a.saleTypeId=b.id
+        where  a.cityCode  =  #{cityCode} and b.valid='T'
     </select>
     <sql id="Base_Column_List" >
         id, saleName, saleTypeId,picUrl,backPicUrl,backColor,fontColor,fontSize,fontFamily,showBeginTime,showEndTime,
@@ -47,21 +48,22 @@
         FROM
         t_room_sale_show_config
         <where>
-            <if test="saleTypeId != null" >
-                saleTypeId = #{saleTypeId}
+            <if test="promoid != null" >
+               AND saleTypeId = #{promoid}
+            </if>
+            <if test="promoid == null" >
+              AND saleTypeId is NULL
             </if>
             <if test="showArea != null" >
-                showArea = #{showArea}
+              AND showArea = #{showArea}
             </if>
             <if test="normalId != null" >
-                normalId = #{normalId}
+                AND normalId = #{normalId}
             </if>
             <if test="isSpecial != null" >
-                isSpecial = #{isSpecial}
+                AND isSpecial = #{isSpecial}
             </if>
-            <if test="valid != null" >
-                valid = #{valid}
-            </if>
+                AND valid ='T'
         </where>
         ORDER  BY ord ASC
     </select>

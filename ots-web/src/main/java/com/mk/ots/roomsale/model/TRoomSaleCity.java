@@ -1,26 +1,24 @@
 package com.mk.ots.roomsale.model;
 
-import java.util.Date;
-
 public class TRoomSaleCity {
-    private Long id;
-    private Long saleTypeId;
+    private Integer id;
+    private Integer saleTypeId;
     private String provinceCode;
     private String cityCode;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public Long getSaleTypeId() {
+    public Integer getSaleTypeId() {
         return saleTypeId;
     }
 
-    public void setSaleTypeId(Long saleTypeId) {
+    public void setSaleTypeId(Integer saleTypeId) {
         this.saleTypeId = saleTypeId;
     }
 
