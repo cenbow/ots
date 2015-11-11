@@ -337,7 +337,6 @@ public class HotelController {
 
 		String errorMessage = "";
 		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
@@ -351,7 +350,6 @@ public class HotelController {
 		if (!isAccessible) {
 			logger.warn("not allowed to access");
 
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "not allowed to access");
 
@@ -399,7 +397,7 @@ public class HotelController {
 			}
 
 			logger.info("【/hotel/querypromolist】 end...");
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		} catch (Exception e) {
