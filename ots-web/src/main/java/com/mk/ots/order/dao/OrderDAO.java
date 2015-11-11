@@ -182,7 +182,7 @@ public class OrderDAO extends BaseDAO {
 			sql.setLength(sql.length() - 1);
 			sql.append(") ");
 		}
-		return Db.query(sql.toString(), paras.toArray());
+		return OtaOrder.dao.find(sql.toString(), paras.toArray());
 	}
 
 	/**

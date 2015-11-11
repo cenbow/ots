@@ -115,7 +115,7 @@
 	</select>
 
 	<select id="findByUserId"  resultMap="BaseResultMap"  parameterType="java.util.Map">
-		select * from p_pay where userId. = #{userId}
+		select * from p_pay where userId = #{userId}
 	</select>
 	
 	<select id="findUMemberByMid" resultType="com.mk.ots.member.model.UMember" parameterType="long" >

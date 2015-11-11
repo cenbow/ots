@@ -242,7 +242,7 @@ public class PayDAO extends MyBatisDaoImpl<PPay, Long> implements IPayDAO{
 	public List<PPay> findByUserId (String userId) {
 		Map param = Maps.newHashMap();
 		param.put("userId", userId);
-		return find("findByOrderIdAndPaysrc", param);
+		return find("findByUserId", param);
 	}
 	
 }

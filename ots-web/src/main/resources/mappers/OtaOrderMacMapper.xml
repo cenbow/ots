@@ -145,8 +145,8 @@
 
   <select id="selectByDeviceimei" resultMap="BaseResultMap" parameterType="java.util.Map" >
     select
-    id, orderID, uuid, sysno, deviceimei, simsn, wifimacaddr, blmacaddr
-    from b_otaorder_mac m left JOIN  b_otaorder o on m.orderId = o.orderId
+    m.id, m.orderID, m.uuid, m.sysno, m.deviceimei, m.simsn, m.wifimacaddr, m.blmacaddr
+    from b_otaorder_mac m left JOIN  b_otaorder o on m.orderId = o.Id
     where m.deviceimei = #{deviceimei} and o.OrderStatus in
     <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
       #{item}

@@ -34,6 +34,7 @@ public class QiekeRuleService {
     @Autowired
     private IMemberService iMemberService;
 
+    @Autowired
     private IPayService iPayService;
     /**
      * 手机号必须是第一次，入住并离店的订单
@@ -270,9 +271,9 @@ public class QiekeRuleService {
                 continue;
             }
             Integer orderStatus = dbOrder.getOrderStatus();
-            if (orderStatus == OtaOrderStatusEnum.CheckIn.getId()
-                    || orderStatus == OtaOrderStatusEnum.Account.getId()
-                    || orderStatus == OtaOrderStatusEnum.CheckOut.getId()) {
+            if (orderStatus.compareTo(OtaOrderStatusEnum.CheckIn.getId()) == 0
+                    || orderStatus.compareTo(OtaOrderStatusEnum.Account.getId()) == 0
+                    || orderStatus.compareTo(OtaOrderStatusEnum.CheckOut.getId()) ==0 ) {
                 Long dbPayId = dbPay.getId();
                 payIdSet.add(dbPayId);
             }
