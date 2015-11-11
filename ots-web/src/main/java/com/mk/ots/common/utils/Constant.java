@@ -1,6 +1,9 @@
 package com.mk.ots.common.utils;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author shellingford
  * @version 创建时间：2013-1-3 上午10:54:52
@@ -233,4 +236,11 @@ public class Constant {
 
 	public static final Integer PROMO_BANNER_PROMO = 3;
 	public static final Integer PROMO_BANNER_ONE_PROMO = 6;
+
+	/**B+规则 切客收益覆盖城市**/
+	public static final Map<String,String> QIE_KE_CITY_MAP = new HashMap<>();
+	static {
+		QIE_KE_CITY_MAP.put("410300", "410300");
+		QIE_KE_CITY_MAP.put("410300", "410300");
+	}
 }

@@ -198,6 +198,8 @@ public class OrderServiceImpl implements OrderService {
     private RoomSaleService roomSaleService;
     @Autowired
     private RoomSaleConfigInfoMapper roomSaleConfigInfoMapper;
+    @Autowired
+    private QiekeRuleService qiekeRuleService;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
     private static final long TIME_FOR_FIFTEEN = Long.parseLong(PropertyConfigurer.getProperty("transferCheckinUsernameTime"));
@@ -1910,7 +1912,8 @@ public class OrderServiceImpl implements OrderService {
                           this.orderBusinessLogService.saveLog(otaorder, OtaOrderFlagEnum.AFTERXIAFALUZHUBI.getId(), "", "常住人Invalidreason为1", "");
                       }
 					} else if (otaorder.getInt("rulecode") == 1002) {
-						doRuleBWhenPmsIN(otaorder, pmsRoomOrder, freqtrv);
+                      //进行切客原因设置
+                      doQieKeRuleWhenPmsIN(otaorder, pmsRoomOrder, freqtrv);
 					}
 
                     // 订单到付的时候 客户有优惠券下发
@@ -2028,7 +2031,8 @@ public class OrderServiceImpl implements OrderService {
 		    }
 		} else if (otaorder.getInt("rulecode") == 1002) {// 重庆规则
 		    if(otaorder.getSpreadUser() != null){// 切客订单
-		        if(otaorder.get("Invalidreason") == null){// 非有效切客理由为空
+                String InvalidReason= otaorder.get("Invalidreason");
+		        if(StringUtils.isEmpty(InvalidReason)|| OtaFreqTrvEnum.CHECKIN_LESS4.getId().equals(InvalidReason)){// 非有效切客理由为空
 		            OrderServiceImpl.logger.info("重庆非有效切客理由为空" + otaorder.getId() + otaorder.getSpreadUser());
 		            Date bgtemp = pmsRoomOrder.getDate("CheckInTime");
 		            Date edtemp = pmsRoomOrder.getDate("CheckOutTime");
@@ -2276,8 +2280,12 @@ public class OrderServiceImpl implements OrderService {
       if (hotel.getInt("rulecode") != null && hotel.getInt("rulecode") == 1002) {
           throw MyErrorEnum.customError.getMyException("B规则酒店不能创建切客订单");
       }
-            //设置cityCode
-            order.setCityCode(hotel.getTCityByDisId().getStr("code"));
+      //设置cityCode
+      order.setCityCode(hotel.getTCityByDisId().getStr("code"));
+        //符合B+规则的切客订单 在创建订单的时候将切客理由设置为未入住
+      if(qiekeRuleService.isOrderQiekeRuleCity(order)){
+          order.set("Invalidreason", OtaFreqTrvEnum.NOT_CHECKIN.getId());
+      }
       order.set("hotelname", hotel.get("hotelName"));
       order.set("hotelpms", hotel.get("pms"));
       order.put("hotelAddress", hotel.get("detailAddr"));
@@ -2778,8 +2786,21 @@ public class OrderServiceImpl implements OrderService {
       orderUtil.getOrderToJson(jsonObj, null, order, showRoom, showInUser);
       jsonObj.put("success", true);
   }
-  
-  private void doRuleBWhenPmsIN(OtaOrder otaorder, PmsRoomOrder pmsRoomOrder, String freqtrv) {
+
+    private void doQieKeRuleWhenPmsIN(OtaOrder otaorder, PmsRoomOrder pmsRoomOrder, String freqtrv){
+        if(qiekeRuleService.isOrderQiekeRuleCity(otaorder)){
+            OtaFreqTrvEnum otaFreqTrvEnum = qiekeRuleService.getQiekeRuleReason(otaorder);
+            if(otaFreqTrvEnum == null || OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+                otaorder.set("Invalidreason", otaFreqTrvEnum.CHECKIN_LESS4.getId());
+            }else {
+                otaorder.set("Invalidreason", otaFreqTrvEnum.getId());
+            }
+        }else {
+            doRuleBWhenPmsIN(otaorder, pmsRoomOrder, freqtrv);
+        }
+    }
+
+    private void doRuleBWhenPmsIN(OtaOrder otaorder, PmsRoomOrder pmsRoomOrder, String freqtrv) {
 	// 判断入住时间减创建时间是否小于15分钟
 		Date checkintime = pmsRoomOrder.getDate("CheckInTime");
 		Date createtime = otaorder.getDate("Createtime");
@@ -2838,8 +2859,9 @@ public class OrderServiceImpl implements OrderService {
 			PmsRoomOrder pmsRoomOrder = pmsRoomOrderDao.getPmsRoomOrder(roomOrder.getPmsRoomOrderNo(), pOrder.getHotelId());
 			PmsCheckinUser checkinUser = findPmsUserIncheckSelect(pOrder.getHotelId(), roomOrder.getPmsRoomOrderNo());
 			String freqtrv = checkinUser != null ? String.valueOf(checkinUser.getInt("freqtrv")) : "";
-			
-			doRuleBWhenPmsIN(pOrder, pmsRoomOrder, freqtrv);
+
+            //进行切客原因设置
+            doQieKeRuleWhenPmsIN(pOrder, pmsRoomOrder, freqtrv);
 			
 			// 订单到付的时候 客户有优惠券下发
           	if ((OrderTypeEnum.PT.getId().intValue() == pOrder.getOrderType())) {
