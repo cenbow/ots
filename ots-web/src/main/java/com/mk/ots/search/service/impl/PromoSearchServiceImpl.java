@@ -1195,7 +1195,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		try {
 			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
-			List<FilterBuilder> keywordBuilders = new ArrayList<FilterBuilder>();
 
 			// C端搜索分类
 			Integer searchType = reqentity.getSearchtype();
