@@ -1042,7 +1042,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				result.put("latitude", pin.get("lat"));
 				result.put("longitude", pin.get("lon"));
 
-				// TODO: 是否推荐，无数据来源，暂定为F
 				result.put("isrecommend", Constant.STR_FALSE);
 
 				Long startTime = new Date().getTime();
@@ -1213,12 +1212,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			int page = reqentity.getPage().intValue();
 			int limit = reqentity.getLimit().intValue();
 
-			double cityLat_default = Constant.LAT_SHANGHAI;
-			double cityLon_default = Constant.LON_SHANGHAI;
-
-			double userlat = reqentity.getUserlatitude();
-			double userlon = reqentity.getUserlongitude();
-
 			SearchRequestBuilder searchBuilder = esProxy.prepareSearch();
 			if (StringUtils.isBlank(hotelid)) {
 				searchBuilder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
@@ -1226,7 +1219,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				// make term filter builder
 				this.makeTermFilter(reqentity, filterBuilders);
 
-				double distance = Double.valueOf(reqentity.getRange());
 				GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
 
 				filterBuilders.add(geoFilter);

@@ -181,6 +181,7 @@ public class HotelController {
 				DateUtils.FORMATSHORTDATETIME);
 
 		hotelEntity.setCityid(reqentity.getCityid());
+		hotelEntity.setCallversion(reqentity.getCallversion());
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
 		hotelEntity.setStartdateday(strCurDay);
