@@ -5,13 +5,22 @@ import com.mk.ots.common.enums.OrderMethodEnum;
 import com.mk.ots.common.enums.OrderTypeEnum;
 import com.mk.ots.common.enums.OtaFreqTrvEnum;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
+import com.mk.ots.common.utils.Constant;
+import com.mk.ots.hotel.model.THotelModel;
 import com.mk.ots.mapper.OtaOrderMacMapper;
+import com.mk.ots.mapper.PmsCheckinUserMapper;
+import com.mk.ots.mapper.THotelMapper;
 import com.mk.ots.member.model.UMember;
 import com.mk.ots.member.service.IMemberService;
 import com.mk.ots.order.bean.OtaOrder;
+import com.mk.ots.order.dao.CheckInUserDAO;
+import com.mk.ots.order.dao.OrderDAO;
 import com.mk.ots.order.model.OtaOrderMac;
 import com.mk.ots.pay.model.PPay;
 import com.mk.ots.pay.service.IPayService;
+import com.mk.ots.search.service.impl.SearchService;
+import com.mk.ots.utils.DistanceUtil;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +45,16 @@ public class QiekeRuleService {
 
     @Autowired
     private IPayService iPayService;
+    private SearchService searchService;
+    @Autowired
+    private CheckInUserDAO checkInUserDAO;
+    @Autowired
+    private PmsCheckinUserMapper pmsCheckinUserMapper;
+    @Autowired
+    private OrderDAO orderDAO;
+    @Autowired
+    private THotelMapper tHotelMapper;
+    
     /**
      * 手机号必须是第一次，入住并离店的订单
      * @param otaOrder
@@ -231,7 +250,15 @@ public class QiekeRuleService {
      * @return
      */
     public OtaFreqTrvEnum checkIdentityCard(OtaOrder otaOrder){
-        return OtaFreqTrvEnum.IN_FREQUSER;
+        String cardId = pmsCheckinUserMapper.getCardId(otaOrder.getId());
+        if(StringUtils.isEmpty(cardId)){
+            return OtaFreqTrvEnum.CARD_ID_IS_NULL;
+        }
+        Long cardCount = pmsCheckinUserMapper.getCardCountByCardId(cardId);
+        if(cardCount > 1){
+            return OtaFreqTrvEnum.CARD_ID_NOT_FIRST;
+        }
+        return OtaFreqTrvEnum.L1;
     }
 
     /**
@@ -297,17 +324,23 @@ public class QiekeRuleService {
      * @return
      */
     public OtaFreqTrvEnum checkUserAdders(OtaOrder otaOrder){
-        return OtaFreqTrvEnum.IN_FREQUSER;
+        THotelModel tHotelModel = tHotelMapper.selectById(otaOrder.getHotelId());
+        Double userlongitude = otaOrder.getBigDecimal("userlongitude").doubleValue();
+        Double userlatitude = otaOrder.getBigDecimal("userlatitude").doubleValue();
+        if(userlatitude == null || userlongitude == null){
+            return OtaFreqTrvEnum.OUT_OF_RANG;
+        }
+        if(tHotelModel.getLatitude() == null || tHotelModel.getLongitude() == null){
+            return OtaFreqTrvEnum.OUT_OF_RANG;
+        }
+        double distance = DistanceUtil.distance(tHotelModel.getLongitude().doubleValue(), tHotelModel.getLatitude().doubleValue(), userlongitude, userlatitude);
+        if(distance < 1000){
+            return OtaFreqTrvEnum.L1;
+        }
+        return OtaFreqTrvEnum.L1;
     }
 
-    /**
-     * 用户来源必须是切客来源（u_manber中comefromtype=BQK）
-     * @param otaOrder
-     * @return
-     */
-    public OtaFreqTrvEnum checkUserSource(OtaOrder otaOrder){
-        return OtaFreqTrvEnum.IN_FREQUSER;
-    }
+
 
     /**
      * 每个酒店每天前10个拉新订单有效，超过10个的，即使满足上述7条，酒店也不能获得更多的拉新收益（10个这个参数可以配置）
@@ -316,5 +349,41 @@ public class QiekeRuleService {
      */
     public OtaFreqTrvEnum checkOrderNumberThreshold(OtaOrder otaOrder){
         return OtaFreqTrvEnum.IN_FREQUSER;
+    }
+
+    public OtaFreqTrvEnum getQiekeRuleReason(OtaOrder otaOrder){
+        OtaFreqTrvEnum otaFreqTrvEnum = checkMobile(otaOrder);
+        if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+            return otaFreqTrvEnum;
+        }
+
+        otaFreqTrvEnum = checkSysNo(otaOrder);
+        if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+            return otaFreqTrvEnum;
+        }
+
+        otaFreqTrvEnum = checkIdentityCard(otaOrder);
+        if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+            return otaFreqTrvEnum;
+        }
+
+        otaFreqTrvEnum = checkPayAccount(otaOrder);
+        if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+            return otaFreqTrvEnum;
+        }
+
+        otaFreqTrvEnum = checkUserAdders(otaOrder);
+        if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+            return otaFreqTrvEnum;
+        }
+        return OtaFreqTrvEnum.L1;
+    }
+
+    public boolean isOrderQiekeRuleCity(OtaOrder otaOrder){
+        if(Constant.QIE_KE_CITY_MAP.containsKey(otaOrder.getCityCode())){
+            return true;
+        }else{
+            return false;
+        }
     }
 }
