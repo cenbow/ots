@@ -3,9 +3,25 @@
 <mapper namespace="com.mk.ots.mapper.RoomSaleTypeMapper">
 	<resultMap id="tRoomSaleShowConfig" type="com.mk.ots.roomsale.model.TRoomSaleShowConfig">
 	    <result property="id" column="id" />
-        <result property="promoicon" column="picUrl" />
-        <result property="promoid" column="saleTypeId" />
-        <result property="promotext" column="saleName" />
+	    <result property="saleName" column="saleName" />
+	    <result property="saleTypeId" column="saleTypeId" />
+	    <result property="picUrl" column="picUrl" />
+	    <result property="backPicUrl" column="backPicUrl" />
+	    <result property="backColor" column="backColor" />
+	    <result property="fontColor" column="fontColor" />
+	    <result property="fontSize" column="fontSize" />
+	    <result property="fontFamily" column="fontFamily" />
+	    <result property="showBeginTime" column="showBeginTime" />
+	    <result property="showEndTime" column="showEndTime" />
+	    <result property="showArea" column="showArea" />
+	    <result property="normalId" column="normalId" />
+	    <result property="isSpecial" column="isSpecial" />
+	    <result property="description" column="description" />
+	    <result property="valid" column="valid" />
+	    <result property="createBy" column="createBy" />
+	    <result property="createTime" column="createTime" />
+	    <result property="updateBy" column="updateBy" />
+	    <result property="updateTime" column="updateTime" />
 	</resultMap>
     <resultMap id="tRoomSaleCity" type="com.mk.ots.roomsale.model.TRoomSaleCity">
         <result property="id" column="id" />
@@ -21,16 +37,33 @@
             t_room_sale_city    trsc
         where  trsc.cityCode  =  #{cityCode}
     </select>
-
-    <select id="queryTRoomSaleShowConfigById" resultMap="tRoomSaleShowConfig"  parameterType="java.util.Map">
+    <sql id="Base_Column_List" >
+        id, saleName, saleTypeId,picUrl,backPicUrl,backColor,fontColor,fontSize,fontFamily,showBeginTime,showEndTime,
+        showArea,normalId,isSpecial,description,valid,createBy,updateTime,updateBy
+    </sql>
+    <select id="queryRoomSaleShowConfigByParams" resultMap="tRoomSaleShowConfig"  parameterType="com.mk.ots.roomsale.model.RoomSaleShowConfigDto">
         select
-       trssc.id,trssc.picUrl,trssc.saleTypeId,trssc.saleName
+        <include refid="Base_Column_List"/>
         FROM
-        t_room_sale_show_config    trssc
-        where  trssc.saleTypeId  =  #{saleTypeId}
-        <if test="showArea != null" >
-            trssc.showArea = #{showArea}
-        </if>
+        t_room_sale_show_config
+        <where>
+            <if test="saleTypeId != null" >
+                saleTypeId = #{saleTypeId}
+            </if>
+            <if test="showArea != null" >
+                showArea = #{showArea}
+            </if>
+            <if test="normalId != null" >
+                normalId = #{normalId}
+            </if>
+            <if test="isSpecial != null" >
+                isSpecial = #{isSpecial}
+            </if>
+            <if test="valid != null" >
+                valid = #{valid}
+            </if>
+        </where>
+        ORDER  BY ord ASC
     </select>
 
 </mapper>
