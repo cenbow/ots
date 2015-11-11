@@ -1,18 +1,20 @@
 package com.mk.ots.order.service;
 
+import com.google.common.base.Optional;
+import com.mk.ots.common.enums.OrderMethodEnum;
 import com.mk.ots.common.enums.OtaFreqTrvEnum;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
+import com.mk.ots.mapper.OtaOrderMacMapper;
+import com.mk.ots.member.model.UMember;
+import com.mk.ots.member.service.IMemberService;
 import com.mk.ots.order.bean.OtaOrder;
-import com.mk.ots.order.dao.OrderDAO;
+import com.mk.ots.order.model.OtaOrderMac;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Thinkpad on 2015/11/11.
@@ -22,7 +24,12 @@ public class QiekeRuleService {
     private static Logger logger = LoggerFactory.getLogger(QiekeRuleService.class);
 
     @Autowired
-    private OrderDAO orderDAO;
+    private OrderService orderService;
+    @Autowired
+    private OtaOrderMacMapper otaOrderMacMapper;
+
+    @Autowired
+    private IMemberService iMemberService;
 
     /**
      * 手机号必须是第一次，入住并离店的订单
@@ -42,7 +49,7 @@ public class QiekeRuleService {
         statusList.add(OtaOrderStatusEnum.CheckOut);
 
         //查询该用户下所有 入住、挂单、离店酒店
-        List<OtaOrder> orderList = this.orderDAO.findOtaOrderByMid(mid, statusList);
+        List<OtaOrder> orderList = this.orderService.findOtaOrderByMid(mid, statusList);
 
         //排除这次订单外，其他是否还有订单
         Set<Long> orderSet = new HashSet<>();
@@ -56,17 +63,127 @@ public class QiekeRuleService {
             return OtaFreqTrvEnum.PHONE_NOT_FIRST;
         }
 
-        //
+        //通过
         return OtaFreqTrvEnum.L1;
     }
 
     /**
-     * 手机唯一码必须是第一次，入住并离店的订单（若手机唯一码未取到，则酒店无该笔拉新收益）
+     * 系统号必须是第一次，入住并离店的订单（若系统号未取到，则酒店无该笔拉新收益）
      * @param otaOrder
      * @return
      */
     public OtaFreqTrvEnum checkSysNo(OtaOrder otaOrder){
-        return OtaFreqTrvEnum.IN_FREQUSER;
+        if (null == otaOrder) {
+            return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+        }
+
+        Integer orderMethod = otaOrder.getOrderMethod();
+        if (orderMethod ==  OrderMethodEnum.WECHAT.getId()) {
+            //微信
+            Long mid = otaOrder.getMid();
+            Optional<UMember> memberOptional = iMemberService.findMemberById(mid, "T");
+            if (memberOptional.isPresent()) {
+                UMember member = memberOptional.get();
+                String openId = member.getOpenid();
+                List<UMember> uMemberList = iMemberService.findUMemberByOpenId(openId);
+
+                //去除本次账号
+                Set<Long> memberIdSet = new HashSet<>();
+                for (UMember dbMember : uMemberList) {
+                    Long dbMid = dbMember.getId();
+                    memberIdSet.add(dbMid);
+                }
+                memberIdSet.remove(mid);
+
+                //
+                if (memberIdSet.size() > 0) {
+                    return OtaFreqTrvEnum.DEVICE_NUM_NOT_FIRST;
+                } else {
+                    return  OtaFreqTrvEnum.L1;
+                }
+            }
+            return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+
+        } else if (orderMethod == OrderMethodEnum.ANDROID.getId()) {
+            //安卓
+            Long orderId = otaOrder.getId();
+
+            OtaOrderMac orderMac = otaOrderMacMapper.selectByOrderId(orderId);
+            if (null == orderMac) {
+                return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+            }
+            String deviceimei = orderMac.getDeviceimei();
+            if (null == deviceimei) {
+                return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+            }
+
+            //订单状态
+            List<OtaOrderStatusEnum> statusList = new ArrayList<>();
+            statusList.add(OtaOrderStatusEnum.CheckIn);
+            statusList.add(OtaOrderStatusEnum.Account);
+            statusList.add(OtaOrderStatusEnum.CheckOut);
+
+            //
+            Map<String, Object> param = new HashMap<>();
+            param.put("deviceimei",deviceimei);
+            param.put("statusList",statusList);
+            List<OtaOrderMac> orderMacList = otaOrderMacMapper.selectByDeviceimei(param);
+
+            //去除本次账号
+            Set<Long> orderIdSet = new HashSet<>();
+            for(OtaOrderMac dbOrderMac : orderMacList) {
+                Long macOrderId = dbOrderMac.getOrderid();
+                orderIdSet.add(macOrderId);
+            }
+            orderIdSet.remove(orderId);
+
+            //
+            if (orderIdSet.size() > 0) {
+                return OtaFreqTrvEnum.DEVICE_NUM_NOT_FIRST;
+            } else {
+                return  OtaFreqTrvEnum.L1;
+            }
+        } else if (orderMethod == OrderMethodEnum.IOS.getId()) {
+            //IOS
+            Long orderId = otaOrder.getId();
+            OtaOrderMac orderMac = otaOrderMacMapper.selectByOrderId(orderId);
+            if (null == orderMac) {
+                return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+            }
+            String uuid = orderMac.getUuid();
+            if (null == uuid) {
+                return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+            }
+
+            //订单状态
+            List<OtaOrderStatusEnum> statusList = new ArrayList<>();
+            statusList.add(OtaOrderStatusEnum.CheckIn);
+            statusList.add(OtaOrderStatusEnum.Account);
+            statusList.add(OtaOrderStatusEnum.CheckOut);
+            //
+            Map<String, Object> param = new HashMap<>();
+            param.put("uuid",uuid);
+            param.put("statusList",statusList);
+            List<OtaOrderMac> orderMacList = otaOrderMacMapper.selectByUuid(param);
+
+            //去除本次账号
+            Set<Long> orderIdSet = new HashSet<>();
+            for(OtaOrderMac dbOrderMac : orderMacList) {
+                Long macOrderId = dbOrderMac.getOrderid();
+                orderIdSet.add(macOrderId);
+            }
+            orderIdSet.remove(orderId);
+
+            //
+            if (orderIdSet.size() > 0) {
+                return OtaFreqTrvEnum.DEVICE_NUM_NOT_FIRST;
+            } else {
+                return  OtaFreqTrvEnum.L1;
+            }
+        } else {
+            //其他类型返回系统号为空
+            return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+        }
     }
 
     /**

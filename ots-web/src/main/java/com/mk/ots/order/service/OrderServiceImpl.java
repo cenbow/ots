@@ -3984,6 +3984,12 @@ public class OrderServiceImpl implements OrderService {
            return   false;
         }
     }
+
+    @Override
+    public List<OtaOrder> findOtaOrderByMid(Long mid, List<OtaOrderStatusEnum> statusList) {
+        return this.orderDAO.findOtaOrderByMid(mid, statusList);
+    }
+
     private  OtaOrderTasts getMessageToC(OtaOrder otaorder,Date executeTime,Boolean isSms,CopywriterTypeEnum copywriterTypeEnum,
                                         OrderTasksTypeEnum   orderTasksTypeEnum,BigDecimal  backcost){
         Message message=new Message();
