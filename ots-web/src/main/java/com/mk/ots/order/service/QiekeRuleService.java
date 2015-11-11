@@ -6,6 +6,7 @@ import com.mk.ots.common.enums.OrderTypeEnum;
 import com.mk.ots.common.enums.OtaFreqTrvEnum;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.utils.Constant;
+import com.mk.ots.common.utils.SearchConst;
 import com.mk.ots.hotel.model.THotelModel;
 import com.mk.ots.mapper.OtaOrderMacMapper;
 import com.mk.ots.mapper.PmsCheckinUserMapper;
@@ -18,6 +19,9 @@ import com.mk.ots.order.dao.OrderDAO;
 import com.mk.ots.order.model.OtaOrderMac;
 import com.mk.ots.pay.model.PPay;
 import com.mk.ots.pay.service.IPayService;
+import com.mk.ots.order.bean.OtaOrder;
+import com.mk.ots.order.dao.CheckInUserDAO;
+import com.mk.ots.order.dao.OrderDAO;
 import com.mk.ots.search.service.impl.SearchService;
 import com.mk.ots.utils.DistanceUtil;
 import org.apache.commons.lang.StringUtils;
@@ -334,7 +338,7 @@ public class QiekeRuleService {
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }
         double distance = DistanceUtil.distance(tHotelModel.getLongitude().doubleValue(), tHotelModel.getLatitude().doubleValue(), userlongitude, userlatitude);
-        if(distance < 1000){
+        if(distance < SearchConst.SEARCH_RANGE_1_KM){
             return OtaFreqTrvEnum.L1;
         }
         return OtaFreqTrvEnum.L1;
