@@ -1,14 +1,12 @@
 package com.mk.ots.roomsale.service;
 
-import com.mk.ots.roomsale.model.TRoomSaleShowConfig;
+import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
+import com.mk.ots.roomsale.model.TRoomSaleCity;
 
 import java.util.List;
 
 public interface TRoomSaleShowConfigService {
-    /**
-     * @param cityid
-     * @return
-     */
 
-    public List<TRoomSaleShowConfig> queryTRoomSaleShowConfig(String cityid,String  showArea);
+    public List<RoomSaleShowConfigDto> queryRoomSaleShowConfigByParams(RoomSaleShowConfigDto bean);
+    public  List<TRoomSaleCity> queryTRoomSaleCity(String cityid);
 }

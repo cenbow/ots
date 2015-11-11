@@ -1,26 +1,23 @@
 package com.mk.ots.roomsale.model;
 
-public class TRoomSaleShowConfig {
+public class RoomSaleShowConfigDto {
     private Integer id;
-    private String saleName;
-    private Integer saleTypeId;
-    private String picUrl;
-    private String backPicUrl;
+    private String promotext;
+    private Integer promoid;
+    private String promoicon;
+    private String backPics;
     private String backColor;
     private String fontColor;
     private Integer fontSize;
     private String fontFamily;
     private String showBeginTime;
     private String showEndTime;
-    private String showArea;
+    private String  showArea;
+    private String  cityid;
     private Integer normalId;
     private String isSpecial;
-    private String description;
-    private String valid;
-    private String createBy;
-    private String createTime;
-    private String updateBy;
-    private String updateTime;
+    private String  describe;
+    private Integer ord;
 
     public Integer getId() {
         return id;
@@ -30,36 +27,36 @@ public class TRoomSaleShowConfig {
         this.id = id;
     }
 
-    public String getSaleName() {
-        return saleName;
+    public String getPromotext() {
+        return promotext;
     }
 
-    public void setSaleName(String saleName) {
-        this.saleName = saleName;
+    public void setPromotext(String promotext) {
+        this.promotext = promotext;
     }
 
-    public Integer getSaleTypeId() {
-        return saleTypeId;
+    public Integer getPromoid() {
+        return promoid;
     }
 
-    public void setSaleTypeId(Integer saleTypeId) {
-        this.saleTypeId = saleTypeId;
+    public void setPromoid(Integer promoid) {
+        this.promoid = promoid;
     }
 
-    public String getPicUrl() {
-        return picUrl;
+    public String getPromoicon() {
+        return promoicon;
     }
 
-    public void setPicUrl(String picUrl) {
-        this.picUrl = picUrl;
+    public void setPromoicon(String promoicon) {
+        this.promoicon = promoicon;
     }
 
-    public String getBackPicUrl() {
-        return backPicUrl;
+    public String getBackPics() {
+        return backPics;
     }
 
-    public void setBackPicUrl(String backPicUrl) {
-        this.backPicUrl = backPicUrl;
+    public void setBackPics(String backPics) {
+        this.backPics = backPics;
     }
 
     public String getBackColor() {
@@ -118,52 +115,20 @@ public class TRoomSaleShowConfig {
         this.showArea = showArea;
     }
 
-    public String getDescription() {
-        return description;
+    public Integer getOrd() {
+        return ord;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setOrd(Integer ord) {
+        this.ord = ord;
     }
 
-    public String getValid() {
-        return valid;
+    public String getDescribe() {
+        return describe;
     }
 
-    public void setValid(String valid) {
-        this.valid = valid;
-    }
-
-    public String getCreateBy() {
-        return createBy;
-    }
-
-    public void setCreateBy(String createBy) {
-        this.createBy = createBy;
-    }
-
-    public String getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(String createTime) {
-        this.createTime = createTime;
-    }
-
-    public String getUpdateBy() {
-        return updateBy;
-    }
-
-    public void setUpdateBy(String updateBy) {
-        this.updateBy = updateBy;
-    }
-
-    public String getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(String updateTime) {
-        this.updateTime = updateTime;
+    public void setDescribe(String describe) {
+        this.describe = describe;
     }
 
     public Integer getNormalId() {
@@ -180,5 +145,13 @@ public class TRoomSaleShowConfig {
 
     public void setIsSpecial(String isSpecial) {
         this.isSpecial = isSpecial;
+    }
+
+    public String getCityid() {
+        return cityid;
+    }
+
+    public void setCityid(String cityid) {
+        this.cityid = cityid;
     }
 }
