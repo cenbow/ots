@@ -384,7 +384,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			params.setIspromoonly(Boolean.TRUE);
 			params.setLimit(FrontPageEnum.limit.getId());
 			params.setPromotype(HotelPromoEnum.OneDollar.getCode());
-
+			params.setCallentry(null);
+			
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
 			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
 			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
@@ -403,6 +404,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			params.setIspromoonly(Boolean.TRUE);
 			params.setLimit(FrontPageEnum.limit.getId());
 			params.setPromotype(HotelPromoEnum.Day.getCode());
+			params.setCallentry(null);
+			
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
 
 			promoItem = new HashMap<String, Object>();
@@ -426,7 +429,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			params.setLimit(FrontPageEnum.limit.getId());
 			params.setIspromoonly(Boolean.TRUE);
 			params.setPromotype(HotelPromoEnum.Night.getCode());
-
+			params.setCallentry(null);
+			
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
 			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
 			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
@@ -447,6 +451,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			params.setPromotype(HotelPromoEnum.Theme.getCode());
 			params.setIspromoonly(Boolean.TRUE);
 			params.setLimit(FrontPageEnum.limit.getId());
+			params.setCallentry(null);
 
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
 			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
