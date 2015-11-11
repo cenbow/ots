@@ -99,7 +99,6 @@ public class QiekeRuleService {
      * @return
      */
     public OtaFreqTrvEnum checkUserAdders(OtaOrder otaOrder){
-        otaOrder = orderDAO.findOtaOrderById(otaOrder.getId());
         THotelModel tHotelModel = tHotelMapper.selectById(otaOrder.getHotelId());
         Double userlongitude = otaOrder.getBigDecimal("userlongitude").doubleValue();
         Double userlatitude = otaOrder.getBigDecimal("userlatitude").doubleValue();
@@ -111,7 +110,7 @@ public class QiekeRuleService {
         }
         double distance = DistanceUtil.distance(tHotelModel.getLongitude().doubleValue(), tHotelModel.getLatitude().doubleValue(), userlongitude, userlatitude);
         if(distance < 1000){
-            return OtaFreqTrvEnum.OUT_OF_RANG;
+            return OtaFreqTrvEnum.L1;
         }
         return OtaFreqTrvEnum.L1;
     }
