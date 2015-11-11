@@ -1,10 +1,18 @@
 package com.mk.ots.order.service;
 
 import com.mk.ots.common.enums.OtaFreqTrvEnum;
+import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.order.bean.OtaOrder;
+import com.mk.ots.order.dao.OrderDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Thinkpad on 2015/11/11.
@@ -12,13 +20,44 @@ import org.springframework.stereotype.Service;
 @Service
 public class QiekeRuleService {
     private static Logger logger = LoggerFactory.getLogger(QiekeRuleService.class);
+
+    @Autowired
+    private OrderDAO orderDAO;
+
     /**
      * 手机号必须是第一次，入住并离店的订单
      * @param otaOrder
      * @return
      */
     public OtaFreqTrvEnum checkMobile(OtaOrder otaOrder){
-        return OtaFreqTrvEnum.IN_FREQUSER;
+        if (null == otaOrder) {
+            return OtaFreqTrvEnum.PHONE_NOT_FIRST;
+        }
+        Long mid = otaOrder.getMid();
+
+        //订单状态
+        List<OtaOrderStatusEnum> statusList = new ArrayList<>();
+        statusList.add(OtaOrderStatusEnum.CheckIn);
+        statusList.add(OtaOrderStatusEnum.Account);
+        statusList.add(OtaOrderStatusEnum.CheckOut);
+
+        //查询该用户下所有 入住、挂单、离店酒店
+        List<OtaOrder> orderList = this.orderDAO.findOtaOrderByMid(mid, statusList);
+
+        //排除这次订单外，其他是否还有订单
+        Set<Long> orderSet = new HashSet<>();
+        for(OtaOrder order : orderList) {
+            orderSet.add(order.getId());
+        }
+        orderSet.remove(otaOrder.getId());
+
+        //其他是否还有订单，人为非第一次使用
+        if (orderSet.size() > 0 ) {
+            return OtaFreqTrvEnum.PHONE_NOT_FIRST;
+        }
+
+        //
+        return OtaFreqTrvEnum.L1;
     }
 
     /**
