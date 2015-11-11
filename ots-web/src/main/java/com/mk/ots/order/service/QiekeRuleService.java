@@ -264,8 +264,18 @@ public class QiekeRuleService {
         //去除本次账号
         Set<Long> payIdSet = new HashSet<>();
         for(PPay dbPay : payList) {
-            Long dbPayId = dbPay.getId();
-            payIdSet.add(dbPayId);
+            Long dbPayOrderid = dbPay.getOrderid();
+            OtaOrder dbOrder = this.orderService.findOtaOrderById(dbPayOrderid);
+            if (null == dbOrder) {
+                continue;
+            }
+            Integer orderStatus = dbOrder.getOrderStatus();
+            if (orderStatus == OtaOrderStatusEnum.CheckIn.getId()
+                    || orderStatus == OtaOrderStatusEnum.Account.getId()
+                    || orderStatus == OtaOrderStatusEnum.CheckOut.getId()) {
+                Long dbPayId = dbPay.getId();
+                payIdSet.add(dbPayId);
+            }
         }
         payIdSet.remove(pay.getId());
 
