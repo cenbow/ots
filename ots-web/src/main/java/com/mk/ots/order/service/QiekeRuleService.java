@@ -2,32 +2,20 @@ package com.mk.ots.order.service;
 
 import com.mk.ots.common.enums.OtaFreqTrvEnum;
 import com.mk.ots.common.utils.Constant;
-import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.common.utils.SearchConst;
-import com.mk.ots.hotel.dao.HotelDAO;
 import com.mk.ots.hotel.model.THotelModel;
 import com.mk.ots.mapper.PmsCheckinUserMapper;
 import com.mk.ots.mapper.THotelMapper;
-import com.mk.ots.order.bean.OtaCheckInUser;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.dao.CheckInUserDAO;
 import com.mk.ots.order.dao.OrderDAO;
-import com.mk.ots.order.dao.OtaOrderDAO;
-import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.search.service.impl.SearchService;
 import com.mk.ots.utils.DistanceUtil;
-import com.mk.ots.web.ServiceOutput;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Thinkpad on 2015/11/11.
@@ -109,7 +97,7 @@ public class QiekeRuleService {
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }
         double distance = DistanceUtil.distance(tHotelModel.getLongitude().doubleValue(), tHotelModel.getLatitude().doubleValue(), userlongitude, userlatitude);
-        if(distance < 1000){
+        if(distance < SearchConst.SEARCH_RANGE_1_KM){
             return OtaFreqTrvEnum.L1;
         }
         return OtaFreqTrvEnum.L1;
