@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,28 +27,28 @@ public class TRoomSaleShowConfigServiceImpl implements TRoomSaleShowConfigServic
 	private RoomSaleShowConfigMapper roomSaleShowConfigMapper;
 
 
-    public List<TRoomSaleShowConfig> queryTRoomSaleShowConfig(String cityid){
+    public List<TRoomSaleShowConfig> queryTRoomSaleShowConfig(String cityid,String showArea){
         logger.info(" method queryTRoomSaleShowConfig  parame   cityid:" + cityid);
         List<TRoomSaleCity>   tRoomSaleCityList   =  this.queryTRoomSaleCity(cityid);
         if(CollectionUtils.isEmpty(tRoomSaleCityList)){
             logger.info(" method queryTRoomSaleShowConfig  querytRoomSaleCityList is  null ");
             return null;
         }
-        String  ids = "";
+        HashMap  map=new HashMap<>();
+        if(!StringUtils.isEmpty(showArea)){
+            map.put("showArea",showArea);
+        }
+        List<TRoomSaleShowConfig>  resultList =  new ArrayList();
         for(TRoomSaleCity  tRoomSaleCity:tRoomSaleCityList){
             if(0==tRoomSaleCity.getSaleTypeId()){
                 continue;
             }
-            ids = ids + tRoomSaleCity.getSaleTypeId() + ",";
+            map.put("saleTypeId",tRoomSaleCity.getSaleTypeId());
+            List<TRoomSaleShowConfig>  tRoomSaleShowConfigList = roomSaleShowConfigMapper.queryTRoomSaleShowConfig(map);
+            resultList.addAll(tRoomSaleShowConfigList);
         }
-        if(StringUtils.isEmpty(ids)){
-            return null;
-        }
-        logger.info(" method queryTRoomSaleShowConfig   parame  ids   " +  ids);
-        if(ids.endsWith(",")){
-            ids = ids.substring(0,ids.length()-1);
-        }
-        return  roomSaleShowConfigMapper.queryTRoomSaleShowConfigByIds(ids);
+
+        return  resultList;
     }
 
 

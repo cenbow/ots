@@ -22,19 +22,15 @@
         where  trsc.cityCode  =  #{cityCode}
     </select>
 
-    <select id="queryTRoomSaleShowConfigById" resultMap="tRoomSaleShowConfig"  parameterType="java.lang.Long">
+    <select id="queryTRoomSaleShowConfigById" resultMap="tRoomSaleShowConfig"  parameterType="java.util.Map">
         select
-        trssc.*
+       trssc.id,trssc.picUrl,trssc.saleTypeId,trssc.saleName
         FROM
         t_room_sale_show_config    trssc
-        where  trssc.id  =  #{roomSaleShowConfigId}
+        where  trssc.saleTypeId  =  #{saleTypeId}
+        <if test="showArea != null" >
+            trssc.showArea = #{showArea}
+        </if>
     </select>
 
-    <select id="queryTRoomSaleShowConfigByIds" resultMap="tRoomSaleShowConfig"  parameterType="java.lang.String">
-        select
-        trssc.picUrl,trssc.saleTypeId,trssc.saleName
-        FROM
-        t_room_sale_show_config    trssc
-        where  trssc.id   in  #{ids}
-    </select>
 </mapper>

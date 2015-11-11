@@ -10,9 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface RoomSaleShowConfigMapper {
-    public List<TRoomSaleShowConfig> queryTRoomSaleShowConfigById(Long   roomSaleShowConfigId );
-
-    public List<TRoomSaleShowConfig> queryTRoomSaleShowConfigByIds(String    ids );
+    public List<TRoomSaleShowConfig> queryTRoomSaleShowConfig(HashMap  map);
 
     public  List<TRoomSaleCity>    queryTRoomSaleCity(HashMap  map);
 
