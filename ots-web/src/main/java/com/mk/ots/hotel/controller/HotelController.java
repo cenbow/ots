@@ -179,7 +179,7 @@ public class HotelController {
 		String strCurDay = DateUtils.getStringFromDate(new Date(), DateUtils.FORMATSHORTDATETIME);
 		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(new Date(), 1),
 				DateUtils.FORMATSHORTDATETIME);
-		
+
 		hotelEntity.setCityid(reqentity.getCityid());
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
@@ -376,7 +376,15 @@ public class HotelController {
 
 			reqentity.setIspromoonly(Boolean.TRUE);
 
-			rtnMap = promoSearchService.readonlySearchHotels(reqentity);
+			/**
+			 * check if theme is being searched
+			 */
+			String promoType = reqentity.getPromotype();
+			if (StringUtils.isNotBlank(promoType) && promoType.equals("16")) {
+				rtnMap = promoSearchService.searchThemes(reqentity);
+			} else {
+				rtnMap = promoSearchService.readonlySearchHotels(reqentity);
+			}
 
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
 					HttpStatus.OK);

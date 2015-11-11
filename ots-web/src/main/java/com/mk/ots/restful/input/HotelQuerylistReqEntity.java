@@ -1,7 +1,6 @@
 package com.mk.ots.restful.input;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
