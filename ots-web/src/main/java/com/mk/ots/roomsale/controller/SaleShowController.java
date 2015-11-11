@@ -57,7 +57,7 @@ public class SaleShowController {
 		for (TRoomSaleCity saleCity:roomSaleCityList){
 			bean.setPromoid(saleCity.getSaleTypeId());
 			List<RoomSaleShowConfigDto> saleShowConfigList= tRoomSaleShowConfigService.queryRoomSaleShowConfigByParams(bean);
-			if (CollectionUtils.isEmpty(saleShowConfigList)){
+			if (!CollectionUtils.isEmpty(saleShowConfigList)){
 				resultList.add(saleShowConfigList.get(0));
 			}
 		}
