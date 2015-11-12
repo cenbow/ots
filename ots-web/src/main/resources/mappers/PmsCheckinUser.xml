@@ -18,6 +18,6 @@
     where ord.id = roomorder.OtaOrderId
     and ck.pmsRoomOrderNo = roomorder.PMSRoomOrderNo
     and ord.OrderStatus in (180,190,200)
-    and ck.cardid = #{cardId}
+    and ck.cardid = #{cardId} and ord.id != #{otaOrderId}
   </select>
 </mapper>
