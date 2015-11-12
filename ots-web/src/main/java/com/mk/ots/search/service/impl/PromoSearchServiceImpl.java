@@ -303,6 +303,58 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return validateStr;
 	}
 
+	private String validateSearchHome(HotelQuerylistReqEntity params) {
+		String validateStr = "";
+		try {
+			String startdateday = params.getStartdateday();
+			if (StringUtils.isBlank(startdateday)) {
+				validateStr = "无效的入住日期.";
+				return validateStr;
+			}
+			String enddateday = params.getEnddateday();
+			if (StringUtils.isBlank(enddateday)) {
+				validateStr = "无效的离店日期.";
+				return validateStr;
+			}
+			if (startdateday.equals(enddateday)) {
+				validateStr = "入住和离店不能是同一天.";
+				return validateStr;
+			}
+			// 用户坐标经纬度值没有,先判断屏幕坐标经纬度值，有的话用屏幕坐标经纬度，没有默认上海市中心位置
+			if (params.getUserlongitude() == null) {
+				return "用户userlongitude必须传入";
+			}
+			if (params.getUserlatitude() == null) {
+				return "用户userlatitude必须传入";
+			}
+			if (StringUtils.isBlank(params.getCityid())) {
+				return "用户cityid必须传入";
+			}
+			if (StringUtils.isBlank(params.getCallversion())) {
+				return "callversion必须传入";
+			}
+			if (StringUtils.isNotBlank(params.getCallversion()) && ("3.1".compareTo(params.getCallversion()) > 0)) {
+				return "callversion版本不正确";
+			}
+			if (StringUtils.isNotEmpty(params.getCallmethod()) && "3".equalsIgnoreCase(params.getCallmethod())) {
+				return "callmethod为wechat";
+			}
+			if ((params.getCallentry() != null) && (params.getCallentry() == 1 || params.getCallentry() == 2) ) {
+				return "callentry为摇一摇或切客";
+			}
+
+			Date startDate = DateUtils.getDateFromString(params.getStartdateday());
+			Date endDate = DateUtils.getDateFromString(params.getEnddateday());
+			validateStr = this.validateSearchDate(startDate, endDate);
+			return validateStr;
+		} catch (Exception e) {
+			logger.error("search hotel validation failed", e);
+			validateStr = e.getLocalizedMessage();
+		}
+
+		return validateStr;
+	}
+
 	/**
 	 * 酒店搜索校验
 	 * 
@@ -337,6 +389,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (StringUtils.isBlank(params.getCityid())) {
 				return "用户cityid必须传入";
 			}
+
 			Date startDate = DateUtils.getDateFromString(params.getStartdateday());
 			Date endDate = DateUtils.getDateFromString(params.getEnddateday());
 			validateStr = this.validateSearchDate(startDate, endDate);
@@ -544,7 +597,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	@Override
 	public List<Map<String, Object>> searchHomePromos(HotelQuerylistReqEntity params) throws Exception {
 		// 酒店搜索校验: 开始
-		String validateStr = this.getValidateSearchHotels(params);
+		String validateStr = this.validateSearchHome(params);
 		if (StringUtils.isNotBlank(validateStr)) {
 			logger.error("invalid parameters {}", validateStr);
 			throw new Exception(String.format("invalid paramters %s", validateStr));
@@ -581,24 +634,31 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
 			roomSaleShowConfigDto.setPromoid(promoId);
 
-			List<RoomSaleShowConfigDto> oneDollarShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
-
 			promoItem.put("promotype", HotelPromoEnum.OneDollar.getCode());
 			promoItem.put("normalid", -1);
 
-			if (oneDollarShowConfigs != null && oneDollarShowConfigs.size() > 0){
-				RoomSaleShowConfigDto promoShowConfig = oneDollarShowConfigs.get(0);
-				promoItem.put("promoicon", promoShowConfig.getPromoicon());
-				promoItem.put("promotext", promoShowConfig.getPromotext());
-				promoItem.put("promonote", promoShowConfig.getPromonote());
+			try {
+				List<RoomSaleShowConfigDto> oneDollarShowConfigs = roomSaleShowConfigService
+						.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
 
-			}else {
+				if (oneDollarShowConfigs != null && oneDollarShowConfigs.size() > 0) {
+					RoomSaleShowConfigDto promoShowConfig = oneDollarShowConfigs.get(0);
+					promoItem.put("promoicon", promoShowConfig.getPromoicon());
+					promoItem.put("promotext", promoShowConfig.getPromotext());
+					promoItem.put("promonote", promoShowConfig.getPromonote());
+				} else {
+					promoItem.put("promoicon", "");
+					promoItem.put("promotext", HotelPromoEnum.OneDollar.getText());
+					promoItem.put("promonote", "一元秒杀， 先到先得");
+
+				}
+			} catch (Exception ex) {
 				promoItem.put("promoicon", "");
 				promoItem.put("promotext", HotelPromoEnum.OneDollar.getText());
-				promoItem.put("promonote", "一元秒杀， 先到先得");
+				promoItem.put("promonote", "");
 
+				logger.warn("failed to query resources from showconfig for one dollar", ex);
 			}
-
 
 			params.setIspromoonly(Boolean.TRUE);
 			params.setLimit(FrontPageEnum.limit.getId());
@@ -618,24 +678,33 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				promoItem.put("hotel", supplementHotels);
 			}
 			promoId = HotelPromoEnum.Day.getCode();
-			roomSaleShowConfigDto.setPromoid(promoId);
-
-			List<RoomSaleShowConfigDto> dayShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
 
 			promoItem.put("promotype", promoId);
 			promoItem.put("normalid", -1);
 
-			if (dayShowConfigs != null && dayShowConfigs.size() > 0){
-				RoomSaleShowConfigDto promoShowConfig = dayShowConfigs.get(0);
-				promoItem.put("promoicon", promoShowConfig.getPromoicon());
-				promoItem.put("promotext", promoShowConfig.getPromotext());
-				promoItem.put("promonote", promoShowConfig.getPromonote());
+			roomSaleShowConfigDto.setPromoid(promoId);
+			roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
 
-			}else {
+			try {
+				List<RoomSaleShowConfigDto> dayShowConfigs = roomSaleShowConfigService
+						.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+
+				if (dayShowConfigs != null && dayShowConfigs.size() > 0) {
+					RoomSaleShowConfigDto promoShowConfig = dayShowConfigs.get(0);
+					promoItem.put("promoicon", promoShowConfig.getPromoicon());
+					promoItem.put("promotext", promoShowConfig.getPromotext());
+					promoItem.put("promonote", promoShowConfig.getPromonote());
+				} else {
+					promoItem.put("promoicon", "");
+					promoItem.put("promotext", HotelPromoEnum.Day.getText());
+					promoItem.put("promonote", "每天12: 00-18: 00，订房享受特价");
+				}
+			} catch (Exception ex) {
 				promoItem.put("promoicon", "");
 				promoItem.put("promotext", HotelPromoEnum.Day.getText());
 				promoItem.put("promonote", "每天12: 00-18: 00，订房享受特价");
 
+				logger.warn("failed to query resources from showconfig for one dollar", ex);
 			}
 
 			promoItem = new HashMap<String, Object>();
@@ -655,25 +724,33 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				promoItem.put("hotel", supplementHotels);
 			}
 
-			promoId =HotelPromoEnum.Night.getCode();
-			roomSaleShowConfigDto.setPromoid(promoId);
-
-			List<RoomSaleShowConfigDto> nightShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+			promoId = HotelPromoEnum.Night.getCode();
 
 			promoItem.put("promotype", promoId);
 			promoItem.put("normalid", -1);
 
-			if (nightShowConfigs != null && nightShowConfigs.size() > 0){
-				RoomSaleShowConfigDto promoShowConfig = nightShowConfigs.get(0);
-				promoItem.put("promoicon", promoShowConfig.getPromoicon());
-				promoItem.put("promotext", promoShowConfig.getPromotext());
-				promoItem.put("promonote", promoShowConfig.getPromonote());
+			roomSaleShowConfigDto.setPromoid(promoId);
 
-			}else {
+			try {
+				List<RoomSaleShowConfigDto> nightShowConfigs = roomSaleShowConfigService
+						.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+
+				if (nightShowConfigs != null && nightShowConfigs.size() > 0) {
+					RoomSaleShowConfigDto promoShowConfig = nightShowConfigs.get(0);
+					promoItem.put("promoicon", promoShowConfig.getPromoicon());
+					promoItem.put("promotext", promoShowConfig.getPromotext());
+					promoItem.put("promonote", promoShowConfig.getPromonote());
+
+				} else {
+					promoItem.put("promoicon", "");
+					promoItem.put("promotext", HotelPromoEnum.Night.getText());
+					promoItem.put("promonote", "每天20: 00-02: 00，订房30元起");
+				}
+			} catch (Exception ex) {
 				promoItem.put("promoicon", "");
 				promoItem.put("promotext", HotelPromoEnum.Night.getText());
 				promoItem.put("promonote", "每天20: 00-02: 00，订房30元起");
-
+				logger.warn("failed to query resources from showconfig for night promo", ex);
 			}
 
 			promoItem = new HashMap<String, Object>();
@@ -694,23 +771,31 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 
 			promoId = HotelPromoEnum.Theme.getCode();
-			roomSaleShowConfigDto.setPromoid(promoId);
-
-			List<RoomSaleShowConfigDto> themeShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
 
 			promoItem.put("promotype", promoId);
 			promoItem.put("normalid", -1);
 
-			if (themeShowConfigs != null && themeShowConfigs.size() > 0){
-				RoomSaleShowConfigDto promoShowConfig = themeShowConfigs.get(0);
-				promoItem.put("promoicon", promoShowConfig.getPromoicon());
-				promoItem.put("promotext", promoShowConfig.getPromotext());
-				promoItem.put("promonote", promoShowConfig.getPromonote());
+			roomSaleShowConfigDto.setPromoid(promoId);
 
-			}else {
+			try {
+				List<RoomSaleShowConfigDto> themeShowConfigs = roomSaleShowConfigService
+						.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+
+				if (themeShowConfigs != null && themeShowConfigs.size() > 0) {
+					RoomSaleShowConfigDto promoShowConfig = themeShowConfigs.get(0);
+					promoItem.put("promoicon", promoShowConfig.getPromoicon());
+					promoItem.put("promotext", promoShowConfig.getPromotext());
+					promoItem.put("promonote", promoShowConfig.getPromonote());
+				} else {
+					promoItem.put("promoicon", "");
+					promoItem.put("promotext", HotelPromoEnum.Theme.getText());
+					promoItem.put("promonote", "总有一款适合你");
+				}
+			} catch (Exception ex) {
 				promoItem.put("promoicon", "");
 				promoItem.put("promotext", HotelPromoEnum.Theme.getText());
 				promoItem.put("promonote", "总有一款适合你");
+				logger.warn("failed to query resources from showconfig for theme", ex);
 			}
 
 			return promolist;
