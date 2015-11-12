@@ -16,6 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
 
 /**
  * Created by Thinkpad on 2015/11/11.
@@ -61,9 +64,19 @@ public class QiekeRuleService {
      * @return
      */
     public OtaFreqTrvEnum checkIdentityCard(OtaOrder otaOrder){
-        String cardId = pmsCheckinUserMapper.getCardId(otaOrder.getId());
-        if(StringUtils.isEmpty(cardId)){
+        List<String> cardIdList = pmsCheckinUserMapper.getCardId(otaOrder.getId());
+        if(CollectionUtils.isEmpty(cardIdList)){
             return OtaFreqTrvEnum.CARD_ID_IS_NULL;
+        }
+        String cardId = "";
+        for(String org : cardIdList){
+            if(StringUtils.isNotEmpty(org)){
+                cardId = org;
+                break;
+            }
+        }
+        if(StringUtils.isEmpty(cardId)){
+            return OtaFreqTrvEnum.CARD_ID_NOT_FIRST;
         }
         Long cardCount = pmsCheckinUserMapper.getCardCountByCardId(otaOrder.getId(), cardId);
         if(cardCount > 1){
@@ -72,12 +85,13 @@ public class QiekeRuleService {
         return OtaFreqTrvEnum.L1;
     }
 
+
     /**
      * 支付账号（如支付宝账号或者微信支付账号）必须是第一次（若订单为到付订单，则忽略此条）
      * @param otaOrder
      * @return
      */
-    public OtaFreqTrvEnum checkPayAccount(OtaOrder otaOrder){
+    public OtaFreqTrvEnum checkPayAccount(OtaOrder otaOrder) {
         return OtaFreqTrvEnum.IN_FREQUSER;
     }
 
@@ -90,10 +104,10 @@ public class QiekeRuleService {
         THotelModel tHotelModel = tHotelMapper.selectById(otaOrder.getHotelId());
         Double userlongitude = otaOrder.getBigDecimal("userlongitude").doubleValue();
         Double userlatitude = otaOrder.getBigDecimal("userlatitude").doubleValue();
-        if(userlatitude == null || userlongitude == null){
+        if(userlatitude == null || userlongitude == null) {
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }
-        if(tHotelModel.getLatitude() == null || tHotelModel.getLongitude() == null){
+        if (tHotelModel.getLatitude() == null || tHotelModel.getLongitude() == null){
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }
         double distance = DistanceUtil.distance(tHotelModel.getLongitude().doubleValue(), tHotelModel.getLatitude().doubleValue(), userlongitude, userlatitude);
