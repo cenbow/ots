@@ -262,13 +262,14 @@ public class QiekeRuleService {
         logger.info(String.format("checkIdentityCard begin"));
         List<String> cardIdList = pmsCheckinUserMapper.getCardId(otaOrder.getId());
         if(CollectionUtils.isEmpty(cardIdList)){
-            logger.info(String.format("checkIdentityCard getCardId params[%s]", otaOrder.getId()));
+            logger.info(String.format("checkIdentityCard getCardId params otaOrder id[%s]", otaOrder.getId()));
             return OtaFreqTrvEnum.CARD_ID_IS_NULL;
         }
         String cardId = "";
         for(String org : cardIdList){
             if(StringUtils.isNotEmpty(org)){
                 cardId = org;
+                logger.info(String.format("checkIdentityCard getCardId cardId[%s]", cardId));
                 break;
             }
         }
