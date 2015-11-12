@@ -1,7 +1,7 @@
 pScore = 0
 
-pPrice = 10000
-minPrice = 10000
+pPrice = 100000
+minPrice = 100000
 mikePrice = 0
 
 for(mkPriceDate in mkPriceDates){
