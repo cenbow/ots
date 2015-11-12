@@ -233,4 +233,8 @@ public class Constant {
 
 	public static final Integer PROMO_BANNER_PROMO = 3;
 	public static final Integer PROMO_BANNER_ONE_PROMO = 6;
+
+	public static final Integer ACTIVE_CHANCE = 1;
+
+	public static final String ACTIVE_NOTE = "您已经参与过该活动， 不能重复参与！";
 }

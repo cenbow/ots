@@ -50,7 +50,7 @@
 		<filter-class>com.mk.ots.system.interceptor.CrossDomainFilter</filter-class>
 		<init-param>
 			<param-name>crossDomainPatterns</param-name>
-			<param-value>/recommend/query,/recommend/querydetail</param-value>
+			<param-value>/recommend/query,/recommend/querydetail,/unionidandphone/binding,/ticket/tryluck,/ticket/nologintryluck,/verifycode/send, </param-value>
 		</init-param>
 	</filter>
 

@@ -86,7 +86,12 @@ public class AppController {
 	/**
 	 * 开学季活动id
 	 */
-	public static final long  ACTIVE_KAI_XUE = 23;
+	public static final long  ACTIVE_KAI_XUE1 = 23;
+	/**
+	 * 重庆砸金蛋活动id
+	 */
+	public static final long  ACTIVE_CQ_KICKEGG = 23;
+
 	/**
 	 * @param unionid
 	 *            微信unionid,非必填（两项至少有一项）
@@ -324,7 +329,7 @@ public class AppController {
 			//iPromoService.genTicketByAllRegNewMember(regMem.getMid());
 			logger.info("手机注册发放新用户礼包. mid:{}", regMem.getMid());
 			//查询开学季活动，该用户(一个手机就是一个用户)是否通过第三方平台领取该活动优惠券，如果有就绑定一下
-			ticketService.loginbindinggit(regMem, ACTIVE_KAI_XUE);
+			ticketService.loginbindinggit(regMem, ACTIVE_CQ_KICKEGG);
 			isRegister = true;
 		} else if (Strings.isNullOrEmpty(phone) && !Strings.isNullOrEmpty(unionid)) { // 微信注册
 			logger.info("微信注册入口. phone:{}, unionid:{}", phone, unionid);

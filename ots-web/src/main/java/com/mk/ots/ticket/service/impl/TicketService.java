@@ -47,6 +47,7 @@ import com.mk.ots.ticket.service.ITicketService;
 import com.mk.ots.ticket.service.IUActiveShareService;
 import com.mk.ots.ticket.service.IUPrizeRecordService;
 import com.mk.ots.ticket.service.parse.ITicketParse;
+import com.sun.tools.internal.jxc.apt.Const;
 import org.apache.commons.collections.CollectionUtils;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -1038,9 +1039,9 @@ public class TicketService implements ITicketService{
          if (timeFlag == 0) {date = DateUtils.getDate();}
          //查询某一时间段的抽奖次数
 		  long recordCount = iuPrizeRecordService.selectCountByMidAndActiveIdAndOstypeAndTime(mid, activeid, null, date);
-		 if (recordCount >= 3) { //小于3才可以抽奖
+		 if (recordCount >= Constant.ACTIVE_CHANCE) { //小于1才可以抽奖
 			 logger.info("1:不可以抽奖，recordCount：{}",recordCount);
-				throw MyErrorEnum.customError.getMyException("今天的抽奖机会已经用光啦，请明日再来。");
+				throw MyErrorEnum.customError.getMyException(Constant.ACTIVE_NOTE);
 		}
 		 //根据几个条件判断该用户在该活动中是否有抽奖机会
 		 List<String> ostypes =new ArrayList<String>();
@@ -1056,12 +1057,16 @@ public class TicketService implements ITicketService{
         if (prizeRecordCount == 0) {//没抽过奖，可以抽奖
 			logger.info("2：可以抽奖，prizeRecordCount：{}",prizeRecordCount);
 			 return true;
-		}else if (prizeRecordCount == 1) {
+		}else {
+			logger.info("4：不可以抽奖，prizeRecordCount：{}",prizeRecordCount);
+			throw MyErrorEnum.customError.getMyException(Constant.ACTIVE_NOTE);
+		}
+		/*else if (prizeRecordCount == 1) {
 			//判断该活动是否分享过，如果分享过，该抽奖方式(app或微信)还可以再抽奖一次，没分享过则不可以再抽奖了
 		    long shareCount = iuActiveShareService.countNumByMidAndActiveIdAndTime(mid, activeid,date);
 		    if (shareCount == 0) { //没有分享过，不允许抽奖
 				logger.info("3：不可以抽奖，shareCount：{}",shareCount);
-				throw MyErrorEnum.customError.getMyException("分享后才能再次抽奖");	
+				throw MyErrorEnum.customError.getMyException("分享后才能再次抽奖");
 			}else if (shareCount >= 1) { //分享过,可以抽奖
 				logger.info("4：可以抽奖，shareCount：{}",shareCount);
 				return true;
@@ -1069,8 +1074,8 @@ public class TicketService implements ITicketService{
 		}else if (prizeRecordCount >= 2) { //app或微信单个抽奖设备方式抽奖次数已经等于或超过了最大手机次数所以不能再次抽奖了
 			logger.info("4：不可以抽奖，prizeRecordCount：{}",prizeRecordCount);
 			throw MyErrorEnum.customError.getMyException("今天的抽奖机会已经用光啦，请明日再来。");
-		}
-		return true;
+		}*/
+
 		
 	 }
     

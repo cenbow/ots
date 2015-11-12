@@ -576,7 +576,7 @@ public class TicketController {
 			if(isCondition){
 				//定义：id，type
                 //List<BPrizeInfo> pidList = this.iPromoService.tryLuckByActive(Long.parseLong(activeid), member.getMid(), ostype);
-				List<BPrizeInfo> pidList = this.iPromoService.genTicketByActive(Long.parseLong(activeid), member,ostype,null); //开学季
+				List<BPrizeInfo> pidList = this.iPromoService.genTicketByActive(Long.parseLong(activeid), member,ostype,null); //重庆砸金蛋
 				if(pidList!=null && pidList.size()>0){
 					logger.info("pidList.get(0):{}",pidList.get(0).toString());
 					List<Long> pidMiKeList =new ArrayList<Long>();

@@ -111,6 +111,10 @@ public class PromoService implements IPromoService {
      * 开学季活动id
      */
     public static final long  ACTIVE_KAI_XUE = 23;
+    /**
+     * 重启砸蛋活动id
+     */
+    public static final long  ACTIVE_CQ_KICKEGG = 23;
     private static String genRandomCode(int length) {
         String base = "abcdefghijklmnopqrstuvwxyz123456789";
         Random random = new Random();
@@ -697,15 +701,15 @@ public class PromoService implements IPromoService {
             logger.info("用户 "+mid+"开始抽奖！");
             BActivity bActivity = ibActivityDao.findById(activeid);
             //判断该用户是否领取过实物
-            boolean isMaterialObject=false;
-            if (ACTIVE_KAI_XUE!=activeid.longValue()) {//开学季没有实物，不需要查询
+            boolean isExcludeMaterialObject=false;
+            if (ACTIVE_CQ_KICKEGG!=activeid.longValue()) {//开学季&&重庆砸蛋没有实物，不需要查询
                 Long countLong=iUPrizeRecordDao.findMaterialCountByMidAndAct(mid, activeid,PrizeTypeEnum.material.getId());
                 if (countLong>=1) {
-                    isMaterialObject=true;
+                    isExcludeMaterialObject=true;
                 }
             }
 
-            List<BPrize> proList = this.iBPrizeDao.findBPrizeByActiveid(activeid, isMaterialObject);
+            List<BPrize> proList = this.iBPrizeDao.findBPrizeByActiveid(activeid, isExcludeMaterialObject);
             //查询第三方库存，确保prize表定义券数目与库存一致
             if (CollectionUtils.isNotEmpty(proList)) {
                 for (BPrize bPrize : proList) {
@@ -741,20 +745,21 @@ public class PromoService implements IPromoService {
                         }
                     }
                 }else { //第三方平台
-                    if (OSTypeEnum.H.getId().equals(ostype)) {
+                   // if (OSTypeEnum.H.getId().equals(ostype)) {
                         for(BPrize tmp: proList){
                             if(tmp.getNum()==-1 || tmp.getNum()>0){
                                 rwiList.add(new RandomWeightItem<BPrize>(tmp,Integer.parseInt(tmp.getOtherweight().toString())));
                             }
                         }
-                    }else {
-                        throw MyErrorEnum.customError.getMyException("此平台不允许抽奖.");
-                    }
+//                    }else {
+//                        throw MyErrorEnum.customError.getMyException("此平台不允许抽奖.");
+//                    }
 
                 }
                 if(rwiList==null || rwiList.size()==0){
                     throw MyErrorEnum.customError.getMyException("该活动的优惠券已发放完毕.");
                 }
+
                 List<RandomWeightItem<BPrize>> selection = RandomSelectionUtils.randomSelect(rwiList, 1);
                 if(selection!=null && selection.size()>0){
                     //根据随机结果生成奖品券
@@ -863,8 +868,8 @@ public class PromoService implements IPromoService {
                 throw MyErrorEnum.customError.getMyException("此活动不允许领取优惠券.");
             }
         }else {
-            logger.info("用户 "+mid+"今天已抽过奖！");
-            throw MyErrorEnum.customError.getMyException("用户今天已抽过奖！");
+            logger.info("用户 "+mid+"已抽过奖！");
+            throw MyErrorEnum.customError.getMyException("您已抽过奖！");
         }
 
         logger.info("生成用户优惠券：mid:{}, status:{}, 券实例:{}", mid, true, rtnList);
