@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface PmsCheckinUserMapper {
     public String getCardId(@Param("otaOrderId")Long otaOrderId);
 
-    public Long getCardCountByCardId(@Param("cardId")String cardId);
+    public Long getCardCountByCardId(@Param("otaOrderId")Long otaOrderId, @Param("cardId")String cardId);
 }

@@ -258,7 +258,7 @@ public class QiekeRuleService {
         if(StringUtils.isEmpty(cardId)){
             return OtaFreqTrvEnum.CARD_ID_IS_NULL;
         }
-        Long cardCount = pmsCheckinUserMapper.getCardCountByCardId(cardId);
+        Long cardCount = pmsCheckinUserMapper.getCardCountByCardId(otaOrder.getId(), cardId);
         if(cardCount > 1){
             return OtaFreqTrvEnum.CARD_ID_NOT_FIRST;
         }
