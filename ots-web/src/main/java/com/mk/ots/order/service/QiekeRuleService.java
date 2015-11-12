@@ -7,7 +7,9 @@ import com.mk.ots.common.enums.OtaFreqTrvEnum;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.SearchConst;
+import com.mk.ots.hotel.model.TCityModel;
 import com.mk.ots.hotel.model.THotelModel;
+import com.mk.ots.hotel.service.CityService;
 import com.mk.ots.mapper.OtaOrderMacMapper;
 import com.mk.ots.mapper.PmsCheckinUserMapper;
 import com.mk.ots.mapper.THotelMapper;
@@ -19,9 +21,8 @@ import com.mk.ots.order.dao.OrderDAO;
 import com.mk.ots.order.model.OtaOrderMac;
 import com.mk.ots.pay.model.PPay;
 import com.mk.ots.pay.service.IPayService;
-import com.mk.ots.order.bean.OtaOrder;
-import com.mk.ots.order.dao.CheckInUserDAO;
-import com.mk.ots.order.dao.OrderDAO;
+import com.mk.ots.promoteconfig.model.TPromoteConfig;
+import com.mk.ots.promoteconfig.service.IPromoteConfigService;
 import com.mk.ots.search.service.impl.SearchService;
 import com.mk.ots.utils.DistanceUtil;
 import org.apache.commons.lang.StringUtils;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -58,7 +60,7 @@ public class QiekeRuleService {
     private OrderDAO orderDAO;
     @Autowired
     private THotelMapper tHotelMapper;
-    
+
     /**
      * 手机号必须是第一次，入住并离店的订单
      * @param otaOrder
@@ -390,4 +392,6 @@ public class QiekeRuleService {
             return false;
         }
     }
+
+
 }
