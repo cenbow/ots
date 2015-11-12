@@ -10,8 +10,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -69,7 +73,6 @@ import com.mk.ots.hotel.service.HotelPriceService;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.inner.service.IOtsAdminService;
-import com.mk.ots.mapper.PositionMapper;
 import com.mk.ots.mapper.PositionTypeMapper;
 import com.mk.ots.mapper.SAreaInfoMapper;
 import com.mk.ots.mapper.SLandMarkMapper;
@@ -110,12 +113,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 */
 	@Autowired
 	private PositionTypeMapper positionTypeMapper;
-
-	/**
-	 * 注入位置区域mapper
-	 */
-	@Autowired
-	private PositionMapper positionMapper;
 
 	/**
 	 * 注入城市服务类实例
@@ -351,13 +348,194 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	@Override
-	public Map<String, Object> searchThemes(HotelQuerylistReqEntity params) throws Exception {
+	public Map<String, Object> searchThemes(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
-		params.setPromotype("16");
-		rtnMap = launchThemeQuery(params);
+		try {
+			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
 
+			// C端搜索分类
+			Integer searchType = reqentity.getSearchtype();
+			if (searchType == null) {
+				searchType = HotelSearchEnum.ALL.getId();
+			}
+
+			// 如果城市id 为空则默认设置为上海
+			String cityid = reqentity.getCityid();
+
+			String hotelid = reqentity.getHotelid();
+
+			if (logger.isInfoEnabled()) {
+				logger.info(String.format("about to search for cityid: %s; hotelid: %s", cityid, hotelid));
+			}
+
+			int page = reqentity.getPage().intValue();
+			int limit = reqentity.getLimit().intValue();
+
+			SearchRequestBuilder searchBuilder = esProxy.prepareSearch();
+			if (StringUtils.isBlank(hotelid)) {
+				searchBuilder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+
+				// make term filter builder
+				this.makeTermFilter(reqentity, filterBuilders);
+
+				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
+
+				FilterBuilder[] builders = new FilterBuilder[] {};
+				BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
+
+				// make range filter builder
+				List<FilterBuilder> mikePriceBuilders = this.makeMikePriceRangeFilter(reqentity);
+
+				if (mikePriceBuilders.size() > 0) {
+					BoolFilterBuilder mikePriceBoolFilter = FilterBuilders.boolFilter();
+					mikePriceBoolFilter.should(mikePriceBuilders.toArray(builders));
+					boolFilter.must(mikePriceBoolFilter);
+				}
+				if (AppUtils.DEBUG_MODE) {
+					logger.info("boolFilter is : \n{}", boolFilter.toString());
+				}
+
+				BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+						.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
+						.must(QueryBuilders.matchQuery("online", Constant.STR_TRUE));
+				boolFilter.must(FilterBuilders.queryFilter(boolQueryBuilder));
+				searchBuilder.setPostFilter(boolFilter);
+
+				Integer paramOrderby = reqentity.getOrderby();
+				if (paramOrderby == null) {
+					paramOrderby = 0;
+				}
+
+				String startdateday = reqentity.getStartdateday();
+				String enddateday = reqentity.getEnddateday();
+				List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
+				this.setScoreScriptSort(searchBuilder, boolFilter,
+						new GeoPoint(reqentity.getUserlatitude(), reqentity.getUserlongitude()), mkPriceDateList);
+			} else {
+				filterBuilders.add(FilterBuilders.termFilter("hotelid", hotelid));
+			}
+
+			searchBuilder.setFrom((page - 1) * limit).setSize(limit).setExplain(true);
+
+			logger.info(searchBuilder.toString());
+
+			SearchResponse searchResponse = searchBuilder.execute().actionGet();
+
+			SearchHits searchHits = searchResponse.getHits();
+			long totalHits = searchHits.totalHits();
+
+			if (StringUtils.isNotBlank(reqentity.getKeyword()) && (totalHits == 0D)) {
+				Cat.logEvent("MismatchKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
+			}
+
+			List<Map<String, Object>> searchResults = this.reorderSearchResults(searchHits.getHits(), reqentity);
+
+			logger.info("search hotel success: total {} found. current pagesize:{}", totalHits,
+					searchResults != null ? searchResults.size() : 0);
+
+			rtnMap.put("themes", searchResults);
+		} catch (Exception e) {
+			logger.error("failed to readonlyOtsHotelListFromEsStore...", e);
+
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
+		}
 		return rtnMap;
+	}
+
+	private boolean isThemed(Integer hotelId, Map<String, Object> roomtype) {
+		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<Map<String, Object>> groupThemes(List<Map<String, Object>> searchResults) {
+		Map<Integer, Queue<Map<String, Object>>> hotelRoomTypes = new HashMap<Integer, Queue<Map<String, Object>>>();
+		List<Map<String, Object>> themeGrouped = new ArrayList<Map<String, Object>>();
+
+		Integer counter = 0;
+		for (Map<String, Object> hotel : searchResults) {
+			List<Map<String, Object>> roomtypes = (List<Map<String, Object>>) hotel.get("roomtype");
+			Integer hotelId = Integer.parseInt((String) hotel.get("hotelid"));
+			String hotelname = (String) hotel.get("hotelname");
+
+			if (!hotelRoomTypes.containsKey(hotelId)) {
+				hotelRoomTypes.put(hotelId, new ArrayBlockingQueue<Map<String, Object>>(10));
+			}
+
+			for (Map<String, Object> roomtype : roomtypes) {
+				if (!roomtype.containsKey("hotelname")) {
+					roomtype.put("hotelname", hotelname);
+				}
+
+				if (isThemed(hotelId, roomtype)) {
+					if (!hotelRoomTypes.get(hotelId).contains(roomtype)) {
+						hotelRoomTypes.get(hotelId).offer(roomtype);
+						counter++;
+					}
+				}
+			}
+		}
+
+		Iterator<Queue<Map<String, Object>>> roomTypeQueues = hotelRoomTypes.values().iterator();
+		List<Queue<Map<String, Object>>> roomTypeQueueList = new ArrayList<Queue<Map<String, Object>>>();
+		while (roomTypeQueues.hasNext()) {
+			Queue<Map<String, Object>> roomTypeQueue = roomTypeQueues.next();
+			if (roomTypeQueue != null) {
+				roomTypeQueueList.add(roomTypeQueue);
+			}
+		}
+
+		AtomicInteger curPos = new AtomicInteger(0);
+
+		for (int i = 0; i < counter; i++) {
+			Map<String, Object> roomtype = pollRoomtype(roomTypeQueueList, curPos);
+
+			if (roomtype != null) {
+				themeGrouped.add(roomtype);
+			}
+			/**
+			 * no roomtypes existed any more
+			 */
+			else {
+				if (i < counter) {
+					logger.warn("roomtype is leaked somehow...");
+				}
+				break;
+			}
+		}
+
+		return themeGrouped;
+	}
+
+	private Map<String, Object> pollRoomtype(List<Queue<Map<String, Object>>> roomTypeQueue, AtomicInteger curPos) {
+		Map<String, Object> roomtype = null;
+
+		for (int i = curPos.get(); i < roomTypeQueue.size(); i++) {
+			if (!roomTypeQueue.get(i).isEmpty()) {
+				roomtype = roomTypeQueue.get(i).poll();
+			}
+
+			if (roomtype != null) {
+				curPos.set(i);
+				break;
+			}
+		}
+
+		if (roomtype == null) {
+			for (int i = 0; i < roomTypeQueue.size(); i++) {
+				if (!roomTypeQueue.get(i).isEmpty()) {
+					roomtype = roomTypeQueue.get(i).poll();
+				}
+
+				if (roomtype != null) {
+					curPos.set(i);
+					break;
+				}
+			}
+		}
+
+		return roomtype;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -385,7 +563,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			params.setLimit(FrontPageEnum.limit.getId());
 			params.setPromotype(HotelPromoEnum.OneDollar.getCode());
 			params.setCallentry(null);
-			
+
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
 			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
 			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
@@ -405,7 +583,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			params.setLimit(FrontPageEnum.limit.getId());
 			params.setPromotype(HotelPromoEnum.Day.getCode());
 			params.setCallentry(null);
-			
+
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
 
 			promoItem = new HashMap<String, Object>();
@@ -430,7 +608,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			params.setIspromoonly(Boolean.TRUE);
 			params.setPromotype(HotelPromoEnum.Night.getCode());
 			params.setCallentry(null);
-			
+
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
 			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
 			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
@@ -1183,109 +1361,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			String hotelvc = Constant.STR_TRUE;
 			result.put("hotelvc", hotelvc);
 
+			List<Map<String, Object>> roomtypeList = this.readonlyRoomtypeList(result, "");
+			result.put("roomtype", roomtypeList);
+
 			// 添加接口返回数据到结果集
 			searchResults.add(result);
 		}
 
-		return searchResults;
-	}
-
-	private Map<String, Object> launchThemeQuery(HotelQuerylistReqEntity reqentity) throws Exception {
-		Map<String, Object> rtnMap = new HashMap<String, Object>();
-
-		try {
-			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
-
-			// C端搜索分类
-			Integer searchType = reqentity.getSearchtype();
-			if (searchType == null) {
-				searchType = HotelSearchEnum.ALL.getId();
-			}
-
-			//
-			List<Map<String, Object>> hotels = new ArrayList<Map<String, Object>>();
-			// 如果城市id 为空则默认设置为上海
-			String cityid = reqentity.getCityid();
-
-			String hotelid = reqentity.getHotelid();
-
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format("about to search for cityid: %s; hotelid: %s", cityid, hotelid));
-			}
-
-			int page = reqentity.getPage().intValue();
-			int limit = reqentity.getLimit().intValue();
-
-			SearchRequestBuilder searchBuilder = esProxy.prepareSearch();
-			if (StringUtils.isBlank(hotelid)) {
-				searchBuilder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
-
-				// make term filter builder
-				this.makeTermFilter(reqentity, filterBuilders);
-
-				GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
-
-				filterBuilders.add(geoFilter);
-				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
-
-				FilterBuilder[] builders = new FilterBuilder[] {};
-				BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
-
-				// make range filter builder
-				List<FilterBuilder> mikePriceBuilders = this.makeMikePriceRangeFilter(reqentity);
-
-				if (mikePriceBuilders.size() > 0) {
-					BoolFilterBuilder mikePriceBoolFilter = FilterBuilders.boolFilter();
-					mikePriceBoolFilter.should(mikePriceBuilders.toArray(builders));
-					boolFilter.must(mikePriceBoolFilter);
-				}
-				if (AppUtils.DEBUG_MODE) {
-					logger.info("boolFilter is : \n{}", boolFilter.toString());
-				}
-
-				BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-						.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
-						.must(QueryBuilders.matchQuery("online", Constant.STR_TRUE));
-				boolFilter.must(FilterBuilders.queryFilter(boolQueryBuilder));
-				searchBuilder.setPostFilter(boolFilter);
-
-				Integer paramOrderby = reqentity.getOrderby();
-				if (paramOrderby == null) {
-					paramOrderby = 0;
-				}
-			} else {
-				filterBuilders.add(FilterBuilders.termFilter("hotelid", hotelid));
-			}
-
-			searchBuilder.setFrom((page - 1) * limit).setSize(limit).setExplain(true);
-
-			logger.info(searchBuilder.toString());
-
-			SearchResponse searchResponse = searchBuilder.execute().actionGet();
-
-			SearchHits searchHits = searchResponse.getHits();
-			long totalHits = searchHits.totalHits();
-
-			if (StringUtils.isNotBlank(reqentity.getKeyword()) && (totalHits == 0D)) {
-				Cat.logEvent("MismatchKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
-			}
-
-			List<Map<String, Object>> searchResults = this.reorderSearchResults(searchHits.getHits(), reqentity);
-
-			logger.info("search hotel success: total {} found. current pagesize:{}", totalHits,
-					searchResults != null ? searchResults.size() : 0);
-
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
-			rtnMap.put("count", totalHits);
-			rtnMap.put("hotel", hotels);
-		} catch (Exception e) {
-			logger.error("failed to readonlyOtsHotelListFromEsStore...", e);
-
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
-			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
-		}
-		return rtnMap;
+		return groupThemes(searchResults);
 	}
 
 	/**

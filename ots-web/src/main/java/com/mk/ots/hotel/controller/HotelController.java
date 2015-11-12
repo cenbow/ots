@@ -379,13 +379,14 @@ public class HotelController {
 			 * check if theme is being searched
 			 */
 			String promoType = reqentity.getPromotype();
-			if (StringUtils.isNotBlank(promoType) && promoType.equals("16")) {
+			if (StringUtils.isNotBlank(promoType) && promoType.equals("1")) {
 				rtnMap = promoSearchService.searchThemes(reqentity);
+				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
 			} else {
 				rtnMap = promoSearchService.readonlySearchHotels(reqentity);
+				rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
+				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
 			}
-			
-			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
 
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
 					HttpStatus.OK);
@@ -402,7 +403,6 @@ public class HotelController {
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		} catch (Exception e) {
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 			logger.error("【/hotel/querypromolist】 is error: {} ", e);
