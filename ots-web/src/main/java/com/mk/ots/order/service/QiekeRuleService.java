@@ -2,13 +2,18 @@ package com.mk.ots.order.service;
 
 import com.mk.ots.common.enums.OtaFreqTrvEnum;
 import com.mk.ots.common.utils.Constant;
+import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.common.utils.SearchConst;
 import com.mk.ots.hotel.model.THotelModel;
+import com.mk.ots.mapper.OrderMapper;
 import com.mk.ots.mapper.PmsCheckinUserMapper;
 import com.mk.ots.mapper.THotelMapper;
 import com.mk.ots.order.bean.OtaOrder;
+import com.mk.ots.order.bean.PmsRoomOrder;
+import com.mk.ots.order.bean.TopPmsRoomOrderQuery;
 import com.mk.ots.order.dao.CheckInUserDAO;
 import com.mk.ots.order.dao.OrderDAO;
+import com.mk.ots.order.dao.PmsRoomOrderDao;
 import com.mk.ots.search.service.impl.SearchService;
 import com.mk.ots.utils.DistanceUtil;
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.List;
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,6 +45,10 @@ public class QiekeRuleService {
     private OrderDAO orderDAO;
     @Autowired
     private THotelMapper tHotelMapper;
+    @Autowired
+    private OrderMapper orderMapper;
+    @Autowired
+    private PmsRoomOrderDao pmsRoomOrderDao;
 
 
     /**
@@ -127,6 +139,48 @@ public class QiekeRuleService {
     public OtaFreqTrvEnum checkOrderNumberThreshold(OtaOrder otaOrder){
         return OtaFreqTrvEnum.IN_FREQUSER;
     }
+
+
+    public void updateCheckInStatusInvalidReason(){
+    }
+
+    public void updateAccountAndCheckOutStatusInvalidReason(){
+
+    }
+
+    public void updateTopInvalidReason(){
+
+    }
+
+    public List<PmsRoomOrder> getTopPmsRoomOrder(TopPmsRoomOrderQuery topPmsRoomOrderQuery){
+        Date yesterday = DateUtils.addDays(topPmsRoomOrderQuery.getNow(), -1);
+        String yesterdayStr = DateUtils.formatDateTime(yesterday, DateUtils.FORMAT_DATE);
+        String todayStr =  DateUtils.formatDateTime(yesterday, DateUtils.FORMAT_DATE);
+        List<PmsRoomOrder> pmsRoomOrderList = pmsRoomOrderDao.getPmsRoomOrderByCheckInTime(yesterdayStr, todayStr,
+                topPmsRoomOrderQuery.getLimitBegin(), topPmsRoomOrderQuery.getLimitEen());
+        for(PmsRoomOrder pmsRoomOrder : pmsRoomOrderList){
+            if(topPmsRoomOrderQuery.getPmsRoomOrderList().size() >= topPmsRoomOrderQuery.getCount()){
+                return topPmsRoomOrderQuery.getPmsRoomOrderList();
+            }
+            BigDecimal orderId =  pmsRoomOrder.getBigDecimal("orderId");
+            Integer invalidreason = pmsRoomOrder.getInt("Invalidreason");
+            Date checkinTime = pmsRoomOrder.getDate("checkintime");
+            Date checkouttime = pmsRoomOrder.getDate("checkouttime");
+            if(invalidreason == 101){
+                topPmsRoomOrderQuery.getPmsRoomOrderList().add(pmsRoomOrder);
+                continue;
+            }
+            if(DateUtils.diffSecond(checkinTime, checkouttime) > 30 * 60){
+                continue;
+            }
+
+        }
+        if(topPmsRoomOrderQuery.getPmsRoomOrderList().size() >= topPmsRoomOrderQuery.getCount()){
+            return topPmsRoomOrderQuery.getPmsRoomOrderList();
+        }
+        return getTopPmsRoomOrder(topPmsRoomOrderQuery);
+    }
+
 
     public OtaFreqTrvEnum getQiekeRuleReason(OtaOrder otaOrder){
         OtaFreqTrvEnum otaFreqTrvEnum = checkMobile(otaOrder);

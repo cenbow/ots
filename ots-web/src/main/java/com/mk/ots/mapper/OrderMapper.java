@@ -66,4 +66,12 @@ public interface OrderMapper {
 	public List<OtaOrder> findMyOtaOrderByMid(@Param("otaOrderId") Long Mid, @Param("otaOrderId") Long hotelId,
 			@Param("otaOrderId") List<OtaOrderStatusEnum> statusList, @Param("otaOrderId") Date begintime, @Param("otaOrderId") Date endtime,
 			@Param("otaOrderId") Integer start, @Param("otaOrderId") Integer limit, @Param("otaOrderId") Boolean canshow);
+
+	public void updateCheckInStatusInvalidReason(@Param("checkInBeginTime")String checkInBeginTime,
+												 @Param("checkInEndTime")String checkInEndTime,@Param("invalidReason")String invalidReason);
+
+	public void updateAccountAndCheckOutStatusInvalidReason(@Param("checkInBeginTime")String checkInBeginTime,
+												 @Param("checkInEndTime")String checkInEndTime,@Param("invalidReason")String invalidReason);
+
+	public void updateInvalidReason(@Param("orderId")Long orderId);
 }

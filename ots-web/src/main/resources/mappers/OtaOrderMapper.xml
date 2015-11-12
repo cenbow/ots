@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.OrderMapper" >
+
+  <update id="updateCheckInStatusInvalidReason" >
+      <![CDATA[
+          UPDATE b_otaorder odr
+          INNER JOIN (
+              SELECT
+              bo.id
+              FROM
+              b_pmsroomorder bp,
+              b_otaorder bo,
+              b_otaroomorder bor
+              WHERE
+              bp.checkintime >= #{checkInBeginTime}
+              AND bp.checkintime < #{checkInEndTime}
+              AND bo.id = bor.otaorderid
+              AND bor.hotelid = bp.hotelid
+              AND bor.pmsroomorderno = bp.pmsroomorderno
+              AND bo.orderstatus IN (180)
+              AND bp.checkintime < date_sub(bp.checkouttime,INTERVAL 30 MINUTE)
+          ) bo ON odr.id = bo.id
+          SET odr.InvalidReason = #{invalidReason}
+      ]]>
+  </update>
+
+  <update id="updateAccountAndCheckOutStatusInvalidReason">
+      <![CDATA[
+          UPDATE b_otaorder odr
+          INNER JOIN (
+              SELECT
+              bo.id
+              FROM
+              b_pmsroomorder bp,
+              b_otaorder bo,
+              b_otaroomorder bor
+              WHERE
+              bp.checkintime >= #{checkInBeginTime}
+              AND bp.checkintime < #{checkInEndTime}
+              AND bo.id = bor.otaorderid
+              AND bor.hotelid = bp.hotelid
+              AND bor.pmsroomorderno = bp.pmsroomorderno
+              AND bo.orderstatus IN (190, 200)
+              AND bp.checkintime < date_sub(bp.checkouttime,INTERVAL 30 MINUTE)
+          ) bo ON odr.id = bo.id
+          SET odr.InvalidReason = #{invalidReason}
+      ]]>
+  </update>
+
+    <update id="updateInvalidReason">
+        <![CDATA[
+          UPDATE b_otaorder odr
+          SET odr.InvalidReason = ''
+          where odr.id = #{orderId}
+      ]]>
+    </update>
+</mapper>
