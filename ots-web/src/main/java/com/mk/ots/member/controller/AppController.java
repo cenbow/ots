@@ -1,25 +1,5 @@
 package com.mk.ots.member.controller;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.base.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.mk.care.kafka.common.CopywriterTypeEnum;
@@ -46,6 +26,26 @@ import com.mk.ots.member.service.IMemberService;
 import com.mk.ots.promo.service.IPromoService;
 import com.mk.ots.system.model.UToken;
 import com.mk.ots.system.service.ITokenService;
+import com.mk.ots.ticket.service.ITicketService;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * @author nolan
@@ -80,6 +80,13 @@ public class AppController {
 	private BloginInfoService bloginInfoService;
 	@Autowired
 	private OtsCareProducer careProducer;
+
+	@Autowired
+	private ITicketService ticketService;
+	/**
+	 * 开学季活动id
+	 */
+	public static final long  ACTIVE_KAI_XUE = 23;
 	/**
 	 * @param unionid
 	 *            微信unionid,非必填（两项至少有一项）
@@ -316,6 +323,8 @@ public class AppController {
 			// 调用发放券接口：发放新用户礼包 暂时停掉
 			//iPromoService.genTicketByAllRegNewMember(regMem.getMid());
 			logger.info("手机注册发放新用户礼包. mid:{}", regMem.getMid());
+			//查询开学季活动，该用户(一个手机就是一个用户)是否通过第三方平台领取该活动优惠券，如果有就绑定一下
+			ticketService.loginbindinggit(regMem, ACTIVE_KAI_XUE);
 			isRegister = true;
 		} else if (Strings.isNullOrEmpty(phone) && !Strings.isNullOrEmpty(unionid)) { // 微信注册
 			logger.info("微信注册入口. phone:{}, unionid:{}", phone, unionid);

@@ -3,6 +3,7 @@ package com.mk.ots.promo.service;
 import com.mk.ots.activity.model.BActiveChannel;
 import com.mk.ots.common.enums.PromotionMethodTypeEnum;
 import com.mk.ots.common.enums.PromotionTypeEnum;
+import com.mk.ots.member.model.UMember;
 import com.mk.ots.promo.model.BPromotion;
 import com.mk.ots.promo.model.BPromotionPrice;
 import com.mk.ots.ticket.model.BPrizeInfo;
@@ -136,6 +137,16 @@ public interface IPromoService {
      * @return
      */
     boolean isGetFirstOrderPromotion(String hardwarecode);
-
+    public BPromotion findById(Long id);
     public List<BPromotion> findByActiveidAndPrizeId(Long activeid,Long prizeid);
+    /**
+     * 根据活动、设备生成奖品
+     * @param activeid
+     * @param mid
+     * @param ostype
+     * @return
+     */
+    public abstract List<BPrizeInfo> genTicketByActive(Long activeid, UMember member, String ostype,String usermark);
+    public List<BPromotion> findByActiveidAndPrizeRecordId(long activeid,long recordid);
+    public List<BPromotion> findByActiveidAndPrizeIdList(Long activeid,List<Long> prizeidList);
 }

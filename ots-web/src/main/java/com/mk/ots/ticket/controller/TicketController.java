@@ -19,6 +19,7 @@ import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.enums.PrizeTypeEnum;
 import com.mk.ots.common.enums.PromotionMethodTypeEnum;
 import com.mk.ots.common.utils.Constant;
+import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.manager.RedisCacheName;
 import com.mk.ots.member.model.UMember;
 import com.mk.ots.message.service.IMessageService;
@@ -47,7 +48,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 优惠券业务接口
@@ -571,8 +575,9 @@ public class TicketController {
 			//2. 根据不同活动领取不同优惠券
 			if(isCondition){
 				//定义：id，type
-                List<BPrizeInfo> pidList = this.iPromoService.tryLuckByActive(Long.parseLong(activeid), member.getMid(), ostype);
-                if(pidList!=null && pidList.size()>0){
+                //List<BPrizeInfo> pidList = this.iPromoService.tryLuckByActive(Long.parseLong(activeid), member.getMid(), ostype);
+				List<BPrizeInfo> pidList = this.iPromoService.genTicketByActive(Long.parseLong(activeid), member,ostype,null); //开学季
+				if(pidList!=null && pidList.size()>0){
 					logger.info("pidList.get(0):{}",pidList.get(0).toString());
 					List<Long> pidMiKeList =new ArrayList<Long>();
 					for (BPrizeInfo list : pidList) {
@@ -606,7 +611,111 @@ public class TicketController {
 		return new ResponseEntity<Map<String, Object>>(rtnMap,HttpStatus.OK);
 	
 	}
-	
+
+	@RequestMapping("/nologintryluck")
+	public ResponseEntity<Map<String, Object>> nologintryluck(String activeid,String ostype,String usermark){
+		logger.info("nologintryluck接口传来参数 ,activeid：{},ostype:{},usermark:{}",activeid,ostype,usermark);
+		//1. 参数校验
+		//1.1  基本校验
+		if(Strings.isNullOrEmpty(activeid)){
+			throw MyErrorEnum.errorParm.getMyException("活动id不允许为空.");
+		}
+		if(Strings.isNullOrEmpty(usermark)){
+			throw MyErrorEnum.errorParm.getMyException("该设备唯一标示不允许为空.");
+		}
+
+		if(!Strings.isNullOrEmpty(ostype)&&!OSTypeEnum.H.getId().equals(ostype)){
+			throw MyErrorEnum.errorParm.getMyException("该设备类型不允许访问.");
+		}
+		//1.2.2 活动校验
+		BActivity bActivity =  ibActivityService.findById(Long.parseLong(activeid));
+		if(bActivity == null){
+			throw MyErrorEnum.IllegalActive.getMyException();
+		}
+		Date current = new Date();
+		if(current.before(bActivity.getBegintime())){
+			throw MyErrorEnum.notStartActive.getMyException();
+		}
+		if(current.after(bActivity.getEndtime())){
+			throw MyErrorEnum.alreadyEndActive.getMyException();
+		}
+		if(bActivity.getPromotionmethodtype()==null || PromotionMethodTypeEnum.AUTO.equals(bActivity.getPromotionmethodtype())){
+			throw MyErrorEnum.customError.getMyException("此类活动不允许领取优惠券.");
+		}
+		String  synLockKey = RedisCacheName.IMIKE_OTS_TRYLUCK_KEY+usermark;
+
+		String synLockValue=null;
+		Map<String, Object> rtnMap = Maps.newHashMap();
+		List<TicketInfo> tickets = Lists.newArrayList();
+		List<BPrizeInfo> prizeInfo = Lists.newArrayList();
+		try{
+			//加redis锁，防止重复请求
+			if((synLockValue=DistributedLockUtil.tryLock(synLockKey, 60))==null){
+				logger.info("usermark:"+usermark+"-----领取优惠券正在进行中,重复请求");
+				return new ResponseEntity<Map<String, Object>>(rtnMap,HttpStatus.OK);
+			}
+			boolean isCondition = false;
+			//1.2.3 校验活动是否可以多次领取
+			if(bActivity.getLimitget()==-1){
+				//A. 无限次领取
+				isCondition = true;
+			}
+			//B. 限定次数领取
+				/*int limitgetnum = bActivity.getLimitget();
+				long totalGetTicket = this.iTicketService.countByMidAndActiveId(member.getMid(), bActivity.getId());  //参加此活动总共领券数量
+				if(totalGetTicket >= limitgetnum){
+					throw MyErrorEnum.customError.getMyException("此活动只允许领取"+limitgetnum+"次.");
+				}
+
+				Date starttime = LocalDateTime.now().withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).toDate();
+				Date endtime = LocalDateTime.now().withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59).toDate();
+				long uGetDayTicketNum = this.iTicketService.countByMidAndActiveIdAndTime(member.getMid(), bActivity.getId(), starttime, endtime);  //当天领券数量
+				if(uGetDayTicketNum >= 1){
+					throw MyErrorEnum.customError.getMyException("今天已领取过优惠券.");
+				}
+				isCondition = uGetDayTicketNum==0 && totalGetTicket<limitgetnum;
+
+			}
+			*/
+			//2. 根据不同活动领取不同优惠券
+			if(isCondition){
+				//定义：id，type
+				List<BPrizeInfo> pidList=this.iPromoService.genTicketByActive(Long.parseLong(activeid), null,ostype,usermark);
+				if(pidList!=null && pidList.size()>0){
+					logger.info("pidList.get(0):{}",pidList.get(0).toString());
+					List<Long> pidMiKeList =new ArrayList<Long>();
+					for (BPrizeInfo list : pidList) {
+						pidMiKeList.add(list.getId());
+					}
+					// 米可优惠券
+					if (PrizeTypeEnum.mike.getId().intValue()==pidList.get(0).getType()) {
+						logger.info("usermark:"+usermark+"领取到的是眯客券");
+						tickets = this.ticketService.queryMyTicketOnUserMark(pidList.get(0),Long.parseLong(activeid));
+					}else if (PrizeTypeEnum.thirdparty.getId().intValue()==pidList.get(0).getType()){
+						logger.info("usermark:"+usermark+"领取到的是第三方券");
+						prizeInfo = this.ibPrizeStockService.queryMyThirdpartyPrize(pidList.get(0));
+					}else if (PrizeTypeEnum.material.getId().intValue()==pidList.get(0).getType()){
+						logger.info("usermark:"+usermark+"领取到的是实物");
+
+						prizeInfo = this.ibPrizeService.queryMyMaterialPrize(pidList.get(0));
+					}
+				}
+			}
+
+		}finally{
+			//消除锁
+			if(StringUtil.isNotEmpty(synLockValue)){
+				DistributedLockUtil.releaseLock(synLockKey, synLockValue);
+			}
+		}
+		boolean trueOrFalse = (tickets!=null && tickets.size()>0) || (prizeInfo!=null && prizeInfo.size()>0) ;
+		rtnMap.put("success", trueOrFalse);
+		rtnMap.put("tickets", tickets);
+		rtnMap.put("others", prizeInfo);
+		return new ResponseEntity<Map<String, Object>>(rtnMap,HttpStatus.OK);
+
+	}
+
 	/**
 	 * 活动转发记录
 	 * @param token
@@ -726,6 +835,57 @@ public class TicketController {
 		Map<String,Object> rtnMap = Maps.newHashMap();
 		rtnMap.put("success", true);
 		rtnMap.put("lucklist", bPrizeInfoList);
+		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+	}
+
+	/**
+	 * 查询第三方领未领取的优惠券
+	 * @param token 用户token
+	 * @param activeid 活动id
+	 * @return ResponseEntity
+	 */
+	@RequestMapping("/querynotreceive")
+	public ResponseEntity<Map<String, Object>> querynotreceive(String activeid,String usermark){
+		logger.info("传来参数,activeid:{},usermark:{}",activeid,usermark);
+		//1. 参数校验
+		if(Strings.isNullOrEmpty(activeid)){
+			throw MyErrorEnum.errorParm.getMyException("活动id不能为空.");
+		}
+
+		List<BPrizeInfo>  bPrizeInfoList =  this.iTicketService.queryMyNotreceiveyPrize(Long.parseLong(activeid),usermark);
+
+		logger.info("返回优惠券集合个数bPrizeInfoList.size:{}",bPrizeInfoList.size());
+		Map<String,Object> rtnMap = Maps.newHashMap();
+		rtnMap.put("success", true);
+		rtnMap.put("lucklist", bPrizeInfoList);
+		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+	}
+	/**
+	 * 根据记录id将查询到的记录插入手机号,更新奖品记录状态
+	 * @param prizerecordid
+	 * @param phone 活动id
+	 * @return ResponseEntity
+	 */
+	@RequestMapping("/prizebindingphone")
+	public ResponseEntity<Map<String, Object>> prizebindingphone(String prizerecordid,String activeid,String phone,String ostype){
+		logger.info("传来参数prizerecordid:{},phone:{}",prizerecordid,phone);
+		//1. 参数校验
+		if(Strings.isNullOrEmpty(prizerecordid)){
+			throw MyErrorEnum.errorParm.getMyException("奖品记录号不能为空.");
+		}
+
+		if(Strings.isNullOrEmpty(phone)){
+			throw MyErrorEnum.errorParm.getMyException("手机号不能为空.");
+		}
+		if(Strings.isNullOrEmpty(activeid)){
+			throw MyErrorEnum.errorParm.getMyException("活动id不能为空.");
+		}
+		//判断该手机是否领取奖品
+		iTicketService.checkReceivePrizeByPhone(phone,Long.parseLong(activeid),OSTypeEnum.H.getId(), DateUtils.getDate());
+		//如果该手机已经是眯客用户就直接绑定，如果不是眯客用户，就下次他登录(注册)时候绑定
+		iTicketService.prizeBindingUser(phone,prizerecordid);
+		Map<String,Object> rtnMap = Maps.newHashMap();
+		rtnMap.put("success", true);
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 }

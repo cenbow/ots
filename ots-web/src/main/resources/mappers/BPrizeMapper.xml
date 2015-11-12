@@ -10,6 +10,8 @@
     <result column="type" property="type" jdbcType="BIGINT" />
     <result column="url" property="url" jdbcType="VARCHAR" />
     <result column="weight" property="weight" jdbcType="BIGINT" />
+    <result column="newweight" property="newweight" jdbcType="BIGINT" />
+    <result column="otherweight" property="otherweight" jdbcType="BIGINT" />
     <result column="merchantid" property="merchantid" jdbcType="BIGINT" />
     <result column="activeid" property="activeid" jdbcType="BIGINT" />
     <result column="enable" property="enable" jdbcType="CHAR" />
@@ -23,7 +25,7 @@
       enable,begintime,endtime)
     values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, 
       #{num,jdbcType=BIGINT}, #{price,jdbcType=DECIMAL}, #{type,jdbcType=BIGINT}, #{url,jdbcType=VARCHAR}, 
-      #{weight,jdbcType=BIGINT}, #{merchantid,jdbcType=BIGINT}, #{activeid,jdbcType=BIGINT}, 
+      #{weight,jdbcType=BIGINT}, #{newweight,jdbcType=BIGINT},#{otherweight,jdbcType=BIGINT},#{merchantid,jdbcType=BIGINT}, #{activeid,jdbcType=BIGINT},
       #{enable,jdbcType=CHAR},#{begintime,jdbcType=TIMESTAMP},#{endtime,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="com.mk.ots.ticket.model.BPrize" >
@@ -52,6 +54,12 @@
       </if>
       <if test="weight != null" >
         weight,
+      </if>
+      <if test="newweight != null" >
+        newweight,
+      </if>
+      <if test="otherweight != null" >
+        otherweight,
       </if>
       <if test="merchantid != null" >
         merchantid,
@@ -93,6 +101,12 @@
       </if>
       <if test="weight != null" >
         #{weight,jdbcType=BIGINT},
+      </if>
+      <if test="newweight != null" >
+        #{newweight,jdbcType=BIGINT},
+      </if>
+      <if test="otherweight != null" >
+        #{otherweight,jdbcType=BIGINT},
       </if>
       <if test="merchantid != null" >
         #{merchantid,jdbcType=BIGINT},
@@ -143,6 +157,12 @@
       </if>
       <if test="weight != null" >
         weight=#{weight,jdbcType=BIGINT},
+      </if>
+      <if test="newweight != null" >
+        newweight=#{newweight,jdbcType=BIGINT},
+      </if>
+      <if test="otherweight != null" >
+        otherweight=#{otherweight,jdbcType=BIGINT},
       </if>
       <if test="merchantid != null" >
         merchantid= #{merchantid,jdbcType=BIGINT},
