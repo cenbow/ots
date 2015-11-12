@@ -257,8 +257,10 @@ public class QiekeRuleService {
      * @return
      */
     public OtaFreqTrvEnum checkIdentityCard(OtaOrder otaOrder){
+        logger.info(String.format("checkIdentityCard begin"));
         List<String> cardIdList = pmsCheckinUserMapper.getCardId(otaOrder.getId());
         if(CollectionUtils.isEmpty(cardIdList)){
+            logger.info(String.format("checkIdentityCard getCardId params[%s]", otaOrder.getId()));
             return OtaFreqTrvEnum.CARD_ID_IS_NULL;
         }
         String cardId = "";
