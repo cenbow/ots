@@ -361,8 +361,8 @@ public class QiekeRuleService {
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }
         double distance = DistanceUtil.distance(tHotelModel.getLongitude().doubleValue(), tHotelModel.getLatitude().doubleValue(), userlongitude, userlatitude);
-        if(distance < SearchConst.SEARCH_RANGE_1_KM){
-            return OtaFreqTrvEnum.L1;
+        if(distance > SearchConst.SEARCH_RANGE_1_KM){
+            return OtaFreqTrvEnum.OUT_OF_RANG;
         }
         return OtaFreqTrvEnum.L1;
     }
