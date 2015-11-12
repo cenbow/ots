@@ -333,13 +333,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (StringUtils.isBlank(params.getCallversion())) {
 				return "callversion必须传入";
 			}
-			if (StringUtils.isNotBlank(params.getCallversion()) && ("3.1".compareTo(params.getCallversion()) > 0)) {
+			if (StringUtils.isNotBlank(params.getCallversion()) && ("3.1".compareTo(params.getCallversion()) >= 0)) {
 				return "callversion版本不正确";
 			}
 			if (StringUtils.isNotEmpty(params.getCallmethod()) && "3".equalsIgnoreCase(params.getCallmethod())) {
 				return "callmethod为wechat";
 			}
-			if ((params.getCallentry() != null) && (params.getCallentry() == 1 || params.getCallentry() == 2) ) {
+			if ((params.getCallentry() != null) && (params.getCallentry() == 1 || params.getCallentry() == 2)) {
 				return "callentry为摇一摇或切客";
 			}
 
@@ -624,9 +624,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
 				promoItem.put("hotel", hotels);
 			} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
-				searchAround(rtnMap, params, FrontPageEnum.limit.getId() - hotels.size());
-				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap.get("supplementhotel");
-				promoItem.put("hotel", supplementHotels);
+				Map<String, Object> sups = new HashMap<String, Object>();
+				searchAround(sups, params, FrontPageEnum.limit.getId() - hotels.size());
+				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) sups.get("supplementhotel");
+				promoItem.put("hotel", new ArrayList<Map<String, Object>>());
+				((List<Map<String, Object>>) promoItem.get("hotel"))
+						.addAll(hotels == null ? new ArrayList<Map<String, Object>>() : hotels);
+				((List<Map<String, Object>>) promoItem.get("hotel"))
+						.addAll(supplementHotels == null ? new ArrayList<Map<String, Object>>() : supplementHotels);
 			}
 			Integer promoId = HotelPromoEnum.OneDollar.getCode();
 
@@ -673,9 +678,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
 				promoItem.put("hotel", hotels);
 			} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
-				searchAround(rtnMap, params, FrontPageEnum.limit.getId() - hotels.size());
-				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap.get("supplementhotel");
-				promoItem.put("hotel", supplementHotels);
+				Map<String, Object> sups = new HashMap<String, Object>();
+				searchAround(sups, params, FrontPageEnum.limit.getId() - hotels.size());
+				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) sups.get("supplementhotel");
+				promoItem.put("hotel", new ArrayList<Map<String, Object>>());
+				((List<Map<String, Object>>) promoItem.get("hotel"))
+						.addAll(hotels == null ? new ArrayList<Map<String, Object>>() : hotels);
+				((List<Map<String, Object>>) promoItem.get("hotel"))
+						.addAll(supplementHotels == null ? new ArrayList<Map<String, Object>>() : supplementHotels);
 			}
 			promoId = HotelPromoEnum.Day.getCode();
 
@@ -719,9 +729,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
 				promoItem.put("hotel", hotels);
 			} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
-				searchAround(rtnMap, params, FrontPageEnum.limit.getId() - hotels.size());
-				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap.get("supplementhotel");
-				promoItem.put("hotel", supplementHotels);
+				Map<String, Object> sups = new HashMap<String, Object>();
+				searchAround(sups, params, FrontPageEnum.limit.getId() - hotels.size());
+				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) sups.get("supplementhotel");
+				promoItem.put("hotel", new ArrayList<Map<String, Object>>());
+				((List<Map<String, Object>>) promoItem.get("hotel"))
+						.addAll(hotels == null ? new ArrayList<Map<String, Object>>() : hotels);
+				((List<Map<String, Object>>) promoItem.get("hotel"))
+						.addAll(supplementHotels == null ? new ArrayList<Map<String, Object>>() : supplementHotels);
 			}
 
 			promoId = HotelPromoEnum.Night.getCode();
@@ -765,9 +780,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
 				promoItem.put("hotel", hotels);
 			} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
-				searchAround(rtnMap, params, FrontPageEnum.limit.getId() - hotels.size());
-				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap.get("supplementhotel");
-				promoItem.put("hotel", supplementHotels);
+				Map<String, Object> sups = new HashMap<String, Object>();
+				searchAround(sups, params, FrontPageEnum.limit.getId() - hotels.size());
+				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) sups.get("supplementhotel");
+				promoItem.put("hotel", new ArrayList<Map<String, Object>>());
+				((List<Map<String, Object>>) promoItem.get("hotel"))
+						.addAll(hotels == null ? new ArrayList<Map<String, Object>>() : hotels);
+				((List<Map<String, Object>>) promoItem.get("hotel"))
+						.addAll(supplementHotels == null ? new ArrayList<Map<String, Object>>() : supplementHotels);
 			}
 
 			promoId = HotelPromoEnum.Theme.getCode();
