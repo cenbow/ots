@@ -5,6 +5,7 @@ public class RoomSaleShowConfigDto {
     private String promotext;
     private Integer promoid;
     private String promoicon;
+    private String promonote;
     private String backPics;
     private String backColor;
     private String fontColor;
@@ -16,7 +17,6 @@ public class RoomSaleShowConfigDto {
     private String  cityid;
     private Integer normalId;
     private String isSpecial;
-    private String  describe;
     private Integer ord;
 
     public Integer getId() {
@@ -123,13 +123,6 @@ public class RoomSaleShowConfigDto {
         this.ord = ord;
     }
 
-    public String getDescribe() {
-        return describe;
-    }
-
-    public void setDescribe(String describe) {
-        this.describe = describe;
-    }
 
     public Integer getNormalId() {
         return normalId;
@@ -153,5 +146,13 @@ public class RoomSaleShowConfigDto {
 
     public void setCityid(String cityid) {
         this.cityid = cityid;
+    }
+
+    public String getPromonote() {
+        return promonote;
+    }
+
+    public void setPromonote(String promonote) {
+        this.promonote = promonote;
     }
 }
