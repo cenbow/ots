@@ -2032,8 +2032,8 @@ public class OrderServiceImpl implements OrderService {
 		} else if (otaorder.getInt("rulecode") == 1002) {// 重庆规则
             if(!qiekeRuleService.isOrderQiekeRuleCity(otaorder)) {
                 if (otaorder.getSpreadUser() != null) {// 切客订单
-                    String InvalidReason = otaorder.get("Invalidreason");
-                    if (StringUtils.isEmpty(InvalidReason)) {// 非有效切客理由为空
+                    Integer invalidReason = otaorder.get("Invalidreason");
+                    if (null == invalidReason) {// 非有效切客理由为空
                         OrderServiceImpl.logger.info("重庆非有效切客理由为空" + otaorder.getId() + otaorder.getSpreadUser());
                         Date bgtemp = pmsRoomOrder.getDate("CheckInTime");
                         Date edtemp = pmsRoomOrder.getDate("CheckOutTime");
