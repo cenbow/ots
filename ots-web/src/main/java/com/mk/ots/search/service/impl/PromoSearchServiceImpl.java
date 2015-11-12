@@ -17,6 +17,9 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.mk.ots.common.enums.*;
+import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
+import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -55,10 +58,6 @@ import com.mk.framework.AppUtils;
 import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
-import com.mk.ots.common.enums.FrontPageEnum;
-import com.mk.ots.common.enums.HotelPromoEnum;
-import com.mk.ots.common.enums.HotelSearchEnum;
-import com.mk.ots.common.enums.HotelSortEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.common.utils.SearchConst;
@@ -182,6 +181,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	@Autowired
 	private SSubwayStationMapper subwayStationMapper;
+
+	@Autowired
+	private TRoomSaleShowConfigService roomSaleShowConfigService;
 
 	private LocalDateTime promoStartTime;
 	private LocalDateTime promoEndTime;
@@ -573,11 +575,30 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap.get("supplementhotel");
 				promoItem.put("hotel", supplementHotels);
 			}
+			Integer promoId = HotelPromoEnum.OneDollar.getCode();
 
-			promoItem.put("promoicon", "");
-			promoItem.put("promonote", "一元秒杀， 先到先得");
-			promoItem.put("promotext", HotelPromoEnum.OneDollar.getText());
+			RoomSaleShowConfigDto roomSaleShowConfigDto = new RoomSaleShowConfigDto();
+			roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
+			roomSaleShowConfigDto.setPromoid(promoId);
+
+			List<RoomSaleShowConfigDto> oneDollarShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+
 			promoItem.put("promotype", HotelPromoEnum.OneDollar.getCode());
+			promoItem.put("normalid", -1);
+
+			if (oneDollarShowConfigs != null && oneDollarShowConfigs.size() > 0){
+				RoomSaleShowConfigDto promoShowConfig = oneDollarShowConfigs.get(0);
+				promoItem.put("promoicon", promoShowConfig.getPromoicon());
+				promoItem.put("promotext", promoShowConfig.getPromotext());
+				promoItem.put("promonote", promoShowConfig.getPromonote());
+
+			}else {
+				promoItem.put("promoicon", "");
+				promoItem.put("promotext", HotelPromoEnum.OneDollar.getText());
+				promoItem.put("promonote", "一元秒杀， 先到先得");
+
+			}
+
 
 			params.setIspromoonly(Boolean.TRUE);
 			params.setLimit(FrontPageEnum.limit.getId());
@@ -596,11 +617,26 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) rtnMap.get("supplementhotel");
 				promoItem.put("hotel", supplementHotels);
 			}
+			promoId = HotelPromoEnum.Day.getCode();
+			roomSaleShowConfigDto.setPromoid(promoId);
 
-			promoItem.put("promoicon", "");
-			promoItem.put("promonote", "每天12: 00-18: 00，订房享受特价");
-			promoItem.put("promotext", HotelPromoEnum.Day.getText());
-			promoItem.put("promotype", HotelPromoEnum.Day.getCode());
+			List<RoomSaleShowConfigDto> dayShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+
+			promoItem.put("promotype", promoId);
+			promoItem.put("normalid", -1);
+
+			if (dayShowConfigs != null && dayShowConfigs.size() > 0){
+				RoomSaleShowConfigDto promoShowConfig = dayShowConfigs.get(0);
+				promoItem.put("promoicon", promoShowConfig.getPromoicon());
+				promoItem.put("promotext", promoShowConfig.getPromotext());
+				promoItem.put("promonote", promoShowConfig.getPromonote());
+
+			}else {
+				promoItem.put("promoicon", "");
+				promoItem.put("promotext", HotelPromoEnum.Day.getText());
+				promoItem.put("promonote", "每天12: 00-18: 00，订房享受特价");
+
+			}
 
 			promoItem = new HashMap<String, Object>();
 			promolist.add(promoItem);
@@ -619,10 +655,26 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				promoItem.put("hotel", supplementHotels);
 			}
 
-			promoItem.put("promoicon", "");
-			promoItem.put("promonote", "每天20: 00-02: 00，订房30元起");
-			promoItem.put("promotext", HotelPromoEnum.Night.getText());
-			promoItem.put("promotype", HotelPromoEnum.Night.getCode());
+			promoId =HotelPromoEnum.Night.getCode();
+			roomSaleShowConfigDto.setPromoid(promoId);
+
+			List<RoomSaleShowConfigDto> nightShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+
+			promoItem.put("promotype", promoId);
+			promoItem.put("normalid", -1);
+
+			if (nightShowConfigs != null && nightShowConfigs.size() > 0){
+				RoomSaleShowConfigDto promoShowConfig = nightShowConfigs.get(0);
+				promoItem.put("promoicon", promoShowConfig.getPromoicon());
+				promoItem.put("promotext", promoShowConfig.getPromotext());
+				promoItem.put("promonote", promoShowConfig.getPromonote());
+
+			}else {
+				promoItem.put("promoicon", "");
+				promoItem.put("promotext", HotelPromoEnum.Night.getText());
+				promoItem.put("promonote", "每天20: 00-02: 00，订房30元起");
+
+			}
 
 			promoItem = new HashMap<String, Object>();
 			promolist.add(promoItem);
@@ -641,10 +693,25 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				promoItem.put("hotel", supplementHotels);
 			}
 
-			promoItem.put("promoicon", "");
-			promoItem.put("promonote", "总有一款适合你");
-			promoItem.put("promotext", HotelPromoEnum.Theme.getText());
-			promoItem.put("promotype", HotelPromoEnum.Theme.getCode());
+			promoId = HotelPromoEnum.Theme.getCode();
+			roomSaleShowConfigDto.setPromoid(promoId);
+
+			List<RoomSaleShowConfigDto> themeShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+
+			promoItem.put("promotype", promoId);
+			promoItem.put("normalid", -1);
+
+			if (themeShowConfigs != null && themeShowConfigs.size() > 0){
+				RoomSaleShowConfigDto promoShowConfig = themeShowConfigs.get(0);
+				promoItem.put("promoicon", promoShowConfig.getPromoicon());
+				promoItem.put("promotext", promoShowConfig.getPromotext());
+				promoItem.put("promonote", promoShowConfig.getPromonote());
+
+			}else {
+				promoItem.put("promoicon", "");
+				promoItem.put("promotext", HotelPromoEnum.Theme.getText());
+				promoItem.put("promonote", "总有一款适合你");
+			}
 
 			return promolist;
 		} catch (Exception e) {

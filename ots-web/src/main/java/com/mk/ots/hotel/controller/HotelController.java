@@ -209,7 +209,6 @@ public class HotelController {
 	 */
 	private List<Map<String, Object>> normalFrontPageList(HotelFrontPageQueryReqEntity hotelEntity) throws Exception {
 
-		Map<String, Object> resultMap = new HashMap<>();
 		List<Map<String, Object>> normaList = new ArrayList<>();
 		Date day = new Date();
 
