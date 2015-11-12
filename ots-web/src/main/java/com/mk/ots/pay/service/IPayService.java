@@ -190,4 +190,6 @@ public interface IPayService {
 	
 	//批量退款
 	public String refundBatchPay(String orderid);
+
+	public List<PPay> findByUserId (String userId);
 }
