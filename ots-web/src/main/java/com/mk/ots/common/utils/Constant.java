@@ -240,7 +240,7 @@ public class Constant {
 	/**B+规则 切客收益覆盖城市**/
 	public static final Map<String,String> QIE_KE_CITY_MAP = new HashMap<>();
 	static {
-		QIE_KE_CITY_MAP.put("410300", "410300");
-		QIE_KE_CITY_MAP.put("410300", "410300");
+		QIE_KE_CITY_MAP.put("410300", "410300");//洛阳
+		QIE_KE_CITY_MAP.put("430100", "430100");//长沙
 	}
 }
