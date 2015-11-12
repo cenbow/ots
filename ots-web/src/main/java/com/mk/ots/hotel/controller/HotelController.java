@@ -9,18 +9,22 @@ import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.common.bean.ParamBaseBean;
 import com.mk.ots.common.enums.FrontPageEnum;
 import com.mk.ots.common.enums.HotelSortEnum;
+import com.mk.ots.common.enums.ShowAreaEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.hotel.service.HotelPriceService;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomstateService;
+import com.mk.ots.mapper.RoomSaleShowConfigMapper;
 import com.mk.ots.restful.input.HotelFrontPageQueryReqEntity;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
+import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
 import com.mk.ots.roomsale.service.RoomSaleService;
+import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
@@ -75,6 +79,9 @@ public class HotelController {
 
 	@Autowired
 	private RoomSaleService roomSaleService;
+
+	@Autowired
+	private  TRoomSaleShowConfigService roomSaleShowConfigService;
 
 	/**
 	 * 
@@ -228,11 +235,31 @@ public class HotelController {
 			distanceQueryList.setLimit(FrontPageEnum.limit.getId());
 
 			Map<String, Object> distanceResultMap = searchService.readonlySearchHotels(distanceQueryList);
-			distanceResultMap.put("normalid", HotelSortEnum.DISTANCE.getId());
-			distanceResultMap.put("promnote", "");
-			distanceResultMap.put("promoicon", "");
-			distanceResultMap.put("promotext", "最近距离");
+			Integer normalid = HotelSortEnum.DISTANCE.getId();
+
+			RoomSaleShowConfigDto roomSaleShowConfigDto = new RoomSaleShowConfigDto();
+			roomSaleShowConfigDto.setCityid(hotelEntity.getCityid());
+			roomSaleShowConfigDto.setIsSpecial(Constant.STR_FALSE);
+			roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
+			roomSaleShowConfigDto.setNormalId(normalid);
+
+			List<RoomSaleShowConfigDto> distanceShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+			distanceResultMap.put("normalid", normalid);
 			distanceResultMap.put("promotype", -1);
+
+			if (distanceShowConfigs != null&& distanceShowConfigs.size() > 0){
+				RoomSaleShowConfigDto normalShowConfig = distanceShowConfigs.get(0);
+				distanceResultMap.put("promotext", normalShowConfig.getPromotext());
+				distanceResultMap.put("promnote", normalShowConfig.getPromonote());
+				distanceResultMap.put("promoicon", normalShowConfig.getPromoicon());
+
+			}else{
+				distanceResultMap.put("normalid", normalid);
+				distanceResultMap.put("promnote", "");
+				distanceResultMap.put("promoicon", "");
+				distanceResultMap.put("promotext", "最近距离");
+
+			}
 
 			normaList.add(distanceResultMap);
 
@@ -251,11 +278,24 @@ public class HotelController {
 
 			Map<String, Object> priceResultMap = searchService.readonlySearchHotels(priceQueryList);
 
-			priceResultMap.put("normalid", HotelSortEnum.PRICE.getId());
-			priceResultMap.put("promnote", "");
-			priceResultMap.put("promoicon", "");
-			priceResultMap.put("promotext", "最便宜");
+			normalid = HotelSortEnum.PRICE.getId();
+			roomSaleShowConfigDto.setNormalId(normalid);
+
+			List<RoomSaleShowConfigDto>  priceShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+			priceResultMap.put("normalid", normalid);
 			priceResultMap.put("promotype", -1);
+
+			if (priceShowConfigs != null && priceShowConfigs.size() > 0){
+				RoomSaleShowConfigDto normalShowConfig = priceShowConfigs.get(0);
+				priceResultMap.put("promotext", normalShowConfig.getPromotext());
+				priceResultMap.put("promnote", normalShowConfig.getPromonote());
+				priceResultMap.put("promoicon", normalShowConfig.getPromoicon());
+
+			}else {
+				priceResultMap.put("promnote", "");
+				priceResultMap.put("promoicon", "");
+				priceResultMap.put("promotext", "最便宜");
+			}
 
 			normaList.add(priceResultMap);
 
@@ -274,11 +314,25 @@ public class HotelController {
 
 			Map<String, Object> orderNumResultMap = searchService.readonlySearchHotels(orderNumQueryList);
 
-			orderNumResultMap.put("normalid", HotelSortEnum.ORDERNUMS.getId());
-			orderNumResultMap.put("promnote", "");
-			orderNumResultMap.put("promoicon", "");
-			orderNumResultMap.put("promotext", "最受欢迎");
+			normalid = HotelSortEnum.ORDERNUMS.getId();
+			roomSaleShowConfigDto.setNormalId(normalid);
+
+
+			List<RoomSaleShowConfigDto>   orderNumShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+			orderNumResultMap.put("normalid", normalid);
 			orderNumResultMap.put("promotype", -1);
+
+			if (orderNumShowConfigs != null && orderNumShowConfigs.size() > 0){
+				RoomSaleShowConfigDto normalShowConfig = orderNumShowConfigs.get(0);
+				orderNumResultMap.put("promotext", normalShowConfig.getPromotext());
+				orderNumResultMap.put("promnote", normalShowConfig.getPromonote());
+				orderNumResultMap.put("promoicon", normalShowConfig.getPromoicon());
+
+			}else {
+				orderNumResultMap.put("promnote", "");
+				orderNumResultMap.put("promoicon", "");
+				orderNumResultMap.put("promotext", "最受欢迎");
+			}
 
 			normaList.add(orderNumResultMap);
 

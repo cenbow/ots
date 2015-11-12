@@ -41,15 +41,17 @@ public class TRoomSaleShowConfigServiceImpl implements TRoomSaleShowConfigServic
         showDto.setPromotext(bean.getSaleName());
         showDto.setPromoid(bean.getSaleTypeId());
         showDto.setPromoicon(bean.getPicUrl());
+        showDto.setPromonote(bean.getDescription());
         showDto.setBackPics(bean.getBackPicUrl());
         showDto.setBackColor(bean.getBackColor());
         showDto.setFontColor(bean.getFontColor());
         showDto.setFontFamily(bean.getFontFamily());
         showDto.setShowBeginTime(bean.getShowBeginTime());
         showDto.setShowEndTime(bean.getShowBeginTime());
-        showDto.setPromoid(bean.getSaleTypeId());
-        showDto.setPromoid(bean.getSaleTypeId());
-        showDto.setPromoid(bean.getSaleTypeId());
+        showDto.setShowArea(bean.getShowArea());
+        showDto.setNormalId(bean.getNormalId());
+        showDto.setIsSpecial(bean.getIsSpecial());
+        showDto.setOrd(bean.getOrd());
         return showDto;
     }
     public  List<TRoomSaleCity> queryTRoomSaleCity(String cityid) {

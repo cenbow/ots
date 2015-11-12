@@ -21,6 +21,7 @@ public class TRoomSaleShowConfig {
     private String createTime;
     private String updateBy;
     private String updateTime;
+    private Integer ord;
 
     public Integer getId() {
         return id;
@@ -180,5 +181,13 @@ public class TRoomSaleShowConfig {
 
     public void setIsSpecial(String isSpecial) {
         this.isSpecial = isSpecial;
+    }
+
+    public Integer getOrd() {
+        return ord;
+    }
+
+    public void setOrd(Integer ord) {
+        this.ord = ord;
     }
 }
