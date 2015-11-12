@@ -136,4 +136,6 @@ public interface IPromoService {
      * @return
      */
     boolean isGetFirstOrderPromotion(String hardwarecode);
+
+    public List<BPromotion> findByActiveidAndPrizeId(Long activeid,Long prizeid);
 }

@@ -1,8 +1,8 @@
 package com.mk.ots.ticket.model;
 
-import java.util.Date;
-
 import com.mk.ots.promo.model.BPromotion;
+
+import java.util.Date;
 
 public class UPrizeRecord {
     private Long id;
@@ -21,6 +21,9 @@ public class UPrizeRecord {
 
     private Date createtime;
 
+    private String usermark;
+    private String receivestate;
+    private String phone;
     private BPrize bPrize;
     
     private BPromotion bPromotion;
@@ -104,7 +107,31 @@ public class UPrizeRecord {
 		this.bPromotion = bPromotion;
 	}
 
-	@Override
+    public String getUsermark() {
+        return usermark;
+    }
+
+    public void setUsermark(String usermark) {
+        this.usermark = usermark;
+    }
+
+    public String getReceivestate() {
+        return receivestate;
+    }
+
+    public void setReceivestate(String receivestate) {
+        this.receivestate = receivestate;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    @Override
 	public String toString() {
 		return "UPrizeRecord [id=" + id + ", mid=" + mid + ", prizeid="
 				+ prizeid + ", prizeinfo=" + prizeinfo + ", ostype=" + ostype

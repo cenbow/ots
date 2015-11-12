@@ -18,7 +18,8 @@ public class BPrize {
     private String url;
 
     private Long weight;
-
+    private Long newweight;
+    private Long otherweight;
     private Long merchantid;
 
     private Long activeid;
@@ -134,12 +135,28 @@ public class BPrize {
 		this.endtime = endtime;
 	}
 
-	@Override
+    public Long getNewweight() {
+        return newweight;
+    }
+
+    public void setNewweight(Long newweight) {
+        this.newweight = newweight;
+    }
+
+    public Long getOtherweight() {
+        return otherweight;
+    }
+
+    public void setOtherweight(Long otherweight) {
+        this.otherweight = otherweight;
+    }
+
+    @Override
 	public String toString() {
 		return "BPrize [id=" + id + ", name=" + name + ", description="
 				+ description + ", num=" + num + ", price=" + price + ", type="
-				+ type + ", url=" + url + ", weight=" + weight
-				+ ", merchantid=" + merchantid + ", activeid=" + activeid
+				+ type + ", url=" + url + ", weight=" + weight + ", newweight="
+                + newweight + ", otherweight=" + otherweight  + ", merchantid=" + merchantid + ", activeid=" + activeid
 				+ ", enable=" + enable + ", begintime=" + begintime
 				+ ", endtime=" + endtime + "]";
 	}
