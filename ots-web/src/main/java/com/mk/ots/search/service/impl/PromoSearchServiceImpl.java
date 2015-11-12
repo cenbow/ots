@@ -561,7 +561,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			params.setIspromoonly(Boolean.TRUE);
 			params.setLimit(FrontPageEnum.limit.getId());
-			params.setPromotype(HotelPromoEnum.OneDollar.getCode());
+			params.setPromotype(String.valueOf(HotelPromoEnum.OneDollar.getCode()));
 			params.setCallentry(null);
 
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
@@ -581,7 +581,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			params.setIspromoonly(Boolean.TRUE);
 			params.setLimit(FrontPageEnum.limit.getId());
-			params.setPromotype(HotelPromoEnum.Day.getCode());
+			params.setPromotype(String.valueOf(HotelPromoEnum.Day.getCode()));
 			params.setCallentry(null);
 
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
@@ -606,7 +606,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			promolist.add(promoItem);
 			params.setLimit(FrontPageEnum.limit.getId());
 			params.setIspromoonly(Boolean.TRUE);
-			params.setPromotype(HotelPromoEnum.Night.getCode());
+			params.setPromotype(String.valueOf(HotelPromoEnum.Night.getCode()));
 			params.setCallentry(null);
 
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
@@ -626,7 +626,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			promoItem = new HashMap<String, Object>();
 			promolist.add(promoItem);
-			params.setPromotype(HotelPromoEnum.Theme.getCode());
+			params.setPromotype(String.valueOf(HotelPromoEnum.Theme.getCode()));
 			params.setIspromoonly(Boolean.TRUE);
 			params.setLimit(FrontPageEnum.limit.getId());
 			params.setCallentry(null);
