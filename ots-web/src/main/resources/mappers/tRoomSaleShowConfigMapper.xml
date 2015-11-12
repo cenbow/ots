@@ -22,6 +22,7 @@
 	    <result property="createTime" column="createTime" />
 	    <result property="updateBy" column="updateBy" />
 	    <result property="updateTime" column="updateTime" />
+        <result property="ord" column="ord" />
 	</resultMap>
     <resultMap id="tRoomSaleCity" type="com.mk.ots.roomsale.model.TRoomSaleCity">
         <result property="id" column="id" />
@@ -40,7 +41,7 @@
     </select>
     <sql id="Base_Column_List" >
         id, saleName, saleTypeId,picUrl,backPicUrl,backColor,fontColor,fontSize,fontFamily,showBeginTime,showEndTime,
-        showArea,normalId,isSpecial,description,valid,createBy,updateTime,updateBy
+        showArea,normalId,isSpecial,description,valid,createBy,updateTime,updateBy, ord
     </sql>
     <select id="queryRoomSaleShowConfigByParams" resultMap="tRoomSaleShowConfig"  parameterType="com.mk.ots.roomsale.model.RoomSaleShowConfigDto">
         select
