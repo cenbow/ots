@@ -165,10 +165,10 @@ public class QiekeRuleService {
             }
 
             //订单状态
-            List<OtaOrderStatusEnum> statusList = new ArrayList<>();
-            statusList.add(OtaOrderStatusEnum.CheckIn);
-            statusList.add(OtaOrderStatusEnum.Account);
-            statusList.add(OtaOrderStatusEnum.CheckOut);
+            List<Integer> statusList = new ArrayList<>();
+            statusList.add(OtaOrderStatusEnum.CheckIn.getId());
+            statusList.add(OtaOrderStatusEnum.Account.getId());
+            statusList.add(OtaOrderStatusEnum.CheckOut.getId());
 
             //
             Map<String, Object> param = new HashMap<>();
@@ -212,10 +212,10 @@ public class QiekeRuleService {
             }
 
             //订单状态
-            List<OtaOrderStatusEnum> statusList = new ArrayList<>();
-            statusList.add(OtaOrderStatusEnum.CheckIn);
-            statusList.add(OtaOrderStatusEnum.Account);
-            statusList.add(OtaOrderStatusEnum.CheckOut);
+            List<Integer> statusList = new ArrayList<>();
+            statusList.add(OtaOrderStatusEnum.CheckIn.getId());
+            statusList.add(OtaOrderStatusEnum.Account.getId());
+            statusList.add(OtaOrderStatusEnum.CheckOut.getId());
             //
             Map<String, Object> param = new HashMap<>();
             param.put("uuid",uuid);
