@@ -7,11 +7,6 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.mk.framework.AppUtils;
 import com.mk.ots.bill.dao.BillOrderDAO;
-import com.mk.ots.common.enums.OtaFreqTrvEnum;
-import com.mk.ots.order.bean.OtaOrder;
-import com.mk.ots.order.dao.OrderDAO;
-import com.mk.ots.order.dao.OtaOrderDAO;
-import com.mk.ots.order.service.QiekeRuleService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,11 +46,6 @@ public class OtsAdminController {
 
 	@Autowired
 	private BillOrderService billService;
-
-	@Autowired
-	private QiekeRuleService qiekeRuleService;
-	@Autowired
-	private OrderDAO orderDAO;
 
 	private final SimpleDateFormat defaultDateFormatter = new SimpleDateFormat(DateUtils.FORMATSHORTDATETIME);
 
@@ -234,19 +224,15 @@ public class OtsAdminController {
 	}
 
 
-
 	@RequestMapping(value = "/report/runtWeekClearing", method = RequestMethod.POST)
 	public ResponseEntity<Map<String, Object>> runtWeekClearing(String startdateday) {
 		logger.info(String.format("url /report/runtWeekClearing params startdateday[%s]", startdateday));
 		Map<String, Object> datas = new HashMap<String, Object>();
 		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
 		logger.info("周结算开始");
-		OtaOrder order = new OtaOrder();
-		order.setId(Long.valueOf(startdateday));
-		OtaFreqTrvEnum otaFreqTrvEnum = qiekeRuleService.checkIdentityCard(order);
-		logger.info("!!!!!!!!!!otaFreqTrvEnum + "+otaFreqTrvEnum.getId());
-		otaFreqTrvEnum = qiekeRuleService.checkUserAdders(order);
-		logger.info("!!!!!!!!!!otaFreqTrvEnum + "+otaFreqTrvEnum.getId());
+		Date beginTime = DateUtils.getDateFromString(startdateday, DateUtils.FORMATSHORTDATETIME);
+		BillOrderService billOrderDAO = AppUtils.getBean(BillOrderService.class);
+		billOrderDAO.runtWeekClearing(beginTime, null);
 		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 	}
 

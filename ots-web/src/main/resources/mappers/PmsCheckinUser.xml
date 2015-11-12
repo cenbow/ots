@@ -11,7 +11,7 @@
         and ord.id = #{otaOrderId}
   </select>
 
-  <select id="getCardCountByCardId" parameterType="java.lang.String" resultType="java.lang.Long">
+  <select id="getCardCountByCardId" resultType="java.lang.Long">
     select count(1)
     from
     b_otaorder ord ,b_otaroomorder roomorder,b_pms_checkinuser ck
