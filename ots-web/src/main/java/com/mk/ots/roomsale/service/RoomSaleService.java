@@ -2,6 +2,7 @@ package com.mk.ots.roomsale.service;
 
 import com.mk.ots.roomsale.model.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -54,4 +55,5 @@ public interface RoomSaleService {
 	public Boolean checkRoomSaleWithOldRoomType(TRoomSaleConfig bean);
 	public List<RoomSaleToIndexDto> getUpdateIndexList(TRoomSaleConfig bean);
 	public List<Map<String, Object>> queryRoomByHotelAndRoomType(String hotelId, String roomTypeId) throws Exception;
+	public BigDecimal getHotelMinPromoPrice(Integer hotelid);
 }

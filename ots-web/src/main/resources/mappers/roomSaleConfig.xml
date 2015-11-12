@@ -303,4 +303,13 @@
             </if>
         </where>
     </select>
+
+
+    <select id="getHotelMinPromoPrice" resultMap="roomSaleConfig" parameterType="Integer">
+     SELECT
+     <include refid="Base_Column_List"/>
+
+     FROM t_room_sale_config
+     WHERE hotelid=#{hotelid} AND valid = 'T' ORDER BY saleValue ASC limit 1
+    </select>
 </mapper>

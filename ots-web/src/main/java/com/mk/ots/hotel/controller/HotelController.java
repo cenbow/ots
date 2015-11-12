@@ -1142,4 +1142,14 @@ public class HotelController {
 	// ResponseEntity<Map<String,Object>>(hotelService.readonlyClearEsHotelNotInTHotel(citycode),HttpStatus.OK);
 	// }
 
+
+	@RequestMapping(value="/hotel/test")
+	public ResponseEntity<Map<String, Object>> clearESHotelNotInThotel(Integer
+	hotelid) {
+		HashMap<String, Object> rntMap = new HashMap<>();
+		rntMap.put("minprice",roomSaleService.getHotelMinPromoPrice(hotelid) );
+	return new
+	ResponseEntity<Map<String,Object>>(rntMap,HttpStatus.OK);
+	}
+
 }

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -205,5 +206,15 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 			saleIndex.setPromoPrice(rooms.getSaleValue());
 		}
 		return roomSaleToIndexList;
+	}
+
+	public BigDecimal getHotelMinPromoPrice(Integer hotelid){
+		TRoomSaleConfig result = roomSaleConfigMapper.getHotelMinPromoPrice(hotelid);
+		if (result != null){
+			return result.getSettleValue();
+		}else {
+			return null;
+		}
+
 	}
 }
