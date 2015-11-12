@@ -133,8 +133,19 @@ public class HotelQuerylistReqEntity extends ParamBaseBean implements Serializab
 
 	private Boolean ispromoonly;
 
+	private String promoid;
+	
 	private String promotype;
 	
+	
+	public String getPromoid() {
+		return promoid;
+	}
+
+	public void setPromoid(String promoid) {
+		this.promoid = promoid;
+	}
+
 	public String getPromotype() {
 		return promotype;
 	}

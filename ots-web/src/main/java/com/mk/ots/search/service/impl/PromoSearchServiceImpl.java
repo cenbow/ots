@@ -17,9 +17,6 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.mk.ots.common.enums.*;
-import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
-import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -58,6 +55,11 @@ import com.mk.framework.AppUtils;
 import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
+import com.mk.ots.common.enums.FrontPageEnum;
+import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.enums.HotelSearchEnum;
+import com.mk.ots.common.enums.HotelSortEnum;
+import com.mk.ots.common.enums.ShowAreaEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.common.utils.SearchConst;
@@ -85,7 +87,11 @@ import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
 import com.mk.ots.restful.output.SearchPositionsDistanceRespEntity;
 import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
+import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
+import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import com.mk.ots.search.enums.PositionTypeEnum;
 import com.mk.ots.search.model.PositionTypeModel;
 import com.mk.ots.search.model.SAreaInfo;
@@ -136,6 +142,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 */
 	@Autowired
 	private RoomstateService roomstateService;
+
+	@Autowired
+	private RoomSaleConfigInfoService roomSaleConfigInfoService;
 
 	@Autowired
 	private RoomSaleService roomSaleService;
@@ -616,7 +625,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			params.setIspromoonly(Boolean.TRUE);
 			params.setLimit(FrontPageEnum.limit.getId());
-			params.setPromotype(String.valueOf(HotelPromoEnum.OneDollar.getCode()));
+			params.setPromoid(String.valueOf(HotelPromoEnum.OneDollar.getCode()));
 			params.setCallentry(null);
 
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
@@ -667,7 +676,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			params.setIspromoonly(Boolean.TRUE);
 			params.setLimit(FrontPageEnum.limit.getId());
-			params.setPromotype(String.valueOf(HotelPromoEnum.Day.getCode()));
+			params.setPromoid(String.valueOf(HotelPromoEnum.Day.getCode()));
 			params.setCallentry(null);
 
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
@@ -721,7 +730,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			promolist.add(promoItem);
 			params.setLimit(FrontPageEnum.limit.getId());
 			params.setIspromoonly(Boolean.TRUE);
-			params.setPromotype(String.valueOf(HotelPromoEnum.Night.getCode()));
+			params.setPromoid(String.valueOf(HotelPromoEnum.Night.getCode()));
 			params.setCallentry(null);
 
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
@@ -770,7 +779,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			promoItem = new HashMap<String, Object>();
 			promolist.add(promoItem);
-			params.setPromotype(String.valueOf(HotelPromoEnum.Theme.getCode()));
+
+			params.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 			params.setIspromoonly(Boolean.TRUE);
 			params.setLimit(FrontPageEnum.limit.getId());
 			params.setCallentry(null);
@@ -2414,6 +2424,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Integer callEntry = reqentity.getCallentry();
 		String callMethod = reqentity.getCallmethod() == null ? "" : reqentity.getCallmethod().trim();
 		String promoType = reqentity.getPromotype() == null ? "" : reqentity.getPromotype().trim();
+		String promoId = reqentity.getPromoid();
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("callEntry:%s; callMethod:%s; callVersion:%s; isPromoOnly:%s", callEntry,
@@ -2451,7 +2462,19 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 		}
 
-		if (StringUtils.isNotBlank(promoType)) {
+		if (StringUtils.isNotBlank(promoId)) {
+			List<TRoomSaleConfigInfo> promotypes = roomSaleConfigInfoService.queryListBySaleTypeId("",
+					Integer.parseInt(promoId), 1, 10);
+			List<QueryFilterBuilder> queryFilterBuilders = new ArrayList<QueryFilterBuilder>();
+
+			for (TRoomSaleConfigInfo config : promotypes) {
+				Integer promotype = config.getId();
+
+				queryFilterBuilders.add(FilterBuilders
+						.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", promotype).operator(Operator.OR)));
+			}
+
+		} else if (StringUtils.isNotBlank(promoType)) {
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", promoType)));
 		}
 	}
