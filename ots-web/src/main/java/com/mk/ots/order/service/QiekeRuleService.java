@@ -18,13 +18,14 @@ import com.mk.ots.member.service.IMemberService;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.PmsRoomOrder;
 import com.mk.ots.order.bean.TopPmsRoomOrderQuery;
-import com.mk.ots.order.dao.CheckInUserDAO;
-import com.mk.ots.order.dao.OrderDAO;
 import com.mk.ots.order.dao.PmsRoomOrderDao;
 import com.mk.ots.order.model.OtaOrderMac;
+import com.mk.ots.pay.dao.impl.POrderLogDAO;
+import com.mk.ots.pay.dao.impl.PayDAO;
+import com.mk.ots.pay.model.POrderLog;
 import com.mk.ots.pay.model.PPay;
 import com.mk.ots.pay.service.IPayService;
-import com.mk.ots.search.service.impl.SearchService;
+import com.mk.ots.promoteconfig.service.impl.PromoteConfigService;
 import com.mk.ots.utils.DistanceUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -46,25 +48,24 @@ public class QiekeRuleService {
     private OrderService orderService;
     @Autowired
     private OtaOrderMacMapper otaOrderMacMapper;
-
     @Autowired
     private IMemberService iMemberService;
-
     @Autowired
     private IPayService iPayService;
-    private SearchService searchService;
-    @Autowired
-    private CheckInUserDAO checkInUserDAO;
     @Autowired
     private PmsCheckinUserMapper pmsCheckinUserMapper;
-    @Autowired
-    private OrderDAO orderDAO;
     @Autowired
     private THotelMapper tHotelMapper;
     @Autowired
     private OrderMapper orderMapper;
     @Autowired
     private PmsRoomOrderDao pmsRoomOrderDao;
+    @Autowired
+    private POrderLogDAO pOrderLogDAO;
+    @Autowired
+    private PromoteConfigService promoteConfigService;
+    @Autowired
+    private PayDAO payDAO;
 
     /**
      * 手机号必须是第一次，入住并离店的订单
@@ -356,61 +357,86 @@ public class QiekeRuleService {
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }
         double distance = DistanceUtil.distance(tHotelModel.getLongitude().doubleValue(), tHotelModel.getLatitude().doubleValue(), userlongitude, userlatitude);
-        if(distance < SearchConst.SEARCH_RANGE_1_KM){
-            return OtaFreqTrvEnum.L1;
+        if(distance > SearchConst.SEARCH_RANGE_1_KM){
+            return OtaFreqTrvEnum.OUT_OF_RANG;
         }
         return OtaFreqTrvEnum.L1;
     }
 
 
-
-    /**
-     * 每个酒店每天前10个拉新订单有效，超过10个的，即使满足上述7条，酒店也不能获得更多的拉新收益（10个这个参数可以配置）
-     * @param otaOrder
-     * @return
-     */
-    public OtaFreqTrvEnum checkOrderNumberThreshold(OtaOrder otaOrder){
-        return OtaFreqTrvEnum.IN_FREQUSER;
+    public int updateTopInvalidReasonToNull(Long orderId){
+        return orderMapper.updateInvalidReason(orderId);
     }
 
+    public void updateTopInvalidReason(Date now){
+        String yesterdayStr = DateUtils.formatDateTime(DateUtils.addDays(now, -1), DateUtils.FORMAT_DATE);
+        String todayStr =  DateUtils.formatDateTime(now, DateUtils.FORMAT_DATE);
+        //将符合入住时间大于四个小时订单打上标记
+        Integer updateCheckInStatusInvalidReasonNum = orderMapper.updateCheckInStatusInvalidReason(yesterdayStr, todayStr, OtaFreqTrvEnum.CHECKIN_THAN4.getId());
+        logger.info(String.format("updateTopInvalidReason updateTopInvalidReason num[%s]", updateCheckInStatusInvalidReasonNum));
+        Integer updateAccountAndCheckOutStatusInvalidReasonNum = orderMapper.updateAccountAndCheckOutStatusInvalidReason(yesterdayStr, todayStr, OtaFreqTrvEnum.CHECKIN_THAN4.getId());
+        logger.info(String.format("updateTopInvalidReason updateAccountAndCheckOutStatusInvalidReasonNum num[%s]", updateAccountAndCheckOutStatusInvalidReasonNum));
+        //更新切克收益
+        updateQieKeIncome(yesterdayStr, todayStr);
 
-    public void updateCheckInStatusInvalidReason(){
     }
 
-    public void updateAccountAndCheckOutStatusInvalidReason(){
-
+    private void updateQieKeIncome(String yesterdayStr, String todayStr) {
+        TopPmsRoomOrderQuery topPmsRoomOrderQuery = new TopPmsRoomOrderQuery();
+        topPmsRoomOrderQuery.setCount(Constant.QIE_KE_TOP_NUM);
+        topPmsRoomOrderQuery.setLimitBegin(0);
+        topPmsRoomOrderQuery.setLimitEen(topPmsRoomOrderQuery.getBasePageSize());
+        topPmsRoomOrderQuery.setYesterdayStr(yesterdayStr);
+        topPmsRoomOrderQuery.setTodayStr(todayStr);
+        //查找每日top订单
+        List<PmsRoomOrder> pmsRoomOrderList = getTopPmsRoomOrder(topPmsRoomOrderQuery);
+        logger.info(String.format("updateQieKeIncome top[%s] top pmsRoomOrderList size[%s]", Constant.QIE_KE_TOP_NUM.toString(), pmsRoomOrderList.size()+""));
+        for(PmsRoomOrder pmsRoomOrder : pmsRoomOrderList){
+            Long orderId =  pmsRoomOrder.getLong("orderId");
+            String cityCode =  pmsRoomOrder.getStr("cityCode");
+            Integer orderType =  pmsRoomOrder.getInt("Ordertype");
+            Integer updateTopInvalidReasonToNullNum = updateTopInvalidReasonToNull(orderId);
+            logger.info(String.format("updateTopInvalidReason updateTopInvalidReasonToNullNum num[%s]", updateTopInvalidReasonToNullNum));
+            //切客收益
+            PPay pPay = payDAO.getPayByOrderId(orderId);
+            if(pPay == null){
+                logger.warn(String.format("updateTopInvalidReason pPay is null orderId[%s]", orderId));
+            }
+            POrderLog pOrderLog = pOrderLogDAO.findPOrderLogByPay(pPay.getId());
+            if(pOrderLog == null){
+                logger.warn(String.format("updateTopInvalidReason pOrderLog is null params pPay id[%s]", pPay.getId()));
+            }
+            BigDecimal qiekeIncome = new BigDecimal(0);
+            if(OrderTypeEnum.YF.getId().equals(orderType)){
+                qiekeIncome = promoteConfigService.queryOnlineGiveHotel(cityCode);
+            }else {
+                qiekeIncome = promoteConfigService.queryOfflineGiveHotel(cityCode);
+            }
+            pOrderLog.setQiekeIncome(qiekeIncome);
+            pOrderLogDAO.update(pOrderLog);
+        }
     }
 
-    public void updateTopInvalidReason(){
-
-    }
 
     public List<PmsRoomOrder> getTopPmsRoomOrder(TopPmsRoomOrderQuery topPmsRoomOrderQuery){
-        Date yesterday = DateUtils.addDays(topPmsRoomOrderQuery.getNow(), -1);
-        String yesterdayStr = DateUtils.formatDateTime(yesterday, DateUtils.FORMAT_DATE);
-        String todayStr =  DateUtils.formatDateTime(yesterday, DateUtils.FORMAT_DATE);
-        List<PmsRoomOrder> pmsRoomOrderList = pmsRoomOrderDao.getPmsRoomOrderByCheckInTime(yesterdayStr, todayStr,
-                topPmsRoomOrderQuery.getLimitBegin(), topPmsRoomOrderQuery.getLimitEen());
+        List<PmsRoomOrder> pmsRoomOrderList = pmsRoomOrderDao.getPmsRoomOrderByCheckInTime(topPmsRoomOrderQuery.getYesterdayStr(),
+                topPmsRoomOrderQuery.getTodayStr(),topPmsRoomOrderQuery.getLimitBegin(), topPmsRoomOrderQuery.getLimitEen());
+        if(CollectionUtils.isEmpty(pmsRoomOrderList)){
+            return topPmsRoomOrderQuery.getPmsRoomOrderList();
+        }
         for(PmsRoomOrder pmsRoomOrder : pmsRoomOrderList){
             if(topPmsRoomOrderQuery.getPmsRoomOrderList().size() >= topPmsRoomOrderQuery.getCount()){
                 return topPmsRoomOrderQuery.getPmsRoomOrderList();
             }
-            BigDecimal orderId =  pmsRoomOrder.getBigDecimal("orderId");
-            Integer invalidreason = pmsRoomOrder.getInt("Invalidreason");
-            Date checkinTime = pmsRoomOrder.getDate("checkintime");
-            Date checkouttime = pmsRoomOrder.getDate("checkouttime");
-            if(invalidreason == 101){
+            Integer invalidReason = pmsRoomOrder.getInt("Invalidreason");
+            if(Integer.valueOf(OtaFreqTrvEnum.CHECKIN_THAN4.getId()) == invalidReason){
                 topPmsRoomOrderQuery.getPmsRoomOrderList().add(pmsRoomOrder);
-                continue;
             }
-            if(DateUtils.diffSecond(checkinTime, checkouttime) > 30 * 60){
-                continue;
-            }
-
         }
         if(topPmsRoomOrderQuery.getPmsRoomOrderList().size() >= topPmsRoomOrderQuery.getCount()){
             return topPmsRoomOrderQuery.getPmsRoomOrderList();
         }
+        topPmsRoomOrderQuery.setLimitBegin(topPmsRoomOrderQuery.getLimitEen() + topPmsRoomOrderQuery.getBasePageSize() +1);
         return getTopPmsRoomOrder(topPmsRoomOrderQuery);
     }
 

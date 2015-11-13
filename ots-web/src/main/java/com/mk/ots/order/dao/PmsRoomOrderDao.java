@@ -17,8 +17,8 @@ public class PmsRoomOrderDao {
 		return PmsRoomOrder.dao.findFirst("select bp.* from b_pmsroomorder bp, b_otaorder bo, b_otaroomorder bor where bo.id = ? and bo.id = bor.otaorderid and bor.hotelid = bp.hotelid and bor.pmsroomorderno = bp.pmsroomorderno", otaorderid);
 	}
 
-	public List<PmsRoomOrder> getPmsRoomOrderByCheckInTime(String checkInBeginTime, String checkInEndTime, Long limtBegin, Long limtEnd){
-		return PmsRoomOrder.dao.find("select bo.id as orderId,bp.* from b_pmsroomorder bp, b_otaorder bo, b_otaroomorder bor where bp.checkintime >= ? and bp.checkintime < ? and bo.id = bor.otaorderid and bor.hotelid = bp.hotelid and bor.pmsroomorderno = bp.pmsroomorderno and bo.orderstatus in (180, 190, 200) order by bp.checkintime, bp.id limit ?, ?",
-				checkInBeginTime, checkInEndTime, limtBegin, limtEnd);
+	public List<PmsRoomOrder> getPmsRoomOrderByCheckInTime(String checkInBeginTime, String checkInEndTime, Integer limitBegin, Integer limitEnd){
+		return PmsRoomOrder.dao.find("select bo.id as orderId,bo.cityCode,bo.Invalidreason ,bo.Ordertype from b_pmsroomorder bp, b_otaorder bo, b_otaroomorder bor where bp.checkintime >= ? and bp.checkintime < ? and bo.id = bor.otaorderid and bor.hotelid = bp.hotelid and bor.pmsroomorderno = bp.pmsroomorderno and bo.orderstatus in (180, 190, 200) and bo.spreadUser =-1 order by bp.checkintime, bp.id limit ?, ?",
+				checkInBeginTime, checkInEndTime, limitBegin, limitEnd);
 	}
 }

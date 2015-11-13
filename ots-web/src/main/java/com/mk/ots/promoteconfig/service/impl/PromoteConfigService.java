@@ -17,6 +17,11 @@ public class PromoteConfigService implements IPromoteConfigService {
     @Autowired
     private CityService cityService;
 
+    /**
+     * 根据几线城市查询配置信息
+     * @param cityLevel 1：一线城市 2：2线城市 3：3线城市
+     * @return
+     */
     public TPromoteConfig queryByCityLevel(Integer cityLevel) {
         return this.promoteConfigMapper.queryByCityLevel(cityLevel);
     }
@@ -40,6 +45,11 @@ public class PromoteConfigService implements IPromoteConfigService {
         return config;
     }
 
+    /**
+     * 在线支付返酒店老板金额
+     * @param cityCode
+     * @return
+     */
     public BigDecimal queryOnlineGiveHotel(String cityCode) {
         TPromoteConfig config = this.queryGiveHotel(cityCode);
         if (null == config) {
@@ -48,6 +58,12 @@ public class PromoteConfigService implements IPromoteConfigService {
             return config.getOnlineGiveHotel();
         }
     }
+
+    /**
+     * 到付返酒店老板金额
+     * @param cityCode
+     * @return
+     */
     public BigDecimal queryOfflineGiveHotel(String cityCode) {
         TPromoteConfig config = this.queryGiveHotel(cityCode);
         if (null == config) {
