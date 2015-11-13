@@ -28,6 +28,7 @@ import com.mk.ots.order.service.OrderService;
 import com.mk.ots.promo.model.BPromotionPrice;
 import com.mk.ots.promo.service.IPromoService;
 import com.mk.ots.promo.service.IPromotionPriceService;
+import com.mk.ots.ticket.model.BPrize;
 import com.mk.ots.ticket.model.BPrizeInfo;
 import com.mk.ots.ticket.model.TicketInfo;
 import com.mk.ots.ticket.service.*;
@@ -884,6 +885,22 @@ public class TicketController {
 		iTicketService.checkReceivePrizeByPhone(phone,Long.parseLong(activeid),OSTypeEnum.H.getId(), DateUtils.getDate());
 		//如果该手机已经是眯客用户就直接绑定，如果不是眯客用户，就下次他登录(注册)时候绑定
 		iTicketService.prizeBindingUser(phone,prizerecordid);
+		Map<String,Object> rtnMap = Maps.newHashMap();
+		rtnMap.put("success", true);
+		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+	}
+	/**
+	 * 根据记录id将查询到的记录插入手机号,更新奖品记录状态
+	 * @param prizerecordid
+	 * @param phone 活动id
+	 * @return ResponseEntity
+	 */
+	@RequestMapping("/cq/init")
+	public ResponseEntity<Map<String, Object>> init(){
+		logger.info("init cq kickegg ");
+
+		// 在 b_price 添加奖品
+
 		Map<String,Object> rtnMap = Maps.newHashMap();
 		rtnMap.put("success", true);
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
