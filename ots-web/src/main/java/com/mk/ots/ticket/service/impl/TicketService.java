@@ -242,7 +242,7 @@ public class TicketService implements ITicketService{
 
 			if (info.getType() == PromotionTypeEnum.shoudan.getId()) {
 				if(!org.apache.commons.lang3.StringUtils.isEmpty(tHotelModel.getCitycode())){
-					m.put("promotionId",info.getId());
+					m.put("activityId",info.getActivityid());
 					List<BPromotionCity>   promotionCityList = tPromotionCityMapper.findPromotionCityByCityCode(m);
 					logger.info("method [filterLimitArea]  parme : promotionCityList: {}, mid: {}...",promotionCityList ,tHotelModel);
 					if(CollectionUtils.isEmpty(promotionCityList)){
