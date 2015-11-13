@@ -932,12 +932,85 @@ public class TicketController {
 
 			}
 			List<BPrizeInfo>  bPrizeInfoList = this.iTicketService.queryMyHistoryPrize(member.getId(), Long.parseLong(activeid));
-			prizeInfoLists.addAll(bPrizeInfoList);
+			for (BPrizeInfo bPrizeInfo: bPrizeInfoList){
+				BPrizeInfo tmpPrizeinfo = new BPrizeInfo();
+				tmpPrizeinfo.setName(bPrizeInfo.getName());
+				tmpPrizeinfo.setCode(bPrizeInfo.getCode());
+				tmpPrizeinfo.setMerchantid(bPrizeInfo.getMerchantid());
+				try{
+					Date tmpBeginDate = DateUtils.getDateFromString(bPrizeInfo.getBegintime(), "yyMMddHHmmssSSS");
+					String tmpBgTime = DateUtils.getStringFromDate(tmpBeginDate, DateUtils.FORMAT_DATE);
+					tmpPrizeinfo.setBegintime(tmpBgTime);
+				}catch (Exception e){
+					tmpPrizeinfo.setBegintime(bPrizeInfo.getBegintime());
+				}
+
+				try{
+					Date tmpEndDate = DateUtils.getDateFromString(bPrizeInfo.getEndtime(), "yyMMddHHmmssSSS");
+					String tmpEdTime = DateUtils.getStringFromDate(tmpEndDate, DateUtils.FORMAT_DATE);
+					tmpPrizeinfo.setEndtime(tmpEdTime);
+				}catch (Exception e){
+					tmpPrizeinfo.setEndtime(bPrizeInfo.getEndtime());
+				}
+
+				try{
+					Date tmpCreateDate = DateUtils.getDateFromString(bPrizeInfo.getCreatetime(), "yyMMddHHmmssSSS");
+					String tmpCreateTime = DateUtils.getStringFromDate(tmpCreateDate, DateUtils.FORMAT_DATE);
+					tmpPrizeinfo.setCreatetime(tmpCreateTime);
+				}catch (Exception e){
+					tmpPrizeinfo.setCreatetime(bPrizeInfo.getCreatetime());
+				}
+
+				tmpPrizeinfo.setId(bPrizeInfo.getId());
+				tmpPrizeinfo.setPrice(bPrizeInfo.getPrice());
+				tmpPrizeinfo.setPrizeRecordId(bPrizeInfo.getPrizeRecordId());
+				tmpPrizeinfo.setType(bPrizeInfo.getType());
+				tmpPrizeinfo.setUrl(bPrizeInfo.getUrl());
+
+				prizeInfoLists.add(tmpPrizeinfo);
+			}
+
 		}
 
 		if (StringUtils.isNotBlank(usermark)){
 			List<BPrizeInfo>  bPrizeInfoList =  this.iTicketService.queryMyNotreceiveyPrize(Long.parseLong(activeid),usermark);
-			prizeInfoLists.addAll(bPrizeInfoList);
+			for (BPrizeInfo bPrizeInfo: bPrizeInfoList){
+				BPrizeInfo tmpPrizeinfo = new BPrizeInfo();
+				tmpPrizeinfo.setName(bPrizeInfo.getName());
+				tmpPrizeinfo.setCode(bPrizeInfo.getCode());
+				tmpPrizeinfo.setMerchantid(bPrizeInfo.getMerchantid());
+				try{
+					Date tmpBeginDate = DateUtils.getDateFromString(bPrizeInfo.getBegintime());
+					String tmpBgTime = DateUtils.getStringFromDate(tmpBeginDate, DateUtils.FORMAT_DATE);
+					tmpPrizeinfo.setBegintime(tmpBgTime);
+				}catch (Exception e){
+					tmpPrizeinfo.setBegintime(bPrizeInfo.getBegintime());
+				}
+
+				try{
+					Date tmpEndDate = DateUtils.getDateFromString(bPrizeInfo.getEndtime());
+					String tmpEdTime = DateUtils.getStringFromDate(tmpEndDate, DateUtils.FORMAT_DATE);
+					tmpPrizeinfo.setEndtime(tmpEdTime);
+				}catch (Exception e){
+					tmpPrizeinfo.setEndtime(bPrizeInfo.getEndtime());
+				}
+
+				try{
+					Date tmpCreateDate = DateUtils.getDateFromString(bPrizeInfo.getCreatetime());
+					String tmpCreateTime = DateUtils.getStringFromDate(tmpCreateDate, DateUtils.FORMAT_DATE);
+					tmpPrizeinfo.setCreatetime(tmpCreateTime);
+				}catch (Exception e){
+					tmpPrizeinfo.setCreatetime(bPrizeInfo.getCreatetime());
+				}
+
+				tmpPrizeinfo.setId(bPrizeInfo.getId());
+				tmpPrizeinfo.setPrice(bPrizeInfo.getPrice());
+				tmpPrizeinfo.setPrizeRecordId(bPrizeInfo.getPrizeRecordId());
+				tmpPrizeinfo.setType(bPrizeInfo.getType());
+				tmpPrizeinfo.setUrl(bPrizeInfo.getUrl());
+
+				prizeInfoLists.add(tmpPrizeinfo);
+			}
 		}
 
 		logger.info("返回优惠券集合个数prizeInfoLists.size:{}",prizeInfoLists.size());
