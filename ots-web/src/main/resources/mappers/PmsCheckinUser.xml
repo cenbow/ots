@@ -2,13 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.mk.ots.mapper.PmsCheckinUserMapper" >
 
-  <select id="getCardId" parameterType="java.lang.Long" resultType="java.lang.String">
-  		select ck.cardid from
+  <select id="getCheckUserByOrderId" parameterType="java.lang.Long" resultType="java.util.Map">
+  		select ck.* from
   		b_otaorder ord ,b_otaroomorder roomorder,b_pms_checkinuser ck
   		where ord.id = roomorder.OtaOrderId
         and ck.pmsRoomOrderNo = roomorder.PMSRoomOrderNo and ck.HotelId = roomorder.HotelId
-        and ord.OrderStatus in (180,190,200)
         and ord.id = #{otaOrderId}
+        order by ck.id desc
   </select>
 
   <select id="getCardCountByCardId" parameterType="java.lang.String" resultType="java.lang.Long">

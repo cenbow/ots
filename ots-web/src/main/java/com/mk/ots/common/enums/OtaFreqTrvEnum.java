@@ -13,12 +13,11 @@ public enum OtaFreqTrvEnum {
 	DEVICE_NUM_NOT_FIRST("30","设备号不是第一次使用"),
 
 	CARD_ID_IS_NULL("40","身份证号为空"),
+	CARD_ID_IS_NOT_PMS_SCAN("41","身份证号不为PMS扫描"),
 	CARD_ID_NOT_FIRST("50","身份证号不是第一次使用"),
 	ZHIFU_NOT_FIRST("70","支付账号不是第一次使用"),
-	LOCATION_IS_NULL("80","下单位置为空"),
 	OUT_OF_RANG("90","下单位置不在酒店1公里范围内"),
 	CHECKIN_LESS4("100","入住4小时内"),
-	CHECKIN_THAN4("101","入住大于4小时"),
 	OVER_RANG("110","结算超出定额"),
 	NOT_CHECKIN("120","未入住"),
 	L1("-1", "无原因");

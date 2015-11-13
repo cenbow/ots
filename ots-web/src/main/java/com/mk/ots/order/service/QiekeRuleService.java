@@ -1,10 +1,7 @@
 package com.mk.ots.order.service;
 
 import com.google.common.base.Optional;
-import com.mk.ots.common.enums.OrderMethodEnum;
-import com.mk.ots.common.enums.OrderTypeEnum;
-import com.mk.ots.common.enums.OtaFreqTrvEnum;
-import com.mk.ots.common.enums.OtaOrderStatusEnum;
+import com.mk.ots.common.enums.*;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.common.utils.SearchConst;
@@ -27,6 +24,7 @@ import com.mk.ots.pay.model.PPay;
 import com.mk.ots.pay.service.IPayService;
 import com.mk.ots.promoteconfig.service.impl.PromoteConfigService;
 import com.mk.ots.utils.DistanceUtil;
+import com.mk.pms.myenum.PmsCheckInTypeEnum;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -266,22 +264,41 @@ public class QiekeRuleService {
      * @return
      */
     public OtaFreqTrvEnum checkIdentityCard(OtaOrder otaOrder){
-        List<String> cardIdList = pmsCheckinUserMapper.getCardId(otaOrder.getId());
+        logger.info(String.format("checkIdentityCard begin"));
+        List<Map> cardIdList = pmsCheckinUserMapper.getCheckUserByOrderId(otaOrder.getId());
         if(CollectionUtils.isEmpty(cardIdList)){
+            logger.info(String.format("checkIdentityCard getCardId params otaOrder id[%s]", otaOrder.getId()));
             return OtaFreqTrvEnum.CARD_ID_IS_NULL;
         }
         String cardId = "";
-        for(String org : cardIdList){
-            if(StringUtils.isNotEmpty(org)){
-                cardId = org;
+        Integer isScan = null;
+        for(Map map : cardIdList){
+            String cardType = null;
+            if(map.get("cardType") != null){
+                cardType = (String)map.get("cardType");
+            }
+            if(!CardTypeEnum.shenfenzheng.getId().equals(cardType)){
+                break;
+            }
+            if(map.get("cardid") != null){
+                cardId = (String)map.get("cardid");
+            }
+            if (map.get("isScan") != null){
+                isScan = (Integer)map.get("isscan");
+            }
+            if(StringUtils.isNotEmpty(cardId)){
+                logger.info(String.format("checkIdentityCard getCardId cardId[%s]", cardId));
                 break;
             }
         }
         if(StringUtils.isEmpty(cardId)){
-            return OtaFreqTrvEnum.CARD_ID_NOT_FIRST;
+            return OtaFreqTrvEnum.CARD_ID_IS_NULL;
+        }
+        if(PmsCheckInTypeEnum.PMS.getCode() == isScan){
+            return OtaFreqTrvEnum.CARD_ID_IS_NOT_PMS_SCAN;
         }
         Long cardCount = pmsCheckinUserMapper.getCardCountByCardId(otaOrder.getId(), cardId);
-        if(cardCount > 1){
+        if(cardCount >= 1){
             return OtaFreqTrvEnum.CARD_ID_NOT_FIRST;
         }
         return OtaFreqTrvEnum.L1;
@@ -376,9 +393,9 @@ public class QiekeRuleService {
         String yesterdayStr = DateUtils.formatDateTime(DateUtils.addDays(now, -1), DateUtils.FORMAT_DATE);
         String todayStr =  DateUtils.formatDateTime(now, DateUtils.FORMAT_DATE);
         //将符合入住时间大于四个小时订单打上标记
-        Integer updateCheckInStatusInvalidReasonNum = orderMapper.updateCheckInStatusInvalidReason(yesterdayStr, todayStr, OtaFreqTrvEnum.CHECKIN_THAN4.getId());
+        Integer updateCheckInStatusInvalidReasonNum = orderMapper.updateCheckInStatusInvalidReason(yesterdayStr, todayStr, OtaFreqTrvEnum.OVER_RANG.getId());
         logger.info(String.format("updateTopInvalidReason updateTopInvalidReason num[%s]", updateCheckInStatusInvalidReasonNum));
-        Integer updateAccountAndCheckOutStatusInvalidReasonNum = orderMapper.updateAccountAndCheckOutStatusInvalidReason(yesterdayStr, todayStr, OtaFreqTrvEnum.CHECKIN_THAN4.getId());
+        Integer updateAccountAndCheckOutStatusInvalidReasonNum = orderMapper.updateAccountAndCheckOutStatusInvalidReason(yesterdayStr, todayStr, OtaFreqTrvEnum.OVER_RANG.getId());
         logger.info(String.format("updateTopInvalidReason updateAccountAndCheckOutStatusInvalidReasonNum num[%s]", updateAccountAndCheckOutStatusInvalidReasonNum));
         //更新切克收益
         updateQieKeIncome(yesterdayStr, todayStr);
@@ -433,7 +450,7 @@ public class QiekeRuleService {
                 return topPmsRoomOrderQuery.getPmsRoomOrderList();
             }
             Integer invalidReason = pmsRoomOrder.getInt("Invalidreason");
-            if(Integer.valueOf(OtaFreqTrvEnum.CHECKIN_THAN4.getId()) == invalidReason){
+            if(Integer.valueOf(OtaFreqTrvEnum.OVER_RANG.getId()) == invalidReason){
                 topPmsRoomOrderQuery.getPmsRoomOrderList().add(pmsRoomOrder);
             }
         }
