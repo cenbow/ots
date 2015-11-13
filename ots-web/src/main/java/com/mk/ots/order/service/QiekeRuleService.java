@@ -348,15 +348,15 @@ public class QiekeRuleService {
      */
     public OtaFreqTrvEnum checkUserAdders(OtaOrder otaOrder){
         THotelModel tHotelModel = tHotelMapper.selectById(otaOrder.getHotelId());
-        Double userlongitude = otaOrder.getBigDecimal("userlongitude").doubleValue();
-        Double userlatitude = otaOrder.getBigDecimal("userlatitude").doubleValue();
+        BigDecimal userlongitude = otaOrder.getBigDecimal("userlongitude");
+        BigDecimal userlatitude = otaOrder.getBigDecimal("userlatitude");
         if(userlatitude == null || userlongitude == null) {
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }
         if (tHotelModel.getLatitude() == null || tHotelModel.getLongitude() == null){
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }
-        double distance = DistanceUtil.distance(tHotelModel.getLongitude().doubleValue(), tHotelModel.getLatitude().doubleValue(), userlongitude, userlatitude);
+        double distance = DistanceUtil.distance(tHotelModel.getLongitude().doubleValue(), tHotelModel.getLatitude().doubleValue(), userlongitude.doubleValue(), userlatitude.doubleValue());
         if(distance > SearchConst.SEARCH_RANGE_1_KM){
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }
