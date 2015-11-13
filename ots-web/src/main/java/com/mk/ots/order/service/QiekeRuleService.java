@@ -442,11 +442,11 @@ public class QiekeRuleService {
         String generalName = String.format("新用户优惠券", general);
 
         List<Long> appPromoList = promoService.genCGTicketByPrice(
-                101, mid, appName, "限制在线支付app使用", appOnly, PlatformTypeEnum.APP.getId());
+                110, mid, appName, "限制在线支付app使用", appOnly, PlatformTypeEnum.APP.getId());
         result.addAll(appPromoList);
 
         List<Long> generalPromoList = promoService.genCGTicketByPrice(
-                101,mid,generalName,"限制在线支付使用",general,PlatformTypeEnum.ALL.getId());
+                110,mid,generalName,"限制在线支付使用",general,PlatformTypeEnum.ALL.getId());
         result.addAll(generalPromoList);
         return result;
     }
