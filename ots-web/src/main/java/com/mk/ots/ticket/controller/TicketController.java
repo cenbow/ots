@@ -35,6 +35,7 @@ import com.mk.ots.ticket.model.TicketInfo;
 import com.mk.ots.ticket.service.*;
 import jodd.util.StringUtil;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.base.Strings;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
@@ -909,5 +910,40 @@ public class TicketController {
 	}
 
 
+	/**
+	 * 查询领取的中奖结果
+	 * @param token 用户token
+	 * @param activeid 活动id
+	 * @return ResponseEntity
+	 */
+	@RequestMapping("/queryallluck")
+	public ResponseEntity<Map<String, Object>> querylucky(String token, String activeid,String usermark){
+		logger.info("传来参数token:{},activeid:{}, usermark:{}",token,activeid, usermark);
+		//1. 参数校验
 
+		if(Strings.isNullOrEmpty(activeid)){
+			throw MyErrorEnum.errorParm.getMyException("活动id不能为空.");
+		}
+		List<BPrizeInfo> prizeInfoLists = new ArrayList<>();
+		//2. 业务校验
+		if (StringUtils.isNoneBlank(token)){
+			UMember member = MyTokenUtils.getMemberByToken(token);
+			if(member==null){
+
+			}
+			List<BPrizeInfo>  bPrizeInfoList = this.iTicketService.queryMyHistoryPrize(member.getId(), Long.parseLong(activeid));
+			prizeInfoLists.addAll(bPrizeInfoList);
+		}
+
+		if (StringUtils.isNotBlank(usermark)){
+			List<BPrizeInfo>  bPrizeInfoList =  this.iTicketService.queryMyNotreceiveyPrize(Long.parseLong(activeid),usermark);
+			prizeInfoLists.addAll(bPrizeInfoList);
+		}
+
+		logger.info("返回优惠券集合个数prizeInfoLists.size:{}",prizeInfoLists.size());
+		Map<String,Object> rtnMap = Maps.newHashMap();
+		rtnMap.put("success", true);
+		rtnMap.put("lucklist", prizeInfoLists);
+		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+	}
 }
