@@ -242,15 +242,15 @@ public class AppController {
 	 *            微信用户昵称 非必填
 	 * @param comefrom
 	 *            来源人id 非必填
-	 * @return    2015年11月13日13:52:35 invitationcode新加邀请码
+	 * @return
 	 */
 	@RequestMapping("/unionidandphone/binding")
 	public ResponseEntity<Map<String, Object>> binding(String unionid,
 			String phone, String sysno, String devicetype, String marketsource,
 			String appversion, String ostype, String osver, String weixinname,
-			String comefrom, String comefromtype, Long hotelid, String channelid, String citycode,String invitationcode) {
-		logger.info("/unionidandphone/binding...  unionid:{} phone:{} sysno:{} devicetype:{} marketsource:{} appversion:{} ostype:{} osver:{} weixinname:{} comefrom:{} comefromtype:{} hotelid:{} channelid:{} citycode:{} invitationcod:{}",
-				unionid, phone,  sysno,  devicetype,  marketsource,appversion,  ostype,  osver,  weixinname, comefrom,  comefromtype,  hotelid,  channelid ,citycode,invitationcode
+			String comefrom, String comefromtype, Long hotelid, String channelid, String citycode) {
+		logger.info("/unionidandphone/binding...  unionid:{} phone:{} sysno:{} devicetype:{} marketsource:{} appversion:{} ostype:{} osver:{} weixinname:{} comefrom:{} comefromtype:{} hotelid:{} channelid:{} citycode:{}",
+				unionid, phone,  sysno,  devicetype,  marketsource,appversion,  ostype,  osver,  weixinname, comefrom,  comefromtype,  hotelid,  channelid ,citycode
 				);
 		
 		String checkerrortype = ""; // 绑定失败的原因，1、unionid已被其他手机号绑定，2、手机号已被其他unionid绑定
@@ -305,11 +305,7 @@ public class AppController {
 			regMem.setOstype(ostype);
 			regMem.setRegostype(ostype);
 			regMem.setOsver(osver);
-            if (StringUtils.isEmpty(invitationcode)){
-                regMem.setComefrom(comefrom);
-            } else{
-                regMem.setComefrom(invitationcode);
-            }
+            regMem.setComefrom(comefrom);
 			regMem.setComefromtype(comefromtype);
 			regMem.setHotelid(hotelid);
 			regMem.setCitycode(citycode);
