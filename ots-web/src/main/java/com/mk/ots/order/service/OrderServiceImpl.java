@@ -2827,6 +2827,7 @@ public class OrderServiceImpl implements OrderService {
         if(qiekeRuleService.isOrderQiekeRuleCity(otaorder)){
             OtaFreqTrvEnum otaFreqTrvEnum = qiekeRuleService.getQiekeRuleReason(otaorder);
             if(otaFreqTrvEnum == null || OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+                otaorder.set("spreadUser", Constant.QIE_KE_SPREAD_USER);
                 otaorder.set("Invalidreason", otaFreqTrvEnum.CHECKIN_LESS4.getId());
             }else {
                 otaorder.set("Invalidreason", otaFreqTrvEnum.getId());

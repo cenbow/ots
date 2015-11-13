@@ -53,6 +53,7 @@
                 <ref bean="confirmedPayingOrderTrigger"/>
                 <ref bean="payStatusErrorOrderTrigger"/>
 				<ref bean="billPromoOrdersTrigger"/>
+				<ref bean="qieKeRuleTrigger"/>
                 <!--  暂时停掉  -->
                 <!--<ref bean="SendTicketJobTrigger"/>-->
 			</list>
@@ -136,6 +137,16 @@
 	<bean id="billOrdersJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
 		<property name="name" value="billOrderJob" />
 		<property name="jobClassName" value="com.mk.ots.job.BillOrdersJob" />
+	</bean>
+
+
+	<bean id="qieKeRuleTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="qieKeRuleJobDetail" />
+		<property name="cronExpression" value="0 30 2 * * ?" />
+	</bean>
+	<bean id="qieKeRuleJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="qieKeRuleJob" />
+		<property name="jobClassName" value="com.mk.ots.job.QieKeRuleJob" />
 	</bean>
 
 	<!-- Day-of-Week(每周)：可以用数字1-7表示（1 ＝ 星期日） 每周一的4点10分开始 酒店结算的特价订单数据-->

@@ -1,3 +1,4 @@
+ALTER TABLE b_pms_checkinuser ADD INDEX idx_checkinuser_cardid (cardid);
 
 ALTER TABLE `b_otaorder`
 MODIFY COLUMN `Invalidreason`  int(3) NULL DEFAULT NULL COMMENT '拉新作废原因';
@@ -23,7 +24,9 @@ UPDATE `t_city` SET LEVEL=1 WHERE querycityname IN ('北京市',
 '福州市',
 '乌鲁木齐市',
 '海口市',
-'东莞市');
+'东莞市',
+'长沙市',
+'洛阳市');
 
 UPDATE `t_city` SET LEVEL=2 WHERE querycityname IN ('漯河市',
 '景德镇市',
@@ -66,7 +69,6 @@ UPDATE `t_city` SET LEVEL=2 WHERE querycityname IN ('漯河市',
 '石家庄市',
 '厦门市',
 '太原市',
-'长沙市',
 '哈尔滨市',
 '烟台市',
 '宁波市',
@@ -80,7 +82,6 @@ UPDATE `t_city` SET LEVEL=2 WHERE querycityname IN ('漯河市',
 '徐州市',
 '临沂市',
 '威海市',
-'洛阳市',
 '常州市',
 '中山市',
 '银川市',
