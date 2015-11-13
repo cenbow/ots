@@ -1,5 +1,7 @@
 ALTER TABLE b_pms_checkinuser ADD INDEX idx_checkinuser_cardid (cardid);
 
+alter table b_pms_checkinuser add column isscan int(1) NULL COMMENT '是否ｐｍｓ扫描：1扫描  0非扫描';
+
 ALTER TABLE `b_otaorder`
 MODIFY COLUMN `Invalidreason`  int(3) NULL DEFAULT NULL COMMENT '拉新作废原因';
 
