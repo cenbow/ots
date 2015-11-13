@@ -795,9 +795,14 @@ public class PromoService implements IPromoService {
                         if (bps==null) {
                             throw MyErrorEnum.customError.getMyException("奖品已被领取完了！");
                         }
-                        bps.setStatus(PrizeStatusEnum.received.getId());//0为未使用状态；1为已领取状态；2为已使用状态
-                        bPrizeStockDao.saveOrUpdate(bps);
-                        logger.info("更新第三方券"+bps.getId()+"为使用状态！");
+                        if (bp.getNum() == -1){
+                            logger.info("第三方券是无限领取"+bps.getId()+"使用状态！");
+                        }else{
+                            bps.setStatus(PrizeStatusEnum.received.getId());//0为未使用状态；1为已领取状态；2为已使用状态
+                            bPrizeStockDao.saveOrUpdate(bps);
+                            logger.info("更新第三方券"+bps.getId()+"为使用状态！");
+                        }
+
 
                         BPrizeInfo bpi=new BPrizeInfo();
                         bpi.setCode(bps.getCode());

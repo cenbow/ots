@@ -9,6 +9,7 @@ import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.util.MyTokenUtils;
 import com.mk.framework.util.ValidateUtils;
+import com.mk.ots.activity.dao.impl.BActivityDao;
 import com.mk.ots.activity.model.BActiveChannel;
 import com.mk.ots.activity.model.BActivity;
 import com.mk.ots.activity.service.IBActiveCDKeyService;
@@ -28,8 +29,10 @@ import com.mk.ots.order.service.OrderService;
 import com.mk.ots.promo.model.BPromotionPrice;
 import com.mk.ots.promo.service.IPromoService;
 import com.mk.ots.promo.service.IPromotionPriceService;
+import com.mk.ots.ticket.dao.BPrizeStockDao;
 import com.mk.ots.ticket.model.BPrize;
 import com.mk.ots.ticket.model.BPrizeInfo;
+import com.mk.ots.ticket.model.BPrizeStock;
 import com.mk.ots.ticket.model.TicketInfo;
 import com.mk.ots.ticket.service.*;
 import jodd.util.StringUtil;
@@ -101,6 +104,8 @@ public class TicketController {
 	private IBPrizeStockService ibPrizeStockService;
 	@Autowired
 	private IBPrizeService ibPrizeService;
+	@Autowired
+	private BActivityDao bActivityDao;
 	
 	/**
 	 * 查询优惠券接口
@@ -629,7 +634,7 @@ public class TicketController {
 			throw MyErrorEnum.errorParm.getMyException("该设备类型不允许访问.");
 		}
 		//1.2.2 活动校验
-		BActivity bActivity =  ibActivityService.findById(Long.parseLong(activeid));
+		BActivity bActivity =  bActivityDao.findById(Long.parseLong(activeid));
 		if(bActivity == null){
 			throw MyErrorEnum.IllegalActive.getMyException();
 		}
@@ -889,20 +894,5 @@ public class TicketController {
 		rtnMap.put("success", true);
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
-	/**
-	 * 根据记录id将查询到的记录插入手机号,更新奖品记录状态
-	 * @param prizerecordid
-	 * @param phone 活动id
-	 * @return ResponseEntity
-	 */
-	@RequestMapping("/cq/init")
-	public ResponseEntity<Map<String, Object>> init(){
-		logger.info("init cq kickegg ");
 
-		// 在 b_price 添加奖品
-
-		Map<String,Object> rtnMap = Maps.newHashMap();
-		rtnMap.put("success", true);
-		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
-	}
 }
