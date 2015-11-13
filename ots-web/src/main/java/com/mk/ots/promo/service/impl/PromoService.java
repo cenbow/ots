@@ -710,19 +710,19 @@ public class PromoService implements IPromoService {
             }
 
             List<BPrize> proList = this.iBPrizeDao.findBPrizeByActiveid(activeid, isExcludeMaterialObject);
-            //查询第三方库存，确保prize表定义券数目与库存一致
-            if (CollectionUtils.isNotEmpty(proList)) {
-                for (BPrize bPrize : proList) {
-                    if (PrizeTypeEnum.thirdparty.getId().equals(bPrize.getType())) {
-                        Long actNum=bPrizeStockDao.findStockCountByPrizeIDAndStatus(bPrize.getId(), 0l);
-                        if (bPrize.getNum()!=actNum) {
-                            bPrize.setNum(actNum);
-                            this.iBPrizeDao.saveOrUpdate(bPrize);
-                            logger.info("奖品id为"+bPrize.getId()+"定义奖品数目与库存表不一致，现更新为库存值："+actNum);
-                        }
-                    }
-                }
-            }
+//            //查询第三方库存，确保prize表定义券数目与库存一致
+//            if (CollectionUtils.isNotEmpty(proList)) {
+//                for (BPrize bPrize : proList) {
+//                    if (PrizeTypeEnum.thirdparty.getId().equals(bPrize.getType())) {
+//                        Long actNum=bPrizeStockDao.findStockCountByPrizeIDAndStatus(bPrize.getId(), 0l);
+//                        if (bPrize.getNum()!=actNum) {
+//                            bPrize.setNum(actNum);
+//                            this.iBPrizeDao.saveOrUpdate(bPrize);
+//                            logger.info("奖品id为"+bPrize.getId()+"定义奖品数目与库存表不一致，现更新为库存值："+actNum);
+//                        }
+//                    }
+//                }
+//            }
             logger.info(">>>根据活动发放优惠券----------------------//1. 查询活动对应的优惠券定义 {}", proList);
 
             if (PromotionGenTypeEnum.PRIZERANDOM.equals(bActivity.getGentype())) {
@@ -864,7 +864,10 @@ public class PromoService implements IPromoService {
                         Long numLong=bp.getNum();
                         if (numLong>=1) {
                             bp.setNum(--numLong);
-                        }else {
+                        }else if (numLong == -1){
+                            logger.info("第三方无限领取："+uPrizeRecord.getId());
+                        }
+                        else {
                             throw MyErrorEnum.customError.getMyException("该类型奖品已发放完毕，无剩余库存！");
                         }
                         iBPrizeDao.saveOrUpdate(bp);

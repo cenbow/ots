@@ -30,10 +30,7 @@ import com.mk.ots.order.service.OrderService;
 import com.mk.ots.promo.model.BPromotionPrice;
 import com.mk.ots.promo.service.IPromoService;
 import com.mk.ots.promo.service.IPromotionPriceService;
-import com.mk.ots.ticket.dao.BPrizeStockDao;
-import com.mk.ots.ticket.model.BPrize;
 import com.mk.ots.ticket.model.BPrizeInfo;
-import com.mk.ots.ticket.model.BPrizeStock;
 import com.mk.ots.ticket.model.TicketInfo;
 import com.mk.ots.ticket.service.*;
 import jodd.util.StringUtil;
@@ -510,7 +507,8 @@ public class TicketController {
 	 */
 	@RequestMapping("/tryluck")
 	public ResponseEntity<Map<String, Object>> tryluck(String token, String activeid,String ostype){
-		
+
+		Cat.logEvent("tryluckrequest",activeid,ostype,token);
 		//1. 参数校验
 		//1.1  基本校验
 		if(Strings.isNullOrEmpty(activeid)){
@@ -612,6 +610,11 @@ public class TicketController {
 			}
 		}
 		boolean trueOrFalse = (tickets!=null && tickets.size()>0) || (prizeInfo!=null && prizeInfo.size()>0) ;
+		if (trueOrFalse){
+			Cat.logEvent("KickEggFromMike",member.getLoginname(),"SUCCESS",prizeInfo.toString());
+		}else {
+			Cat.logEvent("KickEggFromMike",member.getLoginname(),"FAILED",prizeInfo.toString());
+		}
 		rtnMap.put("success", trueOrFalse);
 		rtnMap.put("tickets", tickets);
 		rtnMap.put("others", prizeInfo);
