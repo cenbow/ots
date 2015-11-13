@@ -660,7 +660,7 @@ public class OrderController {
 			roomOrder.set("contactsweixin", StringUtils.isNotBlank(contactsWeixin) ? contactsWeixin : "");
 			roomOrder.set("note", StringUtils.isNotBlank(note) ? note : "");
 			roomOrder.set("ordermethod", order.getOrderMethod());
-			List<OtaCheckInUser> inUsers = this.orderService.getInUsersByJson(checkInUser);
+			List<OtaCheckInUser> inUsers = this.orderService.getInUsersByJson(null,checkInUser);
 			roomOrder.put("UserList", inUsers);
 			roomOrderList.add(roomOrder);
 			order.put("roomorderlist", roomOrderList);

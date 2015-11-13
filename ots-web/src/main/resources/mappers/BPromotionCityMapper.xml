@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.mapper.TPromotionCityMapper">
+
+  <select id="findCityCodeByPromotionId"  parameterType="java.lang.Long"  resultType="java.lang.String">
+    select 
+      cityCode
+      from  b_promotion_city a
+        where promotionId = #{promotionId};
+  </select>
+
+  <select id="findPromotionCityByCityCode"  parameterType="java.util.Map"  resultType="com.mk.ots.ticket.model.BPromotionCity">
+    select
+     *
+    from  b_promotion_city a
+    where 1=1
+    <if test="cityCode != null">
+      and ( a.cityCode = #{cityCode} or   a.cityCode = '-1'  )
+    </if>
+    <if test="promotionId != null">
+      and a.promotionId = #{promotionId}
+    </if>
+    <if test="activityId != null">
+      and a.activityId = #{activityId}
+    </if>
+  </select>
+
+
+</mapper>
