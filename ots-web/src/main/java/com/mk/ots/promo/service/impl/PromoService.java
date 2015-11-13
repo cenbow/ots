@@ -16,6 +16,7 @@ import com.mk.ots.activity.model.BActiveChannel;
 import com.mk.ots.activity.model.BActivity;
 import com.mk.ots.activity.model.PromotionGenTypeEnum;
 import com.mk.ots.common.enums.*;
+import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.member.dao.IUPromotionLogDao;
 import com.mk.ots.member.model.UMember;
@@ -693,7 +694,7 @@ public class PromoService implements IPromoService {
                 //第三方平台判断用户是否抽过奖
                 long count =iuPrizeRecordService.checkLuckChanceByUserMark(usermark, activeid);
                 if (count>0) {
-                    throw MyErrorEnum.customError.getMyException("该平台只能抽奖一次.");
+                    throw MyErrorEnum.customError.getMyException(Constant.ACTIVE_NOTE);
                 }
             }
         }
