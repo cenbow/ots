@@ -261,8 +261,8 @@ public class AppController {
 			String phone, String sysno, String devicetype, String marketsource,
 			String appversion, String ostype, String osver, String weixinname,
 			String comefrom, String comefromtype, Long hotelid, String channelid, String citycode) {
-		logger.info("/unionidandphone/binding...  unionid:{} phone:{} sysno:{} devicetype:{} marketsource:{} appversion:{} ostype:{} osver:{} weixinname:{} comefrom:{} comefromtype:{} hotelid:{} channelid:{}",
-				unionid, phone,  sysno,  devicetype,  marketsource,appversion,  ostype,  osver,  weixinname, comefrom,  comefromtype,  hotelid,  channelid
+		logger.info("/unionidandphone/binding...  unionid:{} phone:{} sysno:{} devicetype:{} marketsource:{} appversion:{} ostype:{} osver:{} weixinname:{} comefrom:{} comefromtype:{} hotelid:{} channelid:{} citycode:{}",
+				unionid, phone,  sysno,  devicetype,  marketsource,appversion,  ostype,  osver,  weixinname, comefrom,  comefromtype,  hotelid,  channelid ,citycode
 				);
 		
 		String checkerrortype = ""; // 绑定失败的原因，1、unionid已被其他手机号绑定，2、手机号已被其他unionid绑定
@@ -317,7 +317,7 @@ public class AppController {
 			regMem.setOstype(ostype);
 			regMem.setRegostype(ostype);
 			regMem.setOsver(osver);
-			regMem.setComefrom(comefrom);
+            regMem.setComefrom(comefrom);
 			regMem.setComefromtype(comefromtype);
 			regMem.setHotelid(hotelid);
 			regMem.setCitycode(citycode);
