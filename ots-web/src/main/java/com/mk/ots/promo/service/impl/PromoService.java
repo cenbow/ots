@@ -826,6 +826,10 @@ public class PromoService implements IPromoService {
                             uPrizeRecord.setPhone(member.getPhone());
                             uPrizeRecord.setReceivestate(String.valueOf(ReceiveStateEnum.binding.getId()));
                         }else {
+                            Random random = new Random(-1);
+                            Integer seed = -1;
+                            Integer  temp=  random.nextInt(100000) * seed;
+                            uPrizeRecord.setMid(temp.longValue());
                             uPrizeRecord.setReceivestate(String.valueOf(ReceiveStateEnum.Unget.getId()));
                         }
 
@@ -843,6 +847,7 @@ public class PromoService implements IPromoService {
                             uPrizeRecord.setPrizeinfo(rtnList.get(0).getCode());
                         }
                         uPrizeRecord.setPrizeid(bp.getId());
+
                         iUPrizeRecordDao.saveOrUpdate(uPrizeRecord);
                         if (uPrizeRecord.getId()==null) {
                             throw MyErrorEnum.customError.getMyException("插入奖品记录出错!");
@@ -1274,4 +1279,6 @@ public class PromoService implements IPromoService {
         // TODO Auto-generated method stub
         return  iBPromotionDao.findByActiveidAndPrizeIdList(activeid,prizeidList);
     }
+
+
 }
