@@ -1,5 +1,6 @@
 package com.mk.framework.component.message;
 
+import com.ctc.smscloud.xml.webservice.utils.WebServiceXmlClientUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
@@ -84,7 +85,7 @@ public class TongSmsMessage extends AbstractMessage {
         String respInfo = null;
         // 发送短信
         this.logger.error("ctc smsmessage send beging:\n");
-        respInfo = WebServiceXmlClientUtil.sendSms(sn, pwd, rrid,
+        respInfo = WebServiceXmlClientUtil.sendSms(sn, pwd, rrid.toString(),
                 mobile, content, content_sign, subcode, stime);
         this.logger.error(respInfo);
         this.logger.error("ctc smsmessage send beging end.\n");
