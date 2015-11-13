@@ -56,4 +56,21 @@ public class PromoteConfigService implements IPromoteConfigService {
             return config.getOfflineGiveHotel();
         }
     }
+
+    public BigDecimal queryGiveNewMemberGeneral(String cityCode) {
+        TPromoteConfig config = this.queryGiveHotel(cityCode);
+        if (null == config) {
+            return BigDecimal.ZERO;
+        } else {
+            return config.getGiveNewMemberGeneral();
+        }
+    }
+    public BigDecimal queryGiveNewMemberAppOnly(String cityCode) {
+        TPromoteConfig config = this.queryGiveHotel(cityCode);
+        if (null == config) {
+            return BigDecimal.ZERO;
+        } else {
+            return config.getGiveNewMemberAppOnly();
+        }
+    }
 }

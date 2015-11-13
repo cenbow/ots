@@ -9,4 +9,7 @@ public interface IPromoteConfigService {
     public TPromoteConfig queryGiveHotel(String cityCode);
     public BigDecimal queryOnlineGiveHotel(String cityCode);
     public BigDecimal queryOfflineGiveHotel(String cityCode);
+
+    public BigDecimal queryGiveNewMemberGeneral(String cityCode);
+    public BigDecimal queryGiveNewMemberAppOnly(String cityCode);
 }
