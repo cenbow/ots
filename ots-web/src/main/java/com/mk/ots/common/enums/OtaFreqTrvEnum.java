@@ -18,6 +18,7 @@ public enum OtaFreqTrvEnum {
 	LOCATION_IS_NULL("80","下单位置为空"),
 	OUT_OF_RANG("90","下单位置不在酒店1公里范围内"),
 	CHECKIN_LESS4("100","入住4小时内"),
+	CHECKIN_THAN4("101","入住大于4小时"),
 	OVER_RANG("110","结算超出定额"),
 	NOT_CHECKIN("120","未入住"),
 	L1("-1", "无原因");
