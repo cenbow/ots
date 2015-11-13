@@ -18,6 +18,7 @@ import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.hotel.model.THotelModel;
 import com.mk.ots.mapper.THotelMapper;
+import com.mk.ots.mapper.TPromotionCityMapper;
 import com.mk.ots.member.model.UMember;
 import com.mk.ots.member.service.IMemberService;
 import com.mk.ots.order.bean.OrderLog;
@@ -47,7 +48,6 @@ import com.mk.ots.ticket.service.ITicketService;
 import com.mk.ots.ticket.service.IUActiveShareService;
 import com.mk.ots.ticket.service.IUPrizeRecordService;
 import com.mk.ots.ticket.service.parse.ITicketParse;
-import com.sun.tools.internal.jxc.apt.Const;
 import org.apache.commons.collections.CollectionUtils;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -105,7 +105,7 @@ public class TicketService implements ITicketService{
 	
 	@Autowired
 	private IUActiveCDKeyLogDao iUActiveCDKeyLogDao;
-	
+
     @Autowired
     private OtaOrderDAO otaOrderDAO;
     @Autowired
@@ -120,6 +120,9 @@ public class TicketService implements ITicketService{
 
     @Autowired
     private THotelMapper tHotelMapper;
+
+	@Autowired
+	private TPromotionCityMapper tPromotionCityMapper;
 
 	@Autowired
 	private USendUTicketDao uSendUTicketDao;
@@ -188,9 +191,10 @@ public class TicketService implements ITicketService{
 				logger.info("2. 查询可用优惠券: {}", myticket);
 				
 				if(CollectionUtils.isNotEmpty(myticket)){
-                    List citycodes = Lists.newArrayList();
-                    citycodes.add("310000");
-                    filterLimitArea(myticket, otaOrder, citycodes);
+//                    List citycodes = Lists.newArrayList();
+//                    citycodes.add("310000");
+
+                    filterLimitArea(myticket, otaOrder);
 //					checkBRule(myticket, otaOrder);
 					//update by tankai  去掉对B规则的酒店判断
 //					checkBRule(myticket, otaOrder);
@@ -209,29 +213,46 @@ public class TicketService implements ITicketService{
 		return ticketList;
 	}
 
+//    private void filterLimitArea(List<TicketInfo> myticket, OtaOrder otaOrder, List citycodes) {
+//    	Iterator<TicketInfo> it =myticket.iterator();
+//    	while (it.hasNext()) {
+//    		TicketInfo info = it.next();
+//
+//    		 if (info.getType() == PromotionTypeEnum.shoudan.getId()) {
+//                 THotelModel tHotelModel = tHotelMapper.findHotelInfoById(otaOrder.getHotelId());
+//                 if (!citycodes.contains(tHotelModel.getCitycode())) {
+//                     it.remove();
+//                 }
+//             }
+//		}
+//    }
+	/**
+	 * 过滤只允许某城市使用的优惠券
+	 *
+	 * @param myticket
+	 * @param otaOrder
+	 */
+	private void filterLimitArea(List<TicketInfo> myticket, OtaOrder otaOrder) {
+		THotelModel tHotelModel = tHotelMapper.findHotelInfoById(otaOrder.getHotelId());
+		HashMap  m = new  HashMap();
+		m.put("cityCode",tHotelModel.getCitycode());
+		Iterator<TicketInfo> it =myticket.iterator();
+		while (it.hasNext()) {
+			TicketInfo info = it.next();
 
-
-    /**
-     * 过滤只允许某城市使用的优惠券
-     *
-     * @param myticket
-     * @param otaOrder
-     * @param citycodes
-     */
-    private void filterLimitArea(List<TicketInfo> myticket, OtaOrder otaOrder, List citycodes) {
-    	Iterator<TicketInfo> it =myticket.iterator();
-    	while (it.hasNext()) {
-    		TicketInfo info = it.next();
-    		
-    		 if (info.getType() == PromotionTypeEnum.shoudan.getId()) {
-                 THotelModel tHotelModel = tHotelMapper.findHotelInfoById(otaOrder.getHotelId());
-                 if (!citycodes.contains(tHotelModel.getCitycode())) {
-                     it.remove();
-                 }
-             }
+			if (info.getType() == PromotionTypeEnum.shoudan.getId()) {
+				if(!org.apache.commons.lang3.StringUtils.isEmpty(tHotelModel.getCitycode())){
+					m.put("promotionId",info.getId());
+					List<BPromotionCity>   promotionCityList = tPromotionCityMapper.findPromotionCityByCityCode(m);
+					logger.info("method [filterLimitArea]  parme : promotionCityList: {}, mid: {}...",promotionCityList ,tHotelModel);
+					if(CollectionUtils.isEmpty(promotionCityList)){
+						logger.info("method [filterLimitArea]  remove  promotion :",it);
+						it.remove();
+					}
+				}
+			}
 		}
-    }
-
+	}
     
 
 	/**
