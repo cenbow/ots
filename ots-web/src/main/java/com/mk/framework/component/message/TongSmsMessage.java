@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.ctc.smscloud.xml.webservice.utils.WebServiceXmlClientUtil;
 
 /**
  *     大汉三通
@@ -51,7 +52,7 @@ public class TongSmsMessage extends AbstractMessage {
 	 */
 	public TongSmsMessage(String sn, String password, String serviceUrl) throws UnsupportedEncodingException, NoSuchAlgorithmException {
 		this.sn = sn;
-		this.pwd = this.getMD5(sn + password);
+		this.pwd = password;
 		this.api = serviceUrl;
 	}
 
@@ -83,126 +84,42 @@ public class TongSmsMessage extends AbstractMessage {
 		if (StringUtils.isBlank(mobile)) {
 			throw MessageErrorEnum.mobileNotEmpty.getMyException();
 		}
-		HttpURLConnection httpconn = null;
-		ByteArrayOutputStream bout = null;
-		OutputStream out = null;
-		BufferedReader in = null;
-		try {
-//			String soapAction = "http://entinfo.cn/mdsmssend";
-			String xml ="<?xml version =\"1.0\" encoding=\"UTF-8\"?>" +
-                    "<message>" +
-                    "<account>"+sn+"</account>" +
-                    "<password>"+pwd+"</password>" +
-                    "<msgid>"+rrid+"</msgid>" +
-                    "<phones>"+mobile+"</phones>" +
-                    "<content>"+content+"</content>" +
-                    "<sign>"+content_sign+"</sign>" +
-                    "<subcode>"+subcode+"</subcode>" +
-                    "<sendtime>"+ stime+"</sendtime>" +
-                    "</message>";
 
-			// //
-			this.logger.info("request xml output begin:\n");
-			this.logger.info(xml);
-			this.logger.info("request xml output end.\n");
-			// //
+        // 服务端地址，默认可不设置
+        WebServiceXmlClientUtil.setServerUrl(this.api);
+        String respInfo = null;
+        // 发送短信
+        this.logger.error("ctc smsmessage send beging:\n");
+        respInfo = WebServiceXmlClientUtil.sendSms(sn, pwd, rrid,
+                mobile, content, content_sign, subcode, stime);
+        this.logger.error(respInfo);
+        this.logger.error("ctc smsmessage send beging end.\n");
+        return respInfo;
+//		// 获取状态报告
+//		System.out.println("*************状态报告*************");
+//		_respInfo = WebServiceXmlClientUtil.getReport(account, password, msgid,
+//				phone);
+//		System.out.println(_respInfo);
+//		// 获取余额
+//		System.out.println("*************获取余额*************");
+//		_respInfo = WebServiceXmlClientUtil.getBalance(account, password);
+//		System.out.println(_respInfo);
+//		// 获取上行
+//		System.out.println("*************获取上行*************");
+//		_respInfo = WebServiceXmlClientUtil.getSms(account, password);
+//		System.out.println(_respInfo);
 
-			URL url = new URL(this.api);
-			URLConnection connection = url.openConnection();
-			httpconn = (HttpURLConnection) connection;
-			bout = new ByteArrayOutputStream();
-			bout.write(xml.getBytes(Constant.defaultcharset));
-			byte[] b = bout.toByteArray();
-			httpconn.setRequestProperty("Content-Length", String.valueOf(b.length));
-			httpconn.setRequestProperty("Content-Type", "text/xml; charset=utf-8");
-//			httpconn.setRequestProperty("SOAPAction", soapAction);
-			httpconn.setRequestMethod("POST");
-			httpconn.setDoInput(true);
-			httpconn.setDoOutput(true);
+        // 检测敏感词
+//		System.out.println("*************检测敏感词*************");
+//		_respInfo = WebServiceXmlClientUtil.checkKeyWord(account, password,
+//				content);
+//		System.out.println(_respInfo);
 
-			out = httpconn.getOutputStream();
-			out.write(b);
-			out.close();
-
-			in = new BufferedReader(new InputStreamReader(httpconn.getInputStream()));
-			String inputLine;
-			StringBuffer bfResult = new StringBuffer();
-			while (null != (inputLine = in.readLine())) {
-				bfResult.append(inputLine).append("\n");
-				Pattern pattern = Pattern.compile("<mdsmssendResult>(.*)</mdsmssendResult>");
-				Matcher matcher = pattern.matcher(inputLine);
-				while (matcher.find()) {
-					result = matcher.group(1);
-				}
-			}
-			// //
-			this.logger.error("result is : " + result);
-
-			this.logger.error("response output begin:\n");
-			this.logger.error(bfResult.toString());
-			this.logger.error("response output end.\n");
-			// //
-		} catch (Exception e) {
-			this.logger.error("SmsMessage sendSMS is error: " + e.getMessage());
-			throw new RuntimeException(e.getMessage());
-		} finally {
-			if (httpconn != null) {
-				try {
-					httpconn.disconnect();
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-			}
-
-			if (bout != null) {
-				try {
-					bout.close();
-				} catch (Exception e2) {
-					e2.printStackTrace();
-				}
-			}
-
-			if (out != null) {
-				try {
-					out.close();
-				} catch (Exception e3) {
-					e3.printStackTrace();
-				}
-			}
-
-			if (in != null) {
-				try {
-					in.close();
-				} catch (Exception e4) {
-					e4.printStackTrace();
-				}
-			}
-		}
-		return result;
+        // 检测黑名单
+//		System.out.println("*************检测黑名单*************");
+//		_respInfo = WebServiceXmlClientUtil.checkBlacklist(account, password,
+//				phone);
+//		System.out.println(_respInfo);
 	}
 
-	/**
-	 * 字符串MD5加密
-	 *
-	 * @param sourceStr
-	 *            参 数：待转换字符串
-	 * @return String 返回值：加密之后字符串
-	 * @throws java.io.UnsupportedEncodingException
-	 * @throws java.security.NoSuchAlgorithmException
-	 */
-	private String getMD5(String sourceStr) throws UnsupportedEncodingException, NoSuchAlgorithmException {
-		String resultStr = "";
-		byte[] temp = sourceStr.getBytes(Constant.defaultcharset);
-		MessageDigest md5 = MessageDigest.getInstance("MD5");
-		md5.update(temp);
-		byte[] b = md5.digest();
-		for (int i = 0; i < b.length; i++) {
-			char[] digit = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-			char[] ob = new char[2];
-			ob[0] = digit[(b[i] >>> 4) & 0X0F];
-			ob[1] = digit[b[i] & 0X0F];
-			resultStr += new String(ob);
-		}
-		return resultStr;
-	}
 }
