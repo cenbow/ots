@@ -1,3 +1,4 @@
+ALTER TABLE b_pms_checkinuser ADD INDEX idx_checkinuser_cardid (cardid);
 
 ALTER TABLE `b_otaorder`
 MODIFY COLUMN `Invalidreason`  int(3) NULL DEFAULT NULL COMMENT '拉新作废原因';
@@ -23,7 +24,9 @@ UPDATE `t_city` SET LEVEL=1 WHERE querycityname IN ('北京市',
 '福州市',
 '乌鲁木齐市',
 '海口市',
-'东莞市');
+'东莞市',
+'长沙市',
+'洛阳市');
 
 UPDATE `t_city` SET LEVEL=2 WHERE querycityname IN ('漯河市',
 '景德镇市',
@@ -66,7 +69,6 @@ UPDATE `t_city` SET LEVEL=2 WHERE querycityname IN ('漯河市',
 '石家庄市',
 '厦门市',
 '太原市',
-'长沙市',
 '哈尔滨市',
 '烟台市',
 '宁波市',
@@ -80,7 +82,6 @@ UPDATE `t_city` SET LEVEL=2 WHERE querycityname IN ('漯河市',
 '徐州市',
 '临沂市',
 '威海市',
-'洛阳市',
 '常州市',
 '中山市',
 '银川市',
@@ -382,3 +383,64 @@ VALUES (2,16,8,25,25);
 
 insert into t_promote_config(citylevel,`onlineGiveHotel`,`offlineGiveHotel`,`GiveNewMemberGeneral`,`GiveNewMemberAppOnly`)
 VALUES (3,12,6,20,20);
+
+
+INSERT INTO `ots`.`b_activity` (
+	`id`,
+	`title`,
+	`detail`,
+	`description`,
+	`type`,
+	`begintime`,
+	`endtime`,
+	`limitget`,
+	`hotel`,
+	`banner`,
+	`Iscollect`,
+	`actState`,
+	`expectNum`,
+	`actualNum`,
+	`expectMerchantNum`,
+	`actualMerchantNum`,
+	`isticket`,
+	`gentype`,
+	`promotionmethodtype`,
+	`activeurl`,
+	`activepic`,
+	`activityCarrier`,
+	`userGroup`,
+	`isvisible`
+)
+VALUES
+	(
+		'110',
+		'新用户优惠券',
+		NULL,
+		NULL,
+		'5',
+		'2015-11-11 00:00:00',
+		'2015-12-31 23:59:59',
+		'0',
+		NULL,
+		'',
+		'T',
+		'5',
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		'2',
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		'T'
+	);
+
+INSERT INTO `ots`.`b_promotion` (`name`, `description`, `Createtime`, `Begintime`, `Endtime`, `type`, `isticket`, `num`, `info`, `classname`, `isota`, `otapre`, `activitiesid`, `note`, `pic`, `version`, `isinstance`, `weight`, `totalnum`, `plannum`, `protype`, `onlineprice`, `offlineprice`, `expiretype`, `expiredaynum`, `effectivetype`, `platformtype`, `sourcecdkey`, `channelid`, `strategy_id`)
+
+VALUES ('洛阳长沙新用户优惠券', '洛阳长沙限在线支付使用', '2015-11-13 00:00:00', '2015-11-11 00:00:00', '2015-12-31 23:59:59', '1', 'T', '-1', '', 'com.mk.ots.ticket.service.parse.SimplesubTicket', 'T', '1.00', '110', '', '', '2', 'T', NULL, '6000', NULL, NULL, '30', '0', '2', '30', '1', '1', NULL, NULL, NULL);
+
+INSERT INTO `ots`.`b_promotion_city` (`cityCode`, `cityName`, `activityId`, `delete`) VALUES ('-1', '全部', '110', 'F');

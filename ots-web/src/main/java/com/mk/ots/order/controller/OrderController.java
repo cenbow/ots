@@ -497,6 +497,9 @@ public class OrderController {
 		String sysno = request.getParameter("sysno");
 		// 用户注册应用信息
 		String uuid = request.getParameter("uuid");
+		if (StringUtils.isBlank(uuid)) {
+			uuid = request.getParameter("hardwarecode");
+		}
 		// 手机唯一识别码imei
 		String deviceimei = request.getParameter("deviceimei");
 		// sim卡串号
@@ -587,7 +590,7 @@ public class OrderController {
 			}
 			// 用户注册应用信息
 			if (StringUtils.isNotBlank(uuid)) {
-				otaOrderMac.setUuid(DESUtils.decryptDES(uuid));
+				otaOrderMac.setUuid(uuid);
 			}
 			// 手机唯一识别码imei
 			if (StringUtils.isNotBlank(deviceimei)) {

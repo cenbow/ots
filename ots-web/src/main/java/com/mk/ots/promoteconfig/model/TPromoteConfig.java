@@ -4,6 +4,19 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 public class TPromoteConfig {
+	private Long id;
+	private Integer cityLevel;
+	private BigDecimal onlineGiveHotel;
+	private BigDecimal offlineGiveHotel;
+	private BigDecimal giveNewMemberGeneral;
+	private BigDecimal giveNewMemberAppOnly;
+
+	private String description;
+	private Date createTime;
+	private Date updateTime;
+	private String createBy;
+	private String updateBy;
+
 	public Long getId() {
 		return id;
 	}
@@ -92,17 +105,6 @@ public class TPromoteConfig {
 		this.updateBy = updateBy;
 	}
 
-	private Long id;
-	private Integer cityLevel;
-	private BigDecimal onlineGiveHotel;
-	private BigDecimal offlineGiveHotel;
-	private BigDecimal giveNewMemberGeneral;
-	private BigDecimal giveNewMemberAppOnly;
 
-	private String description;
-	private Date createTime;
-	private Date updateTime;
-	private String createBy;
-	private String updateBy;
 	
 }
