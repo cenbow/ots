@@ -819,6 +819,11 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.ctc</groupId>
+            <artifactId>ctc-smscloud</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
 
     </dependencies>

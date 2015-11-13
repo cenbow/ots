@@ -3,15 +3,9 @@ package com.mk.framework.component.message;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.security.MessageDigest;
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import com.ctc.smscloud.xml.webservice.utils.WebServiceXmlClientUtil;
+
 
 /**
  *     大汉三通
@@ -39,7 +33,7 @@ public class TongSmsMessage extends AbstractMessage {
 	//private final String content_sign_end = "（眯客弹指间有房间，保证低价、快速入住)";
 
 	public TongSmsMessage() throws UnsupportedEncodingException, NoSuchAlgorithmException {
-		this("dh28001", "!2FW!7oe", "http://ws.3tong.net/services/sms?wsdl");
+		this("dh28001", "!2FW!7oe", "http://ws.3tong.net/services/sms");
 	}
 
 	/**
