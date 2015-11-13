@@ -128,6 +128,10 @@ public class QiekeRuleService {
             if (memberOptional.isPresent()) {
                 UMember member = memberOptional.get();
                 String openId = member.getOpenid();
+                if (null == openId) {
+                    logger.info(String.format("----------QiekeRuleService.checkMobile do wechat order id:[%s] openId is null end", otaOrder.getId()));
+                    return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+                }
                 List<UMember> uMemberList = iMemberService.findUMemberByOpenId(openId);
 
                 //去除本次账号
@@ -393,5 +397,7 @@ public class QiekeRuleService {
         }
     }
 
-
+    public List<Long> genTicketByCityCode(String cityCode, long mid){
+        return new ArrayList<>();
+    }
 }

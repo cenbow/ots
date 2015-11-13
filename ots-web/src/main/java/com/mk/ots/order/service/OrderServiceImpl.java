@@ -2048,7 +2048,35 @@ public class OrderServiceImpl implements OrderService {
                     }
                 }
             } else {
-                // job 任务处理
+                // 4小时 判断拉新返老板逻辑，由job 任务处理，这里不处理
+
+                //判断 洛阳 长沙 等新用户，发送优惠券
+                Integer invalidReason = otaorder.get("Invalidreason");
+                if (null == invalidReason
+                        || OtaFreqTrvEnum.CHECKIN_LESS4.getId().equals(String.valueOf(invalidReason))
+                        || OtaFreqTrvEnum.OVER_RANG.getId().equals(String.valueOf(invalidReason))) {
+                    OrderServiceImpl.logger.info(
+                            String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] start genTicket ",otaorder.getId()));
+
+                    Date bgtemp = pmsRoomOrder.getDate("CheckInTime");
+                    Date edtemp = pmsRoomOrder.getDate("CheckOutTime");
+                    double diffHours = DateUtils.getDiffHoure(DateUtils.getDatetime(bgtemp), DateUtils.getDatetime(edtemp));
+                    if (diffHours >= 0.5) {
+                        OrderServiceImpl.logger.info(
+                                String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] to genTicket", otaorder.getId()));
+                        Long mid = otaorder.getMid();
+                        String cityCode = otaorder.getCityCode();
+                        List<Long> ticketIdList = this.qiekeRuleService.genTicketByCityCode(cityCode, mid);
+                        for (Long ticketId : ticketIdList) {
+                            OrderServiceImpl.logger.info(
+                                    String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] send genTicket[%s]", otaorder.getId(),ticketId));
+                        }
+                    }
+                } else {
+                    OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] dont genTicket",otaorder.getId()));
+
+                }
+                OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] end",otaorder.getId()));
             }
 		}
 		// 住三送一活动，调用促销接口
