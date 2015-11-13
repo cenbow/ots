@@ -497,7 +497,7 @@ public class OrderController {
 		String sysno = request.getParameter("sysno");
 		// 用户注册应用信息
 		String uuid = request.getParameter("uuid");
-		if (StringUtils.isEmpty(uuid)) {
+		if (StringUtils.isBlank(uuid)) {
 			uuid = request.getParameter("hardwarecode");
 		}
 		// 手机唯一识别码imei
