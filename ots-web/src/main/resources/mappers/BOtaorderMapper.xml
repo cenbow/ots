@@ -605,7 +605,9 @@
 	</select>	
 	<!-- 判断是否用户首单-->
 	<select id="isFirstOrder" resultType="long" parameterType="java.util.Map">
-		SELECT COUNT(DISTINCT b.id) FROM b_otaorder b where b.OrderStatus IN (140,160,180,190,200) and  b.mid in
+		SELECT COUNT(DISTINCT b.id) FROM b_otaorder b where ((b.OrderStatus IN (140,160,180,190,200) and  b.Ordertype =1)
+            or    (b.OrderStatus IN (160,180,190,200) and  b.Ordertype =2))  and
+              b.mid in
 		<foreach collection="midList" index="index" item="item" open="(" separator="," close=")">  
         	#{item}  
     	</foreach>  
