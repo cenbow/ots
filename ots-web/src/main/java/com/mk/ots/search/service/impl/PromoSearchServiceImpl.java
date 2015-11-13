@@ -1922,7 +1922,16 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Long endTime = new Date().getTime();
 				Long times = endTime - startTime;
 				logger.info("查询酒店: {}眯客价耗时: {}ms.", es_hotelid, times);
+
 				BigDecimal minPrice = new BigDecimal(prices[0]);
+				Integer hotelId = Integer.valueOf(hotelid);
+				Double tempMinPromoPrice = roomSaleService.getHotelMinPromoPrice(hotelId);
+
+				BigDecimal minPromoPrice = new BigDecimal(tempMinPromoPrice);
+				if (minPrice.compareTo(minPromoPrice) > 0){
+					minPrice = minPromoPrice;
+				}
+
 				result.put("minprice", minPrice);
 
 				Long maxPrice = roomstateService.findHotelMaxPrice(Long.parseLong(es_hotelid));
