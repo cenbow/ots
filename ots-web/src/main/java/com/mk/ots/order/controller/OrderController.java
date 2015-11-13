@@ -590,7 +590,7 @@ public class OrderController {
 			}
 			// 用户注册应用信息
 			if (StringUtils.isNotBlank(uuid)) {
-				otaOrderMac.setUuid(DESUtils.decryptDES(uuid));
+				otaOrderMac.setUuid(uuid);
 			}
 			// 手机唯一识别码imei
 			if (StringUtils.isNotBlank(deviceimei)) {
