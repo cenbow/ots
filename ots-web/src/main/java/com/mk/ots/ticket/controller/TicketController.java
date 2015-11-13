@@ -50,10 +50,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 优惠券业务接口
@@ -898,5 +895,19 @@ public class TicketController {
 		rtnMap.put("success", true);
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
+
+	@RequestMapping("/uuid")
+	public ResponseEntity<Map<String, Object>> getuuid(){
+		logger.info("git uuid");
+		UUID uuid = UUID.randomUUID();
+		String guuid = uuid.toString();
+
+		Map<String,Object> rtnMap = Maps.newHashMap();
+		rtnMap.put("usermark",guuid);
+		rtnMap.put("success", true);
+		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+	}
+
+
 
 }
