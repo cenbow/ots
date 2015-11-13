@@ -134,6 +134,10 @@ public class QiekeRuleService {
             if (memberOptional.isPresent()) {
                 UMember member = memberOptional.get();
                 String openId = member.getOpenid();
+                if (null == openId) {
+                    logger.info(String.format("----------QiekeRuleService.checkMobile do wechat order id:[%s] openId is null end", otaOrder.getId()));
+                    return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+                }
                 List<UMember> uMemberList = iMemberService.findUMemberByOpenId(openId);
 
                 //去除本次账号
@@ -171,10 +175,10 @@ public class QiekeRuleService {
             }
 
             //订单状态
-            List<OtaOrderStatusEnum> statusList = new ArrayList<>();
-            statusList.add(OtaOrderStatusEnum.CheckIn);
-            statusList.add(OtaOrderStatusEnum.Account);
-            statusList.add(OtaOrderStatusEnum.CheckOut);
+            List<Integer> statusList = new ArrayList<>();
+            statusList.add(OtaOrderStatusEnum.CheckIn.getId());
+            statusList.add(OtaOrderStatusEnum.Account.getId());
+            statusList.add(OtaOrderStatusEnum.CheckOut.getId());
 
             //
             Map<String, Object> param = new HashMap<>();
@@ -218,10 +222,10 @@ public class QiekeRuleService {
             }
 
             //订单状态
-            List<OtaOrderStatusEnum> statusList = new ArrayList<>();
-            statusList.add(OtaOrderStatusEnum.CheckIn);
-            statusList.add(OtaOrderStatusEnum.Account);
-            statusList.add(OtaOrderStatusEnum.CheckOut);
+            List<Integer> statusList = new ArrayList<>();
+            statusList.add(OtaOrderStatusEnum.CheckIn.getId());
+            statusList.add(OtaOrderStatusEnum.Account.getId());
+            statusList.add(OtaOrderStatusEnum.CheckOut.getId());
             //
             Map<String, Object> param = new HashMap<>();
             param.put("uuid",uuid);
@@ -477,5 +481,7 @@ public class QiekeRuleService {
         }
     }
 
-
+    public List<Long> genTicketByCityCode(String cityCode, long mid){
+        return new ArrayList<>();
+    }
 }
