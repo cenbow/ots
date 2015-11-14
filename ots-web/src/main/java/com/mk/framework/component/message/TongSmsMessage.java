@@ -1,6 +1,6 @@
 package com.mk.framework.component.message;
 
-import com.ctc.smscloud.xml.webservice.utils.WebServiceXmlClientUtil;
+import com.mk.framework.component.message.webservice.utils.WebServiceXmlClientUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
