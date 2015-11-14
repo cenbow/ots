@@ -13,5 +13,5 @@ import java.util.Map;
 public interface PmsCheckinUserMapper {
     public List<Map> getCheckUserByOrderId(@Param("otaOrderId")Long otaOrderId);
 
-    public Long getCardCountByCardId(@Param("otaOrderId")Long otaOrderId, @Param("cardId")String cardId);
+    public Long getCardCountByCardId(@Param("otaOrderId")String otaOrderId, @Param("cardId")String cardId);
 }
