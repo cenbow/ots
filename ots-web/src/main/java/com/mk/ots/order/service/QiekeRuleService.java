@@ -277,13 +277,14 @@ public class QiekeRuleService {
             if(map.get("cardType") != null){
                 cardType = (String)map.get("cardType");
             }
-            if(!CardTypeEnum.shenfenzheng.getId().equals(cardType)){
-                break;
+            if( !(CardTypeEnum.shenfenzheng.getId().equals(cardType)
+                    || CardTypeEnum.shenfenzheng.getName().equals(cardType))){
+                return OtaFreqTrvEnum.CARD_ID_IS_NULL;
             }
             if(map.get("cardid") != null){
                 cardId = (String)map.get("cardid");
             }
-            if (map.get("isScan") != null){
+            if (map.get("isscan") != null){
                 isScan = (Integer)map.get("isscan");
             }
             if(StringUtils.isNotEmpty(cardId)){
@@ -294,10 +295,10 @@ public class QiekeRuleService {
         if(StringUtils.isEmpty(cardId)){
             return OtaFreqTrvEnum.CARD_ID_IS_NULL;
         }
-        if(PmsCheckInTypeEnum.PMS.getCode() == isScan){
+        if(PmsCheckInTypeEnum.PMS.getCode() != isScan){
             return OtaFreqTrvEnum.CARD_ID_IS_NOT_PMS_SCAN;
         }
-        Long cardCount = pmsCheckinUserMapper.getCardCountByCardId(otaOrder.getId(), cardId);
+        Long cardCount = pmsCheckinUserMapper.getCardCountByCardId(otaOrder.getId().toString(), cardId);
         if(cardCount >= 1){
             return OtaFreqTrvEnum.CARD_ID_NOT_FIRST;
         }
