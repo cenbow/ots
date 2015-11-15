@@ -717,6 +717,7 @@ public class TicketController {
 			}
 		}
 		boolean trueOrFalse = (tickets!=null && tickets.size()>0) || (prizeInfo!=null && prizeInfo.size()>0) ;
+
 		rtnMap.put("success", trueOrFalse);
 		rtnMap.put("tickets", tickets);
 		rtnMap.put("others", prizeInfo);
@@ -938,7 +939,7 @@ public class TicketController {
 				tmpPrizeinfo.setCode(bPrizeInfo.getCode());
 				tmpPrizeinfo.setMerchantid(bPrizeInfo.getMerchantid());
 				try{
-					Date tmpBeginDate = DateUtils.getDateFromString(bPrizeInfo.getBegintime(), "yyMMddHHmmssSSS");
+					Date tmpBeginDate = DateUtils.getDateFromString(bPrizeInfo.getBegintime());
 					String tmpBgTime = DateUtils.getStringFromDate(tmpBeginDate, DateUtils.FORMAT_DATE);
 					tmpPrizeinfo.setBegintime(tmpBgTime);
 				}catch (Exception e){
@@ -946,7 +947,7 @@ public class TicketController {
 				}
 
 				try{
-					Date tmpEndDate = DateUtils.getDateFromString(bPrizeInfo.getEndtime(), "yyMMddHHmmssSSS");
+					Date tmpEndDate = DateUtils.getDateFromString(bPrizeInfo.getEndtime());
 					String tmpEdTime = DateUtils.getStringFromDate(tmpEndDate, DateUtils.FORMAT_DATE);
 					tmpPrizeinfo.setEndtime(tmpEdTime);
 				}catch (Exception e){
@@ -954,7 +955,7 @@ public class TicketController {
 				}
 
 				try{
-					Date tmpCreateDate = DateUtils.getDateFromString(bPrizeInfo.getCreatetime(), "yyMMddHHmmssSSS");
+					Date tmpCreateDate = DateUtils.getDateFromString(bPrizeInfo.getCreatetime());
 					String tmpCreateTime = DateUtils.getStringFromDate(tmpCreateDate, DateUtils.FORMAT_DATE);
 					tmpPrizeinfo.setCreatetime(tmpCreateTime);
 				}catch (Exception e){
