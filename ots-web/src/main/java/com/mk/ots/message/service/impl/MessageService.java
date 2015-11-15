@@ -1,28 +1,9 @@
 package com.mk.ots.message.service.impl;
 
-import java.text.MessageFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
-
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.base.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
-import org.springframework.stereotype.Service;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.mk.care.kafka.common.CopywriterTypeEnum;
-import com.mk.framework.component.message.AndroidPushMessage;
-import com.mk.framework.component.message.ITips;
-import com.mk.framework.component.message.IosPushMessage;
-import com.mk.framework.component.message.SmsMessage;
-import com.mk.framework.component.message.VoiceMessage;
+import com.mk.framework.component.message.*;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.common.enums.MessageTypeEnum;
 import com.mk.ots.common.enums.OSTypeEnum;
@@ -35,14 +16,18 @@ import com.mk.ots.message.dao.IBMessageWhiteListDao;
 import com.mk.ots.message.dao.ILMessageLogDao;
 import com.mk.ots.message.dao.ILPushLogDao;
 import com.mk.ots.message.dao.IMessageProviderDao;
-import com.mk.ots.message.model.BMessageCopywriter;
-import com.mk.ots.message.model.BMessageWhiteList;
-import com.mk.ots.message.model.LMessageLog;
-import com.mk.ots.message.model.LPushLog;
-import com.mk.ots.message.model.MessageProvider;
-import com.mk.ots.message.model.MessageType;
+import com.mk.ots.message.model.*;
 import com.mk.ots.message.service.IMessageService;
 import com.mk.ots.order.common.PropertyConfigurer;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 /**
  * @author nolan
@@ -92,7 +77,7 @@ public class MessageService implements IMessageService {
 			if (messageTypeEnum == MessageTypeEnum.normal) {
 			    message = new SmsMessage();
 			} else if (messageTypeEnum == MessageTypeEnum.audioMessage) {
-			    message = new VoiceMessage();
+			    message = new YunVoiceMessage();
 			} 
 
 			ITips setContent = message.setTitle("--").setReceivers(phone).setContent(msgContent).setMsgId(msgid);
@@ -139,7 +124,9 @@ public class MessageService implements IMessageService {
 					}
 				} else if (messageTypeEnum == MessageTypeEnum.audioMessage) {
 					if (providerClasStrings[j].toLowerCase().contains("voice")) {
-						message=(ITips)Class.forName(providerClasStrings[j]).newInstance();
+                        //yunvoice语音
+                        message= new YunVoiceMessage();
+//						message=(ITips)Class.forName(providerClasStrings[j]).newInstance();
 						break;
 					}
 				} 
