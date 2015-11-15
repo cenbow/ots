@@ -934,10 +934,16 @@ public class TicketController {
 			}
 			List<BPrizeInfo>  bPrizeInfoList = this.iTicketService.queryMyHistoryPrize(member.getId(), Long.parseLong(activeid));
 			for (BPrizeInfo bPrizeInfo: bPrizeInfoList){
+
+				if ("a10009".equals(bPrizeInfo.getCode()) || "谢谢惠顾".equals(bPrizeInfo.getName())){
+					continue;
+				}
+
 				BPrizeInfo tmpPrizeinfo = new BPrizeInfo();
 				tmpPrizeinfo.setName(bPrizeInfo.getName());
 				tmpPrizeinfo.setCode(bPrizeInfo.getCode());
 				tmpPrizeinfo.setMerchantid(bPrizeInfo.getMerchantid());
+
 				try{
 					Date tmpBeginDate = DateUtils.getDateFromString(bPrizeInfo.getBegintime());
 					String tmpBgTime = DateUtils.getStringFromDate(tmpBeginDate, DateUtils.FORMAT_DATE);
@@ -976,6 +982,12 @@ public class TicketController {
 		if (StringUtils.isNotBlank(usermark)){
 			List<BPrizeInfo>  bPrizeInfoList =  this.iTicketService.queryMyNotreceiveyPrize(Long.parseLong(activeid),usermark);
 			for (BPrizeInfo bPrizeInfo: bPrizeInfoList){
+
+				if ("a10009".equals(bPrizeInfo.getCode()) || "谢谢惠顾".equals(bPrizeInfo.getName())){
+					continue;
+				}
+
+
 				BPrizeInfo tmpPrizeinfo = new BPrizeInfo();
 				tmpPrizeinfo.setName(bPrizeInfo.getName());
 				tmpPrizeinfo.setCode(bPrizeInfo.getCode());
