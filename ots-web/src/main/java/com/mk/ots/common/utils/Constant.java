@@ -211,6 +211,8 @@ public class Constant {
 	public static final Integer TONIGHT_PROMO_VIEWTYPE = 3;
 
 	public static final String WEIXIN_CALLMETHOD = "3";
+	public static final String IOS_CALLMETHOD = "4";
+	public static final String ANDROID_CALLMETHOD = "5";
 
 	public static final Integer ANDROID_PLATFORM = 1;
 

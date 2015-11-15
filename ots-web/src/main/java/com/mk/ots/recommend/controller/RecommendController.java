@@ -55,6 +55,14 @@ public class RecommendController {
         try {
             if (StringUtils.isNotBlank(platform)) {
                 platformValue = Integer.valueOf(platform);
+            }else if (StringUtils.isNotBlank(callmethod)){
+                if (Constant.WEIXIN_CALLMETHOD.equals(callmethod)){
+                    platformValue = Constant.WEIXIN_PLATFORM;
+                }else if (Constant.ANDROID_CALLMETHOD.equals(callmethod)){
+                    platformValue = Constant.ANDROID_PLATFORM;
+                }else if (Constant.IOS_CALLMETHOD.equals(callmethod)){
+                    platformValue = Constant.IOS_PLATFORM;
+                }
             }
             List<RecommendList> banners = new ArrayList<>();
 
