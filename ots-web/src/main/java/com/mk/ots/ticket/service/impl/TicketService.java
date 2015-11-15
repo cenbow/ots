@@ -1061,7 +1061,18 @@ public class TicketService implements ITicketService{
 
 		 //根据几个条件判断该用户在该活动中是否有抽奖机会
 		 List<String> ostypes =new ArrayList<String>();
-		
+		if (OSTypeEnum.H.getId().equals(ostype)) {
+			ostypes.add(OSTypeEnum.IOS.getId());
+			ostypes.add(OSTypeEnum.ANDROID.getId());
+			ostypes.add(OSTypeEnum.WX.getId());
+			long prizeRecordCount = iuPrizeRecordService.selectCountByMidAndActiveIdAndOstypeAndTime(mid, activeid, ostypes, date);
+			if (prizeRecordCount >= 1){
+				logger.info("1：来自第三方不可以抽奖， 在 mike 平台参与过抽奖，prizeRecordCount：{}",prizeRecordCount);
+				throw MyErrorEnum.customError.getMyException(Constant.ACTIVE_NOTE);
+			}
+		}
+
+		ostypes =new ArrayList<String>();
 		 if (OSTypeEnum.IOS.getId().equals(ostype)||OSTypeEnum.ANDROID.getId().equals(ostype)) {
 			 ostypes.add(OSTypeEnum.IOS.getId());
 			 ostypes.add(OSTypeEnum.ANDROID.getId());
