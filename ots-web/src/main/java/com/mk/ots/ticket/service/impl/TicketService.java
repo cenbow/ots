@@ -1058,12 +1058,7 @@ public class TicketService implements ITicketService{
 		 long timeFlag = getTimeFlag();
 	      String date = null; 
          if (timeFlag == 0) {date = DateUtils.getDate();}
-         //查询某一时间段的抽奖次数
-		  long recordCount = iuPrizeRecordService.selectCountByMidAndActiveIdAndOstypeAndTime(mid, activeid, null, date);
-		 if (recordCount >= Constant.ACTIVE_CHANCE) { //小于1才可以抽奖
-			 logger.info("1:不可以抽奖，recordCount：{}",recordCount);
-				throw MyErrorEnum.customError.getMyException(Constant.ACTIVE_NOTE);
-		}
+
 		 //根据几个条件判断该用户在该活动中是否有抽奖机会
 		 List<String> ostypes =new ArrayList<String>();
 		
