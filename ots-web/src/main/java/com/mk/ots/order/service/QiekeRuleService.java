@@ -1,6 +1,10 @@
 package com.mk.ots.order.service;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.mk.framework.exception.MyErrorEnum;
+import com.mk.ots.activity.dao.IBActivityDao;
+import com.mk.ots.activity.model.BActivity;
 import com.mk.ots.common.enums.*;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
@@ -25,9 +29,18 @@ import com.mk.ots.pay.model.POrderLog;
 import com.mk.ots.pay.model.PPay;
 import com.mk.ots.pay.service.IPayService;
 import com.mk.ots.promoteconfig.service.impl.PromoteConfigService;
+import com.mk.ots.promo.model.BPromotion;
+import com.mk.ots.promo.service.IPromoService;
+import com.mk.ots.promoteconfig.model.TPromoteConfig;
+import com.mk.ots.promoteconfig.service.IPromoteConfigService;
+import com.mk.ots.search.service.impl.SearchService;
+import com.mk.ots.ticket.model.UTicket;
+import com.mk.ots.ticket.service.parse.SimplesubTicket;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.pms.myenum.PmsCheckInTypeEnum;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,12 +76,16 @@ public class QiekeRuleService {
     @Autowired
     private POrderLogDAO pOrderLogDAO;
     @Autowired
-    private PromoteConfigService promoteConfigService;
-    @Autowired
     private PayDAO payDAO;
 
     @Autowired
     private IUnionidLogService unionidLogService;
+    private IPromoService promoService;
+
+    @Autowired
+    private IPromoteConfigService promoteConfigService;
+    @Autowired
+    private IBActivityDao ibActivityDao;
     /**
      * 手机号必须是第一次，入住并离店的订单
      * @param otaOrder
@@ -505,6 +522,26 @@ public class QiekeRuleService {
     }
 
     public List<Long> genTicketByCityCode(String cityCode, long mid){
-        return new ArrayList<>();
+
+        TPromoteConfig config = this.promoteConfigService.queryGiveHotel(cityCode);
+        List<Long> result = new ArrayList<>();
+        if (null == config) {
+            return result;
+        }
+        BigDecimal general = config.getGiveNewMemberGeneral();
+        BigDecimal appOnly = config.getGiveNewMemberAppOnly();
+
+        String appName = String.format("新用户优惠券", appOnly);
+        String generalName = String.format("新用户优惠券", general);
+
+        List<Long> appPromoList = promoService.genCGTicketByPrice(
+                110, mid, appName, "限制在线支付app使用", appOnly, PlatformTypeEnum.APP.getId());
+        result.addAll(appPromoList);
+
+        List<Long> generalPromoList = promoService.genCGTicketByPrice(
+                110,mid,generalName,"限制在线支付使用",general,PlatformTypeEnum.ALL.getId());
+        result.addAll(generalPromoList);
+        return result;
     }
+
 }

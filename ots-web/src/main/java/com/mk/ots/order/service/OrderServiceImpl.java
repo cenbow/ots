@@ -73,10 +73,10 @@ import com.mk.ots.ticket.model.TicketInfo;
 import com.mk.ots.ticket.model.UTicket;
 import com.mk.ots.ticket.service.ITicketService;
 import com.mk.ots.ticket.service.parse.ITicketParse;
-import com.mk.ots.utils.MD5Util;
 import com.mk.ots.wallet.service.IWalletCashflowService;
 import com.mk.ots.wallet.service.IWalletService;
 import com.mk.ots.web.ServiceOutput;
+import com.mk.ots.wordcenser.job.TextFilterService;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.myenum.PmsErrorEnum;
 import com.mk.sever.ServerChannel;
@@ -200,6 +200,9 @@ public class OrderServiceImpl implements OrderService {
     private RoomSaleConfigInfoMapper roomSaleConfigInfoMapper;
     @Autowired
     private QiekeRuleService qiekeRuleService;
+
+    @Autowired
+    TextFilterService textFilterService;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
     private static final long TIME_FOR_FIFTEEN = Long.parseLong(PropertyConfigurer.getProperty("transferCheckinUsernameTime"));
@@ -2695,7 +2698,11 @@ public class OrderServiceImpl implements OrderService {
               }
           } else { //预付单
               if(now) { //当天单
-                  beginTime = DateUtils.getStringFromDate(calNow.getTime(), "yyyyMMddHHmmss").substring(0, 12)+"00";
+                  if(DateUtils.getStringFromDate(createTime, "yyyyMMdd").equals(beginTime)){
+                      beginTime = DateUtils.getStringFromDate(calNow.getTime(), "yyyyMMddHHmmss").substring(0, 12)+"00";
+                  }else{
+                      beginTime = beginTime + "120000";
+                  }
               } else {
                   beginTime = beginTime + "120000";
               }
@@ -3196,7 +3203,7 @@ public class OrderServiceImpl implements OrderService {
           roomOrder.set("note", StringUtils.isNotBlank(note) ? note : order.getNote());
           roomOrder.set("ordermethod", order.getOrderMethod());
 
-          List<OtaCheckInUser> inUsers = getInUsersByJson(checkInUser);
+          List<OtaCheckInUser> inUsers = getInUsersByJson(order.getId(),checkInUser);
           roomOrder.put("UserList", inUsers);
 
           checkInTimeBefore(order, hotel, roomOrder, order.get("spreadUser") != null);
@@ -3244,7 +3251,7 @@ public class OrderServiceImpl implements OrderService {
    * @return
    * @throws Exception
    */
-  public List<OtaCheckInUser> getInUsersByJson(String checkInUser) {
+  public List<OtaCheckInUser> getInUsersByJson(Long orderid, String checkInUser) {
       SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
       if (StringUtils.isNotBlank(checkInUser)) {
           List<OtaCheckInUser> inUsers = new ArrayList<>();
@@ -3256,7 +3263,18 @@ public class OrderServiceImpl implements OrderService {
 					continue;
               }
               inUser.set("Name", jsonObj.getString("name"));
-              if (StringUtils.isNotBlank(jsonObj.getString("sex"))) {
+
+              boolean needCheckInvalidWord = true;
+              if (orderid != null) {
+                  OrderLog log = orderLogService.findOrderLog(orderid);
+                  needCheckInvalidWord = log != null ? !"F".equals(log.get("needCheckInvalidWord")) : true;
+              }
+
+              if (needCheckInvalidWord && inUser.getName() != null  && textFilterService.checkSensitiveWord(inUser.getName()).size() > 0) {
+                  throw MyErrorEnum.errorParm.getMyException("您好，由于入住人姓名包含敏感词，不能办理预定，如有疑问，请联系我们的客服400-188-8733，谢谢！");
+              }
+
+                  if (StringUtils.isNotBlank(jsonObj.getString("sex"))) {
                   inUser.set("Sex", jsonObj.getString("sex"));
               } else {
                   inUser.set("Sex", "男");
@@ -4609,7 +4627,16 @@ public class OrderServiceImpl implements OrderService {
             throw MyErrorEnum.saveOrder.getMyException("没有当前id的酒店");
         }
         // 入住人编辑
-        List<OtaCheckInUser> inUsers = this.getInUsersByJson(checkInUser);
+        Long checkBanOrderId = null;
+        try {
+            checkBanOrderId = Long.valueOf(orderId);
+        }catch (Exception e){
+            checkBanOrderId = null;
+            logger.error("modifyCheckinuser 修改订单入住人 订单id 有误, Long.valueOf(orderId)");
+        }
+
+
+        List<OtaCheckInUser> inUsers = this.getInUsersByJson(checkBanOrderId,checkInUser);
 
         List<OtaRoomOrder> roomOrderList = order.getRoomOrderList();
         OrderServiceImpl.logger.info("OrderServiceImpl:: modifyCheckinuser::修改入住人名字! size:{},orderid : {},入住人详细：{}", roomOrderList.size(), orderId, inUsers);
