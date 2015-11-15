@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.mk.ots.member.model.UUnionidLog;
+import com.mk.ots.member.service.IUnionidLogService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.base.Strings;
@@ -80,6 +82,9 @@ public class AppController {
 	private BloginInfoService bloginInfoService;
 	@Autowired
 	private OtsCareProducer careProducer;
+
+	@Autowired
+	private IUnionidLogService unionidLogService;
 	/**
 	 * @param unionid
 	 *            微信unionid,非必填（两项至少有一项）
@@ -463,6 +468,13 @@ public class AppController {
 		logger.info("tokentype:{}", tokenType);
 
 		UMember um = ofMember.get();
+		if (null != um && !Strings.isNullOrEmpty(unionid)) {
+			UUnionidLog log = new UUnionidLog();
+			log.setMid(um.getMid());
+			log.setUnionid(unionid);
+			log.setCreateTime(new Date());
+			this.unionidLogService.saveLog(log);
+		}
 		if(isRegister){
 			try {
 				boolean isActivity = false;

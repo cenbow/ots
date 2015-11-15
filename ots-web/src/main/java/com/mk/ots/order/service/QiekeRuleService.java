@@ -11,7 +11,9 @@ import com.mk.ots.mapper.OtaOrderMacMapper;
 import com.mk.ots.mapper.PmsCheckinUserMapper;
 import com.mk.ots.mapper.THotelMapper;
 import com.mk.ots.member.model.UMember;
+import com.mk.ots.member.model.UUnionidLog;
 import com.mk.ots.member.service.IMemberService;
+import com.mk.ots.member.service.IUnionidLogService;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.PmsRoomOrder;
 import com.mk.ots.order.bean.TopPmsRoomOrderQuery;
@@ -65,6 +67,8 @@ public class QiekeRuleService {
     @Autowired
     private PayDAO payDAO;
 
+    @Autowired
+    private IUnionidLogService unionidLogService;
     /**
      * 手机号必须是第一次，入住并离店的订单
      * @param otaOrder
@@ -131,17 +135,18 @@ public class QiekeRuleService {
             Optional<UMember> memberOptional = iMemberService.findMemberById(mid, "T");
             if (memberOptional.isPresent()) {
                 UMember member = memberOptional.get();
-                String openId = member.getOpenid();
-                if (null == openId) {
+
+                String unionid = member.getUnionid();
+                if (null == unionid) {
                     logger.info(String.format("----------QiekeRuleService.checkMobile do wechat order id:[%s] openId is null end", otaOrder.getId()));
                     return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
                 }
-                List<UMember> uMemberList = iMemberService.findUMemberByOpenId(openId);
+                List<UUnionidLog> unionidLogList = unionidLogService.queryByUnionid(unionid);
 
                 //去除本次账号
                 Set<Long> memberIdSet = new HashSet<>();
-                for (UMember dbMember : uMemberList) {
-                    Long dbMid = dbMember.getId();
+                for (UUnionidLog log : unionidLogList) {
+                    Long dbMid = log.getMid();
                     memberIdSet.add(dbMid);
                 }
                 memberIdSet.remove(mid);

@@ -446,3 +446,17 @@ INSERT INTO `ots`.`b_promotion` (`name`, `description`, `Createtime`, `Begintime
 VALUES ('洛阳长沙新用户优惠券', '洛阳长沙限在线支付使用', '2015-11-13 00:00:00', '2015-11-11 00:00:00', '2015-12-31 23:59:59', '1', 'T', '-1', '', 'com.mk.ots.ticket.service.parse.SimplesubTicket', 'T', '1.00', '110', '', '', '2', 'T', NULL, '6000', NULL, NULL, '30', '0', '2', '30', '1', '1', NULL, NULL, NULL);
 
 INSERT INTO `ots`.`b_promotion_city` (`cityCode`, `cityName`, `activityId`, `delete`) VALUES ('-1', '全部', '110', 'F');
+
+
+CREATE TABLE `u_unionid_log` (
+  `id` INT(20) NOT NULL AUTO_INCREMENT,
+  `mid` INT(20) NOT NULL,
+  `unionid` VARCHAR(255) NOT NULL,
+
+  `description` TEXT COMMENT '描述',
+  `createTime` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `u_unionid_log`
+ADD INDEX `IDX_UNIONID_LOG` (`unionid`) ;
