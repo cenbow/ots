@@ -530,6 +530,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			for (Map<String, Object> roomtype : roomtypes) {
 				if (!roomtype.containsKey("hotelname")) {
 					roomtype.put("hotelname", hotelname);
+					roomtype.put("hotelId", hotelId);
 				}
 
 				if (isThemed(hotelId, roomtype)) {
@@ -1370,13 +1371,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Integer promoType = Integer.parseInt(reqEntity.getPromotype());
 
 		Map<String, Object> hotelIdMap = new HashMap<String, Object>();
-		
+
 		for (int i = 0; i < hits.length; i++) {
 			SearchHit hit = hits[i];
 			Map<String, Object> result = hit.getSource();
 			String es_hotelid = String.valueOf(result.get("hotelid"));
 			hotelIdMap.put(es_hotelid, result);
-			
+
 			String isonpromo = (String) result.get("isonpromo");
 			if (StringUtils.isBlank(isonpromo) || "0".equals(isonpromo)) {
 				logger.warn(String.format("hotelid %s doesn't belong to promo", es_hotelid));
@@ -1554,10 +1555,19 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 
 		List<Map<String, Object>> roomtypeGrouped = groupThemes(searchResults);
-		
-		
-		
-		return groupThemes(searchResults);
+		List<Map<String, Object>> hotelIds = new ArrayList<Map<String, Object>>();
+		for (Map<String, Object> roomtype : roomtypeGrouped) {
+			Integer hotelId = (Integer) roomtype.get("hotelId");
+
+			Map<String, Object> hotel = (Map<String, Object>) hotelIdMap.get(String.valueOf(hotelId));
+			List<Map<String, Object>> singleRoomType = new ArrayList<Map<String, Object>>();
+			singleRoomType.add(roomtype);
+			hotel.put("roomtype", roomtype);
+			
+			hotelIds.add(hotel);
+		}
+
+		return hotelIds;
 	}
 
 	/**
