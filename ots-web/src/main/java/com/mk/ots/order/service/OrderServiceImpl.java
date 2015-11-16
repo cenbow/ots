@@ -198,14 +198,16 @@ public class OrderServiceImpl implements OrderService {
     private RoomSaleService roomSaleService;
     @Autowired
     private RoomSaleConfigInfoMapper roomSaleConfigInfoMapper;
+    @Autowired
+    private QiekeRuleService qiekeRuleService;
+    @Autowired
+    private PropertiesUtils propertiesUtils;
 
     @Autowired
     TextFilterService textFilterService;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
-    private static final long TIME_FOR_FIFTEEN = Long.parseLong(PropertyConfigurer.getProperty("transferCheckinUsernameTime"));
-    private static final int time_for_fifteen=(int) (TIME_FOR_FIFTEEN/1000/60);
-    
+
     @Override
     public OtaOrder updateOrderPms(OtaOrder order) {
         for (OtaRoomOrder roomOrder : order.getRoomOrderList()) {
@@ -1913,7 +1915,8 @@ public class OrderServiceImpl implements OrderService {
                           this.orderBusinessLogService.saveLog(otaorder, OtaOrderFlagEnum.AFTERXIAFALUZHUBI.getId(), "", "常住人Invalidreason为1", "");
                       }
 					} else if (otaorder.getInt("rulecode") == 1002) {
-						doRuleBWhenPmsIN(otaorder, pmsRoomOrder, freqtrv);
+                      //进行切客原因设置
+                      doQieKeRuleWhenPmsIN(otaorder, pmsRoomOrder, freqtrv);
 					}
 
                     // 订单到付的时候 客户有优惠券下发
@@ -2030,21 +2033,54 @@ public class OrderServiceImpl implements OrderService {
 				}
 		    }
 		} else if (otaorder.getInt("rulecode") == 1002) {// 重庆规则
-		    if(otaorder.getSpreadUser() != null){// 切客订单
-		        if(otaorder.get("Invalidreason") == null){// 非有效切客理由为空
-		            OrderServiceImpl.logger.info("重庆非有效切客理由为空" + otaorder.getId() + otaorder.getSpreadUser());
-		            Date bgtemp = pmsRoomOrder.getDate("CheckInTime");
-		            Date edtemp = pmsRoomOrder.getDate("CheckOutTime");
-		            double diffHours = DateUtils.getDiffHoure(DateUtils.getDatetime(bgtemp), DateUtils.getDatetime(edtemp));
-		            OrderServiceImpl.logger.info("离店时判断入住时间小于4小时?入住时间:{},离开时间:{},相差:{}", bgtemp, edtemp, diffHours);
-		            // 离店时如果订单是到付切客订单且离店时间减入住时间小于4小时，则订单表需修改标记位字段内容，将“无效切客订单原因Invalidreason”置为2
-		            if(diffHours < 4){
-		                OrderServiceImpl.logger.info("小于4小时非常住人" + otaorder.getId());
-		                otaorder.set("Invalidreason", OtaFreqTrvEnum.OK_LESS4.getId());
-		                //this.payService.leaveTimeLess(otaorderid);
-		            }
-		        }
-		    }
+            if(!qiekeRuleService.isOrderQiekeRuleCity(otaorder)) {
+                if (otaorder.getSpreadUser() != null) {// 切客订单
+                    Integer invalidReason = otaorder.get("Invalidreason");
+                    if (null == invalidReason) {// 非有效切客理由为空
+                        OrderServiceImpl.logger.info("重庆非有效切客理由为空" + otaorder.getId() + otaorder.getSpreadUser());
+                        Date bgtemp = pmsRoomOrder.getDate("CheckInTime");
+                        Date edtemp = pmsRoomOrder.getDate("CheckOutTime");
+                        double diffHours = DateUtils.getDiffHoure(DateUtils.getDatetime(bgtemp), DateUtils.getDatetime(edtemp));
+                        OrderServiceImpl.logger.info("离店时判断入住时间小于4小时?入住时间:{},离开时间:{},相差:{}", bgtemp, edtemp, diffHours);
+                        // 离店时如果订单是到付切客订单且离店时间减入住时间小于4小时，则订单表需修改标记位字段内容，将“无效切客订单原因Invalidreason”置为2
+                        if (diffHours < 4) {
+                            OrderServiceImpl.logger.info("小于4小时非常住人" + otaorder.getId());
+                            otaorder.set("Invalidreason", OtaFreqTrvEnum.OK_LESS4.getId());
+                            //this.payService.leaveTimeLess(otaorderid);
+                        }
+                    }
+                }
+            } else {
+                // 4小时 判断拉新返老板逻辑，由job 任务处理，这里不处理
+
+                //判断 洛阳 长沙 等新用户，发送优惠券
+                Integer invalidReason = otaorder.get("Invalidreason");
+                if (null == invalidReason
+                        || OtaFreqTrvEnum.CHECKIN_LESS4.getId().equals(String.valueOf(invalidReason))
+                        || OtaFreqTrvEnum.OVER_RANG.getId().equals(String.valueOf(invalidReason))) {
+                    OrderServiceImpl.logger.info(
+                            String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] start genTicket ",otaorder.getId()));
+
+                    Date bgtemp = pmsRoomOrder.getDate("CheckInTime");
+                    Date edtemp = pmsRoomOrder.getDate("CheckOutTime");
+                    double diffHours = DateUtils.getDiffHoure(DateUtils.getDatetime(bgtemp), DateUtils.getDatetime(edtemp));
+                    if (diffHours >= 0.5) {
+                        OrderServiceImpl.logger.info(
+                                String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] to genTicket", otaorder.getId()));
+                        Long mid = otaorder.getMid();
+                        String cityCode = otaorder.getCityCode();
+                        List<Long> ticketIdList = this.qiekeRuleService.genTicketByCityCode(cityCode, mid);
+                        for (Long ticketId : ticketIdList) {
+                            OrderServiceImpl.logger.info(
+                                    String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] send genTicket[%s]", otaorder.getId(),ticketId));
+                        }
+                    }
+                } else {
+                    OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] dont genTicket",otaorder.getId()));
+
+                }
+                OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] end",otaorder.getId()));
+            }
 		}
 		// 住三送一活动，调用促销接口
 		logger.info("住三送一活动,调用促销接口,orderid = " + otaorderid);
@@ -2279,8 +2315,12 @@ public class OrderServiceImpl implements OrderService {
       if (hotel.getInt("rulecode") != null && hotel.getInt("rulecode") == 1002) {
           throw MyErrorEnum.customError.getMyException("B规则酒店不能创建切客订单");
       }
-            //设置cityCode
-            order.setCityCode(hotel.getTCityByDisId().getStr("code"));
+      //设置cityCode
+      order.setCityCode(hotel.getTCityByDisId().getStr("code"));
+        //符合B+规则的切客订单 在创建订单的时候将切客理由设置为未入住
+      if(qiekeRuleService.isOrderQiekeRuleCity(order)){
+          order.set("Invalidreason", OtaFreqTrvEnum.NOT_CHECKIN.getId());
+      }
       order.set("hotelname", hotel.get("hotelName"));
       order.set("hotelpms", hotel.get("pms"));
       order.put("hotelAddress", hotel.get("detailAddr"));
@@ -2464,8 +2504,12 @@ public class OrderServiceImpl implements OrderService {
       if (hotel == null) {
           throw MyErrorEnum.saveOrder.getMyException("没有当前id的酒店");
       }
-            //设置cityCode
-            order.setCityCode(hotel.getTCityByDisId().getStr("code"));
+      //设置cityCode
+      order.setCityCode(hotel.getTCityByDisId().getStr("code"));
+      //符合B+规则的切客订单 在创建订单的时候将切客理由设置为未入住
+      if(qiekeRuleService.isOrderQiekeRuleCity(order)){
+          order.set("Invalidreason", OtaFreqTrvEnum.NOT_CHECKIN.getId());
+      }
       order.set("hotelname", hotel.get("hotelName"));
       order.set("hotelpms", hotel.get("pms"));
       order.put("hotelAddress", hotel.get("detailAddr"));
@@ -2785,13 +2829,27 @@ public class OrderServiceImpl implements OrderService {
       orderUtil.getOrderToJson(jsonObj, null, order, showRoom, showInUser);
       jsonObj.put("success", true);
   }
-  
-  private void doRuleBWhenPmsIN(OtaOrder otaorder, PmsRoomOrder pmsRoomOrder, String freqtrv) {
+
+    private void doQieKeRuleWhenPmsIN(OtaOrder otaorder, PmsRoomOrder pmsRoomOrder, String freqtrv){
+        if(qiekeRuleService.isOrderQiekeRuleCity(otaorder)){
+            OtaFreqTrvEnum otaFreqTrvEnum = qiekeRuleService.getQiekeRuleReason(otaorder);
+            if(otaFreqTrvEnum == null || OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+                otaorder.set("spreadUser", Constant.QIE_KE_SPREAD_USER);
+                otaorder.set("Invalidreason", otaFreqTrvEnum.CHECKIN_LESS4.getId());
+            }else {
+                otaorder.set("Invalidreason", otaFreqTrvEnum.getId());
+            }
+        }else {
+            doRuleBWhenPmsIN(otaorder, pmsRoomOrder, freqtrv);
+        }
+    }
+
+    private void doRuleBWhenPmsIN(OtaOrder otaorder, PmsRoomOrder pmsRoomOrder, String freqtrv) {
 	// 判断入住时间减创建时间是否小于15分钟
 		Date checkintime = pmsRoomOrder.getDate("CheckInTime");
 		Date createtime = otaorder.getDate("Createtime");
 		long temp = checkintime.getTime() - createtime.getTime(); // 相差毫秒数
-		if (temp < OrderServiceImpl.TIME_FOR_FIFTEEN) {
+		if (temp < propertiesUtils.getTransferCheckinUsernameTime()) {
 			OrderServiceImpl.logger.info("小于15分钟" + otaorder.getId());
 			otaorder.setSpreadUser(otaorder.getHotelId());
 			// 判断入住人是否常住人
@@ -2845,8 +2903,9 @@ public class OrderServiceImpl implements OrderService {
 			PmsRoomOrder pmsRoomOrder = pmsRoomOrderDao.getPmsRoomOrder(roomOrder.getPmsRoomOrderNo(), pOrder.getHotelId());
 			PmsCheckinUser checkinUser = findPmsUserIncheckSelect(pOrder.getHotelId(), roomOrder.getPmsRoomOrderNo());
 			String freqtrv = checkinUser != null ? String.valueOf(checkinUser.getInt("freqtrv")) : "";
-			
-			doRuleBWhenPmsIN(pOrder, pmsRoomOrder, freqtrv);
+
+            //进行切客原因设置
+            doQieKeRuleWhenPmsIN(pOrder, pmsRoomOrder, freqtrv);
 			
 			// 订单到付的时候 客户有优惠券下发
           	if ((OrderTypeEnum.PT.getId().intValue() == pOrder.getOrderType())) {
@@ -4002,6 +4061,12 @@ public class OrderServiceImpl implements OrderService {
            return   false;
         }
     }
+
+    @Override
+    public List<OtaOrder> findOtaOrderByMid(Long mid, List<OtaOrderStatusEnum> statusList) {
+        return this.orderDAO.findOtaOrderByMid(mid, statusList);
+    }
+
     private  OtaOrderTasts getMessageToC(OtaOrder otaorder,Date executeTime,Boolean isSms,CopywriterTypeEnum copywriterTypeEnum,
                                         OrderTasksTypeEnum   orderTasksTypeEnum,BigDecimal  backcost){
         Message message=new Message();
@@ -4415,7 +4480,7 @@ public class OrderServiceImpl implements OrderService {
             if(checkintime != null && createtime != null){
                 long temp = checkintime.getTime() - createtime.getTime(); // 相差毫秒数
                 logger.info("时间差 = "+temp+",orderid = "+otaorder.getId());
-                if (temp < OrderServiceImpl.TIME_FOR_FIFTEEN) { // 负值也算切客
+                if (temp < propertiesUtils.getTransferCheckinUsernameTime()) { // 负值也算切客
                     otaorder.setSpreadUser(otaorder.getHotelId());
 
                     // 判断入住人是否常住人

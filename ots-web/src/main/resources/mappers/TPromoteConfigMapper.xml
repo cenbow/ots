@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.TPromoteConfigMapper" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.promoteconfig.model.TPromoteConfig" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="cityLevel" property="cityLevel" jdbcType="INTEGER" />
+    <result column="onlineGiveHotel" property="onlineGiveHotel" jdbcType="DECIMAL" />
+    <result column="offlineGiveHotel" property="offlineGiveHotel" jdbcType="DECIMAL" />
+    <result column="giveNewMemberGeneral" property="giveNewMemberGeneral" jdbcType="DECIMAL" />
+    <result column="giveNewMemberAppOnly" property="giveNewMemberAppOnly" jdbcType="DECIMAL" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="createTime" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="updateTime" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="createBy" property="createBy" jdbcType="VARCHAR" />
+    <result column="updateBy" property="updateBy" jdbcType="VARCHAR" />
+
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id,cityLevel,onlineGiveHotel,offlineGiveHotel,GiveNewMemberGeneral,GiveNewMemberAppOnly,description,
+    createTime,updateTime,createBy,updateBy
+  </sql>
+
+  <select id="queryByCityLevel" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_promote_config
+    where cityLevel = #{cityLevel}
+  </select>
+
+</mapper>

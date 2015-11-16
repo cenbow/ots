@@ -38,4 +38,5 @@ public interface IMemberDao extends BaseDao<UMember, String> {
 	
 	public abstract List<UMember> findUMemberByFirstOrder(FirstOrderModel fom);
 
+	public List<UMember> findUMemberByOpenId(String openId);
 }

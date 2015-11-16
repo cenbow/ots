@@ -1558,6 +1558,18 @@ public class DateUtils extends Object {
 	    return days.intValue();
 	}
 
+    /**
+     * 计算两个时间的时间差多少秒
+     * @param day1
+     * @param day2
+     * @return
+     */
+    public static int diffSecond(Date day1, Date day2) {
+        long diff = day2.getTime() - day1.getTime();
+        Long days = diff / 1000;
+        return days.intValue();
+    }
+
     public static long calDiffTime(Date startDate,Date endDate, Time startTime, Time endTime) {
         Calendar cal=Calendar.getInstance();
         java.util.Date sysTime = cal.getTime();

@@ -21,6 +21,9 @@ public class PmsCheckinUserService {
 		} else {
 			pmsCheckinUser.set("id", oldCheckinUser.getLong("id"));
 			pmsCheckinUser.set("updatetime", DateUtils.createDate());
+			if(pmsCheckinUser.get("isscan") != null){
+				pmsCheckinUser.remove("isscan");
+			}
 			pmsCheckinUser.update();
 		}
 		logger.info("PmsCheckinUserService::PmsCheckinUser::saveOrUpdatePmsInCheckUser::end");

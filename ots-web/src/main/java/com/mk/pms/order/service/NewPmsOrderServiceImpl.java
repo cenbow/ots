@@ -147,6 +147,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 						checkinUser.set("cardid", user.getString("idno"));
 						checkinUser.set("pmsRoomOrderNo", customNo.get("customeno"));
 						checkinUser.set("freqtrv", user.getString("ispermanent"));
+						checkinUser.set("isscan", StringUtils.defaultIfBlank(user.getString("isscan"), null));
 						// 补上酒店id
 						checkinUser.set("Hotelid", hotelId);
 

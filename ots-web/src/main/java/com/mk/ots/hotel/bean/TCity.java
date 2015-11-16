@@ -32,6 +32,8 @@ public class TCity extends BizModel<TCity> implements Serializable{
 	private String querycityname; //20150729 add
 	private String pinyin;//拼音 全小写
 	private String py;//拼音首字母 全小写
+
+	private Integer level;//城市等级
 	
 	
 	public Integer getCityid() {
@@ -149,6 +151,14 @@ public class TCity extends BizModel<TCity> implements Serializable{
 	public void setQuerycityname(String querycityname) {
 		this.querycityname = querycityname;
 	}
-	
-	
+
+	public Integer getLevel() {
+		return level;
+	}
+
+	public void setLevel(Integer level) {
+		this.level = level;
+	}
+
+
 }
