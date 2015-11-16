@@ -1924,7 +1924,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				logger.info("查询酒店: {}眯客价耗时: {}ms.", es_hotelid, times);
 
 				BigDecimal minPrice = new BigDecimal(prices[0]);
-				Integer hotelId = Integer.valueOf(hotelid);
+				Integer hotelId = Integer.valueOf(es_hotelid);
 				Double tempMinPromoPrice = roomSaleService.getHotelMinPromoPrice(hotelId);
 
 				BigDecimal minPromoPrice = new BigDecimal(tempMinPromoPrice);
