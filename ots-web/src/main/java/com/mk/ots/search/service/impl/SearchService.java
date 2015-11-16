@@ -1349,7 +1349,7 @@ public class SearchService implements ISearchService {
 				Long times = endTime - startTime;
 				logger.info("查询酒店: {}眯客价耗时: {}ms.", es_hotelid, times);
 				BigDecimal minPrice = new BigDecimal(prices[0]);
-				Integer hotelId = Integer.valueOf(hotelid);
+				Integer hotelId = Integer.valueOf(es_hotelid);
 				Double tempMinPromoPrice = roomSaleService.getHotelMinPromoPrice(hotelId);
 
 				BigDecimal minPromoPrice = new BigDecimal(tempMinPromoPrice);
@@ -1471,7 +1471,7 @@ public class SearchService implements ISearchService {
 			rtnMap.put("hotel", hotels);
 		} catch (Exception e) {
 			logger.error("failed to readonlyOtsHotelListFromEsStore...", e);
-
+			e.printStackTrace();
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
