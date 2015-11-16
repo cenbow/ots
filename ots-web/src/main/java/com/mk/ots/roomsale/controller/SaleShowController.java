@@ -43,16 +43,14 @@ public class SaleShowController {
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		if (Strings.isNullOrEmpty(bean.getCityid())) {
 			rtnMap.put("errmsg", "城市编码不能为空");
-			rtnMap.put("errcode", 553);
-			rtnMap.put("success", true);
+			rtnMap.put("errcode", -1);
 			logger.info("【/promo/queryinfo】 end cityId is null...");
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
 		List<TRoomSaleCity> roomSaleCityList = tRoomSaleShowConfigService.queryTRoomSaleCity(bean.getCityid());
 		if (CollectionUtils.isEmpty(roomSaleCityList)) {
 			rtnMap.put("errmsg", "该城市没有参加特价活动");
-			rtnMap.put("errcode", 553);
-			rtnMap.put("success", true);
+			rtnMap.put("errcode", -1);
 			logger.info("【/promo/queryinfo】 end is not promo...");
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
@@ -66,11 +64,11 @@ public class SaleShowController {
 				resultList.add(saleShowConfigList.get(0));
 			}
 		}
-		
+
 		bean.setPromoid(-1);
 		bean.setIsSpecial("F");
 		bean.setNormalId(1);
-		
+
 		List<RoomSaleShowConfigDto> troomSaleShowConfigList = tRoomSaleShowConfigService
 				.queryRoomSaleShowConfigByParams(bean);
 		resultList.addAll(troomSaleShowConfigList);
@@ -98,9 +96,8 @@ public class SaleShowController {
 
 		rtnMap.put("promo", promoList);
 		logger.info(" query  troomSaleShowConfigList ", troomSaleShowConfigList);
-		rtnMap.put("errmsg", null);
+		rtnMap.put("errmsg", "");
 		rtnMap.put("errcode", 0);
-		rtnMap.put("success", true);
 		logger.info("【/promo/queryinfo】 end...");
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
