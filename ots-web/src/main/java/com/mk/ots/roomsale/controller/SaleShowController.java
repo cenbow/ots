@@ -66,8 +66,11 @@ public class SaleShowController {
 				resultList.add(saleShowConfigList.get(0));
 			}
 		}
-		bean.setPromoid(null);
-		bean.setIsSpecial("T");
+		
+		bean.setPromoid(-1);
+		bean.setIsSpecial("F");
+		bean.setNormalId(1);
+		
 		List<RoomSaleShowConfigDto> troomSaleShowConfigList = tRoomSaleShowConfigService
 				.queryRoomSaleShowConfigByParams(bean);
 		resultList.addAll(troomSaleShowConfigList);
