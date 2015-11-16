@@ -503,7 +503,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			logger.info("search hotel success: total {} found. current pagesize:{}", totalHits,
 					searchResults != null ? searchResults.size() : 0);
 
-			rtnMap.put("themes", searchResults);
+			rtnMap.put("hotel", searchResults);
 		} catch (Exception e) {
 			logger.error("failed to readonlyOtsHotelListFromEsStore...", e);
 
@@ -516,7 +516,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private boolean isThemed(Integer hotelId, Map<String, Object> roomtype) {
 		try {
 			TRoomSaleConfig config = roomsaleConfigMapper
-					.queryRoomSaleConfigByType((Integer) roomtype.get("roomtypeid"));
+					.queryRoomSaleConfigByType(((Long) roomtype.get("roomtypeid")).intValue());
 			if (config != null) {
 				return true;
 			}
