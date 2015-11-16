@@ -22,6 +22,7 @@ public class HotelQuerylistReqEntity extends ParamBaseBean implements Serializab
 	 */
 	private static final long serialVersionUID = 8392856964959038410L;
 
+	private String token;
 	private String hotelid;
 	private String hotelname;
 	private String hoteladdr;
@@ -138,6 +139,14 @@ public class HotelQuerylistReqEntity extends ParamBaseBean implements Serializab
 	private String promotype;
 	
 	
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
 	public String getPromoid() {
 		return promoid;
 	}

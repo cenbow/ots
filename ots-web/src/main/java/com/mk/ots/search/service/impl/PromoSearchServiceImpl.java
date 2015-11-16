@@ -70,6 +70,7 @@ import com.mk.ots.hotel.model.TDistrictModel;
 import com.mk.ots.hotel.model.THotelModel;
 import com.mk.ots.hotel.service.CashBackService;
 import com.mk.ots.hotel.service.CityService;
+import com.mk.ots.hotel.service.HotelCollectionService;
 import com.mk.ots.hotel.service.HotelPriceService;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomstateService;
@@ -144,6 +145,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 */
 	@Autowired
 	private RoomstateService roomstateService;
+
+	@Autowired
+	private HotelCollectionService hotelCollectionService;
 
 	@Autowired
 	private RoomSaleConfigInfoService roomSaleConfigInfoService;
@@ -1607,6 +1611,18 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return hotelIds;
 	}
 
+	private String findCollection(String token, Long hotelid) throws Exception {
+		String isCollected = "F";
+
+		try {
+			Map<String, Object> result = hotelCollectionService.readonlyHotelISCollected(token, hotelid);
+		} catch (Exception ex) {
+
+		}
+
+		return isCollected;
+	}
+
 	/**
 	 * 酒店综合查询返回酒店列表数据
 	 * 
@@ -2210,6 +2226,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				String hotelvc = Constant.STR_TRUE;
 				result.put("hotelvc", hotelvc);
+
+				if (StringUtils.isNotBlank(reqentity.getToken())) {
+					try {
+						String collectionState = findCollection(reqentity.getToken(), Long.valueOf(hotelid));
+						result.put("collectionstate", collectionState);
+					} catch (Exception ex) {
+						result.put("collectionstate", "");
+
+						logger.warn(String.format("invalid collectionstate for hotelid:%s", hotelid), ex);
+					}
+				}
 
 				// 添加接口返回数据到结果集
 				hotels.add(result);
