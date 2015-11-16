@@ -71,6 +71,7 @@ public class QiekeRuleService {
     @Autowired
     private THotelMapper tHotelMapper;
 
+
     @Autowired
     private IPromoService promoService;
 
