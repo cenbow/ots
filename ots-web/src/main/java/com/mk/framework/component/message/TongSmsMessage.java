@@ -84,11 +84,11 @@ public class TongSmsMessage extends AbstractMessage {
         WebServiceXmlClientUtil.setServerUrl(this.api);
         String respInfo = null;
         // 发送短信
-        this.logger.error("ctc smsmessage send beging:\n");
+        this.logger.info("ctc smsmessage send beging:\n");
         respInfo = WebServiceXmlClientUtil.sendSms(sn, pwd, rrid.toString(),
                 mobile, content, content_sign, subcode, stime);
-        this.logger.error(respInfo);
-        this.logger.error("ctc smsmessage send beging end.\n");
+        this.logger.info(respInfo);
+        this.logger.info("ctc smsmessage send end.\n");
         return respInfo;
 //		// 获取状态报告
 //		System.out.println("*************状态报告*************");
@@ -116,5 +116,22 @@ public class TongSmsMessage extends AbstractMessage {
 //				phone);
 //		System.out.println(_respInfo);
 	}
+
+    private String getReport(String mobile, Long rrid) {
+        if (StringUtils.isBlank(mobile)) {
+            throw MessageErrorEnum.mobileNotEmpty.getMyException();
+        }
+
+        // 服务端地址，默认可不设置
+        WebServiceXmlClientUtil.setServerUrl(this.api);
+        String respInfo = null;
+		// 获取状态报告
+        this.logger.info("ctc getReport beging:\n");
+        respInfo = WebServiceXmlClientUtil.getReport(sn, pwd, rrid.toString(),
+                mobile);
+        this.logger.info("msgid respInfo:"+respInfo);
+        this.logger.info("ctc getReport end.\n");
+        return respInfo;
+    }
 
 }
