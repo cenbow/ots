@@ -735,13 +735,13 @@ public class PromoService implements IPromoService {
                     if (DateUtils.formatDate(new Date()).equals(DateUtils.formatDate(member.getCreatetime()))) {
                         //是当天注册的，说明是新用户，那么就用新用户的奖品概率
                         for(BPrize tmp: proList){
-                            if(tmp.getNum()==-1 || tmp.getNum()>0){
+                            if((tmp.getNum()==-1 || tmp.getNum()>0)&& tmp.getNewweight() > 0){
                                 rwiList.add(new RandomWeightItem<BPrize>(tmp,Integer.parseInt(tmp.getNewweight().toString())));
                             }
                         }
                     }else {//老用户
                         for(BPrize tmp: proList){
-                            if(tmp.getNum()==-1 || tmp.getNum()>0){
+                            if((tmp.getNum()==-1 || tmp.getNum()>0) && tmp.getWeight() > 0){
                                 rwiList.add(new RandomWeightItem<BPrize>(tmp,Integer.parseInt(tmp.getWeight().toString())));
                             }
                         }
@@ -749,7 +749,7 @@ public class PromoService implements IPromoService {
                 }else { //第三方平台
                    // if (OSTypeEnum.H.getId().equals(ostype)) {
                         for(BPrize tmp: proList){
-                            if(tmp.getNum()==-1 || tmp.getNum()>0){
+                            if((tmp.getNum()==-1 || tmp.getNum()>0)&& tmp.getOtherweight() > 0 ){
                                 rwiList.add(new RandomWeightItem<BPrize>(tmp,Integer.parseInt(tmp.getOtherweight().toString())));
                             }
                         }
