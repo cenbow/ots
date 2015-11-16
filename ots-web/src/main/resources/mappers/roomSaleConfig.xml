@@ -219,6 +219,13 @@
         FROM  t_room_sale_config
         where   id = #{id}
     </select>
+    <select id="queryRoomSaleConfigByType" resultMap="roomSaleConfig" parameterType="java.lang.Integer">
+        SELECT
+        id,<include refid="Base_Column_List"/>
+        FROM  t_room_sale_config
+        where   roomTypeId = #{roomTypeId} AND tag = 1
+        limit 1
+    </select>    
     <sql id="Base_view_Column_List" >
         hotelId, roomId, roomTypeId,saleType,saleValue,costPrice,num,saleName,settleValue,settleType,valid,
         styleType,started,saleConfigInfoId,createTime,createBy,updateTime,updateBy,saleRoomTypeId

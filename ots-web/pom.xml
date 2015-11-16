@@ -1279,6 +1279,7 @@
 
         <profile>
             <id>dump-simulation</id>
+
             <properties>
                 <label>product</label>
                 <jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
