@@ -142,9 +142,15 @@ public class RoomstateQuerylistRespEntity implements Serializable {
         private String promodustartsec;
         private String promoduendsec;
         private Integer promostatus;
-
+        private List<Object> roomtypepic;
         
-        public String getPromostarttime() {
+        public List<Object> getRoomtypepic() {
+			return roomtypepic;
+		}
+		public void setRoomtypepic(List<Object> roomtypepic) {
+			this.roomtypepic = roomtypepic;
+		}
+		public String getPromostarttime() {
 			return promostarttime;
 		}
 		public void setPromostarttime(String promostarttime) {
