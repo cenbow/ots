@@ -75,6 +75,7 @@ import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.inner.service.IOtsAdminService;
 import com.mk.ots.mapper.PositionTypeMapper;
+import com.mk.ots.mapper.RoomSaleConfigMapper;
 import com.mk.ots.mapper.SAreaInfoMapper;
 import com.mk.ots.mapper.SLandMarkMapper;
 import com.mk.ots.mapper.SSubwayMapper;
@@ -88,6 +89,7 @@ import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
 import com.mk.ots.restful.output.SearchPositionsDistanceRespEntity;
 import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
 import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
+import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
@@ -200,6 +202,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private final SimpleDateFormat defaultFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 
 	private final int minItemCount = 5;
+
+	@Autowired
+	private RoomSaleConfigMapper roomsaleConfigMapper;
 
 	/*
 	 * 获取 区域位置类型
@@ -509,7 +514,18 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	private boolean isThemed(Integer hotelId, Map<String, Object> roomtype) {
-		return true;
+		try {
+			TRoomSaleConfig config = roomsaleConfigMapper
+					.queryRoomSaleConfigByType((Integer) roomtype.get("roomtypeid"));
+			if (config != null) {
+				return true;
+			}
+		} catch (Exception ex) {
+			logger.warn("failed to queryRoomSaleConfigByType with hotelId");
+			return false;
+		}
+
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1563,7 +1579,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			List<Map<String, Object>> singleRoomType = new ArrayList<Map<String, Object>>();
 			singleRoomType.add(roomtype);
 			hotel.put("roomtype", roomtype);
-			
+
 			hotelIds.add(hotel);
 		}
 
