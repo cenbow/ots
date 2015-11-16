@@ -504,6 +504,7 @@ public class OrderServiceImpl implements OrderService {
 			// 是否设置系统取消
 			if ("2".equals(order.getStr("cancelType"))) {
 				logger.info("用户回退取消订单:cancelType:{},orderid:{}", order.getStr("cancelType"), order.getId());
+                order.setUpdateTime(new Date());
 				order.setOrderStatus(OtaOrderStatusEnum.CancelBySystem.getId());
 			}
 			order.update();
@@ -3496,6 +3497,7 @@ public class OrderServiceImpl implements OrderService {
         // ots解房
         unLockRoom(order);
   	}
+      order.setUpdateTime(new Date());
       order.setOrderStatus(OtaOrderStatusEnum.CancelBySystem.getId());
       order.update();
       //修改已使用券状态
