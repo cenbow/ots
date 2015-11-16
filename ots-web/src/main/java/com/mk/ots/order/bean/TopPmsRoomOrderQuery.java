@@ -10,6 +10,7 @@ import java.util.List;
  * Created by Thinkpad on 2015/11/12.
  */
 public class TopPmsRoomOrderQuery {
+    private Long hotelId;
     private String todayStr;
     private String yesterdayStr;
     private Integer limitBegin;
@@ -72,5 +73,13 @@ public class TopPmsRoomOrderQuery {
 
     public void setBasePageSize(Integer basePageSize) {
         this.basePageSize = basePageSize;
+    }
+
+    public Long getHotelId() {
+        return hotelId;
+    }
+
+    public void setHotelId(Long hotelId) {
+        this.hotelId = hotelId;
     }
 }
