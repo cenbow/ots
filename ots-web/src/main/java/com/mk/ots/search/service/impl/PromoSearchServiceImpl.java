@@ -498,6 +498,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Cat.logEvent("MismatchKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
 			}
 
+			if (logger.isInfoEnabled()) {
+				logger.info("about to reorderSearchResults");
+			}
+
 			List<Map<String, Object>> searchResults = this.reorderSearchResults(searchHits.getHits(), reqentity);
 
 			logger.info("search hotel success: total {} found. current pagesize:{}", totalHits,
@@ -521,7 +525,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				return true;
 			}
 		} catch (Exception ex) {
-			logger.warn("failed to queryRoomSaleConfigByType with hotelId");
+			logger.warn("failed to queryRoomSaleConfigByType with hotelId", ex);
 			return false;
 		}
 
@@ -1384,7 +1388,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private List<Map<String, Object>> reorderSearchResults(SearchHit[] hits, HotelQuerylistReqEntity reqEntity)
 			throws Exception {
 		List<Map<String, Object>> searchResults = new ArrayList<Map<String, Object>>();
-		Integer promoType = Integer.parseInt(reqEntity.getPromotype());
+
+		Integer promoType = 0;
+
+		try {
+			promoType = Integer.parseInt(reqEntity.getPromotype());
+		} catch (Exception ex) {
+			throw new Exception(String.format("invalid promotype %s", reqEntity.getPromotype()), ex);
+		}
 
 		Map<String, Object> hotelIdMap = new HashMap<String, Object>();
 
@@ -1392,6 +1403,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			SearchHit hit = hits[i];
 			Map<String, Object> result = hit.getSource();
 			String es_hotelid = String.valueOf(result.get("hotelid"));
+
+			if (StringUtils.isBlank(es_hotelid)) {
+				logger.warn("hotelid is empty, skip");
+				continue;
+			}
+
 			hotelIdMap.put(es_hotelid, result);
 
 			String isonpromo = (String) result.get("isonpromo");
@@ -1568,6 +1585,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			// 添加接口返回数据到结果集
 			searchResults.add(result);
+		}
+
+		if (logger.isInfoEnabled()) {
+			logger.info("about to groupThemes");
 		}
 
 		List<Map<String, Object>> roomtypeGrouped = groupThemes(searchResults);
@@ -2075,13 +2096,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Integer hotelId = Integer.valueOf(es_hotelid);
 				Double tempMinPromoPrice = roomSaleService.getHotelMinPromoPrice(hotelId);
 
-				if (tempMinPromoPrice != null){
+				if (tempMinPromoPrice != null) {
 					BigDecimal minPromoPrice = new BigDecimal(tempMinPromoPrice);
-					if (minPrice.compareTo(minPromoPrice) > 0){
+					if (minPrice.compareTo(minPromoPrice) > 0) {
 						minPrice = minPromoPrice;
 					}
 				}
-
 
 				result.put("minprice", minPrice);
 
@@ -2928,8 +2948,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			bfSql.append(
 					"select a.id as roomtypeid, a.name as roomtypename, a.cost as roomtypepmsprice, a.bednum,a.roomnum, "
 							+ "a.cost as roomtypeprice,b.maxarea,b.minarea,b.pics,b.bedtype,b.bedsize as bedlength, d.name as bedtypename")
-					.append(", config.saleType as promotype, info.saleTypeId as promoid  ").append("  from t_roomtype a ")
-					.append(" join t_roomtype_info b on a.id = b.roomtypeid")
+					.append(", config.saleType as promotype, info.saleTypeId as promoid  ")
+					.append("  from t_roomtype a ").append(" join t_roomtype_info b on a.id = b.roomtypeid")
 					.append(" join t_bedtype d on b.bedtype = d.id")
 					.append(" left join t_room_sale_config config on b.roomtypeid = config.roomtypeid ")
 					.append(" join t_room_sale_config_info info on config.saleConfigInfoId = info.id ")
@@ -2943,7 +2963,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				roomtypelist.add(bean.getColumns());
 			}
 		} catch (Exception e) {
-			logger.error("getRoomtypeList method error:\n" + e.getMessage());
+			logger.error("getRoomtypeList method error...", e);
 			return roomtypelist;
 		}
 		return roomtypelist;
