@@ -216,6 +216,7 @@ public class BillOrderDAO {
                 + "CASE "
                 + "WHEN isnull(o.spreadUser) THEN "
                 + "1 " //非切客
+                + "when spreadUser = -1 then 3 " //新切客
                 + "ELSE "
                 + "2 " //切客 有值
                 + "END "
@@ -268,6 +269,7 @@ public class BillOrderDAO {
                 + "CASE "
                 + "WHEN isnull(o.spreadUser) THEN "
                 + "1 " //非切客
+                + "when spreadUser = -1 then 3 " //新切客
                 + "ELSE "
                 + "2 " //切客 有值
                 + "END "
@@ -471,6 +473,8 @@ public class BillOrderDAO {
                         } else{
                             servicecost = new BigDecimal(0);
                         }
+                    }else if(spreaduser == 3L){
+                        servicecost = new BigDecimal(0);
                     }
                 }
                 map.put("servicecost", servicecost);
