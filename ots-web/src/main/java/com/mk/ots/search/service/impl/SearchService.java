@@ -1351,11 +1351,13 @@ public class SearchService implements ISearchService {
 				BigDecimal minPrice = new BigDecimal(prices[0]);
 				Integer hotelId = Integer.valueOf(es_hotelid);
 				Double tempMinPromoPrice = roomSaleService.getHotelMinPromoPrice(hotelId);
-
-				BigDecimal minPromoPrice = new BigDecimal(tempMinPromoPrice);
-				if (minPrice.compareTo(minPromoPrice) > 0){
-					minPrice = minPromoPrice;
+                if (tempMinPromoPrice != null){
+					BigDecimal minPromoPrice = new BigDecimal(tempMinPromoPrice);
+					if (minPrice.compareTo(minPromoPrice) > 0){
+						minPrice = minPromoPrice;
+					}
 				}
+
 				result.put("minprice", minPrice);
 				result.put("promoprice", minPrice);
 				result.put("minpmsprice", new BigDecimal(prices[1]));

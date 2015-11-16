@@ -1927,10 +1927,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Integer hotelId = Integer.valueOf(es_hotelid);
 				Double tempMinPromoPrice = roomSaleService.getHotelMinPromoPrice(hotelId);
 
-				BigDecimal minPromoPrice = new BigDecimal(tempMinPromoPrice);
-				if (minPrice.compareTo(minPromoPrice) > 0){
-					minPrice = minPromoPrice;
+				if (tempMinPromoPrice != null){
+					BigDecimal minPromoPrice = new BigDecimal(tempMinPromoPrice);
+					if (minPrice.compareTo(minPromoPrice) > 0){
+						minPrice = minPromoPrice;
+					}
 				}
+
 
 				result.put("minprice", minPrice);
 
