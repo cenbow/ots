@@ -83,6 +83,7 @@ public class QiekeRuleService {
 
     @Autowired
     private IUnionidLogService unionidLogService;
+    @Autowired
     private IPromoService promoService;
 
     @Autowired
