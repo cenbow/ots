@@ -43,7 +43,10 @@ import java.util.*;
 @Service
 public class QiekeRuleService {
     private static Logger logger = LoggerFactory.getLogger(QiekeRuleService.class);
-
+    /**检查用的坐标是否为空开关， true：则检查 false：不检查**/
+    private final static boolean IOS_CHECK_USER_ADDRESS_IS_NULL_SWITCH = true;
+    /**检查用的坐标距离开关， true：则检查 false：不检查**/
+    private final static boolean IOS_CHECK_USER_ADDRESS_DISTANCE_SWITCH = false;
     @Autowired
     private OrderService orderService;
     @Autowired
@@ -377,13 +380,35 @@ public class QiekeRuleService {
         THotelModel tHotelModel = tHotelMapper.selectById(otaOrder.getHotelId());
         BigDecimal userlongitude = otaOrder.getBigDecimal("userlongitude");
         BigDecimal userlatitude = otaOrder.getBigDecimal("userlatitude");
-        if(userlatitude == null || userlongitude == null) {
+        //地址开关
+        Integer orderMethod = otaOrder.getOrderMethod();
+        if (orderMethod ==  OrderMethodEnum.IOS.getId()) {
+            return checkUserAdders(IOS_CHECK_USER_ADDRESS_IS_NULL_SWITCH, IOS_CHECK_USER_ADDRESS_DISTANCE_SWITCH,
+                    userlongitude, userlatitude, tHotelModel.getLongitude(), tHotelModel.getLatitude());
+        }else{
+            return checkUserAdders(true, true,
+                    userlongitude, userlatitude, tHotelModel.getLongitude(), tHotelModel.getLatitude());
+        }
+    }
+
+    public OtaFreqTrvEnum checkUserAdders(boolean checkAddressIsNullSwitchOpen, boolean checkDistanceSwitchOpen,
+                                          BigDecimal userLongitude, BigDecimal userLatitude, BigDecimal hotelLongitude, BigDecimal hotelLatitude){
+        if(!checkAddressIsNullSwitchOpen){
+            if (userLongitude == null || userLatitude == null){
+                return OtaFreqTrvEnum.L1;
+            }
+        }
+        if(!checkDistanceSwitchOpen){
+            return OtaFreqTrvEnum.L1;
+        }
+        if(hotelLongitude == null ||  hotelLatitude== null) {
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }
-        if (tHotelModel.getLatitude() == null || tHotelModel.getLongitude() == null){
+        if (userLongitude == null || userLatitude == null){
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }
-        double distance = DistanceUtil.distance(tHotelModel.getLongitude().doubleValue(), tHotelModel.getLatitude().doubleValue(), userlongitude.doubleValue(), userlatitude.doubleValue());
+        double distance = DistanceUtil.distance(hotelLongitude.doubleValue(), hotelLatitude.doubleValue(),
+                userLongitude.doubleValue(), userLatitude.doubleValue());
         if(distance > SearchConst.SEARCH_RANGE_1_KM){
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }

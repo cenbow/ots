@@ -200,11 +200,11 @@ public class OrderServiceImpl implements OrderService {
     private RoomSaleConfigInfoMapper roomSaleConfigInfoMapper;
     @Autowired
     private QiekeRuleService qiekeRuleService;
+    @Autowired
+    private PropertiesUtils propertiesUtils;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
-    private static final long TIME_FOR_FIFTEEN = Long.parseLong(PropertyConfigurer.getProperty("transferCheckinUsernameTime"));
-    private static final int time_for_fifteen=(int) (TIME_FOR_FIFTEEN/1000/60);
-    
+
     @Override
     public OtaOrder updateOrderPms(OtaOrder order) {
         for (OtaRoomOrder roomOrder : order.getRoomOrderList()) {
@@ -2842,7 +2842,7 @@ public class OrderServiceImpl implements OrderService {
 		Date checkintime = pmsRoomOrder.getDate("CheckInTime");
 		Date createtime = otaorder.getDate("Createtime");
 		long temp = checkintime.getTime() - createtime.getTime(); // 相差毫秒数
-		if (temp < OrderServiceImpl.TIME_FOR_FIFTEEN) {
+		if (temp < propertiesUtils.getTransferCheckinUsernameTime()) {
 			OrderServiceImpl.logger.info("小于15分钟" + otaorder.getId());
 			otaorder.setSpreadUser(otaorder.getHotelId());
 			// 判断入住人是否常住人
@@ -4462,7 +4462,7 @@ public class OrderServiceImpl implements OrderService {
             if(checkintime != null && createtime != null){
                 long temp = checkintime.getTime() - createtime.getTime(); // 相差毫秒数
                 logger.info("时间差 = "+temp+",orderid = "+otaorder.getId());
-                if (temp < OrderServiceImpl.TIME_FOR_FIFTEEN) { // 负值也算切客
+                if (temp < propertiesUtils.getTransferCheckinUsernameTime()) { // 负值也算切客
                     otaorder.setSpreadUser(otaorder.getHotelId());
 
                     // 判断入住人是否常住人

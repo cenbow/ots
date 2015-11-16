@@ -17,7 +17,7 @@ public enum OtaFreqTrvEnum {
 	CARD_ID_NOT_FIRST("50","身份证号不是第一次使用"),
 	ZHIFU_NOT_FIRST("70","支付账号不是第一次使用"),
 	OUT_OF_RANG("90","下单位置不在酒店1公里范围内"),
-	CHECKIN_LESS4("100","入住4小时内"),
+	CHECKIN_LESS4("100","入住30分钟内"),
 	OVER_RANG("110","结算超出定额"),
 	NOT_CHECKIN("120","未入住"),
 	L1("-1", "无原因");
