@@ -42,7 +42,6 @@
               AND bor.hotelid = bp.hotelid
               AND bor.pmsroomorderno = bp.pmsroomorderno
               AND bo.orderstatus IN (190, 200) and bo.spreadUser = -1
-              AND spreadUser
               AND bp.checkintime < date_sub(bp.checkouttime,INTERVAL 30 MINUTE)
           ) bo ON odr.id = bo.id
           SET odr.InvalidReason = #{invalidReason}
