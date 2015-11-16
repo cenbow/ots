@@ -206,4 +206,14 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		}
 		return roomSaleToIndexList;
 	}
+
+	public Double getHotelMinPromoPrice(Integer hotelid){
+		TRoomSaleConfig result = roomSaleConfigMapper.getHotelMinPromoPrice(hotelid);
+		if (result != null){
+			return result.getSaleValue();
+		}else {
+			return null;
+		}
+
+	}
 }

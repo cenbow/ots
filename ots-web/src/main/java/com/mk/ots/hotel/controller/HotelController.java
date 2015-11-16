@@ -229,6 +229,8 @@ public class HotelController {
 			distanceQueryList.setStartdateday(strCurDay);
 			distanceQueryList.setEnddateday(strNextDay);
 			distanceQueryList.setOrderby(HotelSortEnum.DISTANCE.getId());
+			distanceQueryList.setPillowlatitude(hotelEntity.getUserlatitude());
+			distanceQueryList.setPillowlongitude(hotelEntity.getUserlongitude());
 			distanceQueryList.setIspromoonly(false);
 			distanceQueryList.setPage(FrontPageEnum.page.getId());
 			distanceQueryList.setLimit(FrontPageEnum.limit.getId());
@@ -1141,5 +1143,15 @@ public class HotelController {
 	// return new
 	// ResponseEntity<Map<String,Object>>(hotelService.readonlyClearEsHotelNotInTHotel(citycode),HttpStatus.OK);
 	// }
+
+
+	@RequestMapping(value="/hotel/test")
+	public ResponseEntity<Map<String, Object>> clearESHotelNotInThotel(Integer
+	hotelid) {
+		HashMap<String, Object> rntMap = new HashMap<>();
+		rntMap.put("minprice",roomSaleService.getHotelMinPromoPrice(hotelid) );
+	return new
+	ResponseEntity<Map<String,Object>>(rntMap,HttpStatus.OK);
+	}
 
 }
