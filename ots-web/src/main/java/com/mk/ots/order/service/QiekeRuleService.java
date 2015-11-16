@@ -78,7 +78,6 @@ public class QiekeRuleService {
     @Autowired
     private PayDAO payDAO;
 
-
     @Autowired
     private IUnionidLogService unionidLogService;
     private IPromoService promoService;
