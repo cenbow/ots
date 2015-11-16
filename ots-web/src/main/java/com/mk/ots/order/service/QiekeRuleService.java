@@ -434,12 +434,29 @@ public class QiekeRuleService {
     }
 
     private void updateQieKeIncome(String yesterdayStr, String todayStr) {
-        TopPmsRoomOrderQuery topPmsRoomOrderQuery = new TopPmsRoomOrderQuery();
-        topPmsRoomOrderQuery.setCount(Constant.QIE_KE_TOP_NUM);
-        topPmsRoomOrderQuery.setLimitBegin(0);
-        topPmsRoomOrderQuery.setLimitEen(topPmsRoomOrderQuery.getBasePageSize());
-        topPmsRoomOrderQuery.setYesterdayStr(yesterdayStr);
-        topPmsRoomOrderQuery.setTodayStr(todayStr);
+        List<PmsRoomOrder>  hotelIdList = pmsRoomOrderDao.getHotelIdByCheckInTime(yesterdayStr, todayStr);
+        if(CollectionUtils.isEmpty(hotelIdList)){
+            logger.info(String.format("updateQieKeIncome hotelIdList is empty. params yesterdayStr[%s] todayStr[%s]", yesterdayStr, todayStr));
+            return;
+        }
+        for(PmsRoomOrder pmsRoomOrder : hotelIdList){
+            Long hotelId =  pmsRoomOrder.getLong("hotelId");
+            if(hotelId == null){
+                continue;
+            }
+            TopPmsRoomOrderQuery topPmsRoomOrderQuery = new TopPmsRoomOrderQuery();
+            topPmsRoomOrderQuery.setCount(Constant.QIE_KE_TOP_NUM);
+            topPmsRoomOrderQuery.setLimitBegin(0);
+            topPmsRoomOrderQuery.setLimitEen(topPmsRoomOrderQuery.getBasePageSize());
+            topPmsRoomOrderQuery.setYesterdayStr(yesterdayStr);
+            topPmsRoomOrderQuery.setTodayStr(todayStr);
+            topPmsRoomOrderQuery.setHotelId(hotelId);
+            updateQieKeIncome(topPmsRoomOrderQuery);
+        }
+
+    }
+
+    private void updateQieKeIncome(TopPmsRoomOrderQuery topPmsRoomOrderQuery) {
         //查找每日top订单
         List<PmsRoomOrder> pmsRoomOrderList = getTopPmsRoomOrder(topPmsRoomOrderQuery);
         logger.info(String.format("updateQieKeIncome top[%s] top pmsRoomOrderList size[%s]", Constant.QIE_KE_TOP_NUM.toString(), pmsRoomOrderList.size()+""));
@@ -472,7 +489,7 @@ public class QiekeRuleService {
 
     public List<PmsRoomOrder> getTopPmsRoomOrder(TopPmsRoomOrderQuery topPmsRoomOrderQuery){
         List<PmsRoomOrder> pmsRoomOrderList = pmsRoomOrderDao.getPmsRoomOrderByCheckInTime(topPmsRoomOrderQuery.getYesterdayStr(),
-                topPmsRoomOrderQuery.getTodayStr(),topPmsRoomOrderQuery.getLimitBegin(), topPmsRoomOrderQuery.getLimitEen());
+                topPmsRoomOrderQuery.getTodayStr(), topPmsRoomOrderQuery.getHotelId(), topPmsRoomOrderQuery.getLimitBegin(), topPmsRoomOrderQuery.getLimitEen());
         if(CollectionUtils.isEmpty(pmsRoomOrderList)){
             return topPmsRoomOrderQuery.getPmsRoomOrderList();
         }
