@@ -717,7 +717,11 @@ public class TicketController {
 			}
 		}
 		boolean trueOrFalse = (tickets!=null && tickets.size()>0) || (prizeInfo!=null && prizeInfo.size()>0) ;
-
+		if (trueOrFalse){
+			Cat.logEvent("KickEggFromH5",usermark,"SUCCESS",prizeInfo.toString());
+		}else {
+			Cat.logEvent("KickEggFromH5",usermark,"FAILED",prizeInfo.toString());
+		}
 		rtnMap.put("success", trueOrFalse);
 		rtnMap.put("tickets", tickets);
 		rtnMap.put("others", prizeInfo);

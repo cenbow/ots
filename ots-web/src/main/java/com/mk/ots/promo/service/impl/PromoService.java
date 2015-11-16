@@ -1,5 +1,6 @@
 package com.mk.ots.promo.service.impl;
 
+import com.dianping.cat.Cat;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.mk.framework.exception.MyErrorEnum;
@@ -758,6 +759,8 @@ public class PromoService implements IPromoService {
 
                 }
                 if(rwiList==null || rwiList.size()==0){
+                    String msg = member == null? usermark: member.getMid().toString();
+                    Cat.logEvent("EggTicketOutAlert",msg);
                     throw MyErrorEnum.customError.getMyException("该活动的优惠券已发放完毕.");
                 }
 
