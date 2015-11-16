@@ -1369,11 +1369,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		List<Map<String, Object>> searchResults = new ArrayList<Map<String, Object>>();
 		Integer promoType = Integer.parseInt(reqEntity.getPromotype());
 
+		Map<String, Object> hotelIdMap = new HashMap<String, Object>();
+		
 		for (int i = 0; i < hits.length; i++) {
 			SearchHit hit = hits[i];
 			Map<String, Object> result = hit.getSource();
 			String es_hotelid = String.valueOf(result.get("hotelid"));
-
+			hotelIdMap.put(es_hotelid, result);
+			
 			String isonpromo = (String) result.get("isonpromo");
 			if (StringUtils.isBlank(isonpromo) || "0".equals(isonpromo)) {
 				logger.warn(String.format("hotelid %s doesn't belong to promo", es_hotelid));
@@ -1550,6 +1553,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			searchResults.add(result);
 		}
 
+		List<Map<String, Object>> roomtypeGrouped = groupThemes(searchResults);
+		
+		
+		
 		return groupThemes(searchResults);
 	}
 

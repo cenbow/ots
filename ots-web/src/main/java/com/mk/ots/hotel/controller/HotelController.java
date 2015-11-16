@@ -432,7 +432,7 @@ public class HotelController {
 			 * check if theme is being searched
 			 */
 			String promoType = reqentity.getPromotype();
-			if (StringUtils.isNotBlank(promoType) && promoType.equals("16")) {
+			if (StringUtils.isNotBlank(promoType) && promoType.equals("1")) {
 				rtnMap = promoSearchService.searchThemes(reqentity);
 				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
 			} else {
