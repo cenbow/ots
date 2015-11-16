@@ -525,6 +525,7 @@ public class HotelController {
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 
+	
 	/**
 	 * 首页查询接口 根据cityid 获得搜索获得信息.
 	 *
