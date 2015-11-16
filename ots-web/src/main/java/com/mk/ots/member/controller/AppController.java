@@ -105,7 +105,6 @@ public class AppController {
 	private OtsCareProducer careProducer;
 
 	@Autowired
-
 	private ITicketService ticketService;
 	/**
 	 * 开学季活动id
@@ -116,6 +115,7 @@ public class AppController {
 	 */
 	public static final long  ACTIVE_CQ_KICKEGG = 23;
 
+	@Autowired
 	private IUnionidLogService unionidLogService;
 
 	/**
