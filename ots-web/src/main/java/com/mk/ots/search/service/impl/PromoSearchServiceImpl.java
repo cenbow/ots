@@ -2928,7 +2928,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			bfSql.append(
 					"select a.id as roomtypeid, a.name as roomtypename, a.cost as roomtypepmsprice, a.bednum,a.roomnum, "
 							+ "a.cost as roomtypeprice,b.maxarea,b.minarea,b.pics,b.bedtype,b.bedsize as bedlength, d.name as bedtypename")
-					.append(", config.saleType as promotype  ").append("  from t_roomtype a ")
+					.append(", config.saleType as promotype, info.saleTypeId as promoid  ").append("  from t_roomtype a ")
 					.append(" join t_roomtype_info b on a.id = b.roomtypeid")
 					.append(" join t_bedtype d on b.bedtype = d.id")
 					.append(" left join t_room_sale_config config on b.roomtypeid = config.roomtypeid ")
