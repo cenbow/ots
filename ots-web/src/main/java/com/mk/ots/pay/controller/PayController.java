@@ -8,6 +8,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.http.HTTPException;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
 import jodd.util.StringUtil;
 
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
@@ -500,13 +502,15 @@ public class PayController {
 		} catch (Exception e) {
 			orderService.changeOrderStatusByPay(longorderId, OtaOrderStatusEnum.WaitPay, PayStatusEnum.waitPay, OrderTypeEnum.YF);
 			logger.info("订单号：" + longorderId +"回滚，将其置为初始状态.异常:" + e.getMessage());
+			Cat.logEvent("/pay/create", orderid, "Error", "订单:" + orderid + ",促销代码" + promotionno + ",优惠券" + couponno + ",付款类型(1:预付，2:到付):" + paytype + ",在线支付类型(1:微信,2:支付宝,3:网银,4:其它):" + onlinepaytype);
+			Cat.logError("/pay/create error", e);
 			throw e;
 		} finally {
 			
 			logger.info("订单：" + orderid +"支付流程完毕,释放分布锁.");
 			DistributedLockUtil.releaseLock(PayLockKeyUtil.genLockKey4Pay(orderid), lockValue);
 		}
-		
+		Cat.logEvent("/pay/create", orderid, Event.SUCCESS, "订单:" + orderid + ",促销代码" + promotionno + ",优惠券" + couponno + ",付款类型(1:预付，2:到付):" + paytype + ",在线支付类型(1:微信,2:支付宝,3:网银,4:其它):" + onlinepaytype);
 		return new ResponseEntity<Map<String, Object>>(map, org.springframework.http.HttpStatus.OK);
 	}
 
@@ -584,7 +588,7 @@ public class PayController {
 		try {
 			result = payService.pmspay(otaorderid, lezhupay,operateName);
 		} catch (Exception e) {
-
+			Cat.logError("手动下发乐住币 error", e);
 			logger.error("订单:" + orderid + "下发/取消乐住币流程异常!", e);
 
 			result = ManualLuzhuRstEnum.canReTry;
@@ -595,7 +599,8 @@ public class PayController {
 		rtnMap.put("code", result.getCode());
 		rtnMap.put("success", result.getResult());
 		rtnMap.put("desc", result.getDesc());
-
+		Cat.logEvent("手动下发乐住币", orderid, Event.SUCCESS,
+				String.format("params orderid[%s], imikepay[%s], operator[%s]",orderid, imikepay, operator));
 		return new ResponseEntity<Map<String, Object>>(rtnMap, org.springframework.http.HttpStatus.OK);
 	} 
 
