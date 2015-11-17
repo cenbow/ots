@@ -1,5 +1,7 @@
 package com.mk.ots.message.service.impl;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.mk.care.kafka.common.CopywriterTypeEnum;
@@ -86,19 +88,24 @@ public class MessageService implements IMessageService {
 				logger.info("发送短信响应结果:{}", rtnstatus);
 				if(rtnstatus){
 					logger.info("发送短信成功.....{}", phone);
-					break;
+                    Cat.logEvent("send message", message.getClass().getName(), Event.SUCCESS, "phone{" + phone + "}, msgContent{" + msgContent + "}, messageTypeEnum{" + messageTypeEnum.getName() + "}");
+
+                    break;
 				}else{
-					logger.info("第{}次重新发送短信....", i+1);
-				}
+					logger.info("第{}次重新发送短信....", i + 1);
+                    Cat.logEvent("send message again", message.getClass().getName(), Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
+                }
 		    }
 			
 			if(!rtnstatus){
-				logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);	
-			}
+				logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);
+                Cat.logEvent("send message error", message.getClass().getName(), Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
+            }
 		} catch (Exception e) {
 			logger.error("send message occur error. info: {}, {}, {}.", phone, msgContent, messageTypeEnum);
 			e.printStackTrace();
-		}
+            Cat.logEvent("send message error", "", Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
+        }
 		
 
 		return rtnstatus;
