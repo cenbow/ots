@@ -227,6 +227,7 @@ public class HotelController {
 			// search hotel from elasticsearch
 			// 如果没有开始日期和截止日期，默认今住明退
 
+
 			// 最近酒店
 			HotelQuerylistReqEntity distanceQueryList = new HotelQuerylistReqEntity();
 
