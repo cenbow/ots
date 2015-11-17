@@ -443,12 +443,14 @@ public class HotelController {
 			 */
 			String promoId = reqentity.getPromoid();
 			if (StringUtils.isNotBlank(promoId)) {
-				if (HotelPromoEnum.Theme.getCode().toString().equals(promoId)) {
+				Integer promotype = promoSearchService.queryByPromoId(reqentity.getCityid(),
+						Integer.valueOf(promoId));				
+				reqentity.setPromotype(String.valueOf(promotype));
+
+				if (HotelPromoEnum.Theme.getCode().toString().equals(promoId)) {	
 					rtnMap = promoSearchService.searchThemes(reqentity);
 				} else {
-					Integer promotype = promoSearchService.queryByPromoId(reqentity.getCityid(),
-							Integer.valueOf(promoId));
-					reqentity.setPromotype(String.valueOf(promotype));
+					rtnMap = promoSearchService.readonlySearchHotels(reqentity);
 				}
 
 				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
