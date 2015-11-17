@@ -31,6 +31,16 @@ public class TCityModel {
     private String isselect;
 
     private String querycityname;
+    private Integer level;
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
 
     public Long getCityid() {
         return cityid;

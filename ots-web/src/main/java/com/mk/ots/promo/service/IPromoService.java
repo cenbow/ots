@@ -8,6 +8,7 @@ import com.mk.ots.promo.model.BPromotion;
 import com.mk.ots.promo.model.BPromotionPrice;
 import com.mk.ots.ticket.model.BPrizeInfo;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -149,4 +150,20 @@ public interface IPromoService {
     public abstract List<BPrizeInfo> genTicketByActive(Long activeid, UMember member, String ostype,String usermark);
     public List<BPromotion> findByActiveidAndPrizeRecordId(long activeid,long recordid);
     public List<BPromotion> findByActiveidAndPrizeIdList(Long activeid,List<Long> prizeidList);
+
+
+    /**
+     * 发放指定名称指定价格的优惠券
+     * @param activeId
+     * @param mid
+     * @param name
+     * @param descr
+     * @param price
+     * @param platformtype
+     *
+     * @return
+     */
+    public List<Long> genCGTicketByPrice(
+            long activeId, long mid, String name,String descr, BigDecimal price, Integer platformtype);
+
 }

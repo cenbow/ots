@@ -14,10 +14,11 @@
     <result column="range" property="range" jdbcType="DOUBLE" />
     <result column="isSelect" property="isselect" jdbcType="VARCHAR" />
     <result column="querycityname" property="querycityname" jdbcType="VARCHAR" />
+    <result column="level" property="level" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
     cityid, Code, CityName, ProID, CitySort, latitude, longitude, simplename, ishotcity, 
-    `range`, isSelect, querycityname
+    `range`, isSelect, querycityname,level
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
