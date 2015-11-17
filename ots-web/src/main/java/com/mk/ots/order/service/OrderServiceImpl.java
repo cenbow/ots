@@ -1632,9 +1632,12 @@ public class OrderServiceImpl implements OrderService {
               }
               
               if ("527".equals(returnObject.getString("errcode"))) {
+                  Cat.logEvent("SavePmsOrderRoomNULLExcption", order.getLong("hotelId").toString(),"ERROR",order.toJson());
                   throw MyErrorEnum.customError.getMyException("房间没有了");
               } else {
+                  Cat.logEvent("SavePmsOrderExcption", order.getLong("hotelId").toString(),"ERROR",order.toJson());
                   throw MyErrorEnum.saveOrderPms.getMyException(returnObject.getString("errmsg"));
+
               }
           } else {
               logger.info("OTSMessage::接口调用:submitAddOrder::创建psmOrder成功" + order.getId());
@@ -3474,6 +3477,7 @@ public class OrderServiceImpl implements OrderService {
             return PayTools.dopostjson(url, json);
       } catch (Exception e) {
           logger.info("doPostJson参数:{},{},异常:{}", url, json, e.getLocalizedMessage());
+          Cat.logError("doPostJson参数 Excpetion", e);
           e.printStackTrace();
           back.put("success", false);
           if(e instanceof HTTPException){
