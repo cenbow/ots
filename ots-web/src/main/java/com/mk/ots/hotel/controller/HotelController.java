@@ -199,6 +199,7 @@ public class HotelController {
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
 		hotelEntity.setStartdateday(strCurDay);
 		hotelEntity.setEnddateday(strNextDay);
+		hotelEntity.setIshotelpic("T");
 		hotelEntity.setIspromoonly(true);
 		hotelEntity.setPage(FrontPageEnum.page.getId());
 		hotelEntity.setLimit(FrontPageEnum.limit.getId());

@@ -470,48 +470,49 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			int limit = reqentity.getLimit().intValue();
 
 			SearchRequestBuilder searchBuilder = esProxy.prepareSearch();
-			if (StringUtils.isBlank(hotelid)) {
-				searchBuilder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+			searchBuilder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
 
-				// make term filter builder
-				this.makeTermFilter(reqentity, filterBuilders);
+			// make term filter builder
+			this.makeTermFilter(reqentity, filterBuilders);
 
-				filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
-
-				FilterBuilder[] builders = new FilterBuilder[] {};
-				BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
-
-				// make range filter builder
-				List<FilterBuilder> mikePriceBuilders = this.makeMikePriceRangeFilter(reqentity);
-
-				if (mikePriceBuilders.size() > 0) {
-					BoolFilterBuilder mikePriceBoolFilter = FilterBuilders.boolFilter();
-					mikePriceBoolFilter.should(mikePriceBuilders.toArray(builders));
-					boolFilter.must(mikePriceBoolFilter);
-				}
-				if (AppUtils.DEBUG_MODE) {
-					logger.info("boolFilter is : \n{}", boolFilter.toString());
-				}
-
-				BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
-						.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
-						.must(QueryBuilders.matchQuery("online", Constant.STR_TRUE));
-				boolFilter.must(FilterBuilders.queryFilter(boolQueryBuilder));
-				searchBuilder.setPostFilter(boolFilter);
-
-				Integer paramOrderby = reqentity.getOrderby();
-				if (paramOrderby == null) {
-					paramOrderby = 0;
-				}
-
-				String startdateday = reqentity.getStartdateday();
-				String enddateday = reqentity.getEnddateday();
-				List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
-				this.setScoreScriptSort(searchBuilder, boolFilter,
-						new GeoPoint(reqentity.getUserlatitude(), reqentity.getUserlongitude()), mkPriceDateList);
-			} else {
-				filterBuilders.add(FilterBuilders.termFilter("hotelid", hotelid));
+			if (StringUtils.isNotBlank(reqentity.getPromotype())) {
+				filterBuilders.add(FilterBuilders
+						.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", reqentity.getPromotype())));
 			}
+
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
+
+			FilterBuilder[] builders = new FilterBuilder[] {};
+			BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
+
+			// make range filter builder
+			List<FilterBuilder> mikePriceBuilders = this.makeMikePriceRangeFilter(reqentity);
+
+			if (mikePriceBuilders.size() > 0) {
+				BoolFilterBuilder mikePriceBoolFilter = FilterBuilders.boolFilter();
+				mikePriceBoolFilter.should(mikePriceBuilders.toArray(builders));
+				boolFilter.must(mikePriceBoolFilter);
+			}
+			if (AppUtils.DEBUG_MODE) {
+				logger.info("boolFilter is : \n{}", boolFilter.toString());
+			}
+
+			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
+					.must(QueryBuilders.matchQuery("online", Constant.STR_TRUE));
+			boolFilter.must(FilterBuilders.queryFilter(boolQueryBuilder));
+			searchBuilder.setPostFilter(boolFilter);
+
+			Integer paramOrderby = reqentity.getOrderby();
+			if (paramOrderby == null) {
+				paramOrderby = 0;
+			}
+
+			String startdateday = reqentity.getStartdateday();
+			String enddateday = reqentity.getEnddateday();
+			List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
+			this.setScoreScriptSort(searchBuilder, boolFilter,
+					new GeoPoint(reqentity.getUserlatitude(), reqentity.getUserlongitude()), mkPriceDateList);
 
 			searchBuilder.setFrom((page - 1) * limit).setSize(limit).setExplain(true);
 
@@ -1474,8 +1475,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		try {
 			Map<String, Object> result = hotelCollectionService.readonlyHotelISCollected(token, hotelid);
-		} catch (Exception ex) {
 
+			if (result != null) {
+				isCollected = "T";
+			}
+		} catch (Exception ex) {
+			throw new Exception("failed to collection user collecitonstate", ex);
 		}
 
 		return isCollected;
@@ -2084,6 +2089,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				String hotelvc = Constant.STR_TRUE;
 				result.put("hotelvc", hotelvc);
+
+				result.put("collectionstate", "");
 
 				if (StringUtils.isNotBlank(reqentity.getToken())) {
 					try {
