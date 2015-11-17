@@ -129,6 +129,10 @@
 	<select id="findMemberByPhoneAndUnionid" resultType="com.mk.ots.member.model.UMember" parameterType="java.util.Map">
 		select * from u_member where unionid = #{unionid} and phone = #{phone}
 	</select>
+
+  <select id="findMemberByOpenId" resultType="com.mk.ots.member.model.UMember" parameterType="java.util.Map">
+    select * from u_member where openId = #{openId}
+  </select>
 	
 	<select id="countLoginPsdVerifyName" resultType="long" parameterType="java.util.Map">
 		select count(*) from u_member where mid = #{mid} and name = #{name}

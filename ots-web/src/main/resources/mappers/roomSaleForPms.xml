@@ -76,6 +76,7 @@
         id, <include refid="Base_Column_List"/>
          FROM  t_room_sale_config
         <include refid="Base_Query_List"/>
+        and saleConfigInfoId in(1,2,3)
     </select>
     <select id="getRoomTypeByPms" resultMap="roomSaleConfig" parameterType="String">
         SELECT

@@ -67,4 +67,5 @@ public interface IMemberService {
 	
 	public abstract List<UMember> findUMemberByFirstOrder(FirstOrderModel fom);
 
+	public List<UMember> findUMemberByOpenId(String openId);
 }
