@@ -694,7 +694,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			Integer promoId = HotelPromoEnum.OneDollar.getCode();
 
 			RoomSaleShowConfigDto roomSaleShowConfigDto = new RoomSaleShowConfigDto();
-			roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
+			roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageHead.getCode());
 			roomSaleShowConfigDto.setPromoid(promoId);
 
 			promoItem.put("promotype", HotelPromoEnum.OneDollar.getCode());
@@ -751,7 +751,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			promoItem.put("normalid", -1);
 
 			roomSaleShowConfigDto.setPromoid(promoId);
-			roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
+			roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageHead.getCode());
 
 			try {
 				List<RoomSaleShowConfigDto> dayShowConfigs = roomSaleShowConfigService
