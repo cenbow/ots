@@ -9,4 +9,5 @@ public interface TRoomSaleShowConfigService {
     public List<RoomSaleShowConfigDto> queryRoomSaleShowConfigByParams(RoomSaleShowConfigDto bean);
     public  List<TRoomSaleCity> queryTRoomSaleCity(String cityid);
     public List<RoomSaleShowConfigDto> queryRenderableShows(RoomSaleShowConfigDto bean) throws Exception;
+    public List<RoomSaleShowConfigDto> queryRenderableHeaderShows(RoomSaleShowConfigDto bean) throws Exception ;
 }

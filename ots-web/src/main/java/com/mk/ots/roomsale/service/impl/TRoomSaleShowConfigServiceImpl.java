@@ -20,12 +20,28 @@ public class TRoomSaleShowConfigServiceImpl implements TRoomSaleShowConfigServic
 	@Autowired
 	private RoomSaleShowConfigMapper roomSaleShowConfigMapper;
 
-	public List<RoomSaleShowConfigDto> queryRenderableShows(RoomSaleShowConfigDto bean) throws Exception {
+	public List<RoomSaleShowConfigDto> queryRenderableHeaderShows(RoomSaleShowConfigDto bean) throws Exception {
 		List<RoomSaleShowConfigDto> resultList = new ArrayList<>();
 
 		try {
 			List<TRoomSaleShowConfig> tRoomSaleShowConfigList = roomSaleShowConfigMapper
-					.queryRenderableShows(bean);
+					.queryRenderableHeaderShows(bean);
+
+			for (TRoomSaleShowConfig showConfig : tRoomSaleShowConfigList) {
+				resultList.add(buildUMemberDto(showConfig));
+			}
+		} catch (Exception ex) {
+			throw new Exception("failed to queryRenderableShows", ex);
+		}
+
+		return resultList;
+	}
+
+	public List<RoomSaleShowConfigDto> queryRenderableShows(RoomSaleShowConfigDto bean) throws Exception {
+		List<RoomSaleShowConfigDto> resultList = new ArrayList<>();
+
+		try {
+			List<TRoomSaleShowConfig> tRoomSaleShowConfigList = roomSaleShowConfigMapper.queryRenderableShows(bean);
 
 			for (TRoomSaleShowConfig showConfig : tRoomSaleShowConfigList) {
 				resultList.add(buildUMemberDto(showConfig));

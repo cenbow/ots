@@ -55,26 +55,19 @@ public class SaleShowController {
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
 		List<RoomSaleShowConfigDto> resultList = new ArrayList<>();
-		bean.setShowArea(ShowAreaEnum.FrontPageHead.getCode());
-		for (TRoomSaleCity saleCity : roomSaleCityList) {
-			bean.setPromoid(saleCity.getSaleTypeId());
-			List<RoomSaleShowConfigDto> saleShowConfigList = tRoomSaleShowConfigService
-					.queryRoomSaleShowConfigByParams(bean);
-			if (!CollectionUtils.isEmpty(saleShowConfigList)) {
-				resultList.add(saleShowConfigList.get(0));
-			}
+
+		String errMsg = "";
+		int errCode = 0;
+		try {
+			resultList = tRoomSaleShowConfigService.queryRenderableHeaderShows(bean);
+		} catch (Exception ex) {
+			errMsg = String.format("failed to queryRenderableHeaderShows by cityid:%s", bean.getCityid());
+			errCode = -1;
+			
+			logger.error(errMsg, ex);
 		}
 
-		bean.setPromoid(-1);
-		bean.setIsSpecial("F");
-		bean.setNormalId(1);
-
-		List<RoomSaleShowConfigDto> troomSaleShowConfigList = tRoomSaleShowConfigService
-				.queryRoomSaleShowConfigByParams(bean);
-		resultList.addAll(troomSaleShowConfigList);
-
 		List<Map<String, Object>> promoList = new ArrayList<Map<String, Object>>();
-		List<Map<String, Object>> normalList = new ArrayList<Map<String, Object>>();
 		for (RoomSaleShowConfigDto configDto : resultList) {
 			Map<String, Object> promo = new HashMap<String, Object>();
 			promo.put("promoid", configDto.getPromoid());
@@ -82,22 +75,12 @@ public class SaleShowController {
 			promo.put("promoicon", configDto.getPromoicon());
 			promo.put("promotext", configDto.getPromotext());
 
-			if (configDto.getPromoid() != null && configDto.getPromoid() > 0) {
-				promoList.add(promo);
-			} else if (configDto.getNormalId() != null && configDto.getNormalId() > 0) {
-				normalList.add(promo);
-			} else {
-				logger.warn(String.format("invalid data types promoid:%s; normalid:%s", configDto.getPromoid(),
-						configDto.getNormalId()));
-			}
+			promoList.add(promo);
 		}
 
-		promoList.addAll(normalList);
-
 		rtnMap.put("promo", promoList);
-		logger.info(" query  troomSaleShowConfigList ", troomSaleShowConfigList);
-		rtnMap.put("errmsg", "");
-		rtnMap.put("errcode", 0);
+		rtnMap.put("errmsg", errMsg);
+		rtnMap.put("errcode", errCode);
 		logger.info("【/promo/queryinfo】 end...");
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}

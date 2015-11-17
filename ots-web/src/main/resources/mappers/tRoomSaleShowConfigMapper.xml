@@ -69,6 +69,16 @@
         ORDER  BY ord ASC
     </select>
 
+    <select id="queryRenderableHeaderShows" resultMap="tRoomSaleShowConfig"  parameterType="com.mk.ots.roomsale.model.RoomSaleShowConfigDto">
+        select
+        <include refid="Base_Column_List"/>
+	 	FROM t_room_sale_show_config 
+        <where>
+           valid ='T' AND headord > 0
+        </where>
+        ORDER  BY headord ASC
+    </select>
+
     <select id="queryRenderableShows" resultMap="tRoomSaleShowConfig"  parameterType="com.mk.ots.roomsale.model.RoomSaleShowConfigDto">
         select
         <include refid="Base_Column_List"/>
