@@ -275,6 +275,26 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
+	 * 
+	 * @param cityId
+	 * @param promoId
+	 * @return
+	 */
+	public Integer queryByPromoId(String cityId, Integer promoId) throws Exception {
+		try {
+			List<TRoomSaleConfigInfo> promos = roomSaleConfigInfoService.queryListBySaleTypeId(cityId, promoId, 1, 1);
+
+			if (promos != null && promos.size() > 0) {
+				return promos.get(0).getId();
+			} else {
+				return -1;
+			}
+		} catch (Exception ex) {
+			throw new Exception(String.format("failed to query promotype by promoId %s", promoId), ex);
+		}
+	}
+
+	/**
 	 * 校验酒店搜索日期
 	 * 
 	 * @param startDate

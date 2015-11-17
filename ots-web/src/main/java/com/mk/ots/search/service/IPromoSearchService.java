@@ -77,4 +77,13 @@ public interface IPromoSearchService {
 	 * @throws Exception
 	 */
 	public Map<String, Object> searchThemes(HotelQuerylistReqEntity params) throws Exception;
+	
+	/**
+	 * 
+	 * @param cityId
+	 * @param promoId
+	 * @return
+	 * @throws Exception
+	 */
+	public Integer queryByPromoId(String cityId, Integer promoId) throws Exception ;
 }

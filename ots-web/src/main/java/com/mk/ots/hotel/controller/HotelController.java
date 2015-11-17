@@ -1,33 +1,14 @@
 package com.mk.ots.hotel.controller;
 
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Event;
-import com.dianping.cat.message.Transaction;
-import com.google.common.collect.Maps;
-import com.mk.framework.AppUtils;
-import com.mk.framework.exception.MyErrorEnum;
-import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.common.enums.FrontPageEnum;
-import com.mk.ots.common.enums.HotelSortEnum;
-import com.mk.ots.common.enums.ShowAreaEnum;
-import com.mk.ots.common.utils.Constant;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.hotel.service.HotelPriceService;
-import com.mk.ots.hotel.service.HotelService;
-import com.mk.ots.hotel.service.RoomstateService;
-import com.mk.ots.mapper.RoomSaleShowConfigMapper;
-import com.mk.ots.restful.input.HotelFrontPageQueryReqEntity;
-import com.mk.ots.restful.input.HotelQuerylistReqEntity;
-import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
-import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
-import com.mk.ots.roomsale.service.RoomSaleService;
-import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
-import com.mk.ots.search.service.IPromoSearchService;
-import com.mk.ots.search.service.ISearchService;
-import com.mk.ots.web.ServiceOutput;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -43,9 +24,34 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.util.*;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
+import com.google.common.collect.Maps;
+import com.mk.framework.AppUtils;
+import com.mk.framework.exception.MyErrorEnum;
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.enums.FrontPageEnum;
+import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.enums.HotelSortEnum;
+import com.mk.ots.common.enums.ShowAreaEnum;
+import com.mk.ots.common.utils.Constant;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.hotel.service.HotelPriceService;
+import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.hotel.service.RoomstateService;
+import com.mk.ots.restful.input.HotelFrontPageQueryReqEntity;
+import com.mk.ots.restful.input.HotelQuerylistReqEntity;
+import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
+import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
+import com.mk.ots.roomsale.service.RoomSaleService;
+import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
+import com.mk.ots.search.service.IPromoSearchService;
+import com.mk.ots.search.service.ISearchService;
+import com.mk.ots.web.ServiceOutput;
 
 /**
  * 酒店前端控制类 发布接口
@@ -81,7 +87,7 @@ public class HotelController {
 	private RoomSaleService roomSaleService;
 
 	@Autowired
-	private  TRoomSaleShowConfigService roomSaleShowConfigService;
+	private TRoomSaleShowConfigService roomSaleShowConfigService;
 
 	/**
 	 * 
@@ -244,17 +250,18 @@ public class HotelController {
 			roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
 			roomSaleShowConfigDto.setNormalId(normalid);
 
-			List<RoomSaleShowConfigDto> distanceShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+			List<RoomSaleShowConfigDto> distanceShowConfigs = roomSaleShowConfigService
+					.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
 			distanceResultMap.put("normalid", normalid);
 			distanceResultMap.put("promotype", -1);
 
-			if (distanceShowConfigs != null&& distanceShowConfigs.size() > 0){
+			if (distanceShowConfigs != null && distanceShowConfigs.size() > 0) {
 				RoomSaleShowConfigDto normalShowConfig = distanceShowConfigs.get(0);
 				distanceResultMap.put("promotext", normalShowConfig.getPromotext());
 				distanceResultMap.put("promnote", normalShowConfig.getPromonote());
 				distanceResultMap.put("promoicon", normalShowConfig.getPromoicon());
 
-			}else{
+			} else {
 				distanceResultMap.put("normalid", normalid);
 				distanceResultMap.put("promnote", "");
 				distanceResultMap.put("promoicon", "");
@@ -282,17 +289,18 @@ public class HotelController {
 			normalid = HotelSortEnum.PRICE.getId();
 			roomSaleShowConfigDto.setNormalId(normalid);
 
-			List<RoomSaleShowConfigDto>  priceShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+			List<RoomSaleShowConfigDto> priceShowConfigs = roomSaleShowConfigService
+					.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
 			priceResultMap.put("normalid", normalid);
 			priceResultMap.put("promotype", -1);
 
-			if (priceShowConfigs != null && priceShowConfigs.size() > 0){
+			if (priceShowConfigs != null && priceShowConfigs.size() > 0) {
 				RoomSaleShowConfigDto normalShowConfig = priceShowConfigs.get(0);
 				priceResultMap.put("promotext", normalShowConfig.getPromotext());
 				priceResultMap.put("promnote", normalShowConfig.getPromonote());
 				priceResultMap.put("promoicon", normalShowConfig.getPromoicon());
 
-			}else {
+			} else {
 				priceResultMap.put("promnote", "");
 				priceResultMap.put("promoicon", "");
 				priceResultMap.put("promotext", "最便宜");
@@ -318,18 +326,18 @@ public class HotelController {
 			normalid = HotelSortEnum.ORDERNUMS.getId();
 			roomSaleShowConfigDto.setNormalId(normalid);
 
-
-			List<RoomSaleShowConfigDto>   orderNumShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+			List<RoomSaleShowConfigDto> orderNumShowConfigs = roomSaleShowConfigService
+					.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
 			orderNumResultMap.put("normalid", normalid);
 			orderNumResultMap.put("promotype", -1);
 
-			if (orderNumShowConfigs != null && orderNumShowConfigs.size() > 0){
+			if (orderNumShowConfigs != null && orderNumShowConfigs.size() > 0) {
 				RoomSaleShowConfigDto normalShowConfig = orderNumShowConfigs.get(0);
 				orderNumResultMap.put("promotext", normalShowConfig.getPromotext());
 				orderNumResultMap.put("promnote", normalShowConfig.getPromonote());
 				orderNumResultMap.put("promoicon", normalShowConfig.getPromoicon());
 
-			}else {
+			} else {
 				orderNumResultMap.put("promnote", "");
 				orderNumResultMap.put("promoicon", "");
 				orderNumResultMap.put("promotext", "最受欢迎");
@@ -433,11 +441,22 @@ public class HotelController {
 			/**
 			 * check if theme is being searched
 			 */
-			String promoType = reqentity.getPromotype();
-			if (StringUtils.isNotBlank(promoType) && promoType.equals("16")) {
-				rtnMap = promoSearchService.searchThemes(reqentity);
+			String promoId = reqentity.getPromoid();
+			if (StringUtils.isNotBlank(promoId)) {
+				if (HotelPromoEnum.Theme.getCode().toString().equals(promoId)) {
+					rtnMap = promoSearchService.searchThemes(reqentity);
+				} else {
+					Integer promotype = promoSearchService.queryByPromoId(reqentity.getCityid(),
+							Integer.valueOf(promoId));
+					reqentity.setPromotype(String.valueOf(promotype));
+				}
+
 				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
-			} else {
+			}
+			/**
+			 * search with promotype
+			 */
+			else {
 				rtnMap = promoSearchService.readonlySearchHotels(reqentity);
 				rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
@@ -525,7 +544,6 @@ public class HotelController {
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 
-	
 	/**
 	 * 首页查询接口 根据cityid 获得搜索获得信息.
 	 *
@@ -572,7 +590,7 @@ public class HotelController {
 			rtnMap.put("promolist", promolist);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "succeed");
-			
+
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
 					HttpStatus.OK);
 			if (AppUtils.DEBUG_MODE) {
@@ -1145,14 +1163,11 @@ public class HotelController {
 	// ResponseEntity<Map<String,Object>>(hotelService.readonlyClearEsHotelNotInTHotel(citycode),HttpStatus.OK);
 	// }
 
-
-	@RequestMapping(value="/hotel/test")
-	public ResponseEntity<Map<String, Object>> clearESHotelNotInThotel(Integer
-	hotelid) {
+	@RequestMapping(value = "/hotel/test")
+	public ResponseEntity<Map<String, Object>> clearESHotelNotInThotel(Integer hotelid) {
 		HashMap<String, Object> rntMap = new HashMap<>();
-		rntMap.put("minprice",roomSaleService.getHotelMinPromoPrice(hotelid) );
-	return new
-	ResponseEntity<Map<String,Object>>(rntMap,HttpStatus.OK);
+		rntMap.put("minprice", roomSaleService.getHotelMinPromoPrice(hotelid));
+		return new ResponseEntity<Map<String, Object>>(rntMap, HttpStatus.OK);
 	}
 
 }
