@@ -60,11 +60,34 @@
             </if>
             <if test="normalId != null" >
                 AND normalId = #{normalId}
-            </if>
+            </if>                
             <if test="isSpecial != null" >
                 AND isSpecial = #{isSpecial}
             </if>
-                AND valid ='T'
+                AND valid ='T' AND ord > 0
+        </where>
+        ORDER  BY ord ASC
+    </select>
+
+    <select id="queryRenderableShows" resultMap="tRoomSaleShowConfig"  parameterType="com.mk.ots.roomsale.model.RoomSaleShowConfigDto">
+        select
+        <include refid="Base_Column_List"/>
+        FROM
+        t_room_sale_show_config
+        <where>
+            <if test="promoid != null" >
+               AND saleTypeId = #{promoid}
+            </if>
+            <if test="showArea != null" >
+              AND showArea = #{showArea}
+            </if>
+            <if test="normalId != null" >
+                AND normalId = #{normalId}
+            </if>      
+            <if test="isSpecial != null" >
+                AND isSpecial = #{isSpecial}
+            </if>
+                AND valid ='T' AND ord > 0
         </where>
         ORDER  BY ord ASC
     </select>

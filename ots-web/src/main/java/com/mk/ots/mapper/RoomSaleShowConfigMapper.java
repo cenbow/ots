@@ -11,4 +11,5 @@ import java.util.List;
 public interface RoomSaleShowConfigMapper {
     public List<TRoomSaleShowConfig> queryRoomSaleShowConfigByParams(RoomSaleShowConfigDto bean);
     public  List<TRoomSaleCity>    queryTRoomSaleCity(HashMap  map);
+    public List<TRoomSaleShowConfig> queryRenderableShows(RoomSaleShowConfigDto bean);
 }

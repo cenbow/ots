@@ -652,6 +652,44 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	@SuppressWarnings("unchecked")
+	private Map<String, Object> createPromoItem(HotelQuerylistReqEntity params, RoomSaleShowConfigDto showConfig)
+			throws Exception {
+		Map<String, Object> promoItem = new HashMap<String, Object>();
+
+		params.setIspromoonly(Boolean.TRUE);
+		params.setLimit(FrontPageEnum.limit.getId());
+		params.setPromoid(String.valueOf(showConfig.getPromoid()));
+		params.setCallentry(null);
+
+		Map<String, Object> rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+		List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+		if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
+			promoItem.put("hotel", hotels);
+		} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
+			Map<String, Object> sups = new HashMap<String, Object>();
+			searchAround(sups, params, FrontPageEnum.limit.getId() - hotels.size());
+			List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) sups.get("supplementhotel");
+			promoItem.put("hotel", new ArrayList<Map<String, Object>>());
+			((List<Map<String, Object>>) promoItem.get("hotel"))
+					.addAll(hotels == null ? new ArrayList<Map<String, Object>>() : hotels);
+			((List<Map<String, Object>>) promoItem.get("hotel"))
+					.addAll(supplementHotels == null ? new ArrayList<Map<String, Object>>() : supplementHotels);
+		}
+		Integer promoId = HotelPromoEnum.OneDollar.getCode();
+
+		RoomSaleShowConfigDto roomSaleShowConfigDto = new RoomSaleShowConfigDto();
+		roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageHead.getCode());
+		roomSaleShowConfigDto.setPromoid(promoId);
+
+		promoItem.put("promoicon", showConfig.getPromoicon());
+		promoItem.put("promotext", showConfig.getPromotext());
+		promoItem.put("promonote", showConfig.getPromonote());
+		promoItem.put("promoid", showConfig.getPromoid());
+		promoItem.put("normalid", showConfig.getNormalId());
+
+		return promoItem;
+	}
+
 	@Override
 	public List<Map<String, Object>> searchHomePromos(HotelQuerylistReqEntity params) throws Exception {
 		// 酒店搜索校验: 开始
@@ -662,219 +700,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 		// 酒店搜索校验: 结束
 
-		List<Map<String, Object>> promolist = null;
+		List<Map<String, Object>> promolist = new ArrayList<Map<String, Object>>();
 		try {
-			promolist = new ArrayList<Map<String, Object>>();
-			Map<String, Object> promoItem = new HashMap<String, Object>();
-			Map<String, Object> rtnMap = null;
-			List<Map<String, Object>> hotels = null;
+			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
+			showConfig.setNormalId(-1);
+			showConfig.setShowArea(ShowAreaEnum.FrontPageHead.getCode());
 
-			promoItem = new HashMap<String, Object>();
-			promolist.add(promoItem);
-
-			params.setIspromoonly(Boolean.TRUE);
-			params.setLimit(FrontPageEnum.limit.getId());
-			params.setPromoid(String.valueOf(HotelPromoEnum.OneDollar.getCode()));
-			params.setCallentry(null);
-
-			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
-			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
-				promoItem.put("hotel", hotels);
-			} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
-				Map<String, Object> sups = new HashMap<String, Object>();
-				searchAround(sups, params, FrontPageEnum.limit.getId() - hotels.size());
-				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) sups.get("supplementhotel");
-				promoItem.put("hotel", new ArrayList<Map<String, Object>>());
-				((List<Map<String, Object>>) promoItem.get("hotel"))
-						.addAll(hotels == null ? new ArrayList<Map<String, Object>>() : hotels);
-				((List<Map<String, Object>>) promoItem.get("hotel"))
-						.addAll(supplementHotels == null ? new ArrayList<Map<String, Object>>() : supplementHotels);
-			}
-			Integer promoId = HotelPromoEnum.OneDollar.getCode();
-
-			RoomSaleShowConfigDto roomSaleShowConfigDto = new RoomSaleShowConfigDto();
-			roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageHead.getCode());
-			roomSaleShowConfigDto.setPromoid(promoId);
-
-			promoItem.put("promotype", HotelPromoEnum.OneDollar.getCode());
-			promoItem.put("normalid", -1);
-
-			try {
-				List<RoomSaleShowConfigDto> oneDollarShowConfigs = roomSaleShowConfigService
-						.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
-
-				if (oneDollarShowConfigs != null && oneDollarShowConfigs.size() > 0) {
-					RoomSaleShowConfigDto promoShowConfig = oneDollarShowConfigs.get(0);
-					promoItem.put("promoicon", promoShowConfig.getPromoicon());
-					promoItem.put("promotext", promoShowConfig.getPromotext());
-					promoItem.put("promonote", promoShowConfig.getPromonote());
-				} else {
-					promoItem.put("promoicon", "");
-					promoItem.put("promotext", HotelPromoEnum.OneDollar.getText());
-					promoItem.put("promonote", "一元秒杀， 先到先得");
-
-				}
-			} catch (Exception ex) {
-				promoItem.put("promoicon", "");
-				promoItem.put("promotext", HotelPromoEnum.OneDollar.getText());
-				promoItem.put("promonote", "");
-
-				logger.warn("failed to query resources from showconfig for one dollar", ex);
-			}
-
-			params.setIspromoonly(Boolean.TRUE);
-			params.setLimit(FrontPageEnum.limit.getId());
-			params.setPromoid(String.valueOf(HotelPromoEnum.Day.getCode()));
-			params.setCallentry(null);
-
-			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
-
-			promoItem = new HashMap<String, Object>();
-			promolist.add(promoItem);
-			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
-				promoItem.put("hotel", hotels);
-			} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
-				Map<String, Object> sups = new HashMap<String, Object>();
-				searchAround(sups, params, FrontPageEnum.limit.getId() - hotels.size());
-				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) sups.get("supplementhotel");
-				promoItem.put("hotel", new ArrayList<Map<String, Object>>());
-				((List<Map<String, Object>>) promoItem.get("hotel"))
-						.addAll(hotels == null ? new ArrayList<Map<String, Object>>() : hotels);
-				((List<Map<String, Object>>) promoItem.get("hotel"))
-						.addAll(supplementHotels == null ? new ArrayList<Map<String, Object>>() : supplementHotels);
-			}
-			promoId = HotelPromoEnum.Day.getCode();
-
-			promoItem.put("promotype", promoId);
-			promoItem.put("normalid", -1);
-
-			roomSaleShowConfigDto.setPromoid(promoId);
-			roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageHead.getCode());
-
-			try {
-				List<RoomSaleShowConfigDto> dayShowConfigs = roomSaleShowConfigService
-						.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
-
-				if (dayShowConfigs != null && dayShowConfigs.size() > 0) {
-					RoomSaleShowConfigDto promoShowConfig = dayShowConfigs.get(0);
-					promoItem.put("promoicon", promoShowConfig.getPromoicon());
-					promoItem.put("promotext", promoShowConfig.getPromotext());
-					promoItem.put("promonote", promoShowConfig.getPromonote());
-				} else {
-					promoItem.put("promoicon", "");
-					promoItem.put("promotext", HotelPromoEnum.Day.getText());
-					promoItem.put("promonote", "每天12: 00-18: 00，订房享受特价");
-				}
-			} catch (Exception ex) {
-				promoItem.put("promoicon", "");
-				promoItem.put("promotext", HotelPromoEnum.Day.getText());
-				promoItem.put("promonote", "每天12: 00-18: 00，订房享受特价");
-
-				logger.warn("failed to query resources from showconfig for one dollar", ex);
-			}
-
-			promoItem = new HashMap<String, Object>();
-			promolist.add(promoItem);
-			params.setLimit(FrontPageEnum.limit.getId());
-			params.setIspromoonly(Boolean.TRUE);
-			params.setPromoid(String.valueOf(HotelPromoEnum.Night.getCode()));
-			params.setCallentry(null);
-
-			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
-			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
-				promoItem.put("hotel", hotels);
-			} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
-				Map<String, Object> sups = new HashMap<String, Object>();
-				searchAround(sups, params, FrontPageEnum.limit.getId() - hotels.size());
-				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) sups.get("supplementhotel");
-				promoItem.put("hotel", new ArrayList<Map<String, Object>>());
-				((List<Map<String, Object>>) promoItem.get("hotel"))
-						.addAll(hotels == null ? new ArrayList<Map<String, Object>>() : hotels);
-				((List<Map<String, Object>>) promoItem.get("hotel"))
-						.addAll(supplementHotels == null ? new ArrayList<Map<String, Object>>() : supplementHotels);
-			}
-
-			promoId = HotelPromoEnum.Night.getCode();
-
-			promoItem.put("promotype", promoId);
-			promoItem.put("normalid", -1);
-
-			roomSaleShowConfigDto.setPromoid(promoId);
-
-			try {
-				List<RoomSaleShowConfigDto> nightShowConfigs = roomSaleShowConfigService
-						.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
-
-				if (nightShowConfigs != null && nightShowConfigs.size() > 0) {
-					RoomSaleShowConfigDto promoShowConfig = nightShowConfigs.get(0);
-					promoItem.put("promoicon", promoShowConfig.getPromoicon());
-					promoItem.put("promotext", promoShowConfig.getPromotext());
-					promoItem.put("promonote", promoShowConfig.getPromonote());
-
-				} else {
-					promoItem.put("promoicon", "");
-					promoItem.put("promotext", HotelPromoEnum.Night.getText());
-					promoItem.put("promonote", "每天20: 00-02: 00，订房30元起");
-				}
-			} catch (Exception ex) {
-				promoItem.put("promoicon", "");
-				promoItem.put("promotext", HotelPromoEnum.Night.getText());
-				promoItem.put("promonote", "每天20: 00-02: 00，订房30元起");
-				logger.warn("failed to query resources from showconfig for night promo", ex);
-			}
-
-			promoItem = new HashMap<String, Object>();
-			promolist.add(promoItem);
-
-			params.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
-			params.setIspromoonly(Boolean.TRUE);
-			params.setLimit(FrontPageEnum.limit.getId());
-			params.setCallentry(null);
-
-			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
-			hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-			if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
-				promoItem.put("hotel", hotels);
-			} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
-				Map<String, Object> sups = new HashMap<String, Object>();
-				searchAround(sups, params, FrontPageEnum.limit.getId() - hotels.size());
-				List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) sups.get("supplementhotel");
-				promoItem.put("hotel", new ArrayList<Map<String, Object>>());
-				((List<Map<String, Object>>) promoItem.get("hotel"))
-						.addAll(hotels == null ? new ArrayList<Map<String, Object>>() : hotels);
-				((List<Map<String, Object>>) promoItem.get("hotel"))
-						.addAll(supplementHotels == null ? new ArrayList<Map<String, Object>>() : supplementHotels);
-			}
-
-			promoId = HotelPromoEnum.Theme.getCode();
-
-			promoItem.put("promotype", promoId);
-			promoItem.put("normalid", -1);
-
-			roomSaleShowConfigDto.setPromoid(promoId);
-
-			try {
-				List<RoomSaleShowConfigDto> themeShowConfigs = roomSaleShowConfigService
-						.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
-
-				if (themeShowConfigs != null && themeShowConfigs.size() > 0) {
-					RoomSaleShowConfigDto promoShowConfig = themeShowConfigs.get(0);
-					promoItem.put("promoicon", promoShowConfig.getPromoicon());
-					promoItem.put("promotext", promoShowConfig.getPromotext());
-					promoItem.put("promonote", promoShowConfig.getPromonote());
-				} else {
-					promoItem.put("promoicon", "");
-					promoItem.put("promotext", HotelPromoEnum.Theme.getText());
-					promoItem.put("promonote", "总有一款适合你");
-				}
-			} catch (Exception ex) {
-				promoItem.put("promoicon", "");
-				promoItem.put("promotext", HotelPromoEnum.Theme.getText());
-				promoItem.put("promonote", "总有一款适合你");
-				logger.warn("failed to query resources from showconfig for theme", ex);
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
+			for (RoomSaleShowConfigDto showConfigDto : showConfigs) {
+				promolist.add(createPromoItem(params, showConfigDto));
 			}
 
 			return promolist;
