@@ -85,5 +85,5 @@ public interface IPromoSearchService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Integer queryByPromoId(String cityId, Integer promoId) throws Exception ;
+	public Integer queryByPromoId(Integer promoId) throws Exception ;
 }

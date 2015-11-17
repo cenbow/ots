@@ -443,11 +443,10 @@ public class HotelController {
 			 */
 			String promoId = reqentity.getPromoid();
 			if (StringUtils.isNotBlank(promoId)) {
-				Integer promotype = promoSearchService.queryByPromoId(reqentity.getCityid(),
-						Integer.valueOf(promoId));				
+				Integer promotype = promoSearchService.queryByPromoId(Integer.parseInt(promoId));
 				reqentity.setPromotype(String.valueOf(promotype));
 
-				if (HotelPromoEnum.Theme.getCode().toString().equals(promoId)) {	
+				if (HotelPromoEnum.Theme.getCode().toString().equals(promoId)) {
 					rtnMap = promoSearchService.searchThemes(reqentity);
 				} else {
 					rtnMap = promoSearchService.readonlySearchHotels(reqentity);

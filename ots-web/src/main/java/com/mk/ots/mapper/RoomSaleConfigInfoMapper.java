@@ -16,8 +16,8 @@ public interface RoomSaleConfigInfoMapper {
     public TRoomSaleConfigInfo queryRoomSaleConfigById(Integer Id);
 
     public int updateTRoomSaleConfigInfo(Map<String, Object> map);
-
-    List<TRoomSaleConfigInfo>queryListBySaleTypeId(Map<String,Object>map);
+    
+    public List<TRoomSaleConfigInfo> queryListBySaleTypeId(Integer saleTypeId);
 
     public TRoomSaleConfigInfo getRoomSaleConfigInfoByConfigId(TRoomSaleConfig tRoomSaleConfig);
 }

@@ -76,6 +76,7 @@ import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.inner.service.IOtsAdminService;
 import com.mk.ots.mapper.PositionTypeMapper;
+import com.mk.ots.mapper.RoomSaleConfigInfoMapper;
 import com.mk.ots.mapper.RoomSaleConfigMapper;
 import com.mk.ots.mapper.SAreaInfoMapper;
 import com.mk.ots.mapper.SLandMarkMapper;
@@ -210,6 +211,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	@Autowired
 	private RoomSaleConfigMapper roomsaleConfigMapper;
 
+	@Autowired
+	private RoomSaleConfigInfoMapper roomsaleConfigInfoMapper;
+
 	/*
 	 * 获取 区域位置类型
 	 * 
@@ -280,9 +284,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 * @param promoId
 	 * @return
 	 */
-	public Integer queryByPromoId(String cityId, Integer promoId) throws Exception {
+	public Integer queryByPromoId(Integer promoId) throws Exception {
 		try {
-			List<TRoomSaleConfigInfo> promos = roomSaleConfigInfoService.queryListBySaleTypeId(cityId, promoId, 1, 1);
+			List<TRoomSaleConfigInfo> promos = roomsaleConfigInfoMapper.queryListBySaleTypeId(promoId);
 
 			if (promos != null && promos.size() > 0) {
 				return promos.get(0).getId();

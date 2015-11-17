@@ -143,18 +143,13 @@
         WHERE  id=#{id}
     </select>
 
-    <select id="queryListBySaleTypeId" resultMap="BaseResultMap" parameterType="java.util.Map">
+    <select id="queryListBySaleTypeId" resultMap="BaseResultMap" parameterType="java.lang.Integer">
         SELECT
-        <include refid="Base_Column_List"/>
-        FROM  t_room_sale_config_info a
-        <where>
-            a.valid ='T'
-            <if test="saleTypeId != null">
-                AND a.saleTypeId = #{saleTypeId}
-            </if>
-        </where>
-        limit ${start} , ${limit}
+        id,<include refid="Base_Column_List"/>
+        FROM  t_room_sale_config_info
+        WHERE  valid ='T' AND saleTypeId = #{saleTypeId}
+        limit 1
     </select>
-
+    
 
 </mapper>
