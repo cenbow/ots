@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.mk.framework.util.CommonUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -214,6 +215,7 @@ public class HotelController {
 		logger.info("【/hotel/querypromolist】 begin...");
 		logger.info("remote client request ui is: {}", request.getRequestURI());
 		logger.info("【/hotel/querypromolist】 request params is : {}", params);
+		Cat.logEvent("/hotel/querypromolist",reqentity.getCallmethod(),Event.SUCCESS, params);
 		logger.info("【/hotel/querypromolist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
@@ -224,6 +226,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
 			logger.error(String.format("parameters validation failed with error %s", errorMessage));
+			Cat.logEvent("querypromolistException",reqentity.getCallmethod(),Event.SUCCESS,String.format("parameters validation failed with error %s", errorMessage));
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
@@ -281,6 +284,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 			logger.error("【/hotel/querypromolist】 is error: {} ", e);
+			Cat.logError("querypromolistException", e);
 		}
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
@@ -304,7 +308,7 @@ public class HotelController {
 		logger.info("remote client request ui is: {}", request.getRequestURI());
 		logger.info("【/hotel/querylist】 request params is : {}", params);
 		logger.info("【/hotel/querylist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
-
+		Cat.logEvent("/hotel/queryist",reqentity.getCallmethod(),Event.SUCCESS, params);
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
 		String errorMessage = "";
@@ -314,7 +318,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
 			logger.error(String.format("parameters validation failed with error %s", errorMessage));
-
+			Cat.logEvent("querylistException",reqentity.getCallmethod(),Event.SUCCESS,String.format("parameters validation failed with error %s", errorMessage));
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
 
@@ -353,6 +357,7 @@ public class HotelController {
 	public ResponseEntity<Map<String, Object>> getHotelRoomPrice(ParamBaseBean pbb, String roomno,
 																 @Valid RoomstateQuerylistReqEntity params, Errors errors) throws Exception {
 		logger.info("【/roomstate/queryprice】 params is : {}", pbb.toString());
+		Cat.logEvent("/roomstate/queryprice",pbb.getCallmethod(),Event.SUCCESS, CommonUtils.toStr(pbb));
 		// 办理再次入住传 roomno
 		// 调用service方法
 		long startTime = new Date().getTime();
@@ -382,6 +387,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 			e.printStackTrace();
 			logger.info("查询房价报错:{}{}", params.getHotelid(), e.getMessage());
+			Cat.logError("RoomStateQueryPriceException",e);
 			throw e;
 		} finally {
 			t.complete();
@@ -402,6 +408,7 @@ public class HotelController {
 		// pbb.getCallversion(), pbb.getIp(), "/roomstate/querylist",
 		// params.toString(),"ots");
 		logger.info("【/roomstate/querylist】 params is : {}", pbb.toString());
+		Cat.logEvent("/roomstate/querylist", pbb == null? "" : pbb.getCallmethod(),Event.SUCCESS, CommonUtils.toStr(pbb));
 		// 办理再次入住传 roomno
 		// 调用service方法
 		long startTime = new Date().getTime();
@@ -442,7 +449,7 @@ public class HotelController {
 				 */
 				if (freeRoomCount == 0) {
 					logger.info("记录埋点:{}", params.getHotelid());
-					Cat.logEvent("ROOMSTATE", "fullroomnum", Event.SUCCESS, "");
+					Cat.logEvent("ROOMSTATE-FullRoomNum", params.getHotelid().toString(),  Event.SUCCESS, CommonUtils.toStr(params));
 				}
 			}
 			// 埋点真实用户进入酒店后满房的次数end
@@ -457,6 +464,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 			e.printStackTrace();
 			logger.info("查询房态报错:{}{}", params.getHotelid(), e.getMessage());
+			Cat.logError("RoomStateQueryListException",e);
 			throw e;
 		} finally {
 			t.complete();
@@ -799,6 +807,7 @@ public class HotelController {
 	public ResponseEntity<Map<String, Object>> updateEsMikePrice(Long hotelid) {
 		logger.info("updateEsMikePrice method begin...");
 		long startTime = new Date().getTime();
+		Cat.logEvent("/hotel/updatemikeprices", CommonUtils.toStr(hotelid));
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		try {
 			if (hotelid == null) {
@@ -819,6 +828,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getLocalizedMessage());
 			e.printStackTrace();
 			logger.error("更新ES眯客价出错: " + e.getLocalizedMessage(), e);
+			Cat.logError("updatemikepricesException", e);
 		}
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
@@ -861,6 +871,7 @@ public class HotelController {
 	@RequestMapping(value = "/hotel/updatemikepricecache")
 	public ResponseEntity<Map<String, Object>> updateMikePriceCache(String citycode, String hotelid) {
 		logger.info("updateMikePriceCache method begin...");
+		Cat.logEvent("/hotel/updatemikepricecache",CommonUtils.toStr(hotelid));
 		long startTime = new Date().getTime();
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		try {
@@ -881,6 +892,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getLocalizedMessage());
 			e.printStackTrace();
 			logger.error("更新眯客价redis缓存出错: " + e.getLocalizedMessage(), e);
+			Cat.logError("updatemikepricecacheException", e);
 		}
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}

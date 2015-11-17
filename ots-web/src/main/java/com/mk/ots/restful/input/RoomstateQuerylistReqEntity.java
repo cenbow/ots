@@ -156,4 +156,23 @@ public class RoomstateQuerylistReqEntity implements Serializable {
 	public void setIsShowAllRoom(String isShowAllRoom) {
 		this.isShowAllRoom = isShowAllRoom;
 	}
+
+	@Override
+	public String toString() {
+		return "RoomstateQuerylistReqEntity{" +
+				"hotelid=" + hotelid +
+				", roomtypeid=" + roomtypeid +
+				", startdateday='" + startdateday + '\'' +
+				", enddateday='" + enddateday + '\'' +
+				", startdate='" + startdate + '\'' +
+				", enddate='" + enddate + '\'' +
+				", roomstatus='" + roomstatus + '\'' +
+				", bednum=" + bednum +
+				", orderby='" + orderby + '\'' +
+				", callentry=" + callentry +
+				", callmethod='" + callmethod + '\'' +
+				", callversion='" + callversion + '\'' +
+				", isShowAllRoom='" + isShowAllRoom + '\'' +
+				'}';
+	}
 }

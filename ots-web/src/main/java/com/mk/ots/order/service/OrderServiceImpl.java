@@ -15,10 +15,7 @@ import com.mk.care.kafka.model.Message;
 import com.mk.framework.AppUtils;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
-import com.mk.framework.util.Cast;
-import com.mk.framework.util.MyTokenUtils;
-import com.mk.framework.util.PayUtil;
-import com.mk.framework.util.UrlUtils;
+import com.mk.framework.util.*;
 import com.mk.orm.kit.JsonKit;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
@@ -1632,10 +1629,10 @@ public class OrderServiceImpl implements OrderService {
               }
               
               if ("527".equals(returnObject.getString("errcode"))) {
-                  Cat.logEvent("SavePmsOrderRoomNULLExcption", order.getLong("hotelId").toString(),"ERROR",order.toJson());
+                  Cat.logEvent("SavePmsOrderRoomNULLExcption", CommonUtils.toStr(order.getLong("hotelId")),"ERROR",order.toJson());
                   throw MyErrorEnum.customError.getMyException("房间没有了");
               } else {
-                  Cat.logEvent("SavePmsOrderExcption", order.getLong("hotelId").toString(),"ERROR",order.toJson());
+                  Cat.logEvent("SavePmsOrderExcption", CommonUtils.toStr(order.getLong("hotelId")),"ERROR",order.toJson());
                   throw MyErrorEnum.saveOrderPms.getMyException(returnObject.getString("errmsg"));
 
               }
@@ -1669,10 +1666,10 @@ public class OrderServiceImpl implements OrderService {
               
               if(PmsErrorEnum.offLine.getErrorCode().equals(returnObject.getErrorCode())){
                   if(order.getOrderType()==OrderTypeEnum.PT.getId()){
-                      Cat.logEvent("PmsOffLine", "toPayPMS1.0", Event.SUCCESS, "");
+                      Cat.logEvent("PmsOffLine", "toPayPMS1.0", Event.SUCCESS, order.toJson());
                   }
                   if(order.getOrderType()==OrderTypeEnum.YF.getId()){
-                      Cat.logEvent("PmsOffLine", "prepayPMS1.0", Event.SUCCESS, "");
+                      Cat.logEvent("PmsOffLine", "prepayPMS1.0", Event.SUCCESS, order.toJson());
                   }
               }
               

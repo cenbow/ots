@@ -955,9 +955,9 @@ public class HotelService {
 				if ("F".equals(result.get("online"))) {
 					logger.info("记录离线埋点:{}", hotel.toString());
 					if ("T".equals(result.get("isnewpms"))) {
-						Cat.logEvent("ROOMSTATE", "pmsOffLine-2.0", Event.SUCCESS, "");
+						Cat.logEvent("ROOMSTATE", "pmsOffLine-2.0", Event.SUCCESS, hotelid);
 					} else {
-						Cat.logEvent("ROOMSTATE", "pmsOffLine-1.0", Event.SUCCESS, "");
+						Cat.logEvent("ROOMSTATE", "pmsOffLine-1.0", Event.SUCCESS, hotelid);
 					}
 				}
 			}

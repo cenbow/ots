@@ -1,11 +1,11 @@
 package com.mk.framework.util;
 
+import com.google.common.base.Strings;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.google.common.base.Strings;
 
 
 /**
@@ -110,5 +110,13 @@ public class CommonUtils {
         Pattern pattern = Pattern.compile("[0-9]+(.[0-9]+)?");
         Matcher isNum = pattern.matcher(str.trim());
         return isNum.matches();
+    }
+
+    public static String toStr(Object oj){
+        if (oj == null){
+            return "";
+        }else {
+            return oj.toString();
+        }
     }
 }
