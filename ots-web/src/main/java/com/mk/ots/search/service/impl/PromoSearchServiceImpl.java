@@ -728,9 +728,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 
-
-
-
 	@Override
 	public List<Map<String, Object>> searchHomeNormals(HotelQuerylistReqEntity params) throws Exception {
 		// 酒店搜索校验: 开始
@@ -758,6 +755,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			throw new Exception("failed to searchHomeNormals", e);
 		}
 	}
+
+
 	private Map<String, Object> createNormalItem(HotelQuerylistReqEntity params, Integer normalId)
 			throws Exception {
 
@@ -789,8 +788,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Integer normalId = showConfig.getNormalId();
 
 		final Date day = new Date();
-		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
-		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
 
 		Map<String, Object> rtnMap = null;
 		if (promoId > 0) {
