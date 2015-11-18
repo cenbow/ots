@@ -1,5 +1,6 @@
 package com.mk.ots.rpc.service;
 
+import com.dianping.cat.Cat;
 import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.framework.util.NetUtils;
 import com.mk.orm.kit.JsonKit;
@@ -86,6 +87,7 @@ public class PmsSoapServiceImpl implements IPmsSoapService {
                     logger.info("_id: {}, Hotel: {} has fund and prepare update online property from ES store...", _id, hotelid);
                     esProxy.updateDocument(_id, "online", "T");
                     logger.info("-id: {}, Hotel: {} has updated from ES store. field: online, value: T.", _id, hotelid);
+                    Cat.logEvent("PSMHotelOnline",hotelid,"SUCCESS","T");
                 }
                 logger.info("PMS酒店在线处理, 更新ES酒店online属性 end.");
                 //// PMS酒店在线处理: 结束
@@ -94,6 +96,7 @@ public class PmsSoapServiceImpl implements IPmsSoapService {
                 rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
             } else {
                 logger.info("PMS Hotel id: {} not exists in OTS t_hotel.", hotelid);
+                Cat.logEvent("PSMHotelOnline", hotelid, "Failed", "PMS Hotel id: " + hotelid + " not exists in OTS t_hotel.");
                 rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
                 rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
                 rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "PMS Hotel id: " + hotelid + " not exists in OTS t_hotel.");
@@ -103,6 +106,7 @@ public class PmsSoapServiceImpl implements IPmsSoapService {
             rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
             rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "PMS Hotel id: " + hotelid + " Online error: " + e.getMessage());
             logger.error("PMS Hotel id: {0} Online error: {1} ", hotelid, e.getMessage());
+            Cat.logError("PSMHotelOnlineException",e);
         }
         logger.info("--======================= pmsHotelOnline method end... =====================--");
         logger.info("pmsHotelOnline method return data: {} ", rtnMap);
@@ -166,6 +170,7 @@ public class PmsSoapServiceImpl implements IPmsSoapService {
                             logger.info("_id: {}, Hotel: {} has fund and prepare update online property from ES store...", _id, hotelid);
                             esProxy.updateDocument(_id, "online", "F");
                             logger.info("-id: {}, Hotel: {} has updated from ES store. field: online, value: F.", _id, hotelid);
+                            Cat.logEvent("PSMHotelOffline",hotelid,"SUCCESS","T");
                         }
                         logger.info("PMS酒店离线处理, 更新ES酒店online属性 end.");
                         //// PMS酒店离线处理: 结束
@@ -174,9 +179,11 @@ public class PmsSoapServiceImpl implements IPmsSoapService {
 
                     } else {
                         logger.error("PMS Hotel id: {} not exists in OTS t_hotel.", hotelid);
+                        Cat.logEvent("PSMHotelOffline", hotelid, "Failed", "PMS Hotel id: " + hotelid + " not exists in OTS t_hotel.");
                     }
                 } catch (Exception e) {
-                    logger.error("PMS Hotel id: {0} Online error: {1} ", hotelid, e.getMessage());
+                    Cat.logError("PSMHotelOfflineException", e);
+                    logger.error("PMS Hotel id: {0} Offline error: {1} ", hotelid, e.getMessage());
                 }
             }
         });

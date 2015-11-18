@@ -171,7 +171,7 @@ public class OrderDAO extends BaseDAO {
 	 * @return
 	 */
 	public List<OtaOrder> findOtaOrderByMid(Long mid, List<OtaOrderStatusEnum> statusList) {
-		StringBuffer sql = new StringBuffer("select * from b_otaorder where 1=1 ");
+		StringBuffer sql = new StringBuffer("select * from b_otaorder where mid = ").append(mid);
 		List<Object> paras = new ArrayList<>();
 		if ((statusList != null) && (statusList.size() > 0)) {
 			sql.append(" and orderStatus in (");
@@ -182,7 +182,7 @@ public class OrderDAO extends BaseDAO {
 			sql.setLength(sql.length() - 1);
 			sql.append(") ");
 		}
-		return Db.query(sql.toString(), paras.toArray());
+		return OtaOrder.dao.find(sql.toString(), paras.toArray());
 	}
 
 	/**

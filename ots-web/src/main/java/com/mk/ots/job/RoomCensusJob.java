@@ -1,18 +1,6 @@
 package com.mk.ots.job;
 
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.quartz.QuartzJobBean;
-
 import com.mk.framework.AppUtils;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.hotel.service.RoomstateService;
@@ -21,7 +9,17 @@ import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
 import com.mk.ots.room.bean.RoomCensus;
-import com.mk.pms.order.control.PmsUtilController;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.quartz.QuartzJobBean;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 每30分钟执行一次，房量调度
@@ -55,6 +53,7 @@ public class RoomCensusJob  extends QuartzJobBean {
 							List<RoomstateQuerylistRespEntity> list= roomstateService.findHotelRoomState(null,params);
 							if(list!=null && list.size()>0){
 								RoomstateQuerylistRespEntity result = list.get(0);
+
 								RoomCensus roomCensus = new RoomCensus();
 								roomCensus.setHotelid(result.getHotelid());
 								roomCensus.setHotelname(result.getHotelname());

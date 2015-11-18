@@ -5,10 +5,9 @@ import com.mk.ots.order.bean.OrderLog;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.PmsRoomOrder;
 import com.mk.ots.pay.model.CouponParam;
-import com.mk.ots.ticket.model.BPrizeInfo;
-import com.mk.ots.ticket.model.TicketInfo;
-import com.mk.ots.ticket.model.USendUticket;
-import com.mk.ots.ticket.model.UTicket;
+import com.mk.ots.promo.model.BPromotion;
+import com.mk.ots.ticket.model.*;
+import com.mk.ots.ticket.service.parse.ITicketParse;
 
 import java.util.Date;
 import java.util.List;
@@ -270,9 +269,54 @@ public interface ITicketService {
      * @return
      */
     public CouponParam queryCouponParam(OtaOrder order);
-  
+
+
+    public List<ITicketParse> getPromotionParses(OtaOrder otaOrder);
+
+    public ITicketParse createParseBean(OtaOrder otaOrder,BPromotion bPromotion);
+
     /**
      * @param mid
      */
     void updateSendTicketInvalidByMid(Long mid);
+
+    /**
+     * 根据手机，活动，设备号，检查该手机号是否领取过奖品
+     * @param phone
+     * @param activeid
+     * @param ostype
+     * @return
+     */
+    public boolean checkReceivePrizeByPhone(String phone,Long activeid,String ostype,String date);
+    /**
+     * 根据手机和奖品记录id将奖品绑定给用户
+     * @param phone
+     * @param prizerecordid
+     */
+    public void prizeBindingUser(String phone ,String prizerecordid);
+    public List<BPrizeInfo> queryMyNotreceiveyPrize(Long activeid,String usermark);
+
+    /**
+     * 用户未登录前提下获取他的眯客优惠券
+     * @param prizeInfo
+     * @return
+     */
+    public List<TicketInfo> queryMyTicketOnUserMark(BPrizeInfo prizeInfo,long activeid);
+    /**
+     * 根据手机号绑定某活动未领取的优惠券
+     * @param member
+     * @param activeid
+     */
+    public void loginbindinggit(UMember member,Long activeid);
+    /**
+     * 获取可以绑定的奖品
+     * @param usermark
+     * @param phone
+     * @param activeid
+     * @param date
+     * @param unget
+     * @param geted
+     * @return
+     */
+    public List<UPrizeRecord>findEffectivePrizeByPhone(String phone,Long activeid,String  ostype,String date,Integer geted);
 }

@@ -1,12 +1,12 @@
 package com.mk.ots.ticket.model;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.mk.framework.util.TFBooleanSerializer;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
 
 public class TicketInfo implements Serializable{
 	private static final long serialVersionUID = -1470560953317247446L;
@@ -43,9 +43,11 @@ public class TicketInfo implements Serializable{
 	private Date begintime; 
 	//有效终止时间
 	@JsonFormat(pattern = "yyyyMMddHHmmss",timezone="GMT+8")
-	private Date endtime; 
-	
-	
+	private Date endtime;
+
+	@JsonFormat(pattern="yyyyMMddHHmmss", timezone = "GMT+8")
+	private Date createtime;
+	private Long strategy_id;
 	private Long activityid ;
 	private int status;
 	/**
@@ -170,6 +172,21 @@ public class TicketInfo implements Serializable{
 	public void setStatusname(String statusname) {
 		this.statusname = statusname;
 	}
-	
-	
+
+
+	public Date getCreatetime() {
+		return createtime;
+	}
+
+	public void setCreatetime(Date createtime) {
+		this.createtime = createtime;
+	}
+
+	public Long getStrategy_id() {
+		return strategy_id;
+	}
+
+	public void setStrategy_id(Long strategy_id) {
+		this.strategy_id = strategy_id;
+	}
 }

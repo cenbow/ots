@@ -20,6 +20,12 @@
     from b_otaorder_mac
     where id = #{id,jdbcType=BIGINT}
   </select>
+  <select id="selectByOrderId" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+    from b_otaorder_mac
+    where orderid = #{orderid,jdbcType=BIGINT}
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from b_otaorder_mac
     where id = #{id,jdbcType=BIGINT}
@@ -125,4 +131,25 @@
       blmacaddr = #{blmacaddr,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
+
+
+  <select id="selectByUuid" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select
+    m.id, m.orderID, m.uuid, m.sysno, m.deviceimei, m.simsn, m.wifimacaddr, m.blmacaddr
+    from b_otaorder_mac m left JOIN  b_otaorder o on m.orderId = o.id
+    where m.uuid = #{uuid} and o.OrderStatus in
+    <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </select>
+
+  <select id="selectByDeviceimei" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select
+    m.id, m.orderID, m.uuid, m.sysno, m.deviceimei, m.simsn, m.wifimacaddr, m.blmacaddr
+    from b_otaorder_mac m left JOIN  b_otaorder o on m.orderId = o.id
+    where m.deviceimei = #{deviceimei} and o.OrderStatus in
+    <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </select>
 </mapper>

@@ -15,6 +15,7 @@
     <result column="range" property="range"  />
     <result column="isSelect" property="isSelect" />
     <result column="querycityname" property="querycityname" />
+    <result column="level" property="level" />
   </resultMap>
   
   <select id="getSelectCity" resultMap="TCityMap">
@@ -26,7 +27,8 @@
 		c.ishotcity,
 		c.latitude,
 		c.longitude,
-		c.RANGE
+		c.RANGE,
+		c.level
 	FROM
 		t_city c
 	WHERE

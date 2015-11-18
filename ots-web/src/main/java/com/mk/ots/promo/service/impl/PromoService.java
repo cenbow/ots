@@ -1,5 +1,6 @@
 package com.mk.ots.promo.service.impl;
 
+import com.dianping.cat.Cat;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.mk.framework.exception.MyErrorEnum;
@@ -16,6 +17,7 @@ import com.mk.ots.activity.model.BActiveChannel;
 import com.mk.ots.activity.model.BActivity;
 import com.mk.ots.activity.model.PromotionGenTypeEnum;
 import com.mk.ots.common.enums.*;
+import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.member.dao.IUPromotionLogDao;
 import com.mk.ots.member.model.UMember;
@@ -36,6 +38,7 @@ import com.mk.ots.ticket.dao.IUPrizeRecordDao;
 import com.mk.ots.ticket.dao.UTicketDao;
 import com.mk.ots.ticket.model.*;
 import com.mk.ots.ticket.service.ITicketService;
+import com.mk.ots.ticket.service.IUPrizeRecordService;
 import com.mk.ots.ticket.service.parse.SimplesubTicket;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.hssf.usermodel.*;
@@ -56,10 +59,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * @author Administrator
@@ -104,6 +104,16 @@ public class PromoService implements IPromoService {
     @Autowired
     private IUActiveCDKeyLogDao iUActiveCDKeyLogDao;
 
+    @Autowired
+    private IUPrizeRecordService iuPrizeRecordService;
+    /**
+     * 开学季活动id
+     */
+    public static final long  ACTIVE_KAI_XUE = 23;
+    /**
+     * 重启砸蛋活动id
+     */
+    public static final long  ACTIVE_CQ_KICKEGG = 23;
     private static String genRandomCode(int length) {
         String base = "abcdefghijklmnopqrstuvwxyz123456789";
         Random random = new Random();
@@ -662,6 +672,225 @@ public class PromoService implements IPromoService {
         return rtnList;
     }
 
+    /*
+	 * 奖品随机抽奖券生成
+	 */
+    @Override
+    public List<BPrizeInfo> genTicketByActive(Long activeid, UMember member,String ostype,String usermark){
+        logger.info(">>>根据活动发放优惠券----------------------//开始");
+        List<BPrizeInfo> rtnList = Lists.newArrayList();
+        //此处判断该用户当天是否有抽奖机会
+        boolean isPrizeChance = true;
+        Long mid = null;
+        if (member!=null) {
+            mid = member.getMid();
+        }
+        if (mid!=null) {
+            isPrizeChance=iTicketService.checkUserLuckyDraw(mid, activeid, ostype);
+        }else {
+            if (!Strings.isNullOrEmpty(usermark)) {
+                //第三方平台判断用户是否抽过奖
+                long count =iuPrizeRecordService.checkLuckChanceByUserMark(usermark, activeid);
+                if (count>0) {
+                    throw MyErrorEnum.customError.getMyException(Constant.ACTIVE_NOTE);
+                }
+            }
+        }
+        if (isPrizeChance) {
+            logger.info("用户 "+mid+"开始抽奖！");
+            BActivity bActivity = ibActivityDao.findById(activeid);
+            //判断该用户是否领取过实物
+            boolean isExcludeMaterialObject=false;
+            if (ACTIVE_CQ_KICKEGG!=activeid.longValue()) {//开学季&&重庆砸蛋没有实物，不需要查询
+                Long countLong=iUPrizeRecordDao.findMaterialCountByMidAndAct(mid, activeid,PrizeTypeEnum.material.getId());
+                if (countLong>=1) {
+                    isExcludeMaterialObject=true;
+                }
+            }
+
+            List<BPrize> proList = this.iBPrizeDao.findBPrizeByActiveid(activeid, isExcludeMaterialObject);
+//            //查询第三方库存，确保prize表定义券数目与库存一致
+//            if (CollectionUtils.isNotEmpty(proList)) {
+//                for (BPrize bPrize : proList) {
+//                    if (PrizeTypeEnum.thirdparty.getId().equals(bPrize.getType())) {
+//                        Long actNum=bPrizeStockDao.findStockCountByPrizeIDAndStatus(bPrize.getId(), 0l);
+//                        if (bPrize.getNum()!=actNum) {
+//                            bPrize.setNum(actNum);
+//                            this.iBPrizeDao.saveOrUpdate(bPrize);
+//                            logger.info("奖品id为"+bPrize.getId()+"定义奖品数目与库存表不一致，现更新为库存值："+actNum);
+//                        }
+//                    }
+//                }
+//            }
+            logger.info(">>>根据活动发放优惠券----------------------//1. 查询活动对应的优惠券定义 {}", proList);
+
+            if (PromotionGenTypeEnum.PRIZERANDOM.equals(bActivity.getGentype())) {
+                logger.info(">>>根据活动发放奖品----------------------//2. 随机抽取奖品");
+                List<RandomWeightItem<BPrize>> rwiList = Lists.newArrayList();
+                if (mid !=null) { //登录用户，获取他的中奖概率
+                    //判断是新用户还是老用户[新用户就今日注册的用户]
+                    if (DateUtils.formatDate(new Date()).equals(DateUtils.formatDate(member.getCreatetime()))) {
+                        //是当天注册的，说明是新用户，那么就用新用户的奖品概率
+                        for(BPrize tmp: proList){
+                            if((tmp.getNum()==-1 || tmp.getNum()>0)&& tmp.getNewweight() > 0){
+                                rwiList.add(new RandomWeightItem<BPrize>(tmp,Integer.parseInt(tmp.getNewweight().toString())));
+                            }
+                        }
+                    }else {//老用户
+                        for(BPrize tmp: proList){
+                            if((tmp.getNum()==-1 || tmp.getNum()>0) && tmp.getWeight() > 0){
+                                rwiList.add(new RandomWeightItem<BPrize>(tmp,Integer.parseInt(tmp.getWeight().toString())));
+                            }
+                        }
+                    }
+                }else { //第三方平台
+                   // if (OSTypeEnum.H.getId().equals(ostype)) {
+                        for(BPrize tmp: proList){
+                            if((tmp.getNum()==-1 || tmp.getNum()>0)&& tmp.getOtherweight() > 0 ){
+                                rwiList.add(new RandomWeightItem<BPrize>(tmp,Integer.parseInt(tmp.getOtherweight().toString())));
+                            }
+                        }
+//                    }else {
+//                        throw MyErrorEnum.customError.getMyException("此平台不允许抽奖.");
+//                    }
+
+                }
+                if(rwiList==null || rwiList.size()==0){
+                    String msg = member == null? usermark: member.getMid().toString();
+                    Cat.logEvent("EggTicketOutAlert",msg);
+                    throw MyErrorEnum.customError.getMyException("该活动的优惠券已发放完毕.");
+                }
+
+                List<RandomWeightItem<BPrize>> selection = RandomSelectionUtils.randomSelect(rwiList, 1);
+                if(selection!=null && selection.size()>0){
+                    //根据随机结果生成奖品券
+                    BPrize bp = selection.get(0).getEntity();
+                    if (PrizeTypeEnum.mike.getId().equals(bp.getType())) {
+                        logger.info("开始生成眯客券!");
+                        List<BPromotion> list = this.iBPromotionDao.findByActiveIdAndName(activeid,bp.getName());
+                        if (CollectionUtils.isNotEmpty(list)) {
+                            if (mid!=null) {
+                                List<Long> temp=genCGTicket(list.get(0).getId(), mid, bActivity.getBegintime(), bActivity.getEndtime(), bActivity.getPromotionmethodtype(),null,null,"");
+                                if (CollectionUtils.isNotEmpty(temp)) {
+                                    BPrizeInfo bpi=new BPrizeInfo();
+                                    bpi.setId(temp.get(0));
+                                    bpi.setType(bp.getType());
+                                    rtnList.add(bpi);
+                                }
+                            }else {
+                                BPrizeInfo bpi=new BPrizeInfo();
+                                //bpi.setId(temp.get(0));
+                                bpi.setType(bp.getType());
+                                rtnList.add(bpi);
+                            }
+
+                        }else {
+                            logger.info("根据活动id和奖品名字未能查到b_promtion中优惠券的实例[b_prize表眯客券名字可能和b_promotin中优惠券名字不一样]");
+                            throw MyErrorEnum.customError.getMyException("该活动没有可用眯客优惠券");
+                        }
+
+                    }else if (PrizeTypeEnum.thirdparty.getId().equals(bp.getType())) {
+                        logger.info("开始生成第三方券!");
+                        //Date nowDate=new Date();
+                        BPrizeStock bps=bPrizeStockDao.findBPrizeStockByPrizeid(bp.getId(),activeid);
+                        if (bps==null) {
+                            throw MyErrorEnum.customError.getMyException("奖品已被领取完了！");
+                        }
+                        if (bp.getNum() == -1){
+                            logger.info("第三方券是无限领取"+bps.getId()+"使用状态！");
+                        }else{
+                            bps.setStatus(PrizeStatusEnum.received.getId());//0为未使用状态；1为已领取状态；2为已使用状态
+                            bPrizeStockDao.saveOrUpdate(bps);
+                            logger.info("更新第三方券"+bps.getId()+"为使用状态！");
+                        }
+
+
+                        BPrizeInfo bpi=new BPrizeInfo();
+                        bpi.setCode(bps.getCode());
+                        bpi.setMerchantid(bp.getMerchantid());
+                        bpi.setId(bps.getId());
+                        bpi.setType(bp.getType());
+                        rtnList.add(bpi);
+                    }else if (PrizeTypeEnum.material.getId().equals(bp.getType())) {
+                        logger.info("开始生成实物券!");
+                        BPrizeInfo bpi=new BPrizeInfo();
+                        bpi.setMerchantid(bp.getMerchantid());
+                        bpi.setId(bp.getId());
+                        bpi.setType(bp.getType());
+                        rtnList.add(bpi);
+                    }
+                    if (CollectionUtils.isNotEmpty(rtnList)) {
+                        UPrizeRecord uPrizeRecord=new UPrizeRecord();
+                        uPrizeRecord.setActiveid(bp.getActiveid());
+                        if (mid!=null) {
+                            uPrizeRecord.setMid(mid);
+                            uPrizeRecord.setPhone(member.getPhone());
+                            uPrizeRecord.setReceivestate(String.valueOf(ReceiveStateEnum.binding.getId()));
+                        }else {
+                            Random random = new Random(-1);
+                            Integer seed = -1;
+                            Integer  temp=  random.nextInt(100000) * seed;
+                            uPrizeRecord.setMid(temp.longValue());
+                            uPrizeRecord.setReceivestate(String.valueOf(ReceiveStateEnum.Unget.getId()));
+                        }
+
+                        uPrizeRecord.setOstype(Long.parseLong(ostype));
+                        uPrizeRecord.setCreatetime(new Date());
+
+                        uPrizeRecord.setPrizetype(Long.parseLong(bp.getType().toString()));
+                        uPrizeRecord.setUsermark(usermark);
+                        //如果是眯客券，prizeinfo字段记录promotionid；如果是第三方券或者实物，则记录code
+                        if (PrizeTypeEnum.mike.getId().equals(bp.getType())) {
+                            if (rtnList.get(0).getId()!=null) {
+                                uPrizeRecord.setPrizeinfo(rtnList.get(0).getId().toString());
+                            }
+                        }else {
+                            uPrizeRecord.setPrizeinfo(rtnList.get(0).getCode());
+                        }
+                        uPrizeRecord.setPrizeid(bp.getId());
+
+                        iUPrizeRecordDao.saveOrUpdate(uPrizeRecord);
+                        if (uPrizeRecord.getId()==null) {
+                            throw MyErrorEnum.customError.getMyException("插入奖品记录出错!");
+                        }
+                        rtnList.get(0).setCreatetime(DateUtils.formatDateTime(uPrizeRecord.getCreatetime()));
+                        if (PrizeTypeEnum.mike.getId().intValue()!=rtnList.get(0).getType().intValue()) {
+                            rtnList.get(0).setPrizeRecordId(uPrizeRecord.getId());
+                        }else {
+                            if (mid == null){
+                                rtnList.get(0).setPrizeRecordId(uPrizeRecord.getId());
+                            }
+                        }
+                        logger.info("保存抽奖记录，奖品id为："+uPrizeRecord.getId());
+                        Long numLong=bp.getNum();
+                        if (numLong>=1) {
+                            bp.setNum(--numLong);
+                        }else if (numLong == -1){
+                            logger.info("第三方无限领取："+uPrizeRecord.getId());
+                        }
+                        else {
+                            throw MyErrorEnum.customError.getMyException("该类型奖品已发放完毕，无剩余库存！");
+                        }
+                        iBPrizeDao.saveOrUpdate(bp);
+                        logger.info("更新奖品数目,当前库中奖品数为："+bp.getNum());
+                    }else {
+                        throw MyErrorEnum.customError.getMyException("生成优惠券失败！");
+                    }
+
+                }
+            } else {
+                throw MyErrorEnum.customError.getMyException("此活动不允许领取优惠券.");
+            }
+        }else {
+            logger.info("用户 "+mid+"已抽过奖！");
+            throw MyErrorEnum.customError.getMyException("您已抽过奖！");
+        }
+
+        logger.info("生成用户优惠券：mid:{}, status:{}, 券实例:{}", mid, true, rtnList);
+        logger.info(">>>根据活动发放优惠券----------------------//结束");
+        return rtnList;
+    }
+
     @Override
     public List<Long> genCGTicket(long promotionid, long mid, Date starttime, Date endtime, PromotionMethodTypeEnum promotionMethodType, String sourcecdkey, Long channelid, String hardwarecode) {
         BPromotion bp = this.iBPromotionDao.findById(promotionid);
@@ -1026,9 +1255,175 @@ public class PromoService implements IPromoService {
     }
 
 
+
+    @Override
+    public BPromotion findById(Long id) {
+        return iBPromotionDao.findById(id);
+    }
+
     @Override
     public boolean isGetFirstOrderPromotion(String hardwarecode) {
         List rsList = this.iBPromotionDao.findFirstOrderPromotionByHardwarecode(hardwarecode);
         return rsList != null && rsList.size() > 0;
     }
+
+    @Override
+    public List<BPromotion> findByActiveidAndPrizeId(Long activeid, Long prizeid) {
+        // TODO Auto-generated method stub
+        return iBPromotionDao.findByActiveidAndPrizeId(activeid,prizeid);
+    }
+    @Override
+    public List<BPromotion> findByActiveidAndPrizeRecordId(long activeid,
+                                                           long recordid) {
+        // TODO Auto-generated method stub
+        return iBPromotionDao.findByActiveidAndPrizeRecordId(activeid, recordid);
+    }
+    @Override
+    public List<BPromotion> findByActiveidAndPrizeIdList(Long activeid,
+                                                         List<Long> prizeidList) {
+        // TODO Auto-generated method stub
+        return  iBPromotionDao.findByActiveidAndPrizeIdList(activeid,prizeidList);
+    }
+
+
+    public List<Long> genCGTicketByPrice(
+            long activeId, long mid, String name,String descr, BigDecimal price,Integer platformtype) {
+        BActivity activity = ibActivityDao.findById(activeId);
+        if (null == activity) {
+            logger.error("{},activity定义不存在.", activeId);
+            return new ArrayList<>();
+        }
+        Date startTime =  activity.getBegintime();
+        Date endTime = activity.getEndtime();
+        PromotionMethodTypeEnum promotionMethodType = activity.getPromotionmethodtype();
+        List<BPromotion> promotionList = this.iBPromotionDao.findByActiveId(activeId);
+        if (promotionList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Long promotionid = promotionList.get(0).getId();
+
+        BPromotion bp = this.iBPromotionDao.findById(promotionid);
+        List<Long> genList = Lists.newArrayList();
+        try {
+            //1. 校验券定义
+            if (bp == null) {
+                logger.error("{},券定义不存在.", promotionid);
+                throw MyErrorEnum.customError.getMyException("券定义不存在.");
+            }
+            if (!bp.getIsinstance()) {
+                logger.error("{},此券非实例定义.", promotionid);
+                throw MyErrorEnum.customError.getMyException("此券非实例定义.");
+            }
+            if (PromotionTypeEnum.qieke.equals(bp.getType()) || PromotionTypeEnum.yijia.equals(bp.getType())) {
+                logger.error("{},切客券或议价券不可生成用户券.", promotionid);
+                throw MyErrorEnum.customError.getMyException("切客券或议价券不可生成用户券.");
+            }
+            Date current = new Date();
+            if (current.before(bp.getBegintime()) || current.after(bp.getEndtime())
+                    || current.before(startTime) || current.after(endTime)) {
+                logger.error("{},此券定义未在有效时间范围内. 时间范围: {} - {}", promotionid, bp.getBegintime(), bp.getEndtime());
+                throw MyErrorEnum.customError.getMyException("此券定义未在有效时间范围内.");
+            }
+            if (bp.getNum() != -1 && (bp.getNum() == 0 || bp.getNum() < 0)) {
+                logger.error("{},此券已被领完.", promotionid);
+                throw MyErrorEnum.customError.getMyException("此券已被领完.");
+            }
+
+            logger.info(">>>生成优惠券业务逻辑---------------------->>开始");
+            logger.info(">>>生成优惠券业务逻辑---------------------->>1. 检查优惠券定义[promotionid:{}]可发放数量[num:{}]张", promotionid, bp.getNum());
+            //1. 优惠券数据减1
+            if (bp.getNum() != -1) { //如若此券定义为非无限发放，则需要更新券余量
+                BPromotion instance = new BPromotion();
+                instance.setId(promotionid);
+                instance.setNum(bp.getNum() - 1);
+                this.iBPromotionDao.saveOrUpdate(instance);
+                logger.info(">>>生成优惠券［新］业务逻辑---------------------->>2. 更新优惠券可用数量,num: before={}, after={}", bp.getNum(), bp.getNum() - 1);
+            } else {
+                logger.info(">>>生成优惠券［新］业务逻辑---------------------->>2. 无需更新优惠券可用数量,num:{}", bp.getNum());
+            }
+
+            //2. 生成新优惠券
+            BPromotion newp = new BPromotion();
+            newp.setName(name);
+            newp.setDescription(descr);
+            newp.setCreatetime(new Date());
+
+            LocalDate begintime = LocalDate.now();
+            if (bp.getEffectivetype().equals(EffectiveTypeEnum.TOMORROW)) {
+                begintime = begintime.plusDays(1);
+            }
+            newp.setBegintime(begintime.toDate());
+            Date enddate = null;
+            if (bp.getExpiretype().equals(ExpireTypeEnum.LOCK)) {
+                enddate = bp.getEndtime();
+            } else {
+                org.joda.time.LocalDateTime.Property e = LocalDateTime.fromDateFields(begintime.plusDays(bp.getExpiredaynum()).toDate()).hourOfDay();
+                enddate = e.withMaximumValue().withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59).withMillisOfSecond(59).toDate();
+            }
+            newp.setEndtime(enddate);
+
+            newp.setType(bp.getType());
+            newp.setIsticket(bp.getIsticket());
+            newp.setNum(1);
+            newp.setInfo("");
+            newp.setClassname(SimplesubTicket.class.getName());
+            newp.setIsota(bp.getIsota());
+            newp.setOtapre(bp.getOtapre());
+            newp.setActivitiesid(bp.getActivitiesid());
+            ;
+            newp.setNote(bp.getNote());
+            newp.setPic(bp.getPic());
+            newp.setVersion(bp.getVersion());
+            newp.setIsinstance(false);
+            newp.setWeight(bp.getWeight());
+            newp.setTotalnum(bp.getTotalnum());
+            newp.setPlannum(bp.getPlannum());
+            newp.setProtype(bp.getProtype());
+            newp.setOnlineprice(price);
+            newp.setOfflineprice(bp.getOfflineprice());
+            newp.setExpiretype(bp.getExpiretype());
+            newp.setExpiredaynum(bp.getExpiredaynum());
+            newp.setEffectivetype(bp.getEffectivetype());
+            newp.setPlatformtype(platformtype);
+            newp.setSourcecdkey(bp.getSourcecdkey());
+            newp.setChannelid(bp.getChannelid());
+            this.iBPromotionDao.saveOrUpdate(newp);
+            Long genpromotionid  = newp.getId();
+            logger.info(">>>生成优惠券［新］业务逻辑---------------------->>3. 生成新优惠券:{}", newp);
+
+            //3. 绑定新券至用户
+            UTicket newTicket = new UTicket();
+            if (genpromotionid != null) {
+                newTicket.setMid(mid);
+                newTicket.setPromotionid(String.valueOf(genpromotionid));
+                if (PromotionMethodTypeEnum.HAND_NEEDACTIVE.equals(promotionMethodType)) {
+                    newTicket.setStatus(TicketStatusEnum.unactive.getId());
+                } else {
+                    newTicket.setStatus(TicketStatusEnum.unused.getId());
+                }
+                newTicket.setActivityid(newp.getActivitiesid());
+                newTicket.setPromotiontime(newp.getCreatetime());
+                newTicket.setPromotionmethodtype(promotionMethodType);
+                logger.info("绑定券: 用户id[{}],券定义[{}]", mid, genpromotionid);
+                this.uTicketDao.insert(newTicket);    //关联系统券给指定用户
+                logger.info(">>>生成优惠券［新］业务逻辑---------------------->>4. 绑定新优惠券[{}]给用户[{}]", genpromotionid, mid);
+                if (newTicket.getId() == null) {
+                    logger.error("系统优惠券[{}]绑定用户[{}]时发生错误.券实例:{}.", genpromotionid, mid, promotionid);
+                    throw MyErrorEnum.customError.getMyException("系统优惠券[" + genpromotionid + "]绑定用户[" + mid + "]时发生错误.券实例:" + promotionid);
+                }
+                //4. 记录用户领券记录
+                logMemberGetPromotion(mid, bp.getActivitiesid(), bp.getId(), genpromotionid, "", "", true, null);
+                logger.info(">>>生成优惠券［新］业务逻辑---------------------->>5. 记录用户[{}]领券记录", mid);
+                genList.add(genpromotionid);
+            }
+            logger.info(">>>生成优惠券［新］业务逻辑---------------------->>结束");
+            return genList;
+        } catch (Exception e) {
+            logger.error("genCGTicket(long promotionid, long mid) occur error.", e);
+            logMemberGetPromotion(mid, bp.getActivitiesid(), promotionid, null, "", e.getMessage(), false, null);
+        }
+        return genList;
+    }
+
 }

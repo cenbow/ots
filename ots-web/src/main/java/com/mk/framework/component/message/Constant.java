@@ -87,4 +87,6 @@ public class Constant {
     public static final String QIKE_MONTH_LIMITNUM = "QIKE_MONTH_LIMITNUM";
     
     public static final String WX_TEST_DEBUG = "WX_TEST_DEBUG";
+
+
 }
