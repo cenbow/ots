@@ -657,7 +657,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		Map<String, Object> distanceResultMap = searchService.readonlySearchHotels(hotelEntity);
 
-		Integer normalid = HotelSortEnum.PRICE.getId();
+		Integer normalid = HotelSortEnum.DISTANCE.getId();
 		RoomSaleShowConfigDto roomSaleShowConfigDto = new RoomSaleShowConfigDto();
 		roomSaleShowConfigDto.setCityid(hotelEntity.getCityid());
 		roomSaleShowConfigDto.setIsSpecial(Constant.STR_FALSE);
