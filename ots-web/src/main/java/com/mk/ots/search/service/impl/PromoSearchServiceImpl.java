@@ -58,7 +58,6 @@ import com.mk.orm.plugin.bean.Db;
 import com.mk.ots.common.enums.FrontPageEnum;
 import com.mk.ots.common.enums.HotelSearchEnum;
 import com.mk.ots.common.enums.HotelSortEnum;
-import com.mk.ots.common.enums.ShowAreaEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.common.utils.SearchConst;
