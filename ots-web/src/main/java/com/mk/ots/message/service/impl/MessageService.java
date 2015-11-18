@@ -75,12 +75,14 @@ public class MessageService implements IMessageService {
 			return rtnstatus;
 		}
 	    try {
-			ITips message = null;
-			if (messageTypeEnum == MessageTypeEnum.normal) {
-			    message = new SmsMessage();
-			} else if (messageTypeEnum == MessageTypeEnum.audioMessage) {
-			    message = new YunVoiceMessage();
-			} 
+//			ITips message = null;
+//			if (messageTypeEnum == MessageTypeEnum.normal) {
+//			    message = new SmsMessage();
+//			} else if (messageTypeEnum == MessageTypeEnum.audioMessage) {
+//			    message = new YunVoiceMessage();
+//			}
+
+            ITips message =getMessageInstanceWithWeight(messageTypeEnum,null);
 
 			ITips setContent = message.setTitle("--").setReceivers(phone).setContent(msgContent).setMsgId(msgid);
 			for(int i=0,n=2; i<n; i++){
@@ -730,21 +732,29 @@ public class MessageService implements IMessageService {
 				ITips setContent = message.setTitle("--").setMobiles(phone).setContent(msgContent).setMsgId(msgid);
 				rtnstatus = setContent.send();
 				logger.info("发送短信响应结果:{}", rtnstatus);
-				//更新数据库发送状态
+                Cat.logEvent("send message", message.getClass().getName(), Event.SUCCESS, "phone{" + phone + "}, msgContent{" + msgContent + "}, messageTypeEnum{" + messageTypeEnum.getName() + "}");
+
+                //更新数据库发送状态
 				rewriteReport(msgid, rtnstatus, sendDate.toString(), message.getClass().getSimpleName());
 				//发送失败则重新发送短信
 				if (!rtnstatus) {
 					rtnstatus=reSendMsg(msgid, phone, msgContent, messageTypeEnum, ip,sendDate,message.getClass().getName());
-				}
+                    Cat.logEvent("reSendMsg message", message.getClass().getName(), Event.SUCCESS, "phone{" + phone + "}, msgContent{" + msgContent + "}, messageTypeEnum{" + messageTypeEnum.getName() + "}");
+
+                }
 				
 				if(!rtnstatus){
-					logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);	
-				}
+					logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);
+                    Cat.logEvent("send message error", message.getClass().getName(), Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
+
+                }
 			}
 		} catch (Exception e1) {
 			logger.error("send message occur error. info: {}, {}, {}.", phone, msgContent, messageTypeEnum);
 			e1.printStackTrace();
-		}
+            Cat.logEvent("send message error", "", Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
+
+        }
 		return rtnstatus;
 	}
 }
