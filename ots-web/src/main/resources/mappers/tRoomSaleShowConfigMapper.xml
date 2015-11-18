@@ -71,7 +71,10 @@
         <include refid="Base_Column_List"/>
 	 	FROM t_room_sale_show_config 
         <where>
-           valid ='T' AND headord > 0
+           valid ='T' AND headord > 0 AND showArea = 'front_page_head'
+            <if test="isSpecial != null" >
+                AND isSpecial = #{isSpecial}         
+             </if>  
         </where>
         ORDER  BY headord ASC
     </select>
@@ -85,9 +88,7 @@
             <if test="promoid != null" >
                AND saleTypeId = #{promoid}
             </if>
-            <if test="showArea != null" >
-              AND showArea = #{showArea}
-            </if>
+              AND showArea = 'front_page_centre'
             <if test="normalId != null" >
                 AND normalId = #{normalId}
             </if>      

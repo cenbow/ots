@@ -284,7 +284,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 */
 	public Integer queryByPromoId(Integer promoId) throws Exception {
 		try {
-			List<TRoomSaleConfigInfo> promos = roomsaleConfigInfoMapper.queryListBySaleTypeId(promoId);
+			List<TRoomSaleConfigInfo> promos = roomSaleConfigInfoService.queryListBySaleTypeId("", promoId, 0, 10);
 
 			if (promos != null && promos.size() > 0) {
 				return promos.get(0).getId();
@@ -672,7 +672,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		roomSaleShowConfigDto.setCityid(hotelEntity.getCityid());
 		roomSaleShowConfigDto.setNormalId(normalId);
 		roomSaleShowConfigDto.setPromoid(-1);
-		
+
 		List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService
 				.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
 		resultMap.put("normalid", normalId);
@@ -685,7 +685,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			resultMap.put("promoicon", normalShowConfig.getPromoicon());
 		} else {
 			logger.warn("normalid hasn't been found in showconfig...");
-			
+
 			resultMap.put("normalid", normalId);
 			resultMap.put("promnote", "");
 			resultMap.put("promoicon", "");
