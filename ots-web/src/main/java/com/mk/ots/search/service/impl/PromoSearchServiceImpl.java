@@ -663,7 +663,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		Map<String, Object> distanceResultMap = searchService.readonlySearchHotels(hotelEntity);
 
-		Integer normalid = HotelSortEnum.PRICE.getId();
+		Integer normalid = HotelSortEnum.DISTANCE.getId();
 		RoomSaleShowConfigDto roomSaleShowConfigDto = new RoomSaleShowConfigDto();
 		roomSaleShowConfigDto.setCityid(hotelEntity.getCityid());
 		roomSaleShowConfigDto.setIsSpecial(Constant.STR_FALSE);
@@ -746,12 +746,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		if (showConfigs != null && showConfigs.size() > 0) {
 			RoomSaleShowConfigDto normalShowConfig = showConfigs.get(0);
 			resultMap.put("promotext", normalShowConfig.getPromotext());
-			resultMap.put("promnote", normalShowConfig.getPromonote());
+			resultMap.put("promonote", normalShowConfig.getPromonote());
 			resultMap.put("promoicon", normalShowConfig.getPromoicon());
 
 		} else if (defaultShowConfig != null) {
 
-			resultMap.put("promnote", defaultShowConfig.getPromonote());
+			resultMap.put("promonote", defaultShowConfig.getPromonote());
 			resultMap.put("promoicon", defaultShowConfig.getPromoicon());
 			resultMap.put("promotext", defaultShowConfig.getPromotext());
 		}
@@ -776,7 +776,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			showConfig.setIsSpecial(Constant.STR_FALSE);
 			showConfig.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
 
-			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(showConfig);
 			for (RoomSaleShowConfigDto showConfigDto : showConfigs) {
 				normallist.add(createNormalItem(params, showConfigDto.getNormalId()));
 			}
