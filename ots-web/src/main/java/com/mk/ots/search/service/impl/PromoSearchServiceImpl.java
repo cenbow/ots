@@ -532,6 +532,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					searchResults != null ? searchResults.size() : 0);
 
 			rtnMap.put("hotel", searchResults);
+			rtnMap.put("count", totalHits);
 		} catch (Exception e) {
 			logger.error("failed to readonlyOtsHotelListFromEsStore...", e);
 

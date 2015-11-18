@@ -36,7 +36,7 @@ public class SaleShowController {
 
 	@Autowired
 	private TRoomSaleShowConfigService tRoomSaleShowConfigService;
-
+	
 	@RequestMapping("/queryinfo")
 	public ResponseEntity<Map<String, Object>> queryActivityListByCity(ParamBaseBean pbb, RoomSaleShowConfigDto bean) {
 		logger.info("【/promo/queryinfo】 begin...");
