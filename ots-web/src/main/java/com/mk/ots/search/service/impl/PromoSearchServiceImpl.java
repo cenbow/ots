@@ -770,7 +770,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			showConfig.setIsSpecial(Constant.STR_FALSE);
 			showConfig.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
 
-			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(showConfig);
 			for (RoomSaleShowConfigDto showConfigDto : showConfigs) {
 				normallist.add(createNormalItem(params, showConfigDto.getNormalId()));
 			}
