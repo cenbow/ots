@@ -740,12 +740,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		if (showConfigs != null && showConfigs.size() > 0) {
 			RoomSaleShowConfigDto normalShowConfig = showConfigs.get(0);
 			resultMap.put("promotext", normalShowConfig.getPromotext());
-			resultMap.put("promnote", normalShowConfig.getPromonote());
+			resultMap.put("promonote", normalShowConfig.getPromonote());
 			resultMap.put("promoicon", normalShowConfig.getPromoicon());
 
 		} else if (defaultShowConfig != null) {
 
-			resultMap.put("promnote", defaultShowConfig.getPromonote());
+			resultMap.put("promonote", defaultShowConfig.getPromonote());
 			resultMap.put("promoicon", defaultShowConfig.getPromoicon());
 			resultMap.put("promotext", defaultShowConfig.getPromotext());
 		}
