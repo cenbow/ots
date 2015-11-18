@@ -110,6 +110,7 @@ import com.mk.ots.search.model.SSubwayStation;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.ots.web.ServiceOutput;
+import scala.collection.immutable.Stream;
 
 @Service
 public class PromoSearchServiceImpl implements IPromoSearchService {
@@ -659,15 +660,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 
 
-	private Map<String, Object> distanceQueryMap(HotelFrontPageQueryReqEntity hotelEntity, String strCurDay, String strNextDay){
+	private Map<String, Object> distanceQueryMap(HotelQuerylistReqEntity hotelEntity){
 		// 最近酒店
 		HotelQuerylistReqEntity distanceQueryList = new HotelQuerylistReqEntity();
 
 		distanceQueryList.setCityid(hotelEntity.getCityid());
 		distanceQueryList.setUserlatitude(hotelEntity.getUserlatitude());
 		distanceQueryList.setUserlongitude(hotelEntity.getUserlongitude());
-		distanceQueryList.setStartdateday(strCurDay);
-		distanceQueryList.setEnddateday(strNextDay);
+		distanceQueryList.setStartdateday(hotelEntity.getStartdateday());
+		distanceQueryList.setEnddateday(hotelEntity.getEnddateday());
 		distanceQueryList.setOrderby(HotelSortEnum.DISTANCE.getId());
 		distanceQueryList.setPillowlatitude(hotelEntity.getUserlatitude());
 		distanceQueryList.setPillowlongitude(hotelEntity.getUserlongitude());
@@ -684,36 +685,29 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
 		roomSaleShowConfigDto.setNormalId(normalid);
 
-		List<RoomSaleShowConfigDto> distanceShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+
+
+		RoomSaleShowConfigDto defaultShowConfig = new RoomSaleShowConfigDto();
+		defaultShowConfig.setPromotext(Constant.DEFAULT_NORMAL_DISTANCE_TEXT);
+		defaultShowConfig.setPromonote(Constant.DEFAULT_NORMAL_DISTANCE_NOTE);
+		defaultShowConfig.setPromoicon(Constant.DEFAULT_NORMAL_DISTANCE_ICON);
+
 		distanceResultMap.put("normalid", normalid);
-		distanceResultMap.put("promotype", -1);
+		Map<String, Object> resultMap = renderNormalItem(distanceResultMap, roomSaleShowConfigDto, defaultShowConfig);
 
-		if (distanceShowConfigs != null&& distanceShowConfigs.size() > 0){
-			RoomSaleShowConfigDto normalShowConfig = distanceShowConfigs.get(0);
-			distanceResultMap.put("promotext", normalShowConfig.getPromotext());
-			distanceResultMap.put("promnote", normalShowConfig.getPromonote());
-			distanceResultMap.put("promoicon", normalShowConfig.getPromoicon());
-
-		}else{
-			distanceResultMap.put("normalid", normalid);
-			distanceResultMap.put("promnote", "");
-			distanceResultMap.put("promoicon", "");
-			distanceResultMap.put("promotext", "最近距离");
-
-		}
-		return distanceResultMap;
+		return resultMap;
 	}
 
 
-	private Map<String, Object> cheapestQueryMap(HotelFrontPageQueryReqEntity hotelEntity, String strCurDay, String strNextDay){
+	private Map<String, Object> cheapestQueryMap(HotelQuerylistReqEntity hotelEntity){
 		// 最便宜
 		HotelQuerylistReqEntity priceQueryList = new HotelQuerylistReqEntity();
 
 		priceQueryList.setCityid(hotelEntity.getCityid());
 		priceQueryList.setUserlatitude(hotelEntity.getUserlatitude());
 		priceQueryList.setUserlongitude(hotelEntity.getUserlongitude());
-		priceQueryList.setStartdateday(strCurDay);
-		priceQueryList.setEnddateday(strNextDay);
+		priceQueryList.setStartdateday(hotelEntity.getStartdateday());
+		priceQueryList.setEnddateday(hotelEntity.getEnddateday());
 		priceQueryList.setOrderby(HotelSortEnum.PRICE.getId());
 		priceQueryList.setIspromoonly(false);
 		priceQueryList.setPage(FrontPageEnum.page.getId());
@@ -728,34 +722,27 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
 		roomSaleShowConfigDto.setNormalId(normalid);
 
-		List<RoomSaleShowConfigDto>  priceShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+		RoomSaleShowConfigDto defaultShowConfig = new RoomSaleShowConfigDto();
+		defaultShowConfig.setPromotext(Constant.DEFAULT_NORMAL_CHEAPEST_TEXT);
+		defaultShowConfig.setPromonote(Constant.DEFAULT_NORMAL_CHEAPEST_NOTE);
+		defaultShowConfig.setPromoicon(Constant.DEFAULT_NORMAL_CHEAPEST_ICON);
+
 		priceResultMap.put("normalid", normalid);
-		priceResultMap.put("promotype", -1);
 
-		if (priceShowConfigs != null && priceShowConfigs.size() > 0){
-			RoomSaleShowConfigDto normalShowConfig = priceShowConfigs.get(0);
-			priceResultMap.put("promotext", normalShowConfig.getPromotext());
-			priceResultMap.put("promnote", normalShowConfig.getPromonote());
-			priceResultMap.put("promoicon", normalShowConfig.getPromoicon());
+		Map<String, Object> resultMap = renderNormalItem(priceResultMap, roomSaleShowConfigDto, defaultShowConfig);
 
-		}else {
-			priceResultMap.put("promnote", "");
-			priceResultMap.put("promoicon", "");
-			priceResultMap.put("promotext", "最便宜");
-		}
-
-		return priceResultMap;
+		return resultMap;
 	}
 
-	private Map<String, Object> popularityQueryMap(HotelFrontPageQueryReqEntity hotelEntity, String strCurDay, String strNextDay){
+	private Map<String, Object> popularityQueryMap(HotelQuerylistReqEntity hotelEntity){
 		// 最高人气
 		HotelQuerylistReqEntity orderNumQueryList = new HotelQuerylistReqEntity();
 
 		orderNumQueryList.setCityid(hotelEntity.getCityid());
 		orderNumQueryList.setUserlatitude(hotelEntity.getUserlatitude());
 		orderNumQueryList.setUserlongitude(hotelEntity.getUserlongitude());
-		orderNumQueryList.setStartdateday(strCurDay);
-		orderNumQueryList.setEnddateday(strNextDay);
+		orderNumQueryList.setStartdateday(hotelEntity.getStartdateday());
+		orderNumQueryList.setEnddateday(hotelEntity.getEnddateday());
 		orderNumQueryList.setOrderby(HotelSortEnum.ORDERNUMS.getId());
 		orderNumQueryList.setIspromoonly(false);
 		orderNumQueryList.setPage(FrontPageEnum.page.getId());
@@ -770,26 +757,87 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		roomSaleShowConfigDto.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
 		roomSaleShowConfigDto.setNormalId(normalid);
 
-
-		List<RoomSaleShowConfigDto>   orderNumShowConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
 		orderNumResultMap.put("normalid", normalid);
-		orderNumResultMap.put("promotype", -1);
 
-		if (orderNumShowConfigs != null && orderNumShowConfigs.size() > 0){
-			RoomSaleShowConfigDto normalShowConfig = orderNumShowConfigs.get(0);
-			orderNumResultMap.put("promotext", normalShowConfig.getPromotext());
-			orderNumResultMap.put("promnote", normalShowConfig.getPromonote());
-			orderNumResultMap.put("promoicon", normalShowConfig.getPromoicon());
+		RoomSaleShowConfigDto defaultShowConfig = new RoomSaleShowConfigDto();
+		defaultShowConfig.setPromotext(Constant.DEFAULT_NORMAL_POPULARITY_TEXT);
+		defaultShowConfig.setPromonote(Constant.DEFAULT_NORMAL_POPULARITY_NOTE);
+		defaultShowConfig.setPromoicon(Constant.DEFAULT_NORMAL_POPULARITY_ICON);
 
-		}else {
-			orderNumResultMap.put("promnote", "");
-			orderNumResultMap.put("promoicon", "");
-			orderNumResultMap.put("promotext", "最受欢迎");
+		Map<String, Object> resultMap = renderNormalItem(orderNumResultMap, roomSaleShowConfigDto, defaultShowConfig);
+
+		return resultMap;
+	}
+
+	private Map<String, Object> renderNormalItem(Map<String, Object> resultMap,RoomSaleShowConfigDto roomSaleShowConfigDto,RoomSaleShowConfigDto defaultShowConfig){
+
+		List<RoomSaleShowConfigDto>   showConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+
+		resultMap.put("promotype", -1);
+
+		if (showConfigs != null && showConfigs.size() > 0){
+			RoomSaleShowConfigDto normalShowConfig = showConfigs.get(0);
+			resultMap.put("promotext", normalShowConfig.getPromotext());
+			resultMap.put("promnote", normalShowConfig.getPromonote());
+			resultMap.put("promoicon", normalShowConfig.getPromoicon());
+
+		}else if (defaultShowConfig != null){
+
+			resultMap.put("promnote", defaultShowConfig.getPromonote());
+			resultMap.put("promoicon", defaultShowConfig.getPromoicon());
+			resultMap.put("promotext", defaultShowConfig.getPromotext());
 		}
-		return orderNumResultMap;
+		return resultMap;
+
 	}
 
 
+
+
+
+	@Override
+	public List<Map<String, Object>> searchHomeNormals(HotelQuerylistReqEntity params) throws Exception {
+		// 酒店搜索校验: 开始
+		String validateStr = this.validateSearchHome(params);
+		if (StringUtils.isNotBlank(validateStr)) {
+			logger.error("invalid parameters {}", validateStr);
+			throw new Exception(String.format("invalid paramters %s", validateStr));
+		}
+		// 酒店搜索校验: 结束
+
+		List<Map<String, Object>> normallist = new ArrayList<Map<String, Object>>();
+		try {
+			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
+			showConfig.setPromoid(-1);
+			showConfig.setIsSpecial(Constant.STR_FALSE);
+			showConfig.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
+
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
+			for (RoomSaleShowConfigDto showConfigDto : showConfigs) {
+				normallist.add(createNormalItem(params, showConfigDto));
+			}
+
+			return normallist;
+		} catch (Exception e) {
+			throw new Exception("failed to searchHomeNormals", e);
+		}
+	}
+	private Map<String, Object> createNormalItem(HotelQuerylistReqEntity params, RoomSaleShowConfigDto showConfig)
+			throws Exception {
+
+		Integer normalId = showConfig.getNormalId();
+		Map<String, Object> resultMap = new HashMap<>();
+
+		if(HotelSortEnum.DISTANCE.getId() == normalId){
+			resultMap = distanceQueryMap(params);
+		}else if (HotelSortEnum.PRICE.getId() == normalId){
+			resultMap = cheapestQueryMap(params);
+		}else if(HotelSortEnum.ORDERNUMS.getId() == normalId){
+			resultMap = popularityQueryMap(params);
+		}
+
+		return resultMap;
+	}
 
 	@SuppressWarnings("unchecked")
 	private Map<String, Object> createPromoItem(HotelQuerylistReqEntity params, RoomSaleShowConfigDto showConfig)
