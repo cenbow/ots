@@ -17,11 +17,6 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
-import com.mk.ots.restful.input.HotelFrontPageQueryReqEntity;
-import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
-import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -90,6 +85,7 @@ import com.mk.ots.mapper.SSubwayStationMapper;
 import com.mk.ots.mapper.TDistrictMapper;
 import com.mk.ots.mapper.THotelMapper;
 import com.mk.ots.mapper.THotelScoreMapper;
+import com.mk.ots.restful.input.HotelFrontPageQueryReqEntity;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
@@ -1420,7 +1416,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 
 			result.put("$sortScore", hit.getScore());
-			result.put("promoprice", "");
+			result.put("promoprice", 0);
 
 			Map<String, Object> pin = (Map<String, Object>) result.get("pin");
 			// hotel latitude and longitude
@@ -2842,7 +2838,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					if (promoInfoList.get(i) != null && promoInfoList.get(i).containsKey("promotype")) {
 						promotype = promoInfoList.get(i).get("promotype") == null ? 0
 								: (Integer) promoInfoList.get(i).get("promotype");
-						promoprice = promoInfoList.get(i).get("promoprice") == null ? ""
+						promoprice = promoInfoList.get(i).get("promoprice") == null ? "0"
 								: (String) promoInfoList.get(i).get("promoprice");
 
 						promoMap.put(promotype == null ? 0 : promotype, promoprice);
@@ -2918,7 +2914,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						Long.valueOf(strRoomtypeid), beginDate, endDate);
 				roomtypeItem.put("roomtypeprice", roomtypeprice);
 
-				roomtypeItem.put("promoprice", "");
+				roomtypeItem.put("promoprice", 0);
 				Integer roomPromotype = (Integer) roomtypeItem.get("promotype");
 				if (roomPromotype != null) {
 					String promoPrice = promoMap.get(roomPromotype);
@@ -2937,7 +2933,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype())
 					? Integer.valueOf(reqentity.getPromotype()) : null;
 			if (promoType != null) {
-				List<Map<String, Integer>> promoList = (List) data.get("promoinfo");
+				List<Map<String, Integer>> promoList = (List<Map<String, Integer>>) data.get("promoinfo");
 				if (promoList != null) {
 					for (Map<String, Integer> promoinfo : promoList) {
 						Integer hotelPromoType = promoinfo.get("promotype");
