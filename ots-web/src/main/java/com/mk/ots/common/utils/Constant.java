@@ -235,5 +235,23 @@ public class Constant {
 	public static final Integer PROMO_BANNER_ONE_PROMO = 6;
 
 
+	//非特价城市首页文案默认值
+
+	public static final String DEFAULT_NORMAL_DISTANCE_TEXT = "最近距离";
+	public static final String DEFAULT_NORMAL_DISTANCE_NOTE = "";
+	public static final String DEFAULT_NORMAL_DISTANCE_ICON = "";
+
+
+	public static final String DEFAULT_NORMAL_CHEAPEST_TEXT = "最便宜";
+	public static final String DEFAULT_NORMAL_CHEAPEST_NOTE = "";
+	public static final String DEFAULT_NORMAL_CHEAPEST_ICON = "";
+
+
+	public static final String DEFAULT_NORMAL_POPULARITY_TEXT = "最受欢迎";
+	public static final String DEFAULT_NORMAL_POPULARITY_NOTE = "";
+	public static final String DEFAULT_NORMAL_POPULARITY_ICON = "";
+
+
+
 
 }
