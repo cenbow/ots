@@ -70,6 +70,12 @@ public interface IPromoSearchService {
 	public List<Map<String, Object>> searchHomePromos(HotelQuerylistReqEntity params) throws Exception;
 
 	/**
+	 * search normal entry used in home page
+	 */
+
+	public List<Map<String, Object>> searchHomeNormals(HotelQuerylistReqEntity params) throws Exception;
+
+	/**
 	 * search specifically for theme rooms
 	 * 
 	 * @param params
