@@ -1601,7 +1601,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			Map<String, Object> hotel = (Map<String, Object>) hotelIdMap.get(String.valueOf(hotelId));
 			List<Map<String, Object>> singleRoomType = new ArrayList<Map<String, Object>>();
 			singleRoomType.add(roomtype);
-			hotel.put("roomtype", roomtype);
+			
+			hotel.put("roomtype", singleRoomType);
 
 			hotelIds.add(hotel);
 		}
