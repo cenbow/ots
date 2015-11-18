@@ -622,24 +622,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private Map<String, Object> distanceQueryMap(HotelQuerylistReqEntity hotelEntity){
 		// 最近酒店
 
-		HotelQuerylistReqEntity distanceQueryList = new HotelQuerylistReqEntity();
+		hotelEntity.setOrderby(HotelSortEnum.DISTANCE.getId());
+		hotelEntity.setPillowlatitude(hotelEntity.getUserlatitude());
+		hotelEntity.setPillowlongitude(hotelEntity.getUserlongitude());
+		hotelEntity.setIspromoonly(false);
 
-		distanceQueryList.setCityid(hotelEntity.getCityid());
-		distanceQueryList.setUserlatitude(hotelEntity.getUserlatitude());
-		distanceQueryList.setUserlongitude(hotelEntity.getUserlongitude());
-		distanceQueryList.setStartdateday(hotelEntity.getStartdateday());
-		distanceQueryList.setEnddateday(hotelEntity.getEnddateday());
-		distanceQueryList.setOrderby(HotelSortEnum.DISTANCE.getId());
-
-		distanceQueryList.setPillowlatitude(hotelEntity.getUserlatitude());
-		distanceQueryList.setPillowlongitude(hotelEntity.getUserlongitude());
-		distanceQueryList.setIspromoonly(false);
-		distanceQueryList.setPage(FrontPageEnum.page.getId());
-		distanceQueryList.setLimit(FrontPageEnum.limit.getId());
-
-
-
-		Map<String, Object> distanceResultMap = searchService.readonlySearchHotels(distanceQueryList);
+		Map<String, Object> distanceResultMap = searchService.readonlySearchHotels(hotelEntity);
 
 		Integer normalid = HotelSortEnum.PRICE.getId();
 		RoomSaleShowConfigDto roomSaleShowConfigDto = new RoomSaleShowConfigDto();
@@ -663,19 +651,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	private Map<String, Object> cheapestQueryMap(HotelQuerylistReqEntity hotelEntity){
 		// 最便宜
-		HotelQuerylistReqEntity priceQueryList = new HotelQuerylistReqEntity();
+		hotelEntity.setOrderby(HotelSortEnum.PRICE.getId());
+		hotelEntity.setIspromoonly(false);
 
-		priceQueryList.setCityid(hotelEntity.getCityid());
-		priceQueryList.setUserlatitude(hotelEntity.getUserlatitude());
-		priceQueryList.setUserlongitude(hotelEntity.getUserlongitude());
-		priceQueryList.setStartdateday(hotelEntity.getStartdateday());
-		priceQueryList.setEnddateday(hotelEntity.getEnddateday());
-		priceQueryList.setOrderby(HotelSortEnum.PRICE.getId());
-		priceQueryList.setIspromoonly(false);
-		priceQueryList.setPage(FrontPageEnum.page.getId());
-		priceQueryList.setLimit(FrontPageEnum.limit.getId());
 
-		Map<String, Object> priceResultMap = searchService.readonlySearchHotels(priceQueryList);
+		Map<String, Object> priceResultMap = searchService.readonlySearchHotels(hotelEntity);
 
 		Integer normalid = HotelSortEnum.PRICE.getId();
 		RoomSaleShowConfigDto roomSaleShowConfigDto = new RoomSaleShowConfigDto();
@@ -699,19 +679,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	private Map<String, Object> popularityQueryMap(HotelQuerylistReqEntity hotelEntity){
 		// 最高人气
-		HotelQuerylistReqEntity orderNumQueryList = new HotelQuerylistReqEntity();
 
-		orderNumQueryList.setCityid(hotelEntity.getCityid());
-		orderNumQueryList.setUserlatitude(hotelEntity.getUserlatitude());
-		orderNumQueryList.setUserlongitude(hotelEntity.getUserlongitude());
-		orderNumQueryList.setStartdateday(hotelEntity.getStartdateday());
-		orderNumQueryList.setEnddateday(hotelEntity.getEnddateday());
-		orderNumQueryList.setOrderby(HotelSortEnum.ORDERNUMS.getId());
-		orderNumQueryList.setIspromoonly(false);
-		orderNumQueryList.setPage(FrontPageEnum.page.getId());
-		orderNumQueryList.setLimit(FrontPageEnum.limit.getId());
+		hotelEntity.setOrderby(HotelSortEnum.ORDERNUMS.getId());
+		hotelEntity.setIspromoonly(false);
 
-		Map<String, Object> orderNumResultMap = searchService.readonlySearchHotels(orderNumQueryList);
+
+		Map<String, Object> orderNumResultMap = searchService.readonlySearchHotels(hotelEntity);
 
 		Integer normalid = HotelSortEnum.ORDERNUMS.getId();
 		RoomSaleShowConfigDto roomSaleShowConfigDto = new RoomSaleShowConfigDto();
