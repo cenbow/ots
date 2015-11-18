@@ -48,12 +48,12 @@ public class SaleShowController {
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
 		List<TRoomSaleCity> roomSaleCityList = tRoomSaleShowConfigService.queryTRoomSaleCity(bean.getCityid());
+		bean.setIsSpecial("T");
 		if (CollectionUtils.isEmpty(roomSaleCityList)) {
-			rtnMap.put("errmsg", "该城市没有参加特价活动");
-			rtnMap.put("errcode", -1);
-			logger.info("【/promo/queryinfo】 end is not promo...");
-			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+			bean.setIsSpecial("F");
+			logger.info(String.format("no promo actived in this city %s", bean.getCityid()));
 		}
+
 		List<RoomSaleShowConfigDto> resultList = new ArrayList<>();
 
 		String errMsg = "";
@@ -63,7 +63,7 @@ public class SaleShowController {
 		} catch (Exception ex) {
 			errMsg = String.format("failed to queryRenderableHeaderShows by cityid:%s", bean.getCityid());
 			errCode = -1;
-			
+
 			logger.error(errMsg, ex);
 		}
 

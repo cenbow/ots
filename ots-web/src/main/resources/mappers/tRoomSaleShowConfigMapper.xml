@@ -71,12 +71,12 @@
         <include refid="Base_Column_List"/>
 	 	FROM t_room_sale_show_config 
         <where>
-           valid ='T' AND headord > 0 AND showArea = 'front_page_head'
+           valid ='T' AND ord > 0 AND showArea = 'front_page_head'
             <if test="isSpecial != null" >
                 AND isSpecial = #{isSpecial}         
              </if>  
         </where>
-        ORDER  BY headord ASC
+        ORDER  BY ord ASC
     </select>
 
     <select id="queryRenderableShows" resultMap="tRoomSaleShowConfig"  parameterType="com.mk.ots.roomsale.model.RoomSaleShowConfigDto">

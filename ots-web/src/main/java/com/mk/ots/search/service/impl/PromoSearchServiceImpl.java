@@ -1,5 +1,50 @@
 package com.mk.ots.search.service.impl;
 
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.common.geo.GeoDistance;
+import org.elasticsearch.common.geo.GeoPoint;
+import org.elasticsearch.common.unit.DistanceUnit;
+import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.GeoDistanceFilterBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryFilterBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.script.ScriptScoreFunctionBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
+import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
@@ -22,9 +67,22 @@ import com.mk.ots.hotel.comm.enums.HotelTypeEnum;
 import com.mk.ots.hotel.model.TCityModel;
 import com.mk.ots.hotel.model.TDistrictModel;
 import com.mk.ots.hotel.model.THotelModel;
-import com.mk.ots.hotel.service.*;
+import com.mk.ots.hotel.service.CashBackService;
+import com.mk.ots.hotel.service.CityService;
+import com.mk.ots.hotel.service.HotelCollectionService;
+import com.mk.ots.hotel.service.HotelPriceService;
+import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.inner.service.IOtsAdminService;
-import com.mk.ots.mapper.*;
+import com.mk.ots.mapper.PositionTypeMapper;
+import com.mk.ots.mapper.RoomSaleConfigMapper;
+import com.mk.ots.mapper.SAreaInfoMapper;
+import com.mk.ots.mapper.SLandMarkMapper;
+import com.mk.ots.mapper.SSubwayMapper;
+import com.mk.ots.mapper.SSubwayStationMapper;
+import com.mk.ots.mapper.TDistrictMapper;
+import com.mk.ots.mapper.THotelMapper;
+import com.mk.ots.mapper.THotelScoreMapper;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
@@ -37,38 +95,14 @@ import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import com.mk.ots.search.enums.PositionTypeEnum;
-import com.mk.ots.search.model.*;
+import com.mk.ots.search.model.PositionTypeModel;
+import com.mk.ots.search.model.SAreaInfo;
+import com.mk.ots.search.model.SLandMark;
+import com.mk.ots.search.model.SSubway;
+import com.mk.ots.search.model.SSubwayStation;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.ots.web.ServiceOutput;
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.common.geo.GeoDistance;
-import org.elasticsearch.common.geo.GeoPoint;
-import org.elasticsearch.common.unit.DistanceUnit;
-import org.elasticsearch.index.query.*;
-import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
-import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
-import org.elasticsearch.index.query.functionscore.script.ScriptScoreFunctionBuilder;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
-import org.joda.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class PromoSearchServiceImpl implements IPromoSearchService {
@@ -175,9 +209,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	@Autowired
 	private RoomSaleConfigMapper roomsaleConfigMapper;
 
-	@Autowired
-	private RoomSaleConfigInfoMapper roomsaleConfigInfoMapper;
-
 	/*
 	 * 获取 区域位置类型
 	 * 
@@ -250,7 +281,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 */
 	public Integer queryByPromoId(Integer promoId) throws Exception {
 		try {
-			List<TRoomSaleConfigInfo> promos = roomsaleConfigInfoMapper.queryListBySaleTypeId(promoId);
+			List<TRoomSaleConfigInfo> promos = roomSaleConfigInfoService.queryListBySaleTypeId("", promoId, 1, 10);
 
 			if (promos != null && promos.size() > 0) {
 				return promos.get(0).getId();
@@ -616,10 +647,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return roomtype;
 	}
 
-
-
-
-	private Map<String, Object> distanceQueryMap(HotelQuerylistReqEntity hotelEntity){
+	private Map<String, Object> distanceQueryMap(HotelQuerylistReqEntity hotelEntity) {
 		// 最近酒店
 
 		hotelEntity.setOrderby(HotelSortEnum.DISTANCE.getId());
@@ -648,12 +676,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return resultMap;
 	}
 
-
-	private Map<String, Object> cheapestQueryMap(HotelQuerylistReqEntity hotelEntity){
+	private Map<String, Object> cheapestQueryMap(HotelQuerylistReqEntity hotelEntity) {
 		// 最便宜
 		hotelEntity.setOrderby(HotelSortEnum.PRICE.getId());
 		hotelEntity.setIspromoonly(false);
-
 
 		Map<String, Object> priceResultMap = searchService.readonlySearchHotels(hotelEntity);
 
@@ -673,16 +699,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		Map<String, Object> resultMap = renderNormalItem(priceResultMap, roomSaleShowConfigDto, defaultShowConfig);
 
-
 		return resultMap;
 	}
 
-	private Map<String, Object> popularityQueryMap(HotelQuerylistReqEntity hotelEntity){
+	private Map<String, Object> popularityQueryMap(HotelQuerylistReqEntity hotelEntity) {
 		// 最高人气
 
 		hotelEntity.setOrderby(HotelSortEnum.ORDERNUMS.getId());
 		hotelEntity.setIspromoonly(false);
-
 
 		Map<String, Object> orderNumResultMap = searchService.readonlySearchHotels(hotelEntity);
 
@@ -705,19 +729,21 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return resultMap;
 	}
 
-	private Map<String, Object> renderNormalItem(Map<String, Object> resultMap,RoomSaleShowConfigDto roomSaleShowConfigDto,RoomSaleShowConfigDto defaultShowConfig){
+	private Map<String, Object> renderNormalItem(Map<String, Object> resultMap,
+			RoomSaleShowConfigDto roomSaleShowConfigDto, RoomSaleShowConfigDto defaultShowConfig) {
 
-		List<RoomSaleShowConfigDto>   showConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
+		List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService
+				.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
 
 		resultMap.put("promotype", -1);
 
-		if (showConfigs != null && showConfigs.size() > 0){
+		if (showConfigs != null && showConfigs.size() > 0) {
 			RoomSaleShowConfigDto normalShowConfig = showConfigs.get(0);
 			resultMap.put("promotext", normalShowConfig.getPromotext());
 			resultMap.put("promnote", normalShowConfig.getPromonote());
 			resultMap.put("promoicon", normalShowConfig.getPromoicon());
 
-		}else if (defaultShowConfig != null){
+		} else if (defaultShowConfig != null) {
 
 			resultMap.put("promnote", defaultShowConfig.getPromonote());
 			resultMap.put("promoicon", defaultShowConfig.getPromoicon());
@@ -726,7 +752,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return resultMap;
 
 	}
-
 
 	@Override
 	public List<Map<String, Object>> searchHomeNormals(HotelQuerylistReqEntity params) throws Exception {
@@ -756,23 +781,20 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 	}
 
-
-	private Map<String, Object> createNormalItem(HotelQuerylistReqEntity params, Integer normalId)
-			throws Exception {
+	private Map<String, Object> createNormalItem(HotelQuerylistReqEntity params, Integer normalId) throws Exception {
 
 		Map<String, Object> resultMap = new HashMap<>();
 
-		if(HotelSortEnum.DISTANCE.getId() == normalId){
+		if (HotelSortEnum.DISTANCE.getId() == normalId) {
 			resultMap = distanceQueryMap(params);
-		}else if (HotelSortEnum.PRICE.getId() == normalId){
+		} else if (HotelSortEnum.PRICE.getId() == normalId) {
 			resultMap = cheapestQueryMap(params);
-		}else if(HotelSortEnum.ORDERNUMS.getId() == normalId){
+		} else if (HotelSortEnum.ORDERNUMS.getId() == normalId) {
 			resultMap = popularityQueryMap(params);
 		}
 
 		return resultMap;
 	}
-
 
 	@SuppressWarnings("unchecked")
 	private Map<String, Object> createPromoItem(HotelQuerylistReqEntity params, RoomSaleShowConfigDto showConfig)
@@ -786,8 +808,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		Integer promoId = showConfig.getPromoid();
 		Integer normalId = showConfig.getNormalId();
-
-		final Date day = new Date();
 
 		Map<String, Object> rtnMap = null;
 		if (promoId > 0) {
@@ -832,7 +852,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		List<Map<String, Object>> promolist = new ArrayList<Map<String, Object>>();
 		try {
 			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
-
+			showConfig.setIsSpecial("T");
+			
 			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
 			for (RoomSaleShowConfigDto showConfigDto : showConfigs) {
 				promolist.add(createPromoItem(params, showConfigDto));
