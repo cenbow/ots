@@ -2992,9 +2992,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					.append(", config.saleType as promotype, info.saleTypeId as promoid  ")
 					.append("  from t_roomtype a ").append(" join t_roomtype_info b on a.id = b.roomtypeid")
 					.append(" join t_bedtype d on b.bedtype = d.id")
-					.append(" left join t_room_sale_config config on b.roomtypeid = config.roomtypeid ")
+					.append(" left join t_room_sale_config config on b.roomtypeid = config.saleroomtypeid ")
 					.append(" join t_room_sale_config_info info on config.saleConfigInfoId = info.id ")
-					.append(" where a.thotelid='" + hotelid + "'");
+					.append(" where a.thotelid='" + hotelid + "'")
+					.append(" and config.valid = 'T' and info.valid = 'T' ");
 			if (!StringUtils.isBlank(bedtype)) {
 				bfSql.append(" and b.bedtype='" + bedtype + "'");
 			}

@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.common.collect.Maps;
 import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.common.enums.ShowAreaEnum;
 import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
 import com.mk.ots.roomsale.model.TRoomSaleCity;
 import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
