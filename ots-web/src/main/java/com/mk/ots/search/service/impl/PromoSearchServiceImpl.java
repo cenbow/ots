@@ -854,7 +854,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		try {
 			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
 			showConfig.setIsSpecial("T");
-			
+
 			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
 			for (RoomSaleShowConfigDto showConfigDto : showConfigs) {
 				promolist.add(createPromoItem(params, showConfigDto));
@@ -1594,6 +1594,21 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			List<Map<String, Object>> roomtypeList = this.readonlyRoomtypeList(result, "");
 			result.put("roomtype", roomtypeList);
 
+			result.put("collectionstate", "");
+
+			if (StringUtils.isNotBlank(reqEntity.getToken())) {
+				try {
+					String collectionState = findCollection(reqEntity.getToken(), Long.valueOf(es_hotelid));
+					if (StringUtils.isNotBlank(collectionState)) {
+						result.put("collectionstate", collectionState);
+					}
+				} catch (Exception ex) {
+					result.put("collectionstate", "");
+
+					logger.warn(String.format("invalid collectionstate for hotelid:%s", es_hotelid), ex);
+				}
+			}
+
 			// 添加接口返回数据到结果集
 			searchResults.add(result);
 		}
@@ -2244,7 +2259,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				if (StringUtils.isNotBlank(reqentity.getToken())) {
 					try {
 						String collectionState = findCollection(reqentity.getToken(), Long.valueOf(hotelid));
-						result.put("collectionstate", collectionState);
+						if (StringUtils.isNotBlank(collectionState)) {
+							result.put("collectionstate", collectionState);
+						}
 					} catch (Exception ex) {
 						result.put("collectionstate", "");
 
