@@ -105,7 +105,7 @@ public class MessageService implements IMessageService {
 		} catch (Exception e) {
 			logger.error("send message occur error. info: {}, {}, {}.", phone, msgContent, messageTypeEnum);
 			e.printStackTrace();
-            Cat.logEvent("send message error", "", Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
+            Cat.logEvent("send message error", phone, Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
         }
 		
 
