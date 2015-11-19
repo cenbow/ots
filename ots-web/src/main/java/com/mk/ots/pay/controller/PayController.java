@@ -97,9 +97,11 @@ public class PayController {
 		String result_details = request.getParameter("result_details");
 		this.logger.info("支付宝退款回调： " + result_details);
 		if (this.payService.alipayCancelRes(result_details)) {
+			Cat.logEvent("pay", "支付宝退款回调", Event.SUCCESS, result_details);
 			this.logger.info("支付宝退款回调处理成功. ");
 			return "success";
 		} else {
+			Cat.logEvent("pay", "支付宝退款回调", "Error", result_details);
 			this.logger.info("支付宝退款回调处理失败. ");
 			return "";
 		}
@@ -146,7 +148,7 @@ public class PayController {
 						// 处理成功后给支付宝返回 success将不会再请求
 						res = "success";
 					}
-					
+					Cat.logEvent("pay", "支付宝回调", Event.SUCCESS, orderid);
 					this.logger.info("支付宝回调，订单号：" + orderid + "  支付宝支付成功，第一次回调结束");
 				} else {
 					res = "success";
@@ -157,7 +159,7 @@ public class PayController {
 				
 			} else {
 				this.logger.info("支付宝回调，订单号：" + orderid + "  支付宝支付失败，状态是：" + trade_status);
-
+				Cat.logEvent("pay", "支付宝回调", "ERROR", orderid);
 				payService.insertPayCallbackLog(Long.parseLong(orderid), PayCallbackEnum.Ali_Callback.name(), "N", payid,
 						new BigDecimal(price).setScale(2, BigDecimal.ROUND_HALF_UP), trade_status, null);
 			}
@@ -239,7 +241,7 @@ public class PayController {
 				
 				payService.insertPayCallbackLog(Long.parseLong(orderid), PayCallbackEnum.WeChat_Callback.name(), "Y", 
 						payid, payPrice, null, null);
-				
+				Cat.logEvent("pay", "微信回调", Event.SUCCESS, orderid);
 			} else {
 				
 				String errCode = elroot.getChildText("err_code");
@@ -248,14 +250,14 @@ public class PayController {
 				
 				payService.insertPayCallbackLog(Long.parseLong(orderid), PayCallbackEnum.WeChat_Callback.name(), "N", 
 						payid, payPrice, errCode, errMsg);
-				
+				Cat.logEvent("pay", "微信回调", "ERROR", orderid);
 			}
 		} else {
 			this.logger.info("订单:" + orderid + "微信回调,支付错误，错误信息码：" + return_msg);
 			
 			payService.insertPayCallbackLog(Long.parseLong(orderid), PayCallbackEnum.WeChat_Callback.name(), "N", 
 					payid, payPrice, return_code, return_msg);
-			
+			Cat.logEvent("pay", "微信回调", "ERROR", orderid);
 		}
 
 		this.logger.info("订单:" + orderid + "微信回调结束");
@@ -419,6 +421,7 @@ public class PayController {
 
 					payService.insertPayCallbackLog(Long.parseLong(orderid), PayCallbackEnum.WeChat_Platform_Callback.name(), "N", payno,
 							new BigDecimal(price).setScale(2, BigDecimal.ROUND_HALF_UP), null, "去银行查询没有找到支付信息");
+					Cat.logEvent("pay", "微信公共账号付款完成后回调", "ERROR", orderid);
 
 				}
 			} else {
@@ -429,6 +432,7 @@ public class PayController {
 						price).setScale(2, BigDecimal.ROUND_HALF_UP), null, null);
 			}
 			this.logger.info("微信公共账号付款完成后回调,处理完成,订单:" + orderid);
+			Cat.logEvent("pay", "微信公共账号付款完成后回调", Event.SUCCESS, orderid);
 		} finally {
 			logger.info("订单：" + orderid + "回调流程完毕,释放分布锁.");
 			DistributedLockUtil.releaseLock(PayLockKeyUtil.genLockKey4PayCallBack(orderid), lockValue);
