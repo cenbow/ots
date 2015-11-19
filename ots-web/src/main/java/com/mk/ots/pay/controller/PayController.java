@@ -10,6 +10,7 @@ import javax.xml.ws.http.HTTPException;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
 import jodd.util.StringUtil;
 
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
@@ -484,6 +485,7 @@ public class PayController {
 		
 		long longorderId = this.getLongOrderId(orderid);
 		Map<String, Object> map;
+		Transaction t = Cat.newTransaction("URL", "/ots/pay/create");
 		try {
 			map = payService.createPay(request, longorderId, promotionno, couponno, paytype, onlinepaytype);
 			try {
@@ -502,17 +504,18 @@ public class PayController {
 			} catch (Throwable e) {
 				logger.error("订单:" + longorderId +"pushMsg异常!", e);
 			}
-			
+			t.setStatus(Transaction.SUCCESS);
 		} catch (Exception e) {
 			orderService.changeOrderStatusByPay(longorderId, OtaOrderStatusEnum.WaitPay, PayStatusEnum.waitPay, OrderTypeEnum.YF);
 			logger.info("订单号：" + longorderId +"回滚，将其置为初始状态.异常:" + e.getMessage());
 			Cat.logEvent("/pay/create", orderid, "Error", "订单:" + orderid + ",促销代码" + promotionno + ",优惠券" + couponno + ",付款类型(1:预付，2:到付):" + paytype + ",在线支付类型(1:微信,2:支付宝,3:网银,4:其它):" + onlinepaytype);
 			Cat.logError("/pay/create error", e);
+			t.setStatus(e);
 			throw e;
 		} finally {
-			
 			logger.info("订单：" + orderid +"支付流程完毕,释放分布锁.");
 			DistributedLockUtil.releaseLock(PayLockKeyUtil.genLockKey4Pay(orderid), lockValue);
+			t.complete();
 		}
 		Cat.logEvent("/pay/create", orderid, Event.SUCCESS, "订单:" + orderid + ",促销代码" + promotionno + ",优惠券" + couponno + ",付款类型(1:预付，2:到付):" + paytype + ",在线支付类型(1:微信,2:支付宝,3:网银,4:其它):" + onlinepaytype);
 		return new ResponseEntity<Map<String, Object>>(map, org.springframework.http.HttpStatus.OK);
@@ -641,6 +644,7 @@ public class PayController {
 		String responseString=this.payService.cancelpaybyerror(orderId);
 		if(responseString!=null){
 			logger.info("订单号："+ orderid +" 异常情况下支付取消  成功，返回数据是："+responseString  );
+			Cat.logEvent("pay", "异常情况下支付取消", Event.SUCCESS, orderid);
 			return new ResponseEntity<Object>(responseString, org.springframework.http.HttpStatus.OK);
 		}else{
 			logger.info("订单号："+ orderid +" 异常情况下支付取消  出现异常，数据返回 ：null "  );
@@ -648,6 +652,7 @@ public class PayController {
 			map.put("success", false);
 			map.put("errorcode", MyErrorEnum.cancelpaybyerrorError.getErrorCode());
 			map.put("errormsg", MyErrorEnum.cancelpaybyerrorError.getErrorMsg());
+			Cat.logEvent("pay", "异常情况下支付取消", "ERROR", orderid);
 			return new ResponseEntity<Object>(map, org.springframework.http.HttpStatus.OK);
 		}
 	}
