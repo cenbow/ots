@@ -758,6 +758,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<Map<String, Object>> searchHomeNormals(HotelQuerylistReqEntity params) throws Exception {
 		// 酒店搜索校验: 开始
 		String validateStr = this.validateSearchHome(params);
@@ -777,7 +778,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService
 					.queryRoomSaleShowConfigByParams(showConfig);
 			for (RoomSaleShowConfigDto showConfigDto : showConfigs) {
-				normallist.add(createNormalItem(params, showConfigDto.getNormalId()));
+				Map<String, Object> normalItem = createNormalItem(params, showConfigDto.getNormalId());
+				if (normalItem != null && normalItem.get("hotel") != null
+						&& ((List<Map<String, Object>>) normalItem.get("hotel")).size() > 0) {
+					normallist.add(createNormalItem(params, showConfigDto.getNormalId()));
+				}
 			}
 
 			return normallist;
@@ -845,6 +850,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<Map<String, Object>> searchHomePromos(HotelQuerylistReqEntity params) throws Exception {
 		// 酒店搜索校验: 开始
 		String validateStr = this.validateSearchHome(params);
@@ -861,7 +867,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
 			for (RoomSaleShowConfigDto showConfigDto : showConfigs) {
-				promolist.add(createPromoItem(params, showConfigDto));
+				Map<String, Object> promoItem = createPromoItem(params, showConfigDto);
+				if (promoItem != null && promoItem.get("hotel") != null
+						&& ((List<Map<String, Object>>) promoItem.get("hotel")).size() > 0) {
+					promolist.add(promoItem);
+				}
 			}
 
 			return promolist;
