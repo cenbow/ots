@@ -541,9 +541,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 		}
-		
+
 		rtnMap.put("supplementhotel", new ArrayList<Map<String, Object>>());
-		
+
 		return rtnMap;
 	}
 
@@ -776,7 +776,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			showConfig.setIsSpecial(Constant.STR_FALSE);
 			showConfig.setShowArea(ShowAreaEnum.FrontPageCentre.getCode());
 
-			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(showConfig);
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService
+					.queryRoomSaleShowConfigByParams(showConfig);
 			for (RoomSaleShowConfigDto showConfigDto : showConfigs) {
 				normallist.add(createNormalItem(params, showConfigDto.getNormalId()));
 			}
@@ -1190,9 +1191,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				String p_isnewpms = Constant.STR_TRUE.equals(result.get("isnewpms")) ? Constant.STR_TRUE
 						: Constant.STR_FALSE;
 
-				Integer vacants = hotelService.calPromoVacants(Integer.parseInt(promotype), Long.parseLong(hotelid),
-						reqentity.getStartdateday(), reqentity.getEnddateday(), p_isnewpms);
-				result.put("roomvacancy", vacants);
+				if (StringUtils.isNotBlank(promotype)) {
+					Integer vacants = hotelService.calPromoVacants(Integer.parseInt(promotype), Long.parseLong(hotelid),
+							reqentity.getStartdateday(), reqentity.getEnddateday(), p_isnewpms);
+					result.put("roomvacancy", vacants);
+				} else {
+					logger.warn(String.format("promotype is blank on hotelid %s", hotelid));
+				}
 
 				// 添加到酒店列表
 				hotels.add(result);
@@ -1963,6 +1968,25 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 								result.put("promoprice", promoinfo.get("promoprice"));
 							}
 						}
+					}
+
+					if (!result.containsKey("promoids")) {
+						List<Integer> promoIds = new ArrayList<Integer>();
+						for (Map<String, Integer> promo : promoList) {
+							Integer tmppromoType = promo.get("promotype");
+
+							List<TRoomSaleConfigInfo> configInfos = roomSaleConfigInfoService
+									.querybyPromoType(tmppromoType);
+
+							if (configInfos != null && configInfos.size() > 0) {
+								Integer promoId = configInfos.get(0).getId();
+								if (!promoIds.contains(promoId)) {
+									promoIds.add(promoId);
+								}
+							}
+						}
+
+						result.put("promoids", promoIds);
 					}
 				}
 

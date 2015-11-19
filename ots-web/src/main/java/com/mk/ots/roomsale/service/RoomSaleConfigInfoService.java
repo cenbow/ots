@@ -14,4 +14,6 @@ public interface RoomSaleConfigInfoService {
      * @return
      */
     List<TRoomSaleConfigInfo> queryListBySaleTypeId(String cityid,int saleTypeId,int start,int limit);
+    
+    public List<TRoomSaleConfigInfo> querybyPromoType(Integer promotype);
 }
