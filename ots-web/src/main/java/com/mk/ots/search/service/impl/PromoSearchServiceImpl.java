@@ -781,7 +781,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Map<String, Object> normalItem = createNormalItem(params, showConfigDto.getNormalId());
 				if (normalItem != null && normalItem.get("hotel") != null
 						&& ((List<Map<String, Object>>) normalItem.get("hotel")).size() > 0) {
-					normallist.add(createNormalItem(params, showConfigDto.getNormalId()));
+					normallist.add(normalItem);
 				}
 			}
 
