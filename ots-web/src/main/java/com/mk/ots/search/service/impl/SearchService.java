@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.mk.framework.util.CommonUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -665,9 +666,9 @@ public class SearchService implements ISearchService {
 				if (!Constant.STR_TRUE.equals(result.get("online"))) {
 					logger.info("记录离线埋点:{}", reqentity.toString());
 					if (Constant.STR_TRUE.equals(result.get("isnewpms"))) {
-						Cat.logEvent("ROOMSTATE", "pmsOffLine-2.0", Event.SUCCESS, "");
+						Cat.logEvent("ROOMSTATE", "pmsOffLine-2.0", Event.SUCCESS, hotelid);
 					} else {
-						Cat.logEvent("ROOMSTATE", "pmsOffLine-1.0", Event.SUCCESS, "");
+						Cat.logEvent("ROOMSTATE", "pmsOffLine-1.0", Event.SUCCESS, hotelid);
 					}
 				}
 			}
@@ -1391,6 +1392,7 @@ public class SearchService implements ISearchService {
 				result.put("avlblroomnum", avlblroomnum);
 				if (avlblroomnum <= 0) {
 					result.put("isfull", Constant.STR_TRUE);
+					Cat.logEvent("Search-RoomFullNum",es_hotelid, Event.SUCCESS,"");
 				} else {
 					result.put("isfull", Constant.STR_FALSE);
 				}

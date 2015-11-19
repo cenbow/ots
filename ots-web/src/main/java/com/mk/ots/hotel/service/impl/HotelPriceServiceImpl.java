@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
@@ -139,8 +142,19 @@ public class HotelPriceServiceImpl implements HotelPriceService {
 
 		JSONObject hotel = new JSONObject();
 		hotel.put("hotelid", hotelPMS);
-
-		String resultJSONStr = doPostJson(UrlUtils.getUrl("newpms.url") + "/synchotelprice", hotel.toJSONString());
+		String resultJSONStr = null;
+		Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/synchotelprice");
+		try {
+			resultJSONStr = doPostJson(UrlUtils.getUrl("newpms.url") + "/synchotelprice", hotel.toJSONString());
+			Cat.logEvent("Pms/synchotelprice", hotelPMS, Event.SUCCESS, hotel.toJSONString());
+			t.setStatus(Transaction.SUCCESS);
+		} catch (Exception e) {
+			t.setStatus(e);
+			log.error("Pms/synchotelprice error", e);
+			throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+		}finally {
+			t.complete();
+		}
 		JSONObject jsonOBJ = null;
 		try {
 			jsonOBJ = JSON.parseObject(resultJSONStr);

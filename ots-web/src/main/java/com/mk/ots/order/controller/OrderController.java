@@ -13,6 +13,10 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
+import com.mk.framework.util.CommonUtils;
 import com.mk.ots.system.model.UToken;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.base.Strings;
@@ -95,7 +99,6 @@ public class OrderController {
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
 	public ResponseEntity<JSONObject> createOrder(HttpServletRequest request) {
 		OrderController.logger.info("OTSMessage::OrderController::createOrder::准备下单");
-
 		String hotelId = request.getParameter("hotelid");
 		JSONObject jsonObj = null;
 		try {
@@ -108,11 +111,13 @@ public class OrderController {
 			this.orderService.doCreateOrder(order, jsonObj);
 			
 			logger.info("创建订单成功,返回数据 : "+jsonObj.toJSONString());
+			Cat.logEvent("/order/create", CommonUtils.toStr(order.getHotelId()), Event.SUCCESS, jsonObj.toJSONString());
 		} catch (Exception e) {
 			OrderController.logger.error("创建订单失败,hotelid = " + hotelId, e);
+			Cat.logError("order create error", e);
 			throw e;
 		}
-		
+
 		OrderController.logger.info("OTSMessage::OrderController::createOrder::orderService.putOrderJobIntoManager");
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
@@ -148,9 +153,11 @@ public class OrderController {
 			// 创建订单
 			this.orderService.doCreateOrder(order, jsonObj);
 			jsonObj.put("success", true);
-			logger.info("创建订单成功,返回数据 : "+jsonObj.toJSONString());
+			logger.info("创建订单成功,返回数据 : " + jsonObj.toJSONString());
+			Cat.logEvent("/order/create", CommonUtils.toStr(order.getHotelId()), Event.SUCCESS, jsonObj.toJSONString());
 		} catch (Exception e) {
 			OrderController.logger.error("创建订单失败,hotelid = " + hotelId, e);
+			Cat.logError("order createByRoomType error", e);
 			throw e;
 		}
 		
@@ -191,10 +198,10 @@ public class OrderController {
 		}
 
 		JSONObject jsonObj = new JSONObject();
-
 		try {
 			this.orderService.doModifyOrder(request, jsonObj, false);
 		} catch (Exception e) {
+			Cat.logError("/order/modify error", e);
 			throw e;
 		} finally{
 			// 释放 redis锁
@@ -202,6 +209,7 @@ public class OrderController {
 			DistributedLockUtil.releaseLock("orderTasksLock_" + orderId, lockValue);
 			DistributedLockUtil.releaseLock(PayLockKeyUtil.genLockKey4PayCallBack(orderId), checkLockValue);
 		}
+		Cat.logEvent("/order/modify", CommonUtils.toStr(orderId), Event.SUCCESS, jsonObj.toJSONString());
 		OrderController.logger.info("OTSMessage::OrderController::modifyOrder::ok");
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
@@ -234,17 +242,17 @@ public class OrderController {
 		}
 		
 		JSONObject jsonObj = new JSONObject();
-		
 		try {
 			this.orderService.doModifyOrder(request, jsonObj, true);
 		} catch (Exception e) {
+			Cat.logError("/order/modifyByRoomType error", e);
 			throw e;
 		} finally{
 			// 释放 redis锁
 			OrderController.logger.info("释放分布锁, orderId= " + orderId);
 			DistributedLockUtil.releaseLock("orderTasksLock_" + orderId, lockValue);
 		}
-		
+		Cat.logEvent("/order/modifyByRoomType", CommonUtils.toStr(orderId), Event.SUCCESS, jsonObj.toJSONString());
 		OrderController.logger.info("OTSMessage::OrderController::modifyOrderByRoomType::ok");
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
@@ -789,11 +797,23 @@ public class OrderController {
 			jsonObject.put("uuid", uuid);
 			jsonObject.put("function", "selectsyncorder");
 			jsonObject.put("timestamp", DateUtils.formatDateTime(Calendar.getInstance().getTime()));
-			OrderController.logger.info("OrderController::sendSynRoomOrderMsg::参数：{}", jsonObject.toJSONString());
-			String theresult = PayTools.dopostjson(UrlUtils.getUrl("newpms.url") + "/selectsyncorder", jsonObject.toJSONString());
-			OrderController.logger.info("OrderController::sendSynRoomOrderMsg::返回：{}", theresult);
-			JSONObject returnObject = JSON.parseObject(theresult);
+			String theresult = null;
+			Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/selectsyncorder");
+			try {
+				OrderController.logger.info("OrderController::sendSynRoomOrderMsg::参数：{}", jsonObject.toJSONString());
+				theresult = PayTools.dopostjson(UrlUtils.getUrl("newpms.url") + "/selectsyncorder", jsonObject.toJSONString());
+				OrderController.logger.info("OrderController::sendSynRoomOrderMsg::返回：{}", theresult);
+				Cat.logEvent("Pms/selectsyncorder", hotelId, Event.SUCCESS, jsonObject.toJSONString());
+				t.setStatus(Transaction.SUCCESS);
+			} catch (Exception e) {
+				t.setStatus(e);
+				this.logger.error("PMS/selectsyncorder error.", e);
+				throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+			}finally {
+				t.complete();
+			}
 
+			JSONObject returnObject = JSON.parseObject(theresult);
 			if (returnObject.getBooleanValue("success")) {
 				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
 			} else {

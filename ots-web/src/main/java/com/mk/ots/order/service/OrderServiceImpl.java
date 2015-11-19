@@ -15,10 +15,7 @@ import com.mk.care.kafka.model.Message;
 import com.mk.framework.AppUtils;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
-import com.mk.framework.util.Cast;
-import com.mk.framework.util.MyTokenUtils;
-import com.mk.framework.util.PayUtil;
-import com.mk.framework.util.UrlUtils;
+import com.mk.framework.util.*;
 import com.mk.orm.kit.JsonKit;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
@@ -591,9 +588,21 @@ public class OrderServiceImpl implements OrderService {
               }
           }
           cancelOrder.put("memo", "");
-          logger.info("OTSMessage::取消订单:NEWPMS取消订单，参数：{}", cancelOrder.toJSONString());
-          JSONObject returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/cancelorder", cancelOrder.toJSONString()));
-          logger.info("OTSMessage::取消订单:NEWPMS取消订单，返回：{}", returnObject.toJSONString());
+          JSONObject returnObject = null;
+          Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/cancelorder");
+          try {
+              logger.info("OTSMessage::取消订单:NEWPMS取消订单，参数：{}", cancelOrder.toJSONString());
+              returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/cancelorder", cancelOrder.toJSONString()));
+              logger.info("OTSMessage::取消订单:NEWPMS取消订单，返回：{}", returnObject.toJSONString());
+              Cat.logEvent("Pms/cancelorder", CommonUtils.toStr(order.getHotelId()), Event.SUCCESS, cancelOrder.toJSONString());
+              t.setStatus(Transaction.SUCCESS);
+          } catch (Exception e) {
+              t.setStatus(e);
+              this.logger.error("Pms/cancelorder error.", e);
+              throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+          }finally {
+              t.complete();
+          }
           if (returnObject.getBooleanValue("success")) {
               logger.info("OTSMessage::取消订单:NEWPMS取消订单成功。{}", order.getId());
               cancelOrderPay(order);
@@ -1617,10 +1626,22 @@ public class OrderServiceImpl implements OrderService {
       // 转换为PMS 接受对象
       if ("T".equals(isNewPms)) {// 新PMS
           JSONObject addOrderObject = convertToNewPms(order, roomOrders, otaRoomPrices);
-          logger.info("OTSMessage::接口调用:pms2.0:订单号：{}", order.getId());
-          logger.info("OTSMessage::接口调用:pms2.0:订单详细：{}", addOrderObject.toJSONString());
-          JSONObject returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/addorder", addOrderObject.toJSONString()));
-          logger.info("OTSMessage::返回:{}", returnObject.toJSONString());
+          JSONObject returnObject = null;
+          Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/addorder");
+          try {
+              logger.info("OTSMessage::接口调用:pms2.0:订单号：{}", order.getId());
+              logger.info("OTSMessage::接口调用:pms2.0:订单详细：{}", addOrderObject.toJSONString());
+              returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/addorder", addOrderObject.toJSONString()));
+              logger.info("OTSMessage::返回:{}", returnObject.toJSONString());
+              Cat.logEvent("Pms/addorder", CommonUtils.toStr(order.getId()), Event.SUCCESS, addOrderObject.toJSONString());
+              t.setStatus(Transaction.SUCCESS);
+          } catch (Exception e) {
+              t.setStatus(e);
+              this.logger.error("Pms/addorder error.", e);
+              throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+          }finally {
+              t.complete();
+          }
           if (!returnObject.getBooleanValue("success")) {
               logger.info("OTSMessage::接口调用:submitAddOrder::创建psmOrder失败,errcode:{},errmsg:{}", returnObject.getString("errcode"),
                       returnObject.getString("errmsg"));
@@ -1635,10 +1656,10 @@ public class OrderServiceImpl implements OrderService {
               }
               
               if ("527".equals(returnObject.getString("errcode"))) {
-                  Cat.logEvent("SavePmsOrderRoomNULLExcption", order.getLong("hotelId").toString(),"ERROR",order.toJson());
+                  Cat.logEvent("SavePmsOrderRoomNULLExcption", CommonUtils.toStr(order.getLong("hotelId")),"ERROR",order.toJson());
                   throw MyErrorEnum.customError.getMyException("房间没有了");
               } else {
-                  Cat.logEvent("SavePmsOrderExcption", order.getLong("hotelId").toString(),"ERROR",order.toJson());
+                  Cat.logEvent("SavePmsOrderExcption", CommonUtils.toStr(order.getLong("hotelId")),"ERROR",order.toJson());
                   throw MyErrorEnum.saveOrderPms.getMyException(returnObject.getString("errmsg"));
 
               }
@@ -1672,10 +1693,10 @@ public class OrderServiceImpl implements OrderService {
               
               if(PmsErrorEnum.offLine.getErrorCode().equals(returnObject.getErrorCode())){
                   if(order.getOrderType()==OrderTypeEnum.PT.getId()){
-                      Cat.logEvent("PmsOffLine", "toPayPMS1.0", Event.SUCCESS, "");
+                      Cat.logEvent("PmsOffLine", "toPayPMS1.0", Event.SUCCESS, order.toJson());
                   }
                   if(order.getOrderType()==OrderTypeEnum.YF.getId()){
-                      Cat.logEvent("PmsOffLine", "prepayPMS1.0", Event.SUCCESS, "");
+                      Cat.logEvent("PmsOffLine", "prepayPMS1.0", Event.SUCCESS, order.toJson());
                   }
               }
               
@@ -2981,11 +3002,23 @@ public class OrderServiceImpl implements OrderService {
           addOrder.put("customerno", customernos);
           // ots里目前没有换房先注释掉 addOrder.put("roomid",
           // otaRoomOrder.getLong("roomid"));
-          
-          logger.info("OTSMessage::modifyPmsOrder::修改订单，订单号：{}，参数:{}",order.getId(), addOrder.toJSONString());
+          JSONObject returnObject = null;
+          Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/updateorder");
+          try {
+              logger.info("OTSMessage::modifyPmsOrder::修改订单，订单号：{}，参数:{}",order.getId(), addOrder.toJSONString());
+              returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", addOrder.toJSONString()));
+              logger.info("OTSMessage::modifyPmsOrder::修改订单，返回:{}", returnObject.toJSONString());
+              Cat.logEvent("Pms/updateorder", CommonUtils.toStr(order.getId()), Event.SUCCESS, addOrder.toJSONString());
+              t.setStatus(Transaction.SUCCESS);
+          } catch (Exception e) {
+              t.setStatus(e);
+              this.logger.error("Pms/updateorder error.", e);
+              throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+          }finally {
+              t.complete();
+          }
 
-          JSONObject returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", addOrder.toJSONString()));
-          logger.info("OTSMessage::modifyPmsOrder::修改订单，返回:{}", returnObject.toJSONString());
+
           if (returnObject.getBooleanValue("success")) {
               logger.info("OTSMessage::modifyPmsOrder::修改订单成功。orderid:{}", otaRoomOrder.getLong("otaorderid"));
               orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.MODIFY_CHECKINUSERBYUSER.getId(), "", "PMS2.0用户修改入住人:"+otaCheckInUsers.get(0).getName(), "");
@@ -3811,16 +3844,29 @@ public class OrderServiceImpl implements OrderService {
           JSONArray customernos = new JSONArray();
           customernos.add(customerno);
           addOrder.put("customerno", customernos);
-              JSONObject returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", addOrder.toJSONString()));
+          JSONObject returnObject = null;
+          Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/updateorder");
+          try {
+              returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", returnObject.toJSONString()));
               logger.info("OTSMessage::modifyPmsOrder::修改订单，返回:{}", returnObject.toJSONString());
-              if (returnObject.getBooleanValue("success")) {
-                  logger.info("OTSMessage::modifyPmsOrder::修改订单成功。orderid:{}", otaRoomOrder.getLong("otaorderid"));
-                  //
-                  orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.MODIFY_CHECKINUSERBYUSER.getId(), "", "PMS2.0客服修改入住人:"+otaCheckInUsers.get(0).getName(), "");
-              } else {
-                  throw MyErrorEnum.updateOrder.getMyException("errorcode:" + returnObject.getString("errorcode") + ",errormsg:"
-                          + returnObject.getString("errormsg"));
-              }
+              Cat.logEvent("Pms/updateorder", CommonUtils.toStr(order.getId()), Event.SUCCESS, returnObject.toJSONString());
+              t.setStatus(Transaction.SUCCESS);
+          } catch (Exception e) {
+              t.setStatus(e);
+              this.logger.error("Pms/updateorder error.", e);
+              throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+          }finally {
+              t.complete();
+          }
+
+          if (returnObject.getBooleanValue("success")) {
+              logger.info("OTSMessage::modifyPmsOrder::修改订单成功。orderid:{}", otaRoomOrder.getLong("otaorderid"));
+              //
+              orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.MODIFY_CHECKINUSERBYUSER.getId(), "", "PMS2.0客服修改入住人:"+otaCheckInUsers.get(0).getName(), "");
+          } else {
+              throw MyErrorEnum.updateOrder.getMyException("errorcode:" + returnObject.getString("errorcode") + ",errormsg:"
+                      + returnObject.getString("errormsg"));
+          }
       } else {
           // 订单下发到pms
         List<PmsOtaAddOrder> list = new ArrayList<PmsOtaAddOrder>();
@@ -4361,11 +4407,22 @@ public class OrderServiceImpl implements OrderService {
         int count=0;
         for(OtaOrderTasts orderTasts:list){
             JSONObject jsonObject=gson.fromJson(orderTasts.getContent(),JSONObject.class);
-            logger.info("pms2.0订单修改推送，{}",orderTasts.getContent());
-            //推送消息
-            JSONObject returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", jsonObject.toJSONString()));
-            logger.info("OTSMessage::modifyPmsOrder::修改订单，返回:{}", returnObject.toJSONString());
-            
+            JSONObject returnObject = null;
+            Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/updateorder");
+            try {
+                logger.info("pms2.0订单修改推送，{}",orderTasts.getContent());
+                //推送消息
+                returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", jsonObject.toJSONString()));
+                logger.info("OTSMessage::modifyPmsOrder::修改订单，返回:{}", returnObject.toJSONString());
+                Cat.logEvent("Pms/updateorder", orderTasts.getId().toString(), Event.SUCCESS, jsonObject.toJSONString());
+                t.setStatus(Transaction.SUCCESS);
+            } catch (Exception e) {
+                t.setStatus(e);
+                this.logger.error("Pms/updateorder error.", e);
+                throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+            }finally {
+                t.complete();
+            }
             if (returnObject.getBooleanValue("success")) {
                 
                 //推送成功修改状态
@@ -4794,9 +4851,22 @@ public class OrderServiceImpl implements OrderService {
             customernos.add(customerno);
             addOrder.put("customerno", customernos);
 
-            logger.info("OTSMessage::modifyPmsCheckinuser::修改订单，订单号：{}，参数:{}", order.getId(), addOrder.toJSONString());
-            JSONObject returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", addOrder.toJSONString()));
-            logger.info("OTSMessage::modifyPmsCheckinuser::修改订单，返回:{}", returnObject.toJSONString());
+            JSONObject returnObject = null;
+            Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/updateorder");
+            try {
+                logger.info("OTSMessage::modifyPmsCheckinuser::修改订单，订单号：{}，参数:{}", order.getId(), addOrder.toJSONString());
+                returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", addOrder.toJSONString()));
+                logger.info("OTSMessage::modifyPmsCheckinuser::修改订单，返回:{}", returnObject.toJSONString());
+                Cat.logEvent("Pms/updateorder", CommonUtils.toStr(order.getId()), Event.SUCCESS, addOrder.toJSONString());
+                t.setStatus(Transaction.SUCCESS);
+            } catch (Exception e) {
+                t.setStatus(e);
+                this.logger.error("Pms/updateorder error.", e);
+                throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+            }finally {
+                t.complete();
+            }
+
             if (returnObject.getBooleanValue("success")) {
                 logger.info("OTSMessage::modifyPmsCheckinuser::修改订单成功。orderid:{}", otaRoomOrder.getLong("otaorderid"));
             } else {

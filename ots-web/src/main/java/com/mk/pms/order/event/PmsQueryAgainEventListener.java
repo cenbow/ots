@@ -7,6 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
+import com.mk.framework.util.CommonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,8 +117,21 @@ public class PmsQueryAgainEventListener {
 				}
 				ids.setLength(ids.length() - 1);
 				pmsCustomNosJson.put("customerid", ids.toString());
-				
-				JSONObject returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/selectcustomerno", pmsCustomNosJson.toJSONString()));
+
+				JSONObject returnObject = null;
+				Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/selectcustomerno");
+				try {
+					returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/selectcustomerno", pmsCustomNosJson.toJSONString()));
+					Cat.logEvent("Pms/selectcustomerno", CommonUtils.toStr(hotelid), Event.SUCCESS, pmsCustomNosJson.toJSONString());
+					t.setStatus(Transaction.SUCCESS);
+				} catch (Exception e) {
+					t.setStatus(e);
+					this.logger.error("Pms/selectcustomerno error.", e);
+					throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+				}finally {
+					t.complete();
+				}
+
 				if (returnObject.getBooleanValue("success")) {
 					logger.info("PmsQueryAgainEventListener::call pms ::selectCustomerno::ok::saveResult");
 					JSONArray customerno = returnObject.getJSONArray("customerno");
