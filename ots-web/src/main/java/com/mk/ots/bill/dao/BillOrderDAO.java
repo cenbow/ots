@@ -18,7 +18,6 @@ package com.mk.ots.bill.dao;
  toPayDiscount //到付贴现金额--qiekeIncome //切客收益10
  */
 import com.google.common.collect.ImmutableMap;
-import com.mk.ots.common.enums.ClearingTypeEnum;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.home.util.HomeConst;
 import com.mk.ots.mapper.BillOrderMapper;
@@ -1018,6 +1017,22 @@ public class BillOrderDAO {
 
     //修改订单noshow 状态
     public void changeOrderStatusNoshow(Date nowTime) {
+        List<Map<String, Object>> list = getNowShowList(nowTime);
+        //更新订单状态为520 ， 订单updatetime取当前时间
+        String updateOrder = "UPDATE b_otaorder o SET o.orderstatus = 520 , o.updatetime = :currentTime WHERE o.id = :id";
+        for (int i = 0; i < list.size(); i++) {
+            Map<String, Object> map = list.get(i);
+            Long orderid = (Long) map.get("orderid");
+            Map<String,Object>paramMap2 =new HashMap<String, Object>();
+            paramMap2.put("currentTime", new Date());
+            paramMap2.put("id", orderid);
+            namedParameterJdbcTemplate.update(updateOrder, paramMap2);
+            logger.info("更新订单状态为520，订单号为：{}", orderid);
+        }
+
+    }
+
+    public List<Map<String, Object>> getNowShowList(Date nowTime){
         // 查询订单，已过预离时间，入住时间为空，支付类型预付1，支付状态已支付120，订单状态已确认140，结算明细表去重
         String queryOrder = "SELECT "
                 + "o.id orderid "
@@ -1032,7 +1047,7 @@ public class BillOrderDAO {
                 + "AND o.endtime >= DATE_ADD( DATE(:nowTime), INTERVAL - 3 DAY ) "
                 + "AND o.ordertype = 1 "
                 + "AND o.paystatus = 120 "
-                + "AND o.orderstatus = 140 "
+                + "AND o.orderstatus = 140 AND o.promoType = 0 "
                 + "AND NOT EXISTS ( "
                 + "SELECT "
                 + "	 orderid "
@@ -1045,18 +1060,36 @@ public class BillOrderDAO {
         paramMap.put("nowTime", nowTime);
         List<Map<String, Object>> list=namedParameterJdbcTemplate.queryForList(queryOrder, paramMap);
 
-        //更新订单状态为520 ， 订单updatetime取当前时间
-        String updateOrder = "UPDATE b_otaorder o SET o.orderstatus = 520 , o.updatetime = :currentTime WHERE o.id = :id";
-        for (int i = 0; i < list.size(); i++) {
-            Map<String, Object> map = list.get(i);
-            Long orderid = (Long) map.get("orderid");
-            Map<String,Object>paramMap2 =new HashMap<String, Object>();
-            paramMap2.put("currentTime", new Date());
-            paramMap2.put("id", orderid);
-            namedParameterJdbcTemplate.update(updateOrder, paramMap2);
-            logger.info("更新订单状态为520，订单号为：{}", orderid);
-        }
+        String queryOrderByPromoType = "SELECT "
+                + "o.id orderid "
+                + "FROM "
+                + "b_otaorder o "
+                + "LEFT JOIN b_otaroomorder ro ON o.id = ro.otaorderid "
+                + "LEFT JOIN b_pmsroomorder ox ON ro.hotelid = ox.hotelid "
+                + "AND ro.pmsroomorderno = ox.pmsroomorderno "
+                + "WHERE "
+                + "ox.checkintime IS NULL "
+                + "AND o.endtime < DATE(:nowTime) "
+                + "AND o.ordertype = 1 "
+                + "AND o.paystatus = 120 "
+                + "AND o.orderstatus = 140 AND o.promoType = 1 "
+                + "AND NOT EXISTS ( "
+                + "SELECT "
+                + "	 orderid "
+                + "FROM "
+                + "	 b_bill_special_detail "
+                + "WHERE "
+                + "	 o.id = b_bill_special_detail.orderid "
+                + ")";
 
+        Map<String,Date> promoTypeParamMap =new HashMap<String, Date>();
+        promoTypeParamMap.put("nowTime", nowTime);
+        List<Map<String, Object>> promoTypeList=namedParameterJdbcTemplate.queryForList(queryOrderByPromoType, promoTypeParamMap);
+        if(list == null){
+            list = new ArrayList<Map<String, Object>>();
+        }
+        list.addAll(promoTypeList);
+        return list;
     }
 
     public List<Map> getBillOrderList(Long hotelId, Date beginTime, Date endTime){
