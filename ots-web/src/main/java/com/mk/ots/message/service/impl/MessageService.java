@@ -63,7 +63,7 @@ public class MessageService implements IMessageService {
 	@Override
 	public boolean sendMsg(Long msgid, String phone, String msgContent, MessageTypeEnum messageTypeEnum, String ip) {
 		logger.info("send message: {}, {}, {}", phone, msgContent, messageTypeEnum);
-		Date sendDate=new Date();
+        Date sendDate=new Date();
 		if (messageTypeEnum == null) {
 			logger.error("短信类型错误. ");
 			throw MyErrorEnum.customError.getMyException("短信类型错误.");
@@ -90,9 +90,8 @@ public class MessageService implements IMessageService {
 				logger.info("发送短信响应结果:{}", rtnstatus);
 				if(rtnstatus){
 					logger.info("发送短信成功.....{}", phone);
-                    Cat.logEvent("send message", message.getClass().getName(), Event.SUCCESS, "phone{" + phone + "}, msgContent{" + msgContent + "}, messageTypeEnum{" + messageTypeEnum.getName() + "}");
-
-                    break;
+                    Cat.logEvent("send message", message.getClass().getName(), Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
+					break;
 				}else{
 					logger.info("第{}次重新发送短信....", i + 1);
                     Cat.logEvent("send message again", message.getClass().getName(), Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
@@ -106,7 +105,7 @@ public class MessageService implements IMessageService {
 		} catch (Exception e) {
 			logger.error("send message occur error. info: {}, {}, {}.", phone, msgContent, messageTypeEnum);
 			e.printStackTrace();
-            Cat.logEvent("send message error", "", Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
+            Cat.logEvent("send message error", phone, Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
         }
 		
 
