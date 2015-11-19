@@ -101,7 +101,6 @@ public class OrderController {
 		OrderController.logger.info("OTSMessage::OrderController::createOrder::准备下单");
 		String hotelId = request.getParameter("hotelid");
 		JSONObject jsonObj = null;
-		Transaction t = Cat.newTransaction("URL", "/ots/order/create");
 		try {
 		    logger.info("创建订单开始 , hotelid = "+hotelId);
 			// 提取orderbean
@@ -113,14 +112,10 @@ public class OrderController {
 			
 			logger.info("创建订单成功,返回数据 : "+jsonObj.toJSONString());
 			Cat.logEvent("/order/create", CommonUtils.toStr(order.getHotelId()), Event.SUCCESS, jsonObj.toJSONString());
-			t.setStatus(Transaction.SUCCESS);
 		} catch (Exception e) {
 			OrderController.logger.error("创建订单失败,hotelid = " + hotelId, e);
 			Cat.logError("order create error", e);
-			t.setStatus(e);
 			throw e;
-		}finally {
-			t.complete();
 		}
 
 		OrderController.logger.info("OTSMessage::OrderController::createOrder::orderService.putOrderJobIntoManager");
@@ -149,7 +144,6 @@ public class OrderController {
 		
 		String hotelId = request.getParameter("hotelid");
 		JSONObject jsonObj = null;
-		Transaction t = Cat.newTransaction("URL", "/ots/order/createByRoomType");
 		try {
 			logger.info("创建订单开始 , hotelid = "+hotelId);
 			// 提取orderbean
@@ -161,14 +155,10 @@ public class OrderController {
 			jsonObj.put("success", true);
 			logger.info("创建订单成功,返回数据 : " + jsonObj.toJSONString());
 			Cat.logEvent("/order/create", CommonUtils.toStr(order.getHotelId()), Event.SUCCESS, jsonObj.toJSONString());
-			t.setStatus(Transaction.SUCCESS);
 		} catch (Exception e) {
-			t.setStatus(e);
 			OrderController.logger.error("创建订单失败,hotelid = " + hotelId, e);
 			Cat.logError("order createByRoomType error", e);
 			throw e;
-		}finally {
-			t.complete();
 		}
 		
 		OrderController.logger.info("createOrderByRoomType::ok");
@@ -208,12 +198,9 @@ public class OrderController {
 		}
 
 		JSONObject jsonObj = new JSONObject();
-		Transaction t = Cat.newTransaction("URL", "/ots/order/modify");
 		try {
 			this.orderService.doModifyOrder(request, jsonObj, false);
-			t.setStatus(Transaction.SUCCESS);
 		} catch (Exception e) {
-			t.setStatus(e);
 			Cat.logError("/order/modify error", e);
 			throw e;
 		} finally{
@@ -221,7 +208,6 @@ public class OrderController {
 			OrderController.logger.info("释放分布锁, orderId= " + orderId);
 			DistributedLockUtil.releaseLock("orderTasksLock_" + orderId, lockValue);
 			DistributedLockUtil.releaseLock(PayLockKeyUtil.genLockKey4PayCallBack(orderId), checkLockValue);
-			t.complete();
 		}
 		Cat.logEvent("/order/modify", CommonUtils.toStr(orderId), Event.SUCCESS, jsonObj.toJSONString());
 		OrderController.logger.info("OTSMessage::OrderController::modifyOrder::ok");
@@ -256,19 +242,15 @@ public class OrderController {
 		}
 		
 		JSONObject jsonObj = new JSONObject();
-		Transaction t = Cat.newTransaction("URL", "/ots/order/modifyByRoomType");
 		try {
 			this.orderService.doModifyOrder(request, jsonObj, true);
-			t.setStatus(Transaction.SUCCESS);
 		} catch (Exception e) {
-			t.setStatus(e);
 			Cat.logError("/order/modifyByRoomType error", e);
 			throw e;
 		} finally{
 			// 释放 redis锁
 			OrderController.logger.info("释放分布锁, orderId= " + orderId);
 			DistributedLockUtil.releaseLock("orderTasksLock_" + orderId, lockValue);
-			t.complete();
 		}
 		Cat.logEvent("/order/modifyByRoomType", CommonUtils.toStr(orderId), Event.SUCCESS, jsonObj.toJSONString());
 		OrderController.logger.info("OTSMessage::OrderController::modifyOrderByRoomType::ok");
@@ -779,18 +761,14 @@ public class OrderController {
 		}
 
 		JSONObject jsonObj = new JSONObject();
-		Transaction t = Cat.newTransaction("URL", "/ots/order/crsmodify");
 		try {
 			this.orderService.doUpdateOrder(request, jsonObj);
-			t.setStatus(Transaction.SUCCESS);
 		} catch (Exception e) {
-			t.setStatus(e);
 			throw e;
 		} finally{
 			// 释放 redis锁
 			OrderController.logger.info("释放分布锁, orderId= " + orderId);
 			DistributedLockUtil.releaseLock("orderTasksLock_" + orderId, lockValue);
-			t.complete();
 		}
 
 		OrderController.logger.info("OTSMessage::OrderController::crsModifyOrder::ok");

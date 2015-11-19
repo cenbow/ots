@@ -485,7 +485,6 @@ public class PayController {
 		
 		long longorderId = this.getLongOrderId(orderid);
 		Map<String, Object> map;
-		Transaction t = Cat.newTransaction("URL", "/ots/pay/create");
 		try {
 			map = payService.createPay(request, longorderId, promotionno, couponno, paytype, onlinepaytype);
 			try {
@@ -504,18 +503,15 @@ public class PayController {
 			} catch (Throwable e) {
 				logger.error("订单:" + longorderId +"pushMsg异常!", e);
 			}
-			t.setStatus(Transaction.SUCCESS);
 		} catch (Exception e) {
 			orderService.changeOrderStatusByPay(longorderId, OtaOrderStatusEnum.WaitPay, PayStatusEnum.waitPay, OrderTypeEnum.YF);
 			logger.info("订单号：" + longorderId +"回滚，将其置为初始状态.异常:" + e.getMessage());
 			Cat.logEvent("/pay/create", orderid, "Error", "订单:" + orderid + ",促销代码" + promotionno + ",优惠券" + couponno + ",付款类型(1:预付，2:到付):" + paytype + ",在线支付类型(1:微信,2:支付宝,3:网银,4:其它):" + onlinepaytype);
 			Cat.logError("/pay/create error", e);
-			t.setStatus(e);
 			throw e;
 		} finally {
 			logger.info("订单：" + orderid +"支付流程完毕,释放分布锁.");
 			DistributedLockUtil.releaseLock(PayLockKeyUtil.genLockKey4Pay(orderid), lockValue);
-			t.complete();
 		}
 		Cat.logEvent("/pay/create", orderid, Event.SUCCESS, "订单:" + orderid + ",促销代码" + promotionno + ",优惠券" + couponno + ",付款类型(1:预付，2:到付):" + paytype + ",在线支付类型(1:微信,2:支付宝,3:网银,4:其它):" + onlinepaytype);
 		return new ResponseEntity<Map<String, Object>>(map, org.springframework.http.HttpStatus.OK);
