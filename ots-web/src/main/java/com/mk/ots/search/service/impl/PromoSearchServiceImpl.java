@@ -1650,8 +1650,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		try {
 			Map<String, Object> result = hotelCollectionService.readonlyHotelISCollected(token, hotelid);
 
-			if (result != null) {
-				isCollected = "T";
+			if (result != null && result.containsKey("state")) {
+				isCollected = (String) result.get("state");
 			}
 		} catch (Exception ex) {
 			throw new Exception("failed to collection user collecitonstate", ex);
