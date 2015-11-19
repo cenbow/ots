@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
 import com.mk.framework.util.CommonUtils;
 import com.mk.ots.system.model.UToken;
 import org.apache.commons.lang.StringUtils;
@@ -795,11 +796,23 @@ public class OrderController {
 			jsonObject.put("uuid", uuid);
 			jsonObject.put("function", "selectsyncorder");
 			jsonObject.put("timestamp", DateUtils.formatDateTime(Calendar.getInstance().getTime()));
-			OrderController.logger.info("OrderController::sendSynRoomOrderMsg::参数：{}", jsonObject.toJSONString());
-			String theresult = PayTools.dopostjson(UrlUtils.getUrl("newpms.url") + "/selectsyncorder", jsonObject.toJSONString());
-			OrderController.logger.info("OrderController::sendSynRoomOrderMsg::返回：{}", theresult);
-			JSONObject returnObject = JSON.parseObject(theresult);
+			String theresult = null;
+			Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/selectsyncorder");
+			try {
+				OrderController.logger.info("OrderController::sendSynRoomOrderMsg::参数：{}", jsonObject.toJSONString());
+				theresult = PayTools.dopostjson(UrlUtils.getUrl("newpms.url") + "/selectsyncorder", jsonObject.toJSONString());
+				OrderController.logger.info("OrderController::sendSynRoomOrderMsg::返回：{}", theresult);
+				Cat.logEvent("Pms/selectsyncorder", hotelId, Event.SUCCESS, jsonObject.toJSONString());
+				t.setStatus(Transaction.SUCCESS);
+			} catch (Exception e) {
+				t.setStatus(e);
+				this.logger.error("PMS/selectsyncorder error.", e);
+				throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+			}finally {
+				t.complete();
+			}
 
+			JSONObject returnObject = JSON.parseObject(theresult);
 			if (returnObject.getBooleanValue("success")) {
 				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
 			} else {

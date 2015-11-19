@@ -9,11 +9,15 @@ import cn.com.winhoo.pms.webout.service.bean.RoomTypeOrderResult;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
 import com.google.gson.Gson;
 import com.mk.framework.AppUtils;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.component.eventbus.EventBusHelper;
 import com.mk.framework.exception.MyErrorEnum;
+import com.mk.framework.util.CommonUtils;
 import com.mk.framework.util.UrlUtils;
 import com.mk.orm.plugin.bean.BizModel;
 import com.mk.orm.plugin.bean.Db;
@@ -1203,9 +1207,24 @@ public class PmsOrderServiceImpl implements PmsOrderService {
                 }
                 ids.setLength(ids.length() - 1);
                 pmsCustomNosJson.put("customerid", ids.toString());
-                PmsOrderServiceImpl.logger.info("Pms2.0同步今天0点之后数据传参,hotelid:{},参数:{}", hotelid, pmsCustomNos.toString());
-                String result = this.doPostJson(UrlUtils.getUrl("newpms.url") + "/selectcustomerno", pmsCustomNosJson.toJSONString());
-                PmsOrderServiceImpl.logger.info("Pms2.0同步今天0点之后数据结果{}{}", hotelid, result);
+
+                String result = null;
+                Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/selectcustomerno");
+                try {
+                    PmsOrderServiceImpl.logger.info("Pms2.0同步今天0点之后数据传参,hotelid:{},参数:{}", hotelid, pmsCustomNos.toString());
+                    result = this.doPostJson(UrlUtils.getUrl("newpms.url") + "/selectcustomerno", pmsCustomNosJson.toJSONString());
+                    PmsOrderServiceImpl.logger.info("Pms2.0同步今天0点之后数据结果{}{}", hotelid, result);
+                    Cat.logEvent("Pms/selectcustomerno", CommonUtils.toStr(hotelid), Event.SUCCESS, pmsCustomNosJson.toJSONString());
+                    t.setStatus(Transaction.SUCCESS);
+                } catch (Exception e) {
+                    t.setStatus(e);
+                    this.logger.error("Pms/selectcustomerno error.", e);
+                    throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+                }finally {
+                    t.complete();
+                }
+
+
                 JSONObject returnObject = JSON.parseObject(result);
                 if (returnObject.getBooleanValue("success")) {
                     JSONArray customerno = returnObject.getJSONArray("customerno");
