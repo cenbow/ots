@@ -31,6 +31,13 @@ public class HotelFrontPageQueryReqEntity extends ParamBaseBean implements Seria
 	// 纬度
 	private Double userlatitude;
 
+	/** 地图地理位置坐标：根据搜索范围查询周边酒店 */
+	// 经度
+	private Double pillowlongitude;
+	// 纬度
+	private Double pillowlatitude;
+
+
 
 	// 调用来源: 1-crs 客服；2-web；3-wechat 微信；4-app(ios) iOS App；5-app(Android)
 	// android App
@@ -127,5 +134,21 @@ public class HotelFrontPageQueryReqEntity extends ParamBaseBean implements Seria
 
 	public void setSearchtype(Integer searchtype) {
 		this.searchtype = searchtype;
+	}
+
+	public Double getPillowlatitude() {
+		return pillowlatitude;
+	}
+
+	public void setPillowlatitude(Double pillowlatitude) {
+		this.pillowlatitude = pillowlatitude;
+	}
+
+	public Double getPillowlongitude() {
+		return pillowlongitude;
+	}
+
+	public void setPillowlongitude(Double pillowlongitude) {
+		this.pillowlongitude = pillowlongitude;
 	}
 }
