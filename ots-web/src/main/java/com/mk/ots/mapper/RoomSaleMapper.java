@@ -26,6 +26,8 @@ public interface RoomSaleMapper {
 
 	public Map<String, Object> queryRoomPromoInfo();
 
+	public Map<String, Object> checkPromoCity(String citycode);
+
 	public List<Map<String, Object>> queryRoomPromoInfoByHotelAndPromoType(Map<?, ?> map);
 
 	public List<Map<String, Object>> queryRoomByHotelAndRoomType(Map<String, Object> map);

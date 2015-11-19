@@ -9,6 +9,8 @@ import java.util.Map;
 
 public interface RoomSaleConfigInfoMapper {
 
+	public List<TRoomSaleConfigInfo> queryByPromoType(Map<String, Object> map);
+	
     public List<TRoomSaleConfigInfo> queryRoomSaleConfigInfoList(Map<String, Object> map);
 
     public int saveRoomSaleConfigInfo(Map<String, Object> map );
@@ -16,8 +18,8 @@ public interface RoomSaleConfigInfoMapper {
     public TRoomSaleConfigInfo queryRoomSaleConfigById(Integer Id);
 
     public int updateTRoomSaleConfigInfo(Map<String, Object> map);
-
-    List<TRoomSaleConfigInfo>queryListBySaleTypeId(Map<String,Object>map);
+    
+    public List<TRoomSaleConfigInfo> queryListBySaleTypeId(Map<String, Object> parameters);
 
     public TRoomSaleConfigInfo getRoomSaleConfigInfoByConfigId(TRoomSaleConfig tRoomSaleConfig);
 }

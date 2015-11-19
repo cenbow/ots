@@ -194,7 +194,7 @@
     </select>
 
     <select id="queryRoomByHotelAndRoomType" resultType="map" parameterType="map">
-        SELECT info.id as promotype, info.salevalue as promoprice, config.roomTypeid as roomtypeid
+        SELECT info.saletypeid as promoid , info.id as promotype, info.salevalue as promoprice, config.roomTypeid as roomtypeid
         FROM t_room_sale_config config
         join t_room_sale_config_info info on config.saleconfiginfoid = info.id
         WHERE config.hotelId = #{hotelId} and config.saleRoomTypeId = #{roomTypeId}
@@ -214,6 +214,15 @@
         FROM t_room_sale_config config
         join t_room_sale_config_info info on config.saleconfiginfoid = info.id
         <![CDATA[  where  info.startdate ||' '||info.startTime < date(now())  and info.enddate||' '||info.endTime > date(now()) ]]>
+
+        limit 1
+    </select>
+
+
+    <select id="checkPromoCity" resultType="map" parameterType="String">
+        SELECT *
+        FROM t_room_sale_city
+        WHERE citycode = #{citycode}
 
         limit 1
     </select>

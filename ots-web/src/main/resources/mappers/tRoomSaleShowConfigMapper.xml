@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.mapper.RoomSaleShowConfigMapper">
+	<resultMap id="tRoomSaleShowConfig" type="com.mk.ots.roomsale.model.TRoomSaleShowConfig">
+	    <result property="id" column="id" />
+	    <result property="saleName" column="saleName" />
+	    <result property="saleTypeId" column="saleTypeId" />
+	    <result property="picUrl" column="picUrl" />
+	    <result property="backPicUrl" column="backPicUrl" />
+	    <result property="backColor" column="backColor" />
+	    <result property="fontColor" column="fontColor" />
+	    <result property="fontSize" column="fontSize" />
+	    <result property="fontFamily" column="fontFamily" />
+	    <result property="showBeginTime" column="showBeginTime" />
+	    <result property="showEndTime" column="showEndTime" />
+	    <result property="showArea" column="showArea" />
+	    <result property="normalId" column="normalId" />
+	    <result property="isSpecial" column="isSpecial" />
+	    <result property="description" column="description" />
+	    <result property="valid" column="valid" />
+	    <result property="createBy" column="createBy" />
+	    <result property="createTime" column="createTime" />
+	    <result property="updateBy" column="updateBy" />
+	    <result property="updateTime" column="updateTime" />
+        <result property="ord" column="ord" />
+	</resultMap>
+    <resultMap id="tRoomSaleCity" type="com.mk.ots.roomsale.model.TRoomSaleCity">
+        <result property="id" column="id" />
+        <result property="saleTypeId" column="saleTypeId" />
+        <result property="provinceCode" column="provinceCode" />
+        <result property="cityCode" column="cityCode" />
+    </resultMap>
+
+    <select id="queryTRoomSaleCity" resultMap="tRoomSaleCity"  parameterType="java.util.Map">
+       select
+             a.id,a.saleTypeId,a.provinceCode,a.cityCode
+        FROM
+            t_room_sale_city a LEFT  JOIN  t_room_sale_type b
+            on a.saleTypeId=b.id
+        where  a.cityCode  =  #{cityCode} and b.valid='T'
+    </select>
+    <sql id="Base_Column_List" >
+        id, saleName, saleTypeId,picUrl,backPicUrl,backColor,fontColor,fontSize,fontFamily,showBeginTime,showEndTime,
+        showArea,normalId,isSpecial,description,valid,createBy,updateTime,updateBy, ord
+    </sql>
+    <select id="queryRoomSaleShowConfigByParams" resultMap="tRoomSaleShowConfig"  parameterType="com.mk.ots.roomsale.model.RoomSaleShowConfigDto">
+        select
+        <include refid="Base_Column_List"/>
+        FROM
+        t_room_sale_show_config
+        <where>
+            <if test="promoid != null" >
+               AND saleTypeId = #{promoid}
+            </if>
+            <if test="showArea != null" >
+              AND showArea = #{showArea}
+            </if>
+            <if test="normalId != null" >
+                AND normalId = #{normalId}
+            </if>                
+            <if test="isSpecial != null" >
+                AND isSpecial = #{isSpecial}
+            </if>
+                AND valid ='T' AND ord > 0
+        </where>
+        ORDER  BY ord ASC
+    </select>
+
+    <select id="queryRenderableHeaderShows" resultMap="tRoomSaleShowConfig"  parameterType="com.mk.ots.roomsale.model.RoomSaleShowConfigDto">
+        select
+        <include refid="Base_Column_List"/>
+	 	FROM t_room_sale_show_config 
+        <where>
+           valid ='T' AND ord > 0 AND showArea = 'front_page_head'
+            <if test="isSpecial != null" >
+                AND isSpecial = #{isSpecial}         
+             </if>  
+        </where>
+        ORDER  BY ord ASC
+    </select>
+
+    <select id="queryRenderableShows" resultMap="tRoomSaleShowConfig"  parameterType="com.mk.ots.roomsale.model.RoomSaleShowConfigDto">
+        select
+        <include refid="Base_Column_List"/>
+        FROM
+        t_room_sale_show_config
+        <where>
+            <if test="promoid != null" >
+               AND saleTypeId = #{promoid}
+            </if>
+              AND showArea = 'front_page_centre'
+            <if test="normalId != null" >
+                AND normalId = #{normalId}
+            </if>      
+            <if test="isSpecial != null" >
+                AND isSpecial = #{isSpecial}
+            </if>
+                AND valid ='T' AND ord > 0
+        </where>
+        ORDER  BY ord ASC
+    </select>
+
+</mapper>

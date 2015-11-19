@@ -1352,13 +1352,12 @@ public class SearchService implements ISearchService {
 
 				Integer hotelId = Integer.valueOf(es_hotelid);
 				Double tempMinPromoPrice = roomSaleService.getHotelMinPromoPrice(hotelId);
-
 				if (tempMinPromoPrice != null){
 					BigDecimal minPromoPrice = new BigDecimal(tempMinPromoPrice);
 					if (minPrice.compareTo(minPromoPrice) > 0){
+						minPrice = minPromoPrice;
 						Cat.logEvent("MIKEPriceShowERROR",hotelId.toString(),"ERROR",minPrice.toString() );
 						minPrice = minPromoPrice;
-
 					}
 				}
 
@@ -1477,7 +1476,7 @@ public class SearchService implements ISearchService {
 			rtnMap.put("hotel", hotels);
 		} catch (Exception e) {
 			logger.error("failed to readonlyOtsHotelListFromEsStore...", e);
-
+			e.printStackTrace();
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());

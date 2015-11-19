@@ -142,9 +142,15 @@ public class RoomstateQuerylistRespEntity implements Serializable {
         private String promodustartsec;
         private String promoduendsec;
         private Integer promostatus;
-
+        private List<Object> roomtypepic;
         
-        public String getPromostarttime() {
+        public List<Object> getRoomtypepic() {
+			return roomtypepic;
+		}
+		public void setRoomtypepic(List<Object> roomtypepic) {
+			this.roomtypepic = roomtypepic;
+		}
+		public String getPromostarttime() {
 			return promostarttime;
 		}
 		public void setPromostarttime(String promostarttime) {
@@ -331,6 +337,7 @@ public class RoomstateQuerylistRespEntity implements Serializable {
         private String roomstatus;
         private String isselected="F";
         private String haswindow;
+        private String floor;
         
         
         //床信息
@@ -379,8 +386,14 @@ public class RoomstateQuerylistRespEntity implements Serializable {
 		public void setHaswindow(String haswindow) {
 			this.haswindow = haswindow;
 		}
-        
-        
+
+        public String getFloor() {
+            return floor;
+        }
+
+        public void setFloor(String floor) {
+            this.floor = floor;
+        }
     }
     
     /**

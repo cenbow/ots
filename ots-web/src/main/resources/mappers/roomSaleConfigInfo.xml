@@ -142,7 +142,7 @@
         FROM  t_room_sale_config_info
         WHERE  id=#{id}
     </select>
-
+    
     <select id="queryListBySaleTypeId" resultMap="BaseResultMap" parameterType="java.util.Map">
         SELECT
         <include refid="Base_Column_List"/>
@@ -156,5 +156,17 @@
         limit ${start} , ${limit}
     </select>
 
+    <select id="queryByPromoType" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM  t_room_sale_config_info 
+        <where>
+            valid ='T'
+            <if test="promoType != null">
+                AND id = #{promoType}
+            </if>
+        </where>
+        limit 1
+    </select>
 
 </mapper>

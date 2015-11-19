@@ -436,7 +436,7 @@ public class ScoreService {
 	public List<Map<String,Object>> findScoreMxStatus(String hotelid,String roomtypeid,String roomid, String maxgrade, String mingrade,
 			String subjectid, String orderby, String startdateday,
 			String enddateday, String starttime, String endtime,String page,String limit, Long mid, String gradetype) {
-		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 		int pageInt=1;
 		int limitInt=10;
 		if(StringUtils.isNotBlank(page)){
@@ -508,7 +508,7 @@ public class ScoreService {
 			m.put("allgrade", gr);
 			Date createtime = bb.getDate("createtime");
 			m.put("createtime", sdf.format(createtime));
-			
+			m.put("userimage","http://7xn138.com2.z0.glb.qiniucdn.com/20151110_userimagedefault.png");
 			Long id= bb.getLong("id");
 			Bean replyBean = replyMap.get(id);
 			if( null != replyBean ){

@@ -178,6 +178,15 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		}
 	}
 
+	public Boolean checkPromoCity(String  cityCode) {
+		Map<String, Object> promoCity = roomSaleMapper.checkPromoCity(cityCode);
+		if (promoCity == null || promoCity.get("id") == null) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 	public Boolean checkRoomSaleWithOldRoomType(TRoomSaleConfig bean) {
 		TRoomSaleConfig roomSaleConfig = roomSaleConfigMapper.checkRoomSaleWithOldRoomType(bean);
 		if (roomSaleConfig == null || roomSaleConfig.getId() == null) {
@@ -197,6 +206,7 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		}
 		return roomSaleToIndexList;
 	}
+
 	public Double getHotelMinPromoPrice(Integer hotelid){
 		TRoomSaleConfig result = roomSaleConfigMapper.getHotelMinPromoPrice(hotelid);
 		if (result != null){
