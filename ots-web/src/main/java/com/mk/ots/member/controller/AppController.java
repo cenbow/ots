@@ -1,5 +1,28 @@
 package com.mk.ots.member.controller;
 
+
+import java.io.UnsupportedEncodingException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import com.mk.ots.member.model.UUnionidLog;
+import com.mk.ots.member.service.IUnionidLogService;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.mk.care.kafka.common.CopywriterTypeEnum;
@@ -91,6 +114,9 @@ public class AppController {
 	 * 重庆砸金蛋活动id
 	 */
 	public static final long  ACTIVE_CQ_KICKEGG = 23;
+
+	@Autowired
+	private IUnionidLogService unionidLogService;
 
 	/**
 	 * @param unionid
@@ -477,6 +503,13 @@ public class AppController {
 		logger.info("tokentype:{}", tokenType);
 
 		UMember um = ofMember.get();
+		if (null != um && !Strings.isNullOrEmpty(unionid)) {
+			UUnionidLog log = new UUnionidLog();
+			log.setMid(um.getMid());
+			log.setUnionid(unionid);
+			log.setCreateTime(new Date());
+			this.unionidLogService.saveLog(log);
+		}
 		if(isRegister){
 			try {
 				boolean isActivity = false;

@@ -3404,4 +3404,7 @@ public class PayService implements IPayService {
 		return "处理完毕.";
 	}
 
+    public List<PPay> findByUserId (String userId) {
+        return this.iPayDAO.findByUserId(userId);
+    }
 }

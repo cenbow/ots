@@ -147,6 +147,9 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 						checkinUser.set("cardid", user.getString("idno"));
 						checkinUser.set("pmsRoomOrderNo", customNo.get("customeno"));
 						checkinUser.set("freqtrv", user.getString("ispermanent"));
+						if(user.get("isscan") != null) {
+							checkinUser.set("isscan", StringUtils.defaultIfBlank(user.getString("isscan"), null));
+						}
 						// 补上酒店id
 						checkinUser.set("Hotelid", hotelId);
 
@@ -161,8 +164,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 				 */
 				logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:day:{}", order.get("id"),
 						customNo.getJSONArray("day"));
-				logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:bolean:{}", order.get("id"),
-						(customNo.getJSONArray("day") != null) && (customNo.getJSONArray("day").size() > 0));
+					logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:bolean:{}", order.get("id"),
+							(customNo.getJSONArray("day") != null) && (customNo.getJSONArray("day").size() > 0));
 				if ((customNo.getJSONArray("day") != null) && (customNo.getJSONArray("day").size() > 0)) {
 					JSONArray days = customNo.getJSONArray("day");
 					long pmsorderid = order.get("id");

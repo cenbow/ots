@@ -85,7 +85,7 @@ public class MemberDao extends MyBatisDaoImpl<UMember, String> implements IMembe
 	@Override
 	public void save(UMember uMember){
 		String primarykey = this.insert(uMember);
-		System.out.println("gen key: "+ primarykey);
+		System.out.println("gen key: " + primarykey);
 	}
 	
 	@Override
@@ -119,5 +119,12 @@ public class MemberDao extends MyBatisDaoImpl<UMember, String> implements IMembe
 		param.put("phone", fom.getPhone());
 		param.put("deviceid", fom.getDeviceid());
 		return this.find("findUMemberByFirstOrder", param);
+	}
+
+	@Override
+	public List<UMember> findUMemberByOpenId(String openId) {
+		Map<String,Object> param = Maps.newHashMap();
+		param.put("findMemberByOpenId", openId);
+		return this.find("findMemberByOpenId", param);
 	}
 }
