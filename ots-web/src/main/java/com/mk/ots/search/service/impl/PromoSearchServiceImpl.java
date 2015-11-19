@@ -657,8 +657,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		// 最近酒店
 
 		hotelEntity.setOrderby(HotelSortEnum.DISTANCE.getId());
-		hotelEntity.setPillowlatitude(hotelEntity.getUserlatitude());
-		hotelEntity.setPillowlongitude(hotelEntity.getUserlongitude());
 		hotelEntity.setIspromoonly(false);
 
 		Map<String, Object> distanceResultMap = searchService.readonlySearchHotels(hotelEntity);
