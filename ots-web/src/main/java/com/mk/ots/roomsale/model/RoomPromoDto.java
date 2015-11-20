@@ -15,6 +15,7 @@ public class RoomPromoDto {
     private String typeDesc;
     private String promoType;
     private String promoValue;
+    private String promoId;
     private String promoLabel;
 
     public Integer getRoomId() {
@@ -95,6 +96,14 @@ public class RoomPromoDto {
 
     public void setPromoType(String promoType) {
         this.promoType = promoType;
+    }
+
+    public String getPromoId() {
+        return promoId;
+    }
+
+    public void setPromoId(String promoId) {
+        this.promoId = promoId;
     }
 
     public String getPromoValue() {

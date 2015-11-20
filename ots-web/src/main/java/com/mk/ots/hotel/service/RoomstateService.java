@@ -1,6 +1,7 @@
 
 package com.mk.ots.hotel.service;
 
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,26 +32,9 @@ import com.mk.orm.kit.JsonKit;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.hotel.model.TFacilityModel;
-import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.model.THotelModel;
-import com.mk.ots.hotel.model.TPricetimeWithPrices;
-import com.mk.ots.hotel.model.TRoomModel;
-import com.mk.ots.hotel.model.TRoomRepairModel;
-import com.mk.ots.hotel.model.TRoomTypeInfoModel;
-import com.mk.ots.hotel.model.TRoomTypeModel;
-import com.mk.ots.hotel.model.TRoomTypeWithBasePrice;
+import com.mk.ots.hotel.model.*;
 import com.mk.ots.manager.OtsCacheManager;
-import com.mk.ots.mapper.PmsRoomOrderMapper;
-import com.mk.ots.mapper.RoomCensusMapper;
-import com.mk.ots.mapper.RoomLockPoMapper;
-import com.mk.ots.mapper.TFacilityMapper;
-import com.mk.ots.mapper.THotelMapper;
-import com.mk.ots.mapper.TPricetimeMapper;
-import com.mk.ots.mapper.TRoomMapper;
-import com.mk.ots.mapper.TRoomRepairMapper;
-import com.mk.ots.mapper.TRoomTypeMapper;
-import com.mk.ots.mapper.TRoomtypeInfoMapper;
+import com.mk.ots.mapper.*;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.OtaRoomOrder;
 import com.mk.ots.order.model.PmsRoomOrderModel;
@@ -65,10 +49,8 @@ import com.mk.pms.myenum.PmsRoomOrderStatusEnum;
 import com.mk.pms.room.bean.RoomLockJsonBean;
 import com.mk.pms.room.bean.RoomLockPo;
 import com.mk.pms.room.service.PmsRoomService;
-
 import redis.clients.jedis.Jedis;
 
-import javax.xml.stream.EventFilter;
 
 /**
  * 房态服务类(git测试5)
@@ -1060,6 +1042,7 @@ public class RoomstateService {
 											roomPromoDto.getEndTime());
 									roomtype.setPromostatus(promostaus);
 									roomtype.setPromotype(roomPromoDto.getPromoType());
+									roomtype.setPromoid(roomPromoDto.getPromoId());
 									roomtype.setPromotext(roomPromoDto.getTypeDesc());
 
 									if (logger.isInfoEnabled()) {
