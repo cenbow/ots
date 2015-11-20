@@ -509,6 +509,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				boolFilter.should(keywordBuilders.toArray(arrKeywordBuilders));
 			}
 
+			makeQueryFilter(reqentity, filterBuilders);
+
 			Integer paramOrderby = reqentity.getOrderby();
 			if (paramOrderby == null) {
 				paramOrderby = 0;
@@ -595,6 +597,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 
 				if (isThemed(hotelId, roomtype)) {
+					Object minprice = roomtype.get("minprice");
+					if (minprice != null) {
+						roomtype.put("promoprice", minprice);
+					}
+
 					if (!hotelRoomTypes.get(hotelId).contains(roomtype)) {
 						hotelRoomTypes.get(hotelId).offer(roomtype);
 						counter++;
