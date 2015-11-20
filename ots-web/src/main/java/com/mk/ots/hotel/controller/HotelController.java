@@ -45,6 +45,8 @@ import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.search.service.ISearchService;
@@ -82,6 +84,9 @@ public class HotelController {
 
 	@Autowired
 	private RoomSaleService roomSaleService;
+
+	@Autowired
+	private RoomSaleConfigInfoService roomSaleConfigInfoService;
 
 	/**
 	 * 
@@ -269,7 +274,7 @@ public class HotelController {
 		logger.info("【/hotel/querypromolist】 begin...");
 		logger.info("remote client request ui is: {}", request.getRequestURI());
 		logger.info("【/hotel/querypromolist】 request params is : {}", params);
-		Cat.logEvent("/hotel/querypromolist",reqentity.getCallmethod(),Event.SUCCESS, params);
+		Cat.logEvent("/hotel/querypromolist", reqentity.getCallmethod(), Event.SUCCESS, params);
 		logger.info("【/hotel/querypromolist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
@@ -279,7 +284,8 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
 			logger.error(String.format("parameters validation failed with error %s", errorMessage));
-			Cat.logEvent("querypromolistException",reqentity.getCallmethod(),Event.SUCCESS,String.format("parameters validation failed with error %s", errorMessage));
+			Cat.logEvent("querypromolistException", reqentity.getCallmethod(), Event.SUCCESS,
+					String.format("parameters validation failed with error %s", errorMessage));
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
@@ -318,7 +324,7 @@ public class HotelController {
 			 * check if theme is being searched
 			 */
 			String promoId = reqentity.getPromoid();
-			
+
 			if (StringUtils.isNotBlank(promoId)) {
 				Integer promotype = promoSearchService.queryByPromoId(Integer.parseInt(promoId));
 				reqentity.setPromotype(String.valueOf(promotype));
@@ -334,10 +340,31 @@ public class HotelController {
 			/**
 			 * search with promotype
 			 */
-			else {
-				rtnMap = promoSearchService.readonlySearchHotels(reqentity);
+			else if (StringUtils.isNotBlank(reqentity.getPromotype())) {
+				Integer promoType = 0;
+
+				try {
+					promoType = Integer.parseInt(reqentity.getPromotype());
+				} catch (Exception ex) {
+					logger.warn(
+							String.format("invalid promotype found in searchPromoHotels:%s", reqentity.getPromotype()),
+							ex);
+				}
+
+				List<TRoomSaleConfigInfo> saleConfigs = roomSaleConfigInfoService.querybyPromoType(promoType);
+				if (saleConfigs != null && saleConfigs.size() > 0 && saleConfigs.get(0).getSaleTypeId() != null
+						&& saleConfigs.get(0).getSaleTypeId() == HotelPromoEnum.Theme.getCode()) {
+					rtnMap = promoSearchService.searchThemes(reqentity);
+				} else {
+					rtnMap = promoSearchService.readonlySearchHotels(reqentity);
+				}
+
 				rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+			} else {
+				logger.info("neither promoid nor promotype has been passed in, go with all search");
+
+				rtnMap = promoSearchService.readonlySearchHotels(reqentity);
 			}
 
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
@@ -361,6 +388,7 @@ public class HotelController {
 			Cat.logError("querypromolistException", e);
 		}
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+
 	}
 
 	/**
@@ -382,7 +410,7 @@ public class HotelController {
 		logger.info("remote client request ui is: {}", request.getRequestURI());
 		logger.info("【/hotel/querylist】 request params is : {}", params);
 		logger.info("【/hotel/querylist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
-		Cat.logEvent("/hotel/queryist",reqentity.getCallmethod(),Event.SUCCESS, params);
+		Cat.logEvent("/hotel/queryist", reqentity.getCallmethod(), Event.SUCCESS, params);
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
 		String errorMessage = "";
@@ -392,7 +420,8 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
 			logger.error(String.format("parameters validation failed with error %s", errorMessage));
-			Cat.logEvent("querylistException",reqentity.getCallmethod(),Event.SUCCESS,String.format("parameters validation failed with error %s", errorMessage));
+			Cat.logEvent("querylistException", reqentity.getCallmethod(), Event.SUCCESS,
+					String.format("parameters validation failed with error %s", errorMessage));
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
 
@@ -498,7 +527,7 @@ public class HotelController {
 	public ResponseEntity<Map<String, Object>> getHotelRoomPrice(ParamBaseBean pbb, String roomno,
 			@Valid RoomstateQuerylistReqEntity params, Errors errors) throws Exception {
 		logger.info("【/roomstate/queryprice】 params is : {}", pbb.toString());
-		Cat.logEvent("/roomstate/queryprice",pbb.getCallmethod(),Event.SUCCESS, CommonUtils.toStr(pbb));
+		Cat.logEvent("/roomstate/queryprice", pbb.getCallmethod(), Event.SUCCESS, CommonUtils.toStr(pbb));
 		// 办理再次入住传 roomno
 		// 调用service方法
 		long startTime = new Date().getTime();
@@ -528,7 +557,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 			e.printStackTrace();
 			logger.info("查询房价报错:{}{}", params.getHotelid(), e.getMessage());
-			Cat.logError("RoomStateQueryPriceException",e);
+			Cat.logError("RoomStateQueryPriceException", e);
 			throw e;
 		} finally {
 			t.complete();
@@ -549,7 +578,8 @@ public class HotelController {
 		// pbb.getCallversion(), pbb.getIp(), "/roomstate/querylist",
 		// params.toString(),"ots");
 		logger.info("【/roomstate/querylist】 params is : {}", pbb.toString());
-		Cat.logEvent("/roomstate/querylist", pbb == null? "" : pbb.getCallmethod(),Event.SUCCESS, CommonUtils.toStr(pbb));
+		Cat.logEvent("/roomstate/querylist", pbb == null ? "" : pbb.getCallmethod(), Event.SUCCESS,
+				CommonUtils.toStr(pbb));
 		// 办理再次入住传 roomno
 		// 调用service方法
 		long startTime = new Date().getTime();
@@ -590,7 +620,8 @@ public class HotelController {
 				 */
 				if (freeRoomCount == 0) {
 					logger.info("记录埋点:{}", params.getHotelid());
-					Cat.logEvent("ROOMSTATE-FullRoomNum", params.getHotelid().toString(),  Event.SUCCESS, CommonUtils.toStr(params));
+					Cat.logEvent("ROOMSTATE-FullRoomNum", params.getHotelid().toString(), Event.SUCCESS,
+							CommonUtils.toStr(params));
 				}
 			}
 			// 埋点真实用户进入酒店后满房的次数end
@@ -605,7 +636,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 			e.printStackTrace();
 			logger.info("查询房态报错:{}{}", params.getHotelid(), e.getMessage());
-			Cat.logError("RoomStateQueryListException",e);
+			Cat.logError("RoomStateQueryListException", e);
 			throw e;
 		} finally {
 			t.complete();
@@ -1012,7 +1043,7 @@ public class HotelController {
 	@RequestMapping(value = "/hotel/updatemikepricecache")
 	public ResponseEntity<Map<String, Object>> updateMikePriceCache(String citycode, String hotelid) {
 		logger.info("updateMikePriceCache method begin...");
-		Cat.logEvent("/hotel/updatemikepricecache",CommonUtils.toStr(hotelid));
+		Cat.logEvent("/hotel/updatemikepricecache", CommonUtils.toStr(hotelid));
 		long startTime = new Date().getTime();
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		try {

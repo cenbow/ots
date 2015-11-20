@@ -94,7 +94,6 @@ import com.mk.ots.price.dao.PriceDAO;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.roomsale.model.TRoomSale;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
-import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.score.dao.ScoreDAO;
@@ -486,24 +485,6 @@ public class HotelService {
 
 					List<Integer> promoIds = new ArrayList<Integer>();
 					hotel.setPromoids(promoIds);
-
-					for (Map<String, Object> promo : promoinfo) {
-						Integer tmppromoType = (Integer) promo.get("promotype");
-
-						try {
-							List<TRoomSaleConfigInfo> configInfos = roomSaleConfigInfoService
-									.querybyPromoType(tmppromoType);
-
-							if (configInfos != null && configInfos.size() > 0) {
-								Integer promoId = configInfos.get(0).getId();
-								if (!promoIds.contains(promoId)) {
-									promoIds.add(promoId);
-								}
-							}
-						} catch (Exception ex) {
-							logger.warn(String.format("failed to query promoid by promotype %s", tmppromoType), ex);
-						}
-					}
 
 					// 先把新的酒店放到集合中，后面做批量添加
 					coll.add(hotel);
