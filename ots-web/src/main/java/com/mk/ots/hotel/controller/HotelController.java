@@ -1,29 +1,5 @@
 package com.mk.ots.hotel.controller;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
@@ -49,6 +25,24 @@ import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.util.*;
 
 /**
  * 酒店前端控制类 发布接口
@@ -269,7 +263,7 @@ public class HotelController {
 		logger.info("【/hotel/querypromolist】 begin...");
 		logger.info("remote client request ui is: {}", request.getRequestURI());
 		logger.info("【/hotel/querypromolist】 request params is : {}", params);
-		Cat.logEvent("/hotel/querypromolist",reqentity.getCallmethod(),Event.SUCCESS, params);
+		Cat.logEvent("/hotel/querypromolist", reqentity.getCallmethod(), Event.SUCCESS, params);
 		logger.info("【/hotel/querypromolist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
@@ -279,7 +273,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
 			logger.error(String.format("parameters validation failed with error %s", errorMessage));
-			Cat.logEvent("querypromolistException",reqentity.getCallmethod(),Event.SUCCESS,String.format("parameters validation failed with error %s", errorMessage));
+			Cat.logEvent("querypromolistException", reqentity.getCallmethod(), Event.SUCCESS, String.format("parameters validation failed with error %s", errorMessage));
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
@@ -498,7 +492,7 @@ public class HotelController {
 	public ResponseEntity<Map<String, Object>> getHotelRoomPrice(ParamBaseBean pbb, String roomno,
 			@Valid RoomstateQuerylistReqEntity params, Errors errors) throws Exception {
 		logger.info("【/roomstate/queryprice】 params is : {}", pbb.toString());
-		Cat.logEvent("/roomstate/queryprice",pbb.getCallmethod(),Event.SUCCESS, CommonUtils.toStr(pbb));
+		Cat.logEvent("/roomstate/queryprice", pbb.getCallmethod(), Event.SUCCESS, CommonUtils.toStr(pbb));
 		// 办理再次入住传 roomno
 		// 调用service方法
 		long startTime = new Date().getTime();
@@ -528,7 +522,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 			e.printStackTrace();
 			logger.info("查询房价报错:{}{}", params.getHotelid(), e.getMessage());
-			Cat.logError("RoomStateQueryPriceException",e);
+			Cat.logError("RoomStateQueryPriceException", e);
 			throw e;
 		} finally {
 			t.complete();
@@ -549,7 +543,7 @@ public class HotelController {
 		// pbb.getCallversion(), pbb.getIp(), "/roomstate/querylist",
 		// params.toString(),"ots");
 		logger.info("【/roomstate/querylist】 params is : {}", pbb.toString());
-		Cat.logEvent("/roomstate/querylist", pbb == null? "" : pbb.getCallmethod(),Event.SUCCESS, CommonUtils.toStr(pbb));
+		Cat.logEvent("/roomstate/querylist", pbb == null ? "" : pbb.getCallmethod(), Event.SUCCESS, CommonUtils.toStr(pbb));
 		// 办理再次入住传 roomno
 		// 调用service方法
 		long startTime = new Date().getTime();
@@ -590,7 +584,7 @@ public class HotelController {
 				 */
 				if (freeRoomCount == 0) {
 					logger.info("记录埋点:{}", params.getHotelid());
-					Cat.logEvent("ROOMSTATE-FullRoomNum", params.getHotelid().toString(),  Event.SUCCESS, CommonUtils.toStr(params));
+					Cat.logEvent("ROOMSTATE-FullRoomNum", CommonUtils.toStr(params.getHotelid()),  Event.SUCCESS, CommonUtils.toStr(params));
 				}
 			}
 			// 埋点真实用户进入酒店后满房的次数end
@@ -605,7 +599,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 			e.printStackTrace();
 			logger.info("查询房态报错:{}{}", params.getHotelid(), e.getMessage());
-			Cat.logError("RoomStateQueryListException",e);
+			Cat.logError("RoomStateQueryListException", e);
 			throw e;
 		} finally {
 			t.complete();
@@ -1012,7 +1006,7 @@ public class HotelController {
 	@RequestMapping(value = "/hotel/updatemikepricecache")
 	public ResponseEntity<Map<String, Object>> updateMikePriceCache(String citycode, String hotelid) {
 		logger.info("updateMikePriceCache method begin...");
-		Cat.logEvent("/hotel/updatemikepricecache",CommonUtils.toStr(hotelid));
+		Cat.logEvent("/hotel/updatemikepricecache", CommonUtils.toStr(hotelid));
 		long startTime = new Date().getTime();
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		try {
