@@ -152,6 +152,6 @@ public interface OrderService {
     public Boolean  afterScoreSendMessage(OtaOrder order,int  minute,BigDecimal  backcost);
 
     public List<OtaOrder> findOtaOrderByMid(Long mid,  List<OtaOrderStatusEnum> statusList);
-    
-    public Integer getPromoId(Long roomId);
+
+    public Integer getPromoId(Integer roomTypeId);
 }

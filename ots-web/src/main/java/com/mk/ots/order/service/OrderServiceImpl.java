@@ -2279,25 +2279,19 @@ public class OrderServiceImpl implements OrderService {
         return PromoTypeEnum.OTHER.getCode().toString();
     }
 
-    public Integer getPromoId(Long roomId) {
-        if(roomId == null){
-            return  null;
+    public Integer getPromoId(Integer roomTypeId) {
+        if(roomTypeId == null){
+            return  0;
         }
         //先根据roo
         TRoomSale tRoomSale = new TRoomSale();
-        tRoomSale.setRoomId(roomId.intValue());
-        TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
-        if(resultRoomSale == null || resultRoomSale.getId() == null || resultRoomSale.getConfigId() == null){
+        tRoomSale.setRoomTypeId(roomTypeId);
+        TRoomSale resultRoomSale = roomSaleService.getOneRoomSaleByRoomTypeId(tRoomSale);
+        if(resultRoomSale == null || resultRoomSale.getId() == null || resultRoomSale.getSaleType() == null){
             return 0;
+        }else {
+            return  resultRoomSale.getSaleType();
         }
-        //判断对应的时间
-        TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
-        tRoomSaleConfig.setId(resultRoomSale.getConfigId());
-        TRoomSaleConfigInfo roomSaleConfigInfo = roomSaleConfigInfoMapper.getRoomSaleConfigInfoByConfigId(tRoomSaleConfig);
-        if(roomSaleConfigInfo == null || roomSaleConfigInfo.getId() == null){
-            return 0;
-        }
-        return  roomSaleConfigInfo.getSaleTypeId();
     }
 
     /**

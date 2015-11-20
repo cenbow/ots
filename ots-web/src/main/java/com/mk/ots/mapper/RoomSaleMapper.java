@@ -16,6 +16,8 @@ public interface RoomSaleMapper {
 
 	public TRoomSale getOneRoomSale(TRoomSale bean);
 
+	public TRoomSale getOneRoomSaleByRoomTypeId(TRoomSale bean);
+
 	public List<TRoomSale> queryRoomSale(TRoomSale bean);
 
 	public List<Map<String, Object>> queryRoomPromoByType(String roomTypeId);
