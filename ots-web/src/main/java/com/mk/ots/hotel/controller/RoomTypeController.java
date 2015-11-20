@@ -1,8 +1,10 @@
 package com.mk.ots.hotel.controller;
 
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.Maps;
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.hotel.bean.TBedType;
+import com.mk.ots.hotel.service.BedTypeService;
+import com.mk.ots.web.ServiceOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +15,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.google.common.collect.Maps;
-import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.hotel.bean.TBedType;
-import com.mk.ots.hotel.service.BedTypeService;
-import com.mk.ots.web.ServiceOutput;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 酒店前端控制类 发布接口
@@ -46,6 +45,13 @@ public class RoomTypeController {
     	Map<String, Object> rtnMap = Maps.newHashMap();
     	try {
 			List<TBedType> bedtypes = bedTypeService.getRoombedtype();
+            TBedType defaultBedType = new TBedType();
+            Long id = new Long(-1);
+            defaultBedType.setId(id);
+            defaultBedType.setName("不限");
+
+            bedtypes.add(0,defaultBedType);
+
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 			rtnMap.put("datas", bedtypes);
 		} catch (Exception e) {
@@ -55,6 +61,5 @@ public class RoomTypeController {
 		}
     	return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
     }
-    
 }
 
