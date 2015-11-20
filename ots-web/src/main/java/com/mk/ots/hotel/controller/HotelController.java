@@ -33,8 +33,6 @@ import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.common.bean.ParamBaseBean;
 import com.mk.ots.common.enums.FrontPageEnum;
 import com.mk.ots.common.enums.HotelPromoEnum;
-import com.mk.ots.common.enums.HotelSortEnum;
-import com.mk.ots.common.enums.ShowAreaEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.hotel.service.HotelPriceService;
@@ -46,9 +44,9 @@ import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
-import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
-import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
@@ -87,7 +85,7 @@ public class HotelController {
 	private RoomSaleService roomSaleService;
 
 	@Autowired
-	private TRoomSaleShowConfigService roomSaleShowConfigService;
+	private RoomSaleConfigInfoService roomSaleConfigInfoService;
 
 	/**
 	 * 
@@ -337,10 +335,31 @@ public class HotelController {
 			/**
 			 * search with promotype
 			 */
-			else {
-				rtnMap = promoSearchService.readonlySearchHotels(reqentity);
+			else if (StringUtils.isNotBlank(reqentity.getPromotype())) {
+				Integer promoType = 0;
+
+				try {
+					promoType = Integer.parseInt(reqentity.getPromotype());
+				} catch (Exception ex) {
+					logger.warn(
+							String.format("invalid promotype found in searchPromoHotels:%s", reqentity.getPromotype()),
+							ex);
+				}
+
+				List<TRoomSaleConfigInfo> saleConfigs = roomSaleConfigInfoService.querybyPromoType(promoType);
+				if (saleConfigs != null && saleConfigs.size() > 0 && saleConfigs.get(0).getSaleTypeId() != null
+						&& saleConfigs.get(0).getSaleTypeId() == HotelPromoEnum.Theme.getCode()) {
+					rtnMap = promoSearchService.searchThemes(reqentity);
+				} else {
+					rtnMap = promoSearchService.readonlySearchHotels(reqentity);
+				}
+
 				rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+			} else {
+				logger.info("neither promoid nor promotype has been passed in, go with all search");
+
+				rtnMap = promoSearchService.readonlySearchHotels(reqentity);
 			}
 
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
@@ -357,12 +376,17 @@ public class HotelController {
 			logger.info("【/hotel/querypromolist】 end...");
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
-		} catch (Exception e) {
+		} catch (
+
+		Exception e)
+
+		{
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 			logger.error("【/hotel/querypromolist】 is error: {} ", e);
 		}
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+
 	}
 
 	/**
