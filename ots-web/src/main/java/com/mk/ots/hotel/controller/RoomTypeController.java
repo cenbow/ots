@@ -50,7 +50,7 @@ public class RoomTypeController {
             defaultBedType.setId(id);
             defaultBedType.setName("不限");
 
-            bedtypes.add(defaultBedType);
+            bedtypes.add(0,defaultBedType);
 
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 			rtnMap.put("datas", bedtypes);
@@ -61,6 +61,5 @@ public class RoomTypeController {
 		}
     	return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
     }
-    
 }
 
