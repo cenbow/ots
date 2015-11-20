@@ -597,11 +597,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 
 				if (isThemed(hotelId, roomtype)) {
-					Object minprice = roomtype.get("minprice");
-					if (minprice != null) {
-						roomtype.put("promoprice", minprice);
-					}
-
 					if (!hotelRoomTypes.get(hotelId).contains(roomtype)) {
 						hotelRoomTypes.get(hotelId).offer(roomtype);
 						counter++;
@@ -1651,6 +1646,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 			}
 
+			Object minprice = result.get("minprice");
+			if (minprice != null) {
+				result.put("promoprice", minprice);
+			}
+			
 			// 添加接口返回数据到结果集
 			searchResults.add(result);
 		}
