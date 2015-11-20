@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
+import com.mk.framework.util.CommonUtils;
 import com.mk.framework.util.MyTokenUtils;
 import com.mk.framework.util.ValidateUtils;
 import com.mk.ots.activity.dao.impl.BActivityDao;
@@ -609,9 +610,9 @@ public class TicketController {
 		}
 		boolean trueOrFalse = (tickets!=null && tickets.size()>0) || (prizeInfo!=null && prizeInfo.size()>0) ;
 		if (trueOrFalse){
-			Cat.logEvent("KickEggFromMike",member.getLoginname(),"SUCCESS",prizeInfo.toString());
+			Cat.logEvent("KickEggFromMike",member.getLoginname(),"SUCCESS",CommonUtils.toStr(prizeInfo));
 		}else {
-			Cat.logEvent("KickEggFromMike",member.getLoginname(),"FAILED",prizeInfo.toString());
+			Cat.logEvent("KickEggFromMike",member.getLoginname(),"FAILED",CommonUtils.toStr(prizeInfo));
 		}
 		rtnMap.put("success", trueOrFalse);
 		rtnMap.put("tickets", tickets);
@@ -718,9 +719,9 @@ public class TicketController {
 		}
 		boolean trueOrFalse = (tickets!=null && tickets.size()>0) || (prizeInfo!=null && prizeInfo.size()>0) ;
 		if (trueOrFalse){
-			Cat.logEvent("KickEggFromH5",usermark,"SUCCESS",prizeInfo.toString());
+			Cat.logEvent("KickEggFromH5",usermark,"SUCCESS",CommonUtils.toStr(prizeInfo));
 		}else {
-			Cat.logEvent("KickEggFromH5",usermark,"FAILED",prizeInfo.toString());
+			Cat.logEvent("KickEggFromH5",usermark,"FAILED", CommonUtils.toStr(prizeInfo));
 		}
 		rtnMap.put("success", trueOrFalse);
 		rtnMap.put("tickets", tickets);

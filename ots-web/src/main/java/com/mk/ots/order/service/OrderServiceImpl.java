@@ -4433,7 +4433,7 @@ public class OrderServiceImpl implements OrderService {
                 //推送消息
                 returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", jsonObject.toJSONString()));
                 logger.info("OTSMessage::modifyPmsOrder::修改订单，返回:{}", returnObject.toJSONString());
-                Cat.logEvent("Pms/updateorder", orderTasts.getId().toString(), Event.SUCCESS, jsonObject.toJSONString());
+                Cat.logEvent("Pms/updateorder", CommonUtils.toStr(orderTasts.getId()), Event.SUCCESS, jsonObject.toJSONString());
                 t.setStatus(Transaction.SUCCESS);
             } catch (Exception e) {
                 t.setStatus(e);
