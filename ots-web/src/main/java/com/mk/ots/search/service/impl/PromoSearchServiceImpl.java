@@ -478,6 +478,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
 
+			makeQueryFilter(reqentity, filterBuilders);
+
 			FilterBuilder[] builders = new FilterBuilder[] {};
 			BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
 
@@ -508,8 +510,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				FilterBuilder[] arrKeywordBuilders = new FilterBuilder[] {};
 				boolFilter.should(keywordBuilders.toArray(arrKeywordBuilders));
 			}
-
-			makeQueryFilter(reqentity, filterBuilders);
 
 			Integer paramOrderby = reqentity.getOrderby();
 			if (paramOrderby == null) {
