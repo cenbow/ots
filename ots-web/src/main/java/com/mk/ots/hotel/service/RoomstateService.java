@@ -1,7 +1,6 @@
 
 package com.mk.ots.hotel.service;
 
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +49,6 @@ import com.mk.pms.room.bean.RoomLockJsonBean;
 import com.mk.pms.room.bean.RoomLockPo;
 import com.mk.pms.room.service.PmsRoomService;
 import redis.clients.jedis.Jedis;
-
 
 /**
  * 房态服务类(git测试5)
@@ -355,11 +353,13 @@ public class RoomstateService {
 					String lockedFlag = order.getPmsroomorderno() == null ? this.LOCKED_REPAIR : this.LOCKED_PMS;
 					lockRoomsCache.put(this.getRoomLockedKey(order.getRoomid(), lockDate), lockedFlag);
 					if (this.LOCKED_REPAIR.equals(lockedFlag)) {
-						Cat.logEvent("RoomState-PMS-REPAIR-LOCK",order.getHotelid().toString(), Event.SUCCESS,order.toString());
+						Cat.logEvent("RoomState-PMS-REPAIR-LOCK", order.getHotelid().toString(), Event.SUCCESS,
+								order.toString());
 						this.logger.info("缓存维修房态锁房信息, roomid: {}, date: {}", order.getRoomid(), lockDate);
 					} else {
 						this.logger.info("缓存PMS房态锁房信息, roomid: {}, date: {}", order.getRoomid(), lockDate);
-						Cat.logEvent("RoomState-PMS-LOCK",order.getHotelid().toString(), Event.SUCCESS,order.toString());
+						Cat.logEvent("RoomState-PMS-LOCK", order.getHotelid().toString(), Event.SUCCESS,
+								order.toString());
 
 					}
 				}
@@ -595,13 +595,13 @@ public class RoomstateService {
 				String lockDate = DateUtils.formatDate(DateUtils.addDays(bdate, i));
 				lockRoomsCache.put(this.getRoomLockedKey(roomid, lockDate), this.LOCKED_OTS);
 				this.logger.info("lockRoomInOTS::hotelid:{}, roomid:{}, lockDate: {}", hotelid, roomid, lockDate);
-				Cat.logEvent("LockRoomInOTS",hotelid.toString(),Event.SUCCESS,roomid.toString());
+				Cat.logEvent("LockRoomInOTS", hotelid.toString(), Event.SUCCESS, roomid.toString());
 			}
 
 			//
 			jedis.set(this.getCacheKey(hotelid).getBytes(), SerializeUtil.serialize(lockRoomsCache));
 			this.logger.info("OTS lock room success.\n {}", JsonKit.toJson(lockRoomsCache));
-			Cat.logEvent("LockRoom",hotelid.toString(),Event.SUCCESS,JsonKit.toJson(lockRoomsCache));
+			Cat.logEvent("LockRoom", hotelid.toString(), Event.SUCCESS, JsonKit.toJson(lockRoomsCache));
 			//
 			long finishTime = new Date().getTime();
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
@@ -609,7 +609,7 @@ public class RoomstateService {
 		} catch (Exception e) {
 			this.logger.error("OTS lock room error: {}", e.getMessage());
 			Cat.logError("OTSLockRoomException", e);
-			Cat.logEvent("LockRoomFailed",hotelid.toString(),Event.SUCCESS,roomid.toString());
+			Cat.logEvent("LockRoomFailed", hotelid.toString(), Event.SUCCESS, roomid.toString());
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
@@ -685,7 +685,7 @@ public class RoomstateService {
 						lockRoomsCache.remove(this.getRoomLockedKey(roomid, unlockDate));
 						this.logger.info("unlockRoomInOTS::hotelid:{}, roomid:{}, unlockDate: {}", hotelid, roomid,
 								unlockDate);
-						Cat.logEvent("UnlockRoomInOTS",hotelid.toString(),Event.SUCCESS,roomid.toString());
+						Cat.logEvent("UnlockRoomInOTS", hotelid.toString(), Event.SUCCESS, roomid.toString());
 					}
 				}
 			}
@@ -699,7 +699,7 @@ public class RoomstateService {
 			rtnMap.put(ServiceOutput.STR_MSG_TIMES, (finishTime - startTime) + "ms");
 		} catch (Exception e) {
 			this.logger.error("OTS unlock room error: {}", e.getMessage());
-			Cat.logEvent("UnlockRoomFailed",hotelid.toString(),Event.SUCCESS,otaorder.getRoomOrderList().toString());
+			Cat.logEvent("UnlockRoomFailed", hotelid.toString(), Event.SUCCESS, otaorder.getRoomOrderList().toString());
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
@@ -783,12 +783,12 @@ public class RoomstateService {
 				lockDate = DateUtils.formatDate(DateUtils.getDateFromString(lockDate));
 				lockRoomsCache.remove(this.getRoomLockedKey(roomid, lockDate));
 				this.logger.info("unlockRoomInOTS::hotelid:{}, roomid:{}, unlockDate: {}", hotelid, roomid, lockDate);
-				Cat.logEvent("UnlockRoomInOTS",hotelid.toString(),Event.SUCCESS,roomid.toString());
+				Cat.logEvent("UnlockRoomInOTS", hotelid.toString(), Event.SUCCESS, roomid.toString());
 			}
 			//
 			jedis.set(this.getCacheKey(hotelid).getBytes(), SerializeUtil.serialize(lockRoomsCache));
 			this.logger.info("OTS unlock room success.\n {}", JsonKit.toJson(lockRoomsCache));
-			Cat.logEvent("UnlockRoomInOTS",hotelid.toString(),Event.SUCCESS,roomid.toString());
+			Cat.logEvent("UnlockRoomInOTS", hotelid.toString(), Event.SUCCESS, roomid.toString());
 			//
 			long finishTime = new Date().getTime();
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
@@ -796,7 +796,7 @@ public class RoomstateService {
 		} catch (Exception e) {
 			this.logger.error("OTS lock room error: {}", e.getMessage());
 			Cat.logError("UnlockRoomInPMS", e);
-			Cat.logEvent("UnlockRoomInOTS",hotelid.toString(),Event.SUCCESS,roomid.toString());
+			Cat.logEvent("UnlockRoomInOTS", hotelid.toString(), Event.SUCCESS, roomid.toString());
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
@@ -915,7 +915,7 @@ public class RoomstateService {
 			String begindate = params.getStartdateday();
 			String enddate = params.getEnddateday();
 
-			Cat.logEvent("findHotelRoomState",hotelid.toString(),Event.SUCCESS,params.toString());
+			Cat.logEvent("findHotelRoomState", hotelid.toString(), Event.SUCCESS, params.toString());
 			// 从redis缓存中查询已锁的房态
 			Map<String, String> lockRoomsCache = new HashMap<String, String>();
 			//// THotel hotel = hotelService.readonlyTHotel(hotelid);
@@ -923,7 +923,8 @@ public class RoomstateService {
 			THotelModel thotelModel = thotelMapper.selectById(hotelid);
 			if (thotelModel == null) {
 				logger.error("hotel: {} already delete from t_hotel.", hotelid);
-				Cat.logEvent("findHotelRoomStateException",hotelid.toString(),Event.SUCCESS,"hotel: "+hotelid +" already delete from t_hotel");
+				Cat.logEvent("findHotelRoomStateException", hotelid.toString(), Event.SUCCESS,
+						"hotel: " + hotelid + " already delete from t_hotel");
 				return respEntityList;
 			}
 			String isNewPms = thotelModel.getIsnewpms();
@@ -1103,7 +1104,7 @@ public class RoomstateService {
 					BigDecimal defenseZeroPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
 
 					if (prices == null || prices.length == 0) {
-						if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0){
+						if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
 							// 眯客价
 							roomtype.setRoomtypeprice(defenseZeroPrice);
 							// 门市价
@@ -1149,7 +1150,9 @@ public class RoomstateService {
 					if (troomtypeInfoModel == null) {
 						this.logger.info("roomtypeid: {} not exists in table t_roomtype_info.",
 								roomtype.getRoomtypeid());
-						Cat.logEvent("findHotelRoomStateException",hotelid == null ? "" :hotelid.toString(),Event.SUCCESS,"roomtypeid: "+ roomtype == null ? "" :roomtype.getRoomtypeid()+" not exists in table t_roomtype_info.");
+						Cat.logEvent("findHotelRoomStateException", hotelid == null ? "" : hotelid.toString(),
+								Event.SUCCESS, "roomtypeid: " + roomtype == null ? ""
+										: roomtype.getRoomtypeid() + " not exists in table t_roomtype_info.");
 					}
 					RoomstateQuerylistRespEntity.Bed bed = respEntity.new Bed();
 					if ((troomtypeInfoModel == null) || StringUtils.isBlank(troomtypeInfoModel.getBedsize())) {
@@ -1435,7 +1438,8 @@ public class RoomstateService {
 		try {
 			troomTypes = troomtypeMapper.findList(roomtypeid, hotelid, bednum);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(String.format("failed to troomtypeMapper.findList->roomtypeid:%s, hotelid:%s, bednum:%s",
+					roomtypeid, hotelid, bednum), e);
 		}
 		RoomstateQuerylistRespEntity respEntity = new RoomstateQuerylistRespEntity();
 

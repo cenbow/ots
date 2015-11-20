@@ -84,6 +84,8 @@ import com.mk.ots.mapper.TDistrictMapper;
 import com.mk.ots.mapper.THotelMapper;
 import com.mk.ots.mapper.THotelScoreMapper;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
+import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
 import com.mk.ots.restful.output.SearchPositionsDistanceRespEntity;
@@ -575,8 +577,22 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return false;
 	}
 
+	private RoomstateQuerylistReqEntity buildRoomstateQuery(Map<String, Object> roomtype, Integer hotelId,
+			String startdateday, String enddateday) {
+		RoomstateQuerylistReqEntity roomstateEntity = new RoomstateQuerylistReqEntity();
+
+		Long roomtypeId = (Long) roomtype.get("roomtypeid");
+		roomstateEntity.setRoomtypeid(roomtypeId);
+		roomstateEntity.setHotelid(hotelId.longValue());
+		roomstateEntity.setStartdateday(startdateday);
+		roomstateEntity.setEnddateday(enddateday);
+
+		return roomstateEntity;
+	}
+
 	@SuppressWarnings("unchecked")
-	private List<Map<String, Object>> groupThemes(List<Map<String, Object>> searchResults) {
+	private List<Map<String, Object>> groupThemes(List<Map<String, Object>> searchResults, String startdateday,
+			String enddateday) {
 		Map<Integer, Queue<Map<String, Object>>> hotelRoomTypes = new HashMap<Integer, Queue<Map<String, Object>>>();
 		List<Map<String, Object>> themeGrouped = new ArrayList<Map<String, Object>>();
 
@@ -585,6 +601,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			List<Map<String, Object>> roomtypes = (List<Map<String, Object>>) hotel.get("roomtype");
 			Integer hotelId = Integer.parseInt((String) hotel.get("hotelid"));
 			String hotelname = (String) hotel.get("hotelname");
+			Integer promoprice = (Integer) hotel.get("promoprice");
 
 			if (!hotelRoomTypes.containsKey(hotelId)) {
 				hotelRoomTypes.put(hotelId, new ArrayBlockingQueue<Map<String, Object>>(10));
@@ -597,6 +614,26 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 
 				if (isThemed(hotelId, roomtype)) {
+					try {
+						List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
+								buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
+						if (roomstatePrices != null && roomstatePrices.size() > 0
+								&& roomstatePrices.get(0).getRoomtype() != null
+								&& roomstatePrices.get(0).getRoomtype().size() > 0) {
+							BigDecimal price = roomstatePrices.get(0).getRoomtype().get(0).getRoomtypeprice();
+
+							if (promoprice == null) {
+								hotel.put("promoprice", price.longValue());
+							} else if (promoprice == 0 && price != null && price.longValue() > 0) {
+								hotel.put("promoprice", price.longValue());
+							} else if (promoprice != null && price != null && (promoprice > price.longValue())) {
+								hotel.put("promoprice", price.longValue());
+							}
+						}
+					} catch (Exception ex) {
+						logger.warn("failed to findHotelRoomPrice...", ex);
+					}
+
 					if (!hotelRoomTypes.get(hotelId).contains(roomtype)) {
 						hotelRoomTypes.get(hotelId).offer(roomtype);
 						counter++;
@@ -1646,11 +1683,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 			}
 
-			Object minprice = result.get("minprice");
-			if (minprice != null) {
-				result.put("promoprice", minprice);
-			}
-			
 			// 添加接口返回数据到结果集
 			searchResults.add(result);
 		}
@@ -1659,7 +1691,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			logger.info("about to groupThemes");
 		}
 
-		List<Map<String, Object>> roomtypeGrouped = groupThemes(searchResults);
+		List<Map<String, Object>> roomtypeGrouped = groupThemes(searchResults, reqEntity.getStartdateday(),
+				reqEntity.getEnddateday());
 		List<Map<String, Object>> hotelIds = new ArrayList<Map<String, Object>>();
 		for (Map<String, Object> roomtype : roomtypeGrouped) {
 			Integer hotelId = (Integer) roomtype.get("hotelId");
