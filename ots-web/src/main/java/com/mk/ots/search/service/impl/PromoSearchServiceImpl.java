@@ -2640,15 +2640,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 
 		if (StringUtils.isNotBlank(promoId)) {
-			List<TRoomSaleConfigInfo> promotypes = roomSaleConfigInfoService.queryListBySaleTypeId("",
-					Integer.parseInt(promoId), 0, 10);
-			for (TRoomSaleConfigInfo config : promotypes) {
-				Integer promotype = config.getId();
-
-				filterBuilders
-						.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", promotype)));
-			}
-
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promoid", promoId)));
 		} else if (StringUtils.isNotBlank(promoType)) {
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", promoType)));
 		}
