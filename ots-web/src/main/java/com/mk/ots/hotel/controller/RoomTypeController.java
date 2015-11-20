@@ -49,7 +49,6 @@ public class RoomTypeController {
             Long id = new Long(-1);
             defaultBedType.setId(id);
             defaultBedType.setName("不限");
-            defaultBedType.setVisible(true);
 
             bedtypes.add(defaultBedType);
 
