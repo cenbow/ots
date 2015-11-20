@@ -44,6 +44,10 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		return roomSaleMapper.getOneRoomSale(bean);
 	}
 
+	public TRoomSale getOneRoomSaleByRoomTypeId(TRoomSale bean) {
+		return roomSaleMapper.getOneRoomSaleByRoomTypeId(bean);
+	}
+
 	public List<TRoomSale> queryRoomSale(TRoomSale bean) {
 		return roomSaleMapper.queryRoomSale(bean);
 	}

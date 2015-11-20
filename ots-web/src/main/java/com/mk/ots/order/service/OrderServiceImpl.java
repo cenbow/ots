@@ -2279,25 +2279,19 @@ public class OrderServiceImpl implements OrderService {
         return PromoTypeEnum.OTHER.getCode().toString();
     }
 
-    public Integer getPromoId(Long roomId) {
-        if(roomId == null){
-            return  null;
+    public Integer getPromoId(Long roomTypeId) {
+        if(roomTypeId == null){
+            return  0;
         }
         //先根据roo
         TRoomSale tRoomSale = new TRoomSale();
-        tRoomSale.setRoomId(roomId.intValue());
-        TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
-        if(resultRoomSale == null || resultRoomSale.getId() == null || resultRoomSale.getConfigId() == null){
+        tRoomSale.setRoomTypeId(roomTypeId.intValue());
+        TRoomSale resultRoomSale = roomSaleService.getOneRoomSaleByRoomTypeId(tRoomSale);
+        if(resultRoomSale == null || resultRoomSale.getId() == null || resultRoomSale.getSaleType() == null){
             return 0;
+        }else {
+            return  resultRoomSale.getSaleType();
         }
-        //判断对应的时间
-        TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
-        tRoomSaleConfig.setId(resultRoomSale.getConfigId());
-        TRoomSaleConfigInfo roomSaleConfigInfo = roomSaleConfigInfoMapper.getRoomSaleConfigInfoByConfigId(tRoomSaleConfig);
-        if(roomSaleConfigInfo == null || roomSaleConfigInfo.getId() == null){
-            return 0;
-        }
-        return  roomSaleConfigInfo.getSaleTypeId();
     }
 
     /**
@@ -3872,9 +3866,9 @@ public class OrderServiceImpl implements OrderService {
           JSONObject returnObject = null;
           Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/updateorder");
           try {
-              returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", returnObject.toJSONString()));
+              returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", addOrder.toJSONString()));
               logger.info("OTSMessage::modifyPmsOrder::修改订单，返回:{}", returnObject.toJSONString());
-              Cat.logEvent("Pms/updateorder", CommonUtils.toStr(order.getId()), Event.SUCCESS, returnObject.toJSONString());
+              Cat.logEvent("Pms/updateorder", CommonUtils.toStr(order.getId()), Event.SUCCESS, addOrder.toJSONString());
               t.setStatus(Transaction.SUCCESS);
           } catch (Exception e) {
               t.setStatus(e);

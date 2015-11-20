@@ -115,6 +115,17 @@
         ORDER by a.id DESC
         limit 1
     </select>
+
+    <select id="getOneRoomSaleByRoomTypeId" resultMap="BaseResultMap" parameterType="com.mk.ots.roomsale.model.TRoomSale">
+        SELECT
+        b.id, b.saleTypeId as saleType
+        from t_room_sale_config config
+        inner JOIN t_room_sale_config_info b  ON config.valid = 'T' and config.saleConfigInfoId = b.id and b.valid = 'T'
+        where 1=1  AND config.saleRoomTypeId = #{roomTypeId}
+        ORDER by config.id DESC
+        limit 1;
+    </select>
+
     <insert id="saveRoomSale"  parameterType="com.mk.ots.roomsale.model.TRoomSale" >
         INSERT INTO t_room_sale
        (roomTypeId,oldRoomTypeId,roomNo,pms,createDate,salePrice,costPrice,
