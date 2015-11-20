@@ -957,14 +957,14 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 		hotel.put("hotelid", hotelPMS);
 
 		String resultJSONStr = null;
-		Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/cancelorder");
+		Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/offline");
 		try {
-			resultJSONStr = doPostJson(UrlUtils.getUrl("newpms.url") + "/cancelorder", hotel.toJSONString());
-			Cat.logEvent("Pms/cancelorder", hotelPMS, Event.SUCCESS, hotel.toJSONString());
+			resultJSONStr = doPostJson(UrlUtils.getUrl("newpms.url") + "/offline", hotel.toJSONString());
+			Cat.logEvent("Pms/offline", hotelPMS, Event.SUCCESS, hotel.toJSONString());
 			t.setStatus(Transaction.SUCCESS);
 		} catch (Exception e) {
 			t.setStatus(e);
-			this.logger.error("Pms/cancelorder error.", e);
+			this.logger.error("Pms/offline error.", e);
 			throw MyErrorEnum.errorParm.getMyException(e.getMessage());
 		}finally {
 			t.complete();
