@@ -2265,6 +2265,10 @@ public class OrderServiceImpl implements OrderService {
         if(roomSaleConfigInfo == null || roomSaleConfigInfo.getId() == null){
             return PromoTypeEnum.OTHER.getCode().toString();
         }
+        if(roomSaleConfigInfo.getSaleTypeId() == 3){
+            //如果是主题房的话则将对应的订单方式改为普通订单
+            return PromoTypeEnum.OTHER.getCode().toString();
+        }
         Integer promoStatus = DateUtils.promoStatus(roomSaleConfigInfo.getStartDate(),
                 roomSaleConfigInfo.getEndDate(), roomSaleConfigInfo.getStartTime(),
                 roomSaleConfigInfo.getEndTime());
