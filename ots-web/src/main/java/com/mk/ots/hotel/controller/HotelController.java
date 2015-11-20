@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import com.mk.framework.util.CommonUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -31,11 +30,10 @@ import com.dianping.cat.message.Transaction;
 import com.google.common.collect.Maps;
 import com.mk.framework.AppUtils;
 import com.mk.framework.exception.MyErrorEnum;
+import com.mk.framework.util.CommonUtils;
 import com.mk.ots.common.bean.ParamBaseBean;
 import com.mk.ots.common.enums.FrontPageEnum;
 import com.mk.ots.common.enums.HotelPromoEnum;
-import com.mk.ots.common.enums.HotelSortEnum;
-import com.mk.ots.common.enums.ShowAreaEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.hotel.service.HotelPriceService;
@@ -47,9 +45,7 @@ import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
-import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
 import com.mk.ots.roomsale.service.RoomSaleService;
-import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
@@ -86,9 +82,6 @@ public class HotelController {
 
 	@Autowired
 	private RoomSaleService roomSaleService;
-
-	@Autowired
-	private TRoomSaleShowConfigService roomSaleShowConfigService;
 
 	/**
 	 * 
@@ -325,6 +318,7 @@ public class HotelController {
 			 * check if theme is being searched
 			 */
 			String promoId = reqentity.getPromoid();
+			
 			if (StringUtils.isNotBlank(promoId)) {
 				Integer promotype = promoSearchService.queryByPromoId(Integer.parseInt(promoId));
 				reqentity.setPromotype(String.valueOf(promotype));
