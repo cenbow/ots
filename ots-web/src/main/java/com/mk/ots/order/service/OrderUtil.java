@@ -343,10 +343,10 @@ public class OrderUtil {
 		// 只选一个时间
 		JSONArray roomOrder = new JSONArray();
 		List<OtaRoomPrice> otaRoomPrices = returnOrder.get("otaRoomPrices");
-		String roomTypeId = null;
+		Long roomTypeId = null;
 		for (OtaRoomOrder room : returnOrder.getRoomOrderList()) {
 			JSONObject jsonRoom = new JSONObject();
-			roomTypeId = room.get("RoomTypeId");
+			roomTypeId = room.getLong("RoomTypeId");
 			jsonRoom.put("orderroomid", room.get("id"));
 			jsonRoom.put("hotelid", room.get("Hotelid"));
 			jsonRoom.put("hotelname", room.get("Hotelname"));
@@ -446,10 +446,10 @@ public class OrderUtil {
 			}
 			roomOrder.add(jsonRoom);
 		}// end of loop otaroomorders
-		if(StringUtils.isEmpty(roomTypeId)){
+		if(roomTypeId == null){
 			jsonObj.put("promoid","0");
 		}else{
-			jsonObj.put("promoid",orderService.getPromoId(Integer.valueOf(roomTypeId)));
+			jsonObj.put("promoid",orderService.getPromoId(roomTypeId));
 		}
 		/*********************钱包业务*****************/
 		if ("modify".equals(returnOrder.getStr("act"))) {

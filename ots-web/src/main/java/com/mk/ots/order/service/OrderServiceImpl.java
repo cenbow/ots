@@ -2279,13 +2279,13 @@ public class OrderServiceImpl implements OrderService {
         return PromoTypeEnum.OTHER.getCode().toString();
     }
 
-    public Integer getPromoId(Integer roomTypeId) {
+    public Integer getPromoId(Long roomTypeId) {
         if(roomTypeId == null){
             return  0;
         }
         //先根据roo
         TRoomSale tRoomSale = new TRoomSale();
-        tRoomSale.setRoomTypeId(roomTypeId);
+        tRoomSale.setRoomTypeId(roomTypeId.intValue());
         TRoomSale resultRoomSale = roomSaleService.getOneRoomSaleByRoomTypeId(tRoomSale);
         if(resultRoomSale == null || resultRoomSale.getId() == null || resultRoomSale.getSaleType() == null){
             return 0;
@@ -3866,9 +3866,9 @@ public class OrderServiceImpl implements OrderService {
           JSONObject returnObject = null;
           Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/updateorder");
           try {
-              returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", returnObject.toJSONString()));
+              returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", addOrder.toJSONString()));
               logger.info("OTSMessage::modifyPmsOrder::修改订单，返回:{}", returnObject.toJSONString());
-              Cat.logEvent("Pms/updateorder", CommonUtils.toStr(order.getId()), Event.SUCCESS, returnObject.toJSONString());
+              Cat.logEvent("Pms/updateorder", CommonUtils.toStr(order.getId()), Event.SUCCESS, addOrder.toJSONString());
               t.setStatus(Transaction.SUCCESS);
           } catch (Exception e) {
               t.setStatus(e);

@@ -153,5 +153,5 @@ public interface OrderService {
 
     public List<OtaOrder> findOtaOrderByMid(Long mid,  List<OtaOrderStatusEnum> statusList);
 
-    public Integer getPromoId(Integer roomTypeId);
+    public Integer getPromoId(Long roomTypeId);
 }
