@@ -446,7 +446,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		try {
 			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
 			List<FilterBuilder> keywordBuilders = new ArrayList<FilterBuilder>();
-			
+
 			// C端搜索分类
 			Integer searchType = reqentity.getSearchtype();
 			if (searchType == null) {
@@ -492,12 +492,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (AppUtils.DEBUG_MODE) {
 				logger.info("boolFilter is : \n{}", boolFilter.toString());
 			}
-			
+
 			if (StringUtils.isNotBlank(reqentity.getKeyword())) {
 				makeKeywordFilter(reqentity, keywordBuilders);
 				Cat.logEvent("HotKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
 			}
-			
+
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
 					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
 					.must(QueryBuilders.matchQuery("online", Constant.STR_TRUE));
@@ -508,7 +508,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				FilterBuilder[] arrKeywordBuilders = new FilterBuilder[] {};
 				boolFilter.should(keywordBuilders.toArray(arrKeywordBuilders));
 			}
-			
+
 			Integer paramOrderby = reqentity.getOrderby();
 			if (paramOrderby == null) {
 				paramOrderby = 0;
@@ -2641,14 +2641,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		if (StringUtils.isNotBlank(promoId)) {
 			List<TRoomSaleConfigInfo> promotypes = roomSaleConfigInfoService.queryListBySaleTypeId("",
-					Integer.parseInt(promoId), 1, 10);
-			List<QueryFilterBuilder> queryFilterBuilders = new ArrayList<QueryFilterBuilder>();
-
+					Integer.parseInt(promoId), 0, 10);
 			for (TRoomSaleConfigInfo config : promotypes) {
 				Integer promotype = config.getId();
 
-				queryFilterBuilders.add(FilterBuilders
-						.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", promotype).operator(Operator.OR)));
+				filterBuilders
+						.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", promotype)));
 			}
 
 		} else if (StringUtils.isNotBlank(promoType)) {
@@ -3060,8 +3058,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			bfSql.append(
 					"select a.id as roomtypeid, a.name as roomtypename, a.cost as roomtypepmsprice, a.bednum,a.roomnum, "
 							+ "a.cost as roomtypeprice,b.maxarea,b.minarea,b.pics,b.bedtype,b.bedsize as bedlength, d.name as bedtypename")
-					.append(", info.id as promotype, info.saleTypeId as promoid  ")
-					.append("  from t_roomtype a ").append(" join t_roomtype_info b on a.id = b.roomtypeid")
+					.append(", info.id as promotype, info.saleTypeId as promoid  ").append("  from t_roomtype a ")
+					.append(" join t_roomtype_info b on a.id = b.roomtypeid")
 					.append(" join t_bedtype d on b.bedtype = d.id")
 					.append(" left join t_room_sale_config config on b.roomtypeid = config.saleroomtypeid ")
 					.append(" join t_room_sale_config_info info on config.saleConfigInfoId = info.id ")
