@@ -133,6 +133,7 @@ public class RoomstateQuerylistRespEntity implements Serializable {
         // mike 3.0 add end 
 
         // mike 3.1
+        private String promoid;
         private String promotype;
         private String isonpromo;
         private String promostarttime;
@@ -322,6 +323,14 @@ public class RoomstateQuerylistRespEntity implements Serializable {
 
         public void setIsonpromo(String isonpromo) {
             this.isonpromo = isonpromo;
+        }
+
+        public String getPromoid() {
+            return promoid;
+        }
+
+        public void setPromoid(String promoid) {
+            this.promoid = promoid;
         }
     }
     
