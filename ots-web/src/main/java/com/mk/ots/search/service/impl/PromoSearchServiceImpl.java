@@ -445,7 +445,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		try {
 			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
-
+			List<FilterBuilder> keywordBuilders = new ArrayList<FilterBuilder>();
+			
 			// C端搜索分类
 			Integer searchType = reqentity.getSearchtype();
 			if (searchType == null) {
@@ -491,13 +492,23 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (AppUtils.DEBUG_MODE) {
 				logger.info("boolFilter is : \n{}", boolFilter.toString());
 			}
-
+			
+			if (StringUtils.isNotBlank(reqentity.getKeyword())) {
+				makeKeywordFilter(reqentity, keywordBuilders);
+				Cat.logEvent("HotKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
+			}
+			
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
 					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
 					.must(QueryBuilders.matchQuery("online", Constant.STR_TRUE));
 			boolFilter.must(FilterBuilders.queryFilter(boolQueryBuilder));
 			searchBuilder.setPostFilter(boolFilter);
 
+			if (keywordBuilders.size() > 0) {
+				FilterBuilder[] arrKeywordBuilders = new FilterBuilder[] {};
+				boolFilter.should(keywordBuilders.toArray(arrKeywordBuilders));
+			}
+			
 			Integer paramOrderby = reqentity.getOrderby();
 			if (paramOrderby == null) {
 				paramOrderby = 0;
