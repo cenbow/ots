@@ -1274,14 +1274,21 @@ public class RoomstateService {
 					List<RoomstateQuerylistRespEntity.Room> vcRooms5 = Lists.newArrayList();
 					// boolean isMatch = false;
 					int vcRoomCount = 0;
+					boolean isRoomSelected = false;
 					for (TRoomModel troom : trooms) {
 						RoomstateQuerylistRespEntity.Room room = respEntity.new Room();
 						room.setRoomid(troom.getId());
 						room.setRoomno(troom.getName());
 						room.setRoomname(roomtype.getRoomtypename());
 						room.setHaswindow(troom.getIsWindow() == null ? "" : troom.getIsWindow()); // TODO
-						//room.setFloor(troom.getFloor() == null ? "" : troom.getFloor()); // 显示楼层信息 TODO 暂不显示楼层信息。等待数据清洗
-																							// t_room关联t_room_setting
+						// room.setFloor(troom.getFloor() == null ? "" :
+						// troom.getFloor()); // 显示楼层信息 TODO 暂不显示楼层信息。等待数据清洗
+						// t_room关联t_room_setting
+						if (StringUtils.isNotBlank(room.getHaswindow()) && "T".equals(room.getHaswindow())) {
+							room.setIsselected("T");
+							isRoomSelected = true;
+						}
+
 						// room.setBed(bed);
 						// 与redis房态缓存比较：vc可用，nvc不可用
 						this.processRoomState(room, hotelid, begindate, enddate, lockRoomsCache);
@@ -1295,6 +1302,7 @@ public class RoomstateService {
 							if (StringUtils.isNotEmpty(roomno) && roomno.equals(room.getRoomno())) {
 								room.setIsselected("T");
 								roomtype.setIsfocus("T");
+								isRoomSelected = true;
 								// isMatch = true;
 							}
 							rooms.add(room);
@@ -1309,6 +1317,13 @@ public class RoomstateService {
 								}
 							}
 						}
+					}
+
+					/**
+					 * select a room casually if no room has window after all
+					 */
+					if (!isRoomSelected && rooms != null && rooms.size() > 0) {
+						rooms.get(0).setIsselected("T");
 					}
 
 					roomtype.setVcroomnum(rooms.size()); // 将售房间数加入房型(roomtype)
