@@ -150,4 +150,6 @@ public interface OrderService {
 	public void callChangeOrderStatusByPmsIN(OtaOrder pOrder);
 
     public Boolean  afterScoreSendMessage(OtaOrder order,int  minute,BigDecimal  backcost);
+
+    public Integer getPromoId(Long roomId);
 }
