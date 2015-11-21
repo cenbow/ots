@@ -355,11 +355,13 @@ public class RoomstateService {
 					lockRoomsCache.put(this.getRoomLockedKey(order.getRoomid(), lockDate), lockedFlag);
 					if (this.LOCKED_REPAIR.equals(lockedFlag)) {
 
-						Cat.logEvent("RoomState-PMS-REPAIR-LOCK", CommonUtils.toStr(order.getHotelid()), Event.SUCCESS,order.toString());
+						Cat.logEvent("RoomState-PMS-REPAIR-LOCK", CommonUtils.toStr(order.getHotelid()), Event.SUCCESS,
+								order.toString());
 						this.logger.info("缓存维修房态锁房信息, roomid: {}, date: {}", order.getRoomid(), lockDate);
 					} else {
 						this.logger.info("缓存PMS房态锁房信息, roomid: {}, date: {}", order.getRoomid(), lockDate);
-						Cat.logEvent("RoomState-PMS-LOCK",CommonUtils.toStr(order.getHotelid()), Event.SUCCESS,order.toString());
+						Cat.logEvent("RoomState-PMS-LOCK", CommonUtils.toStr(order.getHotelid()), Event.SUCCESS,
+								order.toString());
 
 					}
 				}
@@ -602,7 +604,7 @@ public class RoomstateService {
 			jedis.set(this.getCacheKey(hotelid).getBytes(), SerializeUtil.serialize(lockRoomsCache));
 			this.logger.info("OTS lock room success.\n {}", JsonKit.toJson(lockRoomsCache));
 
-			Cat.logEvent("LockRoom",CommonUtils.toStr(hotelid), Event.SUCCESS, JsonKit.toJson(lockRoomsCache));
+			Cat.logEvent("LockRoom", CommonUtils.toStr(hotelid), Event.SUCCESS, JsonKit.toJson(lockRoomsCache));
 
 			//
 			long finishTime = new Date().getTime();
@@ -921,15 +923,15 @@ public class RoomstateService {
 			String begindate = params.getStartdateday();
 			String enddate = params.getEnddateday();
 
-
-			Cat.logEvent("findHotelRoomState",CommonUtils.toStr(hotelid),Event.SUCCESS,params.toString());
+			Cat.logEvent("findHotelRoomState", CommonUtils.toStr(hotelid), Event.SUCCESS, params.toString());
 			// 从redis缓存中查询已锁的房态
 			Map<String, String> lockRoomsCache = new HashMap<String, String>();
 			//// THotel hotel = hotelService.readonlyTHotel(hotelid);
 			// 查酒店信息
 			THotelModel thotelModel = thotelMapper.selectById(hotelid);
 			if (thotelModel == null) {
-				Cat.logEvent("findHotelRoomStateException", CommonUtils.toStr(hotelid), Event.SUCCESS, "hotel: " + hotelid + " already delete from t_hotel");
+				Cat.logEvent("findHotelRoomStateException", CommonUtils.toStr(hotelid), Event.SUCCESS,
+						"hotel: " + hotelid + " already delete from t_hotel");
 				return respEntityList;
 			}
 			String isNewPms = thotelModel.getIsnewpms();
@@ -1156,7 +1158,9 @@ public class RoomstateService {
 						this.logger.info("roomtypeid: {} not exists in table t_roomtype_info.",
 								roomtype.getRoomtypeid());
 
-						Cat.logEvent("findHotelRoomStateException", hotelid == null ? "" : hotelid.toString(), Event.SUCCESS, "roomtypeid: " + roomtype == null ? "" : roomtype.getRoomtypeid() + " not exists in table t_roomtype_info.");
+						Cat.logEvent("findHotelRoomStateException", hotelid == null ? "" : hotelid.toString(),
+								Event.SUCCESS, "roomtypeid: " + roomtype == null ? ""
+										: roomtype.getRoomtypeid() + " not exists in table t_roomtype_info.");
 					}
 					RoomstateQuerylistRespEntity.Bed bed = respEntity.new Bed();
 					if ((troomtypeInfoModel == null) || StringUtils.isBlank(troomtypeInfoModel.getBedsize())) {
@@ -1274,7 +1278,8 @@ public class RoomstateService {
 						// room.setFloor(troom.getFloor() == null ? "" :
 						// troom.getFloor()); // 显示楼层信息 TODO 暂不显示楼层信息。等待数据清洗
 						// t_room关联t_room_setting
-						if (StringUtils.isNotBlank(room.getHaswindow()) && "T".equals(room.getHaswindow())) {
+						if (!isRoomSelected && StringUtils.isNotBlank(room.getHaswindow())
+								&& "T".equals(room.getHaswindow())) {
 							room.setIsselected("T");
 							isRoomSelected = true;
 						}
@@ -1289,7 +1294,7 @@ public class RoomstateService {
 						} else {
 							// 将可预订房间加入房间集合中
 							// 从历史入住进
-							if (StringUtils.isNotEmpty(roomno) && roomno.equals(room.getRoomno())) {
+							if (!isRoomSelected && StringUtils.isNotEmpty(roomno) && roomno.equals(room.getRoomno())) {
 								room.setIsselected("T");
 								roomtype.setIsfocus("T");
 								isRoomSelected = true;
