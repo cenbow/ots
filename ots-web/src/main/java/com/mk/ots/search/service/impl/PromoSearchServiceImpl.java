@@ -2809,7 +2809,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		if (bedtype == null) {
 			return;
 		}
-		if (1 == bedtype || 2 == bedtype) {
+		if (1 == bedtype || 2 == bedtype || 3 == bedtype) {
 			String field = "bedtype" + bedtype;
 			filterBuilders.add(FilterBuilders.termFilter(field, 1));
 		}
@@ -3217,7 +3217,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				roomtypeItem.put("promoprice", 0);
 				Integer roomPromotype = (Integer) roomtypeItem.get("promotype");
-				if (roomPromotype != null) {
+				Integer promoid = (Integer) roomtypeItem.get("promoid");
+
+				if (reqentity.getCallversion() != null && "3.2".compareTo(reqentity.getCallversion()) > 0
+						&& promoid != null && promoid > 1) {
+					roomtypeItem.put("promotype", "");
+				}
+				else if (roomPromotype != null) {
 					String promoPrice = promoMap.get(roomPromotype);
 					if (StringUtils.isNotBlank(promoPrice)) {
 						roomtypeItem.put("promoprice", promoPrice);
