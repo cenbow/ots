@@ -190,6 +190,8 @@ public class HotelController {
 		hotelEntity.setCallversion(reqentity.getCallversion());
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
+		hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
+		hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
 		hotelEntity.setStartdateday(strCurDay);
 		hotelEntity.setEnddateday(strNextDay);
 		hotelEntity.setIshotelpic("T");
@@ -217,6 +219,8 @@ public class HotelController {
 		hotelEntity.setCallversion(reqentity.getCallversion());
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
+		hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
+		hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
 		hotelEntity.setStartdateday(strCurDay);
 		hotelEntity.setEnddateday(strNextDay);
 		hotelEntity.setIshotelpic("T");
