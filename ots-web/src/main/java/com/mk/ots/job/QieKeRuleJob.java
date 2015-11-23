@@ -1,5 +1,6 @@
 package com.mk.ots.job;
 
+import com.mk.framework.AppUtils;
 import com.mk.ots.order.service.QiekeRuleService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -19,12 +20,10 @@ import java.util.Date;
 public class QieKeRuleJob extends QuartzJobBean {
 	private static Logger logger = LoggerFactory.getLogger(QieKeRuleJob.class);
 
-	@Autowired
-	private QiekeRuleService qiekeRuleService;
-
 	@Override
 	protected void executeInternal(JobExecutionContext arg0) throws JobExecutionException {
 		logger.info("QieKeRuleJob begin");
+		QiekeRuleService qiekeRuleService = AppUtils.getBean(QiekeRuleService.class);
 		qiekeRuleService.updateTopInvalidReason(new Date());
 		logger.info("QieKeRuleJob end");
 	}
