@@ -195,8 +195,8 @@ public class HotelController {
 			hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
 			hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
 		}else {
-			//hotelEntity.setPillowlatitude(reqentity.getUserlatitude());
-			//hotelEntity.setPillowlongitude(reqentity.getUserlongitude());
+			hotelEntity.setPillowlatitude(reqentity.getUserlatitude());
+			hotelEntity.setPillowlongitude(reqentity.getUserlongitude());
 		}
 
 		hotelEntity.setStartdateday(strCurDay);
