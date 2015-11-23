@@ -142,7 +142,7 @@
 
 	<bean id="qieKeRuleTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="qieKeRuleJobDetail" />
-		<property name="cronExpression" value="0 30 2 * * ?" />
+		<property name="cronExpression" value="0 10 1 * * ?" />
 	</bean>
 	<bean id="qieKeRuleJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
 		<property name="name" value="qieKeRuleJob" />
