@@ -1321,11 +1321,12 @@ public class SearchService implements ISearchService {
 
 				Integer hotelId = Integer.valueOf(es_hotelid);
 				Double tempMinPromoPrice = roomSaleService.getHotelMinPromoPrice(hotelId);
-				if (tempMinPromoPrice != null){
+				if (tempMinPromoPrice != null) {
 					BigDecimal minPromoPrice = new BigDecimal(tempMinPromoPrice);
-					if (minPrice.compareTo(minPromoPrice) > 0){
+					if (minPrice.compareTo(minPromoPrice) > 0) {
 						minPrice = minPromoPrice;
-						Cat.logEvent("MIKEPriceShowERROR",CommonUtils.toStr(hotelId), "ERROR", CommonUtils.toStr(minPrice));
+						Cat.logEvent("MIKEPriceShowERROR", CommonUtils.toStr(hotelId), "ERROR",
+								CommonUtils.toStr(minPrice));
 						minPrice = minPromoPrice;
 					}
 				}
@@ -1430,6 +1431,10 @@ public class SearchService implements ISearchService {
 				}
 				logger.info("--================================== 查询酒店是否有返现结束: ==================================-- ");
 
+				if (isSwappedInOldVersion(result, reqentity.getCallversion())) {
+					result.put("isonpromo", "0");
+				}
+
 				// 添加接口返回数据到结果集
 				hotels.add(result);
 			}
@@ -1452,6 +1457,32 @@ public class SearchService implements ISearchService {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 		}
 		return rtnMap;
+	}
+
+	@SuppressWarnings("unchecked")
+	private boolean isSwappedInOldVersion(Map<String, Object> hotel, String callVersion) {
+		boolean isSwapped = false;
+
+		List<Map<String, Integer>> promoList = (List<Map<String, Integer>>) hotel.get("promoinfo");
+		if (promoList != null && promoList.size() > 0) {
+			boolean isOldPromoExisted = false;
+			boolean isNewPromoExisted = false;
+			for (Map<String, Integer> promoInfo : promoList) {
+				Integer promoId = promoInfo.get("promoid");
+				if (promoId != null && promoId > 1) {
+					isNewPromoExisted = true;
+				} else if (promoId != null && promoId == 1) {
+					isOldPromoExisted = true;
+				}
+			}
+
+			if (isNewPromoExisted && !isOldPromoExisted) {
+				isSwapped = true;
+			}
+		}
+		hotel.get("promoinfo");
+
+		return isSwapped;
 	}
 
 	private Integer findMinPromoType(List<Map<String, Object>> promoInfoList) {
@@ -2045,7 +2076,7 @@ public class SearchService implements ISearchService {
 						&& promoid != null && promoid > 1) {
 					roomtypeItem.put("promotype", "");
 				}
-				
+
 				// 处理房型眯客价roomtypeprice
 				String strRoomtypeid = String.valueOf(roomtypeItem.get("roomtypeid"));
 				BigDecimal roomtypeprice = roomstateService.getRoomPrice(Long.valueOf(hotelid),
