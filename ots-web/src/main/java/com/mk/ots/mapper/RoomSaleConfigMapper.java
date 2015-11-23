@@ -22,6 +22,7 @@ public interface RoomSaleConfigMapper {
     public TRoomSaleConfig checkRoomSale(TRoomSaleConfig bean);
     public TRoomSaleConfig checkRoomSaleWithOldRoomType(TRoomSaleConfig bean);
     public List<TRoomSaleConfig> getRoomSaleByParams(TRoomSaleConfig bean);
+    public List<TRoomSaleConfig> getThemeRoomSale(TRoomSaleConfig bean);
     public List<TRoomSaleConfig> getRoomSaleByParamsNew(TRoomSaleConfig bean);
     public List<TRoomSaleConfig> queryRoomSaleConfigByParams(Map<String, Object> map);
     public TRoomSaleConfig getHotelMinPromoPrice(Integer hotelid);
