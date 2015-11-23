@@ -873,15 +873,18 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Integer normalId = showConfig.getNormalId();
 
 		Map<String, Object> rtnMap = null;
-		if (promoId == HotelPromoEnum.Theme.getCode()){
+		if (promoId == HotelPromoEnum.Theme.getCode()) {
 			Integer promotype = this.queryByPromoId(promoId);
 			params.setPromotype(String.valueOf(promotype));
 
 			rtnMap = this.searchThemes(params);
-		}else if (promoId > 0) {
+		} else if (promoId > 0) {
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
 		} else if (normalId > 0) {
 			rtnMap = this.createNormalItem(params, normalId);
+		} else {
+			Cat.logEvent("PromoItem", "mike3.2", Event.SUCCESS,
+					String.format("invalid promoid:%s; normal:%s is configured", promoId, normalId));
 		}
 
 		List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
