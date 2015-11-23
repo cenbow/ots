@@ -17,6 +17,7 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.mk.ots.common.enums.*;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -55,10 +56,6 @@ import com.mk.framework.AppUtils;
 import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
-import com.mk.ots.common.enums.FrontPageEnum;
-import com.mk.ots.common.enums.HotelSearchEnum;
-import com.mk.ots.common.enums.HotelSortEnum;
-import com.mk.ots.common.enums.ShowAreaEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.common.utils.SearchConst;
@@ -876,7 +873,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Integer normalId = showConfig.getNormalId();
 
 		Map<String, Object> rtnMap = null;
-		if (promoId > 0) {
+		if (promoId == HotelPromoEnum.Theme.getCode()){
+			Integer promotype = this.queryByPromoId(promoId);
+			params.setPromotype(String.valueOf(promotype));
+
+			rtnMap = this.searchThemes(params);
+		}else if (promoId > 0) {
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
 		} else if (normalId > 0) {
 			rtnMap = this.createNormalItem(params, normalId);
