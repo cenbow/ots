@@ -1279,7 +1279,8 @@ public class RoomstateService {
 						// troom.getFloor()); // 显示楼层信息 TODO 暂不显示楼层信息。等待数据清洗
 						// t_room关联t_room_setting
 						if (!isRoomSelected && StringUtils.isNotBlank(room.getHaswindow())
-								&& "T".equals(room.getHaswindow())) {
+								&& "T".equals(room.getHaswindow()) && StringUtils.isNotBlank(params.getCallversion())
+								&& "3.2".compareTo(params.getCallversion()) <= 0) {
 							room.setIsselected("T");
 							isRoomSelected = true;
 						}
@@ -1294,7 +1295,9 @@ public class RoomstateService {
 						} else {
 							// 将可预订房间加入房间集合中
 							// 从历史入住进
-							if (!isRoomSelected && StringUtils.isNotEmpty(roomno) && roomno.equals(room.getRoomno())) {
+							if (!isRoomSelected && StringUtils.isNotEmpty(roomno) && roomno.equals(room.getRoomno())
+									&& StringUtils.isNotBlank(params.getCallversion())
+									&& "3.2".compareTo(params.getCallversion()) <= 0) {
 								room.setIsselected("T");
 								roomtype.setIsfocus("T");
 								isRoomSelected = true;
@@ -1317,7 +1320,9 @@ public class RoomstateService {
 					/**
 					 * select a room casually if no room has window after all
 					 */
-					if (!isRoomSelected && rooms != null && rooms.size() > 0) {
+					if (!isRoomSelected && rooms != null && rooms.size() > 0
+							&& StringUtils.isNotBlank(params.getCallversion())
+							&& "3.2".compareTo(params.getCallversion()) <= 0) {
 						rooms.get(0).setIsselected("T");
 					}
 
