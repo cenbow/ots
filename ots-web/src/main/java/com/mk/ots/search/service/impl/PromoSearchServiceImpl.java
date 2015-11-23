@@ -876,8 +876,18 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		if (promoId == HotelPromoEnum.Theme.getCode()) {
 			Integer promotype = this.queryByPromoId(promoId);
 			params.setPromotype(String.valueOf(promotype));
+			params.setLimit(15);
 
 			rtnMap = this.searchThemes(params);
+			List<Map<String, Object>> allHotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+			List<Map<String, Object>> limitHotels = new ArrayList<>();
+			if (allHotels != null && allHotels.size() > FrontPageEnum.limit.getId()) {
+				for (Map<String, Object> allHotel : allHotels) {
+					limitHotels.add(allHotel);
+				}
+				
+				rtnMap.put("hotel", limitHotels);
+			}
 		} else if (promoId > 0) {
 			rtnMap = this.readonlyOtsHotelListFromEsStore(params);
 		} else if (normalId > 0) {
