@@ -2039,6 +2039,13 @@ public class SearchService implements ISearchService {
 					roomtypeItem.put("roomtypefacility", facilityList);
 				}
 
+				Integer promoid = (Integer) roomtypeItem.get("promoid");
+
+				if (reqentity.getCallversion() != null && "3.2".compareTo(reqentity.getCallversion()) > 0
+						&& promoid != null && promoid > 1) {
+					roomtypeItem.put("promotype", "");
+				}
+				
 				// 处理房型眯客价roomtypeprice
 				String strRoomtypeid = String.valueOf(roomtypeItem.get("roomtypeid"));
 				BigDecimal roomtypeprice = roomstateService.getRoomPrice(Long.valueOf(hotelid),
