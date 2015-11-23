@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 
 import com.dianping.cat.message.Event;
 import com.mk.framework.util.CommonUtils;
+import com.mk.ots.common.enums.HotelPromoEnum;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -1025,65 +1026,81 @@ public class RoomstateService {
 								callVersionStr));
 					}
 
+					TRoomSaleConfig checkRoomSaleConfig = new TRoomSaleConfig();
+					checkRoomSaleConfig.setValid(Constant.STR_TRUE);
+					checkRoomSaleConfig.setRoomTypeId(roomTypeId);
+					checkRoomSaleConfig.setSaleTypeId(HotelPromoEnum.Theme.getCode());
+
+					Boolean isThemePromo = roomSaleService.checkThemePromo(checkRoomSaleConfig);
 					if (StringUtils.isNotBlank(callVersionStr)) {
 						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
 								&& !"3".equals(callMethod)) {
-							TRoomSaleConfig hotelRoomSaleConfig = new TRoomSaleConfig();
-							Integer thotelId = hotelid != null ? hotelid.intValue() : null;
-							hotelRoomSaleConfig.setHotelId(thotelId);
-							hotelRoomSaleConfig.setRoomTypeId(roomTypeId);
-							List<RoomPromoDto> list = roomSaleService.queryRoomPromoByHotelNew(hotelRoomSaleConfig);
+
 							String isonpromo = "0";
+							if (isThemePromo && "3.2".compareTo(callVersionStr) >= 0){
+								isonpromo = "0";
+							}else{
+								TRoomSaleConfig hotelRoomSaleConfig = new TRoomSaleConfig();
+								Integer thotelId = hotelid != null ? hotelid.intValue() : null;
+								hotelRoomSaleConfig.setHotelId(thotelId);
+								hotelRoomSaleConfig.setRoomTypeId(roomTypeId);
+								List<RoomPromoDto> list = roomSaleService.queryRoomPromoByHotelNew(hotelRoomSaleConfig);
 
-							if (logger.isInfoEnabled()) {
-								logger.info(String.format("isPromo:%s; callVersionStr:%s; rooms:%s", isPromo,
-										callVersionStr, list == null ? 0 : list.size()));
-							}
 
-							if (isPromo != null && isPromo) { // isBack
-								isonpromo = "1";
-								if (list != null && list.size() > 0) {
-									RoomPromoDto roomPromoDto = list.get(0);
+								if (logger.isInfoEnabled()) {
+									logger.info(String.format("isPromo:%s; callVersionStr:%s; rooms:%s", isPromo,
+											callVersionStr, list == null ? 0 : list.size()));
+								}
 
-									Integer promostaus = DateUtils.promoStatus(roomPromoDto.getStartDate(),
-											roomPromoDto.getEndDate(), roomPromoDto.getStartTime(),
-											roomPromoDto.getEndTime());
-									roomtype.setPromostatus(promostaus);
-									roomtype.setPromotype(roomPromoDto.getPromoType());
-									roomtype.setPromoid(roomPromoDto.getPromoId());
-									roomtype.setPromotext(roomPromoDto.getTypeDesc());
+								if (isPromo != null && isPromo) { // isBack
+									isonpromo = "1";
+									if (list != null && list.size() > 0) {
+										RoomPromoDto roomPromoDto = list.get(0);
 
-									if (logger.isInfoEnabled()) {
-										logger.info(String.format("promostatus:%s; promotext:%s; promotype:%s",
-												promostaus, roomPromoDto.getTypeDesc(), roomPromoDto.getPromoType()));
-									}
+										Integer promostaus = DateUtils.promoStatus(roomPromoDto.getStartDate(),
+												roomPromoDto.getEndDate(), roomPromoDto.getStartTime(),
+												roomPromoDto.getEndTime());
+										roomtype.setPromostatus(promostaus);
+										roomtype.setPromotype(roomPromoDto.getPromoType());
+										roomtype.setPromoid(roomPromoDto.getPromoId());
+										roomtype.setPromotext(roomPromoDto.getTypeDesc());
 
-									String promoStartTime = roomPromoDto.getStartTime().toString();
-									if (StringUtils.isNotBlank(promoStartTime)) {
-										String[] tmp = promoStartTime.split(":");
-										promoStartTime = tmp[0] + ":" + tmp[1];
-										roomtype.setPromostarttime(promoStartTime);
-									}
+										if (logger.isInfoEnabled()) {
+											logger.info(String.format("promostatus:%s; promotext:%s; promotype:%s",
+													promostaus, roomPromoDto.getTypeDesc(), roomPromoDto.getPromoType()));
+										}
 
-									Long promoduendsec = DateUtils.promoEndDueTime(roomPromoDto.getEndDate(),
-											roomPromoDto.getStartTime(), roomPromoDto.getEndTime(), promostaus);
-									Long promodustartsec = DateUtils.promoStartDueTime(promoduendsec,
-											roomPromoDto.getStartTime(), promostaus);
+										String promoStartTime = roomPromoDto.getStartTime().toString();
+										if (StringUtils.isNotBlank(promoStartTime)) {
+											String[] tmp = promoStartTime.split(":");
+											promoStartTime = tmp[0] + ":" + tmp[1];
+											roomtype.setPromostarttime(promoStartTime);
+										}
 
-									if (promostaus == Constant.PROMOING) {
-										roomtype.setPromodustartsec("0");
-										roomtype.setPromoduendsec(promoduendsec.toString());
+										Long promoduendsec = DateUtils.promoEndDueTime(roomPromoDto.getEndDate(),
+												roomPromoDto.getStartTime(), roomPromoDto.getEndTime(), promostaus);
+										Long promodustartsec = DateUtils.promoStartDueTime(promoduendsec,
+												roomPromoDto.getStartTime(), promostaus);
 
-									} else {
-										roomtype.setPromodustartsec(promodustartsec.toString());
-										roomtype.setPromoduendsec(promoduendsec.toString());
+										if (promostaus == Constant.PROMOING) {
+											roomtype.setPromodustartsec("0");
+											roomtype.setPromoduendsec(promoduendsec.toString());
+
+										} else {
+											roomtype.setPromodustartsec(promodustartsec.toString());
+											roomtype.setPromoduendsec(promoduendsec.toString());
+										}
+
 									}
 
 								}
-
 							}
 
+
+
 							roomtype.setIsonpromo(isonpromo);
+						}else if (isThemePromo){
+							roomtype.setIsonpromo("0");
 						}
 					}
 
