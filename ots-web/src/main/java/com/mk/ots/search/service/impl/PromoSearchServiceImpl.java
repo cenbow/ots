@@ -1607,11 +1607,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			String p_online = Constant.STR_TRUE.equals(result.get("online")) ? Constant.STR_TRUE : Constant.STR_FALSE;
 
 			if (Constant.STR_CITYID_SHANGHAI.equals(reqEntity.getCityid())) {
-				result.put("ordernummon", "");
+				result.put("ordernummon", "0");
 			} else {
 				Long sales = result.get("ordernummon") == null ? 0l
 						: Long.valueOf(String.valueOf(result.get("ordernummon")));
-				result.put("ordernummon", (sales >= 10 ? "月销" + sales + "单" : ""));
+				result.put("ordernummon", (sales >= 1 ? sales : "0"));
 				logger.info("酒店: {}月销: {}单", es_hotelid, sales);
 			}
 			
