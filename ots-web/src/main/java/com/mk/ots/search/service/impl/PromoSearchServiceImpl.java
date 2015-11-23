@@ -685,8 +685,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return roomstateEntity;
 	}
 
-	private void updateRoomtypeWith(List<Map<String, Object>> roomtypes, Map<String, Object> hotel, String startdateday,
-			String enddateday) {
+	private List<Map<String, Object>> updateRoomtypeThemes(List<Map<String, Object>> roomtypes,
+			Map<String, Object> hotel, String startdateday, String enddateday) {
+		List<Map<String, Object>> themedRoomtypes = new ArrayList<>();
+
 		Integer hotelId = Integer.parseInt((String) hotel.get("hotelid"));
 		String hotelname = (String) hotel.get("hotelname");
 		Integer promoprice = (Integer) hotel.get("promoprice");
@@ -699,6 +701,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 
 			if (isThemed(hotelId, roomtype)) {
+				themedRoomtypes.add(roomtype);
+
 				try {
 					List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
 							buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
@@ -720,6 +724,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 			}
 		}
+
+		return themedRoomtypes;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1832,9 +1838,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			List<Map<String, Object>> roomtypeList = this.readonlyRoomtypeList(result, "");
 			if (roomtypeList != null) {
-				updateRoomtypeWith(roomtypeList, result, reqEntity.getStartdateday(), reqEntity.getEnddateday());
+				List<Map<String, Object>> themedRoomtypes = updateRoomtypeThemes(roomtypeList, result,
+						reqEntity.getStartdateday(), reqEntity.getEnddateday());
 
-				singularRoomTypes.addAll(roomtypeList);
+				singularRoomTypes.addAll(themedRoomtypes);
 			}
 
 			result.put("roomtype", roomtypeList);
