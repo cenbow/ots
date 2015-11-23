@@ -191,7 +191,7 @@ public class HotelController {
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
 
-		if (reqentity.getUserlongitude() != null && reqentity.getUserlatitude() != null ){
+		if (reqentity.getPillowlongitude() != null && reqentity.getPillowlatitude() != null ){
 			hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
 			hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
 		}else {
@@ -227,7 +227,7 @@ public class HotelController {
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
 
-		if (reqentity.getUserlongitude() != null && reqentity.getUserlatitude() != null ){
+		if (reqentity.getPillowlongitude() != null && reqentity.getPillowlatitude() != null ){
 			hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
 			hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
 		}else {
