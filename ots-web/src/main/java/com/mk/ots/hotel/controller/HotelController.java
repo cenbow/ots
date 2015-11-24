@@ -191,13 +191,8 @@ public class HotelController {
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
 
-		if (reqentity.getPillowlongitude() != null && reqentity.getPillowlatitude() != null ){
-			hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
-			hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
-		}else {
-			//hotelEntity.setPillowlatitude(reqentity.getUserlatitude());
-			//hotelEntity.setPillowlongitude(reqentity.getUserlongitude());
-		}
+		hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
+		hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
 
 		hotelEntity.setStartdateday(strCurDay);
 		hotelEntity.setEnddateday(strNextDay);
@@ -227,13 +222,8 @@ public class HotelController {
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
 
-		if (reqentity.getPillowlongitude() != null && reqentity.getPillowlatitude() != null ){
-			hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
-			hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
-		}else {
-			hotelEntity.setPillowlatitude(reqentity.getUserlatitude());
-			hotelEntity.setPillowlongitude(reqentity.getUserlongitude());
-		}
+		hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
+		hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
 
 		hotelEntity.setStartdateday(strCurDay);
 		hotelEntity.setEnddateday(strNextDay);

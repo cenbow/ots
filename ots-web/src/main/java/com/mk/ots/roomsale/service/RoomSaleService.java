@@ -58,4 +58,5 @@ public interface RoomSaleService {
 	public List<RoomSaleToIndexDto> getUpdateIndexList(TRoomSaleConfig bean);
 	public List<Map<String, Object>> queryRoomByHotelAndRoomType(String hotelId, String roomTypeId) throws Exception;
 	public Double getHotelMinPromoPrice(Integer hotelid);
+	public Boolean checkThemePromo(TRoomSaleConfig bean);
 }
