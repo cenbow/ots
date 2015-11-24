@@ -221,4 +221,13 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		}
 
 	}
+
+	public Boolean checkThemePromo(TRoomSaleConfig bean){
+		List<TRoomSaleConfig> roomSaleConfig = roomSaleConfigMapper.getThemeRoomSale(bean);
+		if (roomSaleConfig != null && roomSaleConfig.size()> 0){
+			return true;
+		}else {
+			return false;
+		}
+	}
 }

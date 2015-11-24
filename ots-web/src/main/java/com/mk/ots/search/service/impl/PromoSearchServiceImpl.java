@@ -499,6 +499,91 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Cat.logEvent("HotKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
 			}
 
+			double cityLat_default = Constant.LAT_SHANGHAI;
+			double cityLon_default = Constant.LON_SHANGHAI;
+
+			boolean isZhoubian = StringUtils.isNotBlank(reqentity.getExcludehotelid());
+			if (isZhoubian) {
+				if (reqentity.getRange() == null || reqentity.getRange() <= 0) {
+					reqentity.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
+				}
+			} else {
+				if (!HotelSearchEnum.NEAR.getId().equals(searchType)) {
+					logger.info("find city geopoint begin...");
+					TCityModel tcity = null;
+					String citycode = cityid;
+					if (citycode != null) {
+						tcity = cityService.findCityByCode(citycode);
+					}
+					if (tcity != null) {
+						BigDecimal cityLat = tcity.getLatitude();
+						if (cityLat != null) {
+							cityLat_default = cityLat.doubleValue();
+							logger.info("city {} lat is {}.", cityid, cityLat_default);
+						}
+
+						BigDecimal cityLon = tcity.getLongitude();
+						if (cityLon != null) {
+							cityLon_default = cityLon.doubleValue();
+							logger.info("city {} lon is {}.", cityid, cityLon_default);
+						}
+
+						Double cityRange = tcity.getRange();
+						if (cityRange != null) {
+							reqentity.setRange(cityRange.intValue());
+							logger.info("set city {} search range is {}", cityid, cityRange);
+						}
+					}
+					logger.info("find city geopoint end...");
+				} else {
+					if (reqentity.getRange() == null) {
+						reqentity.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
+					}
+				}
+			}
+
+			double distance = Double.valueOf(reqentity.getRange());
+
+			double lat = reqentity.getPillowlatitude() == null ? cityLat_default : reqentity.getPillowlatitude();
+			double lon = reqentity.getPillowlongitude() == null ? cityLon_default : reqentity.getPillowlongitude();
+
+			if (HotelSearchEnum.BZONE.getId().equals(searchType) || HotelSearchEnum.AIRPORT.getId().equals(searchType)
+					|| HotelSearchEnum.SUBWAY.getId().equals(searchType)
+					|| HotelSearchEnum.SAREA.getId().equals(searchType)
+					|| HotelSearchEnum.HOSPITAL.getId().equals(searchType)
+					|| HotelSearchEnum.COLLEGE.getId().equals(searchType)) {
+				// 坐标取所选位置的坐标，搜索半径取5000米
+				String points = reqentity.getPoints();
+				if (StringUtils.isEmpty(points)) {
+					logger.error("按照{}搜索时points参数错误{}", HotelSearchEnum.getById(searchType).getName(), points);
+				}
+				GeoPoint point = this.getPoint(points);
+				if (point != null) {
+					lat = point.getLat();
+					lon = point.getLon();
+					// 指定位置区域搜索的话，搜索半径按照默认5000米
+					distance = SearchConst.SEARCH_RANGE_DEFAULT;
+					logger.info("按照{}搜索，经纬度坐标：[{},{}], 搜索范围:{}米", HotelSearchEnum.getById(searchType).getName(), lon,
+							lat, distance);
+				} else {
+					logger.error("按照{}搜索是没有获取到经纬度, points: {}。", HotelSearchEnum.getById(searchType).getName(), points);
+				}
+			}
+
+			if (StringUtils.isNotBlank(reqentity.getKeyword()) || StringUtils.isNotBlank(reqentity.getHotelname())
+					|| StringUtils.isNotBlank(reqentity.getHoteladdr())) {
+				reqentity.setRange(SearchConst.SEARCH_RANGE_MAX);
+				logger.info("keyword or hotelname or hoteladdress search, set search range {}",
+						SearchConst.SEARCH_RANGE_MAX);
+			}
+
+			if (HotelSearchEnum.AREA.getId().equals(searchType)) {
+				makeAreaFilter(reqentity, filterBuilders);
+			}
+
+			makeHotelTypeFilter(reqentity, filterBuilders);
+			makeBedTypeFilter(reqentity, filterBuilders);
+
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
 					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
 					.must(QueryBuilders.matchQuery("online", Constant.STR_TRUE));
@@ -513,6 +598,19 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			Integer paramOrderby = reqentity.getOrderby();
 			if (paramOrderby == null) {
 				paramOrderby = 0;
+			}
+
+			if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
+				this.sortByDistance(searchBuilder, new GeoPoint(lat, lon));
+			} else if (HotelSortEnum.PRICE.getId() == paramOrderby) {
+				String startdateday = reqentity.getStartdateday();
+				String enddateday = reqentity.getEnddateday();
+				List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
+				setMikepriceScriptSort(searchBuilder, boolFilter, mkPriceDateList);
+			} else if (HotelSortEnum.RECOMMEND.getId() == paramOrderby) {
+				this.sortByRecommend(searchBuilder);
+			} else if (HotelSortEnum.ORDERNUMS.getId() == paramOrderby) {
+				this.sortByOrders(searchBuilder);
 			}
 
 			String startdateday = reqentity.getStartdateday();
@@ -587,6 +685,49 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return roomstateEntity;
 	}
 
+	private List<Map<String, Object>> updateRoomtypeThemes(List<Map<String, Object>> roomtypes,
+			Map<String, Object> hotel, String startdateday, String enddateday) {
+		List<Map<String, Object>> themedRoomtypes = new ArrayList<>();
+
+		Integer hotelId = Integer.parseInt((String) hotel.get("hotelid"));
+		String hotelname = (String) hotel.get("hotelname");
+		Integer promoprice = (Integer) hotel.get("promoprice");
+
+		for (Map<String, Object> roomtype : roomtypes) {
+
+			if (!roomtype.containsKey("hotelname")) {
+				roomtype.put("hotelname", hotelname);
+				roomtype.put("hotelId", hotelId);
+			}
+
+			if (isThemed(hotelId, roomtype)) {
+				themedRoomtypes.add(roomtype);
+
+				try {
+					List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
+							buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
+					if (roomstatePrices != null && roomstatePrices.size() > 0
+							&& roomstatePrices.get(0).getRoomtype() != null
+							&& roomstatePrices.get(0).getRoomtype().size() > 0) {
+						BigDecimal price = roomstatePrices.get(0).getRoomtype().get(0).getRoomtypeprice();
+
+						if (promoprice == null) {
+							hotel.put("promoprice", price.intValue());
+						} else if (promoprice == 0 && price != null && price.intValue() > 0) {
+							hotel.put("promoprice", price.intValue());
+						} else if (promoprice != null && price != null && (promoprice > price.intValue())) {
+							hotel.put("promoprice", price.intValue());
+						}
+					}
+				} catch (Exception ex) {
+					logger.warn("failed to findHotelRoomPrice...", ex);
+				}
+			}
+		}
+
+		return themedRoomtypes;
+	}
+
 	@SuppressWarnings("unchecked")
 	private List<Map<String, Object>> groupThemes(List<Map<String, Object>> searchResults, String startdateday,
 			String enddateday) {
@@ -596,6 +737,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Integer counter = 0;
 		for (Map<String, Object> hotel : searchResults) {
 			List<Map<String, Object>> roomtypes = (List<Map<String, Object>>) hotel.get("roomtype");
+
+			if (hotel.get("hotelid") == null) {
+				continue;
+			}
+
 			Integer hotelId = Integer.parseInt((String) hotel.get("hotelid"));
 			String hotelname = (String) hotel.get("hotelname");
 			Integer promoprice = (Integer) hotel.get("promoprice");
@@ -882,10 +1028,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			List<Map<String, Object>> allHotels = (List<Map<String, Object>>) rtnMap.get("hotel");
 			List<Map<String, Object>> limitHotels = new ArrayList<>();
 			if (allHotels != null && allHotels.size() > FrontPageEnum.limit.getId()) {
-				for (Map<String, Object> allHotel : allHotels) {
-					limitHotels.add(allHotel);
+				for (int i = 0; i < FrontPageEnum.limit.getId(); i++) {
+					limitHotels.add(allHotels.get(i));
 				}
-				
+
 				rtnMap.put("hotel", limitHotels);
 			}
 		} else if (promoId > 0) {
@@ -1499,6 +1645,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		Map<String, Object> hotelIdMap = new HashMap<String, Object>();
 
+		List<Map<String, Object>> singularRoomTypes = new ArrayList<>();
 		for (int i = 0; i < hits.length; i++) {
 			SearchHit hit = hits[i];
 			Map<String, Object> result = hit.getSource();
@@ -1606,6 +1753,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			String p_visible = Constant.STR_TRUE.equals(result.get("visible")) ? Constant.STR_TRUE : Constant.STR_FALSE;
 			String p_online = Constant.STR_TRUE.equals(result.get("online")) ? Constant.STR_TRUE : Constant.STR_FALSE;
 
+			if (Constant.STR_CITYID_SHANGHAI.equals(reqEntity.getCityid())) {
+				result.put("ordernummon", "0");
+			} else {
+				Long sales = result.get("ordernummon") == null ? 0l
+						: Long.valueOf(String.valueOf(result.get("ordernummon")));
+				result.put("ordernummon", (sales >= 1 ? sales : "0"));
+				logger.info("酒店: {}月销: {}单", es_hotelid, sales);
+			}
+
 			Integer avlblroomnum = hotelService.getAvlblRoomNum(p_hotelid, p_isnewpms, p_visible, p_online,
 					reqEntity.getStartdateday(), reqEntity.getEnddateday());
 
@@ -1681,6 +1837,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			result.put("hotelvc", hotelvc);
 
 			List<Map<String, Object>> roomtypeList = this.readonlyRoomtypeList(result, "");
+			if (roomtypeList != null) {
+				List<Map<String, Object>> themedRoomtypes = updateRoomtypeThemes(roomtypeList, result,
+						reqEntity.getStartdateday(), reqEntity.getEnddateday());
+
+				singularRoomTypes.addAll(themedRoomtypes);
+			}
+
 			result.put("roomtype", roomtypeList);
 
 			result.put("collectionstate", "");
@@ -1706,19 +1869,28 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			logger.info("about to groupThemes");
 		}
 
-		List<Map<String, Object>> roomtypeGrouped = groupThemes(searchResults, reqEntity.getStartdateday(),
-				reqEntity.getEnddateday());
+		List<Map<String, Object>> roomtypeGrouped = null;
+		if (reqEntity.getOrderby() == null || reqEntity.getOrderby() <= 0) {
+			roomtypeGrouped = groupThemes(searchResults, reqEntity.getStartdateday(), reqEntity.getEnddateday());
+		} else {
+			roomtypeGrouped = singularRoomTypes;
+		}
+
 		List<Map<String, Object>> hotelIds = new ArrayList<Map<String, Object>>();
-		for (Map<String, Object> roomtype : roomtypeGrouped) {
-			Integer hotelId = (Integer) roomtype.get("hotelId");
+		if (roomtypeGrouped != null) {
+			for (Map<String, Object> roomtype : roomtypeGrouped) {
+				Integer hotelId = (Integer) roomtype.get("hotelId");
 
-			Map<String, Object> hotel = (Map<String, Object>) hotelIdMap.get(String.valueOf(hotelId));
-			List<Map<String, Object>> singleRoomType = new ArrayList<Map<String, Object>>();
-			singleRoomType.add(roomtype);
+				if (hotelId != null) {
+					Map<String, Object> hotel = (Map<String, Object>) hotelIdMap.get(String.valueOf(hotelId));
+					List<Map<String, Object>> singleRoomType = new ArrayList<Map<String, Object>>();
+					singleRoomType.add(roomtype);
 
-			hotel.put("roomtype", singleRoomType);
+					hotel.put("roomtype", singleRoomType);
 
-			hotelIds.add(hotel);
+					hotelIds.add(hotel);
+				}
+			}
 		}
 
 		return hotelIds;
@@ -2599,7 +2771,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 			filterBuilders.add(FilterBuilders.termFilter("discode", discode));
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("failed to makeAreaFilter", e);
 		}
 	}
 
@@ -2637,7 +2809,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		if (bedtype == null) {
 			return;
 		}
-		if (1 == bedtype || 2 == bedtype) {
+		if (1 == bedtype || 2 == bedtype || 3 == bedtype) {
 			String field = "bedtype" + bedtype;
 			filterBuilders.add(FilterBuilders.termFilter(field, 1));
 		}
@@ -3045,7 +3217,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				roomtypeItem.put("promoprice", 0);
 				Integer roomPromotype = (Integer) roomtypeItem.get("promotype");
-				if (roomPromotype != null) {
+				Integer promoid = (Integer) roomtypeItem.get("promoid");
+
+				if (reqentity.getCallversion() != null && "3.2".compareTo(reqentity.getCallversion()) > 0
+						&& promoid != null && promoid > 1) {
+					roomtypeItem.put("promotype", "");
+				}
+				else if (roomPromotype != null) {
 					String promoPrice = promoMap.get(roomPromotype);
 					if (StringUtils.isNotBlank(promoPrice)) {
 						roomtypeItem.put("promoprice", promoPrice);
