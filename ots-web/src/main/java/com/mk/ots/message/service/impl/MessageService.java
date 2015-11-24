@@ -97,6 +97,9 @@ public class MessageService implements IMessageService {
                     Cat.logEvent("send message again", message.getClass().getName(), Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
                 }
 		    }
+
+            //更新数据库发送状态
+            rewriteReport(msgid, rtnstatus, sendDate.toString(), message.getClass().getSimpleName());
 			
 			if(!rtnstatus){
 				logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);
@@ -733,20 +736,19 @@ public class MessageService implements IMessageService {
 				logger.info("发送短信响应结果:{}", rtnstatus);
                 Cat.logEvent("send message", message.getClass().getName(), Event.SUCCESS, "phone{" + phone + "}, msgContent{" + msgContent + "}, messageTypeEnum{" + messageTypeEnum.getName() + "}");
 
-                //更新数据库发送状态
-				rewriteReport(msgid, rtnstatus, sendDate.toString(), message.getClass().getSimpleName());
 				//发送失败则重新发送短信
 				if (!rtnstatus) {
 					rtnstatus=reSendMsg(msgid, phone, msgContent, messageTypeEnum, ip,sendDate,message.getClass().getName());
                     Cat.logEvent("reSendMsg message", message.getClass().getName(), Event.SUCCESS, "phone{" + phone + "}, msgContent{" + msgContent + "}, messageTypeEnum{" + messageTypeEnum.getName() + "}");
-
                 }
 				
 				if(!rtnstatus){
 					logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);
                     Cat.logEvent("send message error", message.getClass().getName(), Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
-
                 }
+
+                //更新数据库发送状态
+                rewriteReport(msgid, rtnstatus, sendDate.toString(), message.getClass().getSimpleName());
 			}
 		} catch (Exception e1) {
 			logger.error("send message occur error. info: {}, {}, {}.", phone, msgContent, messageTypeEnum);
