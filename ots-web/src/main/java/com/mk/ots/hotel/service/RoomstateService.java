@@ -1037,7 +1037,7 @@ public class RoomstateService {
 								&& !"3".equals(callMethod)) {
 
 							String isonpromo = "0";
-							if (isThemePromo && "3.2".compareTo(callVersionStr) >= 0){
+							if (isThemePromo && "3.2".compareTo(callVersionStr) > 0){
 								isonpromo = "0";
 							}else{
 								TRoomSaleConfig hotelRoomSaleConfig = new TRoomSaleConfig();
