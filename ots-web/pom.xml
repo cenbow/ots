@@ -38,14 +38,14 @@
             </snapshots>
             <id>public</id>
             <name>Public Repositories</name>
-            <url>http://10.4.4.228:8081/nexus/content/repositories/releases/</url>
+            <url>http://10.10.144.74:8081/nexus/content/repositories/releases/</url>
         </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
             <id>public</id>
             <name>Public Repositories</name>
-            <url>http://10.4.4.228:8081/nexus/content/repositories/releases/</url>
+            <url>http://10.10.144.74:8081/nexus/content/repositories/releases/</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -1522,7 +1522,7 @@
                 <!-- kafka end -->
 
                 <!-- BMS黑名单验证接口 -->
-                <blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+                <blacklist.url>http://bypass.imike.cn/check</blacklist.url>
                 <!-- 推送消息配置 0：测试环境 1：生产环境 -->
                 <sendmess.testorformal>0</sendmess.testorformal>
                 <black_Switch>1</black_Switch>
