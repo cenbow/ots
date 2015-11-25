@@ -1888,12 +1888,43 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 					hotel.put("roomtype", singleRoomType);
 
+					updateHotelPicWithRoomtype(roomtype, hotel);
+
 					hotelIds.add(hotel);
 				}
 			}
 		}
 
 		return hotelIds;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void updateHotelPicWithRoomtype(Map<String, Object> roomtype, Map<String, Object> hotel) throws Exception {
+		String picsJson = (String) roomtype.get("pics");
+
+		if (StringUtils.isBlank(picsJson)) {
+			logger.warn("no pics found for roomtype {}", roomtype.get("roomtypeid"));
+
+			return;
+		}
+
+		List<Map<String, Object>> hotelpics = (List<Map<String, Object>>) hotel.get("hotelpic");
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		List<Object> roomtypeList = (List<Object>) objectMapper.readValue(picsJson, List.class);
+
+		if (roomtypeList != null && roomtypeList.size() > 0) {
+			Map<String, Object> roomtypePic = (Map<String, Object>) roomtypeList.get(0);
+
+			if (hotelpics != null && hotelpics.size() > 0) {
+				hotelpics.set(0, roomtypePic);
+			} else {
+				List<Map<String, Object>> newhotelpics = new ArrayList<Map<String, Object>>();
+				hotel.put("hotelpic", newhotelpics);
+
+				newhotelpics.add(roomtypePic);
+			}
+		}
 	}
 
 	private String findCollection(String token, Long hotelid) throws Exception {
@@ -3222,8 +3253,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				if (reqentity.getCallversion() != null && "3.2".compareTo(reqentity.getCallversion()) > 0
 						&& promoid != null && promoid > 1) {
 					roomtypeItem.put("promotype", "");
-				}
-				else if (roomPromotype != null) {
+				} else if (roomPromotype != null) {
 					String promoPrice = promoMap.get(roomPromotype);
 					if (StringUtils.isNotBlank(promoPrice)) {
 						roomtypeItem.put("promoprice", promoPrice);
