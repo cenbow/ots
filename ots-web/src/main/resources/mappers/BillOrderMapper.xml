@@ -39,7 +39,6 @@
     AND o.updatetime >= #{beginTime}
     <![CDATA[ AND o.updatetime < #{endTime} ]]>
     AND NOT EXISTS (select 1 from b_bill_special_detail detail where detail.orderid = o.id)
-    and o.hotelId != 2212
   </select>
 
 
@@ -56,7 +55,6 @@
     AND o.updatetime >= #{beginTime}
     <![CDATA[ AND o.updatetime < #{endTime} ]]>
     AND NOT EXISTS (select 1 from b_bill_special_detail detail where detail.orderid = o.id)
-    and o.hotelId != 2212
     GROUP by o.hotelid
   </select>
 
@@ -88,9 +86,9 @@
     FROM
     b_otaorder o
     LEFT JOIN p_pay p ON o.id = p.orderid
-    LEFT JOIN p_payinfo pinfo ON p.id = pinfo.payid
+    LEFT JOIN p_payinfo pinfo ON p.id = pinfo.payid and pinfo.type = 1
     LEFT JOIN p_orderlog ol ON p.id = ol.payid
     WHERE
-    o.id = #{orderId} and o.HotelId != 2212
+    o.id = #{orderId}
   </select>
 </mapper>
