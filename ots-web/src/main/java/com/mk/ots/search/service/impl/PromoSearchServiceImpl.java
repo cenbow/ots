@@ -17,9 +17,6 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.mk.ots.common.enums.*;
-
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -58,6 +55,11 @@ import com.mk.framework.AppUtils;
 import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
+import com.mk.ots.common.enums.FrontPageEnum;
+import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.enums.HotelSearchEnum;
+import com.mk.ots.common.enums.HotelSortEnum;
+import com.mk.ots.common.enums.ShowAreaEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.common.utils.SearchConst;
@@ -1021,17 +1023,39 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Integer normalId = showConfig.getNormalId();
 
 		Map<String, Object> rtnMap = null;
+		final Integer maxThemes = 15; 
 		if (promoId == HotelPromoEnum.Theme.getCode()) {
 			Integer promotype = this.queryByPromoId(promoId);
 			params.setPromotype(String.valueOf(promotype));
-			params.setLimit(15);
+			params.setLimit(maxThemes);
 
 			rtnMap = this.searchThemes(params);
 			List<Map<String, Object>> allHotels = (List<Map<String, Object>>) rtnMap.get("hotel");
 			List<Map<String, Object>> limitHotels = new ArrayList<>();
+			List<String> hotelIds = new ArrayList<String>();
 			if (allHotels != null && allHotels.size() > FrontPageEnum.limit.getId()) {
-				for (int i = 0; i < FrontPageEnum.limit.getId(); i++) {
-					limitHotels.add(allHotels.get(i));
+				int validCount = 0;
+				int tryCounts = 0;
+				List<Map<String, Object>> diffRoomtypes = new ArrayList<Map<String, Object>>();
+				while (validCount < FrontPageEnum.limit.getId() && tryCounts < allHotels.size()) {
+					String hotelId = (String) allHotels.get(tryCounts).get("hotelid");
+					if (!hotelIds.contains(hotelId)) {
+						limitHotels.add(allHotels.get(tryCounts));
+						hotelIds.add(hotelId);
+						validCount++;
+					} else {
+						diffRoomtypes.add(allHotels.get(tryCounts));
+					}
+					tryCounts++;
+				}
+
+				if (limitHotels != null && limitHotels.size() < FrontPageEnum.limit.getId()
+						&& diffRoomtypes.size() > 0) {
+					limitHotels
+							.addAll(diffRoomtypes.subList(0,
+									(FrontPageEnum.limit.getId() - limitHotels.size()) > diffRoomtypes.size()
+											? diffRoomtypes.size()
+											: (FrontPageEnum.limit.getId() - limitHotels.size())));
 				}
 
 				rtnMap.put("hotel", limitHotels);
@@ -1887,7 +1911,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					Map<String, Object> hotel = (Map<String, Object>) hotelIdMap.get(String.valueOf(hotelId));
 					Map<String, Object> newHotel = new HashMap<String, Object>();
 					newHotel.putAll(hotel);
-					
+
 					List<Map<String, Object>> singleRoomType = new ArrayList<Map<String, Object>>();
 					singleRoomType.add(roomtype);
 
