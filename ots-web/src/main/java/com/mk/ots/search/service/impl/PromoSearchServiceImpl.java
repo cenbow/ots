@@ -3,20 +3,11 @@ package com.mk.ots.search.service.impl;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.mk.es.Hotel;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -2259,48 +2250,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				result.put("$sortScore", hit.getScore());
 
-				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype())
-						? Integer.valueOf(reqentity.getPromotype()) : null;
-
-				if (promoType == null) {
-					if (result.get("promoinfo") != null
-							&& ((List<Map<String, Object>>) result.get("promoinfo")).size() > 0) {
-						promoType = findMinPromoType((List<Map<String, Object>>) result.get("promoinfo"));
-					} else {
-						promoType = 0;
-					}
-				}
-
-				if (promoType != null) {
-					List<Map<String, Integer>> promoList = (List<Map<String, Integer>>) result.get("promoinfo");
-					if (promoList != null) {
-						for (Map<String, Integer> promoinfo : promoList) {
-							Integer hotelPromoType = promoinfo.get("promotype");
-							if (hotelPromoType == promoType) {
-								result.put("promoprice", promoinfo.get("promoprice"));
-							}
-						}
-					}
-
-					if (!result.containsKey("promoids")) {
-						List<Integer> promoIds = new ArrayList<Integer>();
-						for (Map<String, Integer> promo : promoList) {
-							Integer tmppromoType = promo.get("promotype");
-
-							List<TRoomSaleConfigInfo> configInfos = roomSaleConfigInfoService
-									.querybyPromoType(tmppromoType);
-
-							if (configInfos != null && configInfos.size() > 0) {
-								Integer promoId = configInfos.get(0).getId();
-								if (!promoIds.contains(promoId)) {
-									promoIds.add(promoId);
-								}
-							}
-						}
-
-						result.put("promoids", promoIds);
-					}
-				}
 
 				// 根据用户经纬度来计算两个经纬度坐标距离（单位：米）
 				Map<String, Object> pin = (Map<String, Object>) result.get("pin");
@@ -2489,6 +2438,55 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 				result.put("minprice", minPrice);
 
+
+				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype())
+						? Integer.valueOf(reqentity.getPromotype()) : null;
+
+				if (promoType == null) {
+					if (result.get("promoinfo") != null
+							&& ((List<Map<String, Object>>) result.get("promoinfo")).size() > 0) {
+						promoType = findMinPromoType((List<Map<String, Object>>) result.get("promoinfo"));
+					} else {
+						promoType = 0;
+					}
+				}
+
+				if (promoType != null) {
+					List<Map<String, Integer>> promoList = (List<Map<String, Integer>>) result.get("promoinfo");
+					if (promoList != null) {
+						for (Map<String, Integer> promoinfo : promoList) {
+							Integer hotelPromoType = promoinfo.get("promotype");
+							Integer hotelpromoId = promoinfo.get("promoid");
+							if (hotelpromoId != null && hotelpromoId == HotelPromoEnum.Theme.getCode()){
+								result.put("promoprice",minPrice);
+							}else if (hotelPromoType == promoType) {
+								result.put("promoprice", promoinfo.get("promoprice"));
+							}
+						}
+					}
+
+					if (!result.containsKey("promoids")) {
+						List<Integer> promoIds = new ArrayList<Integer>();
+						for (Map<String, Integer> promo : promoList) {
+							Integer tmppromoType = promo.get("promotype");
+
+							List<TRoomSaleConfigInfo> configInfos = roomSaleConfigInfoService
+									.querybyPromoType(tmppromoType);
+
+							if (configInfos != null && configInfos.size() > 0) {
+								Integer promoId = configInfos.get(0).getId();
+								if (!promoIds.contains(promoId)) {
+									promoIds.add(promoId);
+								}
+							}
+						}
+
+						result.put("promoids", promoIds);
+					}
+				}
+
+
+
 				Long maxPrice = roomstateService.findHotelMaxPrice(Long.parseLong(es_hotelid));
 				result.put("minpmsprice", new BigDecimal(maxPrice));
 
@@ -2651,10 +2649,23 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private Integer findMinPromoType(List<Map<String, Object>> promoInfoList) {
 		Integer minTypeId = 0;
 		Integer minPrice = 0;
+		Integer themeType = HotelPromoEnum.Theme.getCode();
+		Integer tmpPromoType = -1;
+
+		Set<Integer> promoTypeLists = new HashSet<>();
+		Boolean existThemeType = false;
+
 		for (int i = 0; (promoInfoList != null && i < promoInfoList.size()); i++) {
 			Map<String, Object> promoInfo = promoInfoList.get(i);
 
 			Integer promoType = (Integer) promoInfo.get("promotype");
+			Integer promoId = (Integer) promoInfo.get("promoid");
+			promoTypeLists.add(promoId);
+			if (themeType == promoId){
+				existThemeType = true;
+				tmpPromoType = promoType;
+			}
+
 			String promoPriceTxt = (String) promoInfo.get("promoprice");
 
 			Integer promoPrice = 0;
@@ -2662,12 +2673,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				promoPrice = Integer.valueOf(promoPriceTxt);
 			} catch (Exception ex) {
 				logger.warn(String.format("promotype is invalid %s", promoPriceTxt), ex);
+				continue;
 			}
 
 			if (minPrice == 0 || (promoPrice < minPrice)) {
 				minPrice = promoPrice;
 				minTypeId = promoType;
 			}
+		}
+
+		if (existThemeType && promoTypeLists.size() == 1 && promoTypeLists.contains(themeType)) {
+			minTypeId = tmpPromoType;
 		}
 
 		if (minTypeId == 0) {

@@ -11,6 +11,7 @@ import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.framework.util.CommonUtils;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
+import com.mk.ots.common.enums.HotelPromoEnum;
 import com.mk.ots.common.enums.HotelSearchEnum;
 import com.mk.ots.common.enums.HotelSortEnum;
 import com.mk.ots.common.utils.Constant;
@@ -1488,10 +1489,23 @@ public class SearchService implements ISearchService {
 	private Integer findMinPromoType(List<Map<String, Object>> promoInfoList) {
 		Integer minTypeId = 0;
 		Integer minPrice = 0;
+		Integer themeType = HotelPromoEnum.Theme.getCode();
+		Integer tmpPromoType = -1;
+
+		Set<Integer> promoTypeLists = new HashSet<>();
+		Boolean existThemeType = false;
+
 		for (int i = 0; (promoInfoList != null && i < promoInfoList.size()); i++) {
 			Map<String, Object> promoInfo = promoInfoList.get(i);
 
 			Integer promoType = (Integer) promoInfo.get("promotype");
+			Integer promoId = (Integer) promoInfo.get("promoid");
+			promoTypeLists.add(promoId);
+			if (themeType == promoId){
+				existThemeType = true;
+				tmpPromoType = promoType;
+			}
+
 			String promoPriceTxt = (String) promoInfo.get("promoprice");
 
 			Integer promoPrice = 0;
@@ -1499,12 +1513,17 @@ public class SearchService implements ISearchService {
 				promoPrice = Integer.valueOf(promoPriceTxt);
 			} catch (Exception ex) {
 				logger.warn(String.format("promotype is invalid %s", promoPriceTxt), ex);
+				continue;
 			}
 
 			if (minPrice == 0 || (promoPrice < minPrice)) {
 				minPrice = promoPrice;
 				minTypeId = promoType;
 			}
+		}
+
+		if (existThemeType && promoTypeLists.size() == 1 && promoTypeLists.contains(themeType)) {
+			minTypeId = tmpPromoType;
 		}
 
 		if (minTypeId == 0) {
