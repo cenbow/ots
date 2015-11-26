@@ -94,6 +94,7 @@ import com.mk.ots.price.dao.PriceDAO;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.roomsale.model.TRoomSale;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
+import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.score.dao.ScoreDAO;
 import com.mk.ots.ticket.dao.BHotelStatDao;
@@ -168,6 +169,9 @@ public class HotelService {
 
 	@Autowired
 	private RoomstateService roomstateService;
+
+	@Autowired
+	private RoomSaleConfigInfoService roomSaleConfigInfoService;
 
 	@Autowired
 	private TFacilityMapper tFacilityMapper;
@@ -478,6 +482,9 @@ public class HotelService {
 					}
 
 					hotel.setPromoinfo(promoinfo);
+
+					List<Integer> promoIds = new ArrayList<Integer>();
+					hotel.setPromoids(promoIds);
 
 					// 先把新的酒店放到集合中，后面做批量添加
 					coll.add(hotel);
@@ -955,9 +962,9 @@ public class HotelService {
 				if ("F".equals(result.get("online"))) {
 					logger.info("记录离线埋点:{}", hotel.toString());
 					if ("T".equals(result.get("isnewpms"))) {
-						Cat.logEvent("ROOMSTATE", "pmsOffLine-2.0", Event.SUCCESS, "");
+						Cat.logEvent("ROOMSTATE", "pmsOffLine-2.0", Event.SUCCESS, hotelid);
 					} else {
-						Cat.logEvent("ROOMSTATE", "pmsOffLine-1.0", Event.SUCCESS, "");
+						Cat.logEvent("ROOMSTATE", "pmsOffLine-1.0", Event.SUCCESS, hotelid);
 					}
 				}
 			}

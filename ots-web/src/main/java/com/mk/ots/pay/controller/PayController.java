@@ -8,6 +8,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.http.HTTPException;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
 import jodd.util.StringUtil;
 
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
@@ -95,9 +98,11 @@ public class PayController {
 		String result_details = request.getParameter("result_details");
 		this.logger.info("支付宝退款回调： " + result_details);
 		if (this.payService.alipayCancelRes(result_details)) {
+			Cat.logEvent("pay", "支付宝退款回调", Event.SUCCESS, result_details);
 			this.logger.info("支付宝退款回调处理成功. ");
 			return "success";
 		} else {
+			Cat.logEvent("pay", "支付宝退款回调", "Error", result_details);
 			this.logger.info("支付宝退款回调处理失败. ");
 			return "";
 		}
@@ -144,7 +149,7 @@ public class PayController {
 						// 处理成功后给支付宝返回 success将不会再请求
 						res = "success";
 					}
-					
+					Cat.logEvent("pay", "支付宝回调", Event.SUCCESS, orderid);
 					this.logger.info("支付宝回调，订单号：" + orderid + "  支付宝支付成功，第一次回调结束");
 				} else {
 					res = "success";
@@ -155,7 +160,7 @@ public class PayController {
 				
 			} else {
 				this.logger.info("支付宝回调，订单号：" + orderid + "  支付宝支付失败，状态是：" + trade_status);
-
+				Cat.logEvent("pay", "支付宝回调", "ERROR", orderid);
 				payService.insertPayCallbackLog(Long.parseLong(orderid), PayCallbackEnum.Ali_Callback.name(), "N", payid,
 						new BigDecimal(price).setScale(2, BigDecimal.ROUND_HALF_UP), trade_status, null);
 			}
@@ -237,7 +242,7 @@ public class PayController {
 				
 				payService.insertPayCallbackLog(Long.parseLong(orderid), PayCallbackEnum.WeChat_Callback.name(), "Y", 
 						payid, payPrice, null, null);
-				
+				Cat.logEvent("pay", "微信回调", Event.SUCCESS, orderid);
 			} else {
 				
 				String errCode = elroot.getChildText("err_code");
@@ -246,14 +251,14 @@ public class PayController {
 				
 				payService.insertPayCallbackLog(Long.parseLong(orderid), PayCallbackEnum.WeChat_Callback.name(), "N", 
 						payid, payPrice, errCode, errMsg);
-				
+				Cat.logEvent("pay", "微信回调", "ERROR", orderid);
 			}
 		} else {
 			this.logger.info("订单:" + orderid + "微信回调,支付错误，错误信息码：" + return_msg);
 			
 			payService.insertPayCallbackLog(Long.parseLong(orderid), PayCallbackEnum.WeChat_Callback.name(), "N", 
 					payid, payPrice, return_code, return_msg);
-			
+			Cat.logEvent("pay", "微信回调", "ERROR", orderid);
 		}
 
 		this.logger.info("订单:" + orderid + "微信回调结束");
@@ -417,6 +422,7 @@ public class PayController {
 
 					payService.insertPayCallbackLog(Long.parseLong(orderid), PayCallbackEnum.WeChat_Platform_Callback.name(), "N", payno,
 							new BigDecimal(price).setScale(2, BigDecimal.ROUND_HALF_UP), null, "去银行查询没有找到支付信息");
+					Cat.logEvent("pay", "微信公共账号付款完成后回调", "ERROR", orderid);
 
 				}
 			} else {
@@ -427,6 +433,7 @@ public class PayController {
 						price).setScale(2, BigDecimal.ROUND_HALF_UP), null, null);
 			}
 			this.logger.info("微信公共账号付款完成后回调,处理完成,订单:" + orderid);
+			Cat.logEvent("pay", "微信公共账号付款完成后回调", Event.SUCCESS, orderid);
 		} finally {
 			logger.info("订单：" + orderid + "回调流程完毕,释放分布锁.");
 			DistributedLockUtil.releaseLock(PayLockKeyUtil.genLockKey4PayCallBack(orderid), lockValue);
@@ -496,17 +503,17 @@ public class PayController {
 			} catch (Throwable e) {
 				logger.error("订单:" + longorderId +"pushMsg异常!", e);
 			}
-			
 		} catch (Exception e) {
 			orderService.changeOrderStatusByPay(longorderId, OtaOrderStatusEnum.WaitPay, PayStatusEnum.waitPay, OrderTypeEnum.YF);
 			logger.info("订单号：" + longorderId +"回滚，将其置为初始状态.异常:" + e.getMessage());
+			Cat.logEvent("/pay/create", orderid, "Error", "订单:" + orderid + ",促销代码" + promotionno + ",优惠券" + couponno + ",付款类型(1:预付，2:到付):" + paytype + ",在线支付类型(1:微信,2:支付宝,3:网银,4:其它):" + onlinepaytype);
+			Cat.logError("/pay/create error", e);
 			throw e;
 		} finally {
-			
 			logger.info("订单：" + orderid +"支付流程完毕,释放分布锁.");
 			DistributedLockUtil.releaseLock(PayLockKeyUtil.genLockKey4Pay(orderid), lockValue);
 		}
-		
+		Cat.logEvent("/pay/create", orderid, Event.SUCCESS, "订单:" + orderid + ",促销代码" + promotionno + ",优惠券" + couponno + ",付款类型(1:预付，2:到付):" + paytype + ",在线支付类型(1:微信,2:支付宝,3:网银,4:其它):" + onlinepaytype);
 		return new ResponseEntity<Map<String, Object>>(map, org.springframework.http.HttpStatus.OK);
 	}
 
@@ -584,7 +591,7 @@ public class PayController {
 		try {
 			result = payService.pmspay(otaorderid, lezhupay,operateName);
 		} catch (Exception e) {
-
+			Cat.logError("手动下发乐住币 error", e);
 			logger.error("订单:" + orderid + "下发/取消乐住币流程异常!", e);
 
 			result = ManualLuzhuRstEnum.canReTry;
@@ -595,7 +602,8 @@ public class PayController {
 		rtnMap.put("code", result.getCode());
 		rtnMap.put("success", result.getResult());
 		rtnMap.put("desc", result.getDesc());
-
+		Cat.logEvent("手动下发乐住币", orderid, Event.SUCCESS,
+				String.format("params orderid[%s], imikepay[%s], operator[%s]",orderid, imikepay, operator));
 		return new ResponseEntity<Map<String, Object>>(rtnMap, org.springframework.http.HttpStatus.OK);
 	} 
 
@@ -632,6 +640,7 @@ public class PayController {
 		String responseString=this.payService.cancelpaybyerror(orderId);
 		if(responseString!=null){
 			logger.info("订单号："+ orderid +" 异常情况下支付取消  成功，返回数据是："+responseString  );
+			Cat.logEvent("pay", "异常情况下支付取消", Event.SUCCESS, orderid);
 			return new ResponseEntity<Object>(responseString, org.springframework.http.HttpStatus.OK);
 		}else{
 			logger.info("订单号："+ orderid +" 异常情况下支付取消  出现异常，数据返回 ：null "  );
@@ -639,6 +648,7 @@ public class PayController {
 			map.put("success", false);
 			map.put("errorcode", MyErrorEnum.cancelpaybyerrorError.getErrorCode());
 			map.put("errormsg", MyErrorEnum.cancelpaybyerrorError.getErrorMsg());
+			Cat.logEvent("pay", "异常情况下支付取消", "ERROR", orderid);
 			return new ResponseEntity<Object>(map, org.springframework.http.HttpStatus.OK);
 		}
 	}

@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * @author nolan
@@ -170,7 +169,7 @@ public class MessageController {
         //判断同一个手机号，在某固定时间段内只允许发x次
         String limitTimeLengthConf = this.iSyConfigService.findValue("msg_limit_length", "mikeweb");
         String limitNumConf = this.iSyConfigService.findValue("msg_limit_num", "mikeweb");
-        logger.info("发送短信限制：在[{}]秒内只允许发送[{}]次.", limitTimeLengthConf, limitNumConf);
+        logger.info("发送短信限制：在{}秒内只允许获取{}次.", limitTimeLengthConf, limitNumConf);
 		int limitTimeLength = !Strings.isNullOrEmpty(limitTimeLengthConf) ? Integer.parseInt(limitTimeLengthConf) : 50;
 		int limitNum = !Strings.isNullOrEmpty(limitNumConf) ? Integer.parseInt(limitNumConf) : 1;
 		Map<String, Object> rtnMap = Maps.newHashMap();
@@ -178,7 +177,7 @@ public class MessageController {
         logger.info("状态：此手机[{}]秒内发送短信[{}]次.", phone, msgCount);
         if (msgCount >= limitNum) {
         	//3. 组织参数
-        	throw MyErrorEnum.customError.getMyException("在[60]秒内只允许发送["+limitNumConf+"]次.");
+        	throw MyErrorEnum.customError.getMyException("在60秒内只允许获取["+limitNumConf+"]次验证码.");
 		}else {
 			//生成验证码
 			String message=iMessageService.generateVerifyCode(phone);

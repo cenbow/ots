@@ -1,7 +1,13 @@
 package com.mk.ots.promo.controller;
 
-import java.util.Map;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
+import com.mk.framework.exception.MyErrorEnum;
+import com.mk.framework.util.MyTokenUtils;
+import com.mk.ots.member.model.UMember;
+import com.mk.ots.member.service.IMemberService;
+import com.mk.ots.promo.service.IPromoService;
+import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import org.elasticsearch.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,14 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
-import com.mk.framework.exception.MyErrorEnum;
-import com.mk.framework.util.MyTokenUtils;
-import com.mk.ots.member.model.UMember;
-import com.mk.ots.member.service.IMemberService;
-import com.mk.ots.promo.service.IPromoService;
-import com.mk.ots.ticket.controller.TicketController;
+import java.util.Map;
 
 /**
  * @author nolan
@@ -36,6 +35,9 @@ public class PromoController {
 	
 	@Autowired
 	private IMemberService iMemberService;
+
+	@Autowired
+	private TRoomSaleShowConfigService tRoomSaleShowConfigService;
 	
 	@RequestMapping("/handgennewticket")
 	public ResponseEntity<Map<String, Object>> handGenTicket(String authcode, String regmid) {
@@ -63,5 +65,4 @@ public class PromoController {
 		rtnMap.put("success", true);
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
-	
 }

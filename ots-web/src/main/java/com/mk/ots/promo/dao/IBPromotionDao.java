@@ -24,4 +24,8 @@ public interface IBPromotionDao extends BaseDao<BPromotion, Long>{
     List<BPromotion> findFirstOrderPromotionByHardwarecode(String hardwarecode);
 	
     public abstract List<BPromotion> queryBPromotionByOrderId(Long otaorderid);
+	public List<BPromotion> findByActiveidAndPrizeId(Long activeid, Long prizeid);
+	public abstract List<BPromotion> findByActiveIdAndName(Long activeid,String promotionName);
+	public List<BPromotion> findByActiveidAndPrizeRecordId(long activeid,long recordid);
+	public List<BPromotion> findByActiveidAndPrizeIdList(Long activeid,List<Long> prizeidList);
 }

@@ -1,7 +1,6 @@
 package com.mk.ots.restful.input;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
@@ -23,6 +22,7 @@ public class HotelQuerylistReqEntity extends ParamBaseBean implements Serializab
 	 */
 	private static final long serialVersionUID = 8392856964959038410L;
 
+	private String token;
 	private String hotelid;
 	private String hotelname;
 	private String hoteladdr;
@@ -134,8 +134,27 @@ public class HotelQuerylistReqEntity extends ParamBaseBean implements Serializab
 
 	private Boolean ispromoonly;
 
+	private String promoid;
+	
 	private String promotype;
 	
+	
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public String getPromoid() {
+		return promoid;
+	}
+
+	public void setPromoid(String promoid) {
+		this.promoid = promoid;
+	}
+
 	public String getPromotype() {
 		return promotype;
 	}

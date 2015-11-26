@@ -7,6 +7,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.mk.framework.AppUtils;
 import com.mk.ots.bill.dao.BillOrderDAO;
+import com.mk.ots.order.service.QiekeRuleService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -236,6 +237,16 @@ public class OtsAdminController {
 		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 	}
 
+	@RequestMapping(value = "/report/updateTopInvalidReason", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> updateTopInvalidReason(String startdateday) {
+		logger.info(String.format("url /report/updateTopInvalidReason"));
+		Map<String, Object> datas = new HashMap<String, Object>();
+		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		QiekeRuleService qiekeRuleService = AppUtils.getBean(QiekeRuleService.class);
+		Date beginTime = DateUtils.getDateFromString(startdateday, DateUtils.FORMATSHORTDATETIME);
+		qiekeRuleService.updateTopInvalidReason(beginTime);
+		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+	}
 
 
 }

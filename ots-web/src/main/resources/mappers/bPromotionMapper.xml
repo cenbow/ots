@@ -408,7 +408,11 @@
     from b_promotion
   	  where  type = #{promotiontype}
   </select>
-  
+  <select id="findByActiveIdAndName" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select id
+    from b_promotion
+    where  activitiesid = #{activeid} and name = #{name} and type != 2 and type != 3 and isinstance = 'T'
+  </select>
    <select id="findByActiveId" parameterType="java.lang.Long" resultMap="BaseResultMap">
   	 select 
    		 <include refid="Base_Column_List" />
@@ -449,6 +453,15 @@
   	 SELECT promotionid FROM u_ticket  WHERE otaorderid=#{otaorderid})
   </select>
 
+  <select id="findByActiveidAndPrizeRecordId" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select
+    <include refid="Base_Column_List" />
+    from b_promotion
+    WHERE NAME=(
+    SELECT NAME FROM b_prize  WHERE id = (SELECT prizeid FROM u_prize_record  WHERE id = #{recordid})
+    ) AND isinstance = 'T' AND activitiesid = #{activeid}
+
+  </select>
     <select id="findFirstOrderPromotionByHardwarecode" parameterType="java.util.Map" resultMap="BaseResultMap">
         SELECT a.*
         FROM b_promotion a
@@ -456,5 +469,10 @@
                 ON a.id = b.promotionid
         WHERE a.type = 8 AND a.isinstance = 'F' AND b.hardwarecode = #{hardwarecode}
     </select>
-
+  <select id="findByActiveidAndPrizeId" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select  id
+    FROM b_promotion WHERE activitiesid = #{activeid} and type != 2 and type != 3 AND isinstance ='T' AND NAME IN (
+    SELECT NAME FROM b_prize WHERE id = #{prizeid}
+    )
+  </select>
 </mapper>

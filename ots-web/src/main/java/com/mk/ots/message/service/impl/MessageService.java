@@ -1,28 +1,11 @@
 package com.mk.ots.message.service.impl;
 
-import java.text.MessageFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
-
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.base.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
-import org.springframework.stereotype.Service;
-
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.mk.care.kafka.common.CopywriterTypeEnum;
-import com.mk.framework.component.message.AndroidPushMessage;
-import com.mk.framework.component.message.ITips;
-import com.mk.framework.component.message.IosPushMessage;
-import com.mk.framework.component.message.SmsMessage;
-import com.mk.framework.component.message.VoiceMessage;
+import com.mk.framework.component.message.*;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.common.enums.MessageTypeEnum;
 import com.mk.ots.common.enums.OSTypeEnum;
@@ -35,14 +18,18 @@ import com.mk.ots.message.dao.IBMessageWhiteListDao;
 import com.mk.ots.message.dao.ILMessageLogDao;
 import com.mk.ots.message.dao.ILPushLogDao;
 import com.mk.ots.message.dao.IMessageProviderDao;
-import com.mk.ots.message.model.BMessageCopywriter;
-import com.mk.ots.message.model.BMessageWhiteList;
-import com.mk.ots.message.model.LMessageLog;
-import com.mk.ots.message.model.LPushLog;
-import com.mk.ots.message.model.MessageProvider;
-import com.mk.ots.message.model.MessageType;
+import com.mk.ots.message.model.*;
 import com.mk.ots.message.service.IMessageService;
 import com.mk.ots.order.common.PropertyConfigurer;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 /**
  * @author nolan
@@ -76,7 +63,7 @@ public class MessageService implements IMessageService {
 	@Override
 	public boolean sendMsg(Long msgid, String phone, String msgContent, MessageTypeEnum messageTypeEnum, String ip) {
 		logger.info("send message: {}, {}, {}", phone, msgContent, messageTypeEnum);
-		Date sendDate=new Date();
+        Date sendDate=new Date();
 		if (messageTypeEnum == null) {
 			logger.error("短信类型错误. ");
 			throw MyErrorEnum.customError.getMyException("短信类型错误.");
@@ -88,12 +75,14 @@ public class MessageService implements IMessageService {
 			return rtnstatus;
 		}
 	    try {
-			ITips message = null;
-			if (messageTypeEnum == MessageTypeEnum.normal) {
-			    message = new SmsMessage();
-			} else if (messageTypeEnum == MessageTypeEnum.audioMessage) {
-			    message = new VoiceMessage();
-			} 
+//			ITips message = null;
+//			if (messageTypeEnum == MessageTypeEnum.normal) {
+//			    message = new SmsMessage();
+//			} else if (messageTypeEnum == MessageTypeEnum.audioMessage) {
+//			    message = new YunVoiceMessage();
+//			}
+
+            ITips message =getMessageInstanceWithWeight(messageTypeEnum,null);
 
 			ITips setContent = message.setTitle("--").setReceivers(phone).setContent(msgContent).setMsgId(msgid);
 			for(int i=0,n=2; i<n; i++){
@@ -101,19 +90,26 @@ public class MessageService implements IMessageService {
 				logger.info("发送短信响应结果:{}", rtnstatus);
 				if(rtnstatus){
 					logger.info("发送短信成功.....{}", phone);
+                    Cat.logEvent("send message", message.getClass().getName(), Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
 					break;
 				}else{
-					logger.info("第{}次重新发送短信....", i+1);
-				}
+					logger.info("第{}次重新发送短信....", i + 1);
+                    Cat.logEvent("send message again", message.getClass().getName(), Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
+                }
 		    }
+
+            //更新数据库发送状态
+            rewriteReport(msgid, rtnstatus, sendDate.toString(), message.getClass().getSimpleName());
 			
 			if(!rtnstatus){
-				logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);	
-			}
+				logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);
+                Cat.logEvent("send message error", message.getClass().getName(), Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
+            }
 		} catch (Exception e) {
 			logger.error("send message occur error. info: {}, {}, {}.", phone, msgContent, messageTypeEnum);
 			e.printStackTrace();
-		}
+            Cat.logEvent("send message error", phone, Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
+        }
 		
 
 		return rtnstatus;
@@ -139,7 +135,9 @@ public class MessageService implements IMessageService {
 					}
 				} else if (messageTypeEnum == MessageTypeEnum.audioMessage) {
 					if (providerClasStrings[j].toLowerCase().contains("voice")) {
-						message=(ITips)Class.forName(providerClasStrings[j]).newInstance();
+                        //yunvoice语音
+                        message= new YunVoiceMessage();
+//						message=(ITips)Class.forName(providerClasStrings[j]).newInstance();
 						break;
 					}
 				} 
@@ -736,21 +734,28 @@ public class MessageService implements IMessageService {
 				ITips setContent = message.setTitle("--").setMobiles(phone).setContent(msgContent).setMsgId(msgid);
 				rtnstatus = setContent.send();
 				logger.info("发送短信响应结果:{}", rtnstatus);
-				//更新数据库发送状态
-				rewriteReport(msgid, rtnstatus, sendDate.toString(), message.getClass().getSimpleName());
+                Cat.logEvent("send message", message.getClass().getName(), Event.SUCCESS, "phone{" + phone + "}, msgContent{" + msgContent + "}, messageTypeEnum{" + messageTypeEnum.getName() + "}");
+
 				//发送失败则重新发送短信
 				if (!rtnstatus) {
 					rtnstatus=reSendMsg(msgid, phone, msgContent, messageTypeEnum, ip,sendDate,message.getClass().getName());
-				}
+                    Cat.logEvent("reSendMsg message", message.getClass().getName(), Event.SUCCESS, "phone{" + phone + "}, msgContent{" + msgContent + "}, messageTypeEnum{" + messageTypeEnum.getName() + "}");
+                }
 				
 				if(!rtnstatus){
-					logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);	
-				}
+					logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);
+                    Cat.logEvent("send message error", message.getClass().getName(), Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
+                }
+
+                //更新数据库发送状态
+                rewriteReport(msgid, rtnstatus, sendDate.toString(), message.getClass().getSimpleName());
 			}
 		} catch (Exception e1) {
 			logger.error("send message occur error. info: {}, {}, {}.", phone, msgContent, messageTypeEnum);
 			e1.printStackTrace();
-		}
+            Cat.logEvent("send message error", "", Event.SUCCESS,"phone{"+phone+"}, msgContent{"+msgContent+"}, messageTypeEnum{"+messageTypeEnum.getName()+"}" );
+
+        }
 		return rtnstatus;
 	}
 }

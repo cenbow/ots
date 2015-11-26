@@ -33,7 +33,7 @@
     LEFT JOIN t_hotel_bank tb ON tb.hotelId = o.HotelId
     WHERE
     o.promoType = 1
-    AND o.orderStatus IN (180, 190, 200)
+    AND o.orderStatus IN (180, 190, 200, 520)
     AND o.paystatus = 120
     AND o.hotelId = #{hotelId}
     AND o.updatetime >= #{beginTime}
@@ -50,7 +50,7 @@
     INNER JOIN b_otaroomorder oo ON oo.OtaOrderId = o.id
     WHERE
     o.promoType = 1
-    AND o.orderStatus IN (180, 190, 200)
+    AND o.orderStatus IN (180, 190, 200, 520)
     AND o.paystatus = 120
     AND o.updatetime >= #{beginTime}
     <![CDATA[ AND o.updatetime < #{endTime} ]]>
@@ -86,7 +86,7 @@
     FROM
     b_otaorder o
     LEFT JOIN p_pay p ON o.id = p.orderid
-    LEFT JOIN p_payinfo pinfo ON p.id = pinfo.payid
+    LEFT JOIN p_payinfo pinfo ON p.id = pinfo.payid and pinfo.type = 1
     LEFT JOIN p_orderlog ol ON p.id = ol.payid
     WHERE
     o.id = #{orderId}

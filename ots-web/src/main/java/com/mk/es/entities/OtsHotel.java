@@ -135,6 +135,8 @@ public class OtsHotel {
 	private String isonpromo;
 
 	private List<Map<String, Object>> promoinfo;
+	
+	private List<Integer> promoids;
 
 	private List<Map<String, Object>> bedtypes;
 
@@ -182,6 +184,14 @@ public class OtsHotel {
 		}
 		// 订单初始化ES时 月销量为0
 		setOrdernummon(0l);
+	}
+
+	public List<Integer> getPromoids() {
+		return promoids;
+	}
+
+	public void setPromoids(List<Integer> promoids) {
+		this.promoids = promoids;
 	}
 
 	public List<Map<String, Object>> getBedtypes() {

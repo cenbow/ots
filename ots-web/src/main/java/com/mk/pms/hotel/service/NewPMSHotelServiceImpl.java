@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,7 +131,21 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 
 		JSONObject hotel = new JSONObject();
 		hotel.put("hotelid", hotelPMS);
-		String resultJSONStr = doPostJson(UrlUtils.getUrl("newpms.url") + "/selecthotelinfo", hotel.toJSONString());
+
+		String resultJSONStr= null;
+		Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/selecthotelinfo");
+		try {
+			resultJSONStr = doPostJson(UrlUtils.getUrl("newpms.url") + "/selecthotelinfo", hotel.toJSONString());
+			Cat.logEvent("Pms/selecthotelinfo", hotelPMS, Event.SUCCESS, hotel.toJSONString());
+			t.setStatus(Transaction.SUCCESS);
+		} catch (Exception e) {
+			t.setStatus(e);
+			this.logger.error("Pms/selecthotelinfo error", e);
+			throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+		}finally {
+			t.complete();
+		}
+
 		JSONObject jsonOBJ = null;
 		try {
 			jsonOBJ = JSON.parseObject(resultJSONStr);
@@ -895,7 +912,19 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 		JSONObject hotel = new JSONObject();
 		hotel.put("hotelid", hotelPMS);
 		hotel.put("hotelname", hotelname);
-		String resultJSONStr = doPostJson(UrlUtils.getUrl("newpms.url") + "/online", hotel.toJSONString());
+		String resultJSONStr = null;
+		Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/online");
+		try {
+			resultJSONStr = doPostJson(UrlUtils.getUrl("newpms.url") + "/online", hotel.toJSONString());
+			Cat.logEvent("Pms/online", hotelname, Event.SUCCESS, hotel.toJSONString());
+			t.setStatus(Transaction.SUCCESS);
+		} catch (Exception e) {
+			t.setStatus(e);
+			this.logger.error("Pms/online error.", e);
+			throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+		}finally {
+			t.complete();
+		}
 		JSONObject jsonOBJ = null;
 		jsonOBJ = JSON.parseObject(resultJSONStr);
 
@@ -926,7 +955,22 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 	public void sendOfflineMsg(String hotelPMS) {
 		JSONObject hotel = new JSONObject();
 		hotel.put("hotelid", hotelPMS);
-		String resultJSONStr = doPostJson(UrlUtils.getUrl("newpms.url") + "/offline", hotel.toJSONString());
+
+		String resultJSONStr = null;
+		Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/offline");
+		try {
+			resultJSONStr = doPostJson(UrlUtils.getUrl("newpms.url") + "/offline", hotel.toJSONString());
+			Cat.logEvent("Pms/offline", hotelPMS, Event.SUCCESS, hotel.toJSONString());
+			t.setStatus(Transaction.SUCCESS);
+		} catch (Exception e) {
+			t.setStatus(e);
+			this.logger.error("Pms/offline error.", e);
+			throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+		}finally {
+			t.complete();
+		}
+
+
 		JSONObject jsonOBJ = null;
 		jsonOBJ = JSON.parseObject(resultJSONStr);
 

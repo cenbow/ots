@@ -15,10 +15,7 @@ import com.mk.care.kafka.model.Message;
 import com.mk.framework.AppUtils;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
-import com.mk.framework.util.Cast;
-import com.mk.framework.util.MyTokenUtils;
-import com.mk.framework.util.PayUtil;
-import com.mk.framework.util.UrlUtils;
+import com.mk.framework.util.*;
 import com.mk.orm.kit.JsonKit;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
@@ -198,14 +195,16 @@ public class OrderServiceImpl implements OrderService {
     private RoomSaleService roomSaleService;
     @Autowired
     private RoomSaleConfigInfoMapper roomSaleConfigInfoMapper;
+    @Autowired
+    private QiekeRuleService qiekeRuleService;
+    @Autowired
+    private PropertiesUtils propertiesUtils;
 
     @Autowired
     TextFilterService textFilterService;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
-    private static final long TIME_FOR_FIFTEEN = Long.parseLong(PropertyConfigurer.getProperty("transferCheckinUsernameTime"));
-    private static final int time_for_fifteen=(int) (TIME_FOR_FIFTEEN/1000/60);
-    
+
     @Override
     public OtaOrder updateOrderPms(OtaOrder order) {
         for (OtaRoomOrder roomOrder : order.getRoomOrderList()) {
@@ -505,6 +504,7 @@ public class OrderServiceImpl implements OrderService {
 			// 是否设置系统取消
 			if ("2".equals(order.getStr("cancelType"))) {
 				logger.info("用户回退取消订单:cancelType:{},orderid:{}", order.getStr("cancelType"), order.getId());
+                order.setUpdateTime(new Date());
 				order.setOrderStatus(OtaOrderStatusEnum.CancelBySystem.getId());
 			}
 			order.update();
@@ -588,9 +588,21 @@ public class OrderServiceImpl implements OrderService {
               }
           }
           cancelOrder.put("memo", "");
-          logger.info("OTSMessage::取消订单:NEWPMS取消订单，参数：{}", cancelOrder.toJSONString());
-          JSONObject returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/cancelorder", cancelOrder.toJSONString()));
-          logger.info("OTSMessage::取消订单:NEWPMS取消订单，返回：{}", returnObject.toJSONString());
+          JSONObject returnObject = null;
+          Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/cancelorder");
+          try {
+              logger.info("OTSMessage::取消订单:NEWPMS取消订单，参数：{}", cancelOrder.toJSONString());
+              returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/cancelorder", cancelOrder.toJSONString()));
+              logger.info("OTSMessage::取消订单:NEWPMS取消订单，返回：{}", returnObject.toJSONString());
+              Cat.logEvent("Pms/cancelorder", CommonUtils.toStr(order.getHotelId()), Event.SUCCESS, cancelOrder.toJSONString());
+              t.setStatus(Transaction.SUCCESS);
+          } catch (Exception e) {
+              t.setStatus(e);
+              this.logger.error("Pms/cancelorder error.", e);
+              throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+          }finally {
+              t.complete();
+          }
           if (returnObject.getBooleanValue("success")) {
               logger.info("OTSMessage::取消订单:NEWPMS取消订单成功。{}", order.getId());
               cancelOrderPay(order);
@@ -1614,10 +1626,22 @@ public class OrderServiceImpl implements OrderService {
       // 转换为PMS 接受对象
       if ("T".equals(isNewPms)) {// 新PMS
           JSONObject addOrderObject = convertToNewPms(order, roomOrders, otaRoomPrices);
-          logger.info("OTSMessage::接口调用:pms2.0:订单号：{}", order.getId());
-          logger.info("OTSMessage::接口调用:pms2.0:订单详细：{}", addOrderObject.toJSONString());
-          JSONObject returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/addorder", addOrderObject.toJSONString()));
-          logger.info("OTSMessage::返回:{}", returnObject.toJSONString());
+          JSONObject returnObject = null;
+          Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/addorder");
+          try {
+              logger.info("OTSMessage::接口调用:pms2.0:订单号：{}", order.getId());
+              logger.info("OTSMessage::接口调用:pms2.0:订单详细：{}", addOrderObject.toJSONString());
+              returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/addorder", addOrderObject.toJSONString()));
+              logger.info("OTSMessage::返回:{}", returnObject.toJSONString());
+              Cat.logEvent("Pms/addorder", CommonUtils.toStr(order.getId()), Event.SUCCESS, addOrderObject.toJSONString());
+              t.setStatus(Transaction.SUCCESS);
+          } catch (Exception e) {
+              t.setStatus(e);
+              this.logger.error("Pms/addorder error.", e);
+              throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+          }finally {
+              t.complete();
+          }
           if (!returnObject.getBooleanValue("success")) {
               logger.info("OTSMessage::接口调用:submitAddOrder::创建psmOrder失败,errcode:{},errmsg:{}", returnObject.getString("errcode"),
                       returnObject.getString("errmsg"));
@@ -1632,9 +1656,17 @@ public class OrderServiceImpl implements OrderService {
               }
               
               if ("527".equals(returnObject.getString("errcode"))) {
+                  Cat.logEvent("SavePmsOrderRoomNULLExcption", CommonUtils.toStr(order.getLong("hotelId")),"ERROR",order.toJson());
                   throw MyErrorEnum.customError.getMyException("房间没有了");
               } else {
-                  throw MyErrorEnum.saveOrderPms.getMyException(returnObject.getString("errmsg"));
+                  if(order != null){
+                      Cat.logEvent("SavePmsOrderExcption", CommonUtils.toStr(order.getLong("hotelId")),"ERROR",order.toJson());
+                  }
+                  if(returnObject != null){
+                      throw MyErrorEnum.saveOrderPms.getMyException(returnObject.getString("errmsg"));
+                  }else{
+                      throw MyErrorEnum.saveOrderPms.getMyException("PMS返回信息错误");
+                  }
               }
           } else {
               logger.info("OTSMessage::接口调用:submitAddOrder::创建psmOrder成功" + order.getId());
@@ -1666,10 +1698,10 @@ public class OrderServiceImpl implements OrderService {
               
               if(PmsErrorEnum.offLine.getErrorCode().equals(returnObject.getErrorCode())){
                   if(order.getOrderType()==OrderTypeEnum.PT.getId()){
-                      Cat.logEvent("PmsOffLine", "toPayPMS1.0", Event.SUCCESS, "");
+                      Cat.logEvent("PmsOffLine", "toPayPMS1.0", Event.SUCCESS, order.toJson());
                   }
                   if(order.getOrderType()==OrderTypeEnum.YF.getId()){
-                      Cat.logEvent("PmsOffLine", "prepayPMS1.0", Event.SUCCESS, "");
+                      Cat.logEvent("PmsOffLine", "prepayPMS1.0", Event.SUCCESS, order.toJson());
                   }
               }
               
@@ -1913,7 +1945,8 @@ public class OrderServiceImpl implements OrderService {
                           this.orderBusinessLogService.saveLog(otaorder, OtaOrderFlagEnum.AFTERXIAFALUZHUBI.getId(), "", "常住人Invalidreason为1", "");
                       }
 					} else if (otaorder.getInt("rulecode") == 1002) {
-						doRuleBWhenPmsIN(otaorder, pmsRoomOrder, freqtrv);
+                      //进行切客原因设置
+                      doQieKeRuleWhenPmsIN(otaorder, pmsRoomOrder, freqtrv);
 					}
 
                     // 订单到付的时候 客户有优惠券下发
@@ -2030,21 +2063,54 @@ public class OrderServiceImpl implements OrderService {
 				}
 		    }
 		} else if (otaorder.getInt("rulecode") == 1002) {// 重庆规则
-		    if(otaorder.getSpreadUser() != null){// 切客订单
-		        if(otaorder.get("Invalidreason") == null){// 非有效切客理由为空
-		            OrderServiceImpl.logger.info("重庆非有效切客理由为空" + otaorder.getId() + otaorder.getSpreadUser());
-		            Date bgtemp = pmsRoomOrder.getDate("CheckInTime");
-		            Date edtemp = pmsRoomOrder.getDate("CheckOutTime");
-		            double diffHours = DateUtils.getDiffHoure(DateUtils.getDatetime(bgtemp), DateUtils.getDatetime(edtemp));
-		            OrderServiceImpl.logger.info("离店时判断入住时间小于4小时?入住时间:{},离开时间:{},相差:{}", bgtemp, edtemp, diffHours);
-		            // 离店时如果订单是到付切客订单且离店时间减入住时间小于4小时，则订单表需修改标记位字段内容，将“无效切客订单原因Invalidreason”置为2
-		            if(diffHours < 4){
-		                OrderServiceImpl.logger.info("小于4小时非常住人" + otaorder.getId());
-		                otaorder.set("Invalidreason", OtaFreqTrvEnum.OK_LESS4.getId());
-		                //this.payService.leaveTimeLess(otaorderid);
-		            }
-		        }
-		    }
+            if(!qiekeRuleService.isOrderQiekeRuleCity(otaorder)) {
+                if (otaorder.getSpreadUser() != null) {// 切客订单
+                    Integer invalidReason = otaorder.get("Invalidreason");
+                    if (null == invalidReason) {// 非有效切客理由为空
+                        OrderServiceImpl.logger.info("重庆非有效切客理由为空" + otaorder.getId() + otaorder.getSpreadUser());
+                        Date bgtemp = pmsRoomOrder.getDate("CheckInTime");
+                        Date edtemp = pmsRoomOrder.getDate("CheckOutTime");
+                        double diffHours = DateUtils.getDiffHoure(DateUtils.getDatetime(bgtemp), DateUtils.getDatetime(edtemp));
+                        OrderServiceImpl.logger.info("离店时判断入住时间小于4小时?入住时间:{},离开时间:{},相差:{}", bgtemp, edtemp, diffHours);
+                        // 离店时如果订单是到付切客订单且离店时间减入住时间小于4小时，则订单表需修改标记位字段内容，将“无效切客订单原因Invalidreason”置为2
+                        if (diffHours < 4) {
+                            OrderServiceImpl.logger.info("小于4小时非常住人" + otaorder.getId());
+                            otaorder.set("Invalidreason", OtaFreqTrvEnum.OK_LESS4.getId());
+                            //this.payService.leaveTimeLess(otaorderid);
+                        }
+                    }
+                }
+            } else {
+                // 4小时 判断拉新返老板逻辑，由job 任务处理，这里不处理
+
+                //判断 洛阳 长沙 等新用户，发送优惠券
+                Integer invalidReason = otaorder.get("Invalidreason");
+                if (null == invalidReason
+                        || OtaFreqTrvEnum.CHECKIN_LESS4.getId().equals(String.valueOf(invalidReason))
+                        || OtaFreqTrvEnum.OVER_RANG.getId().equals(String.valueOf(invalidReason))) {
+                    OrderServiceImpl.logger.info(
+                            String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] start genTicket ",otaorder.getId()));
+
+                    Date bgtemp = pmsRoomOrder.getDate("CheckInTime");
+                    Date edtemp = pmsRoomOrder.getDate("CheckOutTime");
+                    double diffHours = DateUtils.getDiffHoure(DateUtils.getDatetime(bgtemp), DateUtils.getDatetime(edtemp));
+                    if (diffHours >= 0.5) {
+                        OrderServiceImpl.logger.info(
+                                String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] to genTicket", otaorder.getId()));
+                        Long mid = otaorder.getMid();
+                        String cityCode = otaorder.getCityCode();
+                        List<Long> ticketIdList = this.qiekeRuleService.genTicketByCityCode(cityCode, mid);
+                        for (Long ticketId : ticketIdList) {
+                            OrderServiceImpl.logger.info(
+                                    String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] send genTicket[%s]", otaorder.getId(),ticketId));
+                        }
+                    }
+                } else {
+                    OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] dont genTicket",otaorder.getId()));
+
+                }
+                OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] end",otaorder.getId()));
+            }
 		}
 		// 住三送一活动，调用促销接口
 		logger.info("住三送一活动,调用促销接口,orderid = " + otaorderid);
@@ -2204,6 +2270,10 @@ public class OrderServiceImpl implements OrderService {
         if(roomSaleConfigInfo == null || roomSaleConfigInfo.getId() == null){
             return PromoTypeEnum.OTHER.getCode().toString();
         }
+        if(roomSaleConfigInfo.getSaleTypeId() == 3){
+            //如果是主题房的话则将对应的订单方式改为普通订单
+            return PromoTypeEnum.OTHER.getCode().toString();
+        }
         Integer promoStatus = DateUtils.promoStatus(roomSaleConfigInfo.getStartDate(),
                 roomSaleConfigInfo.getEndDate(), roomSaleConfigInfo.getStartTime(),
                 roomSaleConfigInfo.getEndTime());
@@ -2212,6 +2282,21 @@ public class OrderServiceImpl implements OrderService {
             return PromoTypeEnum.TJ.getCode().toString();
         }
         return PromoTypeEnum.OTHER.getCode().toString();
+    }
+
+    public Integer getPromoId(Long roomTypeId) {
+        if(roomTypeId == null){
+            return  0;
+        }
+        //先根据roo
+        TRoomSale tRoomSale = new TRoomSale();
+        tRoomSale.setRoomTypeId(roomTypeId.intValue());
+        TRoomSale resultRoomSale = roomSaleService.getOneRoomSaleByRoomTypeId(tRoomSale);
+        if(resultRoomSale == null || resultRoomSale.getId() == null || resultRoomSale.getSaleType() == null){
+            return 0;
+        }else {
+            return  resultRoomSale.getSaleType();
+        }
     }
 
     /**
@@ -2279,8 +2364,12 @@ public class OrderServiceImpl implements OrderService {
       if (hotel.getInt("rulecode") != null && hotel.getInt("rulecode") == 1002) {
           throw MyErrorEnum.customError.getMyException("B规则酒店不能创建切客订单");
       }
-            //设置cityCode
-            order.setCityCode(hotel.getTCityByDisId().getStr("code"));
+      //设置cityCode
+      order.setCityCode(hotel.getTCityByDisId().getStr("code"));
+        //符合B+规则的切客订单 在创建订单的时候将切客理由设置为未入住
+      if(qiekeRuleService.isOrderQiekeRuleCity(order)){
+          order.set("Invalidreason", OtaFreqTrvEnum.NOT_CHECKIN.getId());
+      }
       order.set("hotelname", hotel.get("hotelName"));
       order.set("hotelpms", hotel.get("pms"));
       order.put("hotelAddress", hotel.get("detailAddr"));
@@ -2464,8 +2553,12 @@ public class OrderServiceImpl implements OrderService {
       if (hotel == null) {
           throw MyErrorEnum.saveOrder.getMyException("没有当前id的酒店");
       }
-            //设置cityCode
-            order.setCityCode(hotel.getTCityByDisId().getStr("code"));
+      //设置cityCode
+      order.setCityCode(hotel.getTCityByDisId().getStr("code"));
+      //符合B+规则的切客订单 在创建订单的时候将切客理由设置为未入住
+      if(qiekeRuleService.isOrderQiekeRuleCity(order)){
+          order.set("Invalidreason", OtaFreqTrvEnum.NOT_CHECKIN.getId());
+      }
       order.set("hotelname", hotel.get("hotelName"));
       order.set("hotelpms", hotel.get("pms"));
       order.put("hotelAddress", hotel.get("detailAddr"));
@@ -2785,13 +2878,27 @@ public class OrderServiceImpl implements OrderService {
       orderUtil.getOrderToJson(jsonObj, null, order, showRoom, showInUser);
       jsonObj.put("success", true);
   }
-  
-  private void doRuleBWhenPmsIN(OtaOrder otaorder, PmsRoomOrder pmsRoomOrder, String freqtrv) {
+
+    private void doQieKeRuleWhenPmsIN(OtaOrder otaorder, PmsRoomOrder pmsRoomOrder, String freqtrv){
+        if(qiekeRuleService.isOrderQiekeRuleCity(otaorder)){
+            OtaFreqTrvEnum otaFreqTrvEnum = qiekeRuleService.getQiekeRuleReason(otaorder);
+            if(otaFreqTrvEnum == null || OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+                otaorder.set("spreadUser", Constant.QIE_KE_SPREAD_USER);
+                otaorder.set("Invalidreason", otaFreqTrvEnum.CHECKIN_LESS4.getId());
+            }else {
+                otaorder.set("Invalidreason", otaFreqTrvEnum.getId());
+            }
+        }else {
+            doRuleBWhenPmsIN(otaorder, pmsRoomOrder, freqtrv);
+        }
+    }
+
+    private void doRuleBWhenPmsIN(OtaOrder otaorder, PmsRoomOrder pmsRoomOrder, String freqtrv) {
 	// 判断入住时间减创建时间是否小于15分钟
 		Date checkintime = pmsRoomOrder.getDate("CheckInTime");
 		Date createtime = otaorder.getDate("Createtime");
 		long temp = checkintime.getTime() - createtime.getTime(); // 相差毫秒数
-		if (temp < OrderServiceImpl.TIME_FOR_FIFTEEN) {
+		if (temp < propertiesUtils.getTransferCheckinUsernameTime()) {
 			OrderServiceImpl.logger.info("小于15分钟" + otaorder.getId());
 			otaorder.setSpreadUser(otaorder.getHotelId());
 			// 判断入住人是否常住人
@@ -2845,8 +2952,9 @@ public class OrderServiceImpl implements OrderService {
 			PmsRoomOrder pmsRoomOrder = pmsRoomOrderDao.getPmsRoomOrder(roomOrder.getPmsRoomOrderNo(), pOrder.getHotelId());
 			PmsCheckinUser checkinUser = findPmsUserIncheckSelect(pOrder.getHotelId(), roomOrder.getPmsRoomOrderNo());
 			String freqtrv = checkinUser != null ? String.valueOf(checkinUser.getInt("freqtrv")) : "";
-			
-			doRuleBWhenPmsIN(pOrder, pmsRoomOrder, freqtrv);
+
+            //进行切客原因设置
+            doQieKeRuleWhenPmsIN(pOrder, pmsRoomOrder, freqtrv);
 			
 			// 订单到付的时候 客户有优惠券下发
           	if ((OrderTypeEnum.PT.getId().intValue() == pOrder.getOrderType())) {
@@ -2918,11 +3026,23 @@ public class OrderServiceImpl implements OrderService {
           addOrder.put("customerno", customernos);
           // ots里目前没有换房先注释掉 addOrder.put("roomid",
           // otaRoomOrder.getLong("roomid"));
-          
-          logger.info("OTSMessage::modifyPmsOrder::修改订单，订单号：{}，参数:{}",order.getId(), addOrder.toJSONString());
+          JSONObject returnObject = null;
+          Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/updateorder");
+          try {
+              logger.info("OTSMessage::modifyPmsOrder::修改订单，订单号：{}，参数:{}",order.getId(), addOrder.toJSONString());
+              returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", addOrder.toJSONString()));
+              logger.info("OTSMessage::modifyPmsOrder::修改订单，返回:{}", returnObject.toJSONString());
+              Cat.logEvent("Pms/updateorder", CommonUtils.toStr(order.getId()), Event.SUCCESS, addOrder.toJSONString());
+              t.setStatus(Transaction.SUCCESS);
+          } catch (Exception e) {
+              t.setStatus(e);
+              this.logger.error("Pms/updateorder error.", e);
+              throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+          }finally {
+              t.complete();
+          }
 
-          JSONObject returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", addOrder.toJSONString()));
-          logger.info("OTSMessage::modifyPmsOrder::修改订单，返回:{}", returnObject.toJSONString());
+
           if (returnObject.getBooleanValue("success")) {
               logger.info("OTSMessage::modifyPmsOrder::修改订单成功。orderid:{}", otaRoomOrder.getLong("otaorderid"));
               orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.MODIFY_CHECKINUSERBYUSER.getId(), "", "PMS2.0用户修改入住人:"+otaCheckInUsers.get(0).getName(), "");
@@ -3455,6 +3575,7 @@ public class OrderServiceImpl implements OrderService {
         // ots解房
         unLockRoom(order);
   	}
+      order.setUpdateTime(new Date());
       order.setOrderStatus(OtaOrderStatusEnum.CancelBySystem.getId());
       order.update();
       //修改已使用券状态
@@ -3474,6 +3595,7 @@ public class OrderServiceImpl implements OrderService {
             return PayTools.dopostjson(url, json);
       } catch (Exception e) {
           logger.info("doPostJson参数:{},{},异常:{}", url, json, e.getLocalizedMessage());
+          Cat.logError("doPostJson参数 Excpetion", e);
           e.printStackTrace();
           back.put("success", false);
           if(e instanceof HTTPException){
@@ -3746,16 +3868,29 @@ public class OrderServiceImpl implements OrderService {
           JSONArray customernos = new JSONArray();
           customernos.add(customerno);
           addOrder.put("customerno", customernos);
-              JSONObject returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", addOrder.toJSONString()));
+          JSONObject returnObject = null;
+          Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/updateorder");
+          try {
+              returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", addOrder.toJSONString()));
               logger.info("OTSMessage::modifyPmsOrder::修改订单，返回:{}", returnObject.toJSONString());
-              if (returnObject.getBooleanValue("success")) {
-                  logger.info("OTSMessage::modifyPmsOrder::修改订单成功。orderid:{}", otaRoomOrder.getLong("otaorderid"));
-                  //
-                  orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.MODIFY_CHECKINUSERBYUSER.getId(), "", "PMS2.0客服修改入住人:"+otaCheckInUsers.get(0).getName(), "");
-              } else {
-                  throw MyErrorEnum.updateOrder.getMyException("errorcode:" + returnObject.getString("errorcode") + ",errormsg:"
-                          + returnObject.getString("errormsg"));
-              }
+              Cat.logEvent("Pms/updateorder", CommonUtils.toStr(order.getId()), Event.SUCCESS, addOrder.toJSONString());
+              t.setStatus(Transaction.SUCCESS);
+          } catch (Exception e) {
+              t.setStatus(e);
+              this.logger.error("Pms/updateorder error.", e);
+              throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+          }finally {
+              t.complete();
+          }
+
+          if (returnObject.getBooleanValue("success")) {
+              logger.info("OTSMessage::modifyPmsOrder::修改订单成功。orderid:{}", otaRoomOrder.getLong("otaorderid"));
+              //
+              orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.MODIFY_CHECKINUSERBYUSER.getId(), "", "PMS2.0客服修改入住人:"+otaCheckInUsers.get(0).getName(), "");
+          } else {
+              throw MyErrorEnum.updateOrder.getMyException("errorcode:" + returnObject.getString("errorcode") + ",errormsg:"
+                      + returnObject.getString("errormsg"));
+          }
       } else {
           // 订单下发到pms
         List<PmsOtaAddOrder> list = new ArrayList<PmsOtaAddOrder>();
@@ -4002,6 +4137,12 @@ public class OrderServiceImpl implements OrderService {
            return   false;
         }
     }
+
+    @Override
+    public List<OtaOrder> findOtaOrderByMid(Long mid, List<OtaOrderStatusEnum> statusList) {
+        return this.orderDAO.findOtaOrderByMid(mid, statusList);
+    }
+
     private  OtaOrderTasts getMessageToC(OtaOrder otaorder,Date executeTime,Boolean isSms,CopywriterTypeEnum copywriterTypeEnum,
                                         OrderTasksTypeEnum   orderTasksTypeEnum,BigDecimal  backcost){
         Message message=new Message();
@@ -4290,11 +4431,22 @@ public class OrderServiceImpl implements OrderService {
         int count=0;
         for(OtaOrderTasts orderTasts:list){
             JSONObject jsonObject=gson.fromJson(orderTasts.getContent(),JSONObject.class);
-            logger.info("pms2.0订单修改推送，{}",orderTasts.getContent());
-            //推送消息
-            JSONObject returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", jsonObject.toJSONString()));
-            logger.info("OTSMessage::modifyPmsOrder::修改订单，返回:{}", returnObject.toJSONString());
-            
+            JSONObject returnObject = null;
+            Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/updateorder");
+            try {
+                logger.info("pms2.0订单修改推送，{}",orderTasts.getContent());
+                //推送消息
+                returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", jsonObject.toJSONString()));
+                logger.info("OTSMessage::modifyPmsOrder::修改订单，返回:{}", returnObject.toJSONString());
+                Cat.logEvent("Pms/updateorder", CommonUtils.toStr(orderTasts.getId()), Event.SUCCESS, jsonObject.toJSONString());
+                t.setStatus(Transaction.SUCCESS);
+            } catch (Exception e) {
+                t.setStatus(e);
+                this.logger.error("Pms/updateorder error.", e);
+                throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+            }finally {
+                t.complete();
+            }
             if (returnObject.getBooleanValue("success")) {
                 
                 //推送成功修改状态
@@ -4415,7 +4567,7 @@ public class OrderServiceImpl implements OrderService {
             if(checkintime != null && createtime != null){
                 long temp = checkintime.getTime() - createtime.getTime(); // 相差毫秒数
                 logger.info("时间差 = "+temp+",orderid = "+otaorder.getId());
-                if (temp < OrderServiceImpl.TIME_FOR_FIFTEEN) { // 负值也算切客
+                if (temp < propertiesUtils.getTransferCheckinUsernameTime()) { // 负值也算切客
                     otaorder.setSpreadUser(otaorder.getHotelId());
 
                     // 判断入住人是否常住人
@@ -4723,9 +4875,22 @@ public class OrderServiceImpl implements OrderService {
             customernos.add(customerno);
             addOrder.put("customerno", customernos);
 
-            logger.info("OTSMessage::modifyPmsCheckinuser::修改订单，订单号：{}，参数:{}", order.getId(), addOrder.toJSONString());
-            JSONObject returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", addOrder.toJSONString()));
-            logger.info("OTSMessage::modifyPmsCheckinuser::修改订单，返回:{}", returnObject.toJSONString());
+            JSONObject returnObject = null;
+            Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/updateorder");
+            try {
+                logger.info("OTSMessage::modifyPmsCheckinuser::修改订单，订单号：{}，参数:{}", order.getId(), addOrder.toJSONString());
+                returnObject = JSONObject.parseObject(doPostJson(UrlUtils.getUrl("newpms.url") + "/updateorder", addOrder.toJSONString()));
+                logger.info("OTSMessage::modifyPmsCheckinuser::修改订单，返回:{}", returnObject.toJSONString());
+                Cat.logEvent("Pms/updateorder", CommonUtils.toStr(order.getId()), Event.SUCCESS, addOrder.toJSONString());
+                t.setStatus(Transaction.SUCCESS);
+            } catch (Exception e) {
+                t.setStatus(e);
+                this.logger.error("Pms/updateorder error.", e);
+                throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+            }finally {
+                t.complete();
+            }
+
             if (returnObject.getBooleanValue("success")) {
                 logger.info("OTSMessage::modifyPmsCheckinuser::修改订单成功。orderid:{}", otaRoomOrder.getLong("otaorderid"));
             } else {

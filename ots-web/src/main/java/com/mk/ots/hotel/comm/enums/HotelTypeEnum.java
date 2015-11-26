@@ -6,6 +6,7 @@ package com.mk.ots.hotel.comm.enums;
  *
  */
 public enum HotelTypeEnum {
+    DEFAULT_HOTE(-1, "不限"),
     HMSHOTEL(1,"旅馆"),
     THEMEDHOTEL(2,"主题酒店"),
     PLAZAHOTEL(3,"精品酒店"),

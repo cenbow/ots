@@ -5,6 +5,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.exception.MyException;
 import com.mk.framework.util.UrlUtils;
@@ -47,7 +48,7 @@ public class MemberService implements IMemberService{
 
 	@Override
 	public Optional<UMember> findMemberById(long mid,String state) {
-		return iMemberDao.findMemberById(mid,state);
+		return iMemberDao.findMemberById(mid, state);
 	}
 
 	@Override
@@ -61,7 +62,7 @@ public class MemberService implements IMemberService{
 
 	@Override
 	public Optional<UMember> findMemberByLoginName(String loginName,String state){
-		return iMemberDao.findMemberByLoginName(loginName,state);
+		return iMemberDao.findMemberByLoginName(loginName, state);
 	}
 
 	@Override
@@ -92,12 +93,12 @@ public class MemberService implements IMemberService{
 		if(Strings.isNullOrEmpty(name)){
 			return false;
 		}
-		return iMemberDao.checkLoginPsdVerifyName(mid,name);
+		return iMemberDao.checkLoginPsdVerifyName(mid, name);
 	}
 
 	@Override
 	public Optional<UMember> findMemberByUnionid(String unionid) {
-		return iMemberDao.findMemberByUnionid(unionid,null);
+		return iMemberDao.findMemberByUnionid(unionid, null);
 	}
 
 
@@ -223,5 +224,11 @@ public class MemberService implements IMemberService{
 	@Override
 	public List<UMember> findUMemberByFirstOrder(FirstOrderModel fom) {
 		return iMemberDao.findUMemberByFirstOrder(fom);
+	}
+
+
+	@Override
+	public List<UMember> findUMemberByOpenId(String openId) {
+		return this.iMemberDao.findUMemberByOpenId(openId);
 	}
 }

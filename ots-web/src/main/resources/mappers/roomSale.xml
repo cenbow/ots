@@ -115,6 +115,17 @@
         ORDER by a.id DESC
         limit 1
     </select>
+
+    <select id="getOneRoomSaleByRoomTypeId" resultMap="BaseResultMap" parameterType="com.mk.ots.roomsale.model.TRoomSale">
+        SELECT
+        b.id, b.saleTypeId as saleType
+        from t_room_sale_config config
+        inner JOIN t_room_sale_config_info b  ON config.valid = 'T' and config.saleConfigInfoId = b.id and b.valid = 'T'
+        where 1=1  AND config.saleRoomTypeId = #{roomTypeId}
+        ORDER by config.id DESC
+        limit 1;
+    </select>
+
     <insert id="saveRoomSale"  parameterType="com.mk.ots.roomsale.model.TRoomSale" >
         INSERT INTO t_room_sale
        (roomTypeId,oldRoomTypeId,roomNo,pms,createDate,salePrice,costPrice,
@@ -186,15 +197,16 @@
     </select>
 
     <select id="queryRoomPromoInfoByHotel" resultType="map" parameterType="String">
-        SELECT info.id as promotype, info.salevalue as promoprice
+        SELECT info.saleTypeId as promoid, info.id as promotype, info.salevalue as promoprice
         FROM t_room_sale_config config
         join t_room_sale_config_info info on config.saleconfiginfoid = info.id
         WHERE config.hotelId = #{hotelId} AND config.valid = 'T'
         GROUP  BY promotype
+        ORDER BY promoid
     </select>
 
     <select id="queryRoomByHotelAndRoomType" resultType="map" parameterType="map">
-        SELECT info.id as promotype, info.salevalue as promoprice, config.roomTypeid as roomtypeid
+        SELECT info.saletypeid as promoid , info.id as promotype, info.salevalue as promoprice, config.roomTypeid as roomtypeid
         FROM t_room_sale_config config
         join t_room_sale_config_info info on config.saleconfiginfoid = info.id
         WHERE config.hotelId = #{hotelId} and config.saleRoomTypeId = #{roomTypeId}
@@ -214,6 +226,15 @@
         FROM t_room_sale_config config
         join t_room_sale_config_info info on config.saleconfiginfoid = info.id
         <![CDATA[  where  info.startdate ||' '||info.startTime < date(now())  and info.enddate||' '||info.endTime > date(now()) ]]>
+
+        limit 1
+    </select>
+
+
+    <select id="checkPromoCity" resultType="map" parameterType="String">
+        SELECT *
+        FROM t_room_sale_city
+        WHERE citycode = #{citycode}
 
         limit 1
     </select>

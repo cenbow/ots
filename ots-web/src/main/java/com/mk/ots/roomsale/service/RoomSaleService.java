@@ -2,6 +2,7 @@ package com.mk.ots.roomsale.service;
 
 import com.mk.ots.roomsale.model.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,8 @@ public interface RoomSaleService {
 	public void saleBegin();
 
 	public TRoomSale getOneRoomSale(TRoomSale bean);
+
+	public TRoomSale getOneRoomSaleByRoomTypeId(TRoomSale bean);
 
 	public List<TRoomSale> queryRoomSale(TRoomSale bean);
 
@@ -50,7 +53,10 @@ public interface RoomSaleService {
 	public List<Map<String, Object>> queryRoomPromoInfoByHotelAndPromoType(String hotelId, Integer promoType) throws Exception;
 	public Map<String, Object> queryRoomPromoInfo() throws Exception;
 	public Boolean checkRoomSale(TRoomSaleConfig bean);
+	public Boolean checkPromoCity(String cityCode);
 	public Boolean checkRoomSaleWithOldRoomType(TRoomSaleConfig bean);
 	public List<RoomSaleToIndexDto> getUpdateIndexList(TRoomSaleConfig bean);
 	public List<Map<String, Object>> queryRoomByHotelAndRoomType(String hotelId, String roomTypeId) throws Exception;
+	public Double getHotelMinPromoPrice(Integer hotelid);
+	public Boolean checkThemePromo(TRoomSaleConfig bean);
 }

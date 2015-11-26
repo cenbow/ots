@@ -1,14 +1,32 @@
 package com.mk.ots.hotel.controller;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
+import com.google.common.collect.Maps;
+import com.mk.framework.AppUtils;
+import com.mk.framework.exception.MyErrorEnum;
+import com.mk.framework.util.CommonUtils;
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.enums.FrontPageEnum;
+import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.utils.Constant;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.hotel.service.HotelPriceService;
+import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.hotel.service.RoomstateService;
+import com.mk.ots.restful.input.HotelFrontPageQueryReqEntity;
+import com.mk.ots.restful.input.HotelQuerylistReqEntity;
+import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
+import com.mk.ots.roomsale.service.RoomSaleService;
+import com.mk.ots.search.service.IPromoSearchService;
+import com.mk.ots.search.service.ISearchService;
+import com.mk.ots.web.ServiceOutput;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -24,26 +42,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Event;
-import com.dianping.cat.message.Transaction;
-import com.google.common.collect.Maps;
-import com.mk.framework.AppUtils;
-import com.mk.framework.exception.MyErrorEnum;
-import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.common.utils.Constant;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.hotel.service.HotelPriceService;
-import com.mk.ots.hotel.service.HotelService;
-import com.mk.ots.hotel.service.RoomstateService;
-import com.mk.ots.restful.input.HotelQuerylistReqEntity;
-import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
-import com.mk.ots.search.service.IPromoSearchService;
-import com.mk.ots.search.service.ISearchService;
-import com.mk.ots.web.ServiceOutput;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.util.*;
 
 /**
  * 酒店前端控制类 发布接口
@@ -74,6 +75,12 @@ public class HotelController {
 	private ISearchService searchService;
 	@Autowired
 	private IPromoSearchService promoSearchService;
+
+	@Autowired
+	private RoomSaleService roomSaleService;
+
+	@Autowired
+	private RoomSaleConfigInfoService roomSaleConfigInfoService;
 
 	/**
 	 * 
@@ -173,6 +180,61 @@ public class HotelController {
 		return resultMap;
 	}
 
+	private List<Map<String, Object>> promoFrontPageList(HotelFrontPageQueryReqEntity reqentity) throws Exception {
+		HotelQuerylistReqEntity hotelEntity = new HotelQuerylistReqEntity();
+		String strCurDay = DateUtils.getStringFromDate(new Date(), DateUtils.FORMATSHORTDATETIME);
+		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(new Date(), 1),
+				DateUtils.FORMATSHORTDATETIME);
+
+		hotelEntity.setCityid(reqentity.getCityid());
+		hotelEntity.setCallversion(reqentity.getCallversion());
+		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
+		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
+
+		hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
+		hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
+
+		hotelEntity.setStartdateday(strCurDay);
+		hotelEntity.setEnddateday(strNextDay);
+		hotelEntity.setIshotelpic("T");
+		hotelEntity.setIspromoonly(true);
+		hotelEntity.setPage(FrontPageEnum.page.getId());
+		hotelEntity.setLimit(FrontPageEnum.limit.getId());
+
+		return promoSearchService.searchHomePromos(hotelEntity);
+	}
+
+	/**
+	 *
+	 *
+	 * @param hotelEntity
+	 * @param
+	 * @return
+	 */
+	private List<Map<String, Object>> normalFrontPageList(HotelFrontPageQueryReqEntity reqentity) throws Exception {
+		HotelQuerylistReqEntity hotelEntity = new HotelQuerylistReqEntity();
+		String strCurDay = DateUtils.getStringFromDate(new Date(), DateUtils.FORMATSHORTDATETIME);
+		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(new Date(), 1),
+				DateUtils.FORMATSHORTDATETIME);
+
+		hotelEntity.setCityid(reqentity.getCityid());
+		hotelEntity.setCallversion(reqentity.getCallversion());
+		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
+		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
+
+		hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
+		hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
+
+		hotelEntity.setStartdateday(strCurDay);
+		hotelEntity.setEnddateday(strNextDay);
+		hotelEntity.setIshotelpic("T");
+		hotelEntity.setIspromoonly(false);
+		hotelEntity.setPage(FrontPageEnum.page.getId());
+		hotelEntity.setLimit(FrontPageEnum.limit.getId());
+
+		return promoSearchService.searchHomeNormals(hotelEntity);
+	}
+
 	private boolean validateAccessibility(HotelQuerylistReqEntity reqentity) {
 		String callVersion = reqentity.getCallversion() == null ? "" : reqentity.getCallversion().trim();
 		Integer callEntry = reqentity.getCallentry();
@@ -214,16 +276,17 @@ public class HotelController {
 		logger.info("【/hotel/querypromolist】 begin...");
 		logger.info("remote client request ui is: {}", request.getRequestURI());
 		logger.info("【/hotel/querypromolist】 request params is : {}", params);
+		Cat.logEvent("/hotel/querypromolist", reqentity.getCallmethod(), Event.SUCCESS, params);
 		logger.info("【/hotel/querypromolist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
 		String errorMessage = "";
 		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
 			logger.error(String.format("parameters validation failed with error %s", errorMessage));
+			Cat.logEvent("querypromolistException", reqentity.getCallmethod(), Event.SUCCESS, String.format("parameters validation failed with error %s", errorMessage));
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
@@ -233,7 +296,6 @@ public class HotelController {
 		if (!isAccessible) {
 			logger.warn("not allowed to access");
 
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "not allowed to access");
 
@@ -259,7 +321,52 @@ public class HotelController {
 
 			reqentity.setIspromoonly(Boolean.TRUE);
 
-			rtnMap = promoSearchService.readonlySearchHotels(reqentity);
+			/**
+			 * check if theme is being searched
+			 */
+			String promoId = reqentity.getPromoid();
+
+			if (StringUtils.isNotBlank(promoId)) {
+				Integer promotype = promoSearchService.queryByPromoId(Integer.parseInt(promoId));
+				reqentity.setPromotype(String.valueOf(promotype));
+
+				if (HotelPromoEnum.Theme.getCode().toString().equals(promoId)) {
+					rtnMap = promoSearchService.searchThemes(reqentity);
+				} else {
+					rtnMap = promoSearchService.readonlySearchHotels(reqentity);
+				}
+
+				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+			}
+			/**
+			 * search with promotype
+			 */
+			else if (StringUtils.isNotBlank(reqentity.getPromotype())) {
+				Integer promoType = 0;
+
+				try {
+					promoType = Integer.parseInt(reqentity.getPromotype());
+				} catch (Exception ex) {
+					logger.warn(
+							String.format("invalid promotype found in searchPromoHotels:%s", reqentity.getPromotype()),
+							ex);
+				}
+
+				List<TRoomSaleConfigInfo> saleConfigs = roomSaleConfigInfoService.querybyPromoType(promoType);
+				if (saleConfigs != null && saleConfigs.size() > 0 && saleConfigs.get(0).getSaleTypeId() != null
+						&& saleConfigs.get(0).getSaleTypeId() == HotelPromoEnum.Theme.getCode()) {
+					rtnMap = promoSearchService.searchThemes(reqentity);
+				} else {
+					rtnMap = promoSearchService.readonlySearchHotels(reqentity);
+				}
+
+				rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
+				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+			} else {
+				logger.info("neither promoid nor promotype has been passed in, go with all search");
+
+				rtnMap = promoSearchService.readonlySearchHotels(reqentity);
+			}
 
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
 					HttpStatus.OK);
@@ -273,16 +380,16 @@ public class HotelController {
 			}
 
 			logger.info("【/hotel/querypromolist】 end...");
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		} catch (Exception e) {
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 			logger.error("【/hotel/querypromolist】 is error: {} ", e);
+			Cat.logError("querypromolistException", e);
 		}
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+
 	}
 
 	/**
@@ -304,7 +411,7 @@ public class HotelController {
 		logger.info("remote client request ui is: {}", request.getRequestURI());
 		logger.info("【/hotel/querylist】 request params is : {}", params);
 		logger.info("【/hotel/querylist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
-
+		Cat.logEvent("/hotel/queryist", reqentity.getCallmethod(), Event.SUCCESS, params);
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
 		String errorMessage = "";
@@ -314,7 +421,8 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
 			logger.error(String.format("parameters validation failed with error %s", errorMessage));
-
+			Cat.logEvent("querylistException", reqentity.getCallmethod(), Event.SUCCESS,
+					String.format("parameters validation failed with error %s", errorMessage));
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
 
@@ -346,13 +454,81 @@ public class HotelController {
 	}
 
 	/**
-	 *  查询酒店房价信息
+	 * 首页查询接口 根据cityid 获得搜索获得信息.
+	 *
+	 * @param request
+	 * @param reqentity
+	 * @param errors
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = { "/hotel/front/querylist" })
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> searchFrontPage(HttpServletRequest request,
+			@Valid HotelFrontPageQueryReqEntity reqentity, Errors errors) throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		String params = objectMapper.writeValueAsString(request.getParameterMap());
+		logger.info("【/hotel/querylist】 begin...");
+		logger.info("remote client request ui is: {}", request.getRequestURI());
+		logger.info("【/hotel/querylist】 request params is : {}", params);
+		logger.info("【/hotel/querylist】 request entity is : {}", objectMapper.writeValueAsString(reqentity));
+
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+
+		String errorMessage = "";
+		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(String.format("parameters validation failed with error %s", errorMessage));
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+
+		try {
+			Date day = new Date();
+			long starttime = day.getTime();
+
+			Boolean isPromoCity = roomSaleService.checkPromoCity(reqentity.getCityid());
+			List<Map<String, Object>> promolist = null;
+			if (!isPromoCity) {
+				promolist = normalFrontPageList(reqentity);
+			} else {
+				promolist = promoFrontPageList(reqentity);
+			}
+			rtnMap.put("promolist", promolist);
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "succeed");
+
+			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
+					HttpStatus.OK);
+			if (AppUtils.DEBUG_MODE) {
+				long endtime = new Date().getTime();
+				resultResponse.getBody().put("$times$", endtime - starttime + " ms");
+			}
+
+			logger.info("【/hotel/querylist】 end...");
+			logger.info("【/hotel/querylist】response data:success::{} , count::{}\n",
+					objectMapper.writeValueAsString(resultResponse.getBody().get("success")),
+					resultResponse.getBody().get("count"));
+			return resultResponse;
+		} catch (Exception e) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
+			logger.error("【/hotel/querylist】 is error... ", e);
+		}
+		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+	}
+
+	/**
+	 * 查询酒店房价信息
 	 *
 	 */
 	@RequestMapping(value = { "/roomstate/queryprice" })
 	public ResponseEntity<Map<String, Object>> getHotelRoomPrice(ParamBaseBean pbb, String roomno,
-																 @Valid RoomstateQuerylistReqEntity params, Errors errors) throws Exception {
+			@Valid RoomstateQuerylistReqEntity params, Errors errors) throws Exception {
 		logger.info("【/roomstate/queryprice】 params is : {}", pbb.toString());
+		Cat.logEvent("/roomstate/queryprice", pbb.getCallmethod(), Event.SUCCESS, CommonUtils.toStr(pbb));
 		// 办理再次入住传 roomno
 		// 调用service方法
 		long startTime = new Date().getTime();
@@ -382,6 +558,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 			e.printStackTrace();
 			logger.info("查询房价报错:{}{}", params.getHotelid(), e.getMessage());
+			Cat.logError("RoomStateQueryPriceException", e);
 			throw e;
 		} finally {
 			t.complete();
@@ -402,6 +579,9 @@ public class HotelController {
 		// pbb.getCallversion(), pbb.getIp(), "/roomstate/querylist",
 		// params.toString(),"ots");
 		logger.info("【/roomstate/querylist】 params is : {}", pbb.toString());
+
+		Cat.logEvent("/roomstate/querylist", pbb == null ? "" : pbb.getCallmethod(), Event.SUCCESS, CommonUtils.toStr(pbb));
+
 		// 办理再次入住传 roomno
 		// 调用service方法
 		long startTime = new Date().getTime();
@@ -442,7 +622,7 @@ public class HotelController {
 				 */
 				if (freeRoomCount == 0) {
 					logger.info("记录埋点:{}", params.getHotelid());
-					Cat.logEvent("ROOMSTATE", "fullroomnum", Event.SUCCESS, "");
+					Cat.logEvent("ROOMSTATE-FullRoomNum", CommonUtils.toStr(params.getHotelid()),  Event.SUCCESS, CommonUtils.toStr(params));
 				}
 			}
 			// 埋点真实用户进入酒店后满房的次数end
@@ -457,6 +637,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 			e.printStackTrace();
 			logger.info("查询房态报错:{}{}", params.getHotelid(), e.getMessage());
+			Cat.logError("RoomStateQueryListException", e);
 			throw e;
 		} finally {
 			t.complete();
@@ -799,6 +980,7 @@ public class HotelController {
 	public ResponseEntity<Map<String, Object>> updateEsMikePrice(Long hotelid) {
 		logger.info("updateEsMikePrice method begin...");
 		long startTime = new Date().getTime();
+		Cat.logEvent("/hotel/updatemikeprices", CommonUtils.toStr(hotelid));
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		try {
 			if (hotelid == null) {
@@ -819,6 +1001,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getLocalizedMessage());
 			e.printStackTrace();
 			logger.error("更新ES眯客价出错: " + e.getLocalizedMessage(), e);
+			Cat.logError("updatemikepricesException", e);
 		}
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
@@ -861,6 +1044,7 @@ public class HotelController {
 	@RequestMapping(value = "/hotel/updatemikepricecache")
 	public ResponseEntity<Map<String, Object>> updateMikePriceCache(String citycode, String hotelid) {
 		logger.info("updateMikePriceCache method begin...");
+		Cat.logEvent("/hotel/updatemikepricecache", CommonUtils.toStr(hotelid));
 		long startTime = new Date().getTime();
 		Map<String, Object> rtnMap = Maps.newHashMap();
 		try {
@@ -881,6 +1065,7 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getLocalizedMessage());
 			e.printStackTrace();
 			logger.error("更新眯客价redis缓存出错: " + e.getLocalizedMessage(), e);
+			Cat.logError("updatemikepricecacheException", e);
 		}
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
@@ -896,4 +1081,12 @@ public class HotelController {
 	// return new
 	// ResponseEntity<Map<String,Object>>(hotelService.readonlyClearEsHotelNotInTHotel(citycode),HttpStatus.OK);
 	// }
+
+	@RequestMapping(value = "/hotel/test")
+	public ResponseEntity<Map<String, Object>> clearESHotelNotInThotel(Integer hotelid) {
+		HashMap<String, Object> rntMap = new HashMap<>();
+		rntMap.put("minprice", roomSaleService.getHotelMinPromoPrice(hotelid));
+		return new ResponseEntity<Map<String, Object>>(rntMap, HttpStatus.OK);
+	}
+
 }

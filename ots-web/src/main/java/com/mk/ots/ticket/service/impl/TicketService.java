@@ -9,13 +9,16 @@ import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.activity.dao.IBActiveCDKeyDao;
 import com.mk.ots.activity.dao.IUActiveCDKeyLogDao;
 import com.mk.ots.activity.model.BActiveCDKey;
+import com.mk.ots.activity.model.BActivity;
 import com.mk.ots.activity.service.IBActiveChannelService;
+import com.mk.ots.activity.service.IBActivityService;
 import com.mk.ots.appstatus.dao.IAppStatusDao;
 import com.mk.ots.common.enums.*;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.hotel.model.THotelModel;
 import com.mk.ots.mapper.THotelMapper;
+import com.mk.ots.mapper.TPromotionCityMapper;
 import com.mk.ots.member.model.UMember;
 import com.mk.ots.member.service.IMemberService;
 import com.mk.ots.order.bean.OrderLog;
@@ -45,7 +48,6 @@ import com.mk.ots.ticket.service.ITicketService;
 import com.mk.ots.ticket.service.IUActiveShareService;
 import com.mk.ots.ticket.service.IUPrizeRecordService;
 import com.mk.ots.ticket.service.parse.ITicketParse;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -103,7 +105,7 @@ public class TicketService implements ITicketService{
 	
 	@Autowired
 	private IUActiveCDKeyLogDao iUActiveCDKeyLogDao;
-	
+
     @Autowired
     private OtaOrderDAO otaOrderDAO;
     @Autowired
@@ -120,7 +122,12 @@ public class TicketService implements ITicketService{
     private THotelMapper tHotelMapper;
 
 	@Autowired
+	private TPromotionCityMapper tPromotionCityMapper;
+
+	@Autowired
 	private USendUTicketDao uSendUTicketDao;
+	@Autowired
+	private IBActivityService ibActivityService;
 	/**
      * 10+1活动券
      */
@@ -184,9 +191,10 @@ public class TicketService implements ITicketService{
 				logger.info("2. 查询可用优惠券: {}", myticket);
 				
 				if(CollectionUtils.isNotEmpty(myticket)){
-                    List citycodes = Lists.newArrayList();
-                    citycodes.add("310000");
-                    filterLimitArea(myticket, otaOrder, citycodes);
+//                    List citycodes = Lists.newArrayList();
+//                    citycodes.add("310000");
+
+                    filterLimitArea(myticket, otaOrder);
 //					checkBRule(myticket, otaOrder);
 					//update by tankai  去掉对B规则的酒店判断
 //					checkBRule(myticket, otaOrder);
@@ -205,29 +213,46 @@ public class TicketService implements ITicketService{
 		return ticketList;
 	}
 
+//    private void filterLimitArea(List<TicketInfo> myticket, OtaOrder otaOrder, List citycodes) {
+//    	Iterator<TicketInfo> it =myticket.iterator();
+//    	while (it.hasNext()) {
+//    		TicketInfo info = it.next();
+//
+//    		 if (info.getType() == PromotionTypeEnum.shoudan.getId()) {
+//                 THotelModel tHotelModel = tHotelMapper.findHotelInfoById(otaOrder.getHotelId());
+//                 if (!citycodes.contains(tHotelModel.getCitycode())) {
+//                     it.remove();
+//                 }
+//             }
+//		}
+//    }
+	/**
+	 * 过滤只允许某城市使用的优惠券
+	 *
+	 * @param myticket
+	 * @param otaOrder
+	 */
+	private void filterLimitArea(List<TicketInfo> myticket, OtaOrder otaOrder) {
+		THotelModel tHotelModel = tHotelMapper.findHotelInfoById(otaOrder.getHotelId());
+		HashMap  m = new  HashMap();
+		m.put("cityCode",tHotelModel.getCitycode());
+		Iterator<TicketInfo> it =myticket.iterator();
+		while (it.hasNext()) {
+			TicketInfo info = it.next();
 
-
-    /**
-     * 过滤只允许某城市使用的优惠券
-     *
-     * @param myticket
-     * @param otaOrder
-     * @param citycodes
-     */
-    private void filterLimitArea(List<TicketInfo> myticket, OtaOrder otaOrder, List citycodes) {
-    	Iterator<TicketInfo> it =myticket.iterator();
-    	while (it.hasNext()) {
-    		TicketInfo info = it.next();
-    		
-    		 if (info.getType() == PromotionTypeEnum.shoudan.getId()) {
-                 THotelModel tHotelModel = tHotelMapper.findHotelInfoById(otaOrder.getHotelId());
-                 if (!citycodes.contains(tHotelModel.getCitycode())) {
-                     it.remove();
-                 }
-             }
+			if (info.getType() == PromotionTypeEnum.shoudan.getId()) {
+				if(!org.apache.commons.lang3.StringUtils.isEmpty(tHotelModel.getCitycode())){
+					m.put("activityId",info.getActivityid());
+					List<BPromotionCity>   promotionCityList = tPromotionCityMapper.findPromotionCityByCityCode(m);
+					logger.info("method [filterLimitArea]  parme : promotionCityList: {}, mid: {}...",promotionCityList ,tHotelModel);
+					if(CollectionUtils.isEmpty(promotionCityList)){
+						logger.info("method [filterLimitArea]  remove  promotion :",it);
+						it.remove();
+					}
+				}
+			}
 		}
-    }
-
+	}
     
 
 	/**
@@ -1033,15 +1058,28 @@ public class TicketService implements ITicketService{
 		 long timeFlag = getTimeFlag();
 	      String date = null; 
          if (timeFlag == 0) {date = DateUtils.getDate();}
-         //查询某一时间段的抽奖次数
-		  long recordCount = iuPrizeRecordService.selectCountByMidAndActiveIdAndOstypeAndTime(mid, activeid, null, date);
-		 if (recordCount >= 3) { //小于3才可以抽奖
-			 logger.info("1:不可以抽奖，recordCount：{}",recordCount);
-				throw MyErrorEnum.customError.getMyException("今天的抽奖机会已经用光啦，请明日再来。");
-		}
+
 		 //根据几个条件判断该用户在该活动中是否有抽奖机会
 		 List<String> ostypes =new ArrayList<String>();
-		
+		if (OSTypeEnum.H.getId().equals(ostype)) {
+			ostypes.add(OSTypeEnum.IOS.getId());
+			ostypes.add(OSTypeEnum.ANDROID.getId());
+			ostypes.add(OSTypeEnum.WX.getId());
+			long prizeRecordCount = iuPrizeRecordService.selectCountByMidAndActiveIdAndOstypeAndTime(mid, activeid, ostypes, date);
+			if (prizeRecordCount >= 1){
+				logger.info("1：来自第三方不可以抽奖， 在 mike 平台参与过抽奖，prizeRecordCount：{}",prizeRecordCount);
+				throw MyErrorEnum.customError.getMyException(Constant.ACTIVE_NOTE);
+			}
+		}else if (OSTypeEnum.WX.getId().equals(ostype)){
+			ostypes.add(OSTypeEnum.H.getId());
+			long prizeRecordCount = iuPrizeRecordService.selectCountByMidAndActiveIdAndOstypeAndTime(mid, activeid, ostypes, date);
+			if (prizeRecordCount >= 1){
+				logger.info("1：微信不可以抽奖，已经在来自第三方平台平台参与过抽奖，prizeRecordCount：{}",prizeRecordCount);
+				throw MyErrorEnum.customError.getMyException(Constant.ACTIVE_NOTE);
+			}
+		}
+
+		ostypes =new ArrayList<String>();
 		 if (OSTypeEnum.IOS.getId().equals(ostype)||OSTypeEnum.ANDROID.getId().equals(ostype)) {
 			 ostypes.add(OSTypeEnum.IOS.getId());
 			 ostypes.add(OSTypeEnum.ANDROID.getId());
@@ -1053,12 +1091,16 @@ public class TicketService implements ITicketService{
         if (prizeRecordCount == 0) {//没抽过奖，可以抽奖
 			logger.info("2：可以抽奖，prizeRecordCount：{}",prizeRecordCount);
 			 return true;
-		}else if (prizeRecordCount == 1) {
+		}else {
+			logger.info("4：不可以抽奖，prizeRecordCount：{}",prizeRecordCount);
+			throw MyErrorEnum.customError.getMyException(Constant.ACTIVE_NOTE);
+		}
+		/*else if (prizeRecordCount == 1) {
 			//判断该活动是否分享过，如果分享过，该抽奖方式(app或微信)还可以再抽奖一次，没分享过则不可以再抽奖了
 		    long shareCount = iuActiveShareService.countNumByMidAndActiveIdAndTime(mid, activeid,date);
 		    if (shareCount == 0) { //没有分享过，不允许抽奖
 				logger.info("3：不可以抽奖，shareCount：{}",shareCount);
-				throw MyErrorEnum.customError.getMyException("分享后才能再次抽奖");	
+				throw MyErrorEnum.customError.getMyException("分享后才能再次抽奖");
 			}else if (shareCount >= 1) { //分享过,可以抽奖
 				logger.info("4：可以抽奖，shareCount：{}",shareCount);
 				return true;
@@ -1066,8 +1108,8 @@ public class TicketService implements ITicketService{
 		}else if (prizeRecordCount >= 2) { //app或微信单个抽奖设备方式抽奖次数已经等于或超过了最大手机次数所以不能再次抽奖了
 			logger.info("4：不可以抽奖，prizeRecordCount：{}",prizeRecordCount);
 			throw MyErrorEnum.customError.getMyException("今天的抽奖机会已经用光啦，请明日再来。");
-		}
-		return true;
+		}*/
+
 		
 	 }
     
@@ -1254,4 +1296,232 @@ public class TicketService implements ITicketService{
         
         return allcost;
     }
+
+	public ITicketParse createParseBean(OtaOrder otaOrder,BPromotion bPromotion) {
+		try {
+			UTicketDao uTicketDao = AppUtils.getBean(UTicketDao.class);
+			Object ob = Class.forName(bPromotion.getClassname()).newInstance();
+			ITicketParse parse = (ITicketParse) ob;
+			if(PromotionTypeEnum.qieke.equals(bPromotion.getType().getId()) || PromotionTypeEnum.yijia.equals(bPromotion.getType().getId())){
+				parse.init(null, bPromotion);
+			} else {
+				parse.init(uTicketDao.findByPromotionId(bPromotion.getId()), bPromotion);
+			}
+			parse.parse(otaOrder);
+			return parse;
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 *  解析切客券与议价券
+	 *
+	 * @param otaOrder
+	 * @param promotionNoList
+	 * @param cousNo
+	 * @return
+	 */
+	public List<ITicketParse> getPromotionParses(OtaOrder otaOrder) {
+		// 查询切客券与议价券
+		List<BPromotion> promotions = Lists.newArrayList();
+		List<ITicketParse> parses = new ArrayList<>();
+		if (otaOrder != null) {
+			promotions = this.iBPromotionDao.queryYiJiaAndQiKePromotionByOrderId(otaOrder.getId());
+			// 解析优惠券码信息
+			for (BPromotion promotion : promotions) {
+				ITicketParse parse = this.createParseBean(otaOrder,promotion);
+				parse.checkUsable();
+				parses.add(parse);
+			}
+		}
+		return parses;
+	}
+
+	@Override
+	public boolean checkReceivePrizeByPhone(String phone, Long activeid,
+											String ostype, String date) {
+		// TODO Auto-generated method stub
+		boolean checkflag = iuPrizeRecordService.checkReceivePrizeByPhone(phone,activeid,ostype,date);
+		if (checkflag) {
+			throw MyErrorEnum.customError.getMyException("该手机号已经领取过奖品，不能再领取");
+		}
+		return false;
+	}
+	@Override
+	public void prizeBindingUser(String phone, String prizerecordid) {
+		// TODO Auto-generated method stub
+		//获取该奖品记录
+		UPrizeRecord  recordPrize =  iuPrizeRecordService.findUPrizeRecordById(Long.parseLong(prizerecordid));
+		if (recordPrize==null) {
+			throw MyErrorEnum.customError.getMyException("奖品流水记录id["+prizerecordid+"]无效");
+		}
+		if (String.valueOf(ReceiveStateEnum.binding.getId().intValue()).equals(recordPrize.getReceivestate())) {
+			throw MyErrorEnum.customError.getMyException("该奖品已经领取");
+		}
+		//判断该手机号是不是眯客用户
+		Optional<UMember> umember = iMemberService.findMemberByPhone(phone);
+		if (umember.isPresent()) { //有该用户
+			UMember member = umember.get();
+			//给该用户绑定奖品
+			if (PrizeTypeEnum.mike.getId().intValue() == recordPrize.getPrizetype().longValue()) {
+				BActivity bActivity =  ibActivityService.findById(recordPrize.getActiveid());
+				if(bActivity == null){
+					throw MyErrorEnum.IllegalActive.getMyException();
+				}
+				List<BPromotion> bPromotions = iPromoService.findByActiveidAndPrizeId(recordPrize.getActiveid(), recordPrize.getPrizeid());
+				if (CollectionUtils.isEmpty(bPromotions)) {
+					throw MyErrorEnum.errorParm.getMyException("不能找到该奖品对应的优惠券!");
+				}else {
+					if (bPromotions.size()> 1) {
+						throw MyErrorEnum.errorParm.getMyException("该活动下有相同名字的优惠券!");
+					}
+				}
+				List<Long> proId = iPromoService.genCGTicket(bPromotions.get(0).getId(), member.getMid(), bActivity.getBegintime(), bActivity.getEndtime(), bActivity.getPromotionmethodtype(), null, null,"");
+				recordPrize.setPrizeinfo(String.valueOf(proId.get(0)));
+			}
+			recordPrize.setMid(member.getMid());
+			recordPrize.setPhone(member.getLoginname());
+			recordPrize.setReceivestate(String.valueOf(ReceiveStateEnum.binding.getId()));
+			recordPrize.setCreatetime(new Date());
+			this.updatePrizeRecordByRecordId(recordPrize);
+		}else { //不是眯客用户
+			iuPrizeRecordService.updatePhoneByRecordId(Long.parseLong(prizerecordid),phone,ReceiveStateEnum.Geted.getId());
+		}
+
+	}
+	public void updatePrizeRecordByRecordId(UPrizeRecord prizeRecord) {
+		// TODO Auto-generated method stub
+		iuPrizeRecordService.updatePrizeRecordByRecordId(prizeRecord);
+	}
+	@Override
+	public List<BPrizeInfo> queryMyNotreceiveyPrize(Long activeid, String usermark) {
+		// TODO Auto-generated method stub
+		/*通过usermark和手机查询登录用户未领取的奖品，以usermark为主，手机为辅，如果usermark查询到了，就不用phone查询了*/
+		List<BPrizeInfo>  bPrizeInfoList =  new ArrayList<BPrizeInfo>();
+		//通过手机查询奖品信息
+		List<UPrizeRecord> notReceiveyPrize = null;
+		if (!Strings.isNullOrEmpty(usermark)) {
+			notReceiveyPrize =iuPrizeRecordService.queryMyHistoryPrizeByUserMark(usermark,activeid,ReceiveStateEnum.Unget.getId(),DateUtils.getDate());
+		}
+		if (CollectionUtils.isNotEmpty(notReceiveyPrize)) {
+			logger.info("获取优惠券集合个数notReceiveyPrize.size:{}", notReceiveyPrize.size());
+			int i = 0;
+			for (UPrizeRecord ur:notReceiveyPrize) {
+				logger.info("第"+(++i)+"个优惠券内容：{}",ur);
+				BPrizeInfo bPrizeInfo = new BPrizeInfo();
+				bPrizeInfo.setId(ur.getId());//记录id
+				if (ur.getCreatetime()!=null) {
+					bPrizeInfo.setCreatetime(DateUtils.formatDateTime(ur.getCreatetime()));
+				}else{
+					bPrizeInfo.setCreatetime("");
+				}
+				bPrizeInfo.setName(ur.getbPrize().getName());
+				bPrizeInfo.setType(ur.getbPrize().getType());
+				bPrizeInfo.setPrice(ur.getbPrize().getPrice());
+				bPrizeInfo.setCode(ur.getPrizeinfo());
+				if (ur.getbPrize().getBegintime()!=null) {
+					bPrizeInfo.setBegintime(DateUtils.formatDateTime(ur.getbPrize().getBegintime()));
+				}else{
+					bPrizeInfo.setBegintime("");
+				}
+				if (ur.getbPrize().getEndtime()!=null) {
+					bPrizeInfo.setEndtime(DateUtils.formatDateTime(ur.getbPrize().getEndtime()));
+				}else{
+					bPrizeInfo.setEndtime("");
+				}
+				bPrizeInfoList.add(bPrizeInfo);
+			}
+		}
+		return bPrizeInfoList;
+
+	}
+	@Override
+	public List<TicketInfo> queryMyTicketOnUserMark(BPrizeInfo prizeInfo,
+													long activeid) {
+		// TODO Auto-generated method stub
+		List<TicketInfo> ticketInfos = new ArrayList<TicketInfo>();
+		TicketInfo ticketInfo = new TicketInfo();
+		List<BPromotion> bPromotionList = iPromoService.findByActiveidAndPrizeRecordId(activeid, prizeInfo.getPrizeRecordId());
+		if (CollectionUtils.isEmpty(bPromotionList)) {
+			return ticketInfos;
+		}
+		BPromotion bPromotion = bPromotionList.get(0);
+		ticketInfo.setId(prizeInfo.getPrizeRecordId());
+		ticketInfo.setName(bPromotion.getName());
+		ticketInfo.setBegintime(bPromotion.getBegintime());
+		ticketInfo.setEndtime(bPromotion.getEndtime());
+		ticketInfo.setOfflinePrice(bPromotion.getOfflineprice());
+		ticketInfo.setSubprice(bPromotion.getOnlineprice());
+		ticketInfo.setCheck(true);
+		ticketInfo.setIsticket(true);
+		ticketInfo.setType(PromotionTypeEnum.immReduce.getId());
+		if(ticketInfo.getSubprice()!=null && ticketInfo.getSubprice().compareTo(BigDecimal.ZERO)>0 && ticketInfo.getOfflineprice()!=null && ticketInfo.getOfflineprice().compareTo(BigDecimal.ZERO)>0){
+			ticketInfo.setUselimit(TicketUselimitEnum.ALL.getType());
+		}else if(ticketInfo.getSubprice()!=null && ticketInfo.getSubprice().compareTo(BigDecimal.ZERO)>0){
+			ticketInfo.setUselimit(TicketUselimitEnum.YF.getType());
+		}else if(ticketInfo.getOfflineprice()!=null && ticketInfo.getOfflineprice().compareTo(BigDecimal.ZERO)>0){
+			ticketInfo.setUselimit(TicketUselimitEnum.PT.getType());
+		}
+		ticketInfo.setCreatetime(DateUtils.getDateFromString(prizeInfo.getCreatetime()));
+		ticketInfos.add(ticketInfo);
+		return ticketInfos;
+	}
+	@Override
+	public void loginbindinggit(UMember member, Long activeid) {
+		// TODO Auto-generated method stub
+		//如果要绑定，将第三方平台用户通过手机领取奖品都转换为登录后的该手机的用户
+		List<UPrizeRecord>  recordPrizeList =  this.findEffectivePrizeByPhone(member.getLoginname(),activeid,OSTypeEnum.H.getId(),DateUtils.getDate(),ReceiveStateEnum.Geted.getId());
+		if (CollectionUtils.isNotEmpty(recordPrizeList)) {
+			//眯客券
+			List<UPrizeRecord> mikeRecord  = new ArrayList<UPrizeRecord>();
+			//不是眯客券
+			List<UPrizeRecord> notMikeRecord  = new ArrayList<UPrizeRecord>();
+			List<Long> prizeIdList = new ArrayList<Long>();
+			for (UPrizeRecord uPrizeRecord : recordPrizeList) {
+				if (PrizeTypeEnum.mike.getId().intValue()==uPrizeRecord.getPrizetype().longValue()) {
+					prizeIdList.add(uPrizeRecord.getPrizeid());
+					mikeRecord.add(uPrizeRecord);
+				}else {
+					notMikeRecord.add(uPrizeRecord);
+				}
+			}
+			if (CollectionUtils.isNotEmpty(prizeIdList)) {
+				BActivity bActivity =  ibActivityService.findById(activeid);
+				if(bActivity == null){
+					throw MyErrorEnum.IllegalActive.getMyException();
+				}
+				List<BPromotion> bPromotions = iPromoService.findByActiveidAndPrizeIdList(activeid, prizeIdList);
+				//获取对应的眯客券
+				for (int i = 0; i < bPromotions.size(); i++) {
+					BPromotion bp = bPromotions.get(i);
+					List<Long> proId = iPromoService.genCGTicket(bp.getId(), member.getMid(), bActivity.getBegintime(), bActivity.getEndtime(), bActivity.getPromotionmethodtype(), null, null,"");
+					UPrizeRecord  mike = mikeRecord.get(i);
+					//更新奖品记录表
+					mike.setMid(member.getMid());
+					mike.setPrizeinfo(String.valueOf(proId.get(0)));
+					mike.setPhone(member.getLoginname());
+					mike.setReceivestate(String.valueOf(ReceiveStateEnum.binding.getId()));
+					mike.setCreatetime(new Date());
+					this.updatePrizeRecordByRecordId(mike);
+				}
+			}
+			if (CollectionUtils.isNotEmpty(notMikeRecord)){
+				//更新第三方奖品
+				for (UPrizeRecord notmike : notMikeRecord) {
+					notmike.setMid(member.getMid());
+					notmike.setReceivestate(String.valueOf(ReceiveStateEnum.binding.getId()));
+					notmike.setPhone(member.getLoginname());
+					notmike.setCreatetime(new Date());
+					this.updatePrizeRecordByRecordId(notmike);
+				}
+			}
+		}
+	}
+	@Override
+	public List<UPrizeRecord>findEffectivePrizeByPhone(String phone,Long activeid,String ostype,String date,Integer geted){
+		// TODO Auto-generated method stub
+		return iuPrizeRecordService.findEffectivePrizeByPhone(phone,activeid,ostype,DateUtils.getDate(),geted);
+	}
+
 }

@@ -219,6 +219,13 @@
         FROM  t_room_sale_config
         where   id = #{id}
     </select>
+    <select id="queryRoomSaleConfigByType" resultMap="roomSaleConfig" parameterType="java.lang.Integer">
+        SELECT
+        id,<include refid="Base_Column_List"/>
+        FROM  t_room_sale_config
+        where   roomTypeId = #{roomTypeId} AND tag = 1
+        limit 1
+    </select>    
     <sql id="Base_view_Column_List" >
         hotelId, roomId, roomTypeId,saleType,saleValue,costPrice,num,saleName,settleValue,settleType,valid,
         styleType,started,saleConfigInfoId,createTime,createBy,updateTime,updateBy,saleRoomTypeId
@@ -262,7 +269,7 @@
     <select id="getRoomSaleByParamsNew" resultMap="roomSaleConfig" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfig">
         SELECT
           a.id as promoType,b.hotelId, b.roomId, b.roomTypeId,b.saleValue,b.costPrice,b.num,b.saleName as roomTypeName,
-        b.styleType,b.started,b.saleConfigInfoId,b.saleRoomTypeId,a.startDate,a.endDate,
+        b.styleType,b.started,b.saleConfigInfoId,b.saleRoomTypeId,a.startDate,a.endDate, a.saleTypeId as promoId,
         a.startTime,a.endTime,a.saleValue as saleTypeValue,a.saleLabel,a.description,a.fontColor,c.saleName,c.id as saleType
         FROM  t_room_sale_config_info  a LEFT  JOIN t_room_sale_config b ON a.id=b.saleConfigInfoId
         LEFT JOIN  t_room_sale_type c ON  a.saleTypeId=c.id
@@ -303,4 +310,40 @@
             </if>
         </where>
     </select>
+
+
+    <select id="getHotelMinPromoPrice" resultMap="roomSaleConfig" parameterType="Integer">
+     SELECT
+     <include refid="Base_Column_List"/>
+     FROM t_room_sale_config
+     WHERE hotelid=#{hotelid} AND valid = 'T' AND  started = 'T' ORDER BY saleValue ASC limit 1
+    </select>
+
+    <select id="getThemeRoomSale" resultMap="roomSaleConfig" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfig">
+        SELECT
+        a.id as promoType,b.hotelId, b.roomId, b.roomTypeId,b.saleValue,b.costPrice,b.num,b.saleName as roomTypeName,
+        b.styleType,b.started,b.saleConfigInfoId,b.saleRoomTypeId,a.startDate,a.endDate,
+        a.startTime,a.endTime,a.saleValue as saleTypeValue,a.saleLabel,a.description,a.fontColor,c.saleName,c.id as saleType
+        FROM  t_room_sale_config_info  a LEFT  JOIN t_room_sale_config b ON a.id=b.saleConfigInfoId
+        LEFT JOIN  t_room_sale_type c ON  a.saleTypeId=c.id
+        <where>
+            <if test="hotelId != null">
+                AND b.hotelId = #{hotelId}
+            </if>
+            <if test="roomId != null">
+                AND b.roomId = #{roomId}
+            </if>
+            <if test="roomTypeId != null">
+                AND b.saleRoomTypeId = #{roomTypeId}
+            </if>
+            <if test="valid != null">
+                AND b.valid = #{valid}
+            </if>
+            <if test="saleTypeId != null">
+                AND b.saleTypeId = #{saleTypeId}
+            </if>
+
+        </where>
+    </select>
+
 </mapper>

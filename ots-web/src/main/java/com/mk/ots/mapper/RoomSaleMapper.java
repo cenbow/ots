@@ -16,6 +16,8 @@ public interface RoomSaleMapper {
 
 	public TRoomSale getOneRoomSale(TRoomSale bean);
 
+	public TRoomSale getOneRoomSaleByRoomTypeId(TRoomSale bean);
+
 	public List<TRoomSale> queryRoomSale(TRoomSale bean);
 
 	public List<Map<String, Object>> queryRoomPromoByType(String roomTypeId);
@@ -25,6 +27,8 @@ public interface RoomSaleMapper {
 	public List<Map<String, Object>> queryRoomPromoInfoByHotel(String hotelId);
 
 	public Map<String, Object> queryRoomPromoInfo();
+
+	public Map<String, Object> checkPromoCity(String citycode);
 
 	public List<Map<String, Object>> queryRoomPromoInfoByHotelAndPromoType(Map<?, ?> map);
 

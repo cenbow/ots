@@ -76,4 +76,35 @@ public class BPromoDAO extends MyBatisDaoImpl<BPromotion, Long> implements IBPro
         param.put("hardwarecode", hardwarecode);
         return find("findFirstOrderPromotionByHardwarecode", param);
     }
+	@Override
+	public List<BPromotion> findByActiveidAndPrizeId(Long activeid, Long prizeid) {
+		// TODO Auto-generated method stub
+		Map<String, Object> param = Maps.newHashMap();
+		param.put("activeid", activeid);
+		param.put("prizeid", prizeid);
+		return this.find("findByActiveidAndPrizeId", param);
+	}
+	@Override
+	public List<BPromotion> findByActiveIdAndName(Long activeid,String promotionName) {
+		Map<String, Object> param = Maps.newHashMap();
+		param.put("activeid", activeid);
+		param.put("name", promotionName);
+		return this.find("findByActiveIdAndName", param);
+	}
+	@Override
+	public List<BPromotion> findByActiveidAndPrizeRecordId(long activeid,long recordid){
+		Map<String, Object> param = Maps.newHashMap();
+		param.put("activeid", activeid);
+		param.put("recordid", recordid);
+		return this.find("findByActiveidAndPrizeRecordId", param);
+	}
+	@Override
+	public List<BPromotion> findByActiveidAndPrizeIdList(Long activeid,
+														 List<Long> prizeidList) {
+		// TODO Auto-generated method stub
+		Map<String, Object> param = Maps.newHashMap();
+		param.put("activeid", activeid);
+		param.put("prizeidList", prizeidList);
+		return this.find("findByActiveidAndPrizeIdList", param);
+	}
 }

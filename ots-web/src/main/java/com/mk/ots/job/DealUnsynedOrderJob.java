@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
+import com.mk.framework.util.CommonUtils;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -88,9 +92,23 @@ public class DealUnsynedOrderJob  extends QuartzJobBean {
 						}
 						ids.setLength(ids.length() - 1);
 						pmsCustomNosJson.put("customerid", ids.toString());
-						logger.info("Pms2.0DealUnsynedOrderJob::处理全量更新未同步客单传参{}{}", hotelid,pmsCustomNosJson.toString());
-						String result = PayTools.dopostjson(UrlUtils.getUrl("newpms.url") + "/selectcustomerno", pmsCustomNosJson.toJSONString());
-						logger.info("Pms2.0DealUnsynedOrderJob::处理全量更新未同步客单数据结果{}{}", hotelid,result);
+
+						String result = null;
+						Transaction t = Cat.newTransaction("PmsHttpsPost", UrlUtils.getUrl("newpms.url") + "/selectcustomerno");
+						try {
+							logger.info("Pms2.0DealUnsynedOrderJob::处理全量更新未同步客单传参{}{}", hotelid,pmsCustomNosJson.toString());
+							result = PayTools.dopostjson(UrlUtils.getUrl("newpms.url") + "/selectcustomerno", pmsCustomNosJson.toJSONString());
+							logger.info("Pms2.0DealUnsynedOrderJob::处理全量更新未同步客单数据结果{}{}", hotelid,result);
+							Cat.logEvent("Pms/selectcustomerno", CommonUtils.toStr(hotelid), Event.SUCCESS, pmsCustomNosJson.toJSONString());
+							t.setStatus(Transaction.SUCCESS);
+						} catch (Exception e) {
+							t.setStatus(e);
+							this.logger.error("Pms/selectcustomerno error.", e);
+							throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+						}finally {
+							t.complete();
+						}
+
 						JSONObject returnObject = JSONObject.parseObject(result);
 						
 						if (returnObject.getBooleanValue("success")) {

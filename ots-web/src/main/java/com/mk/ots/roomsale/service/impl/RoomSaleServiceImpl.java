@@ -44,6 +44,10 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		return roomSaleMapper.getOneRoomSale(bean);
 	}
 
+	public TRoomSale getOneRoomSaleByRoomTypeId(TRoomSale bean) {
+		return roomSaleMapper.getOneRoomSaleByRoomTypeId(bean);
+	}
+
 	public List<TRoomSale> queryRoomSale(TRoomSale bean) {
 		return roomSaleMapper.queryRoomSale(bean);
 	}
@@ -92,6 +96,7 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 			roomPromo.setPromoType(rooms.getPromoType());
 			roomPromo.setPromoValue(rooms.getSaleTypeValue());
 			roomPromo.setPromoLabel(rooms.getSaleLabel());
+			roomPromo.setPromoId(rooms.getPromoId());
 			roomPromoDtoList.add(roomPromo);
 		}
 		return roomPromoDtoList;
@@ -178,6 +183,15 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 		}
 	}
 
+	public Boolean checkPromoCity(String  cityCode) {
+		Map<String, Object> promoCity = roomSaleMapper.checkPromoCity(cityCode);
+		if (promoCity == null || promoCity.get("id") == null) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 	public Boolean checkRoomSaleWithOldRoomType(TRoomSaleConfig bean) {
 		TRoomSaleConfig roomSaleConfig = roomSaleConfigMapper.checkRoomSaleWithOldRoomType(bean);
 		if (roomSaleConfig == null || roomSaleConfig.getId() == null) {
@@ -196,5 +210,24 @@ public class RoomSaleServiceImpl implements RoomSaleService {
 			saleIndex.setPromoPrice(rooms.getSaleValue());
 		}
 		return roomSaleToIndexList;
+	}
+
+	public Double getHotelMinPromoPrice(Integer hotelid){
+		TRoomSaleConfig result = roomSaleConfigMapper.getHotelMinPromoPrice(hotelid);
+		if (result != null){
+			return result.getSaleValue();
+		}else {
+			return null;
+		}
+
+	}
+
+	public Boolean checkThemePromo(TRoomSaleConfig bean){
+		List<TRoomSaleConfig> roomSaleConfig = roomSaleConfigMapper.getThemeRoomSale(bean);
+		if (roomSaleConfig != null && roomSaleConfig.size()> 0){
+			return true;
+		}else {
+			return false;
+		}
 	}
 }

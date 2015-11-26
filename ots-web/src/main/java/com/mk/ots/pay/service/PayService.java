@@ -12,6 +12,8 @@ import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 import com.mk.ots.common.enums.*;
 import com.mk.ots.roomsale.model.TRoomSale;
 import com.mk.ots.roomsale.service.RoomSaleService;
@@ -1447,11 +1449,17 @@ public class PayService implements IPayService {
         // 判断原来提交过没有
         PPay oldpay = this.findPayByOrderId(longorderId);
         if (oldpay == null) {
+
+            Transaction pmsLockTransaction = Cat.newTransaction("createPay", "pms-lock-room-on-pay");
             try { // 去PMS锁房，如果抛出异常，说明房子被占用
                 this.orderService.createPmsOrderAndLockRoomBeforerPay(order);
+                pmsLockTransaction.setStatus(Transaction.SUCCESS);
             } catch (Exception e) {
+                pmsLockTransaction.setStatus(e);
                 this.logger.error("订单:" + longorderId + "创建支付时, 锁房出现问题.", e);
                 throw MyErrorEnum.errorParm.getMyException(e.getMessage());
+            }finally {
+                pmsLockTransaction.complete();
             }
         }
         // 创建支付
@@ -3396,4 +3404,7 @@ public class PayService implements IPayService {
 		return "处理完毕.";
 	}
 
+    public List<PPay> findByUserId (String userId) {
+        return this.iPayDAO.findByUserId(userId);
+    }
 }

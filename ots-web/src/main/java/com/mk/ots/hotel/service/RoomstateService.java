@@ -12,7 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.dianping.cat.message.Event;
+import com.mk.framework.util.CommonUtils;
+import com.mk.ots.common.enums.HotelPromoEnum;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,26 +33,9 @@ import com.mk.orm.kit.JsonKit;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.hotel.model.TFacilityModel;
-import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.model.THotelModel;
-import com.mk.ots.hotel.model.TPricetimeWithPrices;
-import com.mk.ots.hotel.model.TRoomModel;
-import com.mk.ots.hotel.model.TRoomRepairModel;
-import com.mk.ots.hotel.model.TRoomTypeInfoModel;
-import com.mk.ots.hotel.model.TRoomTypeModel;
-import com.mk.ots.hotel.model.TRoomTypeWithBasePrice;
+import com.mk.ots.hotel.model.*;
 import com.mk.ots.manager.OtsCacheManager;
-import com.mk.ots.mapper.PmsRoomOrderMapper;
-import com.mk.ots.mapper.RoomCensusMapper;
-import com.mk.ots.mapper.RoomLockPoMapper;
-import com.mk.ots.mapper.TFacilityMapper;
-import com.mk.ots.mapper.THotelMapper;
-import com.mk.ots.mapper.TPricetimeMapper;
-import com.mk.ots.mapper.TRoomMapper;
-import com.mk.ots.mapper.TRoomRepairMapper;
-import com.mk.ots.mapper.TRoomTypeMapper;
-import com.mk.ots.mapper.TRoomtypeInfoMapper;
+import com.mk.ots.mapper.*;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.OtaRoomOrder;
 import com.mk.ots.order.model.PmsRoomOrderModel;
@@ -63,7 +50,6 @@ import com.mk.pms.myenum.PmsRoomOrderStatusEnum;
 import com.mk.pms.room.bean.RoomLockJsonBean;
 import com.mk.pms.room.bean.RoomLockPo;
 import com.mk.pms.room.service.PmsRoomService;
-
 import redis.clients.jedis.Jedis;
 
 /**
@@ -369,9 +355,15 @@ public class RoomstateService {
 					String lockedFlag = order.getPmsroomorderno() == null ? this.LOCKED_REPAIR : this.LOCKED_PMS;
 					lockRoomsCache.put(this.getRoomLockedKey(order.getRoomid(), lockDate), lockedFlag);
 					if (this.LOCKED_REPAIR.equals(lockedFlag)) {
+
+						Cat.logEvent("RoomState-PMS-REPAIR-LOCK", CommonUtils.toStr(order.getHotelid()), Event.SUCCESS,
+								order.toString());
 						this.logger.info("缓存维修房态锁房信息, roomid: {}, date: {}", order.getRoomid(), lockDate);
 					} else {
 						this.logger.info("缓存PMS房态锁房信息, roomid: {}, date: {}", order.getRoomid(), lockDate);
+						Cat.logEvent("RoomState-PMS-LOCK", CommonUtils.toStr(order.getHotelid()), Event.SUCCESS,
+								order.toString());
+
 					}
 				}
 			}
@@ -606,11 +598,14 @@ public class RoomstateService {
 				String lockDate = DateUtils.formatDate(DateUtils.addDays(bdate, i));
 				lockRoomsCache.put(this.getRoomLockedKey(roomid, lockDate), this.LOCKED_OTS);
 				this.logger.info("lockRoomInOTS::hotelid:{}, roomid:{}, lockDate: {}", hotelid, roomid, lockDate);
+				Cat.logEvent("LockRoomInOTS", CommonUtils.toStr(hotelid), Event.SUCCESS, roomid.toString());
 			}
 
 			//
 			jedis.set(this.getCacheKey(hotelid).getBytes(), SerializeUtil.serialize(lockRoomsCache));
 			this.logger.info("OTS lock room success.\n {}", JsonKit.toJson(lockRoomsCache));
+
+			Cat.logEvent("LockRoom", CommonUtils.toStr(hotelid), Event.SUCCESS, JsonKit.toJson(lockRoomsCache));
 
 			//
 			long finishTime = new Date().getTime();
@@ -618,6 +613,10 @@ public class RoomstateService {
 			rtnMap.put(ServiceOutput.STR_MSG_TIMES, (finishTime - startTime) + "ms");
 		} catch (Exception e) {
 			this.logger.error("OTS lock room error: {}", e.getMessage());
+			Cat.logError("OTSLockRoomException", e);
+
+			Cat.logEvent("LockRoomFailed", CommonUtils.toStr(hotelid), Event.SUCCESS, roomid.toString());
+
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
@@ -693,19 +692,23 @@ public class RoomstateService {
 						lockRoomsCache.remove(this.getRoomLockedKey(roomid, unlockDate));
 						this.logger.info("unlockRoomInOTS::hotelid:{}, roomid:{}, unlockDate: {}", hotelid, roomid,
 								unlockDate);
+						Cat.logEvent("UnlockRoomInOTS", hotelid.toString(), Event.SUCCESS, roomid.toString());
+						Cat.logEvent("UnlockRoomInOTS", CommonUtils.toStr(hotelid), Event.SUCCESS, roomid.toString());
+
 					}
 				}
 			}
 			//
 			jedis.set(this.getCacheKey(hotelid).getBytes(), SerializeUtil.serialize(lockRoomsCache));
 			this.logger.info("OTS unlock room success.\n {}", JsonKit.toJson(lockRoomsCache));
-
+			Cat.logEvent("UnlockRoom", hotelid.toString(), Event.SUCCESS, JsonKit.toJson(lockRoomsCache));
 			//
 			long finishTime = new Date().getTime();
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 			rtnMap.put(ServiceOutput.STR_MSG_TIMES, (finishTime - startTime) + "ms");
 		} catch (Exception e) {
 			this.logger.error("OTS unlock room error: {}", e.getMessage());
+			Cat.logEvent("UnlockRoomFailed", hotelid.toString(), Event.SUCCESS, otaorder.getRoomOrderList().toString());
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
@@ -789,17 +792,20 @@ public class RoomstateService {
 				lockDate = DateUtils.formatDate(DateUtils.getDateFromString(lockDate));
 				lockRoomsCache.remove(this.getRoomLockedKey(roomid, lockDate));
 				this.logger.info("unlockRoomInOTS::hotelid:{}, roomid:{}, unlockDate: {}", hotelid, roomid, lockDate);
+				Cat.logEvent("UnlockRoomInOTS", hotelid.toString(), Event.SUCCESS, roomid.toString());
 			}
 			//
 			jedis.set(this.getCacheKey(hotelid).getBytes(), SerializeUtil.serialize(lockRoomsCache));
 			this.logger.info("OTS unlock room success.\n {}", JsonKit.toJson(lockRoomsCache));
-
+			Cat.logEvent("UnlockRoomInOTS", hotelid.toString(), Event.SUCCESS, roomid.toString());
 			//
 			long finishTime = new Date().getTime();
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 			rtnMap.put(ServiceOutput.STR_MSG_TIMES, (finishTime - startTime) + "ms");
 		} catch (Exception e) {
 			this.logger.error("OTS lock room error: {}", e.getMessage());
+			Cat.logError("UnlockRoomInPMS", e);
+			Cat.logEvent("UnlockRoomInOTS", hotelid.toString(), Event.SUCCESS, roomid.toString());
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
@@ -918,13 +924,15 @@ public class RoomstateService {
 			String begindate = params.getStartdateday();
 			String enddate = params.getEnddateday();
 
+			Cat.logEvent("findHotelRoomState", CommonUtils.toStr(hotelid), Event.SUCCESS, params.toString());
 			// 从redis缓存中查询已锁的房态
 			Map<String, String> lockRoomsCache = new HashMap<String, String>();
 			//// THotel hotel = hotelService.readonlyTHotel(hotelid);
 			// 查酒店信息
 			THotelModel thotelModel = thotelMapper.selectById(hotelid);
 			if (thotelModel == null) {
-				logger.error("hotel: {} already delete from t_hotel.", hotelid);
+				Cat.logEvent("findHotelRoomStateException", CommonUtils.toStr(hotelid), Event.SUCCESS,
+						"hotel: " + hotelid + " already delete from t_hotel");
 				return respEntityList;
 			}
 			String isNewPms = thotelModel.getIsnewpms();
@@ -1018,64 +1026,81 @@ public class RoomstateService {
 								callVersionStr));
 					}
 
+					TRoomSaleConfig checkRoomSaleConfig = new TRoomSaleConfig();
+					checkRoomSaleConfig.setValid(Constant.STR_TRUE);
+					checkRoomSaleConfig.setRoomTypeId(roomTypeId);
+					checkRoomSaleConfig.setSaleTypeId(HotelPromoEnum.Theme.getCode());
+
+					Boolean isThemePromo = roomSaleService.checkThemePromo(checkRoomSaleConfig);
 					if (StringUtils.isNotBlank(callVersionStr)) {
 						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
 								&& !"3".equals(callMethod)) {
-							TRoomSaleConfig hotelRoomSaleConfig = new TRoomSaleConfig();
-							Integer thotelId = hotelid != null ? hotelid.intValue() : null;
-							hotelRoomSaleConfig.setHotelId(thotelId);
-							hotelRoomSaleConfig.setRoomTypeId(roomTypeId);
-							List<RoomPromoDto> list = roomSaleService.queryRoomPromoByHotelNew(hotelRoomSaleConfig);
+
 							String isonpromo = "0";
+							if (isThemePromo && "3.2".compareTo(callVersionStr) > 0){
+								isonpromo = "0";
+							}else{
+								TRoomSaleConfig hotelRoomSaleConfig = new TRoomSaleConfig();
+								Integer thotelId = hotelid != null ? hotelid.intValue() : null;
+								hotelRoomSaleConfig.setHotelId(thotelId);
+								hotelRoomSaleConfig.setRoomTypeId(roomTypeId);
+								List<RoomPromoDto> list = roomSaleService.queryRoomPromoByHotelNew(hotelRoomSaleConfig);
 
-							if (logger.isInfoEnabled()) {
-								logger.info(String.format("isPromo:%s; callVersionStr:%s; rooms:%s", isPromo,
-										callVersionStr, list == null ? 0 : list.size()));
-							}
 
-							if (isPromo != null && isPromo) { // isBack
-								isonpromo = "1";
-								if (list != null && list.size() > 0) {
-									RoomPromoDto roomPromoDto = list.get(0);
+								if (logger.isInfoEnabled()) {
+									logger.info(String.format("isPromo:%s; callVersionStr:%s; rooms:%s", isPromo,
+											callVersionStr, list == null ? 0 : list.size()));
+								}
 
-									Integer promostaus = DateUtils.promoStatus(roomPromoDto.getStartDate(),
-											roomPromoDto.getEndDate(), roomPromoDto.getStartTime(),
-											roomPromoDto.getEndTime());
-									roomtype.setPromostatus(promostaus);
-									roomtype.setPromotype(roomPromoDto.getPromoType());
-									roomtype.setPromotext(roomPromoDto.getTypeDesc());
+								if (isPromo != null && isPromo) { // isBack
+									isonpromo = "1";
+									if (list != null && list.size() > 0) {
+										RoomPromoDto roomPromoDto = list.get(0);
 
-									if (logger.isInfoEnabled()) {
-										logger.info(String.format("promostatus:%s; promotext:%s; promotype:%s",
-												promostaus, roomPromoDto.getTypeDesc(), roomPromoDto.getPromoType()));
-									}
+										Integer promostaus = DateUtils.promoStatus(roomPromoDto.getStartDate(),
+												roomPromoDto.getEndDate(), roomPromoDto.getStartTime(),
+												roomPromoDto.getEndTime());
+										roomtype.setPromostatus(promostaus);
+										roomtype.setPromotype(roomPromoDto.getPromoType());
+										roomtype.setPromoid(roomPromoDto.getPromoId());
+										roomtype.setPromotext(roomPromoDto.getTypeDesc());
 
-									String promoStartTime = roomPromoDto.getStartTime().toString();
-									if (StringUtils.isNotBlank(promoStartTime)) {
-										String[] tmp = promoStartTime.split(":");
-										promoStartTime = tmp[0] + ":" + tmp[1];
-										roomtype.setPromostarttime(promoStartTime);
-									}
+										if (logger.isInfoEnabled()) {
+											logger.info(String.format("promostatus:%s; promotext:%s; promotype:%s",
+													promostaus, roomPromoDto.getTypeDesc(), roomPromoDto.getPromoType()));
+										}
 
-									Long promoduendsec = DateUtils.promoEndDueTime(roomPromoDto.getEndDate(),
-											roomPromoDto.getStartTime(), roomPromoDto.getEndTime(), promostaus);
-									Long promodustartsec = DateUtils.promoStartDueTime(promoduendsec,
-											roomPromoDto.getStartTime(), promostaus);
+										String promoStartTime = roomPromoDto.getStartTime().toString();
+										if (StringUtils.isNotBlank(promoStartTime)) {
+											String[] tmp = promoStartTime.split(":");
+											promoStartTime = tmp[0] + ":" + tmp[1];
+											roomtype.setPromostarttime(promoStartTime);
+										}
 
-									if (promostaus == Constant.PROMOING) {
-										roomtype.setPromodustartsec("0");
-										roomtype.setPromoduendsec(promoduendsec.toString());
+										Long promoduendsec = DateUtils.promoEndDueTime(roomPromoDto.getEndDate(),
+												roomPromoDto.getStartTime(), roomPromoDto.getEndTime(), promostaus);
+										Long promodustartsec = DateUtils.promoStartDueTime(promoduendsec,
+												roomPromoDto.getStartTime(), promostaus);
 
-									} else {
-										roomtype.setPromodustartsec(promodustartsec.toString());
-										roomtype.setPromoduendsec(promoduendsec.toString());
+										if (promostaus == Constant.PROMOING) {
+											roomtype.setPromodustartsec("0");
+											roomtype.setPromoduendsec(promoduendsec.toString());
+
+										} else {
+											roomtype.setPromodustartsec(promodustartsec.toString());
+											roomtype.setPromoduendsec(promoduendsec.toString());
+										}
+
 									}
 
 								}
-
 							}
 
+
+
 							roomtype.setIsonpromo(isonpromo);
+						}else if (isThemePromo){
+							roomtype.setIsonpromo("0");
 						}
 					}
 
@@ -1103,45 +1128,39 @@ public class RoomstateService {
 					BigDecimal defenseZeroPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
 
 					if (prices == null || prices.length == 0) {
-
-
-
-						if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0){
+						if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
 							// 眯客价
 							roomtype.setRoomtypeprice(defenseZeroPrice);
 							// 门市价
 							roomtype.setRoomtypepmsprice(defenseZeroPrice);
-						}else{
+						} else {
 							// 眯客价
 							roomtype.setRoomtypeprice(troomType.getCost());
 							// 门市价
 							roomtype.setRoomtypepmsprice(troomType.getCost());
 						}
 
-
-
-
 					} else {
 						// 眯客价
 						if (prices[0] != null) {
-							if ("0".equals(prices[0]) || Double.valueOf(prices[0]) <=0){
+							if ("0".equals(prices[0]) || Double.valueOf(prices[0]) <= 0) {
 								roomtype.setRoomtypeprice(defenseZeroPrice);
-							}else{
+							} else {
 								roomtype.setRoomtypeprice(new BigDecimal(prices[0]));
 							}
 
 						} else {
-							if (troomType.getCost().compareTo(BigDecimal.ZERO) <=0){
+							if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
 								roomtype.setRoomtypeprice(defenseZeroPrice);
-							}else{
+							} else {
 								roomtype.setRoomtypeprice(troomType.getCost());
 							}
 						}
 
-						if (troomType.getCost().compareTo(BigDecimal.ZERO) <=0){
+						if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
 							// 门市价
 							roomtype.setRoomtypepmsprice(defenseZeroPrice);
-						}else{
+						} else {
 							// 门市价
 							roomtype.setRoomtypepmsprice(troomType.getCost());
 						}
@@ -1155,6 +1174,10 @@ public class RoomstateService {
 					if (troomtypeInfoModel == null) {
 						this.logger.info("roomtypeid: {} not exists in table t_roomtype_info.",
 								roomtype.getRoomtypeid());
+
+						Cat.logEvent("findHotelRoomStateException", hotelid == null ? "" : hotelid.toString(),
+								Event.SUCCESS, "roomtypeid: " + roomtype == null ? ""
+										: roomtype.getRoomtypeid() + " not exists in table t_roomtype_info.");
 					}
 					RoomstateQuerylistRespEntity.Bed bed = respEntity.new Bed();
 					if ((troomtypeInfoModel == null) || StringUtils.isBlank(troomtypeInfoModel.getBedsize())) {
@@ -1177,6 +1200,24 @@ public class RoomstateService {
 					bed.setBeds(beds);
 					// 床信息挪到房型中
 					roomtype.setBed(bed);
+
+					/**
+					 * add roomtypepic
+					 */
+					roomtype.setRoomtypepic(new ArrayList<Object>());
+					if (troomtypeInfoModel != null && StringUtils.isNotBlank(troomtypeInfoModel.getPics())) {
+						ObjectMapper objectMapper = new ObjectMapper();
+						String pics = "";
+						try {
+							pics = troomtypeInfoModel.getPics();
+							@SuppressWarnings("unchecked")
+							List<Object> picsList = (List<Object>) objectMapper.readValue(pics, List.class);
+
+							roomtype.setRoomtypepic(picsList);
+						} catch (Exception ex) {
+							logger.warn(String.format("failed to parse roomtypepic %s for hotelid", pics, hotelid), ex);
+						}
+					}
 
 					/** ---------------------imike2.5新增---------------------- */
 					roomtype.setArea(troomType.getArea() == null ? new BigDecimal(0) : troomType.getArea());
@@ -1244,13 +1285,23 @@ public class RoomstateService {
 					List<RoomstateQuerylistRespEntity.Room> vcRooms5 = Lists.newArrayList();
 					// boolean isMatch = false;
 					int vcRoomCount = 0;
+					boolean isRoomSelected = false;
 					for (TRoomModel troom : trooms) {
 						RoomstateQuerylistRespEntity.Room room = respEntity.new Room();
 						room.setRoomid(troom.getId());
 						room.setRoomno(troom.getName());
 						room.setRoomname(roomtype.getRoomtypename());
 						room.setHaswindow(troom.getIsWindow() == null ? "" : troom.getIsWindow()); // TODO
-																									// t_room关联t_room_setting
+						// room.setFloor(troom.getFloor() == null ? "" :
+						// troom.getFloor()); // 显示楼层信息 TODO 暂不显示楼层信息。等待数据清洗
+						// t_room关联t_room_setting
+						if (!isRoomSelected && StringUtils.isNotBlank(room.getHaswindow())
+								&& "T".equals(room.getHaswindow()) && StringUtils.isNotBlank(params.getCallversion())
+								&& "3.2".compareTo(params.getCallversion()) <= 0) {
+							room.setIsselected("T");
+							isRoomSelected = true;
+						}
+
 						// room.setBed(bed);
 						// 与redis房态缓存比较：vc可用，nvc不可用
 						this.processRoomState(room, hotelid, begindate, enddate, lockRoomsCache);
@@ -1261,9 +1312,12 @@ public class RoomstateService {
 						} else {
 							// 将可预订房间加入房间集合中
 							// 从历史入住进
-							if (StringUtils.isNotEmpty(roomno) && roomno.equals(room.getRoomno())) {
+							if (!isRoomSelected && StringUtils.isNotEmpty(roomno) && roomno.equals(room.getRoomno())
+									&& StringUtils.isNotBlank(params.getCallversion())
+									&& "3.2".compareTo(params.getCallversion()) <= 0) {
 								room.setIsselected("T");
 								roomtype.setIsfocus("T");
+								isRoomSelected = true;
 								// isMatch = true;
 							}
 							rooms.add(room);
@@ -1278,6 +1332,15 @@ public class RoomstateService {
 								}
 							}
 						}
+					}
+
+					/**
+					 * select a room casually if no room has window after all
+					 */
+					if (!isRoomSelected && rooms != null && rooms.size() > 0
+							&& StringUtils.isNotBlank(params.getCallversion())
+							&& "3.2".compareTo(params.getCallversion()) <= 0) {
+						rooms.get(0).setIsselected("T");
 					}
 
 					roomtype.setVcroomnum(rooms.size()); // 将售房间数加入房型(roomtype)
@@ -1313,9 +1376,12 @@ public class RoomstateService {
 
 					// 兼容老版本
 					if (isPromo != null && isPromo) {
+
 						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
 								&& !"3".equals(callMethod)) {
 
+							roomtypes.add(roomtype);
+						}else if (isThemePromo){
 							roomtypes.add(roomtype);
 						}
 					} else {
@@ -1324,6 +1390,7 @@ public class RoomstateService {
 				}
 			} catch (Exception e) {
 				logger.error("failed to find rooms...", e);
+				Cat.logError("findHotelRoomStateException", e);
 				t.setStatus(e);
 				throw e;
 			} finally {
@@ -1347,8 +1414,7 @@ public class RoomstateService {
 					RoomstateQuerylistRespEntity.Roomtype rt = (RoomstateQuerylistRespEntity.Roomtype) roomtypesArr[i];
 					if ("1".equals(rt.getIsonpromo())) {
 						promoRoomTypes.add(rt);
-					} 
-					else if (rt.getVcroomnum() <= 0)
+					} else if (rt.getVcroomnum() <= 0)
 						tempRoomTypes.add(rt);
 					else {
 						normalRoomTypes.add(rt);
@@ -1393,9 +1459,7 @@ public class RoomstateService {
 		return respEntityList;
 	}
 
-
-
-	public List<RoomstateQuerylistRespEntity> findHotelRoomPrice(String roomno, RoomstateQuerylistReqEntity params){
+	public List<RoomstateQuerylistRespEntity> findHotelRoomPrice(String roomno, RoomstateQuerylistReqEntity params) {
 		List<RoomstateQuerylistRespEntity> respEntityList = Lists.newArrayList();
 		List<TRoomTypeModel> troomTypes = new ArrayList<TRoomTypeModel>();
 		List<RoomstateQuerylistRespEntity.Roomtype> roomtypes = Lists.newArrayList();
@@ -1408,7 +1472,8 @@ public class RoomstateService {
 		try {
 			troomTypes = troomtypeMapper.findList(roomtypeid, hotelid, bednum);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(String.format("failed to troomtypeMapper.findList->roomtypeid:%s, hotelid:%s, bednum:%s",
+					roomtypeid, hotelid, bednum), e);
 		}
 		RoomstateQuerylistRespEntity respEntity = new RoomstateQuerylistRespEntity();
 
@@ -1420,8 +1485,7 @@ public class RoomstateService {
 			Transaction priceTransaction = Cat.newTransaction("RoomState", "mikeprice-redis");
 			try {
 				if (hotelPriceService.isUseNewPrice())
-					prices = hotelPriceService.getRoomtypeMikePrices(hotelid, troomType.getId(), begindate,
-							enddate);
+					prices = hotelPriceService.getRoomtypeMikePrices(hotelid, troomType.getId(), begindate, enddate);
 				else
 					prices = this.getRoomtypeMikePrices(hotelid, troomType.getId(), begindate, enddate);
 				priceTransaction.setStatus(Transaction.SUCCESS);
@@ -1436,7 +1500,6 @@ public class RoomstateService {
 
 			if (prices == null || prices.length == 0) {
 
-
 				if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
 					// 眯客价
 					roomtype.setRoomtypeprice(defenseZeroPrice);
@@ -1448,7 +1511,6 @@ public class RoomstateService {
 					// 门市价
 					roomtype.setRoomtypepmsprice(troomType.getCost());
 				}
-
 
 			} else {
 				// 眯客价
@@ -1484,8 +1546,6 @@ public class RoomstateService {
 		return respEntityList;
 
 	}
-
-
 
 	/**
 	 * 
@@ -1825,9 +1885,9 @@ public class RoomstateService {
 				BigDecimal subper = troomtype.getSubper();
 				if ((price == null) && (subprice == null) && (subper == null)) {
 					// 没有设置对应的基本价格，直接返回门市价
-					if (troomtype.getCost().compareTo(BigDecimal.ZERO) <= 0){
-						rtnPrice =  new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
-					}else {
+					if (troomtype.getCost().compareTo(BigDecimal.ZERO) <= 0) {
+						rtnPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
+					} else {
 						rtnPrice = troomtype.getCost();
 					}
 
@@ -1842,7 +1902,7 @@ public class RoomstateService {
 					if ((subprice != null) && (subprice.compareTo(BigDecimal.ZERO) == 1)) {
 						rtnPrice = BigDecimal.valueOf(cost.doubleValue() - subprice.doubleValue());
 						if (rtnPrice.compareTo(BigDecimal.ZERO) == -1) {
-							rtnPrice  = new BigDecimal(Constant.DEFENSE_ZERO_PRICE); //BigDecimal.ZERO;
+							rtnPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE); // BigDecimal.ZERO;
 							jedis.hset(key, field, rtnPrice.toString());
 							this.logger.info("基本价未设置, 设置了下浮: {}, 基本价为: {}", subprice, rtnPrice);
 							continue;
@@ -1854,7 +1914,7 @@ public class RoomstateService {
 						double dbl = troomtype.getCost().doubleValue() * (1d - subper.doubleValue());
 						rtnPrice = BigDecimal.valueOf(dbl).setScale(0, BigDecimal.ROUND_HALF_UP);
 
-						if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0){
+						if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0) {
 							rtnPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
 						}
 
@@ -1865,7 +1925,7 @@ public class RoomstateService {
 				} else {
 					// 设置了基本价
 					rtnPrice = troomtype.getPrice();
-					if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0){
+					if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0) {
 						rtnPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
 					}
 					jedis.hset(key, field, rtnPrice.toString());
@@ -1947,11 +2007,9 @@ public class RoomstateService {
 			price = this.findRoomtypePrice(roomtypeid, false);
 			this.logger.info("房型价格, price is {}", price);
 
-
-
 		}
 
-		if (price.compareTo(BigDecimal.ZERO) <= 0){
+		if (price.compareTo(BigDecimal.ZERO) <= 0) {
 			return new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
 		}
 
@@ -2042,7 +2100,7 @@ public class RoomstateService {
 					if ((subprice != null) && (subprice.compareTo(BigDecimal.ZERO) == 1)) {
 						rtnPrice = BigDecimal.valueOf(cost.doubleValue() - subprice.doubleValue());
 						if (rtnPrice.compareTo(BigDecimal.ZERO) == -1) {
-							rtnPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE) ;  //BigDecimal.ZERO;
+							rtnPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE); // BigDecimal.ZERO;
 							jedis.hset(keyMikeRoomprice, field, rtnPrice.toString());
 							this.logger.info("基本价未设置, 设置了下浮: {}, 基本价为: {}", subprice, rtnPrice);
 							continue;
@@ -2060,7 +2118,7 @@ public class RoomstateService {
 				} else {
 					// 设置了基本价
 					rtnPrice = troomtype.getPrice();
-					if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0){
+					if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0) {
 						rtnPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
 					}
 					jedis.hset(keyMikeRoomprice, field, rtnPrice.toString());
@@ -2070,7 +2128,7 @@ public class RoomstateService {
 
 				// 放入redis缓存
 
-				if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0){
+				if (rtnPrice.compareTo(BigDecimal.ZERO) <= 0) {
 					rtnPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
 				}
 
@@ -2290,7 +2348,7 @@ public class RoomstateService {
 				}
 			}
 			if (minkey != null && minval != null) {
-				if ("0".equals(minval)|| Double.valueOf(minval) < 0){
+				if ("0".equals(minval) || Double.valueOf(minval) < 0) {
 					minval = Constant.DEFENSE_ZERO_PRICE.toString();
 				}
 				minRoomprice.put(minkey, minval);
@@ -2309,7 +2367,8 @@ public class RoomstateService {
 	 * @return String[] 返回值
 	 */
 	public String[] getHotelMikePrices(Long hotelid, String startdateday, String enddateday) {
-		String[] resultVal = new String[] { Constant.DEFENSE_ZERO_PRICE.toString(), Constant.DEFENSE_ZERO_PRICE.toString() };
+		String[] resultVal = new String[] { Constant.DEFENSE_ZERO_PRICE.toString(),
+				Constant.DEFENSE_ZERO_PRICE.toString() };
 		try {
 			Map<String, Object> rtnMap = updateHotelMikepricesCache(hotelid, null, false);
 			if (rtnMap == null || rtnMap.size() == 0) {
@@ -2429,7 +2488,8 @@ public class RoomstateService {
 	 * @return String[] 返回值
 	 */
 	public String[] getRoomtypeMikePrices(Long hotelid, Long roomtypeid, String startdateday, String enddateday) {
-		String[] resultVal = new String[] { Constant.DEFENSE_ZERO_PRICE.toString(), Constant.DEFENSE_ZERO_PRICE.toString() };
+		String[] resultVal = new String[] { Constant.DEFENSE_ZERO_PRICE.toString(),
+				Constant.DEFENSE_ZERO_PRICE.toString() };
 		try {
 			Map<String, Object> rtnMap = updateHotelMikepricesCache(hotelid, null, false);
 			if (rtnMap == null || rtnMap.size() == 0) {
@@ -2492,22 +2552,19 @@ public class RoomstateService {
 				if (price == null) {
 					logger.info("未配置策略价格.");
 					String val = mikeRoompriceMap.get(roomtypeid.toString());
-					if (val == null || "0".equals(val) ) {
+					if (val == null || "0".equals(val)) {
 						val = Constant.DEFENSE_ZERO_PRICE.toString();
 						logger.info("房型价格error,酒店需要审核:{}--{}--{}--{}", hotelid, roomtypeid, startdateday, enddateday);
-						Cat.logEvent("ZeroPrice", "hotelid: " +hotelid + " roomtypeid: " + roomtypeid);
+						Cat.logEvent("ZeroPrice", "hotelid: " + hotelid + " roomtypeid: " + roomtypeid);
 						System.out.println("房型价格error,酒店需要审核:{" + hotelid + "}--{" + roomtypeid + "}--{" + startdateday
 								+ "}--{" + enddateday + "}");
-					}else if (val != null && Double.valueOf(val) <= 0){
+					} else if (val != null && Double.valueOf(val) <= 0) {
 						val = Constant.DEFENSE_ZERO_PRICE.toString();
 						logger.info("房型价格error,酒店需要审核:{}--{}--{}--{}", hotelid, roomtypeid, startdateday, enddateday);
-						Cat.logEvent("ZeroPrice", "hotelid: " +hotelid + " roomtypeid: " + roomtypeid);
+						Cat.logEvent("ZeroPrice", "hotelid: " + hotelid + " roomtypeid: " + roomtypeid);
 						System.out.println("房型价格error,酒店需要审核:{" + hotelid + "}--{" + roomtypeid + "}--{" + startdateday
 								+ "}--{" + enddateday + "}");
 					}
-
-
-
 
 					price = new BigDecimal(val);
 					resultVal[0] = price.toString();
