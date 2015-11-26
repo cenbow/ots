@@ -1486,6 +1486,7 @@ public class SearchService implements ISearchService {
 				promoPrice = Integer.valueOf(promoPriceTxt);
 			} catch (Exception ex) {
 				logger.warn(String.format("promotype is invalid %s", promoPriceTxt), ex);
+				continue;
 			}
 
 			if (minPrice == 0 || (promoPrice < minPrice)) {
