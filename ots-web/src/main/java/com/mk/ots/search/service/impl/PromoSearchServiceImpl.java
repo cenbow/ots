@@ -1929,15 +1929,18 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 
 		List<Map<String, Object>> hotelpics = (List<Map<String, Object>>) hotel.get("hotelpic");
-
+		List<Map<String, Object>> newHotelPics = new ArrayList<Map<String, Object>>();
+		newHotelPics.addAll(hotelpics);
+		hotel.put("hotelpic", newHotelPics);
+		
 		ObjectMapper objectMapper = new ObjectMapper();
 		List<Object> roomtypeList = (List<Object>) objectMapper.readValue(picsJson, List.class);
 
 		if (roomtypeList != null && roomtypeList.size() > 0) {
 			Map<String, Object> roomtypePic = (Map<String, Object>) roomtypeList.get(0);
 
-			if (hotelpics != null && hotelpics.size() > 0) {
-				hotelpics.set(0, roomtypePic);
+			if (newHotelPics != null && newHotelPics.size() > 0) {
+				newHotelPics.set(0, roomtypePic);
 			} else {
 				List<Map<String, Object>> newhotelpics = new ArrayList<Map<String, Object>>();
 				hotel.put("hotelpic", newhotelpics);
