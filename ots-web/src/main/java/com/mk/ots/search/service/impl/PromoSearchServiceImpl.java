@@ -18,6 +18,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.mk.ots.common.enums.*;
+
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -789,7 +791,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		List<Queue<Map<String, Object>>> roomTypeQueueList = new ArrayList<Queue<Map<String, Object>>>();
 		while (roomTypeQueues.hasNext()) {
 			Queue<Map<String, Object>> roomTypeQueue = roomTypeQueues.next();
-			if (roomTypeQueue != null) {
+			if (roomTypeQueue != null && !roomTypeQueue.isEmpty()) {
 				roomTypeQueueList.add(roomTypeQueue);
 			}
 		}
@@ -1883,14 +1885,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				if (hotelId != null) {
 					Map<String, Object> hotel = (Map<String, Object>) hotelIdMap.get(String.valueOf(hotelId));
+					Map<String, Object> newHotel = new HashMap<String, Object>();
+					newHotel.putAll(hotel);
+					
 					List<Map<String, Object>> singleRoomType = new ArrayList<Map<String, Object>>();
 					singleRoomType.add(roomtype);
 
-					hotel.put("roomtype", singleRoomType);
+					newHotel.put("roomtype", singleRoomType);
 
-					updateHotelPicWithRoomtype(roomtype, hotel);
+					updateHotelPicWithRoomtype(roomtype, newHotel);
 
-					hotelIds.add(hotel);
+					hotelIds.add(newHotel);
 				}
 			}
 		}
