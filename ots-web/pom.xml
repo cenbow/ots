@@ -1490,12 +1490,12 @@
                 <slave.jdbc.user>smlt-writer</slave.jdbc.user>
                 <slave.jdbc.password>j9bcyZ5U5LQp7xxEomsu</slave.jdbc.password>
                 <!-- <slave.jdbc.url><![CDATA[jdbc:mysql://10.4.28.44:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url> <slave.jdbc.user>smlt-reader</slave.jdbc.user> <slave.jdbc.password>ims8LfQKTBs6gj79TdgB</slave.jdbc.password> -->
-                <spring.redis.sentinel.master>smlt-elasticsearch</spring.redis.sentinel.master>
+                <spring.redis.sentinel.master>ots-smlt-bj-redis</spring.redis.sentinel.master>
                 <spring.redis.sentinel.nodes>10.10.115.57:26379</spring.redis.sentinel.nodes>
                 <synserver.ip>10.10.124.247</synserver.ip>
                 <synserver.port>8000</synserver.port>
                 <elasticsearch.clusterhosts>10.10.118.60:9300</elasticsearch.clusterhosts>
-                <elasticsearch.clustername>ots-smlt-bj-elastic-1</elasticsearch.clustername>
+                <elasticsearch.clustername>smlt-elasticsearch</elasticsearch.clustername>
                 <elasticsearch.index>ots</elasticsearch.index>
                 <elasticsearch.type>hotel</elasticsearch.type>
                 <hessian_soap>http://10.10.131.104:8085/soap/hessian</hessian_soap>
