@@ -403,7 +403,18 @@ public class QiekeRuleService {
         if (orderMethod ==  OrderMethodEnum.IOS.getId()) {
             return checkUserAdders(IOS_CHECK_USER_ADDRESS_IS_NULL_SWITCH, IOS_CHECK_USER_ADDRESS_DISTANCE_SWITCH,
                     userlongitude, userlatitude, tHotelModel.getLongitude(), tHotelModel.getLatitude());
-        }else{
+        }else if (orderMethod ==  OrderMethodEnum.WECHAT.getId()) {
+            //若是微信，且 坐标为 t.userlatitude = 31.164726  t.userlongitude = 121.396908，认为符合规则
+            if(null == userlongitude || null == userlatitude) {
+                return OtaFreqTrvEnum.L1;
+            } else if (userlatitude.compareTo(new BigDecimal("31.164726")) == 0 && userlongitude.compareTo(new BigDecimal("121.396908")) == 0) {
+                return OtaFreqTrvEnum.L1;
+            } else {
+                return checkUserAdders(true, true,
+                        userlongitude, userlatitude, tHotelModel.getLongitude(), tHotelModel.getLatitude());
+            }
+
+        } else {
             return checkUserAdders(true, true,
                     userlongitude, userlatitude, tHotelModel.getLongitude(), tHotelModel.getLatitude());
         }

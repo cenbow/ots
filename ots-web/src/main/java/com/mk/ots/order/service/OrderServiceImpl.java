@@ -1659,9 +1659,14 @@ public class OrderServiceImpl implements OrderService {
                   Cat.logEvent("SavePmsOrderRoomNULLExcption", CommonUtils.toStr(order.getLong("hotelId")),"ERROR",order.toJson());
                   throw MyErrorEnum.customError.getMyException("房间没有了");
               } else {
-                  Cat.logEvent("SavePmsOrderExcption", CommonUtils.toStr(order.getLong("hotelId")),"ERROR",order.toJson());
-                  throw MyErrorEnum.saveOrderPms.getMyException(returnObject.getString("errmsg"));
-
+                  if(order != null){
+                      Cat.logEvent("SavePmsOrderExcption", CommonUtils.toStr(order.getLong("hotelId")),"ERROR",order.toJson());
+                  }
+                  if(returnObject != null){
+                      throw MyErrorEnum.saveOrderPms.getMyException(returnObject.getString("errmsg"));
+                  }else{
+                      throw MyErrorEnum.saveOrderPms.getMyException("PMS返回信息错误");
+                  }
               }
           } else {
               logger.info("OTSMessage::接口调用:submitAddOrder::创建psmOrder成功" + order.getId());
