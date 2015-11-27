@@ -3,11 +3,22 @@ package com.mk.ots.search.service.impl;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.mk.es.Hotel;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -792,7 +803,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		AtomicInteger curPos = new AtomicInteger(0);
 
 		for (int i = 0; i < counter; i++) {
-			Map<String, Object> roomtype = pollRoomtype(roomTypeQueueList, curPos);
+			Map<String, Object> roomtype = pollRoomtypes(roomTypeQueueList, curPos);
 
 			if (roomtype != null) {
 				themeGrouped.add(roomtype);
@@ -811,30 +822,21 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return themeGrouped;
 	}
 
-	private Map<String, Object> pollRoomtype(List<Queue<Map<String, Object>>> roomTypeQueue, AtomicInteger curPos) {
+	private Map<String, Object> pollRoomtypes(List<Queue<Map<String, Object>>> roomTypeQueue, AtomicInteger curPosy) {
 		Map<String, Object> roomtype = null;
 
-		for (int i = curPos.get(); i < roomTypeQueue.size(); i++) {
-			if (!roomTypeQueue.get(i).isEmpty()) {
-				roomtype = roomTypeQueue.get(i).poll();
+		Integer lastPosy = curPosy.get();
+		int y = lastPosy;
+		for (int i = 0; i < roomTypeQueue.size(); i++) {
+			if (!roomTypeQueue.get(y).isEmpty()) {
+				roomtype = roomTypeQueue.get(y).poll();
 			}
+
+			y = (y + 1) % roomTypeQueue.size();
 
 			if (roomtype != null) {
-				curPos.set(i);
+				curPosy.set(y);
 				break;
-			}
-		}
-
-		if (roomtype == null) {
-			for (int i = 0; i < roomTypeQueue.size(); i++) {
-				if (!roomTypeQueue.get(i).isEmpty()) {
-					roomtype = roomTypeQueue.get(i).poll();
-				}
-
-				if (roomtype != null) {
-					curPos.set(i);
-					break;
-				}
 			}
 		}
 
@@ -1014,7 +1016,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Integer normalId = showConfig.getNormalId();
 
 		Map<String, Object> rtnMap = null;
-		final Integer maxThemes = 15; 
+		final Integer maxThemes = 15;
 		if (promoId == HotelPromoEnum.Theme.getCode()) {
 			Integer promotype = this.queryByPromoId(promoId);
 			params.setPromotype(String.valueOf(promotype));
@@ -1932,7 +1934,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		List<Map<String, Object>> newHotelPics = new ArrayList<Map<String, Object>>();
 		newHotelPics.addAll(hotelpics);
 		hotel.put("hotelpic", newHotelPics);
-		
+
 		ObjectMapper objectMapper = new ObjectMapper();
 		List<Object> roomtypeList = (List<Object>) objectMapper.readValue(picsJson, List.class);
 
@@ -2253,7 +2255,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				result.put("$sortScore", hit.getScore());
 
-
 				// 根据用户经纬度来计算两个经纬度坐标距离（单位：米）
 				Map<String, Object> pin = (Map<String, Object>) result.get("pin");
 				// hotel latitude and longitude
@@ -2441,7 +2442,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 				result.put("minprice", minPrice);
 
-
 				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype())
 						? Integer.valueOf(reqentity.getPromotype()) : null;
 
@@ -2460,9 +2460,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						for (Map<String, Integer> promoinfo : promoList) {
 							Integer hotelPromoType = promoinfo.get("promotype");
 							Integer hotelpromoId = promoinfo.get("promoid");
-							if (hotelpromoId != null && hotelpromoId == HotelPromoEnum.Theme.getCode()){
-								result.put("promoprice",minPrice);
-							}else if (hotelPromoType == promoType) {
+							if (hotelpromoId != null && hotelpromoId == HotelPromoEnum.Theme.getCode()) {
+								result.put("promoprice", minPrice);
+							} else if (hotelPromoType == promoType) {
 								result.put("promoprice", promoinfo.get("promoprice"));
 							}
 						}
@@ -2487,8 +2487,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						result.put("promoids", promoIds);
 					}
 				}
-
-
 
 				Long maxPrice = roomstateService.findHotelMaxPrice(Long.parseLong(es_hotelid));
 				result.put("minpmsprice", new BigDecimal(maxPrice));
@@ -2664,7 +2662,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			Integer promoType = (Integer) promoInfo.get("promotype");
 			Integer promoId = (Integer) promoInfo.get("promoid");
 			promoTypeLists.add(promoId);
-			if (themeType == promoId){
+			if (themeType == promoId) {
 				existThemeType = true;
 				tmpPromoType = promoType;
 			}
