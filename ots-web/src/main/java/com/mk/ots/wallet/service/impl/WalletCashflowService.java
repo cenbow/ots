@@ -7,6 +7,7 @@ import com.mk.ots.city.service.ITCityCommentConfigService;
 import com.mk.ots.common.enums.OtaOrderFlagEnum;
 import com.mk.ots.hotel.model.THotelModel;
 import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.mapper.THotelScoreMapper;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.service.OrderBusinessLogService;
 import com.mk.ots.order.service.OrderService;
@@ -56,6 +57,9 @@ public class WalletCashflowService implements IWalletCashflowService {
 
     @Autowired
     private ITCityCommentConfigService itCityCommentConfigService;
+
+    @Autowired
+    private THotelScoreMapper tHotelScoreMapper;
 
     @Override
     public Page<UWalletCashFlow> findPage(Long mid, Long sourceid, int pageindex, int datesize) {
@@ -345,9 +349,21 @@ public class WalletCashflowService implements IWalletCashflowService {
         THotelScore hotelScore = scoreService.findScoreByScoreid(scoreid);
         if (hotelScore != null) {
             THotelModel tHotelModel = hotelService.readonlyHotelModel(hotelScore.getHotelid());
+            if(isHotelFirstScoreUserFull(tHotelModel.getId())){
+
+            }
             Long citycode = Long.parseLong(tHotelModel.getCitycode());
             return itCityCommentConfigService.findCashbackByCitycode(citycode);
         }
         return BigDecimal.ZERO;
+    }
+
+
+    private  Boolean   isHotelFirstScoreUserFull(Long  hotelId){
+        Long  count = tHotelScoreMapper.findHotelScoreNumByHotelId(hotelId);
+        if(count>0){
+            return fasle;
+        }
+        return true;
     }
 }

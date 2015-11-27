@@ -370,4 +370,13 @@
       backcashcost = #{backcashcost,jdbcType=DECIMAL}
     where id = #{id,jdbcType=BIGINT}
   </update>
+
+  <select id="findHotelScoreNumByHotelId"  >
+    SELECT
+    count(*)
+    FROM
+    t_hotel_score a
+    WHERE
+    a.hotelid = #{hotelid}  AND  a.type = 1  AND a.iscashbacked = 'T' ;
+  </select>
 </mapper>

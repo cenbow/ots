@@ -26,4 +26,6 @@ public interface THotelScoreMapper {
     int updateByPrimaryKey(THotelScore record);
     
     List<Map<String, String>> findHotelScoresByHotelid(Long hotelid);
+
+   public  Long  findHotelScoreNumByHotelId(Long hotelId);
 }

@@ -1,5 +1,7 @@
 package com.mk.ots.city.service;
 
+import com.mk.ots.city.model.TCityCommentConfig;
+
 import java.math.BigDecimal;
 
 /**
@@ -13,4 +15,7 @@ public interface ITCityCommentConfigService {
      * @return TCityCommentConfig
      */
     BigDecimal findCashbackByCitycode(Long citycode);
+
+    TCityCommentConfig findCashbackEntityByCitycode(Long citycode);
+
 }
