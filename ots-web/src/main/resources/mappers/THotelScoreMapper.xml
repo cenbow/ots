@@ -371,12 +371,32 @@
     where id = #{id,jdbcType=BIGINT}
   </update>
 
-  <select id="findHotelScoreNumByHotelId"  >
+  <select id="findHotelScoreNumByHotelId"   resultType="java.lang.Long" >
     SELECT
     count(*)
     FROM
     t_hotel_score a
     WHERE
     a.hotelid = #{hotelid}  AND  a.type = 1  AND a.iscashbacked = 'T' ;
+  </select>
+
+  <select id="findHotelScoreNumByMid"  parameterType="java.util.HashMap" resultType="java.lang.Long">
+    SELECT
+    count(*)
+    FROM
+    t_hotel_score a
+    WHERE
+    a.hotelid = #{hotelid}  AND  a.type = 1  AND a.iscashbacked = 'T'
+     and  DATE_FORMAT(createtime,'%Y-%m') = DATE_FORMAT(#{createTime},'%Y-%m');
+  </select>
+
+  <select id="findHotelScoreMoneyByMid"  parameterType="java.util.HashMap"  resultType="java.math.BigDecimal" >
+    SELECT
+    sum(backcashcost) as  backCashCostSum
+    FROM
+    t_hotel_score a
+    WHERE
+    a.mid = #{mid}  AND  a.type = 1  AND a.iscashbacked = 'T'
+     and  DATE_FORMAT(createtime,'%Y-%m') = DATE_FORMAT(#{createTime},'%Y-%m');
   </select>
 </mapper>

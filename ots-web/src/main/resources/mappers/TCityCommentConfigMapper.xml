@@ -12,8 +12,8 @@
         <result column="value" jdbcType="DECIMAL" property="value"/>
         <result column="status" jdbcType="CHAR" property="status"/>
         <result column="first_value" jdbcType="DECIMAL" property="firstValue"/>
-        <result column="type" jdbcType="Integer" property="type"/>
-        <result column="max_count" jdbcType="Integer" property="maxCount"/>
+        <result column="type" jdbcType="BIGINT" property="type"/>
+        <result column="max_count" jdbcType="BIGINT" property="maxCount"/>
         <result column="max_price" jdbcType="DECIMAL" property="maxPrice"/>
 
     </resultMap>
