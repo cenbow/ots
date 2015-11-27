@@ -1498,7 +1498,7 @@
                 <elasticsearch.clustername>smlt-elasticsearch</elasticsearch.clustername>
                 <elasticsearch.index>ots</elasticsearch.index>
                 <elasticsearch.type>hotel</elasticsearch.type>
-                <hessian_soap>http://10.10.131.104:8085/soap/hessian</hessian_soap>
+                <hessian_soap>http://10.10.126.121:8080/soap/hessian</hessian_soap>
                 <hessian_bms>http://sms.imike.cn/</hessian_bms>
                 <newpms.url>https://smlt-otai.imike.cn/otai/ots2pms</newpms.url>
                 <jedis.pool.maxidl>20</jedis.pool.maxidl>
