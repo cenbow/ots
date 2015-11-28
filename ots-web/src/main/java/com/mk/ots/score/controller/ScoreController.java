@@ -344,4 +344,37 @@ public class ScoreController {
 
         return new ResponseEntity<Map<String,Object>>(resultMap, HttpStatus.OK);
 	}
+
+		@RequestMapping("/score/hotelscore")
+		public ResponseEntity<Map<String,Object>> addHotelscore(HttpServletRequest request){
+			String scoreId= request.getParameter("scoreId");
+			if(StringUtils.isBlank(scoreId)){
+				logger.debug("缺少必须参数评价id.");
+				throw MyErrorEnum.errorParm.getMyException("缺少必须参数定单id.");
+			}
+
+			String hotelScore= request.getParameter("hotelScore");//评价内容
+
+				//添加字符转换，输入表情符号
+			if(hotelScore != null){
+				try {
+					if (hotelScore.equals(new String(hotelScore.getBytes("iso8859-1"), "iso8859-1"))){
+						hotelScore = new String(hotelScore.getBytes("iso8859-1"),"utf-8");
+					}
+					logger.info("hotelScore = {}" , hotelScore);
+					hotelScore = CharUtils.toValid3ByteUTF8String(hotelScore);
+				} catch (UnsupportedEncodingException e) {
+					logger.error(e.getMessage() ,e);
+				}
+			}
+
+			HashMap param= new HashMap<String,Object>();
+			param.put("scoreId", scoreId);
+			param.put("hotelScore", hotelScore);//评价内容
+
+			boolean isSuccess=scoreService.addHotelScore(param);
+			Map<String,Object> m = new HashMap<String,Object>();
+			m.put("success", isSuccess);
+			return new ResponseEntity<Map<String,Object>>(m, HttpStatus.OK);
+		}
 }

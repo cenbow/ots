@@ -18,6 +18,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -357,7 +358,6 @@ public class ScoreService {
 	/**
 	 * 查询房间评分
 	 * 
-	 * @param roomtypeid
 	 * @param roomid
 	 * @return
 	 */
@@ -657,5 +657,26 @@ public class ScoreService {
 	 */
 	public THotelScore findScoreByScoreid(Long scoreid){
 		return tHotelScoreMapper.selectByPrimaryKey(scoreid);
+	}
+
+	public Boolean  addHotelScore(HashMap param){
+		Long  scoreId = null==param.get("scoreId")?0:Long.parseLong(param.get("scoreId").toString());
+		String  hotelScore = param.get("hotelScore").toString();
+		THotelScore tHotelScore = tHotelScoreMapper.selectByPrimaryKey(scoreId);
+		if(null==tHotelScore){
+			logger.info("评价id为："+scoreId+"的评价找不到。");
+			return false;
+		}
+		THotelScore  tHotelScoreOfHotel = new  THotelScore();
+		BeanUtils.copyProperties(tHotelScore, tHotelScoreOfHotel);
+		tHotelScoreOfHotel.setType(3); //设置为酒店回复类型
+		tHotelScoreOfHotel.setScore(hotelScore);
+		int result = tHotelScoreMapper.insert(tHotelScoreOfHotel);
+		if(result>0){
+			logger.info("评价回复评价成功");
+			return  true;
+		}else{
+			return  false;
+		}
 	}
 }
