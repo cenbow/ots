@@ -194,8 +194,15 @@ public class WalletCashflowService implements IWalletCashflowService {
             THotelModel tHotelModel = hotelService.readonlyHotelModel(hotelScore.getHotelid());
             Long citycode = Long.parseLong(tHotelModel.getCitycode());
             TCityCommentConfig tcityCommentConfig = itCityCommentConfigService.findCashbackEntityByCitycode(citycode);
+            if(null==tcityCommentConfig){
+                return  null;
+            }
+            //无限制
+            if(BackMoneyTypeEnum.defineNot.getId()==(tcityCommentConfig.getType())){
+                return   tcityCommentConfig;
+            }
             //最大数量限制
-            if (BackMoneyTypeEnum.defineMaxNum.getId()==(tcityCommentConfig.getType())) {
+           else if (BackMoneyTypeEnum.defineMaxNum.getId()==(tcityCommentConfig.getType())) {
                 int  maxCountDef = tcityCommentConfig.getMaxCount();
                 HashMap hm = new HashMap();
                 hm.put("createTime", DateUtils.formatDatetime(hotelScore.getCreatetime()));

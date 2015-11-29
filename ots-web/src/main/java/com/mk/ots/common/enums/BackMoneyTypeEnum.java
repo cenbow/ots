@@ -9,6 +9,8 @@ import cn.com.winhoo.mikeweb.exception.MyErrorEnum;
  */
 
 public enum BackMoneyTypeEnum {
+
+	defineNot(0,"无限制"),
 	defineMaxNum(1,"数量限制"),
 	defineMaxMoney(2,"金额限制"),
 	;
