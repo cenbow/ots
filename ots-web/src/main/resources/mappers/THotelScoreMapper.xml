@@ -386,7 +386,7 @@
     FROM
     t_hotel_score a
     WHERE
-    a.hotelid = #{hotelid}  AND  a.type = 1  AND a.iscashbacked = 'T'
+    a.mid = #{mid}  AND  a.type = 1  AND a.iscashbacked = 'T'
      and  DATE_FORMAT(createtime,'%Y-%m') = DATE_FORMAT(#{createTime},'%Y-%m');
   </select>
 
