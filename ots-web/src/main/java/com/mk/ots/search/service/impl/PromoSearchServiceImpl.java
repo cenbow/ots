@@ -589,7 +589,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			makeHotelTypeFilter(reqentity, filterBuilders);
 			makeBedTypeFilter(reqentity, filterBuilders);
-			
+
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
 					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
 					.must(QueryBuilders.matchQuery("online", Constant.STR_TRUE));
@@ -2842,10 +2842,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		try {
 			Long id = posid == null ? 0l : Long.valueOf(posid);
 			SAreaInfo areainfo = sareaInfoMapper.selectByPrimaryKey(id);
-			Integer disid = areainfo.getDisid();
-			if (areainfo == null || disid == null) {
-				disid = -1;
+
+			Integer disid = -1;
+			if (areainfo != null) {
+				disid = areainfo.getDisid();
 			}
+
 			filterBuilders.add(FilterBuilders.termFilter("hoteldis", disid.toString()));
 		} catch (Exception e) {
 			logger.error("failed to sareaInfoMapper.selectByPrimaryKey", e);

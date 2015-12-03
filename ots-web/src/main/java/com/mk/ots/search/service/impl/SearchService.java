@@ -1647,16 +1647,19 @@ public class SearchService implements ISearchService {
 		try {
 			Long id = posid == null ? 0l : Long.valueOf(posid);
 			SAreaInfo areainfo = sareaInfoMapper.selectByPrimaryKey(id);
-			Integer disid = areainfo.getDisid();
-			if (areainfo == null || disid == null) {
-				disid = -1;
+
+			Integer disid = -1;
+			if (areainfo != null) {
+				disid = areainfo.getDisid();
 			}
+
 			filterBuilders.add(FilterBuilders.termFilter("hoteldis", disid.toString()));
 		} catch (Exception e) {
 			logger.error("failed to sareaInfoMapper.selectByPrimaryKey", e);
 			e.printStackTrace();
 		}
 	}
+
 
 	/**
 	 * 按行政区搜索
