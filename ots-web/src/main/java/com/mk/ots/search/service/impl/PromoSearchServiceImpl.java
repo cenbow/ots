@@ -589,7 +589,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			makeHotelTypeFilter(reqentity, filterBuilders);
 			makeBedTypeFilter(reqentity, filterBuilders);
-
+			
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
 					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
 					.must(QueryBuilders.matchQuery("online", Constant.STR_TRUE));
@@ -2831,7 +2831,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return mikePriceBuilders;
 	}
 
-
 	/**
 	 * 按行政区搜索
 	 * 
@@ -2844,7 +2843,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			Long id = posid == null ? 0l : Long.valueOf(posid);
 			SAreaInfo areainfo = sareaInfoMapper.selectByPrimaryKey(id);
 			Integer disid = areainfo.getDisid();
-			if (disid == null) {
+			if (areainfo == null || disid == null) {
 				disid = -1;
 			}
 			filterBuilders.add(FilterBuilders.termFilter("hoteldis", disid.toString()));

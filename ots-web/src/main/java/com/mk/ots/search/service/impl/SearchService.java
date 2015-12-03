@@ -1648,7 +1648,7 @@ public class SearchService implements ISearchService {
 			Long id = posid == null ? 0l : Long.valueOf(posid);
 			SAreaInfo areainfo = sareaInfoMapper.selectByPrimaryKey(id);
 			Integer disid = areainfo.getDisid();
-			if (disid == null) {
+			if (areainfo == null || disid == null) {
 				disid = -1;
 			}
 			filterBuilders.add(FilterBuilders.termFilter("hoteldis", disid.toString()));
