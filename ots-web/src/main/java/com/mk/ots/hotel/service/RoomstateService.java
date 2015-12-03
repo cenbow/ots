@@ -1669,7 +1669,7 @@ public class RoomstateService {
 		try {
 			Map<String, Object> maxPrices = tRoomTypeMapper.findHotelMaxPrice(hotelid);
 			if (null != maxPrices.get("maxprice")){
-				maxPrice = (BigDecimal) maxPrices.get("maxprice");
+				maxPrice = (BigDecimal)maxPrices.get("maxprice");
 			}
 		} catch (Exception ex) {
 			logger.error(String.format("failed to findHotelMaxPrice by hotelid:%s ", hotelid), ex);
