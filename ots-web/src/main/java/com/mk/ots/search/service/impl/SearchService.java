@@ -1647,11 +1647,11 @@ public class SearchService implements ISearchService {
 		try {
 			Long id = posid == null ? 0l : Long.valueOf(posid);
 			SAreaInfo areainfo = sareaInfoMapper.selectByPrimaryKey(id);
-			String discode = areainfo.getDiscode();
-			if (discode == null) {
-				discode = "";
+			Integer disid = areainfo.getDisid();
+			if (disid == null) {
+				disid = -1;
 			}
-			filterBuilders.add(FilterBuilders.termFilter("discode", discode));
+			filterBuilders.add(FilterBuilders.termFilter("hoteldis", disid.toString()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

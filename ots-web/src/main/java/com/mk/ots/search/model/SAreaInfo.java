@@ -29,6 +29,8 @@ public class SAreaInfo {
 
     private Integer status;
 
+    private Integer disid;
+
     public Long getId() {
         return id;
     }
@@ -107,5 +109,13 @@ public class SAreaInfo {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public Integer getDisid() {
+        return disid;
+    }
+
+    public void setDisid(Integer disid) {
+        this.disid = disid;
     }
 }
