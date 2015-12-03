@@ -2831,6 +2831,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return mikePriceBuilders;
 	}
 
+
 	/**
 	 * 按行政区搜索
 	 * 
@@ -2842,13 +2843,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		try {
 			Long id = posid == null ? 0l : Long.valueOf(posid);
 			SAreaInfo areainfo = sareaInfoMapper.selectByPrimaryKey(id);
-			String discode = areainfo.getDiscode();
-			if (discode == null) {
-				discode = "";
+			Integer disid = areainfo.getDisid();
+			if (disid == null) {
+				disid = -1;
 			}
-			filterBuilders.add(FilterBuilders.termFilter("discode", discode));
+			filterBuilders.add(FilterBuilders.termFilter("hoteldis", disid.toString()));
 		} catch (Exception e) {
-			logger.error("failed to makeAreaFilter", e);
+			logger.error("failed to sareaInfoMapper.selectByPrimaryKey", e);
+			e.printStackTrace();
 		}
 	}
 

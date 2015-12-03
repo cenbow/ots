@@ -1653,6 +1653,7 @@ public class SearchService implements ISearchService {
 			}
 			filterBuilders.add(FilterBuilders.termFilter("hoteldis", disid.toString()));
 		} catch (Exception e) {
+			logger.error("failed to sareaInfoMapper.selectByPrimaryKey", e);
 			e.printStackTrace();
 		}
 	}
