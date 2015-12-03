@@ -483,6 +483,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
 
+			if (HotelSearchEnum.AREA.getId().equals(searchType)) {
+				makeAreaFilter(reqentity, filterBuilders);
+			}
+
+			makeHotelTypeFilter(reqentity, filterBuilders);
+			makeBedTypeFilter(reqentity, filterBuilders);
+			
 			makeQueryFilter(reqentity, filterBuilders);
 
 			FilterBuilder[] builders = new FilterBuilder[] {};
@@ -583,12 +590,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						SearchConst.SEARCH_RANGE_MAX);
 			}
 
-			if (HotelSearchEnum.AREA.getId().equals(searchType)) {
-				makeAreaFilter(reqentity, filterBuilders);
-			}
-
-			makeHotelTypeFilter(reqentity, filterBuilders);
-			makeBedTypeFilter(reqentity, filterBuilders);
 
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
 					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
