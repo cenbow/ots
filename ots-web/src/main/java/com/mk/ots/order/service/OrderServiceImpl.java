@@ -2088,6 +2088,7 @@ public class OrderServiceImpl implements OrderService {
                 if (null == invalidReason
                         || OtaFreqTrvEnum.CHECKIN_LESS4.getId().equals(String.valueOf(invalidReason))
                         || OtaFreqTrvEnum.OVER_RANG.getId().equals(String.valueOf(invalidReason))
+                        || OtaFreqTrvEnum.OUT_OF_RANG.getId().equals(String.valueOf(invalidReason))
                         || OtaFreqTrvEnum.ZHIFU_NOT_FIRST.getId().equals(String.valueOf(invalidReason))
                         || OtaFreqTrvEnum.CARD_ID_NOT_FIRST.getId().equals(String.valueOf(invalidReason))
                         || OtaFreqTrvEnum.CARD_ID_IS_NOT_PMS_SCAN.getId().equals(String.valueOf(invalidReason))
