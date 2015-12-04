@@ -2086,6 +2086,10 @@ public class OrderServiceImpl implements OrderService {
                 //判断 洛阳 长沙 等新用户，发送优惠券
                 Integer invalidReason = otaorder.get("Invalidreason");
                 if (null == invalidReason
+
+                        || OtaFreqTrvEnum.DEVICE_NUM_IS_NULL.getId().equals(String.valueOf(invalidReason))
+                        || OtaFreqTrvEnum.DEVICE_NUM_NOT_FIRST.getId().equals(String.valueOf(invalidReason))
+                        
                         || OtaFreqTrvEnum.CHECKIN_LESS4.getId().equals(String.valueOf(invalidReason))
                         || OtaFreqTrvEnum.OVER_RANG.getId().equals(String.valueOf(invalidReason))
                         || OtaFreqTrvEnum.OUT_OF_RANG.getId().equals(String.valueOf(invalidReason))
