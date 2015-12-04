@@ -2087,23 +2087,21 @@ public class OrderServiceImpl implements OrderService {
                 Integer invalidReason = otaorder.get("Invalidreason");
                 if (null == invalidReason
                         || OtaFreqTrvEnum.CHECKIN_LESS4.getId().equals(String.valueOf(invalidReason))
-                        || OtaFreqTrvEnum.OVER_RANG.getId().equals(String.valueOf(invalidReason))) {
+                        || OtaFreqTrvEnum.OVER_RANG.getId().equals(String.valueOf(invalidReason))
+                        || OtaFreqTrvEnum.ZHIFU_NOT_FIRST.getId().equals(String.valueOf(invalidReason))
+                        || OtaFreqTrvEnum.CARD_ID_NOT_FIRST.getId().equals(String.valueOf(invalidReason))
+                        || OtaFreqTrvEnum.CARD_ID_IS_NOT_PMS_SCAN.getId().equals(String.valueOf(invalidReason))
+                        || OtaFreqTrvEnum.CARD_ID_IS_NULL.getId().equals(String.valueOf(invalidReason))) {
+
                     OrderServiceImpl.logger.info(
                             String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] start genTicket ",otaorder.getId()));
 
-                    Date bgtemp = pmsRoomOrder.getDate("CheckInTime");
-                    Date edtemp = pmsRoomOrder.getDate("CheckOutTime");
-                    double diffHours = DateUtils.getDiffHoure(DateUtils.getDatetime(bgtemp), DateUtils.getDatetime(edtemp));
-                    if (diffHours >= 0.5) {
+                    Long mid = otaorder.getMid();
+                    String cityCode = otaorder.getCityCode();
+                    List<Long> ticketIdList = this.qiekeRuleService.genTicketByCityCode(cityCode, mid);
+                    for (Long ticketId : ticketIdList) {
                         OrderServiceImpl.logger.info(
-                                String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] to genTicket", otaorder.getId()));
-                        Long mid = otaorder.getMid();
-                        String cityCode = otaorder.getCityCode();
-                        List<Long> ticketIdList = this.qiekeRuleService.genTicketByCityCode(cityCode, mid);
-                        for (Long ticketId : ticketIdList) {
-                            OrderServiceImpl.logger.info(
-                                    String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] send genTicket[%s]", otaorder.getId(),ticketId));
-                        }
+                                String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] send genTicket[%s]", otaorder.getId(),ticketId));
                     }
                 } else {
                     OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] dont genTicket",otaorder.getId()));
