@@ -2092,7 +2092,7 @@ public class OrderServiceImpl implements OrderService {
                         || OtaFreqTrvEnum.CARD_ID_NOT_FIRST.getId().equals(String.valueOf(invalidReason))
                         || OtaFreqTrvEnum.CARD_ID_IS_NOT_PMS_SCAN.getId().equals(String.valueOf(invalidReason))
                         || OtaFreqTrvEnum.CARD_ID_IS_NULL.getId().equals(String.valueOf(invalidReason))) {
-
+                    
                     OrderServiceImpl.logger.info(
                             String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] start genTicket ",otaorder.getId()));
 
