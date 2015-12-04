@@ -37,10 +37,13 @@ import com.mk.ots.hotel.bean.TRoom;
 import com.mk.ots.hotel.dao.EHotelDAO;
 import com.mk.ots.hotel.dao.HotelDAO;
 import com.mk.ots.hotel.model.THotel;
+import com.mk.ots.hotel.model.TRoomModel;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomService;
 import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.manager.RedisCacheName;
+import com.mk.ots.mapper.RoomSaleMapper;
+import com.mk.ots.mapper.TRoomMapper;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.OtaRoomOrder;
 import com.mk.ots.order.bean.PmsOrder;
@@ -48,6 +51,7 @@ import com.mk.ots.order.bean.PmsRoomOrder;
 import com.mk.ots.order.service.OrderLogService;
 import com.mk.ots.order.service.OrderServiceImpl;
 import com.mk.ots.pay.service.IPayService;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.bean.PmsCost;
 import com.mk.pms.bean.PmsLog;
@@ -91,6 +95,12 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 	private PmsRoomService pmsRoomService;
 	@Autowired
 	private RoomstateService roomstateService;
+	@Autowired
+	private RoomSaleMapper roomSaleMapper;
+	@Autowired
+	private TRoomMapper roomMapper;
+
+	private final SimpleDateFormat defaultFormat = new SimpleDateFormat("yyyyMMdd");
 
 	/**
 	 * 创建/修改客单 saveCustomerNo
@@ -147,7 +157,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 						checkinUser.set("cardid", user.getString("idno"));
 						checkinUser.set("pmsRoomOrderNo", customNo.get("customeno"));
 						checkinUser.set("freqtrv", user.getString("ispermanent"));
-						if(user.get("isscan") != null) {
+						if (user.get("isscan") != null) {
 							checkinUser.set("isscan", StringUtils.defaultIfBlank(user.getString("isscan"), null));
 						}
 						// 补上酒店id
@@ -164,8 +174,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 				 */
 				logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:day:{}", order.get("id"),
 						customNo.getJSONArray("day"));
-					logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:bolean:{}", order.get("id"),
-							(customNo.getJSONArray("day") != null) && (customNo.getJSONArray("day").size() > 0));
+				logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:bolean:{}", order.get("id"),
+						(customNo.getJSONArray("day") != null) && (customNo.getJSONArray("day").size() > 0));
 				if ((customNo.getJSONArray("day") != null) && (customNo.getJSONArray("day").size() > 0)) {
 					JSONArray days = customNo.getJSONArray("day");
 					long pmsorderid = order.get("id");
@@ -221,6 +231,13 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 							logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:roomLockPo:{}", order.get("id"),
 									JsonKit.toJson(roomLockPo));
 						}
+
+						try {
+							this.makeUpForPromo(order);
+						} catch (Exception ex) {
+							logger.warn(String.format("failed to makeUpForPromo on hotelId:%s; customNo:%s...", hotelId,
+									customNo), ex);
+						}
 					}
 				}
 			}
@@ -251,6 +268,95 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		}
 		NewPmsOrderServiceImpl.logger.info("OTSMessage::NewPmsOrderServiceImpl::saveCustomerNo::完成.data{}", data);
 		return data;
+	}
+
+	private boolean isRoomExisted(List<TRoomModel> rooms, Long roomid) {
+		boolean isExisted = false;
+
+		for (int i = 0; rooms != null && i < rooms.size(); i++) {
+			TRoomModel roomModel = rooms.get(i);
+
+			Long roomModelId = roomModel.getId();
+			if (roomModelId != null && roomModelId == roomid) {
+				isExisted = true;
+				break;
+			}
+		}
+
+		return isExisted;
+	}
+
+	private Room findVCRooms(Long hotelid, Date begindate, Date enddate) throws Exception {
+		Room vcRoom = null;
+
+		try {
+			if (hotelid != null && begindate != null && enddate != null) {
+				String begindateday = defaultFormat.format(begindate);
+				String enddateday = defaultFormat.format(enddate);
+
+				vcRoom = roomstateService.findVCHotelRoom(hotelid, null, begindateday, enddateday);
+			} else {
+				logger.warn("illegal parameters passed in findVCRooms...");
+			}
+		} catch (Exception ex) {
+			throw new Exception(String.format("failed to findVCHotelRoom for hotelid:%s; begindate:%s; enddate:%s",
+					hotelid, begindate, enddate), ex);
+		}
+
+		return vcRoom;
+	}
+
+	private void makeUpForPromo(PmsRoomOrder pmsRoomOrder) throws Exception {
+		Long pmsroomtypeid = pmsRoomOrder.getLong("RoomTypeId");
+		Long pmsroomid = pmsRoomOrder.getLong("RoomId");
+		String hotelid = String.valueOf(pmsRoomOrder.get("HotelId"));
+		pmsRoomOrder.getDate("BeginTime");
+
+		List<Map<String, Object>> promoRooms = roomSaleMapper.queryRoomPromoByType(String.valueOf(pmsroomtypeid));
+		if (promoRooms != null && promoRooms.size() > 0) {
+			Long roomId = (Long) promoRooms.get(0).get("roomid");
+			Long saleRoomtypeId = (Long) promoRooms.get(0).get("saleroomtypeid");
+
+			if (roomId == null) {
+				List<TRoomModel> models = roomMapper.findList(pmsroomtypeid);
+				Room vcRoom = findVCRooms(Long.valueOf(hotelid), pmsRoomOrder.getDate("BeginTime"),
+						pmsRoomOrder.getDate("EndTime"));
+				/**
+				 * promo room has been ordered by non-promo pms, supplementary
+				 * room is required
+				 */
+				if (isRoomExisted(models, pmsroomid) && StringUtils.isNotBlank(hotelid) && vcRoom != null
+						&& vcRoom.getRoomid() != null) {
+					try {
+						Map<String, Object> updateParameters = new HashMap<>();
+						updateParameters.put("roomid", vcRoom.getRoomid());
+						updateParameters.put("roomtypeid", saleRoomtypeId);
+						updateParameters.put("hotelid", hotelid);
+
+						roomMapper.updateRoomtypeByRoom(updateParameters);
+
+						if (logger.isInfoEnabled()) {
+							logger.info(String.format("updateRoomtypeByRoom succeed for hotelid:%s; roomtypeid:%s",
+									hotelid, saleRoomtypeId));
+						}
+
+						roomMapper.updateTRoomSetting(updateParameters);
+
+						if (logger.isInfoEnabled()) {
+							logger.info(String.format("updateTRoomSetting succeed for hotelid:%s; roomtypeid:%s",
+									hotelid, saleRoomtypeId));
+						}
+					} catch (Exception ex) {
+						throw new Exception(String.format("failed to move room for roomid:%s; roomtypeid:%s",
+								vcRoom.getRoomid(), saleRoomtypeId), ex);
+					}
+				} else {
+					logger.warn(String.format(
+							"tried to make up room for promo roomtypeid:%s, however no available room found...",
+							saleRoomtypeId));
+				}
+			}
+		}
 	}
 
 	private PmsRoomOrder updatePmsRoomOrder(EHotel hotel, PmsRoomOrder newOrder, JSONObject customNo, Long hotelId)

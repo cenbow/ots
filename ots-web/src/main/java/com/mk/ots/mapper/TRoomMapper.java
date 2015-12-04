@@ -27,4 +27,8 @@ public interface TRoomMapper {
 	public int updateRoom(TRoomModel tRoom);
 
 	public int delRoomById(Long id);
+	
+	public void updateRoomtypeByRoom(Map<String, Object> parameters);
+	
+	public void updateTRoomSetting(Map<String, Object> parameters);
 }
