@@ -286,7 +286,7 @@
             <if test="valid != null">
                 AND b.valid = #{valid}
             </if>
-            <if test="valid != null">
+            <if test="tag != null">
                 AND b.tag = #{tag}
             </if>            
         </where>
