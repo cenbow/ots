@@ -754,7 +754,7 @@ public class SearchService implements ISearchService {
 	 * @param searchBuilder
 	 */
 	private void sortByOrders(SearchRequestBuilder searchBuilder) {
-		searchBuilder.addSort("ordernummon", SortOrder.DESC);
+		searchBuilder.addSort("x", SortOrder.DESC);
 	}
 
 	/**

@@ -439,6 +439,9 @@ public class HotelService {
 					// mike3.0 添加月销量
 					hotel.setOrdernummon(getOrderNumMon(Long.valueOf(hotelid)));
 
+					// mike3.2 添加受欢迎指数
+					hotel.setGreetscore(getGreetScore(Long.valueOf(hotelid)));
+
 					/**
 					 * add bedtype
 					 */
@@ -1502,6 +1505,20 @@ public class HotelService {
 		Long sales = orderService.findMonthlySales(hotelId);
 		logger.info("getOrderNumMon hotelId: {}, get月销量: {}", hotelId, sales);
 		return sales;
+	}
+
+	/**
+	 * PMS 月销量查询
+	 *
+	 * @param hotelId
+	 * @return
+	 */
+	public Long getGreetScore(long hotelId) {
+		//最受欢迎指数 ota 月销 + pms 月销”
+		Long pmsSales = orderService.findPMSMonthlySales(hotelId);
+		Long otaSales = orderService.findMonthlySales(hotelId);
+		logger.info("getPMSOrderNumMon hotelId: {}, getOAT月销量: {}, PMS月销量：{}", hotelId, otaSales,pmsSales);
+		return pmsSales + otaSales;
 	}
 
 	/**

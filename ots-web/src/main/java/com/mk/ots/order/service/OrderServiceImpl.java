@@ -4695,6 +4695,67 @@ public class OrderServiceImpl implements OrderService {
 		return currentSales;
 	}
 
+
+    @Override
+    public Long findPMSMonthlySales(Long hotelId) {
+        OtsCacheManager manager = AppUtils.getBean(OtsCacheManager.class);
+        Jedis salesCache = manager.getNewJedis();
+
+        Date now = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        String dateNowStr = sdf.format(now);
+
+        JSONObject salesObject = new JSONObject();
+        Long currentSales = -1l;
+
+        SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMdd000000");
+        Calendar beforeCalendar = Calendar.getInstance();
+        beforeCalendar.add(Calendar.DATE, -30);
+        String beforetime = sdf1.format(beforeCalendar.getTime());
+        Calendar yesterCalendar = Calendar.getInstance();
+        yesterCalendar.add(Calendar.DATE, -1);
+        String yestertime = sdf1.format(yesterCalendar.getTime());
+
+
+        try {
+            if(hotelId == null || hotelId <= 0)  {
+                List<Bean> allSales = orderDAO.findAllPMSMonthlySales(beforetime, yestertime);
+                for (Bean sales : allSales) {
+                    String hid = sales.getLong("hid").toString();
+                    String count = sales.get("cnt").toString();
+                    salesObject.put(hid, count);
+                }
+            } else {
+                String arrSales = salesCache.get(Constant.MONTHLY_PMS_SALES_KEY + dateNowStr);
+                if(!StringUtils.isBlank(arrSales)) {
+                    JSONObject jSales = JSONObject.parseObject(arrSales);
+                    String hotelSales = jSales.getString(hotelId + "");
+                    if(!StringUtils.isBlank(hotelSales) && Long.parseLong(hotelSales) >= 0)
+                        return Long.parseLong(hotelSales);
+                    else {
+                        currentSales = orderDAO.findPMSMonthlySaleByHotelId(hotelId, beforetime, yestertime);
+                        jSales.put(hotelId + "", currentSales);
+                        salesCache.set(Constant.MONTHLY_PMS_SALES_KEY + dateNowStr, jSales.toJSONString());
+                        return currentSales;
+                    }
+                } else {
+                    currentSales = orderDAO.findPMSMonthlySaleByHotelId(hotelId, beforetime, yestertime);
+                    salesObject.put(hotelId + "", currentSales);
+                }
+            }
+            salesCache.set(Constant.MONTHLY_PMS_SALES_KEY + dateNowStr, salesObject.toJSONString());
+            salesCache.expire(Constant.MONTHLY_PMS_SALES_KEY + dateNowStr, 24 * 60 * 60);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            logger.error("findPMSMonthlySales exception {}", e);
+        } finally {
+            if(salesCache != null && salesCache.isConnected())
+                salesCache.close();
+        }
+        return currentSales;
+    }
+
+
     /**
      * c端修改房间入住人
      */
