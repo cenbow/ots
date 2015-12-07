@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.base.Strings;
 import org.slf4j.Logger;
@@ -52,6 +53,7 @@ import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.manager.HotelPMSManager;
 import com.mk.ots.manager.OtsCacheManager;
 import com.mk.ots.manager.RedisCacheName;
+import com.mk.ots.mapper.RoomSaleConfigMapper;
 import com.mk.ots.mapper.RoomSaleMapper;
 import com.mk.ots.mapper.TRoomMapper;
 import com.mk.ots.order.bean.OtaOrder;
@@ -63,6 +65,9 @@ import com.mk.ots.order.service.OrderServiceImpl;
 import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.ots.pay.service.IPayService;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
+import com.mk.ots.roomsale.model.TRoomSaleConfig;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.utils.MD5Util;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.bean.PmsCost;
@@ -108,10 +113,14 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 	@Autowired
 	private NewPmsOrderService newPmsOrderService;
 	@Autowired
+	private RoomSaleConfigMapper roomSaleConfigMapper;	
+	@Autowired
 	private RoomSaleMapper roomSaleMapper;
 	@Autowired
 	private TRoomMapper roomMapper;
-
+	@Autowired
+	private RoomSaleConfigInfoService roomSaleConfigInfoService;
+	
 	@Autowired
 	private IPayService payService;
 	@Autowired
@@ -396,9 +405,9 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 					}
 
 					this.saveHotelRoomStatusTest(uuid, hotelId, customNo, order, 1);
-					
+
 					try {
-						this.makeUpForPromo(order);
+						this.shiftRoomForPromo(order, true);
 					} catch (Exception ex) {
 						logger.warn(String.format("failed to makeUpForPromo on hotelId:%s; customNo:%s...", hotelId,
 								customNo), ex);
@@ -450,6 +459,26 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 		return data;
 	}
 
+
+	private boolean isInPromo(String saletypeid) {
+		boolean isInPromo = false;
+
+		List<TRoomSaleConfigInfo> roomSaleConfigInfoList = roomSaleConfigInfoService.queryListBySaleTypeId("",
+				Integer.parseInt(saletypeid), 0, 10);
+
+		if (CollectionUtils.isNotEmpty(roomSaleConfigInfoList)) {
+			TRoomSaleConfigInfo saleConfigInfo = roomSaleConfigInfoList.get(0);
+			long sec = DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
+					saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
+
+			if (sec > 0) {
+				isInPromo = true;
+			}
+		}
+
+		return isInPromo;
+	}
+
 	private boolean isRoomExisted(List<TRoomModel> rooms, Long roomid) {
 		boolean isExisted = false;
 
@@ -486,12 +515,8 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 		return vcRoom;
 	}
 
-	private void makeUpForPromo(PmsRoomOrder pmsRoomOrder) throws Exception {
-		Long pmsroomtypeid = pmsRoomOrder.getLong("RoomTypeId");
-		Long pmsroomid = pmsRoomOrder.getLong("RoomId");
-		String hotelid = String.valueOf(pmsRoomOrder.get("HotelId"));
-		pmsRoomOrder.getDate("BeginTime");
-
+	private void doShiftRoom(String hotelid, Long pmsroomtypeid, Long pmsroomid, PmsRoomOrder pmsRoomOrder)
+			throws Exception {
 		List<Map<String, Object>> promoRooms = roomSaleMapper.queryRoomPromoByType(String.valueOf(pmsroomtypeid));
 		if (promoRooms != null && promoRooms.size() > 0) {
 			Long roomId = (Long) promoRooms.get(0).get("roomid");
@@ -536,6 +561,66 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 							saleRoomtypeId));
 				}
 			}
+		}
+	}
+
+	private void shiftRoomForPromo(PmsRoomOrder pmsRoomOrder, boolean isChanged) throws Exception {
+		Long oldroomtypeid = pmsRoomOrder.getLong("OldRoomTypeId");
+		Long newroomtypeid = pmsRoomOrder.getLong("RoomTypeId");
+		Long newroomid = pmsRoomOrder.getLong("RoomId");
+		String status = pmsRoomOrder.getStr("Status");
+
+		String hotelid = String.valueOf(pmsRoomOrder.get("HotelId"));
+		pmsRoomOrder.getDate("BeginTime");
+
+		boolean isProceed = false;
+		boolean isInPromo = isInPromo(String.valueOf(newroomtypeid));
+
+		/**
+		 * process this room shift only during promo period
+		 */
+		if (isInPromo) {
+			isProceed = true;
+		} else if ("OK".equalsIgnoreCase(status)) {
+			isProceed = true;
+		}
+
+		if (!isProceed) {
+			return;
+		}
+
+		/**
+		 * there is room change going on, checks out for promo if a room shift
+		 * is necessary
+		 */
+		if (isChanged) {
+			TRoomSaleConfig oldRoomsaleConfig = new TRoomSaleConfig();
+			oldRoomsaleConfig.setSaleRoomTypeId(oldroomtypeid == null ? 0 : oldroomtypeid.intValue());
+			oldRoomsaleConfig.setValid("T");
+			List<TRoomSaleConfig> oldRooms = roomSaleConfigMapper.getRoomSaleByParamsNew(oldRoomsaleConfig);
+			boolean isOldPromo = oldRooms != null ? oldRooms.size() > 0 : false;
+
+			TRoomSaleConfig newRoomsaleConfig = new TRoomSaleConfig();
+			newRoomsaleConfig.setSaleRoomTypeId(newroomtypeid == null ? 0 : newroomtypeid.intValue());
+			newRoomsaleConfig.setValid("T");
+			List<TRoomSaleConfig> newRooms = roomSaleConfigMapper.getRoomSaleByParamsNew(newRoomsaleConfig);
+			boolean isNewPromo = newRooms != null ? newRooms.size() > 0 : false;
+
+			/**
+			 * shift room from non-promo rooms to promo news, shift required
+			 */
+			if (!isOldPromo && isNewPromo) {
+				doShiftRoom(hotelid, newroomtypeid, newroomid, pmsRoomOrder);
+			}
+			/**
+			 * shift room from promo rooms to promo rooms, while different promo
+			 * is detected, shift required
+			 */
+			else if (!isOldPromo && !isNewPromo && (newroomtypeid != oldroomtypeid)) {
+				doShiftRoom(hotelid, newroomtypeid, newroomid, pmsRoomOrder);
+			}
+		} else {
+			doShiftRoom(hotelid, newroomtypeid, newroomid, pmsRoomOrder);
 		}
 	}
 
