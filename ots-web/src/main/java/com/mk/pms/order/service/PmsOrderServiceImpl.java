@@ -1,6 +1,7 @@
 package com.mk.pms.order.service;
 
 import java.math.BigDecimal;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.base.Strings;
 import org.slf4j.Logger;
@@ -37,6 +37,7 @@ import com.mk.orm.plugin.bean.BizModel;
 import com.mk.orm.plugin.bean.Db;
 import com.mk.ots.annotation.HessianService;
 import com.mk.ots.common.enums.PmsRoomOrderStatusEnum;
+import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.comp.SynOrderConf;
 import com.mk.ots.hotel.bean.EHotel;
@@ -66,8 +67,6 @@ import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.ots.pay.service.IPayService;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
-import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
-import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.utils.MD5Util;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.bean.PmsCost;
@@ -113,14 +112,12 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 	@Autowired
 	private NewPmsOrderService newPmsOrderService;
 	@Autowired
-	private RoomSaleConfigMapper roomSaleConfigMapper;	
+	private RoomSaleConfigMapper roomSaleConfigMapper;
 	@Autowired
 	private RoomSaleMapper roomSaleMapper;
 	@Autowired
 	private TRoomMapper roomMapper;
-	@Autowired
-	private RoomSaleConfigInfoService roomSaleConfigInfoService;
-	
+
 	@Autowired
 	private IPayService payService;
 	@Autowired
@@ -459,21 +456,12 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 		return data;
 	}
 
-
-	private boolean isInPromo(String saletypeid) {
+	private boolean isInPromo(Date begindate, Date enddate, Time startTime, Time endTime) {
 		boolean isInPromo = false;
 
-		List<TRoomSaleConfigInfo> roomSaleConfigInfoList = roomSaleConfigInfoService.queryListBySaleTypeId("",
-				Integer.parseInt(saletypeid), 0, 10);
-
-		if (CollectionUtils.isNotEmpty(roomSaleConfigInfoList)) {
-			TRoomSaleConfigInfo saleConfigInfo = roomSaleConfigInfoList.get(0);
-			long sec = DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
-					saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
-
-			if (sec > 0) {
-				isInPromo = true;
-			}
+		Integer promostaus = DateUtils.promoStatus(begindate, enddate, startTime, endTime);
+		if (promostaus != null && Constant.PROMOING == promostaus) {
+			isInPromo = true;
 		}
 
 		return isInPromo;
@@ -574,7 +562,28 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 		pmsRoomOrder.getDate("BeginTime");
 
 		boolean isProceed = false;
-		boolean isInPromo = isInPromo(String.valueOf(newroomtypeid));
+		boolean isInPromo = false;
+
+		TRoomSaleConfig newRoomsaleConfig = new TRoomSaleConfig();
+		newRoomsaleConfig.setSaleRoomTypeId(newroomtypeid == null ? 0 : newroomtypeid.intValue());
+		newRoomsaleConfig.setValid("T");
+		newRoomsaleConfig.setTag(0);
+		List<TRoomSaleConfig> newRooms = null;
+
+		try {
+			if (newroomtypeid != null) {
+				newRooms = roomSaleConfigMapper.getRoomSaleByParamsNew(newRoomsaleConfig);
+				if (newRooms != null && newRooms.size() > 0) {
+					newRooms.get(0).getStartDate();
+					newRooms.get(0).getEndDate();
+
+					isInPromo = isInPromo(newRooms.get(0).getStartDate(), newRooms.get(0).getEndDate(),
+							newRooms.get(0).getStartTime(), newRooms.get(0).getEndTime());
+				}
+			}
+		} catch (Exception ex) {
+			logger.warn("failed to invoke getRoomSaleByParamsNew or isInPromo...", ex);
+		}
 
 		/**
 		 * process this room shift only during promo period
@@ -597,13 +606,10 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 			TRoomSaleConfig oldRoomsaleConfig = new TRoomSaleConfig();
 			oldRoomsaleConfig.setSaleRoomTypeId(oldroomtypeid == null ? 0 : oldroomtypeid.intValue());
 			oldRoomsaleConfig.setValid("T");
+			oldRoomsaleConfig.setTag(0);
+
 			List<TRoomSaleConfig> oldRooms = roomSaleConfigMapper.getRoomSaleByParamsNew(oldRoomsaleConfig);
 			boolean isOldPromo = oldRooms != null ? oldRooms.size() > 0 : false;
-
-			TRoomSaleConfig newRoomsaleConfig = new TRoomSaleConfig();
-			newRoomsaleConfig.setSaleRoomTypeId(newroomtypeid == null ? 0 : newroomtypeid.intValue());
-			newRoomsaleConfig.setValid("T");
-			List<TRoomSaleConfig> newRooms = roomSaleConfigMapper.getRoomSaleByParamsNew(newRoomsaleConfig);
 			boolean isNewPromo = newRooms != null ? newRooms.size() > 0 : false;
 
 			/**

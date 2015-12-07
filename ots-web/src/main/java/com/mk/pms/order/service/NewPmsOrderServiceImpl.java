@@ -104,8 +104,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 	private RoomSaleMapper roomSaleMapper;
 	@Autowired
 	private RoomSaleConfigMapper roomSaleConfigMapper;
-	@Autowired
-	private RoomSaleConfigInfoService roomSaleConfigInfoService;
+
 	@Autowired
 	private TRoomMapper roomMapper;
 
@@ -233,19 +232,19 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 								logger.error("huangfang:otaorderid:" + (String) customNo.get("customeno") + ",hotelid:"
 										+ hotelId);
 							}
-
+														
 							// 修改房态
 							roomLockPo.setRoomjson(customNo.getString("day"));
 							this.pmsRoomService.updateRoomLock(roomLockPo);
 							logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:roomLockPo:{}", order.get("id"),
 									JsonKit.toJson(roomLockPo));
-						}
-
-						try {
-							this.shiftRoomForPromo(order, roomLockPo != null);
-						} catch (Exception ex) {
-							logger.warn(String.format("failed to makeUpForPromo on hotelId:%s; customNo:%s...", hotelId,
-									customNo), ex);
+							
+							try {
+								this.shiftRoomForPromo(order, roomLockPo != null);
+							} catch (Exception ex) {
+								logger.warn(String.format("failed to makeUpForPromo on hotelId:%s; customNo:%s...", hotelId,
+										customNo), ex);
+							}							
 						}
 					}
 				}
@@ -279,7 +278,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		return data;
 	}
 
-	private boolean isInPromo(String saletypeid, Date begindate, Date enddate, Time startTime, Time endTime) {
+	private boolean isInPromo(Date begindate, Date enddate, Time startTime, Time endTime) {
 		boolean isInPromo = false;
 
 		Integer promostaus = DateUtils.promoStatus(begindate, enddate, startTime, endTime);
@@ -392,15 +391,17 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		newRoomsaleConfig.setValid("T");
 		newRoomsaleConfig.setTag(0);
 		List<TRoomSaleConfig> newRooms = null;
-		
-		try {
-			newRooms = roomSaleConfigMapper.getRoomSaleByParamsNew(newRoomsaleConfig);
-			if (newRooms != null && newRooms.size() > 0) {
-				newRooms.get(0).getStartDate();
-				newRooms.get(0).getEndDate();
 
-				isInPromo = isInPromo(String.valueOf(newroomtypeid), newRooms.get(0).getStartDate(),
-						newRooms.get(0).getEndDate(), newRooms.get(0).getStartTime(), newRooms.get(0).getEndTime());
+		try {
+			if (newroomtypeid != null) {
+				newRooms = roomSaleConfigMapper.getRoomSaleByParamsNew(newRoomsaleConfig);
+				if (newRooms != null && newRooms.size() > 0) {
+					newRooms.get(0).getStartDate();
+					newRooms.get(0).getEndDate();
+
+					isInPromo = isInPromo(newRooms.get(0).getStartDate(), newRooms.get(0).getEndDate(),
+							newRooms.get(0).getStartTime(), newRooms.get(0).getEndTime());
+				}
 			}
 		} catch (Exception ex) {
 			logger.warn("failed to invoke getRoomSaleByParamsNew or isInPromo...", ex);
