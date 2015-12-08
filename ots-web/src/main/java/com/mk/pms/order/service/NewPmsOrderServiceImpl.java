@@ -429,7 +429,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		/**
 		 * process this room shift only during promo period
 		 */
-		if (isInPromo && "RE".equalsIgnoreCase(status)) {
+		if (isInPromo && ("RE".equalsIgnoreCase(status) || "IN".equalsIgnoreCase(status))) {
 			isProceed = true;
 		}
 
