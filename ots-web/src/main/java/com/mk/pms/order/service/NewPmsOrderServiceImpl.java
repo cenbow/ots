@@ -329,8 +329,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			throws Exception {
 		List<Map<String, Object>> promoRooms = roomSaleMapper.queryRoomPromoByType(String.valueOf(pmsroomtypeid));
 		if (promoRooms != null && promoRooms.size() > 0) {
-			Long roomId = (Long) promoRooms.get(0).get("roomid");
-			Long saleRoomtypeId = (Long) promoRooms.get(0).get("saleroomtypeid");
+			Integer roomId = (Integer) promoRooms.get(0).get("roomid");
+			Integer saleRoomtypeId = (Integer) promoRooms.get(0).get("saleroomtypeid");
 
 			if (roomId == null) {
 				List<TRoomModel> models = roomMapper.findList(pmsroomtypeid);
