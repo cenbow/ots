@@ -67,7 +67,7 @@
 	<select id="selectOtaRoomOrder" resultType="map"
 		parameterType="java.util.Map">
 		select id
-		from b_otaroomordder 
+		from b_otaroomorder 
 		where pmsroomorderno = #{pmsRoomOrderNo}
 		limit 1
 	</select>
