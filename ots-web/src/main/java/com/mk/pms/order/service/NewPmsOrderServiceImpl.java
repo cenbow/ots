@@ -208,6 +208,13 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 							logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:roomLockPo:{}", order.get("id"),
 									JsonKit.toJson(roomLockPo));
 							this.pmsRoomService.saveRoomLock(roomLockPo);
+
+							try {
+								this.shiftRoomForPromo(order, roomLockPo != null);
+							} catch (Exception ex) {
+								logger.warn(String.format("failed to makeUpForPromo on hotelId:%s; customNo:%s...",
+										hotelId, customNo), ex);
+							}
 						} else {
 							try {
 								// 释放原来的房态 add jianghe
@@ -237,13 +244,6 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 							this.pmsRoomService.updateRoomLock(roomLockPo);
 							logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:roomLockPo:{}", order.get("id"),
 									JsonKit.toJson(roomLockPo));
-
-							try {
-								this.shiftRoomForPromo(order, roomLockPo != null);
-							} catch (Exception ex) {
-								logger.warn(String.format("failed to makeUpForPromo on hotelId:%s; customNo:%s...",
-										hotelId, customNo), ex);
-							}
 						}
 					}
 				}
@@ -353,22 +353,23 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 					}
 
 					try {
+						/**
+						 * update vacant non-promo room to promo room
+						 */
 						Map<String, Object> updateParameters = new HashMap<>();
 						updateParameters.put("roomid", vcRoom.getRoomid());
 						updateParameters.put("roomtypeid", saleRoomtypeId);
-						updateParameters.put("hotelid", hotelid);
+						roomMapper.updateRoomtypeByRoom(updateParameters);
 
+						/**
+						 * update current promo room to non-promo room
+						 */
+						updateParameters.put("roomid", pmsroomid);
+						updateParameters.put("roomtypeid", roomtypeId);
 						roomMapper.updateRoomtypeByRoom(updateParameters);
 
 						if (logger.isInfoEnabled()) {
 							logger.info(String.format("updateRoomtypeByRoom succeed for hotelid:%s; roomtypeid:%s",
-									hotelid, saleRoomtypeId));
-						}
-
-						roomMapper.updateTRoomSetting(updateParameters);
-
-						if (logger.isInfoEnabled()) {
-							logger.info(String.format("updateTRoomSetting succeed for hotelid:%s; roomtypeid:%s",
 									hotelid, saleRoomtypeId));
 						}
 					} catch (Exception ex) {
@@ -424,9 +425,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		/**
 		 * process this room shift only during promo period
 		 */
-		if (isInPromo) {
-			isProceed = true;
-		} else if ("OK".equalsIgnoreCase(status)) {
+		if (isInPromo && "RX".equals(status)) {
 			isProceed = true;
 		}
 

@@ -532,22 +532,23 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 					}
 
 					try {
+						/**
+						 * update vacant non-promo room to promo room
+						 */
 						Map<String, Object> updateParameters = new HashMap<>();
 						updateParameters.put("roomid", vcRoom.getRoomid());
 						updateParameters.put("roomtypeid", saleRoomtypeId);
-						updateParameters.put("hotelid", hotelid);
+						roomMapper.updateRoomtypeByRoom(updateParameters);
 
+						/**
+						 * update current promo room to non-promo room
+						 */
+						updateParameters.put("roomid", pmsroomid);
+						updateParameters.put("roomtypeid", roomtypeId);
 						roomMapper.updateRoomtypeByRoom(updateParameters);
 
 						if (logger.isInfoEnabled()) {
 							logger.info(String.format("updateRoomtypeByRoom succeed for hotelid:%s; roomtypeid:%s",
-									hotelid, saleRoomtypeId));
-						}
-
-						roomMapper.updateTRoomSetting(updateParameters);
-
-						if (logger.isInfoEnabled()) {
-							logger.info(String.format("updateTRoomSetting succeed for hotelid:%s; roomtypeid:%s",
 									hotelid, saleRoomtypeId));
 						}
 					} catch (Exception ex) {
@@ -603,9 +604,7 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 		/**
 		 * process this room shift only during promo period
 		 */
-		if (isInPromo) {
-			isProceed = true;
-		} else if ("OK".equalsIgnoreCase(status)) {
+		if (isInPromo && "RX".equals(status)) {
 			isProceed = true;
 		}
 

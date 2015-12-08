@@ -55,7 +55,11 @@
    <update id="updateRoom" parameterType="com.mk.ots.hotel.model.TRoomModel">
    		update t_room set name=#{name} where id=#{id}
    </update>
-   
+
+   <update id="updateRoomtypeByRoom" parameterType="java.util.Map">
+   		update t_room set roomtypeid = #{roomtypeid} where roomid = #{roomid}
+   </update>
+
    <delete id="delRoomById" parameterType="java.lang.Long">
    		delete from t_room where id=#{id}
    </delete>

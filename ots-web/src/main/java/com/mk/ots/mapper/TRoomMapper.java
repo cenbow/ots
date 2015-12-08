@@ -30,5 +30,4 @@ public interface TRoomMapper {
 	
 	public void updateRoomtypeByRoom(Map<String, Object> parameters);
 	
-	public void updateTRoomSetting(Map<String, Object> parameters);
 }
