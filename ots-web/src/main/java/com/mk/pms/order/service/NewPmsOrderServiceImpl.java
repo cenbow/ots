@@ -422,10 +422,14 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			logger.warn("failed to invoke getRoomSaleByParamsNew or isInPromo...", ex);
 		}
 
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("checking isInPromo:%s; status:%s", isInPromo, status));
+		}
+
 		/**
 		 * process this room shift only during promo period
 		 */
-		if (isInPromo && "RX".equals(status)) {
+		if (isInPromo && "RE".equalsIgnoreCase(status)) {
 			isProceed = true;
 		}
 
