@@ -64,7 +64,7 @@
 		update t_room set roomtypeid = #{roomtypeid} where id = #{roomid}
 	</update>
 
-	<select id="selectOtaRoomOrder" resultMap="java.util.Map"
+	<select id="selectOtaRoomOrder" resultType="map"
 		parameterType="java.util.Map">
 		select id
 		from b_otaroomordder 
