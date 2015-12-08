@@ -345,7 +345,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 				 * promo room has been ordered by non-promo pms, supplementary
 				 * room is required
 				 */
-				if (isRoomExisted(models, vcRoom.getRoomid()) && StringUtils.isNotBlank(hotelid) && vcRoom != null
+				if (vcRoom != null && isRoomExisted(models, vcRoom.getRoomid()) && StringUtils.isNotBlank(hotelid)
 						&& vcRoom.getRoomid() != null) {
 					if (logger.isInfoEnabled()) {
 						logger.info(String.format("room is available for a shift...roomid:%s; roomtypeid:%s",
@@ -378,8 +378,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 					}
 				} else {
 					logger.warn(String.format(
-							"tried to make up room for promo roomtypeid:%s, however no available room found...",
-							saleRoomtypeId));
+							"tried to make up room for promo roomtypeid using normal roomtypeid:%s, however no available room found...",
+							roomtypeId));
 				}
 			}
 		}
