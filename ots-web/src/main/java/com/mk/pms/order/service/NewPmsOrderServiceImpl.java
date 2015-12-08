@@ -394,7 +394,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 
 		boolean isProceed = false;
 		boolean isInPromo = false;
-		boolean isFromOta = false;
+		boolean isFromOta = true;
 
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format(
@@ -428,7 +428,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 
 				List<Map<String, Object>> orderResponse = roomMapper.selectOtaRoomOrder(orderParameters);
 				if (orderResponse != null && orderResponse.size() > 0) {
-					isFromOta = true;
+					isFromOta = false;
 				}
 			}
 		} catch (Exception ex) {
