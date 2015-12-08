@@ -137,6 +137,9 @@ public class OtsHotel {
 	// mike3.1 添加今夜特价房信息
 	private String isonpromo;
 
+	//mike3.2+ 添加装修信息
+	private String repairinfo;
+
 	private List<Map<String, Object>> promoinfo;
 	
 	private List<Integer> promoids;
@@ -587,5 +590,13 @@ public class OtsHotel {
 
 	public void setGreetscore(Long greetscore) {
 		this.greetscore = greetscore;
+	}
+
+	public String getRepairinfo() {
+		return repairinfo;
+	}
+
+	public void setRepairinfo(String repairinfo) {
+		this.repairinfo = repairinfo;
 	}
 }

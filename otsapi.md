@@ -142,6 +142,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
             "detailaddr":,//酒店地址
             "hoteldis":,//酒店所属区县
             "hotelcity":,//酒店所属城市
+            "repairinfo":"2014 年装修",//装修信息
             "hotelprovince":,//酒店所属省份
             "hotelphone":,//联系电话
             "hoteldisc":,//酒店简介
@@ -163,6 +164,10 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
             "rcntordertimedes":, //最近订单时间描述
             "distancestr": //距离描述
             "isteambuying":,//是否团购（T/F）
+            "greetscore":,//受欢迎指数
+	    	  "highlights":[{ 
+                        "text": 特点描述
+                        }],  //酒店特点
             "isonpromo":	// 是否特价，是否特价, 0非，>=1特价
             "promoinfo":[{ // 特价活动信息
                         "promoid":// 特价活动 id （1：今夜特价 2.今日特价 3 主题酒店 6.一元秒杀）
@@ -301,6 +306,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
             "hoteldis":,//酒店所属区县
             "hotelcity":,//酒店所属城市
             "hotelprovince":,//酒店所属省份
+            "repairinfo":"2014 年装修",//装修信息
             "hotelphone":,//联系电话
             "hoteldisc":,//酒店简介
             "longitude":, //酒店坐标(经度)
@@ -530,64 +536,6 @@ otsversion 	| OTS版本 	| 否 	|
 }
 ```
 
-### 酒店详细信息查询
-----
-**业务说明：**
-> 根据酒店ID，获取酒店的详细信息。
-
-**接口url：**
-> http://ip:port/ots/hoteldetail/queryinfo
-
-**请求参数：**
-
-    字段        |         名称         | 是否必须 | 说明
---------------- | ------------------- | -------| -----------
-hotelid 	| 酒店id 	| 是 	|  
-callmethod 	| 调用来源 	| 否 	| 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) 
-callversion 	| 调用版本 	| 否 | 
-ip 	| IP地址 	| 否 	|  	|
-hardwarecode 	| 硬件编码 	| 否 |  
-otsversion 	| OTS版本 	| 否 	|  
-
-> API返回json数据示例：
-
-```js
-{
-    "success":true,
-    "errcode":,//错误码
-    "errmsg":,//错误信息
-    "hotel":{
-            "hotelid":,//酒店id
-            "hotelname":,//酒店名称
-            "detailaddr":,//酒店地址
-            "hoteldis":,//酒店所属区县
-            "hotelcity":,//酒店所属城市
-            "hotelprovince":,//酒店所属省份
-            "hotelphone":,//联系电话
-            "hoteldisc":,//酒店简介
-            "hotelfacility":[{//酒店设施
-                            "facid":,//设施id
-                            "facname"://设施名称
-            }]
-    "businesszone":[{//商圈
-            "businesszonename"://商圈名称
-    }],
-
-    "service"[{//酒店服务
-        "serviceid":,//服务id
-        "servicename":,//服务名称
-        }]
-    "trafficdec":,//交通描述
-    "viewspotdec":,//景点描述
-    "ambitustrafficdec":,// 周边交通描述
-    "ambituslifedec":,// 周边生活描述
-    "retentiontime":  18:00//保留时间
-    "defaultleavetime":  12:00// 默认离店时间
-    "iscashback":  //是否返现（T/F）
-
-    }
-}
-```
 
 
 
@@ -643,6 +591,963 @@ otsversion 	| OTS版本 	| 否 	|
 }
 ```
 
+## 房态
+### 酒店综合信息查询
+***
+**业务说明：**
+>查询酒店房型房间信息 
+眯客3.0增加控制，只查询可预定的房间。同时前端展示时默认只展示5个房间。
+
+**接口url：**
+> http://ip:port/ots/roomstate/querylist
+
+**请求参数：**
+
+|    字段        |         名称         | 是否必须 | 说明|
+--------------- | ------------------- | -------| -----------
+|hotelid 	| 酒店id 	| 是 	|  	
+|roomtypeid 	| 房型id 	| 否 	|    | 
+|startdateday 	| 查询开始日期 	| 否 | yyyyMMdd |
+|enddateday 	| 查询结束日期 	| 否 | yyyyMMdd |
+|startdate 	| 入住时间 	| 否 	| yyyyMMddhhmmss |
+|enddate 	| 离店时间 	| 否 	| yyyyMMddhhmmss |
+|roomstatus 	| 返回房态类型	| 否 	| 0或空-全部房间<br>，1-仅返回可售房,<br>2-仅返回不可售房 |
+|bednum 	| 床数量	| 否 	|  （1-1,2-2,3-其他，空-全部）|
+|orderby 	| 排序项目 	| 否 	| 暂时只有roomno| 
+|roomno 	| 房间号	| 否 |  |	
+|isShowAllRoom 	| 是否显示所有的房间 	| 否 | 默认为F. T：显示所有 F:不显示所有（默认只显示5间）|
+|callmethod 	| 调用来源 	| 否 	| 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) |
+|callversion 	| 调用版本 	| 否 |  |
+|callentry 	| 调用入口 	| 否 	| 1-摇一摇 <br>2-房态搜索入口<br> 3-切客 |
+|ip 	| IP地址 	| 否 	|  	|
+|hardwarecode 	| 硬件编码 	| 否 | | 
+|otsversion 	| OTS版本 	| 否 	|  |
+
+>API返回 json 数据说明：
+
+```js
+{
+	"success":true,
+	"errcode":,//错误码
+	"errmsg":,//错误信息
+	"hotel":[{//酒店信息
+		"hotelid":,//酒店id
+		"hotelname":,//酒店名称
+		"hotelrulecode":,//酒店切客规则类型码（1001规则A；1002规则B）
+		"online":,//会否在线(T/F)
+		"repairinfo":"2014 年装修",//装修信息
+		"roomtype":[{//房型
+		"roomtypeid":,//房型id		
+		"bednum":,//床数量（1：单床房，2：双床房，大于2：其他房）
+		"roomtypename":,//房型名称
+		"roomtypeprice":,//房型价格
+	  	"roomtypepmsprice":,//门市价格
+		"ispromoting": //1在促销期间内/0
+		"promoid": "1",// 特价活动id 1-今夜特价， 2-今日特价， 3-主题酒店， 6-一元秒杀
+      	"promotype": "3",// 特价活动类型
+      	"isonpromo": "1", //是否特价
+     	"promostarttime": "20:00", //特价开始时间
+      	"promotext": "该房间正在参与今夜特价活动，预订享受超低价。", //特价文案
+      	"promodustartsec": "0", //距离特价开始的秒数
+      	"promoduendsec": "19039",//距离特价结束的秒数
+      	"promostatus": 1,//特价活动状态： -1-特价活动结束， 0-特价活动未开始， 1-特价活动中
+      	"vcroomnum":,//可售房间数
+		"vctxt":"", //可售房间数小于等于3,显示“仅剩x间”；等于0显示“满房,最近预定3小时前“；大于3间不显示
+		"count":0, //房间内床数
+		"beds":[{
+			"bedtypename":,//床型(双人床，单人床)
+			"bedlength": //尺寸(1.5米，1.8米)
+		}],
+		"area":,//面积
+		"bedtypename":,//床型
+		"bedlength":,//床宽
+		"bathroomtype":,//卫浴类型
+		"bathmode":,//洗浴方式
+		"infrastructure": [{//基础设施
+			"infrastructureid":,// 基础设施id
+			"infrastructurename":,// 基础设施名称
+		}]
+		"valueaddedfa": [{//增值设施
+			"valueaddedfaid":,// 增值设施id
+			"valueaddedfaname":,// 增值设施名称
+		}]
+		"rooms":[{//房间信息
+			"roomid":,//房间id
+			"roomno":,//房间号
+			"isselected":  //T/F
+			"roomname":,//房间类型名称（取自roomtypename）
+			"roomstatus"://房间状态（vc：可售；nvc：不可售）
+			"haswindow":,//是否有窗（T/F）
+			"floor":,//楼层
+		}]
+		"cashbackcost":  //返现金额
+		"iscashback":  //是否返现（T/F）
+
+}] 
+
+}]
+}
+```
+
+>API返回json数据示例：
+
+```js
+{
+	"success":true,
+	"errcode":,//错误码
+	"errmsg:,//错误信息
+	"hotel": [
+        {
+            "hotelid": 7027,
+            "hotelname": "重庆鑫贵宾馆",
+            "hotelrulecode": 1002,
+            "visible": "T",
+            "online": "T",
+            "repairinfo":"2014 年装修",
+            "roomtype": [
+                {
+                    "roomtypeid": 32582,
+                    "bednum": 1,
+                    "roomtypename": "特价单间",
+                    "roomtypeprice": 30,
+                    "roomtypepmsprice": 88,
+                    "vcroomnum": 3,
+                    "bed": {
+                        "count": 1,
+                        "beds": [
+                            {
+                                "bedtypename": "单床房",
+                                "bedlength": "1.50米"
+                            }
+                        ]
+                    },
+                    "area": 12,
+                    "bedtypename": "单床房",
+                    "bedlength": "1.50米",
+                    "bathroomtype": "独立卫浴",
+                    "infrastructure": [
+                        {
+                            "infrastructureid": 15,
+                            "infrastructurename": "24小时热水"
+                        },
+                        {
+                            "infrastructureid": 18,
+                            "infrastructurename": "拖鞋"
+                        },
+                        {
+                            "infrastructureid": 19,
+                            "infrastructurename": "电吹风"
+                        },
+                        {
+                            "infrastructureid": 20,
+                            "infrastructurename": "免费洗漱用品"
+                        },
+                        {
+                            "infrastructureid": 21,
+                            "infrastructurename": "免费瓶装水"
+                        },
+                        {
+                            "infrastructureid": 39,
+                            "infrastructurename": "电视"
+                        },
+                        {
+                            "infrastructureid": 38,
+                            "infrastructurename": "免费茶包"
+                        },
+                        {
+                            "infrastructureid": 37,
+                            "infrastructurename": "电热水壶"
+                        },
+                        {
+                            "infrastructureid": 36,
+                            "infrastructurename": "浴巾"
+                        },
+                        {
+                            "infrastructureid": 35,
+                            "infrastructurename": "毛巾"
+                        },
+                        {
+                            "infrastructureid": 34,
+                            "infrastructurename": "免费wifi"
+                        },
+                        {
+                            "infrastructureid": 33,
+                            "infrastructurename": "有线宽带"
+                        },
+                        {
+                            "infrastructureid": 31,
+                            "infrastructurename": "空调"
+                        }
+                    ],
+                    "valueaddedfa": [
+                        {
+                            "valueaddedfaid": 28,
+                            "valueaddedfaname": "茶具"
+                        },
+                        {
+                            "valueaddedfaid": 41,
+                            "valueaddedfaname": "书桌"
+                        },
+                        {
+                            "valueaddedfaid": 42,
+                            "valueaddedfaname": "插线板"
+                        },
+                        {
+                            "valueaddedfaid": 43,
+                            "valueaddedfaname": "地板"
+                        },
+                        {
+                            "valueaddedfaid": 53,
+                            "valueaddedfaname": "地砖"
+                        },
+                        {
+                            "valueaddedfaid": 54,
+                            "valueaddedfaname": "地毯"
+                        }
+                    ],
+                    "rooms": [
+                        {
+                            "roomid": 179870,
+                            "roomno": "106",
+                            "roomname": "特价单间",
+                            "roomstatus": "vc",
+                            "isselected": "T",
+                            "haswindow": ""
+                        },
+                        {
+                            "roomid": 179871,
+                            "roomno": "112",
+                            "roomname": "特价单间",
+                            "roomstatus": "vc",
+                            "isselected": "F",
+                            "haswindow": ""
+                        },
+                        {
+                            "roomid": 179869,
+                            "roomno": "113",
+                            "roomname": "特价单间",
+                            "roomstatus": "vc",
+                            "isselected": "F",
+                            "haswindow": ""
+                        }
+                    ],
+                    "isfocus": "F",
+                    "iscashback": "F",
+                    "cashbackcost": 0,
+                    "vctxt": "仅剩3间",
+                    "promoid": "1",
+                    "promotype": "1",
+                    "isonpromo": "1",
+                    "promostarttime": "20:00",
+                    "promotext": "该房间正在参与今夜特价活动，预订享受超低价。",
+                    "promodustartsec": "0",
+                    "promoduendsec": "19039",
+                    "promostatus": 1,
+                    "roomtypepic": [
+                        {
+                            "name": "def",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/FrjHUa5KrsR5_LycE6tns6DF2Okk"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "bed",
+                            "pic": []
+                        },
+                        {
+                            "name": "toilet",
+                            "pic": []
+                        }
+                    ]
+                },
+                {
+                    "roomtypeid": 32584,
+                    "bednum": 2,
+                    "roomtypename": "标间",
+                    "roomtypeprice": 60,
+                    "roomtypepmsprice": 108,
+                    "vcroomnum": 2,
+                    "bed": {
+                        "count": 2,
+                        "beds": [
+                            {
+                                "bedtypename": "双床房",
+                                "bedlength": "1.20米"
+                            },
+                            {
+                                "bedtypename": "双床房",
+                                "bedlength": "1.20米"
+                            }
+                        ]
+                    },
+                    "area": 13,
+                    "bedtypename": "双床房",
+                    "bedlength": "1.20,1.20米",
+                    "bathroomtype": "独立卫浴",
+                    "infrastructure": [
+                        {
+                            "infrastructureid": 15,
+                            "infrastructurename": "24小时热水"
+                        },
+                        {
+                            "infrastructureid": 18,
+                            "infrastructurename": "拖鞋"
+                        },
+                        {
+                            "infrastructureid": 19,
+                            "infrastructurename": "电吹风"
+                        },
+                        {
+                            "infrastructureid": 20,
+                            "infrastructurename": "免费洗漱用品"
+                        },
+                        {
+                            "infrastructureid": 21,
+                            "infrastructurename": "免费瓶装水"
+                        },
+                        {
+                            "infrastructureid": 39,
+                            "infrastructurename": "电视"
+                        },
+                        {
+                            "infrastructureid": 38,
+                            "infrastructurename": "免费茶包"
+                        },
+                        {
+                            "infrastructureid": 37,
+                            "infrastructurename": "电热水壶"
+                        },
+                        {
+                            "infrastructureid": 36,
+                            "infrastructurename": "浴巾"
+                        },
+                        {
+                            "infrastructureid": 35,
+                            "infrastructurename": "毛巾"
+                        },
+                        {
+                            "infrastructureid": 34,
+                            "infrastructurename": "免费wifi"
+                        },
+                        {
+                            "infrastructureid": 33,
+                            "infrastructurename": "有线宽带"
+                        },
+                        {
+                            "infrastructureid": 31,
+                            "infrastructurename": "空调"
+                        }
+                    ],
+                    "valueaddedfa": [
+                        {
+                            "valueaddedfaid": 28,
+                            "valueaddedfaname": "茶具"
+                        },
+                        {
+                            "valueaddedfaid": 41,
+                            "valueaddedfaname": "书桌"
+                        },
+                        {
+                            "valueaddedfaid": 42,
+                            "valueaddedfaname": "插线板"
+                        },
+                        {
+                            "valueaddedfaid": 43,
+                            "valueaddedfaname": "地板"
+                        },
+                        {
+                            "valueaddedfaid": 53,
+                            "valueaddedfaname": "地砖"
+                        },
+                        {
+                            "valueaddedfaid": 54,
+                            "valueaddedfaname": "地毯"
+                        }
+                    ],
+                    "rooms": [
+                        {
+                            "roomid": 179874,
+                            "roomno": "108",
+                            "roomname": "标间",
+                            "roomstatus": "vc",
+                            "isselected": "T",
+                            "haswindow": ""
+                        },
+                        {
+                            "roomid": 179876,
+                            "roomno": "110",
+                            "roomname": "标间",
+                            "roomstatus": "vc",
+                            "isselected": "F",
+                            "haswindow": ""
+                        }
+                    ],
+                    "isfocus": "F",
+                    "iscashback": "F",
+                    "cashbackcost": 0,
+                    "vctxt": "仅剩2间",
+                    "promoid": "1",
+                    "promotype": "2",
+                    "isonpromo": "1",
+                    "promostarttime": "20:00",
+                    "promotext": "该房间正在参与今夜特价活动，预订享受超低价。",
+                    "promodustartsec": "0",
+                    "promoduendsec": "19039",
+                    "promostatus": 1,
+                    "roomtypepic": [
+                        {
+                            "name": "def",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/Fm5kfFUFy_vr1kNFuC83MjjqAgn8"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "bed",
+                            "pic": []
+                        },
+                        {
+                            "name": "toilet",
+                            "pic": []
+                        }
+                    ]
+                },
+                {
+                    "roomtypeid": 32591,
+                    "bednum": 1,
+                    "roomtypename": "豪华单间",
+                    "roomtypeprice": 90,
+                    "roomtypepmsprice": 158,
+                    "vcroomnum": 2,
+                    "bed": {
+                        "count": 1,
+                        "beds": [
+                            {
+                                "bedtypename": "单床房",
+                                "bedlength": "1.50米"
+                            }
+                        ]
+                    },
+                    "area": 13,
+                    "bedtypename": "单床房",
+                    "bedlength": "1.50米",
+                    "bathroomtype": "独立卫浴",
+                    "infrastructure": [
+                        {
+                            "infrastructureid": 15,
+                            "infrastructurename": "24小时热水"
+                        },
+                        {
+                            "infrastructureid": 18,
+                            "infrastructurename": "拖鞋"
+                        },
+                        {
+                            "infrastructureid": 19,
+                            "infrastructurename": "电吹风"
+                        },
+                        {
+                            "infrastructureid": 20,
+                            "infrastructurename": "免费洗漱用品"
+                        },
+                        {
+                            "infrastructureid": 21,
+                            "infrastructurename": "免费瓶装水"
+                        },
+                        {
+                            "infrastructureid": 39,
+                            "infrastructurename": "电视"
+                        },
+                        {
+                            "infrastructureid": 38,
+                            "infrastructurename": "免费茶包"
+                        },
+                        {
+                            "infrastructureid": 37,
+                            "infrastructurename": "电热水壶"
+                        },
+                        {
+                            "infrastructureid": 36,
+                            "infrastructurename": "浴巾"
+                        },
+                        {
+                            "infrastructureid": 35,
+                            "infrastructurename": "毛巾"
+                        },
+                        {
+                            "infrastructureid": 34,
+                            "infrastructurename": "免费wifi"
+                        },
+                        {
+                            "infrastructureid": 33,
+                            "infrastructurename": "有线宽带"
+                        },
+                        {
+                            "infrastructureid": 31,
+                            "infrastructurename": "空调"
+                        }
+                    ],
+                    "valueaddedfa": [
+                        {
+                            "valueaddedfaid": 40,
+                            "valueaddedfaname": "电脑"
+                        },
+                        {
+                            "valueaddedfaid": 41,
+                            "valueaddedfaname": "书桌"
+                        },
+                        {
+                            "valueaddedfaid": 42,
+                            "valueaddedfaname": "插线板"
+                        },
+                        {
+                            "valueaddedfaid": 43,
+                            "valueaddedfaname": "地板"
+                        },
+                        {
+                            "valueaddedfaid": 53,
+                            "valueaddedfaname": "地砖"
+                        },
+                        {
+                            "valueaddedfaid": 54,
+                            "valueaddedfaname": "地毯"
+                        }
+                    ],
+                    "rooms": [
+                        {
+                            "roomid": 179865,
+                            "roomno": "102",
+                            "roomname": "豪华单间",
+                            "roomstatus": "vc",
+                            "isselected": "T",
+                            "haswindow": ""
+                        },
+                        {
+                            "roomid": 179867,
+                            "roomno": "111",
+                            "roomname": "豪华单间",
+                            "roomstatus": "vc",
+                            "isselected": "F",
+                            "haswindow": ""
+                        }
+                    ],
+                    "isfocus": "F",
+                    "iscashback": "F",
+                    "cashbackcost": 0,
+                    "vctxt": "仅剩2间",
+                    "promoid": "1",
+                    "promotype": "3",
+                    "isonpromo": "1",
+                    "promostarttime": "20:00",
+                    "promotext": "该房间正在参与今夜特价活动，预订享受超低价。",
+                    "promodustartsec": "0",
+                    "promoduendsec": "19039",
+                    "promostatus": 1,
+                    "roomtypepic": [
+                        {
+                            "name": "def",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/FhpVnndlJVQh4TU9vw_DqOrW4PVv"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "bed",
+                            "pic": []
+                        },
+                        {
+                            "name": "toilet",
+                            "pic": []
+                        }
+                    ]
+                },
+                {
+                    "roomtypeid": 29324,
+                    "bednum": 1,
+                    "roomtypename": "豪华单间",
+                    "roomtypeprice": 138,
+                    "roomtypepmsprice": 158,
+                    "vcroomnum": 0,
+                    "bed": {
+                        "count": 1,
+                        "beds": [
+                            {
+                                "bedtypename": "单床房",
+                                "bedlength": "1.50米"
+                            }
+                        ]
+                    },
+                    "area": 13,
+                    "bedtypename": "单床房",
+                    "bedlength": "1.50米",
+                    "bathroomtype": "独立卫浴",
+                    "infrastructure": [
+                        {
+                            "infrastructureid": 15,
+                            "infrastructurename": "24小时热水"
+                        },
+                        {
+                            "infrastructureid": 18,
+                            "infrastructurename": "拖鞋"
+                        },
+                        {
+                            "infrastructureid": 19,
+                            "infrastructurename": "电吹风"
+                        },
+                        {
+                            "infrastructureid": 20,
+                            "infrastructurename": "免费洗漱用品"
+                        },
+                        {
+                            "infrastructureid": 21,
+                            "infrastructurename": "免费瓶装水"
+                        },
+                        {
+                            "infrastructureid": 39,
+                            "infrastructurename": "电视"
+                        },
+                        {
+                            "infrastructureid": 38,
+                            "infrastructurename": "免费茶包"
+                        },
+                        {
+                            "infrastructureid": 37,
+                            "infrastructurename": "电热水壶"
+                        },
+                        {
+                            "infrastructureid": 36,
+                            "infrastructurename": "浴巾"
+                        },
+                        {
+                            "infrastructureid": 35,
+                            "infrastructurename": "毛巾"
+                        },
+                        {
+                            "infrastructureid": 34,
+                            "infrastructurename": "免费wifi"
+                        },
+                        {
+                            "infrastructureid": 33,
+                            "infrastructurename": "有线宽带"
+                        },
+                        {
+                            "infrastructureid": 31,
+                            "infrastructurename": "空调"
+                        }
+                    ],
+                    "valueaddedfa": [
+                        {
+                            "valueaddedfaid": 40,
+                            "valueaddedfaname": "电脑"
+                        },
+                        {
+                            "valueaddedfaid": 41,
+                            "valueaddedfaname": "书桌"
+                        },
+                        {
+                            "valueaddedfaid": 42,
+                            "valueaddedfaname": "插线板"
+                        },
+                        {
+                            "valueaddedfaid": 43,
+                            "valueaddedfaname": "地板"
+                        },
+                        {
+                            "valueaddedfaid": 53,
+                            "valueaddedfaname": "地砖"
+                        },
+                        {
+                            "valueaddedfaid": 54,
+                            "valueaddedfaname": "地毯"
+                        }
+                    ],
+                    "rooms": [],
+                    "isfocus": "F",
+                    "iscashback": "F",
+                    "cashbackcost": 0,
+                    "vctxt": "满房,最近预定3小时前",
+                    "isonpromo": "0",
+                    "roomtypepic": [
+                        {
+                            "name": "def",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/FhpVnndlJVQh4TU9vw_DqOrW4PVv"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "bed",
+                            "pic": []
+                        },
+                        {
+                            "name": "toilet",
+                            "pic": []
+                        }
+                    ]
+                },
+                {
+                    "roomtypeid": 29325,
+                    "bednum": 1,
+                    "roomtypename": "特价单间",
+                    "roomtypeprice": 68,
+                    "roomtypepmsprice": 88,
+                    "vcroomnum": 0,
+                    "bed": {
+                        "count": 1,
+                        "beds": [
+                            {
+                                "bedtypename": "单床房",
+                                "bedlength": "1.50米"
+                            }
+                        ]
+                    },
+                    "area": 12,
+                    "bedtypename": "单床房",
+                    "bedlength": "1.50米",
+                    "bathroomtype": "独立卫浴",
+                    "infrastructure": [
+                        {
+                            "infrastructureid": 15,
+                            "infrastructurename": "24小时热水"
+                        },
+                        {
+                            "infrastructureid": 18,
+                            "infrastructurename": "拖鞋"
+                        },
+                        {
+                            "infrastructureid": 19,
+                            "infrastructurename": "电吹风"
+                        },
+                        {
+                            "infrastructureid": 20,
+                            "infrastructurename": "免费洗漱用品"
+                        },
+                        {
+                            "infrastructureid": 21,
+                            "infrastructurename": "免费瓶装水"
+                        },
+                        {
+                            "infrastructureid": 39,
+                            "infrastructurename": "电视"
+                        },
+                        {
+                            "infrastructureid": 38,
+                            "infrastructurename": "免费茶包"
+                        },
+                        {
+                            "infrastructureid": 37,
+                            "infrastructurename": "电热水壶"
+                        },
+                        {
+                            "infrastructureid": 36,
+                            "infrastructurename": "浴巾"
+                        },
+                        {
+                            "infrastructureid": 35,
+                            "infrastructurename": "毛巾"
+                        },
+                        {
+                            "infrastructureid": 34,
+                            "infrastructurename": "免费wifi"
+                        },
+                        {
+                            "infrastructureid": 33,
+                            "infrastructurename": "有线宽带"
+                        },
+                        {
+                            "infrastructureid": 31,
+                            "infrastructurename": "空调"
+                        }
+                    ],
+                    "valueaddedfa": [
+                        {
+                            "valueaddedfaid": 28,
+                            "valueaddedfaname": "茶具"
+                        },
+                        {
+                            "valueaddedfaid": 41,
+                            "valueaddedfaname": "书桌"
+                        },
+                        {
+                            "valueaddedfaid": 42,
+                            "valueaddedfaname": "插线板"
+                        },
+                        {
+                            "valueaddedfaid": 43,
+                            "valueaddedfaname": "地板"
+                        },
+                        {
+                            "valueaddedfaid": 53,
+                            "valueaddedfaname": "地砖"
+                        },
+                        {
+                            "valueaddedfaid": 54,
+                            "valueaddedfaname": "地毯"
+                        }
+                    ],
+                    "rooms": [],
+                    "isfocus": "F",
+                    "iscashback": "F",
+                    "cashbackcost": 0,
+                    "vctxt": "满房,最近预定3小时前",
+                    "isonpromo": "0",
+                    "roomtypepic": [
+                        {
+                            "name": "def",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/FrjHUa5KrsR5_LycE6tns6DF2Okk"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "bed",
+                            "pic": []
+                        },
+                        {
+                            "name": "toilet",
+                            "pic": []
+                        }
+                    ]
+                },
+                {
+                    "roomtypeid": 29326,
+                    "bednum": 2,
+                    "roomtypename": "标间",
+                    "roomtypeprice": 88,
+                    "roomtypepmsprice": 108,
+                    "vcroomnum": 0,
+                    "bed": {
+                        "count": 2,
+                        "beds": [
+                            {
+                                "bedtypename": "双床房",
+                                "bedlength": "1.20米"
+                            },
+                            {
+                                "bedtypename": "双床房",
+                                "bedlength": "1.20米"
+                            }
+                        ]
+                    },
+                    "area": 13,
+                    "bedtypename": "双床房",
+                    "bedlength": "1.20,1.20米",
+                    "bathroomtype": "独立卫浴",
+                    "infrastructure": [
+                        {
+                            "infrastructureid": 15,
+                            "infrastructurename": "24小时热水"
+                        },
+                        {
+                            "infrastructureid": 18,
+                            "infrastructurename": "拖鞋"
+                        },
+                        {
+                            "infrastructureid": 19,
+                            "infrastructurename": "电吹风"
+                        },
+                        {
+                            "infrastructureid": 20,
+                            "infrastructurename": "免费洗漱用品"
+                        },
+                        {
+                            "infrastructureid": 21,
+                            "infrastructurename": "免费瓶装水"
+                        },
+                        {
+                            "infrastructureid": 39,
+                            "infrastructurename": "电视"
+                        },
+                        {
+                            "infrastructureid": 38,
+                            "infrastructurename": "免费茶包"
+                        },
+                        {
+                            "infrastructureid": 37,
+                            "infrastructurename": "电热水壶"
+                        },
+                        {
+                            "infrastructureid": 36,
+                            "infrastructurename": "浴巾"
+                        },
+                        {
+                            "infrastructureid": 35,
+                            "infrastructurename": "毛巾"
+                        },
+                        {
+                            "infrastructureid": 34,
+                            "infrastructurename": "免费wifi"
+                        },
+                        {
+                            "infrastructureid": 33,
+                            "infrastructurename": "有线宽带"
+                        },
+                        {
+                            "infrastructureid": 31,
+                            "infrastructurename": "空调"
+                        }
+                    ],
+                    "valueaddedfa": [
+                        {
+                            "valueaddedfaid": 28,
+                            "valueaddedfaname": "茶具"
+                        },
+                        {
+                            "valueaddedfaid": 41,
+                            "valueaddedfaname": "书桌"
+                        },
+                        {
+                            "valueaddedfaid": 42,
+                            "valueaddedfaname": "插线板"
+                        },
+                        {
+                            "valueaddedfaid": 43,
+                            "valueaddedfaname": "地板"
+                        },
+                        {
+                            "valueaddedfaid": 53,
+                            "valueaddedfaname": "地砖"
+                        },
+                        {
+                            "valueaddedfaid": 54,
+                            "valueaddedfaname": "地毯"
+                        }
+                    ],
+                    "rooms": [],
+                    "isfocus": "F",
+                    "iscashback": "F",
+                    "cashbackcost": 0,
+                    "vctxt": "满房,最近预定3小时前",
+                    "isonpromo": "0",
+                    "roomtypepic": [
+                        {
+                            "name": "def",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/Fm5kfFUFy_vr1kNFuC83MjjqAgn8"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "bed",
+                            "pic": []
+                        },
+                        {
+                            "name": "toilet",
+                            "pic": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+ }
+```
 
 
 ## 特价活动
@@ -680,6 +1585,8 @@ otsversion 	| OTS版本 	| 否 	|
 	
 }
 ``` 
+
+### 特价房提醒----**业务说明：**> 记录用户提醒特价房要求。**接口url：**> http://ip:port/ots/remind/create**请求参数：**|    字段        |         名称         | 是否必须  | 说明||--------------- | ------------------- | ----------| -----------||token 	| 用户令牌 	| 是 	|  |roomtypeid 	| 房型id 	| 是 	| 	|callmethod 	| 调用来源 	| 否 	| 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) ||callversion 	| 调用版本 	| 否 | 	|ip 	| IP地址 	| 否 	|  		|hardwarecode 	| 硬件编码 	| 否 |  |otsversion 	| OTS版本 	| 否 	|  > API返回json数据示例：```js{    "success":true,    "errcode":,//错误码    "errmsg"://错误信息}```
 
 ### 特价房信息查询
 ***
@@ -780,8 +1687,9 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
             "rcntordertimedes":, //最近订单时间描述
             "distancestr": //距离描述
             "isteambuying":,//是否团购（T/F）
-	    "greetscore":,//受欢迎指数
-	    "highlights":,[{ 
+	    	  "greetscore":,//受欢迎指数
+	    	  "repairinfo",//装修信息
+	    	  "highlights":,[{ 
                         "text": 特点描述
                         }]  //酒店特点
             "isonpromo":	// 是否特价，是否特价, 0非，>=1特价
@@ -1368,6 +2276,1173 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 
 
 
+## 评分
+
+### 获取评分项信息
+**业务说明：**
+> 查询系统的已有的酒店评分信息和评价标签
+
+**接口 url：**
+> http://ip:port/ots/score/subject/querylist
+
+**请求参数：**
+
+|    字段        |         名称         | 是否必须 | 说明|
+--------------- | ------------------- | -------| -----------                                                
+| subjectid     	| 评分项id   | 否    |         |                                           
+| callmethod   	| 调用来源   | 是   | 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) |
+| callversion  	| 调用版本   | 是   |
+| ip           	| IP地址  | 是     |                                                    
+| hardwarecode 	| 硬件编码   | 是       |                                                    
+| otsversion   	| OTS版本    | 否       |   
+
+
+> API返回json返回说明：
+
+```js
+{
+	"success":true,
+	"errcode":,//错误码
+	"errmsg":,//错误信息
+	"subjects": [{//评分项
+		"subjectid":,//评分项id
+		"subjectname"://评分项名称
+		"minno":,//最小分值
+		"maxno":,//最大分值
+		"dno":,//允许最小值差（每个分值之间的差值，例如：最低分是1分，最高分是5分，值差是1分，则分数分别是1,2,3,4,5分共5个分级）
+		"wfun"://权重系数
+	}],
+	"hotelmark":[{
+ 		"id":1,  //mark主键
+ 		"mark":"非常好" //mark变签内容
+}]
+
+}
+```
+
+
+
+
+> API返回json数据示例：
+
+```js
+{
+    "subjects": [
+        {
+            "wfun": 4,
+            "maxno": 5,
+            "minno": 1,
+            "dno": 1,
+            "mno": 1,
+            "subjectname": "卫生",
+            "subjectid": 23981766981189704
+        },
+        {
+            "wfun": 3,
+            "maxno": 5,
+            "minno": 1,
+            "dno": 1,
+            "mno": 1,
+            "subjectname": "交通",
+            "subjectid": 23981766981189704
+        },
+        {
+            "wfun": 3,
+            "maxno": 5,
+            "minno": 1,
+            "dno": 1,
+            "mno": 1,
+            "subjectname": "性价比",
+            "subjectid": 23981766981189704
+        }
+    ],
+    "hotelmark":[{
+ 		"id":1,
+ 		"mark":"非常好"
+}],
+    "success": true
+}
+```
+
+
+### 酒店评价信息维护
+**业务说明：**
+> 查询系统的已有的酒店评分信息和评价标签
+
+**接口 url：**
+> http://ip:port/ots/score/modify
+
+**请求参数：**
+
+|    字段        |         名称         | 是否必须 | 说明|
+--------------- | ------------------- | -------| -----------                                                
+| orderid     	| 订单id   | 是   |         |   
+| token     	| 授权token   | 是   |         |   
+| actiontype     	| 操作类型   | 是   |  i添加<br>m修改<br>d删除      |   
+| score     	| 评价内容  | 否   |         |   
+| phone     	| 评价人手机号  | 否   |         |          
+| isdefault     	| 默认评价  | 否   |   判断是否系统默认评价(T/F)  |   
+| markids     	|评论标签id  | 否   |   多个标签用逗号”,”隔开| 
+|集合参数(scorepics):                                        
+| scorepictitle     	| 图片标题  | 否   |         |                                           
+| scorepicurl     	| 评价图片url  | 否   |         |                                           
+|集合参数(grades)：
+| subjectid     	| 评分项id | 否   |  集合内必填       |                                           
+| grade     	| 分数 | 否   |  集合内必填       |                                    
+| callmethod   	| 调用来源   | 是   | 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) |
+| callversion  	| 调用版本   | 是   |
+| ip           	| IP地址  | 是     |                                                    
+| hardwarecode 	| 硬件编码   | 是       |                                                    
+| otsversion   	| OTS版本    | 否       |   
+
+
+> API返回json返回说明：
+
+```js
+{
+	"success":true,
+	"errcode":,//错误码
+	"errmsg"
+```
+
+
+
+###查询订单详情
+***
+**业务说明：**
+
+查询订单信息，若订单有删除标记，则不返回该笔订单信息
+眯客3.0增加 订单根据业务要求，显示需要给前端显示的状态（3.0暂时不做）
+
+
+**接口url：**
+> http://ip:port/ots/order/querylist
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿token|授权token|是|
+|orderid|订单id|否|
+|startdateday|查询开始日期|否|yyyyMMdd
+|enddateday|查询结束日期|否|yyyyMMdd
+|begintime|查询时间段的开始时|否|yyyyMMddhhmmss
+|endtime|查询时间段的结束时|否|yyyyMMddhhmmss
+|ordertype|订单状态|否|多状态用”，”隔开
+|isscore|是否评价|否|T/F
+|page|页数|是|第一页为1
+|limit|每页显示记录条数|是|必须为正数
+|hotelid|酒店id|否|只查询该酒店订单
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+|statetype|取值范围|否|[all、doing、done]                                          
+
+> API返回json数据示例：
+
+```js
+{
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+	count:10, //总数
+	order:
+[{//所有订单
+		orderid:1,//订单id
+		hotelid:1,//酒店id
+		hotelname:,//酒店名称
+		hotelphone:,//联系电话
+hoteladdress:,//酒店地址
+hoteldis:,//酒店所属区县
+		hotelcity:,//酒店所属城市
+longitude:, //酒店坐标(经度)
+		latitude:,//酒店坐标(纬度)
+retentiontime:, //最晚保留时间 6位字符串 hhmmss,
+defaultleavetime:, //默认离店时间  6位字符串 hhmmss,
+		ordermethod:1, //预订方式 1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+		ordertype:1, //预订方式  1、预付 2、普通        
+		pricetype:1, //价格类型 1、时租  2、日租
+		begintime:‘20141225171400’, //预抵时间
+		endtime:‘20141225171400’,  //预离时间
+		createtime:‘20141225171400’, //订单创建时间
+		timeouttime:,//订单失效时间（创建订单时，默认是预付，订单失效时间为订单创建后15分钟）
+		promotion:F, //是否促销(T/F)
+		coupon:F, //是否使用了优惠券(T/F)
+isonpromo:// 是否特价, 0非，1特价
+promotype:	// 是否特价, 0非，1特价
+roomticket：房券代码
+		checkcnt:,//可使用优惠券张数
+		payTip:支付提示
+		tickets:
+[{//优惠券信息，按照线上优惠额倒序排序，金额最大的为默认选中
+	id:1,//优惠券唯一id
+	name:’优惠券名’,
+	select:T, //选中,
+	check:T, //可以使用
+	subprice:12, //线上优惠多少钱
+	offlinesubprice:12, //线下优惠多少钱
+	type:1, //优惠券类型 1、普通立减 2、切客优惠码 3、议价优惠码
+	isticket:T,//  是否是优惠券（T优惠券，F优惠码）
+	uselimit://使用限制(1—线上；2—线下；空—全部)
+}],
+		totalprice:150.00, //总房价
+		price:50,  //房价
+		breakfastnum:1,   //早餐数
+		contacts:’联系人姓名’,
+		contactsphone:’联系人电话’,
+		contactsemail:’联系人email’,
+		contactsweixin:’联系人微信’,
+		note:’备注’,
+		orderstatus:100,  //订单状态
+		pay:F,  //是否需要支付(T/F)
+payid:1, //需要支付的订单id
+orderretentiontime:’’  订单保留时间  14位
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+		receipt:F,   //是否需要发票(T/F)
+		spreaduser:1,  //切客用户id
+		roomorder:
+[{//订单下客单
+		orderroomid:1,  //客单id
+		hotelid:1   //酒店id
+		hotelname:’酒店名称’,
+		roomtypeid:1, //房型id
+		roomtypename:’房型名称’,
+		roomid:1,
+		roomno:’房间号’,
+		ordermethod:1,  //预订方式 1、微信、web3、app
+		ordertype:1,  //预订方式  1、预付 2、普通
+		pricetype:1,  //价格类型 1、时租  2、日租
+		begintime:‘20141225171400’,  //预抵时间
+		endtime:‘20141225171400’,  //预离时间
+		orderday:1, //1天
+		createtime:‘20141225171400’, //订单创建时间
+		promotion:F, //是否促销(T/F)
+		coupon:F, //是否使用了优惠券(T/F)
+		totalprice:150.00, //总房价
+payprice:
+[{房费应支付金额
+	actiondate:,// 日期
+	price:,//房价金额
+}] 	
+		breakfastnum:1,   //早餐数
+		contacts:’联系人姓名’,
+		contactsphone:’联系人电话’,
+		contactsemail:’联系人email’,
+		contactsweixin:’联系人微信’,
+		checkinuser:
+[{//入住人信息
+				cpname:,//入住人姓名
+			cpsex:,//入住人性别
+			birthday:,//生日
+			cardtype:,//证件类型
+			cardid:,//证件号
+			ethnic:,//民族
+			fromaddress:,//户籍地址
+			address://联系地址
+			phone:‘’手机号
+}]
+		note:’备注’,
+		orderstatus:100,  //订单状态
+		pay:F,  //是否需要支付(T/F)
+		receipt:F,   //是否需要发票(T/F)
+promotionno:’促销代码’,
+reeceipttitle:’发票抬头’,续住时需要第三方支付金额
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+showtitle:’已取消’, //显示状态
+
+citycode：城市编码
+walletcost ： //钱包金额
+cashbackcost ： //返还金额
+orderpaydetail: [
+{name:房款 ，cost ： 100},
+{name:优惠券 ，cost ： -10},
+{name:乐住币 ，cost ：-20},
+{name:房券 ，cost ：-20}
+],//订单明细费用
+orderstatusname：订单状态的汉字描述
+orderstatusid：订单显示状态id
+receivecashback: 1, //（0:无需领取；1:还未领取;  2:已经领取) 是否返现
+
+确认状态显示规则和前端按钮id
+button:[{
+name:’’, //按钮名称
+action:’’, //动作意义    cancel 取消、pay 付款、edit 修改、checkin快速入住、meet约会、refund退款、evaluation评价、continuedtolive 续住、delete删除
+}]
+}]
+}
+
+
+```
+
+
+
+### 创建订单
+***
+**业务说明：**
+
+
+**接口url：**
+> http://ip:port/ots/order/create
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿token|授权token|是|
+|activeid|活动ID|否|
+|hotelid|所选酒店id|是|
+|roomtypeid|所选房型id|是|
+|pricetype|日租/时租 |是|1时租；2日租
+|startdateday|查询开始日期|是|yyyyMMdd
+|enddateday|查询结束日期|是|yyyyMMdd
+|begintime|开始时间|否|yyyyMMddhhmmss
+|endtime|结束时间|否|yyyyMMddhhmmss
+|userlongitude|用户坐标(经度)|否|用户的经度
+|userlatitude|用户坐标(纬度)|否|用户的纬度
+|roomid|所选房间id|是|
+|ordertype|预付类型|是|1预付；2到店支付
+|hideorder|是否无痕入住|否|T/F
+|breakfastnum|早餐数|否|
+|contacts|联系人|否|
+|contactsphone|联系电话|否|
+|contactsemail|联系邮箱|否|
+|contactsweixin|联系微信|否|
+|note|备注|否|
+|spreaduser|切客用户id|否|
+|ordermethod|订单方式|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|promotion|促销代码|否|
+|couponno|优惠券代码|否|
+|quickuserid|常住人主键id|否|可多个，多个使用过 英文逗号分隔
+|checkinuser|入住人信息|否|除去常住人之外的入住人信息，格式为json格式[{name:’姓名’,sex:’性别’, ethnic,’民族’,birthday:’生日’,cardtype:’证件类型’,cardid:’证件号’,disid:’身份证地址区县id’,address:’身份证具体地址’,img:’’},{…}]其中性别、名族参照代码表，区县地址可从服务器端获取全国三级省市县id照片使用base64编码具体地址最多100汉字/字符，电话最多25字符，证件号50字符
+|sysno|系统号|否|
+|uuid|用户注册应用信息|否|
+|deviceimei|手机唯一识别码imei|否|
+|simsn|sim卡串号|否|
+|wifimacaddr|wifi的mac地址|否|
+|blmacaddr|蓝牙的mac地址|否|
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+|cashbackcost|返现金额              |否|                                                
+
+> API返回json数据示例：
+
+```js
+{
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+	orderid:1,//订单id
+	hotelid:1,//酒店id
+	hotelname:,//酒店名称
+	hotelphone:,//联系电话
+hoteladdress:,//酒店地址
+hoteldis:,//酒店所属区县
+	hotelcity:,//酒店所属城市
+longitude:, //酒店坐标(经度)
+	latitude:,//酒店坐标(纬度)
+retentiontime:, //最晚保留时间 6位字符串 hhmmss,
+defaultleavetime:, //默认离店时间  6位字符串 hhmmss,
+	ordermethod:1, //预订方式 1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+	ordertype:1, //预订方式  1、预付 2、普通
+	pricetype:1, //价格类型 1、时租  2、日租
+	begintime:‘20141225180000’, //预抵时间
+	endtime:‘20141226120000’,  //预离时间
+	createtime:‘20141225171400’, //订单创建时间
+	timeouttime:,//订单失效时间（创建订单时，默认是预付，订单失效时间为订单创建后15分钟）
+	promotion:F, //是否促销(T/F)
+	coupon:F, //是否使用了优惠券(T/F)
+isonpromo:// 是否特价, 0非，1特价
+promotype:	// 是否特价, 0非，1特价
+roomticket：房券代码
+	checkcnt:,//可使用优惠券张数
+uselimit://选定的优惠券的使用限制(1—线上；2—线下；空—全部)
+payTip:支付提示
+	tickets:
+[{//优惠券信息，按照线上优惠额倒序排序，金额最大的为默认选中
+	id:1,//优惠券唯一id
+	name:’优惠券名’,
+	select:T, //选中,
+	check:T, //可以使用
+	subprice:12, //线上优惠多少钱
+	offlinesubprice:12, //线下优惠多少钱
+	type:1, //优惠券类型 1、普通立减 2、切客优惠码 3、议价优惠码
+	isticket:T,//  是否是优惠券（T优惠券，F优惠码）
+	uselimit://使用限制(1—线上；2—线下；空—全部)
+}],
+	totalprice:150.00, //总房价
+	price:50,  //房价
+	breakfastnum:1,   //早餐数
+	contacts:’联系人姓名’,
+	contactsphone:’联系人电话’,
+	contactsemail:’联系人email’,
+	contactsweixin:’联系人微信’,
+	note:’备注’,
+	orderstatus:100,  //订单状态
+	pay:F,  //是否需要支付(T/F)
+payid:1, //需要支付的订单id
+orderretentiontime:’’  订单保留时间  14位
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+	receipt:F,   //是否需要发票(T/F)
+	spreaduser:1,  //切客用户id
+	roomorder:
+[{//订单下客单
+	orderroomid:1,  //客单id
+		hotelid:1   //酒店id
+		hotelname:’酒店名称’,
+		roomtypeid:1, //房型id
+		roomtypename:’房型名称’,
+		roomid:1,
+		roomno:’房间号’,
+		ordermethod:1,  //预订方式 1、微信、web3、app
+		ordertype:1,  //预订方式  1、预付 2、普通
+		pricetype:1,  //价格类型 1、时租  2、日租
+		begintime:‘20141225171400’,  //预抵时间
+		endtime:‘20141225171400’,  //预离时间
+		orderday:1, //1天
+		createtime:‘20141225171400’, //订单创建时间
+		promotion:F, //是否促销(T/F)
+		coupon:F, //是否使用了优惠券(T/F)
+		totalprice:150.00, //总房价
+payprice:
+[{房费应支付金额
+	actiondate:,// 日期
+	price:,//房价金额
+}] 	
+		breakfastnum:1,   //早餐数
+		contacts:’联系人姓名’,
+		contactsphone:’联系人电话’,
+		contactsemail:’联系人email’,
+		contactsweixin:’联系人微信’,
+		note:’备注’,
+		orderstatus:100,  //订单状态
+		pay:F,  //是否需要支付(T/F)
+		receipt:F,   //是否需要发票(T/F)
+promotionno:’促销代码’,
+reeceipttitle:’发票抬头’,续住时需要第三方支付金额
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+}]
+walletcost ： //钱包金额
+citycode：城市编码
+cashbackcost:  //返现金额
+，orderpaydetail: [
+{name:房款 ，cost ： 100},
+{name:优惠券 ，cost ： -10},
+{name:乐住币 ，cost ：-20},
+{name:房券 ，cost ：-20}
+],
+orderstatusname：订单状态的汉字描述
+orderstatusid：订单显示状态id
+
+usermessage：提示信息
+内容要求：
+（1）您预订的酒店，在入住日期前一天18:00前可进行退款操作；预订今日酒店，付款完成后就不可以修改订单或退款咯
+（2）凌晨23:56-2:00下单，可当天办理入住，提示“您最晚可在xxxx年xx月xx日12：00办理退房哦”；
+（3）凌晨2:00后下单，必须在12：00后办理入住，提示“您在xxxx年xx月xx日12:00后可办理入住哦”；
+}
+
+```
+
+### 修改订单
+***
+**业务说明：**
+
+
+**接口url：**
+> http://ip:port/ots/order/modify
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿token|授权token|是|
+|orderid|订单ID|是|
+|hotelid|所选酒店id|否|
+|roomtypeid|所选房型id|否|
+|pricetype|日租/时租 |否|1时租；2日租
+|startdateday|查询开始日期|否|yyyyMMdd
+|enddateday|查询结束日期|否|yyyyMMdd
+|begintime|开始时间|否|yyyyMMddhhmmss
+|endtime|结束时间|否|yyyyMMddhhmmss
+|roomid|所选房间id|否|
+|ordertype|预付类型|否|1预付；2到店支付
+|hideorder|是否无痕入住|否|T/F
+|breakfastnum|早餐数|否|
+|contacts|联系人|否|
+|contactsphone|联系电话|否|
+|contactsemail|联系邮箱|否|
+|contactsweixin|联系微信|否|
+|note|备注|否|
+|spreaduser|切客用户id|否|
+|ordermethod|订单方式|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|promotion|促销代码|否|
+|couponno|优惠券代码|否|
+|quickuserid|常住人主键id|否|可多个，多个使用过 英文逗号分隔
+|checkinuser|入住人信息|否|除去常住人之外的入住人信息，格式为json格式
+|sysno|系统号|否|
+|uuid|用户注册应用信息|否|
+|deviceimei|手机唯一识别码imei|否|
+|simsn|sim卡串号|否|
+|wifimacaddr|wifi的mac地址|否|
+|blmacaddr|蓝牙的mac地址|否|
+|walletcost|钱包费用|否|
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+|isuselewallet|是否使用钱包|否|T/F
+|roomticket|房卷代码|否|                                 
+
+> API返回json数据示例：
+
+```js
+{
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+	orderid:1,//订单id
+	hotelid:1,//酒店id
+	hotelname:,//酒店名称
+	hotelphone:,//联系电话
+hoteladdress:,//酒店地址
+hoteldis:,//酒店所属区县
+	hotelcity:,//酒店所属城市
+longitude:, //酒店坐标(经度)
+	latitude:,//酒店坐标(纬度)
+retentiontime:, //最晚保留时间 6位字符串 hhmmss,
+defaultleavetime:, //默认离店时间  6位字符串 hhmmss,
+	ordermethod:1, //预订方式 1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+	ordertype:1, //预订方式  1、预付 2、普通	pricetype:1, //价格类型 1、时租  2、日租
+	begintime:‘20141225171400’, //预抵时间
+	endtime:‘20141225171400’,  //预离时间
+	createtime:‘20141225171400’, //订单创建时间
+	timeouttime:,//订单失效时间（创建订单时，默认是预付，订单失效时间为订单创建后15分钟）
+	promotion:F, //是否促销(T/F)
+	coupon:F, //是否使用了优惠券(T/F)
+isonpromo:// 是否特价, 0非，1特价
+promotype:	// 是否特价, 0非，1特价
+roomticket：房券代码
+	checkcnt:,//可使用优惠券张数
+uselimit:// 选定的优惠券的使用限制(1—线上；2—线下；空—全部)
+payTip:支付提示
+	tickets:
+[{//优惠券信息，按照线上优惠额倒序排序，金额最大的为默认选中
+	id:1,//优惠券唯一id
+	name:’优惠券名’,
+	select:T, //选中,
+	check:T, //可以使用
+	subprice:12, //线上优惠多少钱
+	offlinesubprice:12, //线下优惠多少钱
+	type:1, //优惠券类型 1、普通立减 2、切客优惠码 3、议价优惠码
+	isticket:T,//  是否是优惠券（T优惠券，F优惠码）
+	uselimit://使用限制(1—线上；2—线下；空—全部)
+}],
+	totalprice:150.00, //总房价
+	price:50,  //房价
+	breakfastnum:1,   //早餐数
+	contacts:’联系人姓名’,
+	contactsphone:’联系人电话’,
+	contactsemail:’联系人email’,
+	contactsweixin:’联系人微信’,
+	note:’备注’,
+	orderstatus:100,  //订单状态
+	pay:F,  //是否需要支付(T/F)
+payid:1, //需要支付的订单id
+orderretentiontime:’’  订单保留时间  14位
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+	receipt:F,   //是否需要发票(T/F)
+	spreaduser:1,  //切客用户id
+	roomorder:
+[{//订单下客单
+	orderroomid:1,  //客单id
+		hotelid:1   //酒店id
+		hotelname:’酒店名称’,
+		roomtypeid:1, //房型id
+		roomtypename:’房型名称’,
+		roomid:1,
+		roomno:’房间号’,
+		ordermethod:1,  //预订方式 1、微信、web3、app
+		ordertype:1,  //预订方式  1、预付 2、普通3、房券支付
+		pricetype:1,  //价格类型 1、时租  2、日租
+		begintime:‘20141225171400’,  //预抵时间
+		endtime:‘20141225171400’,  //预离时间
+		orderday:1, //1天
+		createtime:‘20141225171400’, //订单创建时间
+		promotion:F, //是否促销(T/F)
+		coupon:F, //是否使用了优惠券(T/F)
+		totalprice:150.00, //总房价
+payprice:
+[{房费应支付金额
+	actiondate:,// 日期
+	price:,//房价金额
+}] 	
+		breakfastnum:1,   //早餐数
+		contacts:’联系人姓名’,
+		contactsphone:’联系人电话’,
+		contactsemail:’联系人email’,
+		contactsweixin:’联系人微信’,
+		note:’备注’,
+		orderstatus:100,  //订单状态
+		pay:F,  //是否需要支付(T/F)
+		receipt:F,   //是否需要发票(T/F)
+promotionno:’促销代码’,
+reeceipttitle:’发票抬头’,续住时需要第三方支付金额
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+}]
+walletcost ： //钱包金额
+citycode：城市编码
+cashbackcost:  //返现金额
+，orderpaydetail: [
+{name:房款 ，cost ： 100},
+{name:优惠券 ，cost ： -10},
+{name:乐住币 ，cost ：-20},
+{name:房券 ，cost ：-20}
+],
+
+orderstatusname：订单状态的汉字描述
+orderstatusid：订单显示状态id
+usermessage：提示信息
+内容要求：
+（1）您预订的酒店，在入住日期前一天18:00前可进行退款操作；预订今日酒店，付款完成后就不可以修改订单或退款咯
+（2）凌晨23:56-2:00下单，可当天办理入住，提示“您最晚可在xxxx年xx月xx日12：00办理退房哦”；
+（3）凌晨2:00后下单，必须在12：00后办理入住，提示“您在xxxx年xx月xx日12:00后可办理入住哦”；
+}
+
+
+```
+
+### 房型预订创建订单
+***
+**业务说明：**
+根据酒店房型进行预定，系统自动根据房型下能够预定的房间自动分配一个房间进行展示。
+
+**接口url：**
+>http://ip:port/ots/order/createByRoomType
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿token|授权token|是|
+|activeid|活动ID|否|
+|hotelid|所选酒店id|是|
+|roomtypeid|所选房型id|是|
+|pricetype|日租/时租 |是|1时租；2日租
+|startdateday|查询开始日期|是|yyyyMMdd
+|enddateday|查询结束日期|是|yyyyMMdd
+|begintime|开始时间|否|yyyyMMddhhmmss
+|endtime|结束时间|否|yyyyMMddhhmmss
+|userlongitude|用户坐标(经度)|否|用户的经度
+|userlatitude|用户坐标(纬度)|否|用户的纬度
+|ordertype|预付类型|是|1预付；2到店支付
+|hideorder|是否无痕入住|否|T/F
+|breakfastnum|早餐数|否|
+|contacts|联系人|否|
+|contactsphone|联系电话|否|
+|contactsemail|联系邮箱|否|
+|contactsweixin|联系微信|否|
+|note|备注|否|
+|spreaduser|切客用户id|否|
+|ordermethod|订单方式|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|promotion|促销代码|否|
+|couponno|优惠券代码|否|
+|quickuserid|常住人主键id|否|可多个，多个使用过 英文逗号分隔
+|checkinuser|入住人信息|否|除去常住人之外的入住人信息，格式为json格式
+|sysno|系统号|否|
+|uuid|用户注册应用信息|否|
+|deviceimei|手机唯一识别码imei|否|
+|simsn|sim卡串号|否|
+|wifimacaddr|wifi的mac地址|否|
+|blmacaddr|蓝牙的mac地址|否|
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+|cashbackcost|返现金额|否|                           
+
+> API返回json数据示例：
+
+```js
+{
+	"success":true,
+	"errcode":,//错误码
+errmsg:,//错误信息
+	orderid:1,//订单id
+	hotelid:1,//酒店id
+	hotelname:,//酒店名称
+	hotelphone:,//联系电话
+hoteladdress:,//酒店地址
+hoteldis:,//酒店所属区县
+	hotelcity:,//酒店所属城市
+longitude:, //酒店坐标(经度)
+	latitude:,//酒店坐标(纬度)
+retentiontime:, //最晚保留时间 6位字符串 hhmmss,
+defaultleavetime:, //默认离店时间  6位字符串 hhmmss,
+	ordermethod:1, //预订方式 1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+	ordertype:1, //预订方式  1、预付 2、普通
+	pricetype:1, //价格类型 1、时租  2、日租
+	begintime:‘20141225171400’, //预抵时间
+	endtime:‘20141225171400’,  //预离时间
+	createtime:‘20141225171400’, //订单创建时间
+	timeouttime:,//订单失效时间（创建订单时，默认是预付，订单失效时间为订单创建后15分钟）
+	promotion:F, //是否促销(T/F)
+	coupon:F, //是否使用了优惠券(T/F)
+isonpromo:// 是否特价, 0非，1特价
+promotype:	// 是否特价, 0非，1特价
+roomticket：房券代码
+	checkcnt:,//可使用优惠券张数
+	payTip:支付提示
+	tickets:
+[{//优惠券信息，按照线上优惠额倒序排序，金额最大的为默认选中
+	id:1,//优惠券唯一id
+	name:’优惠券名’,
+	select:T, //选中,
+	check:T, //可以使用
+	subprice:12, //线上优惠多少钱
+	offlinesubprice:12, //线下优惠多少钱
+	type:1, //优惠券类型 1、普通立减 2、切客优惠码 3、议价优惠码
+	isticket:T,//  是否是优惠券（T优惠券，F优惠码）
+	uselimit://使用限制(1—线上；2—线下；空—全部)
+}],
+	totalprice:150.00, //总房价
+	price:50,  //房价
+	breakfastnum:1,   //早餐数
+	contacts:’联系人姓名’,
+	contactsphone:’联系人电话’,
+	contactsemail:’联系人email’,
+	contactsweixin:’联系人微信’,
+	note:’备注’,
+	orderstatus:100,  //订单状态
+	pay:F,  //是否需要支付(T/F)
+payid:1, //需要支付的订单id
+orderretentiontime:’’  订单保留时间  14位
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+	receipt:F,   //是否需要发票(T/F)
+	spreaduser:1,  //切客用户id
+	roomorder:
+[{//订单下客单
+	orderroomid:1,  //客单id
+		hotelid:1   //酒店id
+		hotelname:’酒店名称’,
+		roomtypeid:1, //房型id
+		roomtypename:’房型名称’,
+		roomid:1,
+		roomno:’房间号’,
+		ordermethod:1,  //预订方式 1、微信、web3、app
+		ordertype:1,  //预订方式  1、预付 2、普通
+		pricetype:1,  //价格类型 1、时租  2、日租
+		begintime:‘20141225171400’,  //预抵时间
+		endtime:‘20141225171400’,  //预离时间
+		orderday:1, //1天
+		createtime:‘20141225171400’, //订单创建时间
+		promotion:F, //是否促销(T/F)
+		coupon:F, //是否使用了优惠券(T/F)
+hasroomticket：F, //是否可以使用房券（T/F）
+roomticket：房券代码
+		totalprice:150.00, //总房价
+payprice:
+[{房费应支付金额
+	actiondate:,// 日期
+	price:,//房价金额
+}] 	
+		breakfastnum:1,   //早餐数
+		contacts:’联系人姓名’,
+		contactsphone:’联系人电话’,
+		contactsemail:’联系人email’,
+		contactsweixin:’联系人微信’,
+		note:’备注’,
+		orderstatus:100,  //订单状态
+		pay:F,  //是否需要支付(T/F)
+		receipt:F,   //是否需要发票(T/F)
+promotionno:’促销代码’,
+reeceipttitle:’发票抬头’,续住时需要第三方支付金额
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+}]
+cashbackcost:  //返现金额
+，orderpaydetail: [
+{name:房款 ，cost ： 100},
+{name:优惠券 ，cost ： -10},
+{name:乐住币 ，cost ：-20},
+{name:房券 ，cost ：-20}
+],
+
+orderstatusname：订单状态的汉字描述
+usermessage：提示信息
+内容要求：
+（1）您预订的酒店，在入住日期前一天18:00前可进行退款操作；预订今日酒店，付款完成后就不可以修改订单或退款咯
+（2）凌晨23:56-2:00下单，可当天办理入住，提示“您最晚可在xxxx年xx月xx日12：00办理退房哦”；
+（3）凌晨2:00后下单，必须在12：00后办理入住，提示“您在xxxx年xx月xx日12:00后可办理入住哦”；
+}
+
+```
+
+### 取消订单
+***
+**业务说明：**
+
+
+**接口url：**
+>http://ip:port/ots/order/cancel
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿token|授权token|是|
+|orderid|订单ID|是|
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+|type|取消类型|否|1 用户取消 2 回退取消.为了版本兼容，该参数不传，默认值为1
+                        
+
+> API返回json数据示例：
+
+```js
+{
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+	cancelpay://待退款金额
+}
+```
+
+### 删除订单
+***
+**业务说明：**
+
+该接口用于将订单隐藏，不在C端订单列表中显示,OTS订单表需要增加一个标记位，用于判断是否返回订单给C端查询接口
+
+**接口url：**
+>http://ip:port/ots/order/disable
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿token|授权token|是|
+|orderid|订单ID|是|
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+
+> API返回json数据示例：
+
+```js
+{
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+}
+
+```
+### 订单数量统计
+***
+**业务说明：**
+
+在ota系统中为一个已经创建的订单提交支付
+
+**接口url：**
+>http://ip:port/ots/pay/create
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿orderid|订单id|是|必填
+|promotionno|促销代码|否|若多个，则用“，”分割
+|couponno|优惠券代码|否|若多个，则用“，”分割
+|paytype|支付类型|是|1预付；2到付
+|onlinepaytype|预付支付类型|否（若预付，则必填）|1微信；2支付宝3网银4其他；5房卷支付
+|房卷号|否|
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+
+> API返回json数据示例：
+
+```js
+{
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+statuscount:
+[{
+	sqnum:,//顺序号
+	ordercount:,//订单数量
+},]
+}
+
+
+```
+
+### 支付接口
+***
+**业务说明：**
+
+在ota系统中为一个已经创建的订单提交支付
+
+**接口url：**
+>http://ip:port/ots/pay/create
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿orderid|订单id|是|必填
+|promotionno|促销代码|否|若多个，则用“，”分割
+|couponno|优惠券代码|否|若多个，则用“，”分割
+|paytype|支付类型|是|1预付；2到付
+|onlinepaytype|预付支付类型|否（若预付，则必填）|1微信；2支付宝3网银4其他；5房卷支付
+|房卷号|否|
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+
+> API返回json数据示例：
+
+```js
+{
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+	weinxinpay:
+[{//微信支付信息
+appid:,//以下所有返回内容意义产看微信支付文档
+	appkey:,
+	noncestr:,
+	packagevalue:,//原demo中的package字段
+	partnerid:,
+	prepayid:,
+	timestamp:,
+	sign:
+	}],
+	alipay:
+[{ //支付宝支付信息
+		alipayselleremail:,// 商家支付宝email
+		alipaypartner:,// 支付宝合作者id
+		alipaykey:,// 支付宝商户私钥
+		alipaynotifyurl:// 支付宝异步调用url
+}] 
+}
+
+```
+### 支付接口
+***
+**业务说明：**
+
+在ota系统中为一个已经创建的订单提交支付
+
+**接口url：**
+>http://ip:port/ots/pay/create
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿orderid|订单id|是|必填
+|promotionno|促销代码|否|若多个，则用“，”分割
+|couponno|优惠券代码|否|若多个，则用“，”分割
+|paytype|支付类型|是|1预付；2到付
+|onlinepaytype|预付支付类型|否（若预付，则必填）|1微信；2支付宝3网银4其他；5房卷支付
+|房卷号|否|
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+
+> API返回json数据示例：
+
+```js
+{
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+	weinxinpay:
+[{//微信支付信息
+appid:,//以下所有返回内容意义产看微信支付文档
+	appkey:,
+	noncestr:,
+	packagevalue:,//原demo中的package字段
+	partnerid:,
+	prepayid:,
+	timestamp:,
+	sign:
+	}],
+	alipay:
+[{ //支付宝支付信息
+		alipayselleremail:,// 商家支付宝email
+		alipaypartner:,// 支付宝合作者id
+		alipaykey:,// 支付宝商户私钥
+		alipaynotifyurl:// 支付宝异步调用url
+}] 
+}
+
+```
+### 检验支付通知
+***
+**业务说明：**
+
+
+
+**接口url：**
+>http://ip:port/ots/pay/check
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿orderid|订单号|是|
+|onlinepaytype|预付支付类型|是|1微信；2支付宝；3网银；4其他
+|payno|第三方交易号|否|若预付类型是微信，则必填
+|paytime|支付时间|是|
+|price|支付的价格|是|
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+
+> API返回json数据示例：
+
+```js
+{
+	success:true,
+}
+
+```
+
+###微信支付成功后回调
+***
+**业务说明：**
+
+微信公众号在接收到第三方回调后，调用pay/weixin接口，如不成功，则反复调用。
+
+**接口url：**
+>http://ip:port/ots/pay/weixin
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿orderid|订单号|是|
+|onlinepaytype|预付支付类型|是|1微信；2支付宝；3网银；4其他
+|payno|第三方交易号|否|若预付类型是微信，则必填
+|paytime|支付时间|是|
+|price|支付的价格|是|
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+
+> API返回json数据示例：
+
+```js
+{
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+}
+
+```
+
+
+###入住人查询接口
+***
+**业务说明：**
+
+查询用户历史入住人信息
+
+**接口url：**
+>http://ip:port/ots/order/selectcheckinuser
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿token|授权token|是|
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+
+> API返回json数据示例：
+
+```js
+{
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+datas: [{
+	username: ‘’//入住人姓名
+	phone ： ‘’ //入住人手机号
+}]
+}
+
+
+```
+
+###修改入住人接口
+***
+**业务说明：**
+
+当订单预定后，用户需要修改入住人信息时，请调用该接口进行处理。
+注意：如果订单已经入住，则用户修改入住人信息时，系统报“订单入住后，不能进行入住人信息修改”
+
+
+**接口url：**
+>http://ip:port/ots/order/modifycheckinuser
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿token|授权token|是|
+|orderid|订单id|是|
+|checkinuser|入住人信息|是|除去常住人之外的入住人信息，格式为json格式
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+
+> API返回json数据示例：
+
+```js
+{
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+}
+
+
+
+```
 
 </article>
 

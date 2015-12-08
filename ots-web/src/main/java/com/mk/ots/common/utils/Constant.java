@@ -270,5 +270,6 @@ public class Constant {
 	public static final String DEFAULT_NORMAL_POPULARITY_TEXT = "最受欢迎";
 	public static final String DEFAULT_NORMAL_POPULARITY_NOTE = "";
 	public static final String DEFAULT_NORMAL_POPULARITY_ICON = "";
+	public static final Integer SHOW_HOTEL_REPAIRINFO_YEARS_LIMIT = 3;
 
 }

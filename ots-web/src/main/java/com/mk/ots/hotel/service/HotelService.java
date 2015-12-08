@@ -410,6 +410,15 @@ public class HotelService {
 					hotel.setFlag(1);
 					hotel.setCreatetime(time);
 					hotel.setModifytime(time);
+					Date hotelRepairTime = bean.getRepairtime();
+
+					Date now = new Date();
+					int diffYears = DateUtils.diffYears(now, hotelRepairTime);
+
+					if (diffYears <= Constant.SHOW_HOTEL_REPAIRINFO_YEARS_LIMIT){
+						String repairInfo = hotelRepairTime.getYear() + "年装修";
+						hotel.setRepairinfo(repairInfo);
+					}
 
 					// 新增 最晚保留时间
 					hotel.setRetentiontime(bean.getRetentiontime() == null ? "" : bean.getRetentiontime());
