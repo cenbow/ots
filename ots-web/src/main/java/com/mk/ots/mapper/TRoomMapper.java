@@ -30,4 +30,5 @@ public interface TRoomMapper {
 	
 	public void updateRoomtypeByRoom(Map<String, Object> parameters);
 	
+	public List<Map<String, Object>> selectOtaRoomOrder(Map<String, Object> parameters);
 }
