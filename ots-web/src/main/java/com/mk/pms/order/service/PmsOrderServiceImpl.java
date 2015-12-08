@@ -505,6 +505,11 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 
 	private void doShiftRoom(String hotelid, Long pmsroomtypeid, Long pmsroomid, PmsRoomOrder pmsRoomOrder)
 			throws Exception {
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("about to doShiftRoom with pmsroomtypeid:%s; pmsroomid:%s; ", pmsroomtypeid,
+					pmsroomid));
+		}
+
 		List<Map<String, Object>> promoRooms = roomSaleMapper.queryRoomPromoByType(String.valueOf(pmsroomtypeid));
 		if (promoRooms != null && promoRooms.size() > 0) {
 			Integer roomId = (Integer) promoRooms.get(0).get("roomid");
@@ -512,15 +517,20 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 			Integer roomtypeId = (Integer) promoRooms.get(0).get("roomtypeid");
 
 			if (roomId == null) {
-				List<TRoomModel> models = roomMapper.findList(pmsroomtypeid);
+				List<TRoomModel> models = roomMapper.findList(roomtypeId != null ? roomtypeId.longValue() : 0);
 				Room vcRoom = findVCRooms(Long.valueOf(hotelid), roomtypeId != null ? roomtypeId.longValue() : 0,
 						pmsRoomOrder.getDate("BeginTime"), pmsRoomOrder.getDate("EndTime"));
 				/**
 				 * promo room has been ordered by non-promo pms, supplementary
 				 * room is required
 				 */
-				if (isRoomExisted(models, pmsroomid) && StringUtils.isNotBlank(hotelid) && vcRoom != null
+				if (isRoomExisted(models, vcRoom.getRoomid()) && StringUtils.isNotBlank(hotelid) && vcRoom != null
 						&& vcRoom.getRoomid() != null) {
+					if (logger.isInfoEnabled()) {
+						logger.info(String.format("room is available for a shift...roomid:%s; roomtypeid:%s",
+								vcRoom.getRoomid(), roomtypeId));
+					}
+
 					try {
 						Map<String, Object> updateParameters = new HashMap<>();
 						updateParameters.put("roomid", vcRoom.getRoomid());
@@ -558,12 +568,16 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 		Long newroomtypeid = pmsRoomOrder.getLong("RoomTypeId");
 		Long newroomid = pmsRoomOrder.getLong("RoomId");
 		String status = pmsRoomOrder.getStr("Status");
-
 		String hotelid = String.valueOf(pmsRoomOrder.get("HotelId"));
-		pmsRoomOrder.getDate("BeginTime");
 
 		boolean isProceed = false;
 		boolean isInPromo = false;
+
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format(
+					"about to shiftRoomForPromo... hotelid:%s; status:%s; oldroomtypeid:%s; newroomtypeid:%s; newroomid:%s; ",
+					hotelid, status, oldroomtypeid, newroomtypeid, newroomid));
+		}
 
 		TRoomSaleConfig newRoomsaleConfig = new TRoomSaleConfig();
 		newRoomsaleConfig.setRoomTypeId(newroomtypeid == null ? 0 : newroomtypeid.intValue());
@@ -604,6 +618,9 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 		 * is necessary
 		 */
 		if (isChanged) {
+			if (logger.isInfoEnabled()) {
+				logger.info("there is room change detected...");
+			}
 			TRoomSaleConfig oldRoomsaleConfig = new TRoomSaleConfig();
 			oldRoomsaleConfig.setRoomTypeId(oldroomtypeid == null ? 0 : oldroomtypeid.intValue());
 			oldRoomsaleConfig.setValid("T");
@@ -627,6 +644,9 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 				doShiftRoom(hotelid, newroomtypeid, newroomid, pmsRoomOrder);
 			}
 		} else {
+			if (logger.isInfoEnabled()) {
+				logger.info("no room change detected...");
+			}
 			doShiftRoom(hotelid, newroomtypeid, newroomid, pmsRoomOrder);
 		}
 	}
