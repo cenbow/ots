@@ -483,7 +483,7 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 		return isExisted;
 	}
 
-	private Room findVCRooms(Long hotelid, Date begindate, Date enddate) throws Exception {
+	private Room findVCRooms(Long hotelid, Long roomtypeid, Date begindate, Date enddate) throws Exception {
 		Room vcRoom = null;
 
 		try {
@@ -491,7 +491,7 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 				String begindateday = defaultFormat.format(begindate);
 				String enddateday = defaultFormat.format(enddate);
 
-				vcRoom = roomstateService.findVCHotelRoom(hotelid, null, begindateday, enddateday);
+				vcRoom = roomstateService.findVCHotelRoom(hotelid, roomtypeid, begindateday, enddateday);
 			} else {
 				logger.warn("illegal parameters passed in findVCRooms...");
 			}
@@ -507,13 +507,14 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 			throws Exception {
 		List<Map<String, Object>> promoRooms = roomSaleMapper.queryRoomPromoByType(String.valueOf(pmsroomtypeid));
 		if (promoRooms != null && promoRooms.size() > 0) {
-			Long roomId = (Long) promoRooms.get(0).get("roomid");
-			Long saleRoomtypeId = (Long) promoRooms.get(0).get("saleroomtypeid");
+			Integer roomId = (Integer) promoRooms.get(0).get("roomid");
+			Integer saleRoomtypeId = (Integer) promoRooms.get(0).get("saleroomtypeid");
+			Integer roomtypeId = (Integer) promoRooms.get(0).get("roomtypeid");
 
 			if (roomId == null) {
 				List<TRoomModel> models = roomMapper.findList(pmsroomtypeid);
-				Room vcRoom = findVCRooms(Long.valueOf(hotelid), pmsRoomOrder.getDate("BeginTime"),
-						pmsRoomOrder.getDate("EndTime"));
+				Room vcRoom = findVCRooms(Long.valueOf(hotelid), roomtypeId != null ? roomtypeId.longValue() : 0,
+						pmsRoomOrder.getDate("BeginTime"), pmsRoomOrder.getDate("EndTime"));
 				/**
 				 * promo room has been ordered by non-promo pms, supplementary
 				 * room is required

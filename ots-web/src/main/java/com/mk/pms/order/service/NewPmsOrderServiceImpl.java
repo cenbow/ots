@@ -56,7 +56,6 @@ import com.mk.ots.order.service.OrderServiceImpl;
 import com.mk.ots.pay.service.IPayService;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
-import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.bean.PmsCost;
 import com.mk.pms.bean.PmsLog;
@@ -232,19 +231,19 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 								logger.error("huangfang:otaorderid:" + (String) customNo.get("customeno") + ",hotelid:"
 										+ hotelId);
 							}
-														
+
 							// 修改房态
 							roomLockPo.setRoomjson(customNo.getString("day"));
 							this.pmsRoomService.updateRoomLock(roomLockPo);
 							logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:roomLockPo:{}", order.get("id"),
 									JsonKit.toJson(roomLockPo));
-							
+
 							try {
 								this.shiftRoomForPromo(order, roomLockPo != null);
 							} catch (Exception ex) {
-								logger.warn(String.format("failed to makeUpForPromo on hotelId:%s; customNo:%s...", hotelId,
-										customNo), ex);
-							}							
+								logger.warn(String.format("failed to makeUpForPromo on hotelId:%s; customNo:%s...",
+										hotelId, customNo), ex);
+							}
 						}
 					}
 				}
@@ -305,7 +304,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		return isExisted;
 	}
 
-	private Room findVCRooms(Long hotelid, Date begindate, Date enddate) throws Exception {
+	private Room findVCRooms(Long hotelid, Long roomtypeid, Date begindate, Date enddate) throws Exception {
 		Room vcRoom = null;
 
 		try {
@@ -313,7 +312,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 				String begindateday = defaultFormat.format(begindate);
 				String enddateday = defaultFormat.format(enddate);
 
-				vcRoom = roomstateService.findVCHotelRoom(hotelid, null, begindateday, enddateday);
+				vcRoom = roomstateService.findVCHotelRoom(hotelid, roomtypeid, begindateday, enddateday);
 			} else {
 				logger.warn("illegal parameters passed in findVCRooms...");
 			}
@@ -331,11 +330,12 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		if (promoRooms != null && promoRooms.size() > 0) {
 			Integer roomId = (Integer) promoRooms.get(0).get("roomid");
 			Integer saleRoomtypeId = (Integer) promoRooms.get(0).get("saleroomtypeid");
+			Integer roomtypeId = (Integer) promoRooms.get(0).get("roomtypeid");
 
 			if (roomId == null) {
 				List<TRoomModel> models = roomMapper.findList(pmsroomtypeid);
-				Room vcRoom = findVCRooms(Long.valueOf(hotelid), pmsRoomOrder.getDate("BeginTime"),
-						pmsRoomOrder.getDate("EndTime"));
+				Room vcRoom = findVCRooms(Long.valueOf(hotelid), roomtypeId != null ? roomtypeId.longValue() : 0,
+						pmsRoomOrder.getDate("BeginTime"), pmsRoomOrder.getDate("EndTime"));
 				/**
 				 * promo room has been ordered by non-promo pms, supplementary
 				 * room is required
