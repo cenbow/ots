@@ -645,8 +645,203 @@ otsversion 	| OTS版本 	| 否 	|
 
 
 
+## 特价活动
+### 获取特价活动价格区间
+**业务说明：**
+> 根据 promoid 获取特价活动价格区间
+
+**接口 url：**
+> http://ip:port/ots/promo/queryrange
+
+**请求参数：**
+
+    字段        |         名称         | 是否必须 | 说明
+--------------- | ------------------- | -------| -----------                                                 
+| promoid     	| 特价活动 id   | 是    |1. 今夜特价 <br> 2.今日特价<br> 3. 主题酒店 <br> 6. 一元秒杀                                                    
+| callmethod   	| 调用来源   | 是   | 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) 
+| callversion  	| 调用版本   | 是   |
+| ip           	| IP地址  | 否     |                                                    
+| hardwarecode 	| 硬件编码   | 否       |                                                    
+| otsversion   	| OTS版本    | 否       |   
 
 
+> API返回json返回说明：
+
+```js
+{
+	"success": true,
+	"promoid":1,		       //特价活动 id
+	"step": 15,            //特价步长
+	"minprice": 10,	      // 特价活动最低价
+	"maxprice": 100        // 特价活动最高价
+	"promosec":0,		      //距离特价活动开始的秒数
+	"promosecend":25235， //距离特价活动结束的秒数
+	"nextpromosec":71975	  //距离下一次特价活动开始的秒数
+	
+}
+``` 
+
+
+
+
+
+
+
+
+## 推荐资源配置
+### 获取发现列表页和Banner页
+**业务说明：**
+> 根据 cityid 获取 banner 推荐信息
+
+**接口 url：**
+> http://ip:port/ots/recommend/query
+
+**请求参数：**
+
+    字段        |         名称         | 是否必须 | 说明
+--------------- | ------------------- | -------| -----------                                                 
+| citycode     	| 城市编码   | 是    |                                                    
+| platform   	| 推送平台   | 是   | 1-Android；<br>2-IOS；<br>4-wechat； 
+| position   	| 推荐位   | 是   | 921A：首页，<br> 921C：发现首页，<br> 921D：发现列表页，<br>921B：广告推荐位 
+| callmethod   	| 调用来源   | 是   | 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) 
+| callversion  	| 调用版本   | 是   |
+| ip           	| IP地址  | 否     |                                                    
+| hardwarecode 	| 硬件编码   | 否       |                                                    
+| otsversion   	| OTS版本    | 否       |   
+
+
+> API返回json返回说明：
+
+```js
+{
+    "success": true,
+    "banners": [
+        {
+            "name": "上海那些脑洞大开的主题酒店", //推荐内容名称
+            "description": "上海那些脑洞大开的主题酒店",//推荐内容描述
+            "imgurl": "http://7xn138.com2.z0.glb.qiniucdn.com/主题酒店滚动条.jpg", //图片地址
+            "url": "www.imike.com/app", //推荐外链地址
+            "detailid": 8, //推荐内链 id
+            "querytype": 1, // 推荐类型
+            "createtime": 1443276228000 // 创建时间
+        }
+    ]
+}
+```
+
+> API返回json数据示例：
+
+```js
+{
+    "success": true,
+    "banners": [
+        {
+            "name": "上海那些脑洞大开的主题酒店",
+            "description": "上海那些脑洞大开的主题酒店",
+            "imgurl": "http://7xn138.com2.z0.glb.qiniucdn.com/主题酒店滚动条.jpg",
+            "detailid": 8,
+            "querytype": 1,
+            "createtime": 1443276228000
+        },
+        {
+            "name": "眯客一周年",
+            "description": "眯客一周年",
+            "imgurl": "http://7xn138.com2.z0.glb.qiniucdn.com/20151031imike1year.jpg",
+            "url": "",
+            "detailid": 11,
+            "querytype": 1,
+            "createtime": 1444912720000
+        },
+        {
+            "name": "眯客3.0正式上线",
+            "description": "眯客3.0正式上线",
+            "imgurl": "http://7xn138.com2.z0.glb.qiniucdn.com/20151031mike3.0.png",
+            "url": "",
+            "detailid": 10,
+            "querytype": 1,
+            "createtime": 1444726043000
+        }
+    ]
+}
+```
+
+### 查询首屏推荐信息
+**业务说明：**
+> 根据 cityid 获取首屏推荐信息
+
+**接口 url：**
+> http://ip:port/ots/recommend/queryloadinglist
+
+**请求参数：**
+
+    字段        |         名称         | 是否必须 | 说明
+--------------- | ------------------- | -------| -----------                                                
+| citycode     	| 城市编码   | 是    |                                                    
+| callmethod   	| 调用来源   | 是   | 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) 
+| callversion  	| 调用版本   | 是   |
+| ip           	| IP地址  | 是     |                                                    
+| hardwarecode 	| 硬件编码   | 是       |                                                    
+| otsversion   	| OTS版本    | 否       |   
+
+
+> API返回json返回说明：
+
+```js
+{
+    "success": true,
+    "loading": [ 
+        {
+            "name": " 新版本介绍1", // 图片名称
+            "description": "新版本介绍1", //图片描述
+            "imgurl": "http://7xn138.com2.z0.glb.qiniucdn.com/主题酒店滚动条.jpg", // 图片链接
+            "url": "http://www.baidu.com",  //推荐跳转外链
+            "detailid": 8, //推荐跳转内链 id
+            "querytype": 1, // 推荐类型
+            "createtime": 1443276228000 // 创建时间
+        }
+            ]
+}
+```
+
+
+
+
+> API返回json数据示例：
+
+```js
+{
+    "success": true,
+    "loading": [
+        {
+            "name": " 新版本介绍1",
+            "description": "新版本介绍1",
+            "imgurl": "http://7xn138.com2.z0.glb.qiniucdn.com/主题酒店滚动条.jpg",
+            "url": "http://www.baidu.com",
+            "detailid": 8,
+            "querytype": 1,
+            "createtime": 1443276228000
+        },
+        {
+            "name": "眯客一周年",
+            "description": "眯客一周年",
+            "imgurl": "http://7xn138.com2.z0.glb.qiniucdn.com/20151031imike1year.jpg",
+            "url": "",
+            "detailid": 11,
+            "querytype": 1,
+            "createtime": 1444912720000
+        },
+        {
+            "name": "眯客3.0正式上线",
+            "description": "眯客3.0正式上线",
+            "imgurl": "http://7xn138.com2.z0.glb.qiniucdn.com/20151031mike3.0.png",
+            "url": "",
+            "detailid": 10,
+            "querytype": 1,
+            "createtime": 1444726043000
+        }
+    ]
+}
+```
 
 
 

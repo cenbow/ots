@@ -1514,11 +1514,11 @@ public class HotelService {
 	 * @return
 	 */
 	public Long getGreetScore(long hotelId) {
-		//最受欢迎指数 ota 月销 + pms 月销”
+		//最受欢迎指数  pms 月销* 1000 / hotelromnums”
 		Long pmsSales = orderService.findPMSMonthlySales(hotelId);
-		Long otaSales = orderService.findMonthlySales(hotelId);
-		logger.info("getPMSOrderNumMon hotelId: {}, getOAT月销量: {}, PMS月销量：{}", hotelId, otaSales,pmsSales);
-		return pmsSales + otaSales;
+		//Long otaSales = orderService.findMonthlySales(hotelId);
+		logger.info("getPMSOrderNumMon hotelId: {}, getPMS月销量：{}", hotelId,pmsSales);
+		return pmsSales;
 	}
 
 	/**
@@ -2847,6 +2847,29 @@ public class HotelService {
 	}
 
 	/**
+	 * 更新 ES 索引
+	 */
+
+	public String batchUpdateEsIndexer(){
+		SqlSession session = sqlSessionFactory.openSession();
+		THotelMapper mapper = session.getMapper(THotelMapper.class);
+
+		final List<Long> hotelIdArr = mapper.findAllHotelIds();
+		int count = 1;
+		for (Long hotelid :hotelIdArr){
+			if (count == 10){
+				break;
+			}
+			System.out.println(String.format("%d . init hotel:%d start ====",count++,hotelid));
+			this.readonlyInitPmsHotel(Constant.STR_CITYID_SHANGHAI, hotelid.toString());
+			System.out.println(String.format("%d . init hotel:%d end ====",count++,hotelid));
+		}
+
+		return "success";
+	}
+
+
+	/**
 	 * 更新ES中酒店眯客价。
 	 *
 	 * @param hotelid
@@ -2993,6 +3016,7 @@ public class HotelService {
 				}
 				// mike3.0增加月销量
 				doc.put("ordernummon", getOrderNumMon(hotelid));
+				doc.put("greetscore", getGreetScore(hotelid));
 				esProxy.updateDocument(_id, doc);
 				logger.info("更新酒店眯客价成功.");
 			}

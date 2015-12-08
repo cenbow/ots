@@ -4722,25 +4722,37 @@ public class OrderServiceImpl implements OrderService {
                 List<Bean> allSales = orderDAO.findAllPMSMonthlySales(beforetime, yestertime);
                 for (Bean sales : allSales) {
                     String hid = sales.getLong("hid").toString();
-                    String count = sales.get("cnt").toString();
+
+                    Long hotelRoomNums = roomDAO.findHotelRoomNums(hid);
+                    Long pmsSaleCount = sales.get("cnt");
+
+                    Long greetScore = (pmsSaleCount * 1000) / hotelRoomNums;
+
+                    String count =  greetScore.toString();
                     salesObject.put(hid, count);
                 }
             } else {
                 String arrSales = salesCache.get(Constant.MONTHLY_PMS_SALES_KEY + dateNowStr);
+                Long hotelRoomNums = roomDAO.findHotelRoomNums(hotelId.toString());
                 if(!StringUtils.isBlank(arrSales)) {
                     JSONObject jSales = JSONObject.parseObject(arrSales);
                     String hotelSales = jSales.getString(hotelId + "");
                     if(!StringUtils.isBlank(hotelSales) && Long.parseLong(hotelSales) >= 0)
                         return Long.parseLong(hotelSales);
                     else {
+
+
                         currentSales = orderDAO.findPMSMonthlySaleByHotelId(hotelId, beforetime, yestertime);
-                        jSales.put(hotelId + "", currentSales);
+                        Long greetScore =(currentSales * 1000) / hotelRoomNums;
+                        jSales.put(hotelId + "", greetScore);
                         salesCache.set(Constant.MONTHLY_PMS_SALES_KEY + dateNowStr, jSales.toJSONString());
-                        return currentSales;
+                        return greetScore;
                     }
                 } else {
+
                     currentSales = orderDAO.findPMSMonthlySaleByHotelId(hotelId, beforetime, yestertime);
-                    salesObject.put(hotelId + "", currentSales);
+                    Long greetScore =(currentSales * 1000) / hotelRoomNums;
+                    salesObject.put(hotelId + "", greetScore);
                 }
             }
             salesCache.set(Constant.MONTHLY_PMS_SALES_KEY + dateNowStr, salesObject.toJSONString());

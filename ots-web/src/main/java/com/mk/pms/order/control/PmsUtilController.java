@@ -278,7 +278,7 @@ public class PmsUtilController {
 	@RequestMapping(value = "/test12", method = RequestMethod.POST)
 	public ResponseEntity<Map<String, String>> test12() {
 		
-		String s = "[{\"leavetime\":\"20150709120000\",\"status\":\"IN\",\"totlepayment\":0,\"ordertype\":\"R\",\"type\":\"2\",\"totlecost\":0,\"arrivetime\":\"20150708180000\",\"checkintime\":\"20150708150244\",\"checkouttime\":\"\",\"roomno\":\"1Uiiz8cYRa1UyeXDDOMjmH\",\"roomtypeid\":\"11Vi7dd8mdbOU88hdbH01IPD\",\"day\":[{\"roomid\":\"1Uiiz8cYRa1UyeXDDOMjmH\",\"time\":\"20150708\",\"price\":120}],\"orderid\":\"0lTB4C8A0FbdGZs9gHZsGl7\",\"customeno\":\"0DOQFB9nyJbRGNFgD4MKEUX\",\"otacustomno\":\"\",\"user\":[{\"idtype\":\"13\",\"name\":\"老张\",\"idno\":\"222222222\"}]}]";
+		String s = "[{\"leavetime\":\"20150709120000\",\"status\":\"IN\",\"totlepayment\":0,\"ordertype\":\"R\",\"type\":\"2\",\"totlecost\":0,\"arrivetime\":\"20150708180000\",\"checkintime\":\"20150708150244\",\"checkouttime\":\"\",\"roomno\":\"1Uiiz8cYRa1UyeXDDOMjmH\",\"roomtypeid\":\"11Vi7dd8mdbOU88hdbH01IPD\",\"day\":[{\"roomid\":\"1Uiiz8cYRa1UyeXDDOMjmH\",\"time\":\"20150708\",\"price\":120}],\"orderid\":\"0lTB4C8A0FbdGZs9gHZsGl7\",\"customeno\":\"K1001150605001\",\"otacustomno\":\"\",\"user\":[{\"idtype\":\"13\",\"name\":\"老张\",\"idno\":\"222222222\"}]}]";
 		JSONArray js = JSONArray.parseArray(s);
 		JSONObject param = new JSONObject();
 		param.put("hotelid", 1461L);
@@ -302,7 +302,7 @@ public class PmsUtilController {
 		logger.info("LoadMonthlySalesJob::start");
 		try {
 			Long res = orderService.findMonthlySales(null);
-			if(res <= 0)
+			if (res <= 0)
 				 output.setSuccess(true);
 			else {
                 output.setSuccess(false);
