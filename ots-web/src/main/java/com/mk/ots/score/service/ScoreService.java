@@ -178,6 +178,7 @@ public class ScoreService {
 		
 		// 评价内容 参数
 		List cList = new ArrayList();
+
 		String scoreStr = param.get("score").toString();
 		String picStr = (String)param.get("pics");
 		String isDefault = (String) param.get("isdefault");
@@ -193,20 +194,53 @@ public class ScoreService {
 		}
 		cList.add(isDefault);
 		cList.add(orderid);
-		
+
+		List markList = new ArrayList();
+		markList.add(otaOrder.getMid());
+		markList.add(hotelid);
+		markList.add(roomid);
+		markList.add(orderid);
+
 		boolean isSuccess = true;
 		switch (action) {
 		case ("i"):
 			cList.add(otaOrder.getMid());
 			isSuccess = scoreDAO.insert(cList, sList,orderid);
+			String 	scoreMarksInsert = param.get("markIds").toString();
+			if(!StringUtils.isEmpty(scoreMarksInsert)){
+				if(scoreMarksInsert.startsWith(",")){
+					scoreMarksInsert = scoreMarksInsert.substring(1,scoreMarksInsert.length());
+				}
+				if(scoreMarksInsert.endsWith(",")){
+					scoreMarksInsert = scoreMarksInsert.substring(0,scoreMarksInsert.length()-1);
+				}
+				if(!StringUtils.isEmpty(scoreMarksInsert)){
+					scoreDAO.insertScoreMarkMember(markList,scoreMarksInsert);
+				}
+			}
 			otaOrder.set("isscore","T").saveOrUpdate();
 			break;
 		case ("m"):
 			isSuccess = scoreDAO.update(cList, sList,orderid);
+			String 	scoreMarksUpdate = param.get("markIds").toString();
+			scoreDAO.deleteScoreMarkMember(otaOrder.getMid(),orderid);
+
+			if(!StringUtils.isEmpty(scoreMarksUpdate)){
+				if(scoreMarksUpdate.startsWith(",")){
+					scoreMarksUpdate = scoreMarksUpdate.substring(1,scoreMarksUpdate.length());
+				}
+				if(scoreMarksUpdate.endsWith(",")){
+					scoreMarksUpdate = scoreMarksUpdate.substring(0,scoreMarksUpdate.length()-1);
+				}
+				if(!StringUtils.isEmpty(scoreMarksUpdate)){
+					scoreDAO.insertScoreMarkMember(markList,scoreMarksUpdate);
+				}
+			}
 			otaOrder.set("isscore","T").saveOrUpdate();
 			break;
 		case ("d"):
 			isSuccess = scoreDAO.del(orderid);
+			scoreDAO.deleteScoreMarkMember(otaOrder.getMid(),orderid);
 			otaOrder.set("isscore","F").saveOrUpdate();
 			break;
 		}		
@@ -242,6 +276,15 @@ public class ScoreService {
 	 */
 	public List<Bean> findSubject(String subjectid) {
 		return scoreDAO.findSubject(subjectid);
+	}
+
+
+	/**
+	 * 查询所有评价标签
+	 * @return
+	 */
+	public List<Bean> findScoreMark() {
+		return scoreDAO.findScoreMark();
 	}
 
 	/**
@@ -357,7 +400,6 @@ public class ScoreService {
 	/**
 	 * 查询房间评分
 	 * 
-	 * @param roomtypeid
 	 * @param roomid
 	 * @return
 	 */

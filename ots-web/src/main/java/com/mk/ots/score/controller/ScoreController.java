@@ -81,6 +81,7 @@ public class ScoreController {
 		
 		Map<String,Object> param= new HashMap<String,Object>();
 		param.put("orderid", request.getParameter("orderid"));
+		param.put("markIds", request.getParameter("markids"));
 		param.put("action", actiontype);
 		param.put("score", score);//评价内容 
 		param.put("pics", picStr);
@@ -227,6 +228,17 @@ public class ScoreController {
 			resultList.add(rm);
 		}
 		resultMap.put("subjects", resultList);
+
+		List<Bean>  scoreMarkList = scoreService.findScoreMark();
+		List<Map<String,Object>> scoreMarkListResult= new ArrayList<Map<String,Object>>();
+		for(Bean b :scoreMarkList){
+			Map<String,Object> rm= new HashMap<String,Object>();
+			rm.put("id", b.get("id"));
+			rm.put("mark", b.get("mark"));
+			scoreMarkListResult.add(rm);
+		}
+		resultMap.put("hotelmark", scoreMarkListResult);
+
 		ResponseEntity<Map<String,Object>> result = new ResponseEntity<Map<String,Object>>(resultMap, HttpStatus.OK);
 		return result;
 	}
