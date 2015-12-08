@@ -57,7 +57,7 @@
    </update>
 
    <update id="updateRoomtypeByRoom" parameterType="java.util.Map">
-   		update t_room set roomtypeid = #{roomtypeid} where roomid = #{roomid}
+   		update t_room set roomtypeid = #{roomtypeid} where id = #{roomid}
    </update>
 
    <delete id="delRoomById" parameterType="java.lang.Long">
