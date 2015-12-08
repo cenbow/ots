@@ -565,7 +565,7 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 		boolean isInPromo = false;
 
 		TRoomSaleConfig newRoomsaleConfig = new TRoomSaleConfig();
-		newRoomsaleConfig.setSaleRoomTypeId(newroomtypeid == null ? 0 : newroomtypeid.intValue());
+		newRoomsaleConfig.setRoomTypeId(newroomtypeid == null ? 0 : newroomtypeid.intValue());
 		newRoomsaleConfig.setValid("T");
 		newRoomsaleConfig.setTag(0);
 		List<TRoomSaleConfig> newRooms = null;
@@ -604,7 +604,7 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 		 */
 		if (isChanged) {
 			TRoomSaleConfig oldRoomsaleConfig = new TRoomSaleConfig();
-			oldRoomsaleConfig.setSaleRoomTypeId(oldroomtypeid == null ? 0 : oldroomtypeid.intValue());
+			oldRoomsaleConfig.setRoomTypeId(oldroomtypeid == null ? 0 : oldroomtypeid.intValue());
 			oldRoomsaleConfig.setValid("T");
 			oldRoomsaleConfig.setTag(0);
 
