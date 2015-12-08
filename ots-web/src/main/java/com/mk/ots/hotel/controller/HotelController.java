@@ -26,6 +26,7 @@ import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.search.service.ISearchService;
+import com.mk.ots.search.service.impl.IndexerService;
 import com.mk.ots.web.ServiceOutput;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -61,6 +62,9 @@ public class HotelController {
 	 */
 	@Autowired
 	private HotelService hotelService;
+
+	@Autowired
+	private IndexerService indexerService;
 
 	@Autowired
 	private RoomstateService roomstateService;
@@ -168,7 +172,7 @@ public class HotelController {
 		long starttime = day.getTime();
 		try {
 
-			String ret = hotelService.batchUpdateEsIndexer();
+			String ret = indexerService.batchUpdateEsIndexer();
 			output.setSuccess(true);
 		} catch (Exception e) {
 			output.setFault(e.getMessage());

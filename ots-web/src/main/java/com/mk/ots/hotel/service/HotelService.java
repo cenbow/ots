@@ -415,7 +415,6 @@ public class HotelService {
 					hotel.setRetentiontime(bean.getRetentiontime() == null ? "" : bean.getRetentiontime());
 					// 新增 默认离店时间
 					hotel.setDefaultlevaltime(bean.getDefaultleavetime() == null ? "" : bean.getDefaultleavetime());
-					;
 
 					hotel.setVisible(bean.getVisible() == null ? Constant.STR_TRUE : bean.getVisible());
 					hotel.setOnline(bean.getOnline() == null ? Constant.STR_TRUE : bean.getOnline());
@@ -447,7 +446,7 @@ public class HotelService {
 					 */
 					List<Map<String, Object>> bedtypes = new ArrayList<Map<String, Object>>();
 					try {
-						List<Map<String, Object>> bedtypeList = (List<Map<String, Object>>) readonlyRoomtypeList(
+						List<Map<String, Object>> bedtypeList = readonlyRoomtypeList(
 								bean.getId().toString(), "");
 						for (Map<String, Object> bedtype : bedtypeList) {
 							Map<String, Object> bed = new HashMap<String, Object>();
@@ -2846,27 +2845,6 @@ public class HotelService {
 		}
 	}
 
-	/**
-	 * 更新 ES 索引
-	 */
-
-	public String batchUpdateEsIndexer(){
-		SqlSession session = sqlSessionFactory.openSession();
-		THotelMapper mapper = session.getMapper(THotelMapper.class);
-
-		final List<Long> hotelIdArr = mapper.findAllHotelIds();
-		int count = 1;
-		for (Long hotelid :hotelIdArr){
-			if (count == 10){
-				break;
-			}
-			System.out.println(String.format("%d . init hotel:%d start ====",count++,hotelid));
-			this.readonlyInitPmsHotel(Constant.STR_CITYID_SHANGHAI, hotelid.toString());
-			System.out.println(String.format("%d . init hotel:%d end ====",count++,hotelid));
-		}
-
-		return "success";
-	}
 
 
 	/**
