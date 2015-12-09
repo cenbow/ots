@@ -68,8 +68,7 @@
 		parameterType="java.util.Map">
 		select id
 		from b_otaroomorder 
-		where pmsroomorderno = #{pmsRoomOrderNo}
-		limit 1
+		where pmsroomorderno = #{pmsroomorderno}
 	</select>
 
 	<delete id="delRoomById" parameterType="java.lang.Long">

@@ -437,7 +437,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 
 		boolean isProceed = false;
 		boolean isInPromo = false;
-		boolean isFromOta = true;
+		boolean isNotFromOta = true;
 
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format(
@@ -458,30 +458,33 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 					isInPromo = isInPromo(newRooms.get(0).getStartDate(), newRooms.get(0).getEndDate(),
 							newRooms.get(0).getStartTime(), newRooms.get(0).getEndTime());
 				}
+			}
 
+			if(StringUtils.isNotBlank(pmsRoomOrderNo))
+			{
 				/**
 				 * checks if this order comes from ota
 				 */
 				Map<String, Object> orderParameters = new HashMap<String, Object>();
-				orderParameters.put("pmsRoomOrderNo", pmsRoomOrderNo);
+				orderParameters.put("pmsroomorderno", pmsRoomOrderNo);
 
 				List<Map<String, Object>> orderResponse = roomMapper.selectOtaRoomOrder(orderParameters);
 				if (orderResponse != null && orderResponse.size() > 0) {
-					isFromOta = false;
-				}
+					isNotFromOta = false;
+				}				
 			}
 		} catch (Exception ex) {
 			logger.warn("failed to invoke getRoomSaleByParamsNew or isInPromo...", ex);
 		}
 
 		if (logger.isInfoEnabled()) {
-			logger.info(String.format("checking isInPromo:%s; status:%s; isFromOta:%s", isInPromo, status, isFromOta));
+			logger.info(String.format("checking isInPromo:%s; status:%s; isNotFromOta:%s", isInPromo, status, isNotFromOta));
 		}
 
 		/**
 		 * process this room shift only during promo period
 		 */
-		if (isFromOta && isInPromo && ("RE".equalsIgnoreCase(status) || "IN".equalsIgnoreCase(status))) {
+		if (isNotFromOta && isInPromo && ("RE".equalsIgnoreCase(status) || "IN".equalsIgnoreCase(status))) {
 			isProceed = true;
 		}
 
