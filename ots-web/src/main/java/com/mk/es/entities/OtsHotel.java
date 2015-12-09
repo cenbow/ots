@@ -141,6 +141,8 @@ public class OtsHotel {
 	private String repairinfo;
 
 	private List<Map<String, Object>> promoinfo;
+
+	private List<Map<String, Object>> highlights;
 	
 	private List<Integer> promoids;
 
@@ -598,5 +600,13 @@ public class OtsHotel {
 
 	public void setRepairinfo(String repairinfo) {
 		this.repairinfo = repairinfo;
+	}
+
+	public List<Map<String, Object>> getHighlights() {
+		return highlights;
+	}
+
+	public void setHighlights(List<Map<String, Object>> highlights) {
+		this.highlights = highlights;
 	}
 }

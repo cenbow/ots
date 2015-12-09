@@ -286,7 +286,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 */
 	public Integer queryByPromoId(Integer promoId) throws Exception {
 		try {
-			List<TRoomSaleConfigInfo> promos = roomSaleConfigInfoService.queryListBySaleTypeId("", promoId, 0, 10);
+			List<TRoomSaleConfigInfo> promos = roomSaleConfigInfoService.queryListBySaleTypeId(promoId, 0, 10);
 
 			if (promos != null && promos.size() > 0) {
 				return promos.get(0).getId();

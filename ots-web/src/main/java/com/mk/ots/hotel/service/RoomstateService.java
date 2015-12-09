@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.dianping.cat.message.Event;
+import com.mk.es.Hotel;
 import com.mk.framework.util.CommonUtils;
 import com.mk.ots.common.enums.HotelPromoEnum;
 import org.apache.commons.lang.StringUtils;
@@ -975,7 +976,12 @@ public class RoomstateService {
 				respEntity.setHotelid(hotelid);
 				respEntity.setHotelname(thotelModel.getHotelname());
 				respEntity.setHotelrulecode(thotelModel.getRulecode()); // 20150810
-																		// add
+
+				String repairInfo = HotelService.getRepairInfo(thotelModel.getRepairtime());	// add hotel repair info in mike3.2+
+				if (StringUtils.isNotBlank(repairInfo)){
+					respEntity.setRepairinfo(repairInfo);
+				}
+
 				respEntity.setOnline(thotelModel.getOnline());
 				respEntity.setVisible(thotelModel.getVisible());
 				// 查询t_roomtype表数据

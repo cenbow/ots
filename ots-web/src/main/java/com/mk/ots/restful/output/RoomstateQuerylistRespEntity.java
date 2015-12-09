@@ -21,6 +21,7 @@ public class RoomstateQuerylistRespEntity implements Serializable {
     private Long hotelid;
     private String hotelname;
     private int hotelrulecode;   //20150810 add
+    private String repairinfo;
     private String visible;
     private String online;
     private List<Roomtype> roomtype = Lists.newArrayList();
@@ -40,8 +41,14 @@ public class RoomstateQuerylistRespEntity implements Serializable {
     public void setHotelname(String hotelname) {
         this.hotelname = hotelname;
     }
-    
-    
+
+    public String getRepairinfo() {
+        return repairinfo;
+    }
+
+    public void setRepairinfo(String repairinfo) {
+        this.repairinfo = repairinfo;
+    }
 
     /**
 	 * @return the hotelrulecode

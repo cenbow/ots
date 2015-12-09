@@ -8,9 +8,10 @@
     <result column="binding" property="binding" jdbcType="CHAR" />
     <result column="facSort" property="facsort" jdbcType="INTEGER" />
     <result column="visible" property="visible" jdbcType="CHAR" />
+    <result column="iconUrl" property="iconurl" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, facName, facType, binding, facSort, visible
+    id, facName, facType, binding, facSort, visible, iconUrl
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
@@ -27,7 +28,7 @@
       binding, facSort, visible
       )
     values (#{id,jdbcType=BIGINT}, #{facname,jdbcType=VARCHAR}, #{factype,jdbcType=INTEGER}, 
-      #{binding,jdbcType=CHAR}, #{facsort,jdbcType=INTEGER}, #{visible,jdbcType=CHAR}
+      #{binding,jdbcType=CHAR}, #{facsort,jdbcType=INTEGER}, #{visible,jdbcType=CHAR}, #{iconurl,jdbcType=VARCHAR }
       )
   </insert>
   <insert id="insertSelective" parameterType="com.mk.ots.hotel.model.TFacilityModel" >
@@ -51,6 +52,9 @@
       <if test="visible != null" >
         visible,
       </if>
+      <if test="iconurl != null" >
+        iconurl,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -71,6 +75,10 @@
       <if test="visible != null" >
         #{visible,jdbcType=CHAR},
       </if>
+      <if test="iconurl != null" >
+        #{iconurl,jdbcType=VARCHAR},
+      </if>
+
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.hotel.model.TFacilityModel" >
@@ -91,6 +99,9 @@
       <if test="visible != null" >
         visible = #{visible,jdbcType=CHAR},
       </if>
+      <if test="iconurl != null" >
+        #{iconurl,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -100,6 +111,7 @@
       facType = #{factype,jdbcType=INTEGER},
       binding = #{binding,jdbcType=CHAR},
       facSort = #{facsort,jdbcType=INTEGER},
+      iconUrl = #{iconurl,jdbcType=VARCHAR},
       visible = #{visible,jdbcType=CHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -134,7 +146,8 @@
 			b.facType,
 			b.binding,
 			b.facSort,
-			b.visible
+			b.visible,
+			b.iconUrl
 		FROM
 			t_roomtype_facility a
 		INNER JOIN t_facility b ON a.facid = b.id

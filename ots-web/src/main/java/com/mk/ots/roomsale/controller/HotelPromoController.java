@@ -64,7 +64,7 @@ public class HotelPromoController {
 				return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
 			}
 
-			List<TRoomSaleConfigInfo> roomSaleConfigInfoList = roomSaleConfigInfoService.queryListBySaleTypeId(cityid,
+			List<TRoomSaleConfigInfo> roomSaleConfigInfoList = roomSaleConfigInfoService.queryListBySaleTypeId(
 					Integer.parseInt(saletypeid), start, limit);
 
 			List<JSONObject> list = new ArrayList<JSONObject>();
@@ -123,8 +123,10 @@ public class HotelPromoController {
 		Map<String, Object> result = new HashMap<String, Object>();
 		try {
 
+			Integer limit = 10;
+			Integer page = 1;
 
-
+			int start = (page - 1) * limit;
 			if (StringUtils.isEmpty(promoid)) {
 				result.put(ServiceOutput.STR_MSG_SUCCESS, false);
 				result.put(ServiceOutput.STR_MSG_ERRCODE, "404");
@@ -132,8 +134,8 @@ public class HotelPromoController {
 				return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
 			}
 
-			List<TRoomSaleConfigInfo> roomSaleConfigInfoList = roomSaleConfigInfoService.queryListBySaleTypeId(cityid,
-					Integer.parseInt(saletypeid), start, limit);
+			List<TRoomSaleConfigInfo> roomSaleConfigInfoList = roomSaleConfigInfoService.queryListBySaleTypeId(
+					Integer.parseInt(promoid), start, limit);
 
 			List<JSONObject> list = new ArrayList<JSONObject>();
 			if (CollectionUtils.isNotEmpty(roomSaleConfigInfoList)) {

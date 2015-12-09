@@ -2038,4 +2038,11 @@ public class DateUtils extends Object {
         dates[1] = lastDateOfWeek;
         return dates;
     }
+
+
+    public static Integer getDateYear(Date start){
+        Calendar cl = Calendar.getInstance();
+        cl.setTime(start);
+        return cl.get(Calendar.YEAR);
+    }
 }

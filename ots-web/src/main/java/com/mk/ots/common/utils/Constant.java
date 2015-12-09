@@ -224,8 +224,8 @@ public class Constant {
 
 	public static final Integer WEIXIN_PLATFORM = 4;
 
-	public static final Integer CITY_RECOMMEND_ITEM_LIMT = 1;
-	public static final Integer RECOMMEND_ITEM_LIMT = 4;
+	public static final Integer CITY_RECOMMEND_ITEM_LIMT = 4;
+	public static final Integer RECOMMEND_ITEM_LIMT = 7;
 
 	public static final Integer RECOMMEND_GLOBAL = -1;
 
@@ -271,5 +271,7 @@ public class Constant {
 	public static final String DEFAULT_NORMAL_POPULARITY_NOTE = "";
 	public static final String DEFAULT_NORMAL_POPULARITY_ICON = "";
 	public static final Integer SHOW_HOTEL_REPAIRINFO_YEARS_LIMIT = 3;
+
+	public static final String HOTEL_HIGHLIGHT_SHOWS_IDS ="44";
 
 }
