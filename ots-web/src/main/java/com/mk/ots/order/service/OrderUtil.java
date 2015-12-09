@@ -166,6 +166,9 @@ public class OrderUtil {
 		// format.setRoundingMode(RoundingMode.UP);
 		jsonObj.put("promotype", StringUtils.defaultIfEmpty(returnOrder.getPromoType(), PromoTypeEnum.OTHER.getCode().toString()));
 		jsonObj.put("isonpromo", StringUtils.defaultIfEmpty(returnOrder.getPromoType(), PromoTypeEnum.OTHER.getCode().toString()));
+		if(PromoTypeEnum.TJ.getCode().equals(returnOrder.getPromoType())){
+			jsonObj.put("paytip", "预付入住享5元红包");
+		}
 		jsonObj.put("roomticket", StringUtils.defaultIfEmpty(returnOrder.getRoomTicket(),""));
 		jsonObj.put("orderid", returnOrder.getId());
 		jsonObj.put("hotelid", returnOrder.getHotelId());
@@ -775,16 +778,29 @@ public class OrderUtil {
 			jsonObj.put("usermessage", "该订单付款完成后不可以修改或者退款。");
 			return;
 		}
+		StringBuffer usermessage = new StringBuffer();
+		if(PromoTypeEnum.TJ.getCode().equals(returnOrder.getPromoType())){
+			usermessage.append("该房间正在参与眯客今夜特价活动，预付入住享受低价，规则如下：").append("\n");
+			usermessage.append("1.预付比到付多享受5元红包优惠；").append("\n");
+			usermessage.append("2.5元红包使用规则同评价返现；").append("\n");
+			usermessage.append("3.预付确认入住即奖励5元红包；").append("\n");
+			usermessage.append("4.使用账户纯余额入住不再奖励；").append("\n");
+			usermessage.append("\n");
+			usermessage.append("温馨提示：").append("\n");
+		}
 		if (now && (DateUtils.getStringFromDate(calNow.getTime(), "HH:mm").compareTo("23:56") >= 0
-				 || DateUtils.getStringFromDate(calNow.getTime(), "HH:mm").compareTo("02:00") < 0)) {
+				|| DateUtils.getStringFromDate(calNow.getTime(), "HH:mm").compareTo("02:00") < 0)) {
 			String[] times = DateUtils.getStringFromDate(endTime, "yyyy-MM-dd").split("-");
-			jsonObj.put("usermessage", MessageFormat.format("您最晚可在{0}年{1}月{2}日{3}:00办理退房哦", times[0], times[1], times[2], leavetime));
+			usermessage.append(MessageFormat.format("您最晚可在{0}年{1}月{2}日{3}:00办理退房哦", times[0], times[1], times[2], leavetime));
+			jsonObj.put("usermessage", usermessage.toString());
 		} else if(now && calNow.get(calNow.HOUR_OF_DAY) >= 2 && calNow.get(calNow.HOUR_OF_DAY) < 12){
 			//凌晨2:00后下单，必须在12：00后办理入住，提示“您在xxxx年xx月xx日12:00后可办理入住哦”；
 			String[] times = DateUtils.getStringFromDate(createTime, "yyyy-MM-dd").split("-");
-			jsonObj.put("usermessage", MessageFormat.format("您在{0}年{1}月{2}日{3}:00后可办理入住哦",times[0], times[1], times[2], leavetime));
+			usermessage.append(MessageFormat.format("您在{0}年{1}月{2}日{3}:00后可办理入住哦",times[0], times[1], times[2], leavetime));
+			jsonObj.put("usermessage", usermessage.toString());
 		} else {
-			jsonObj.put("usermessage", MessageFormat.format("您预订的酒店，在入住日期前一天{0}:00前可进行退款操作；预订今日酒店，付款完成后就不可以修改订单或退款咯", retentiontime));
+			usermessage.append(MessageFormat.format("您预订的酒店，在入住日期前一天{0}:00前可进行退款操作；预订今日酒店，付款完成后就不可以修改订单或退款咯", retentiontime));
+			jsonObj.put("usermessage", usermessage.toString());
 		}
 	}
 	
