@@ -676,7 +676,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		saveRoomSaleParameter.put("starttime", startDate);
 		saveRoomSaleParameter.put("endtime", endDate);
 
-		saveRoomSaleParameter.put("configid", roomConfig.get("configId"));
+		saveRoomSaleParameter.put("configid", roomConfig.get("configid"));
 		saveRoomSaleParameter.put("isback", 0);
 		saveRoomSaleParameter.put("salename", roomConfig.get("salename"));
 		saveRoomSaleParameter.put("saletype", roomConfig.get("saletype"));
