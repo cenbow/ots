@@ -176,6 +176,22 @@ public class WalletCashflowService implements IWalletCashflowService {
     }
 
 
+    public  void orderReturnWalletCash(Long orderId, Long mid, BigDecimal price){
+        if (price != null && price.compareTo(BigDecimal.ZERO) > 0) {
+            boolean result = saveCashflowAndSynWallet(mid, price, CashflowTypeEnum.CASHBACK_ORDER_IN, orderId);
+            if (!result) {
+                throw MyErrorEnum.customError.getMyException("订单返现失败.");
+            }
+            logger.info("设置订单已返现. orderid: {}", orderId);
+            orderService.receiveCashBack(orderId);
+        } else {
+            throw MyErrorEnum.customError.getMyException("订单返现不允许为零或负值.");
+        }
+        //2.1.3 记录返现日志
+        OtaOrder order = orderService.findOtaOrderById(orderId);
+        orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.ORDER_CASHBACK.getId(), "", "¥" + price + "红包已放入您的账户", "");
+    }
+
     @Override
     public boolean refund(Long mid, Long orderid) {
         logger.info(">>>钱包消费退回: mid:{}, cashflowtype:{}, orderid:{}", mid, CashflowTypeEnum.CONSUME_ORDER_REFUND, orderid);

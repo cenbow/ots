@@ -2032,6 +2032,10 @@ public class OrderServiceImpl implements OrderService {
           otaorder.setUpdateTime(DateUtils.createDate());
           if (tempOrderStatus != otaorder.getOrderStatus()) {
               otaorder.saveOrUpdate();
+              /**************************特价订单返现***************************/
+              if(PromoTypeEnum.TJ.getCode().equals(otaorder.getPromoType()) && OtaOrderStatusEnum.CheckIn.getId() == otaorder.getOrderStatus()){
+               walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), Constant.TJ_ORDER_RETURN_CASH);
+              }
           }
           orderStatusBuf.append(",更新后OTA订单状态:" + otaorder.getOrderStatus());
           this.orderBusinessLogService.saveLog(otaorder, OtaOrderFlagEnum.UPDATEORDERSTATUS.getId(), orderStatusBuf.toString(), "", "");
@@ -2190,11 +2194,18 @@ public class OrderServiceImpl implements OrderService {
         order.setPromoType(getPromoType(roomId));
        //检查订单promo type是否符合支付规则
         checkPayByPromoType(order, order.getPromoType());
-		Map<String, Object> cash = cashBackService.getCashBackByRoomtypeId(roomTypeId, DateUtils.formatDate(order.getBeginTime()),
-				DateUtils.formatDate(order.getEndTime()));
-		this.logger.info("getCashBackByRoomtypeId:返现详细:{}", gson.toJson(cash));
-		Long cashBigDecimal = (Long) cash.get("cashbackcost");
-		order.setCashBack(new BigDecimal(cashBigDecimal));
+        Long cashBigDecimal = 0L;
+        if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
+            cashBigDecimal = Constant.TJ_ORDER_RETURN_CASH.longValue();
+            order.setCashBack(Constant.TJ_ORDER_RETURN_CASH);
+        }else{
+            Map<String, Object> cash = cashBackService.getCashBackByRoomtypeId(roomTypeId, DateUtils.formatDate(order.getBeginTime()),
+                    DateUtils.formatDate(order.getEndTime()));
+            this.logger.info("getCashBackByRoomtypeId:返现详细:{}", gson.toJson(cash));
+            cashBigDecimal = (Long) cash.get("cashbackcost");
+            order.setCashBack(new BigDecimal(cashBigDecimal));
+        }
+
 		if (cashBigDecimal.longValue() > 0) {
 			order.setIsReceiveCashBack(ReceiveCashBackEnum.notReceiveCashBack.getId());
 		}
@@ -3291,9 +3302,6 @@ public class OrderServiceImpl implements OrderService {
             }
             if("T".equals(order.getCoupon())){
                 throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能使用优惠券");
-            }
-            if(OrderTypeEnum.YF.getId() != order.getOrderType()){
-                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房只能使用在线支付");
             }
             try {
                 Date begin = DateUtils.parseDate(DateUtils.formatDateTime(order.getBeginTime()), DateUtils.FORMATDATETIME);

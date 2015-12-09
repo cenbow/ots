@@ -167,7 +167,7 @@ public class OrderUtil {
 		jsonObj.put("promotype", StringUtils.defaultIfEmpty(returnOrder.getPromoType(), PromoTypeEnum.OTHER.getCode().toString()));
 		jsonObj.put("isonpromo", StringUtils.defaultIfEmpty(returnOrder.getPromoType(), PromoTypeEnum.OTHER.getCode().toString()));
 		if(PromoTypeEnum.TJ.getCode().equals(returnOrder.getPromoType())){
-			jsonObj.put("paytip", "预付入住享5元红包");
+			jsonObj.put("paytip", String.format("预付入住享%s元红包", Constant.TJ_ORDER_RETURN_CASH));
 		}
 		jsonObj.put("roomticket", StringUtils.defaultIfEmpty(returnOrder.getRoomTicket(),""));
 		jsonObj.put("orderid", returnOrder.getId());
@@ -781,9 +781,9 @@ public class OrderUtil {
 		StringBuffer usermessage = new StringBuffer();
 		if(PromoTypeEnum.TJ.getCode().equals(returnOrder.getPromoType())){
 			usermessage.append("该房间正在参与眯客今夜特价活动，预付入住享受低价，规则如下：").append("\n");
-			usermessage.append("1.预付比到付多享受5元红包优惠；").append("\n");
-			usermessage.append("2.5元红包使用规则同评价返现；").append("\n");
-			usermessage.append("3.预付确认入住即奖励5元红包；").append("\n");
+			usermessage.append(String.format("1.预付比到付多享受%s元红包优惠；", Constant.TJ_ORDER_RETURN_CASH)).append("\n");
+			usermessage.append(String.format("2.%s元红包使用规则同评价返现；", Constant.TJ_ORDER_RETURN_CASH)).append("\n");
+			usermessage.append(String.format("3.预付确认入住即奖励%s元红包；", Constant.TJ_ORDER_RETURN_CASH)).append("\n");
 			usermessage.append("4.使用账户纯余额入住不再奖励；").append("\n");
 			usermessage.append("\n");
 			usermessage.append("温馨提示：").append("\n");
