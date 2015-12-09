@@ -136,15 +136,15 @@
 		limit 1;
 	</select>
 
-	<insert id="saveRoomSale" parameterType="com.mk.ots.roomsale.model.TRoomSale">
+	<insert id="saveRoomSale" parameterType="java.util.Map">
 		INSERT INTO t_room_sale
 		(roomTypeId,oldRoomTypeId,roomNo,pms,createDate,salePrice,costPrice,
-		startTime,endTime,roomId,configId,isBack,saleName,saleType)
+		startTime,endTime,roomId,configId,isBack,saleName,saleType,hotelId,settleValue)
 		VALUE
 		(
-		#{roomTypeId}, #{oldRoomTypeId},#{roomNo}, #{pms}, #{createDate},
-		#{salePrice}, #{costPrice},#{startTime},#{endTime},#{roomId},#{configId},
-		#{isBack},#{saleName},#{saleType}
+		#{roomtypeid}, #{oldroomtypeid},#{roomno}, #{pms}, #{createdate},
+		#{saleprice}, #{costprice}, #{starttime}, #{endtime}, #{roomid}, #{configid},
+		#{isback}, #{salename}, #{saletype}, #{hotelid},#{settlevalue}
 		)
 	</insert>
 
@@ -263,7 +263,9 @@
 		parameterType="String">
 		SELECT
 		info.startTime as starttime, info.endTime as endtime, info.startDate as startdate,
-		info.enddate as enddate, config.roomId as roomid, config.saleRoomTypeId as saleroomtypeid, config.roomTypeId as roomtypeid
+		info.enddate as enddate, config.roomId as roomid, config.saleRoomTypeId as saleroomtypeid, 
+		config.roomTypeId as roomtypeid, config.saleValue as salevalue, config.saleType as saletype,
+		config.settleValue as settlevalue, config.settleType as settletype 
 		FROM t_room_sale_config config
 		join t_room_sale_config_info info on config.saleconfiginfoid = info.id
 		WHERE config.valid = 'T' and config.saleRoomTypeId = #{roomTypeId}

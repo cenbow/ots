@@ -1,9 +1,11 @@
 package com.mk.pms.order.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,7 +56,10 @@ import com.mk.ots.order.bean.PmsRoomOrder;
 import com.mk.ots.order.service.OrderLogService;
 import com.mk.ots.order.service.OrderServiceImpl;
 import com.mk.ots.pay.service.IPayService;
+import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.bean.PmsCost;
@@ -288,20 +293,20 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		return isInPromo;
 	}
 
-	private boolean isRoomExisted(List<TRoomModel> rooms, Long roomid) {
-		boolean isExisted = false;
+	private TRoomModel isRoomExisted(List<TRoomModel> rooms, Long roomid) {
+		TRoomModel roomModel = null;
 
 		for (int i = 0; rooms != null && i < rooms.size(); i++) {
-			TRoomModel roomModel = rooms.get(i);
+			TRoomModel troomModel = rooms.get(i);
 
-			Long roomModelId = roomModel.getId();
+			Long roomModelId = troomModel.getId();
 			if (roomModelId != null && roomModelId == roomid) {
-				isExisted = true;
+				roomModel = troomModel;
 				break;
 			}
 		}
 
-		return isExisted;
+		return roomModel;
 	}
 
 	private Room findVCRooms(Long hotelid, Long roomtypeid, Date begindate, Date enddate) throws Exception {
@@ -333,19 +338,42 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 
 		List<Map<String, Object>> promoRooms = roomSaleMapper.queryRoomPromoByType(String.valueOf(pmsroomtypeid));
 		if (promoRooms != null && promoRooms.size() > 0) {
-			Integer roomId = (Integer) promoRooms.get(0).get("roomid");
-			Integer saleRoomtypeId = (Integer) promoRooms.get(0).get("saleroomtypeid");
-			Integer roomtypeId = (Integer) promoRooms.get(0).get("roomtypeid");
+			final Map<String, Object> promoRoom = promoRooms.get(0);
+
+			Integer roomId = (Integer) promoRoom.get("roomid");
+			Integer saleRoomtypeId = (Integer) promoRoom.get("saleroomtypeid");
+			Integer roomtypeId = (Integer) promoRoom.get("roomtypeid");
+
+			if (logger.isInfoEnabled()) {
+				logger.info(
+						String.format("about to findroomprice with hotelid:%s; roomtypeid:%s; begintime:%s; endtime:%s",
+								pmsRoomOrder.getDate("BeginTime"), pmsRoomOrder.getDate("EndTime")));
+			}
+
+			Roomtype roomtype = null;
+			try {
+				roomtype = findRoomSalePrice(hotelid, roomtypeId != null ? roomtypeId.longValue() : 0L,
+						(Date) promoRoom.get("starttime"), (Date) promoRoom.get("endtime"));
+			} catch (Exception ex) {
+				logger.warn("failed to findRoomSalePrice, quit shifting room...", ex);
+				return;
+			}
 
 			if (roomId == null) {
 				List<TRoomModel> models = roomMapper.findList(roomtypeId != null ? roomtypeId.longValue() : 0);
 				Room vcRoom = findVCRooms(Long.valueOf(hotelid), roomtypeId != null ? roomtypeId.longValue() : 0,
-						pmsRoomOrder.getDate("BeginTime"), pmsRoomOrder.getDate("EndTime"));
+						(Date) promoRoom.get("starttime"), (Date) promoRoom.get("endtime"));
+				TRoomModel roomModel = isRoomExisted(models, vcRoom.getRoomid());
+
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("vcroom:%s; roomModel:%s", vcRoom == null, roomModel == null));
+				}
+
 				/**
 				 * promo room has been ordered by non-promo pms, supplementary
 				 * room is required
 				 */
-				if (vcRoom != null && isRoomExisted(models, vcRoom.getRoomid()) && StringUtils.isNotBlank(hotelid)
+				if (vcRoom != null && roomModel != null && StringUtils.isNotBlank(hotelid)
 						&& vcRoom.getRoomid() != null) {
 					if (logger.isInfoEnabled()) {
 						logger.info(String.format("room is available for a shift...roomid:%s; roomtypeid:%s",
@@ -360,6 +388,20 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 						updateParameters.put("roomid", vcRoom.getRoomid());
 						updateParameters.put("roomtypeid", saleRoomtypeId);
 						roomMapper.updateRoomtypeByRoom(updateParameters);
+
+						updateParameters.put("roomno", vcRoom.getRoomno());
+						updateParameters.put("baseprice", roomtype != null ? roomtype.getRoomtypeprice() : 0);
+						updateParameters.put("roomid", vcRoom.getRoomid());
+						updateParameters.put("pms", roomModel.getPms());
+
+						if (logger.isInfoEnabled()) {
+							logger.info(String.format(
+									"about to saveroomsale with parameters, roomno:%s; baseprice:%s; roomid:%s",
+									updateParameters.get("roomno"), updateParameters.get("baseprice"),
+									updateParameters.get("roomid")));
+						}
+
+						this.saveRoomSale(promoRoom, updateParameters);
 
 						/**
 						 * update current promo room to non-promo room
@@ -391,6 +433,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		Long newroomid = pmsRoomOrder.getLong("RoomId");
 		String status = pmsRoomOrder.getStr("Status");
 		String hotelid = String.valueOf(pmsRoomOrder.get("HotelId"));
+		String pmsRoomOrderNo = pmsRoomOrder.getStr("PmsRoomOrderNo");
 
 		boolean isProceed = false;
 		boolean isInPromo = false;
@@ -398,8 +441,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format(
-					"about to shiftRoomForPromo... hotelid:%s; status:%s; oldroomtypeid:%s; newroomtypeid:%s; newroomid:%s; ",
-					hotelid, status, oldroomtypeid, newroomtypeid, newroomid));
+					"about to shiftRoomForPromo... hotelid:%s; status:%s; oldroomtypeid:%s; newroomtypeid:%s; newroomid:%s; pmsRoomOrderNo:%s",
+					hotelid, status, oldroomtypeid, newroomtypeid, newroomid, pmsRoomOrderNo));
 		}
 
 		TRoomSaleConfig newRoomsaleConfig = new TRoomSaleConfig();
@@ -412,9 +455,6 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			if (newroomtypeid != null) {
 				newRooms = roomSaleConfigMapper.getRoomSaleByParamsNew(newRoomsaleConfig);
 				if (newRooms != null && newRooms.size() > 0) {
-					newRooms.get(0).getStartDate();
-					newRooms.get(0).getEndDate();
-
 					isInPromo = isInPromo(newRooms.get(0).getStartDate(), newRooms.get(0).getEndDate(),
 							newRooms.get(0).getStartTime(), newRooms.get(0).getEndTime());
 				}
@@ -422,7 +462,6 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 				/**
 				 * checks if this order comes from ota
 				 */
-				String pmsRoomOrderNo = pmsRoomOrder.getStr("PmsRoomOrderNo");
 				Map<String, Object> orderParameters = new HashMap<String, Object>();
 				orderParameters.put("pmsRoomOrderNo", pmsRoomOrderNo);
 
@@ -486,6 +525,160 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			}
 			doShiftRoom(hotelid, newroomtypeid, newroomid, pmsRoomOrder);
 		}
+	}
+
+	private Roomtype findRoomSalePrice(String hotelId, Long roomTypeId, Date startdate, Date enddate) throws Exception {
+		RoomstateQuerylistReqEntity parameters = new RoomstateQuerylistReqEntity();
+		parameters.setIsShowAllRoom("T");
+		parameters.setHotelid(Long.valueOf(hotelId));
+		parameters.setRoomtypeid(roomTypeId);
+		parameters.setCallentry(2);
+		parameters.setCallversion("3.2.5");
+
+		String begindateday = defaultFormat.format(startdate);
+		String enddateday = defaultFormat.format(enddate);
+
+		parameters.setStartdateday(begindateday);
+		parameters.setEnddateday(enddateday);
+
+		List<RoomstateQuerylistRespEntity> responses = roomstateService.findHotelRoomState("", parameters);
+		Roomtype roomtype = null;
+		if (responses != null && responses.size() > 0 && responses.get(0) != null) {
+			roomtype = responses.get(0).getRoomtype().get(0);
+		}
+
+		return roomtype;
+	}
+
+	private BigDecimal calaValue(BigDecimal baseValue, BigDecimal value, Integer valueTypeEnum) {
+		if (logger.isInfoEnabled()) {
+			logger.info("value received, basevalue:%s; value:%s; valuetypeenum:%s", baseValue, value, valueTypeEnum);
+		}
+
+		if (null == baseValue || null == valueTypeEnum) {
+			return baseValue;
+		}
+
+		if (null == value) {
+			return baseValue;
+		}
+
+		logger.info("============sales online job >> calaValue");
+		if (1 == valueTypeEnum) {
+			logger.info("============sales online job >> calaValue：TYPE_TO：" + value);
+			return value;
+		} else if (2 == valueTypeEnum) {
+			BigDecimal result = baseValue.subtract(value);
+			if (result.compareTo(BigDecimal.ZERO) > 0) {
+				logger.info("============sales online job >> calaValue：TYPE_ADD：" + value);
+				return result;
+			} else {
+				logger.info("============sales online job >> calaValue：TYPE_ADD：" + BigDecimal.ZERO);
+				return BigDecimal.ZERO;
+			}
+		} else if (3 == valueTypeEnum) {
+			logger.info("============sales online job >> calaValue：TYPE_OFF：" + value);
+			return baseValue.multiply(value).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+		} else {
+			logger.info("============sales online job >> calaValue：else：" + baseValue);
+			return baseValue;
+		}
+	}
+
+	private Date[] getStartEndDate(Date runTime, Date startTime, Date endTime) throws Exception {
+		if (null == runTime || null == startTime || null == endTime) {
+			return new Date[] { new Date(), new Date() };
+		}
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+		SimpleDateFormat datetimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+		try {
+			String strMidTime = dateFormat.format(runTime);
+			Date midTime = datetimeFormat.parse(strMidTime + " 3:00:00");
+
+			Date startDate = null;
+			Date endDate = null;
+			// 若当前时间晚于中午12点,住房时间为今日到明日。若早于12点，住房时间为昨日到今日
+			if (runTime.before(midTime)) {
+				endDate = runTime;
+
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(endDate);
+				calendar.add(Calendar.DATE, -1);
+				startDate = calendar.getTime();
+			} else {
+				startDate = runTime;
+
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(startDate);
+				calendar.add(Calendar.DATE, 1);
+				endDate = calendar.getTime();
+			}
+
+			// 若开始时间早于endTime，当日时间
+			if (startTime.before(endTime)) {
+				String strStartDate = dateFormat.format(runTime) + " " + timeFormat.format(startTime);
+				startDate = datetimeFormat.parse(strStartDate);
+
+				String strEndDate = dateFormat.format(runTime) + " " + timeFormat.format(endTime);
+				endDate = datetimeFormat.parse(strEndDate);
+			} else {
+				String strStartDate = dateFormat.format(startDate) + " " + timeFormat.format(startTime);
+				startDate = datetimeFormat.parse(strStartDate);
+
+				String strEndDate = dateFormat.format(endDate) + " " + timeFormat.format(endTime);
+				endDate = datetimeFormat.parse(strEndDate);
+			}
+
+			return new Date[] { startDate, endDate };
+		} catch (Exception ex) {
+			throw new Exception("failed to parse stsrt/end date", ex);
+		}
+	}
+
+	private void saveRoomSale(Map<String, Object> roomConfig, Map<String, Object> saveRoomParameters) throws Exception {
+		BigDecimal basePrice = (BigDecimal) saveRoomParameters.get("baseprice");
+		BigDecimal saleValueOrg = (BigDecimal) roomConfig.get("salevalue");
+		Integer saleType = (Integer) roomConfig.get("saletype");
+		BigDecimal settleValueOrg = (BigDecimal) roomConfig.get("settlevalue");
+		Integer settleType = (Integer) roomConfig.get("settletype");
+		Date starttime = (Date) roomConfig.get("starttime");
+		Date endtime = (Date) roomConfig.get("endtime");
+
+		BigDecimal saleValue = calaValue(basePrice, saleValueOrg, saleType);
+		BigDecimal settleValue = calaValue(basePrice, settleValueOrg, settleType);
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+		Date[] startEndDate = getStartEndDate(new Date(), starttime, endtime);
+		Date startDate = startEndDate[0];
+		Date endDate = startEndDate[1];
+
+		// log roomSale
+		Map<String, Object> saveRoomSaleParameter = new HashMap<String, Object>();
+		saveRoomSaleParameter.put("oldroomtypeid", roomConfig.get("roomtypeid"));
+		saveRoomSaleParameter.put("roomtypeid", roomConfig.get("saleroomtypeid"));
+
+		saveRoomSaleParameter.put("roomno", saveRoomParameters.get("roomno"));
+		saveRoomSaleParameter.put("roomid", saveRoomParameters.get("roomid"));
+		saveRoomSaleParameter.put("pms", saveRoomParameters.get("pms"));
+
+		saveRoomSaleParameter.put("createdate", dateFormat.format(new Date()));
+		saveRoomSaleParameter.put("saleprice", saleValue);
+		saveRoomSaleParameter.put("costprice", basePrice);
+		saveRoomSaleParameter.put("starttime", startDate);
+		saveRoomSaleParameter.put("endtime", endDate);
+
+		saveRoomSaleParameter.put("configid", roomConfig.get("configId"));
+		saveRoomSaleParameter.put("isback", 0);
+		saveRoomSaleParameter.put("salename", roomConfig.get("salename"));
+		saveRoomSaleParameter.put("saletype", roomConfig.get("saletype"));
+		saveRoomSaleParameter.put("hotelid", roomConfig.get("hotelid"));
+		saveRoomSaleParameter.put("settlevalue", settleValue);
+
+		this.roomSaleMapper.saveRoomSale(saveRoomSaleParameter);
 	}
 
 	private PmsRoomOrder updatePmsRoomOrder(EHotel hotel, PmsRoomOrder newOrder, JSONObject customNo, Long hotelId)
