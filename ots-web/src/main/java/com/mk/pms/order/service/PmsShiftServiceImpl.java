@@ -29,9 +29,10 @@ import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
+import com.mk.pms.room.bean.RoomRepairPo;
 
 @Service
-public class PmsShiftServiceImpl {
+public class PmsShiftServiceImpl implements PmsShiftService {
 	private static final Logger logger = LoggerFactory.getLogger(PmsShiftServiceImpl.class);
 	@Autowired
 	private RoomstateService roomstateService;
@@ -41,7 +42,7 @@ public class PmsShiftServiceImpl {
 	private RoomSaleConfigMapper roomSaleConfigMapper;
 	@Autowired
 	private TRoomMapper roomMapper;
-	
+
 	private final SimpleDateFormat defaultFormat = new SimpleDateFormat("yyyyMMdd");
 
 	private boolean isInPromo(Date begindate, Date enddate, Time startTime, Time endTime) {
@@ -96,6 +97,11 @@ public class PmsShiftServiceImpl {
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format("about to doShiftRoom with pmsroomtypeid:%s; pmsroomid:%s; ", pmsroomtypeid,
 					pmsroomid));
+		}
+
+		if (pmsroomid == null) {
+			logger.warn("will not shift room since pmsroomid is empty");
+			return;
 		}
 
 		List<Map<String, Object>> promoRooms = roomSaleMapper.queryRoomPromoByType(String.valueOf(pmsroomtypeid));
@@ -187,6 +193,20 @@ public class PmsShiftServiceImpl {
 				}
 			}
 		}
+	}
+
+	public void shiftRoomForPromo(RoomRepairPo roomRepairPo) throws Exception {
+		if (logger.isInfoEnabled()) {
+			logger.info("enter shiftRoomForPromo repair-mode");
+		}
+
+		PmsRoomOrder pmsRoomOrder = new PmsRoomOrder();
+		pmsRoomOrder.set("RoomTypeId", roomRepairPo.getRoomtypeid());
+		pmsRoomOrder.set("RoomId", roomRepairPo.getRoomid());
+		pmsRoomOrder.set("HotelId", roomRepairPo.getHotelid());
+		pmsRoomOrder.set("Status", "RE");
+
+		shiftRoomForPromo(pmsRoomOrder, false);
 	}
 
 	public void shiftRoomForPromo(PmsRoomOrder pmsRoomOrder, boolean isChanged) throws Exception {
