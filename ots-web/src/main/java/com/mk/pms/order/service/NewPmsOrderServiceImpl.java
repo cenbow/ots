@@ -650,16 +650,17 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		BigDecimal saleValue = calaValue(basePrice, saleValueOrg, saleType);
 		BigDecimal settleValue = calaValue(basePrice, settleValueOrg, settleType);
 
-		if (logger.isInfoEnabled()) {
-			logger.info(
-					String.format("about to saveRoomSale with saleValue:%s; settleValue:%s", saleValue, settleValue));
-		}
-
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 		Date[] startEndDate = getStartEndDate(new Date(), starttime, endtime);
 		Date startDate = startEndDate[0];
 		Date endDate = startEndDate[1];
+
+		if (logger.isInfoEnabled()) {
+			logger.info(
+					String.format("about to saveRoomSale with saleValue:%s; settleValue:%s; startdate:%s; enddate:%s",
+							saleValue, settleValue, startDate, endDate));
+		}
 
 		// log roomSale
 		Map<String, Object> saveRoomSaleParameter = new HashMap<String, Object>();
@@ -677,7 +678,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		saveRoomSaleParameter.put("endtime", endDate);
 
 		saveRoomSaleParameter.put("configid", roomConfig.get("configid"));
-		saveRoomSaleParameter.put("isback", 0);
+		saveRoomSaleParameter.put("isback", "F");
 		saveRoomSaleParameter.put("salename", roomConfig.get("salename"));
 		saveRoomSaleParameter.put("saletype", roomConfig.get("saletype"));
 		saveRoomSaleParameter.put("hotelid", roomConfig.get("hotelid"));

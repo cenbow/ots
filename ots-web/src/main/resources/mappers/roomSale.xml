@@ -265,7 +265,7 @@
 		info.startTime as starttime, info.endTime as endtime, info.startDate as startdate,
 		info.enddate as enddate, config.roomId as roomid, config.saleRoomTypeId as saleroomtypeid, 
 		config.roomTypeId as roomtypeid, config.saleValue as salevalue, config.saleType as saletype,
-		config.settleValue as settlevalue, config.settleType as settletype 
+		config.settleValue as settlevalue, config.settleType as settletype, config.id as configid, config.hotelId as hotelid
 		FROM t_room_sale_config config
 		join t_room_sale_config_info info on config.saleconfiginfoid = info.id
 		WHERE config.valid = 'T' and config.saleRoomTypeId = #{roomTypeId}
