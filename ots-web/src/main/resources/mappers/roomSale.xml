@@ -26,7 +26,8 @@
 	</resultMap>
 
 	<sql id="Base_Column_List">
-		id, roomTypeId,oldRoomTypeId,roomNo,pms,createDate,salePrice,costPrice,
+		id,
+		roomTypeId,oldRoomTypeId,roomNo,pms,createDate,salePrice,costPrice,
 		startTime,endTime,roomId,configId,isBack,saleName,saleType,hotelId,settleValue
 	</sql>
 
@@ -82,9 +83,11 @@
 		SELECT
 		<include refid="Config_Column_List" />
 		FROM t_room_sale a
-		LEFT JOIN t_room_sale_config_info b ON a.configId = b.id and a.isBack =
+		LEFT JOIN t_room_sale_config_info b ON a.configId =
+		b.id and a.isBack =
 		'F' and b.valid = 'T'
-		LEFT JOIN t_room_sale_config config ON config.saleConfigInfoId = b.id and
+		LEFT JOIN t_room_sale_config
+		config ON config.saleConfigInfoId = b.id and
 		config.valid = 'T'
 		<include refid="Base_Query_List" />
 	</select>
@@ -115,9 +118,11 @@
 		SELECT
 		<include refid="Config_Column_List" />
 		FROM t_room_sale a
-		inner JOIN t_room_sale_config config ON a.configId = config.id and
+		inner JOIN t_room_sale_config config ON a.configId =
+		config.id and
 		config.valid = 'T' and a.isBack = 'F' and a.isBack ='F'
-		inner JOIN t_room_sale_config_info b ON config.saleConfigInfoId = b.id and
+		inner JOIN t_room_sale_config_info b ON config.saleConfigInfoId = b.id
+		and
 		b.valid = 'T'
 		<include refid="Base_Query_List" />
 		ORDER by a.id DESC
@@ -128,11 +133,14 @@
 		parameterType="com.mk.ots.roomsale.model.TRoomSale">
 		SELECT
 		b.id, b.saleTypeId as saleType
-		from t_room_sale_config config
-		inner JOIN t_room_sale_config_info b ON config.valid = 'T' and
+		from
+		t_room_sale_config config
+		inner JOIN t_room_sale_config_info b ON
+		config.valid = 'T' and
 		config.saleConfigInfoId = b.id and b.valid = 'T'
 		where 1=1 AND config.saleRoomTypeId = #{roomTypeId}
-		ORDER by config.id DESC
+		ORDER by config.id
+		DESC
 		limit 1;
 	</select>
 
@@ -142,14 +150,25 @@
 		startTime,endTime,roomId,configId,isBack,saleName,saleType,hotelId,settleValue)
 		VALUE
 		(
-		#{roomtypeid}, #{oldroomtypeid},#{roomno}, #{pms}, #{createdate},
-		#{saleprice}, #{costprice}, #{starttime}, #{endtime}, #{roomid}, #{configid},
-		#{isback}, #{salename}, #{saletype}, #{hotelid},#{settlevalue}
+		#{roomtypeid}, #{oldroomtypeid},#{roomno}, #{pms},
+		#{createdate},
+		#{saleprice}, #{costprice}, #{starttime}, #{endtime},
+		#{roomid}, #{configid},
+		#{isback}, #{salename}, #{saletype},
+		#{hotelid},#{settlevalue}
 		)
 	</insert>
 
+	<select id="isRoomSaleExisted" resultType="map" parameterType="java.util.Map">
+		SELECT id
+		FROM t_room_sale
+		WHERE roomTypeId = #{roomtypeid} and oldRoomTypeId = #{oldroomtypeid} and
+		roomId = #{roomid} and hotelId = #{hotelid} and configId = #{configid}
+	</select>
+
 	<delete id="deleteRoomSale" parameterType="Integer">
-		delete from t_room_sale where id = #{id}
+		delete from
+		t_room_sale where id = #{id}
 	</delete>
 
 	<update id="updateRoomSale" parameterType="com.mk.ots.roomsale.model.TRoomSale">
@@ -157,26 +176,31 @@
 		set
 		roomTypeId = #{roomTypeId},
 		oldRoomTypeId = #{oldRoomTypeId},
-		roomNo = #{roomNo},
+		roomNo =
+		#{roomNo},
 		pms = #{pms},
 		createDate = #{createDate},
-		salePrice = #{salePrice},
+		salePrice =
+		#{salePrice},
 		costPrice = #{costPrice},
 		startTime = #{startTime},
 		endTime = #{endTime},
 		roomId = #{roomId},
 		configId = #{configId},
-		isBack = #{isBack},
+		isBack
+		= #{isBack},
 		saleName = #{saleName},
 		saleType = #{saleType}
-		where id = #{id}
+		where id =
+		#{id}
 	</update>
 
 	<select id="queryYesterdayRoomSale" resultMap="BaseResultMap">
 		SELECT
 		<include refid="Base_Column_List" />
 		FROM t_room_sale
-		WHERE createDate > date_add(CURDATE() , interval -1 DAY)
+		WHERE createDate > date_add(CURDATE() , interval -1
+		DAY)
 	</select>
 
 	<select id="queryUnBackRoomSale" resultMap="BaseResultMap">
@@ -196,11 +220,15 @@
 		parameterType="String">
 		SELECT config.roomId as roomid, config.saleRoomTypeId as roomtypeid,
 		config.saleName as salename,
-		info.startTime as starttime, info.endTime as endtime, info.fontColor as
+		info.startTime as starttime, info.endTime
+		as endtime, info.fontColor as
 		namefontcolor,
-		type.fontColor as typefontcolor, type.description as typedesc
-		FROM t_room_sale_config config
-		join t_room_sale_config_info info on config.saleconfiginfoid = info.id
+		type.fontColor as
+		typefontcolor, type.description as typedesc
+		FROM t_room_sale_config
+		config
+		join t_room_sale_config_info info on config.saleconfiginfoid =
+		info.id
 		join t_room_sale_type type on info.saletypeid = type.id
 		where
 		config.valid = 'T' and info.valid = 'T' and type.valid = 'T'
@@ -211,40 +239,53 @@
 
 	<select id="queryRoomPromoInfoByHotel" resultType="map"
 		parameterType="String">
-		SELECT info.saleTypeId as promoid, info.id as promotype, info.salevalue as
+		SELECT info.saleTypeId as promoid, info.id as promotype,
+		info.salevalue as
 		promoprice
 		FROM t_room_sale_config config
-		join t_room_sale_config_info info on config.saleconfiginfoid = info.id
+		join
+		t_room_sale_config_info info on config.saleconfiginfoid = info.id
 		WHERE config.hotelId = #{hotelId} AND config.valid = 'T'
-		GROUP BY promotype
+		GROUP BY
+		promotype
 		ORDER BY promoid
 	</select>
 
 	<select id="queryRoomByHotelAndRoomType" resultType="map"
 		parameterType="map">
-		SELECT info.saletypeid as promoid , info.id as promotype, info.salevalue as
-		promoprice, config.roomTypeid as roomtypeid
+		SELECT info.saletypeid as promoid , info.id as
+		promotype, info.salevalue as
+		promoprice, config.roomTypeid as
+		roomtypeid
 		FROM t_room_sale_config config
-		join t_room_sale_config_info info on config.saleconfiginfoid = info.id
-		WHERE config.hotelId = #{hotelId} and config.saleRoomTypeId =
+		join t_room_sale_config_info
+		info on config.saleconfiginfoid = info.id
+		WHERE config.hotelId =
+		#{hotelId} and config.saleRoomTypeId =
 		#{roomTypeId}
-		and config.valid = 'T'
+		and config.valid =
+		'T'
 	</select>
 
 	<select id="queryRoomPromoInfoByHotelAndPromoType" resultType="map"
 		parameterType="map">
-		SELECT info.id as promotype, info.salevalue as promoprice
+		SELECT info.id as promotype, info.salevalue as
+		promoprice
 		FROM t_room_sale_config config
-		join t_room_sale_config_info info on config.saleconfiginfoid = info.id
-		WHERE config.hotelId = #{hotelId} and info.id = #{promoType}
+		join t_room_sale_config_info
+		info on config.saleconfiginfoid = info.id
+		WHERE config.hotelId =
+		#{hotelId} and info.id = #{promoType}
 		GROUP BY promotype
 	</select>
 
 	<select id="queryRoomPromoInfo" resultType="map" parameterType="String">
 		SELECT info.startTime as starttime, info.endTime as endtime,
 		info.startDate as startdate, info.enddate as enddate
-		FROM t_room_sale_config config
-		join t_room_sale_config_info info on config.saleconfiginfoid = info.id
+		FROM
+		t_room_sale_config config
+		join t_room_sale_config_info info on
+		config.saleconfiginfoid = info.id
         <![CDATA[  where  info.startdate ||' '||info.startTime < date(now())  and info.enddate||' '||info.endTime > date(now()) ]]>
 
 		limit 1
@@ -262,13 +303,20 @@
 	<select id="queryRoomPromoByType" resultType="map"
 		parameterType="String">
 		SELECT
-		info.startTime as starttime, info.endTime as endtime, info.startDate as startdate,
-		info.enddate as enddate, config.roomId as roomid, config.saleRoomTypeId as saleroomtypeid, 
-		config.roomTypeId as roomtypeid, config.saleValue as salevalue, config.saleType as saletype,
-		config.settleValue as settlevalue, config.settleType as settletype, config.id as configid, config.hotelId as hotelid
+		info.startTime as starttime, info.endTime as
+		endtime, info.startDate as startdate,
+		info.enddate as enddate,
+		config.roomId as roomid, config.saleRoomTypeId as saleroomtypeid,
+		config.roomTypeId as roomtypeid, config.saleValue as salevalue,
+		config.saleType as saletype,
+		config.settleValue as settlevalue,
+		config.settleType as settletype, config.id as configid, config.hotelId
+		as hotelid
 		FROM t_room_sale_config config
-		join t_room_sale_config_info info on config.saleconfiginfoid = info.id
-		WHERE config.valid = 'T' and config.saleRoomTypeId = #{roomTypeId}
+		join t_room_sale_config_info
+		info on config.saleconfiginfoid = info.id
+		WHERE config.valid = 'T' and
+		config.saleRoomTypeId = #{roomTypeId}
 	</select>
 
 	<select id="queryRoomSaleByOriginal" resultMap="BaseResultMap"
@@ -276,7 +324,8 @@
 		SELECT
 		<include refid="Base_Column_List" />
 		FROM t_room_sale a
-		where hotelId = #{hotelId} and roomtypeid = #{roomTypeId}
+		where hotelId = #{hotelId} and roomtypeid =
+		#{roomTypeId}
 		order by id desc limit 1
 	</select>
 </mapper>

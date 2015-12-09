@@ -1,7 +1,6 @@
 package com.mk.pms.order.service;
 
 import java.math.BigDecimal;
-import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,7 +36,6 @@ import com.mk.orm.plugin.bean.BizModel;
 import com.mk.orm.plugin.bean.Db;
 import com.mk.ots.annotation.HessianService;
 import com.mk.ots.common.enums.PmsRoomOrderStatusEnum;
-import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.comp.SynOrderConf;
 import com.mk.ots.hotel.bean.EHotel;
@@ -47,7 +45,6 @@ import com.mk.ots.hotel.bean.TRoomType;
 import com.mk.ots.hotel.dao.EHotelDAO;
 import com.mk.ots.hotel.dao.HotelDAO;
 import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.model.TRoomModel;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomService;
 import com.mk.ots.hotel.service.RoomstateService;
@@ -65,8 +62,6 @@ import com.mk.ots.order.service.OrderLogService;
 import com.mk.ots.order.service.OrderServiceImpl;
 import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.ots.pay.service.IPayService;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
-import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.ots.utils.MD5Util;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.bean.PmsCost;
@@ -117,7 +112,9 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 	private RoomSaleMapper roomSaleMapper;
 	@Autowired
 	private TRoomMapper roomMapper;
-
+	@Autowired
+	private PmsShiftService pmsShiftService;
+	
 	@Autowired
 	private IPayService payService;
 	@Autowired
@@ -404,7 +401,7 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 					this.saveHotelRoomStatusTest(uuid, hotelId, customNo, order, 1);
 
 					try {
-						this.shiftRoomForPromo(order, true);
+						pmsShiftService.shiftRoomForPromo(order, true);
 					} catch (Exception ex) {
 						logger.warn(String.format("failed to makeUpForPromo on hotelId:%s; customNo:%s...", hotelId,
 								customNo), ex);
@@ -454,200 +451,6 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 		}
 		PmsOrderServiceImpl.logger.info("OTSMessage::PmsOrderServiceImpl::saveCustomerNo::完成");
 		return data;
-	}
-
-	private boolean isInPromo(Date begindate, Date enddate, Time startTime, Time endTime) {
-		boolean isInPromo = false;
-
-		Integer promostaus = DateUtils.promoStatus(begindate, enddate, startTime, endTime);
-		if (promostaus != null && Constant.PROMOING == promostaus) {
-			isInPromo = true;
-		}
-
-		return isInPromo;
-	}
-
-	private boolean isRoomExisted(List<TRoomModel> rooms, Long roomid) {
-		boolean isExisted = false;
-
-		for (int i = 0; rooms != null && i < rooms.size(); i++) {
-			TRoomModel roomModel = rooms.get(i);
-
-			Long roomModelId = roomModel.getId();
-			if (roomModelId != null && roomModelId == roomid) {
-				isExisted = true;
-				break;
-			}
-		}
-
-		return isExisted;
-	}
-
-	private Room findVCRooms(Long hotelid, Long roomtypeid, Date begindate, Date enddate) throws Exception {
-		Room vcRoom = null;
-
-		try {
-			if (hotelid != null && begindate != null && enddate != null) {
-				String begindateday = defaultFormat.format(begindate);
-				String enddateday = defaultFormat.format(enddate);
-
-				vcRoom = roomstateService.findVCHotelRoom(hotelid, roomtypeid, begindateday, enddateday);
-			} else {
-				logger.warn("illegal parameters passed in findVCRooms...");
-			}
-		} catch (Exception ex) {
-			throw new Exception(String.format("failed to findVCHotelRoom for hotelid:%s; begindate:%s; enddate:%s",
-					hotelid, begindate, enddate), ex);
-		}
-
-		return vcRoom;
-	}
-
-	private void doShiftRoom(String hotelid, Long pmsroomtypeid, Long pmsroomid, PmsRoomOrder pmsRoomOrder)
-			throws Exception {
-		if (logger.isInfoEnabled()) {
-			logger.info(String.format("about to doShiftRoom with pmsroomtypeid:%s; pmsroomid:%s; ", pmsroomtypeid,
-					pmsroomid));
-		}
-
-		List<Map<String, Object>> promoRooms = roomSaleMapper.queryRoomPromoByType(String.valueOf(pmsroomtypeid));
-		if (promoRooms != null && promoRooms.size() > 0) {
-			Integer roomId = (Integer) promoRooms.get(0).get("roomid");
-			Integer saleRoomtypeId = (Integer) promoRooms.get(0).get("saleroomtypeid");
-			Integer roomtypeId = (Integer) promoRooms.get(0).get("roomtypeid");
-
-			if (roomId == null) {
-				List<TRoomModel> models = roomMapper.findList(roomtypeId != null ? roomtypeId.longValue() : 0);
-				Room vcRoom = findVCRooms(Long.valueOf(hotelid), roomtypeId != null ? roomtypeId.longValue() : 0,
-						pmsRoomOrder.getDate("BeginTime"), pmsRoomOrder.getDate("EndTime"));
-				/**
-				 * promo room has been ordered by non-promo pms, supplementary
-				 * room is required
-				 */
-				if (isRoomExisted(models, vcRoom.getRoomid()) && StringUtils.isNotBlank(hotelid) && vcRoom != null
-						&& vcRoom.getRoomid() != null) {
-					if (logger.isInfoEnabled()) {
-						logger.info(String.format("room is available for a shift...roomid:%s; roomtypeid:%s",
-								vcRoom.getRoomid(), roomtypeId));
-					}
-
-					try {
-						/**
-						 * update vacant non-promo room to promo room
-						 */
-						Map<String, Object> updateParameters = new HashMap<>();
-						updateParameters.put("roomid", vcRoom.getRoomid());
-						updateParameters.put("roomtypeid", saleRoomtypeId);
-						roomMapper.updateRoomtypeByRoom(updateParameters);
-
-						/**
-						 * update current promo room to non-promo room
-						 */
-						updateParameters.put("roomid", pmsroomid);
-						updateParameters.put("roomtypeid", roomtypeId);
-						roomMapper.updateRoomtypeByRoom(updateParameters);
-
-						if (logger.isInfoEnabled()) {
-							logger.info(String.format("updateRoomtypeByRoom succeed for hotelid:%s; roomtypeid:%s",
-									hotelid, saleRoomtypeId));
-						}
-					} catch (Exception ex) {
-						throw new Exception(String.format("failed to move room for roomid:%s; roomtypeid:%s",
-								vcRoom.getRoomid(), saleRoomtypeId), ex);
-					}
-				} else {
-					logger.warn(String.format(
-							"tried to make up room for promo roomtypeid:%s, however no available room found...",
-							saleRoomtypeId));
-				}
-			}
-		}
-	}
-
-	private void shiftRoomForPromo(PmsRoomOrder pmsRoomOrder, boolean isChanged) throws Exception {
-		Long oldroomtypeid = pmsRoomOrder.getLong("OldRoomTypeId");
-		Long newroomtypeid = pmsRoomOrder.getLong("RoomTypeId");
-		Long newroomid = pmsRoomOrder.getLong("RoomId");
-		String status = pmsRoomOrder.getStr("Status");
-		String hotelid = String.valueOf(pmsRoomOrder.get("HotelId"));
-
-		boolean isProceed = false;
-		boolean isInPromo = false;
-
-		if (logger.isInfoEnabled()) {
-			logger.info(String.format(
-					"about to shiftRoomForPromo... hotelid:%s; status:%s; oldroomtypeid:%s; newroomtypeid:%s; newroomid:%s; ",
-					hotelid, status, oldroomtypeid, newroomtypeid, newroomid));
-		}
-
-		TRoomSaleConfig newRoomsaleConfig = new TRoomSaleConfig();
-		newRoomsaleConfig.setRoomTypeId(newroomtypeid == null ? 0 : newroomtypeid.intValue());
-		newRoomsaleConfig.setValid("T");
-		newRoomsaleConfig.setTag(0);
-		List<TRoomSaleConfig> newRooms = null;
-
-		try {
-			if (newroomtypeid != null) {
-				newRooms = roomSaleConfigMapper.getRoomSaleByParamsNew(newRoomsaleConfig);
-				if (newRooms != null && newRooms.size() > 0) {
-					newRooms.get(0).getStartDate();
-					newRooms.get(0).getEndDate();
-
-					isInPromo = isInPromo(newRooms.get(0).getStartDate(), newRooms.get(0).getEndDate(),
-							newRooms.get(0).getStartTime(), newRooms.get(0).getEndTime());
-				}
-			}
-		} catch (Exception ex) {
-			logger.warn("failed to invoke getRoomSaleByParamsNew or isInPromo...", ex);
-		}
-
-		/**
-		 * process this room shift only during promo period
-		 */
-		if (isInPromo && "RX".equals(status)) {
-			isProceed = true;
-		}
-
-		if (!isProceed) {
-			return;
-		}
-
-		/**
-		 * there is room change going on, checks out for promo if a room shift
-		 * is necessary
-		 */
-		if (isChanged) {
-			if (logger.isInfoEnabled()) {
-				logger.info("there is room change detected...");
-			}
-			TRoomSaleConfig oldRoomsaleConfig = new TRoomSaleConfig();
-			oldRoomsaleConfig.setRoomTypeId(oldroomtypeid == null ? 0 : oldroomtypeid.intValue());
-			oldRoomsaleConfig.setValid("T");
-			oldRoomsaleConfig.setTag(0);
-
-			List<TRoomSaleConfig> oldRooms = roomSaleConfigMapper.getRoomSaleByParamsNew(oldRoomsaleConfig);
-			boolean isOldPromo = oldRooms != null ? oldRooms.size() > 0 : false;
-			boolean isNewPromo = newRooms != null ? newRooms.size() > 0 : false;
-
-			/**
-			 * shift room from non-promo rooms to promo news, shift required
-			 */
-			if (!isOldPromo && isNewPromo) {
-				doShiftRoom(hotelid, newroomtypeid, newroomid, pmsRoomOrder);
-			}
-			/**
-			 * shift room from promo rooms to promo rooms, while different promo
-			 * is detected, shift required
-			 */
-			else if (!isOldPromo && !isNewPromo && (newroomtypeid != oldroomtypeid)) {
-				doShiftRoom(hotelid, newroomtypeid, newroomid, pmsRoomOrder);
-			}
-		} else {
-			if (logger.isInfoEnabled()) {
-				logger.info("no room change detected...");
-			}
-			doShiftRoom(hotelid, newroomtypeid, newroomid, pmsRoomOrder);
-		}
 	}
 
 	private PmsRoomOrder updatePmsRoomOrder(EHotel hotel, PmsRoomOrder newOrder, Map customNo, Long hotelId)

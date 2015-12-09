@@ -37,4 +37,6 @@ public interface RoomSaleMapper {
 	public TRoomSale queryRoomSaleByOriginal(TRoomSale bean);
 
 	public void saveRoomSale(Map<String, Object> map);
+	
+	public List<Map<String, Object>> isRoomSaleExisted(Map<String, Object> parameters);	
 }
