@@ -347,7 +347,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			if (logger.isInfoEnabled()) {
 				logger.info(
 						String.format("about to findroomprice with hotelid:%s; roomtypeid:%s; begintime:%s; endtime:%s",
-								pmsRoomOrder.getDate("BeginTime"), pmsRoomOrder.getDate("EndTime")));
+								hotelid, pmsroomtypeid, promoRoom.get("starttime"), promoRoom.get("endtime")));
 			}
 
 			Roomtype roomtype = null;
@@ -649,6 +649,11 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 
 		BigDecimal saleValue = calaValue(basePrice, saleValueOrg, saleType);
 		BigDecimal settleValue = calaValue(basePrice, settleValueOrg, settleType);
+
+		if (logger.isInfoEnabled()) {
+			logger.info(
+					String.format("about to saveRoomSale with saleValue:%s; settleValue:%s", saleValue, settleValue));
+		}
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
