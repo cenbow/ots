@@ -163,7 +163,7 @@
 		SELECT id
 		FROM t_room_sale
 		WHERE roomTypeId = #{roomtypeid} and oldRoomTypeId = #{oldroomtypeid} and
-		roomId = #{roomid} and hotelId = #{hotelid} and configId = #{configid}
+		roomId = #{roomid} and hotelId = #{hotelid} and configId = #{configid} and isback = 'F'
 	</select>
 
 	<delete id="deleteRoomSale" parameterType="Integer">
