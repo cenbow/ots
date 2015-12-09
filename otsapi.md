@@ -3605,9 +3605,122 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 	errmsg:,//错误信息
 }
 
+```
 
+
+
+##首页
+### 首页今夜特价房
+***
+**业务说明：**
+根据 citycode 拉取特价城市的特价活动信息
+
+
+**接口url：**
+>http://ip:port/ots/homepage/promolist
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿cityid|城市编码|是|
+| userlatitude |用户坐标(纬度)|是|
+| userlongitude |用户坐标(经度)|是|
+|pillowlongitude 	| 查询坐标(经度) | 否 |
+|pillowlatitude 	| 查询坐标(纬度) | 否 | 
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+
+> API返回json数据示例：
+
+```js
+{
+	success:true,
+	errcode:,//错误码
+	errmsg:,//错误信息
+}
 
 ```
+
+
+### 首页快捷入口
+***
+**业务说明：**
+根据 citycode 获取快捷入口信息
+
+
+**接口url：**
+>http://ip:port/ots/homepage/shortcut
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿ cityid|城市编码|是|
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+
+> API返回json数据示例：
+
+```js
+{
+    "shortcut": [
+        {
+            "id": 1,
+            "imgurl": "http://7xip11.com2.z0.glb.qiniucdn.com/frontpage_btn_jinyetejia.png",
+            "name": "一元秒杀",
+            "description": "一元秒杀",
+            "url": "http://www.baidu.com",
+            "detailid": 8,
+            "querytype": 800,
+            "createtime": 1443276228000
+
+        },
+        {
+            "id": 2,
+             "imgurl": "http://7xip11.com2.z0.glb.qiniucdn.com/frontpage_btn_jinyetejia.png",
+            "name": "评价返现",
+            "description": "评价返现",
+            "url": "http://www.baidu.com",
+            "detailid": 8,
+            "querytype": 801,
+            "createtime": 1443276228000
+
+        },
+        {
+           	"id": 3,
+             "imgurl": "http://7xip11.com2.z0.glb.qiniucdn.com/frontpage_btn_jinyetejia.png",
+            "name": "一省到底",
+            "description": "一省到底",
+            "url": "http://www.baidu.com",
+            "detailid": 8,
+            "querytype": 802,
+            "createtime": 1443276228000
+        },
+        {
+            "id": 4,
+             "imgurl": "http://7xip11.com2.z0.glb.qiniucdn.com/frontpage_btn_jinyetejia.png",
+            "name": "车站酒店",
+            "description": "车站酒店",
+            "url": "http://www.baidu.com",
+            "detailid": 8,
+            "querytype": 803,
+            "createtime": 1443276228000
+        }
+    ],
+    "errmsg": "",
+    "errcode": 0
+}
+
+```
+### 首页主题房
+### 首页特色推荐
 </article>
 
 <link href="asset/css/zTreeStyle.css" media="all" rel="stylesheet" type="text/css"/>
