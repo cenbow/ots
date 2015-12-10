@@ -34,6 +34,78 @@ public class RecommendController {
     private RecommendService recommendService;
 
 
+
+    private List<RecommendList> genGlobalRecommendLists(String position, String platform, String cityid, String callmethod){
+        Integer platformValue = null;
+
+
+
+            if (StringUtils.isNotBlank(platform)) {
+                platformValue = Integer.valueOf(platform);
+            }else if (StringUtils.isNotBlank(callmethod)){
+                if (Constant.WEIXIN_CALLMETHOD.equals(callmethod)){
+                    platformValue = Constant.WEIXIN_PLATFORM;
+                }else if (Constant.ANDROID_CALLMETHOD.equals(callmethod)){
+                    platformValue = Constant.ANDROID_PLATFORM;
+                }else if (Constant.IOS_CALLMETHOD.equals(callmethod)){
+                    platformValue = Constant.IOS_PLATFORM;
+                }
+            }
+            List<RecommendList> banners = new ArrayList<>();
+
+            List<TRecommenditem> list;
+
+            HashMap<Integer, TRecommenditem> recommenditemHashMap = new HashMap<>();
+
+
+            Integer cityId = StringUtils.isNoneBlank(cityid) ? Integer.valueOf(cityid) : Constant.RECOMMEND_GLOBAL;
+
+            List<TRecommendItemArea> cityItemAreaList = recommendService.selectItemAreaByCityId(cityId);
+
+            list = recommendService.queryRecommendItem(position, platformValue);
+
+            for (TRecommenditem recommenditem : list) {
+                recommenditemHashMap.put(recommenditem.getId().intValue(), recommenditem);
+            }
+
+            int city_recommend_count = 0;
+
+
+            if (StringUtils.isNotBlank(cityid) && cityItemAreaList != null) {
+
+                for (int i = 0; i < cityItemAreaList.size(); i++) {
+                    if (cityItemAreaList.get(i) != null && city_recommend_count <= Constant.CITY_RECOMMEND_ITEM_LIMT) {
+                        TRecommenditem tRecommendItem = recommenditemHashMap.get(cityItemAreaList.get(i).getItemid());
+
+
+                        if (tRecommendItem != null) {
+
+                            if (Constant.WEIXIN_CALLMETHOD.equals(callmethod) && tRecommendItem.getViewtype() == Constant.TONIGHT_PROMO_VIEWTYPE) {
+                                continue;
+                            }
+
+                            if (city_recommend_count <= Constant.CITY_RECOMMEND_ITEM_LIMT) {
+                                RecommendList recommendList = new RecommendList();
+                                recommendList.setName(tRecommendItem.getTitle());
+                                recommendList.setDescription(tRecommendItem.getDescription());
+                                recommendList.setImgurl(tRecommendItem.getImageurl());
+                                recommendList.setUrl(tRecommendItem.getLink());
+                                recommendList.setDetailid(tRecommendItem.getDetailid());
+                                recommendList.setQuerytype(tRecommendItem.getViewtype());
+                                recommendList.setCreatetime(tRecommendItem.getCreatetime());
+
+                                banners.add(recommendList);
+                                city_recommend_count++;
+                            }
+
+
+                        }
+                    }
+
+                }
+            }
+    }
+
     /**
      * 根据位置查询banner或者列表
      * http://127.0.0.1:8080/ots/recommend/query

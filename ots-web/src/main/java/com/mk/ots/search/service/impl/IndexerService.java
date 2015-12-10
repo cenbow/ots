@@ -58,7 +58,7 @@ public class IndexerService {
                             hotelService.readonlyInitPmsHotel(Constant.STR_CITYID_SHANGHAI, hotelIdArr.get(j).toString());
                             System.out.println(String.format("%d . init hotel:%d end ====", j, hotelIdArr.get(j)));
                             try {
-                                Thread.currentThread().sleep(200);
+                                Thread.currentThread().sleep(1000);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
