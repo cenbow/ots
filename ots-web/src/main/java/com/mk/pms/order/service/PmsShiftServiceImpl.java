@@ -283,6 +283,7 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 
 				if (promoList != null && promoList.size() > 0) {
 					newroomtypeid = (Long) promoList.get(0).get("roomtypeid");
+					
 				}
 			}
 			if (newroomtypeid != null) {
