@@ -19,6 +19,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 import com.mk.ots.common.enums.*;
+import com.mk.ots.wallet.service.impl.TBackMoneyRuleServiceImpl;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
@@ -69,6 +70,8 @@ public class OrderUtil {
 	OrderServiceImpl orderService;
     @Autowired
     private IWalletCashflowService walletCashflowService;
+	@Autowired
+	private TBackMoneyRuleServiceImpl tBackMoneyRuleService;
 	
 	public static final int BORDERLINEHOUR = 6;
 
@@ -167,7 +170,8 @@ public class OrderUtil {
 		jsonObj.put("promotype", StringUtils.defaultIfEmpty(returnOrder.getPromoType(), PromoTypeEnum.OTHER.getCode().toString()));
 		jsonObj.put("isonpromo", StringUtils.defaultIfEmpty(returnOrder.getPromoType(), PromoTypeEnum.OTHER.getCode().toString()));
 		if(PromoTypeEnum.TJ.getCode().equals(returnOrder.getPromoType())){
-			jsonObj.put("paytip", String.format("预付入住享%s元红包", Constant.TJ_ORDER_RETURN_CASH));
+			BigDecimal returnWalletCashBigDecimal = tBackMoneyRuleService.getBackMoneyByOrder(returnOrder);
+			jsonObj.put("paytip", String.format("预付入住享%s元红包", returnWalletCashBigDecimal));
 		}
 		jsonObj.put("roomticket", StringUtils.defaultIfEmpty(returnOrder.getRoomTicket(),""));
 		jsonObj.put("orderid", returnOrder.getId());
@@ -776,10 +780,11 @@ public class OrderUtil {
 		// 凌晨23:56-2:00下单，可当天办理入住，提示“您最晚可在xxxx年xx月xx日12：00办理退房哦”
 		StringBuffer usermessage = new StringBuffer();
 		if(PromoTypeEnum.TJ.getCode().equals(returnOrder.getPromoType())){
+			BigDecimal returnWalletCashBigDecimal = tBackMoneyRuleService.getBackMoneyByOrder(returnOrder);
 			usermessage.append("该房间正在参与眯客今夜特价活动，预付入住享受低价，规则如下：").append("\n");
-			usermessage.append(String.format("1.预付比到付多享受%s元红包优惠；", Constant.TJ_ORDER_RETURN_CASH)).append("\n");
-			usermessage.append(String.format("2.%s元红包使用规则同评价返现；", Constant.TJ_ORDER_RETURN_CASH)).append("\n");
-			usermessage.append(String.format("3.预付确认入住即奖励%s元红包；", Constant.TJ_ORDER_RETURN_CASH)).append("\n");
+			usermessage.append(String.format("1.预付比到付多享受%s元红包优惠；", returnWalletCashBigDecimal)).append("\n");
+			usermessage.append(String.format("2.%s元红包使用规则同评价返现；", returnWalletCashBigDecimal)).append("\n");
+			usermessage.append(String.format("3.预付确认入住即奖励%s元红包；", returnWalletCashBigDecimal)).append("\n");
 			usermessage.append("4.使用账户纯余额入住不再奖励；").append("\n");
 			usermessage.append("\n");
 			usermessage.append("温馨提示：").append("\n");

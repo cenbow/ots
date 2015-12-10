@@ -72,6 +72,7 @@ import com.mk.ots.ticket.service.ITicketService;
 import com.mk.ots.ticket.service.parse.ITicketParse;
 import com.mk.ots.wallet.service.IWalletCashflowService;
 import com.mk.ots.wallet.service.IWalletService;
+import com.mk.ots.wallet.service.impl.TBackMoneyRuleServiceImpl;
 import com.mk.ots.web.ServiceOutput;
 import com.mk.ots.wordcenser.job.TextFilterService;
 import com.mk.pms.bean.PmsCheckinUser;
@@ -202,6 +203,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     TextFilterService textFilterService;
+    @Autowired
+    TBackMoneyRuleServiceImpl tBackMoneyRuleService;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
 
@@ -2033,8 +2036,12 @@ public class OrderServiceImpl implements OrderService {
           if (tempOrderStatus != otaorder.getOrderStatus()) {
               otaorder.saveOrUpdate();
               /**************************特价订单返现***************************/
-              if(PromoTypeEnum.TJ.getCode().equals(otaorder.getPromoType()) && OtaOrderStatusEnum.CheckIn.getId() == otaorder.getOrderStatus()){
-               walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), Constant.TJ_ORDER_RETURN_CASH);
+              if( OtaOrderStatusEnum.CheckIn.getId() == otaorder.getOrderStatus()){
+                  BigDecimal returnWallCash =  tBackMoneyRuleService.getBackMoneyByOrder(otaorder);
+                  if(returnWallCash != null && returnWallCash.compareTo(new BigDecimal("0")) != 0){
+                      walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), returnWallCash);
+                  }
+
               }
           }
           orderStatusBuf.append(",更新后OTA订单状态:" + otaorder.getOrderStatus());
@@ -2196,8 +2203,8 @@ public class OrderServiceImpl implements OrderService {
         checkPayByPromoType(order, order.getPromoType());
         Long cashBigDecimal = 0L;
         if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
-            cashBigDecimal = Constant.TJ_ORDER_RETURN_CASH.longValue();
-            order.setCashBack(Constant.TJ_ORDER_RETURN_CASH);
+            cashBigDecimal = tBackMoneyRuleService.getBackMoneyByOrder(order).longValue();
+            order.setCashBack(new BigDecimal(cashBigDecimal));
         }else{
             Map<String, Object> cash = cashBackService.getCashBackByRoomtypeId(roomTypeId, DateUtils.formatDate(order.getBeginTime()),
                     DateUtils.formatDate(order.getEndTime()));

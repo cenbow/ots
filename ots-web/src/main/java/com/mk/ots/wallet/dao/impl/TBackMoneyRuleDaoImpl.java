@@ -18,8 +18,8 @@ import java.util.List;
 public class TBackMoneyRuleDaoImpl extends MyBatisDaoImpl<TBackMoneyRule, Long> implements ITBackMoneyRuleDao {
 
     public List<Bean>  getBackMoneyByHotelCityCode(String cityCode,Integer  type,Integer  bussinessType){
-        String sql = " select  *  from  t_backmoney_rule  where type = ? and hotel_city_code =?  and  status =1 and  bussiness_type = ?  order  by  id  desc  limit 1 " +
-                " union all  select  *  from  t_backmoney_rule  where hotel_city_code =-1  and  status =1 and type = ?  and bussiness_type = ? order  by  id  desc  limit 1 ";
+        String sql = " (select  *  from  t_backmoney_rule  where type = ? and hotel_city_code =?  and  status =1 and  bussiness_type = ? order by id desc limit 1) " +
+                " union all (select  *  from  t_backmoney_rule  where hotel_city_code =-1  and  status =1 and type = ?  and bussiness_type = ?  order by id desc  limit 1) ";
         List<Bean> bedList = Db.find(sql,type, cityCode,bussinessType,type,bussinessType);
         return  bedList;
     }

@@ -35,7 +35,7 @@ public class TBackMoneyRuleServiceImpl implements ITBackMoneyRuleService {
     private HotelDAO hotelDAO = null;
 
 
-    public BigDecimal   getBackMoneyByOrder(OtaOrder order) {
+    public BigDecimal getBackMoneyByOrder(OtaOrder order) {
         if (null == order) {
             throw MyErrorEnum.errorParm.getMyException("订单不存在.");
         }
@@ -45,9 +45,8 @@ public class TBackMoneyRuleServiceImpl implements ITBackMoneyRuleService {
         if (null == beanHotel) {
             throw MyErrorEnum.errorParm.getMyException("酒店不存在.");
         }
-
-        String cityCode = beanHotel.getStr("citycode");
-        if (StringUtils.isEmpty(cityCode)) {
+        Integer cityCode = beanHotel.getInt("citycode");
+        if (cityCode == null) {
             logger.info("酒店对应的城市为空");
             return new BigDecimal(0);
         }
@@ -56,17 +55,15 @@ public class TBackMoneyRuleServiceImpl implements ITBackMoneyRuleService {
         if(!StringUtils.isEmpty(promotyStr)){
             bussinessType = Integer.parseInt(promotyStr);
         }
-        List<Bean> lsit =    tBackMoneyRuleDao.getBackMoneyByHotelCityCode(cityCode, BackMoneyTypeEnum.type_pay.getId(),bussinessType);
+        List<Bean> lsit =  tBackMoneyRuleDao.getBackMoneyByHotelCityCode(cityCode.toString(), BackMoneyTypeEnum.type_pay.getId(),bussinessType);
         if(null==lsit||lsit.size()==0){
             logger.info("酒店对应的城市未配置返现");
             return new BigDecimal(0);
         }
-        String  backMoneyPerStr = lsit.get(0).getStr("per_money");
-        if(StringUtils.isEmpty(backMoneyPerStr)){
+        BigDecimal backMoneyPer = lsit.get(0).getBigDecimal("per_money");
+        if(backMoneyPer == null){
             return new BigDecimal(0);
         }
-
-        BigDecimal  backMoenyBigD = BigDecimal.valueOf(Double.parseDouble(backMoneyPerStr));
-       return  backMoenyBigD;
+       return  backMoneyPer;
     }
 }
