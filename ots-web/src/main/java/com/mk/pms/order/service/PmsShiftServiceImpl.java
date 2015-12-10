@@ -72,15 +72,29 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 		return roomModel;
 	}
 
-	private Room findVCRooms(Long hotelid, Long roomtypeid, Date begindate, Date enddate) throws Exception {
-		Room vcRoom = null;
+	private List<Room> findVCRooms(Long hotelid, Long roomtypeid, Date begindate, Date enddate) throws Exception {
+		List<Room> vcRooms = null;
 
 		try {
 			if (hotelid != null && begindate != null && enddate != null) {
-				String begindateday = defaultFormat.format(begindate);
-				String enddateday = defaultFormat.format(enddate);
+				RoomstateQuerylistReqEntity reqEntity = new RoomstateQuerylistReqEntity();
+				reqEntity.setCallversion("3.2");
+				reqEntity.setCallentry(2);
+				reqEntity.setHotelid(hotelid);
+				reqEntity.setRoomtypeid(roomtypeid);
+				reqEntity.setStartdateday(DateUtils.formatDateTime(begindate, DateUtils.FORMATSHORTDATETIME));
+				reqEntity.setEnddateday(DateUtils.formatDateTime(enddate, DateUtils.FORMATSHORTDATETIME));
+				reqEntity.setIsShowAllRoom("T");
 
-				vcRoom = roomstateService.findVCHotelRoom(hotelid, roomtypeid, begindateday, enddateday);
+				List<RoomstateQuerylistRespEntity> response = roomstateService.findHotelRoomState("", reqEntity);
+				if (response != null && response.size() > 0 && response.get(0).getRoomtype() != null
+						&& response.get(0).getRoomtype().size() > 0) {
+					List<Room> rooms = response.get(0).getRoomtype().get(0).getRooms();
+					vcRooms = rooms;
+				} else {
+					logger.warn(String.format("no available rooms found for hotelid:%s; roomtypeid:%s", hotelid,
+							roomtypeid));
+				}
 			} else {
 				logger.warn("illegal parameters passed in findVCRooms...");
 			}
@@ -89,7 +103,7 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 					hotelid, begindate, enddate), ex);
 		}
 
-		return vcRoom;
+		return vcRooms;
 	}
 
 	private void doShiftRoom(String hotelid, Long pmsroomtypeid, Long pmsroomid, PmsRoomOrder pmsRoomOrder)
@@ -129,8 +143,14 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 
 			if (roomId == null) {
 				List<TRoomModel> models = roomMapper.findList(roomtypeId != null ? roomtypeId.longValue() : 0);
-				Room vcRoom = findVCRooms(Long.valueOf(hotelid), roomtypeId != null ? roomtypeId.longValue() : 0,
+				List<Room> vcRooms = findVCRooms(Long.valueOf(hotelid), roomtypeId != null ? roomtypeId.longValue() : 0,
 						(Date) pmsRoomOrder.get("BeginTime"), (Date) pmsRoomOrder.get("EndTime"));
+				Room vcRoom = null;
+				if (vcRooms != null && vcRooms.size() > 0) {
+					vcRoom = vcRooms.get(0);
+				} else {
+					return;
+				}
 
 				TRoomModel roomModel = isRoomExisted(models, vcRoom.getRoomid());
 
