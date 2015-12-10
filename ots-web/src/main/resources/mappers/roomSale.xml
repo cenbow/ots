@@ -313,7 +313,7 @@
 		config.saleType as saletype,
 		config.settleValue as settlevalue,
 		config.settleType as settletype, config.id as configid,
-		config.hotelId, confg.num as num
+		config.hotelId, config.num as num
 		FROM t_room_sale_config
 		config
 		join t_room_sale_config_info
