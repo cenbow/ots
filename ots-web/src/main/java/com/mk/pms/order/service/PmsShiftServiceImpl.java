@@ -122,7 +122,8 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 			Roomtype roomtype = null;
 			try {
 				roomtype = findRoomSalePrice(hotelid, roomtypeId != null ? roomtypeId.longValue() : 0L,
-						(Date) promoRoom.get("starttime"), (Date) promoRoom.get("endtime"));
+						DateUtils.getDateFromString(pmsRoomOrder.getStr("BeginTime")),
+						DateUtils.getDateFromString(pmsRoomOrder.getStr("EndTime")));
 			} catch (Exception ex) {
 				logger.warn("failed to findRoomSalePrice, quit shifting room...", ex);
 				return;
