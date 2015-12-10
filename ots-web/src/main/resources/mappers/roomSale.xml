@@ -314,7 +314,6 @@
 		config.settleValue as settlevalue,
 		config.settleType as settletype, config.id as configid,
 		config.hotelId, confg.num as num
-		as hotelid
 		FROM t_room_sale_config
 		config
 		join t_room_sale_config_info
