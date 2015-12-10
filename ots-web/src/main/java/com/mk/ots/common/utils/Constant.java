@@ -224,8 +224,9 @@ public class Constant {
 
 	public static final Integer WEIXIN_PLATFORM = 4;
 
-	public static final Integer CITY_RECOMMEND_ITEM_LIMT = 4;
-	public static final Integer RECOMMEND_ITEM_LIMT = 7;
+	public static final Integer CITY_RECOMMEND_ITEM_LIMIT = 4;
+	public static final Integer CITY_RECOMMEND_HOMEPAGE_SHORTCUT_LIMIT = 3;
+	public static final Integer RECOMMEND_ITEM_LIMIT = 7;
 
 	public static final Integer RECOMMEND_GLOBAL = -1;
 

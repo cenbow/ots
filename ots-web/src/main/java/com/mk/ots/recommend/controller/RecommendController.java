@@ -60,10 +60,10 @@ public class RecommendController {
 
 
             if (position.equals("921A") || position.equals("921C")) {
-                cityLimit = Constant.CITY_RECOMMEND_ITEM_LIMT;
+                cityLimit = Constant.CITY_RECOMMEND_ITEM_LIMIT;
                 cityBanners = genCityRecommendLists(recommenditemHashMap, cityid, callmethod, cityLimit);
 
-                globleLimit = Constant.RECOMMEND_ITEM_LIMT - cityBanners.size();
+                globleLimit = Constant.RECOMMEND_ITEM_LIMIT - cityBanners.size();
             } else {
                 cityBanners = genCityRecommendLists(recommenditemHashMap, cityid, callmethod, cityLimit);
             }
@@ -164,7 +164,7 @@ public class RecommendController {
         Integer platformValue = getplatformValue(callmethod, platform);
 
         try {
-            Integer cityLimit =  Constant.CITY_RECOMMEND_ITEM_LIMT;
+            Integer cityLimit =  Constant.CITY_RECOMMEND_ITEM_LIMIT;
             Integer globleLimit = null;
             List<RecommendList> banners = new ArrayList<>();
             List<RecommendList> cityBanners;
@@ -172,7 +172,7 @@ public class RecommendController {
 
             cityBanners = genCityRecommendLists(recommenditemHashMap, cityid, callmethod, cityLimit);
 
-            globleLimit = Constant.RECOMMEND_ITEM_LIMT - cityBanners.size();
+            globleLimit = Constant.RECOMMEND_ITEM_LIMIT - cityBanners.size();
 
             banners.addAll(cityBanners);
             List<RecommendList> globleBanners = genGlobleRecommendLists(recommenditemHashMap, cityid, callmethod, globleLimit);
@@ -206,19 +206,22 @@ public class RecommendController {
         Integer platformValue = getplatformValue(callmethod, platform);
 
         try {
-            Integer cityLimit =  Constant.CITY_RECOMMEND_ITEM_LIMT;
+            Integer cityLimit =  Constant.CITY_RECOMMEND_HOMEPAGE_SHORTCUT_LIMIT;
             Integer globleLimit = null;
             List<RecommendList> banners = new ArrayList<>();
             List<RecommendList> cityBanners;
             HashMap<Integer, TRecommenditem> recommenditemHashMap = genRecommenditemHashMap(position, platformValue);
 
+
+            if (StringUtils.isBlank(cityid)){
+                cityid = Constant.STR_CITYID_SHANGHAI;
+            }
+
             cityBanners = genCityRecommendLists(recommenditemHashMap, cityid, callmethod, cityLimit);
 
-            globleLimit = Constant.RECOMMEND_ITEM_LIMT - cityBanners.size();
-
             banners.addAll(cityBanners);
-            List<RecommendList> globleBanners = genGlobleRecommendLists(recommenditemHashMap, cityid, callmethod, globleLimit);
-            banners.addAll(globleBanners);
+//            List<RecommendList> globleBanners = genGlobleRecommendLists(recommenditemHashMap, cityid, callmethod, globleLimit);
+//            banners.addAll(globleBanners);
 
             rtnMap.put("shortcut", banners);
             rtnMap.put("success", true);
