@@ -274,4 +274,5 @@ public class Constant {
 
 	public static final String HOTEL_HIGHLIGHT_SHOWS_IDS ="44";
 	public static final String RECOMMEND_LOADDING_POSITION = "APP-LOADING";
+	public static final String RECOMMEND_HOMEPAGE_SHORTCUT_POSITION = "HOMEPAGE-SHORTCUT";
 }

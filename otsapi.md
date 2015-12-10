@@ -3654,7 +3654,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 
 
 **接口url：**
->http://ip:port/ots/homepage/shortcut
+>http://ip:port/ots/recommend/shortcut
 
 **请求参数：**
 

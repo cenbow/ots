@@ -151,11 +151,10 @@ public class RecommendController {
 
 
     /**
-     * 根据位置查询banner或者列表
-     * http://127.0.0.1:8080/ots/recommend/query
      *
-     * @param position
-     * @return
+     * App 首屏推荐
+     *
+     *
      */
     @RequestMapping("/queryloading")
     public ResponseEntity<Map<String, Object>> queryloading( String platform, String cityid, String callmethod) {
@@ -187,7 +186,49 @@ public class RecommendController {
             rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
             rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
             rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
-            logger.error("【/recommend/query】 is error: {} ", e.getMessage());
+            logger.error("【/recommend/queryloading】 is error: {} ", e.getMessage());
+        }
+        return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+    }
+
+
+    /**
+     *
+     * App 首页快捷入口
+     *
+     *
+     */
+    @RequestMapping("/shortcut")
+    public ResponseEntity<Map<String, Object>> shortCut( String platform, String cityid, String callmethod) {
+        Map<String, Object> rtnMap = Maps.newHashMap();
+        String position = Constant.RECOMMEND_HOMEPAGE_SHORTCUT_POSITION;
+
+        Integer platformValue = getplatformValue(callmethod, platform);
+
+        try {
+            Integer cityLimit =  Constant.CITY_RECOMMEND_ITEM_LIMT;
+            Integer globleLimit = null;
+            List<RecommendList> banners = new ArrayList<>();
+            List<RecommendList> cityBanners;
+            HashMap<Integer, TRecommenditem> recommenditemHashMap = genRecommenditemHashMap(position, platformValue);
+
+            cityBanners = genCityRecommendLists(recommenditemHashMap, cityid, callmethod, cityLimit);
+
+            globleLimit = Constant.RECOMMEND_ITEM_LIMT - cityBanners.size();
+
+            banners.addAll(cityBanners);
+            List<RecommendList> globleBanners = genGlobleRecommendLists(recommenditemHashMap, cityid, callmethod, globleLimit);
+            banners.addAll(globleBanners);
+
+            rtnMap.put("shortcut", banners);
+            rtnMap.put("success", true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+            rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+            rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
+            logger.error("【/recommend/shortcut】 is error: {} ", e.getMessage());
         }
         return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
     }
