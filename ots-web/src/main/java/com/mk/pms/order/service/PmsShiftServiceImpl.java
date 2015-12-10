@@ -77,6 +77,15 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 
 		try {
 			if (hotelid != null && begindate != null && enddate != null) {
+				String startdateday = DateUtils.formatDateTime(begindate, DateUtils.FORMATSHORTDATETIME);
+				String enddateday = DateUtils.formatDateTime(enddate, DateUtils.FORMATSHORTDATETIME);
+
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format(
+							"about to findVCRooms for hotelid:%s; roomtypeid:%s; startdateday:%s; enddateday:%s",
+							hotelid, roomtypeid, startdateday, enddateday));
+				}
+
 				RoomstateQuerylistReqEntity reqEntity = new RoomstateQuerylistReqEntity();
 				reqEntity.setCallversion("3.2");
 				reqEntity.setCallentry(2);
@@ -127,9 +136,10 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 			Integer roomtypeId = (Integer) promoRoom.get("roomtypeid");
 
 			if (logger.isInfoEnabled()) {
-				logger.info(
-						String.format("about to findroomprice with hotelid:%s; roomtypeid:%s; begintime:%s; endtime:%s",
-								hotelid, pmsroomtypeid, pmsRoomOrder.get("BeginTime"), pmsRoomOrder.get("EndTime")));
+				logger.info(String.format(
+						"about to findroomprice with hotelid:%s; pmsroomtypeid:%s; roomtypeid:%s begintime:%s; endtime:%s",
+						hotelid, pmsroomtypeid, roomtypeId, pmsRoomOrder.get("BeginTime"),
+						pmsRoomOrder.get("EndTime")));
 			}
 
 			Roomtype roomtype = null;
@@ -147,7 +157,7 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 						(Date) pmsRoomOrder.get("BeginTime"), (Date) pmsRoomOrder.get("EndTime"));
 				Room vcRoom = null;
 				if (vcRooms != null && vcRooms.size() > 0) {
-					vcRoom = vcRooms.get(0);
+					vcRoom = vcRooms.get(vcRooms.size() - 1);
 				} else {
 					return;
 				}
@@ -155,8 +165,9 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 				TRoomModel roomModel = isRoomExisted(models, vcRoom.getRoomid());
 
 				if (logger.isInfoEnabled()) {
-					logger.info(String.format("vcroom:%s; roomModel:%s; roomstatus:%s", vcRoom == null,
-							roomModel == null, vcRoom != null ? vcRoom.getRoomstatus() : ""));
+					logger.info(String.format("vcroom:%s; roomModel:%s; roomstatus:%s; vcroomid:%s", vcRoom == null,
+							roomModel == null, vcRoom != null ? vcRoom.getRoomstatus() : "",
+							vcRoom != null ? vcRoom.getRoomid() : ""));
 				}
 
 				/**
