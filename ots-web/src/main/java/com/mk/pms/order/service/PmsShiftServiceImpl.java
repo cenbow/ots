@@ -42,6 +42,8 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 	private RoomSaleConfigMapper roomSaleConfigMapper;
 	@Autowired
 	private TRoomMapper roomMapper;
+	@Autowired
+	private PmsShiftHelperService pmsShiftHelperService;
 
 	private final SimpleDateFormat defaultFormat = new SimpleDateFormat("yyyyMMdd");
 
@@ -181,6 +183,15 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 								vcRoom.getRoomid(), roomtypeId));
 					}
 
+					/**
+					 * double check isFromOta
+					 */
+					if (StringUtils.isNotBlank(pmsRoomOrder.getStr("PmsRoomOrderNo"))
+							&& !pmsShiftHelperService.isOtaOrder(pmsRoomOrder.getStr("PmsRoomOrderNo"))) {
+						logger.info("double checked, it is from ota, quit...");
+						return;
+					}
+
 					try {
 						/**
 						 * update vacant non-promo room to promo room
@@ -296,23 +307,7 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 				}
 			}
 
-			if (StringUtils.isNotBlank(pmsRoomOrderNo)) {
-				/**
-				 * checks if this order comes from ota
-				 */
-				Map<String, Object> orderParameters = new HashMap<String, Object>();
-				orderParameters.put("pmsroomorderno", pmsRoomOrderNo);
-
-				List<Map<String, Object>> orderResponse = roomMapper.selectOtaRoomOrder(orderParameters);
-				if (logger.isInfoEnabled()) {
-					logger.info(String.format("succeed in selectOtaRoomOrder with pmsroomorderno:%s; orderResponse:%s",
-							pmsRoomOrderNo, orderResponse != null ? orderResponse.size() : 0));
-				}
-
-				if (orderResponse != null && orderResponse.size() > 0) {
-					isNotFromOta = false;
-				}
-			}
+			isNotFromOta = pmsShiftHelperService.isOtaOrder(pmsRoomOrderNo);
 		} catch (Exception ex) {
 			logger.warn("failed to invoke getRoomSaleByParamsNew or isInPromo...", ex);
 		}
