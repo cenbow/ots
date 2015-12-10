@@ -280,9 +280,6 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 		 * is necessary
 		 */
 		if (isChanged) {
-			if (logger.isInfoEnabled()) {
-				logger.info("there is room change detected...");
-			}
 			TRoomSaleConfig oldRoomsaleConfig = new TRoomSaleConfig();
 			oldRoomsaleConfig.setRoomTypeId(oldroomtypeid == null ? 0 : oldroomtypeid.intValue());
 			oldRoomsaleConfig.setValid("T");
@@ -292,17 +289,15 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 			boolean isOldPromo = oldRooms != null ? oldRooms.size() > 0 : false;
 			boolean isNewPromo = newRooms != null ? newRooms.size() > 0 : false;
 
+			if (logger.isInfoEnabled()) {
+				logger.info("there is room change detected...oldpromo:%s;oldroomtype:%s; newpromo:%s; newrootype:%s",
+						isOldPromo, oldroomtypeid, isNewPromo, newroomtypeid);
+			}
+
 			/**
 			 * shift room from non-promo rooms to promo news, shift required
 			 */
-			if (!isOldPromo && isNewPromo) {
-				doShiftRoom(hotelid, newroomtypeid, newroomid, pmsRoomOrder);
-			}
-			/**
-			 * shift room from promo rooms to promo rooms, while different promo
-			 * is detected, shift required
-			 */
-			else if (!isOldPromo && !isNewPromo && (newroomtypeid != oldroomtypeid)) {
+			if (isNewPromo) {
 				doShiftRoom(hotelid, newroomtypeid, newroomid, pmsRoomOrder);
 			}
 		} else {
