@@ -115,7 +115,8 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 			if (logger.isInfoEnabled()) {
 				logger.info(
 						String.format("about to findroomprice with hotelid:%s; roomtypeid:%s; begintime:%s; endtime:%s",
-								hotelid, pmsroomtypeid, promoRoom.get("starttime"), promoRoom.get("endtime")));
+								hotelid, pmsroomtypeid, (String) pmsRoomOrder.getStr("BeginTime"),
+								(String) pmsRoomOrder.getStr("EndTime")));
 			}
 
 			Roomtype roomtype = null;
@@ -130,7 +131,8 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 			if (roomId == null) {
 				List<TRoomModel> models = roomMapper.findList(roomtypeId != null ? roomtypeId.longValue() : 0);
 				Room vcRoom = findVCRooms(Long.valueOf(hotelid), roomtypeId != null ? roomtypeId.longValue() : 0,
-						(Date) promoRoom.get("starttime"), (Date) promoRoom.get("endtime"));
+						DateUtils.getDateFromString(pmsRoomOrder.getStr("BeginTime")),
+						DateUtils.getDateFromString(pmsRoomOrder.getStr("EndTime")));
 				TRoomModel roomModel = isRoomExisted(models, vcRoom.getRoomid());
 
 				if (logger.isInfoEnabled()) {
