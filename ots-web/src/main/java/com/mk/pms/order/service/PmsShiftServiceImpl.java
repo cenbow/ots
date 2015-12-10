@@ -115,15 +115,13 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 			if (logger.isInfoEnabled()) {
 				logger.info(
 						String.format("about to findroomprice with hotelid:%s; roomtypeid:%s; begintime:%s; endtime:%s",
-								hotelid, pmsroomtypeid, (String) pmsRoomOrder.getStr("BeginTime"),
-								(String) pmsRoomOrder.getStr("EndTime")));
+								hotelid, pmsroomtypeid, pmsRoomOrder.get("BeginTime"), pmsRoomOrder.get("EndTime")));
 			}
 
 			Roomtype roomtype = null;
 			try {
 				roomtype = findRoomSalePrice(hotelid, roomtypeId != null ? roomtypeId.longValue() : 0L,
-						DateUtils.getDateFromString(pmsRoomOrder.getStr("BeginTime")),
-						DateUtils.getDateFromString(pmsRoomOrder.getStr("EndTime")));
+						(Date) pmsRoomOrder.get("BeginTime"), (Date) pmsRoomOrder.get("EndTime"));
 			} catch (Exception ex) {
 				logger.warn("failed to findRoomSalePrice, quit shifting room...", ex);
 				return;
@@ -132,8 +130,7 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 			if (roomId == null) {
 				List<TRoomModel> models = roomMapper.findList(roomtypeId != null ? roomtypeId.longValue() : 0);
 				Room vcRoom = findVCRooms(Long.valueOf(hotelid), roomtypeId != null ? roomtypeId.longValue() : 0,
-						DateUtils.getDateFromString(pmsRoomOrder.getStr("BeginTime")),
-						DateUtils.getDateFromString(pmsRoomOrder.getStr("EndTime")));
+						(Date) pmsRoomOrder.get("BeginTime"), (Date) pmsRoomOrder.get("EndTime"));
 				TRoomModel roomModel = isRoomExisted(models, vcRoom.getRoomid());
 
 				if (logger.isInfoEnabled()) {
@@ -208,8 +205,8 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 		pmsRoomOrder.set("RoomId", roomRepairPo.getRoomid());
 		pmsRoomOrder.set("HotelId", roomRepairPo.getHotelid());
 		pmsRoomOrder.set("Status", "RE");
-		pmsRoomOrder.set("BeginTime", DateUtils.formatDateTime(roomRepairPo.getBegintime(), DateUtils.FORMATDATETIME));
-		pmsRoomOrder.set("EndTime", DateUtils.formatDateTime(roomRepairPo.getEndtime(), DateUtils.FORMATDATETIME));
+		pmsRoomOrder.set("BeginTime", roomRepairPo.getBegintime());
+		pmsRoomOrder.set("EndTime", roomRepairPo.getEndtime());
 
 		shiftRoomForPromo(pmsRoomOrder, false);
 	}
@@ -295,8 +292,9 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 			boolean isNewPromo = newRooms != null ? newRooms.size() > 0 : false;
 
 			if (logger.isInfoEnabled()) {
-				logger.info("there is room change detected...oldpromo:%s;oldroomtype:%s; newpromo:%s; newrootype:%s",
-						isOldPromo, oldroomtypeid, isNewPromo, newroomtypeid);
+				logger.info(String.format(
+						"there is room change detected...oldpromo:%s;oldroomtype:%s; newpromo:%s; newrootype:%s",
+						isOldPromo, oldroomtypeid, isNewPromo, newroomtypeid));
 			}
 
 			/**
