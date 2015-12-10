@@ -34,7 +34,7 @@ import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.pms.room.bean.RoomRepairPo;
 
 @Service
-@Transactional(readOnly = false, propagation = Propagation.SUPPORTS) 
+@Transactional(readOnly = false, propagation = Propagation.SUPPORTS)
 public class PmsShiftServiceImpl implements PmsShiftService {
 	private static final Logger logger = LoggerFactory.getLogger(PmsShiftServiceImpl.class);
 	@Autowired
@@ -77,49 +77,6 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 		return roomModel;
 	}
 
-	private List<Room> findVCRooms(Long hotelid, Long roomtypeid, Date begindate, Date enddate) throws Exception {
-		List<Room> vcRooms = null;
-
-		try {
-			if (hotelid != null && begindate != null && enddate != null) {
-				String startdateday = DateUtils.formatDateTime(begindate, DateUtils.FORMATSHORTDATETIME);
-				String enddateday = DateUtils.formatDateTime(enddate, DateUtils.FORMATSHORTDATETIME);
-
-				if (logger.isInfoEnabled()) {
-					logger.info(String.format(
-							"about to findVCRooms for hotelid:%s; roomtypeid:%s; startdateday:%s; enddateday:%s",
-							hotelid, roomtypeid, startdateday, enddateday));
-				}
-
-				RoomstateQuerylistReqEntity reqEntity = new RoomstateQuerylistReqEntity();
-				reqEntity.setCallversion("3.2");
-				reqEntity.setCallentry(2);
-				reqEntity.setHotelid(hotelid);
-				reqEntity.setRoomtypeid(roomtypeid);
-				reqEntity.setStartdateday(DateUtils.formatDateTime(begindate, DateUtils.FORMATSHORTDATETIME));
-				reqEntity.setEnddateday(DateUtils.formatDateTime(enddate, DateUtils.FORMATSHORTDATETIME));
-				reqEntity.setIsShowAllRoom("T");
-
-				List<RoomstateQuerylistRespEntity> response = roomstateService.findHotelRoomState("", reqEntity);
-				if (response != null && response.size() > 0 && response.get(0).getRoomtype() != null
-						&& response.get(0).getRoomtype().size() > 0) {
-					List<Room> rooms = response.get(0).getRoomtype().get(0).getRooms();
-					vcRooms = rooms;
-				} else {
-					logger.warn(String.format("no available rooms found for hotelid:%s; roomtypeid:%s", hotelid,
-							roomtypeid));
-				}
-			} else {
-				logger.warn("illegal parameters passed in findVCRooms...");
-			}
-		} catch (Exception ex) {
-			throw new Exception(String.format("failed to findVCHotelRoom for hotelid:%s; begindate:%s; enddate:%s",
-					hotelid, begindate, enddate), ex);
-		}
-
-		return vcRooms;
-	}
-
 	private void doShiftRoom(String hotelid, Long pmsroomtypeid, Long pmsroomid, PmsRoomOrder pmsRoomOrder)
 			throws Exception {
 		if (logger.isInfoEnabled()) {
@@ -158,8 +115,19 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 
 			if (roomId == null) {
 				List<TRoomModel> models = roomMapper.findList(roomtypeId != null ? roomtypeId.longValue() : 0);
-				List<Room> vcRooms = findVCRooms(Long.valueOf(hotelid), roomtypeId != null ? roomtypeId.longValue() : 0,
-						(Date) pmsRoomOrder.get("BeginTime"), (Date) pmsRoomOrder.get("EndTime"));
+				List<Room> vcRooms = null;
+				if (roomtype != null && roomtype.getRooms() != null && roomtype.getRooms().size() > 0) {
+					vcRooms = roomtype.getRooms();
+
+					for (Room room : vcRooms) {
+						logger.info("checking roomvc...roomid:%s; roomstatus:%s", room.getRoomid(),
+								room.getRoomstatus());
+					}
+				} else {
+					logger.info(String.format("no available rooms found for roomtypeid%s", roomtypeId));
+					return;
+				}
+
 				Room vcRoom = null;
 				if (vcRooms != null && vcRooms.size() > 0) {
 					vcRoom = vcRooms.get(vcRooms.size() - 1);
@@ -372,7 +340,7 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 		parameters.setHotelid(Long.valueOf(hotelId));
 		parameters.setRoomtypeid(roomTypeId);
 		parameters.setCallentry(2);
-		parameters.setCallversion("3.2.5");
+		parameters.setCallversion("3.2");
 
 		String begindateday = defaultFormat.format(startdate);
 		String enddateday = defaultFormat.format(enddate);
