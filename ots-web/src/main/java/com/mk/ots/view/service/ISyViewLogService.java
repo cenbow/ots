@@ -7,7 +7,7 @@ import java.util.HashMap;
  */
 public interface ISyViewLogService {
 
-    public  Boolean saveSyViewLog(HashMap map);
+    public  Boolean saveSyViewLog(HashMap<String, Object> map);
 
 
 }

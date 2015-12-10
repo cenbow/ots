@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.view.model.SyViewLog" >
+  <resultMap id="BaseResultMap" type="com.mk.ots.view.model.SyViewLog" >
+    <result column="id" property="id" jdbcType="BIGINT" />
+    <result column="longitude" property="longitude" jdbcType="DECIMAL" />
+    <result column="latitude" property="latitude" jdbcType="DECIMAL" />
+    <result column="city_code" property="cityCode" jdbcType="BIGINT" />
+    <result column="ip" property="ip" jdbcType="VARCHAR" />
+    <result column="call_method" property="callMethod" jdbcType="BIGINT" />
+    <result column="version" property="version" jdbcType="VARCHAR" />
+    <result column="wifi_macaddr" property="wifiMacaddr" jdbcType="VARCHAR" />
+    <result column="bi_macaddr" property="biMacaddr" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="simsn" property="simsn" jdbcType="VARCHAR" />
+    <result column="from_url" property="fromUrl" jdbcType="VARCHAR" />
+    <result column="to_url" property="toUrl" jdbcType="VARCHAR" />
+    <result column="mid" property="mid" jdbcType="BIGINT" />
+    <result column="bussiness_id" property="bussinessId" jdbcType="VARCHAR" />
+    <result column="bussiness_type" property="bussinessType" jdbcType="VARCHAR" />
+    <result column="action_type" property="actionType" jdbcType="VARCHAR" />
+    <result column="view_code" property="viewCode" jdbcType="VARCHAR" />
+    <result column="hardwarecode" property="hardwarecode" jdbcType="VARCHAR" />
+    <result column="imei" property="imei" jdbcType="VARCHAR" />
+  </resultMap>
+ <insert id="insert" parameterType="com.mk.ots.view.model.SyViewLog" >
+        insert into sy_view_log (longitude, latitude, city_code,ip,
+        call_method, version, wifi_macaddr,bi_macaddr, create_time,
+        simsn,from_url,to_url,mid,params,bussiness_id,
+        bussiness_type,action_type,view_code,hardwarecode,imei)
+
+        values (#{longitude}, #{latitude}, #{cityCode},#{ip},
+        #{callMethod}, #{version}, #{wifiMacaddr}, #{biMacaddr}, #{createTime},
+        #{simsn}, #{fromUrl},#{toUrl},#{mid}, #{params},#{bussinessId},
+        #{bussinessType},#{actionType},#{viewCode},#{hardwarecode},#{imei})
+    </insert>
+</mapper>
