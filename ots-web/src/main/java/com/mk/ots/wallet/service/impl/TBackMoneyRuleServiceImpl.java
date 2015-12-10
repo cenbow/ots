@@ -51,8 +51,12 @@ public class TBackMoneyRuleServiceImpl implements ITBackMoneyRuleService {
             logger.info("酒店对应的城市为空");
             return new BigDecimal(0);
         }
-
-        List<Bean> lsit =    tBackMoneyRuleDao.getBackMoneyByHotelCityCode(cityCode, BackMoneyTypeEnum.type_pay.getId(), BackMoneyBussinessTypeEnum.type_TJ.getId());
+        String   promotyStr = order.getPromoType();
+        Integer  bussinessType = 0;
+        if(!StringUtils.isEmpty(promotyStr)){
+            bussinessType = Integer.parseInt(promotyStr);
+        }
+        List<Bean> lsit =    tBackMoneyRuleDao.getBackMoneyByHotelCityCode(cityCode, BackMoneyTypeEnum.type_pay.getId(),bussinessType);
         if(null==lsit||lsit.size()==0){
             logger.info("酒店对应的城市未配置返现");
             return new BigDecimal(0);

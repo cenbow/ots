@@ -3,8 +3,8 @@ package com.mk.ots.wallet.enums;
 public enum BackMoneyBussinessTypeEnum {
 
     //1-支付
-    type_PT(1,"普通"),
-    type_TJ(2,"特价");
+    type_PT(0,"普通"),
+    type_TJ(1,"特价");
 
 
     private int id;
