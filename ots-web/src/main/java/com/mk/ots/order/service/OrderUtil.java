@@ -774,10 +774,6 @@ public class OrderUtil {
 		boolean now = diff <= 2 || DateUtils.getStringFromDate(createTime, "yyyyMMdd").equals(DateUtils.getStringFromDate(returnOrder.getBeginTime(), "yyyyMMdd"));
 		this.logger.info("setUserMessage::now:{},createTime:{},endTime:{}", now, createTime, endTime);
 		// 凌晨23:56-2:00下单，可当天办理入住，提示“您最晚可在xxxx年xx月xx日12：00办理退房哦”
-		if(PromoTypeEnum.TJ.getCode().toString().equals(returnOrder.getPromoType())){
-			jsonObj.put("usermessage", "该订单付款完成后不可以修改或者退款。");
-			return;
-		}
 		StringBuffer usermessage = new StringBuffer();
 		if(PromoTypeEnum.TJ.getCode().equals(returnOrder.getPromoType())){
 			usermessage.append("该房间正在参与眯客今夜特价活动，预付入住享受低价，规则如下：").append("\n");
