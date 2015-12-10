@@ -39,4 +39,6 @@ public interface RoomSaleMapper {
 	public void saveRoomSale(Map<String, Object> map);
 	
 	public List<Map<String, Object>> isRoomSaleExisted(Map<String, Object> parameters);	
+	
+	public List<Map<String, Object>> checkPromoByRoom(Map<String, Object> parameters);
 }

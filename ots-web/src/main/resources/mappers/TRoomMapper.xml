@@ -84,4 +84,12 @@
 		limit 1
 	</select>
 
+	<select id="countRooms" resultType="map"
+		parameterType="java.util.Map">
+		select
+		id
+		from t_room
+		where roomtypeid = #{roomtypeid}
+	</select>
+
 </mapper>

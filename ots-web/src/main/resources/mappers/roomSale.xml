@@ -162,8 +162,10 @@
 	<select id="isRoomSaleExisted" resultType="map" parameterType="java.util.Map">
 		SELECT id
 		FROM t_room_sale
-		WHERE roomTypeId = #{roomtypeid} and oldRoomTypeId = #{oldroomtypeid} and
-		roomId = #{roomid} and hotelId = #{hotelid} and configId = #{configid} and isback = 'F'
+		WHERE roomTypeId = #{roomtypeid} and
+		oldRoomTypeId = #{oldroomtypeid} and
+		roomId = #{roomid} and hotelId =
+		#{hotelid} and configId = #{configid} and isback = 'F'
 	</select>
 
 	<delete id="deleteRoomSale" parameterType="Integer">
@@ -310,13 +312,23 @@
 		config.roomTypeId as roomtypeid, config.saleValue as salevalue,
 		config.saleType as saletype,
 		config.settleValue as settlevalue,
-		config.settleType as settletype, config.id as configid, config.hotelId
+		config.settleType as settletype, config.id as configid,
+		config.hotelId, confg.num as num
 		as hotelid
-		FROM t_room_sale_config config
+		FROM t_room_sale_config
+		config
 		join t_room_sale_config_info
-		info on config.saleconfiginfoid = info.id
+		info on config.saleconfiginfoid =
+		info.id
 		WHERE config.valid = 'T' and
-		config.saleRoomTypeId = #{roomTypeId}
+		config.saleRoomTypeId =
+		#{roomTypeId}
+	</select>
+
+	<select id="checkPromoByRoom" resultType="map"
+		parameterType="java.util.Map">
+		select room.roomtypeid as roomtypeid from t_room room join t_room_sale_config saleconfig on
+		room.roomtypeid = saleconfig.saleroomtypeid where room.id = #{roomid}
 	</select>
 
 	<select id="queryRoomSaleByOriginal" resultMap="BaseResultMap"
@@ -328,5 +340,6 @@
 		#{roomTypeId}
 		order by id desc limit 1
 	</select>
+
 </mapper>
 

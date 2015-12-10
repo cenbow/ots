@@ -32,4 +32,5 @@ public interface TRoomMapper {
 
 	public List<Map<String, Object>> selectOtaRoomOrder(Map<String, Object> parameters);
 
+	public List<Map<String, Object>> countRooms(Map<String, Object> parameters);
 }

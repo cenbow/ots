@@ -188,6 +188,7 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 						Map<String, Object> updateParameters = new HashMap<>();
 						updateParameters.put("roomid", vcRoom.getRoomid());
 						updateParameters.put("roomtypeid", saleRoomtypeId);
+
 						roomMapper.updateRoomtypeByRoom(updateParameters);
 
 						updateParameters.put("roomno", vcRoom.getRoomno());
@@ -269,6 +270,21 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 		List<TRoomSaleConfig> newRooms = null;
 
 		try {
+			if (newroomid != null) {
+				Map<String, Object> roomParameters = new HashMap<String, Object>();
+				roomParameters.put("roomid", newroomid);
+
+				List<Map<String, Object>> promoList = roomSaleMapper.checkPromoByRoom(roomParameters);
+
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("check if newroomid:%s is promoted with promolist %s returned", newroomid,
+							promoList != null ? promoList.size() : 0));
+				}
+
+				if (promoList != null && promoList.size() > 0) {
+					newroomtypeid = (Long) promoList.get(0).get("roomtypeid");
+				}
+			}
 			if (newroomtypeid != null) {
 				newRooms = roomSaleConfigMapper.getRoomSaleByParamsNew(newRoomsaleConfig);
 				if (newRooms != null && newRooms.size() > 0) {
