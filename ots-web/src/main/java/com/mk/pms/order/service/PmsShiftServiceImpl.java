@@ -259,8 +259,9 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 		}
 
 		if (logger.isInfoEnabled()) {
-			logger.info(String.format("checking isInPromo:%s; status:%s; isNotFromOta:%s", isInPromo, status,
-					isNotFromOta));
+			logger.info(String.format(
+					"checking isInPromo:%s; status:%s; isNotFromOta:%s; hotelid:%s; roomtypeid:%s; roomid:%s",
+					isInPromo, status, isNotFromOta, hotelid, newroomtypeid, newroomid));
 		}
 
 		/**
