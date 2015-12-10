@@ -208,6 +208,8 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 		pmsRoomOrder.set("RoomId", roomRepairPo.getRoomid());
 		pmsRoomOrder.set("HotelId", roomRepairPo.getHotelid());
 		pmsRoomOrder.set("Status", "RE");
+		pmsRoomOrder.set("BeginTime", DateUtils.formatDateTime(roomRepairPo.getBegintime(), DateUtils.FORMATDATETIME));
+		pmsRoomOrder.set("EndTime", DateUtils.formatDateTime(roomRepairPo.getEndtime(), DateUtils.FORMATDATETIME));
 
 		shiftRoomForPromo(pmsRoomOrder, false);
 	}
