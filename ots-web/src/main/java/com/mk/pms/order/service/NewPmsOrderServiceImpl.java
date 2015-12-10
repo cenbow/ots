@@ -447,14 +447,14 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 				NewPmsOrderServiceImpl.logger.info("OTSMessage::changePmsRoomOrder---status:{}", status);
 				this.orderService.changeOrderStatusByPms(roomOrder.getLong("otaorderid"), pmsRoomOrder,
 						pmsRoomOrder.getStr("freqtrv"));
-
-				try {
-					pmsShiftService.shiftRoomForPromo(pmsRoomOrder, isChanged);
-				} catch (Exception ex) {
-					logger.error("failed to shiftRoomForPromo in ChangeOtaOrder...", ex);
-				}
 			}
 
+			try {
+				pmsShiftService.shiftRoomForPromo(pmsRoomOrder, true);
+			} catch (Exception ex) {
+				logger.error("failed to shiftRoomForPromo in ChangeOtaOrder...", ex);
+			}
+			
 			// 2,记录 酒店ID和对应的房型IDs,提供下面计算缓存
 			Set<Long> tempset = map.get(changeRoomOrderBean.getHotelId());
 			if (tempset == null) {
