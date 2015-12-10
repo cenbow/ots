@@ -1,4 +1,4 @@
-package com.mk.pms.order.service;
+package com.mk.pms.order.event;
 
 public interface PmsShiftHelperService {
 	public boolean isOtaOrder(String pmsRoomOrderNo) throws Exception;

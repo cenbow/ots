@@ -1,4 +1,4 @@
-package com.mk.pms.order.service;
+package com.mk.pms.order.event;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

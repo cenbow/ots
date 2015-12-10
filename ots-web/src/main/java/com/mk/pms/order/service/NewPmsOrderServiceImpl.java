@@ -56,6 +56,7 @@ import com.mk.pms.manager.XmlLogFileManager;
 import com.mk.pms.myenum.PmsResultEnum;
 import com.mk.pms.order.bean.ChangeRoom;
 import com.mk.pms.order.event.PmsCalCacheEvent;
+import com.mk.pms.order.event.PmsShiftService;
 import com.mk.pms.room.bean.RoomLockPo;
 import com.mk.pms.room.service.PmsRoomService;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
