@@ -73,7 +73,6 @@ import com.mk.pms.myenum.PmsResultEnum;
 import com.mk.pms.order.bean.ChangeRoom;
 import com.mk.pms.order.bean.SynedCustomerBean;
 import com.mk.pms.order.event.PmsCalCacheEvent;
-import com.mk.pms.order.event.PmsShiftService;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
 import cn.com.winhoo.mikeweb.webout.service.bean.ChangeRoomOrderBean;

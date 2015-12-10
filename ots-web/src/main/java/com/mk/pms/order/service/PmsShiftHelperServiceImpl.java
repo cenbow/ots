@@ -1,4 +1,4 @@
-package com.mk.pms.order.event;
+package com.mk.pms.order.service;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,10 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.mk.ots.mapper.TRoomMapper;
 
 @Service
+@Transactional(readOnly = false, propagation = Propagation.SUPPORTS) 
 public class PmsShiftHelperServiceImpl implements PmsShiftHelperService {
 	@Autowired
 	private TRoomMapper roomMapper;

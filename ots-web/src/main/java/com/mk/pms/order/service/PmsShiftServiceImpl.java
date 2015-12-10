@@ -1,4 +1,4 @@
-package com.mk.pms.order.event;
+package com.mk.pms.order.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
@@ -32,6 +34,7 @@ import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.pms.room.bean.RoomRepairPo;
 
 @Service
+@Transactional(readOnly = false, propagation = Propagation.SUPPORTS) 
 public class PmsShiftServiceImpl implements PmsShiftService {
 	private static final Logger logger = LoggerFactory.getLogger(PmsShiftServiceImpl.class);
 	@Autowired

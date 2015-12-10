@@ -22,7 +22,7 @@ import com.mk.ots.hotel.model.EHotelModel;
 import com.mk.ots.hotel.model.TRoomModel;
 import com.mk.ots.hotel.service.RoomService;
 import com.mk.ots.web.ServiceOutput;
-import com.mk.pms.order.event.PmsShiftService;
+import com.mk.pms.order.service.PmsShiftService;
 import com.mk.pms.room.bean.RoomRepairJsonBean;
 import com.mk.pms.room.bean.RoomRepairLockJsonBean;
 import com.mk.pms.room.bean.RoomRepairPo;

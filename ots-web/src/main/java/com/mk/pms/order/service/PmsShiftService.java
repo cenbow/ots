@@ -1,4 +1,4 @@
-package com.mk.pms.order.event;
+package com.mk.pms.order.service;
 
 import com.mk.ots.order.bean.PmsRoomOrder;
 import com.mk.pms.room.bean.RoomRepairPo;
