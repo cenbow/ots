@@ -1647,11 +1647,12 @@ hotelname 	| 酒店名 	| 否 	| 支持模糊
 hoteladdr 	| 酒店地址 	| 否 	| 支持模糊 
 keyword 	| 关键字 	| 否 	| 对于hotelname和hoteladdr做模糊查询用 
 disid 	| 区县id 	| 否 	|  	
+promoid|特价活动 id|是|
 minpromoprice 	| 价格区间-小 	| 否 	| 
 maxpromoprice 	| 价格区间-大 	| 否 	| 
 userlongitude 	| 用户坐标(经度) | 否 | 用户的经度 
 userlatitude 	| 用户坐标(纬度) | 否 | 用户的纬度 
-pillowlongitude 	| 查询坐标(经度) | 否 | 非搜索条件 	
+pillowlongitude 	| 查询坐标(经度) | 否 | 非搜索条件 
 pillowlatitude 	| 查询坐标(纬度) | 否 | 非搜索条件 
 range 	| 附近范围 	| 否 	| 单位米，若查询坐标的值不为空，则取查询坐标方圆XXXX米的酒店 
 minprice 	| 最低价格 	| 否 	|  
@@ -2264,13 +2265,13 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 > 根据 cityid 获取首屏推荐信息
 
 **接口 url：**
-> http://ip:port/ots/recommend/queryloadinglist
+> http://ip:port/ots/recommend/queryloading
 
 **请求参数：**
 
     字段        |         名称         | 是否必须 | 说明
 --------------- | ------------------- | -------| -----------                                                
-| citycode     	| 城市编码   | 是    |                                                    
+| cityid     	| 城市编码   | 是    |                                                    
 | callmethod   	| 调用来源   | 是   | 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) 
 | callversion  	| 调用版本   | 是   |
 | ip           	| IP地址  | 是     |                                                    

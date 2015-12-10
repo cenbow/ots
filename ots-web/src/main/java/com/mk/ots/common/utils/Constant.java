@@ -273,5 +273,5 @@ public class Constant {
 	public static final Integer SHOW_HOTEL_REPAIRINFO_YEARS_LIMIT = 3;
 
 	public static final String HOTEL_HIGHLIGHT_SHOWS_IDS ="44";
-
+	public static final String RECOMMEND_LOADDING_POSITION = "APP-LOADING";
 }

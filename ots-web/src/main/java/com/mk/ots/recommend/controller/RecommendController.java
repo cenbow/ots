@@ -35,77 +35,6 @@ public class RecommendController {
 
 
 
-    private List<RecommendList> genGlobalRecommendLists(String position, String platform, String cityid, String callmethod){
-        Integer platformValue = null;
-
-
-
-            if (StringUtils.isNotBlank(platform)) {
-                platformValue = Integer.valueOf(platform);
-            }else if (StringUtils.isNotBlank(callmethod)){
-                if (Constant.WEIXIN_CALLMETHOD.equals(callmethod)){
-                    platformValue = Constant.WEIXIN_PLATFORM;
-                }else if (Constant.ANDROID_CALLMETHOD.equals(callmethod)){
-                    platformValue = Constant.ANDROID_PLATFORM;
-                }else if (Constant.IOS_CALLMETHOD.equals(callmethod)){
-                    platformValue = Constant.IOS_PLATFORM;
-                }
-            }
-            List<RecommendList> banners = new ArrayList<>();
-
-            List<TRecommenditem> list;
-
-            HashMap<Integer, TRecommenditem> recommenditemHashMap = new HashMap<>();
-
-
-            Integer cityId = StringUtils.isNoneBlank(cityid) ? Integer.valueOf(cityid) : Constant.RECOMMEND_GLOBAL;
-
-            List<TRecommendItemArea> cityItemAreaList = recommendService.selectItemAreaByCityId(cityId);
-
-            list = recommendService.queryRecommendItem(position, platformValue);
-
-            for (TRecommenditem recommenditem : list) {
-                recommenditemHashMap.put(recommenditem.getId().intValue(), recommenditem);
-            }
-
-            int city_recommend_count = 0;
-
-
-            if (StringUtils.isNotBlank(cityid) && cityItemAreaList != null) {
-
-                for (int i = 0; i < cityItemAreaList.size(); i++) {
-                    if (cityItemAreaList.get(i) != null && city_recommend_count <= Constant.CITY_RECOMMEND_ITEM_LIMT) {
-                        TRecommenditem tRecommendItem = recommenditemHashMap.get(cityItemAreaList.get(i).getItemid());
-
-
-                        if (tRecommendItem != null) {
-
-                            if (Constant.WEIXIN_CALLMETHOD.equals(callmethod) && tRecommendItem.getViewtype() == Constant.TONIGHT_PROMO_VIEWTYPE) {
-                                continue;
-                            }
-
-                            if (city_recommend_count <= Constant.CITY_RECOMMEND_ITEM_LIMT) {
-                                RecommendList recommendList = new RecommendList();
-                                recommendList.setName(tRecommendItem.getTitle());
-                                recommendList.setDescription(tRecommendItem.getDescription());
-                                recommendList.setImgurl(tRecommendItem.getImageurl());
-                                recommendList.setUrl(tRecommendItem.getLink());
-                                recommendList.setDetailid(tRecommendItem.getDetailid());
-                                recommendList.setQuerytype(tRecommendItem.getViewtype());
-                                recommendList.setCreatetime(tRecommendItem.getCreatetime());
-
-                                banners.add(recommendList);
-                                city_recommend_count++;
-                            }
-
-
-                        }
-                    }
-
-                }
-            }
-    }
-
     /**
      * 根据位置查询banner或者列表
      * http://127.0.0.1:8080/ots/recommend/query
@@ -120,179 +49,30 @@ public class RecommendController {
             throw MyErrorEnum.errorParm.getMyException();
         }
 
-
-        Integer platformValue = null;
-
+        Integer platformValue = getplatformValue(callmethod, platform);
 
         try {
-            if (StringUtils.isNotBlank(platform)) {
-                platformValue = Integer.valueOf(platform);
-            }else if (StringUtils.isNotBlank(callmethod)){
-                if (Constant.WEIXIN_CALLMETHOD.equals(callmethod)){
-                    platformValue = Constant.WEIXIN_PLATFORM;
-                }else if (Constant.ANDROID_CALLMETHOD.equals(callmethod)){
-                    platformValue = Constant.ANDROID_PLATFORM;
-                }else if (Constant.IOS_CALLMETHOD.equals(callmethod)){
-                    platformValue = Constant.IOS_PLATFORM;
-                }
-            }
+            Integer cityLimit = null;
+            Integer globleLimit = null;
             List<RecommendList> banners = new ArrayList<>();
+            List<RecommendList> cityBanners;
+            HashMap<Integer, TRecommenditem> recommenditemHashMap = genRecommenditemHashMap(position, platformValue);
 
-            List<TRecommenditem> list;
-
-            HashMap<Integer, TRecommenditem> recommenditemHashMap = new HashMap<>();
-
-
-            Integer cityId = StringUtils.isNoneBlank(cityid) ? Integer.valueOf(cityid) : Constant.RECOMMEND_GLOBAL;
-
-            List<TRecommendItemArea> cityItemAreaList = recommendService.selectItemAreaByCityId(cityId);
 
             if (position.equals("921A") || position.equals("921C")) {
-                list = recommendService.queryRecommendItem(position, platformValue);
+                cityLimit = Constant.CITY_RECOMMEND_ITEM_LIMT;
+                cityBanners = genCityRecommendLists(recommenditemHashMap, cityid, callmethod, cityLimit);
 
-                for (TRecommenditem recommenditem : list) {
-                    recommenditemHashMap.put(recommenditem.getId().intValue(), recommenditem);
-                }
-
-                int city_recommend_count = 0;
-
-
-                if (StringUtils.isNotBlank(cityid) && cityItemAreaList != null) {
-
-                    for (int i = 0; i < cityItemAreaList.size(); i++) {
-                        if (cityItemAreaList.get(i) != null && city_recommend_count <= Constant.CITY_RECOMMEND_ITEM_LIMT) {
-                            TRecommenditem tRecommendItem = recommenditemHashMap.get(cityItemAreaList.get(i).getItemid());
-
-
-                            if (tRecommendItem != null) {
-
-                                if (Constant.WEIXIN_CALLMETHOD.equals(callmethod) && tRecommendItem.getViewtype() == Constant.TONIGHT_PROMO_VIEWTYPE) {
-                                    continue;
-                                }
-
-                                if (city_recommend_count <= Constant.CITY_RECOMMEND_ITEM_LIMT) {
-                                    RecommendList recommendList = new RecommendList();
-                                    recommendList.setName(tRecommendItem.getTitle());
-                                    recommendList.setDescription(tRecommendItem.getDescription());
-                                    recommendList.setImgurl(tRecommendItem.getImageurl());
-                                    recommendList.setUrl(tRecommendItem.getLink());
-                                    recommendList.setDetailid(tRecommendItem.getDetailid());
-                                    recommendList.setQuerytype(tRecommendItem.getViewtype());
-                                    recommendList.setCreatetime(tRecommendItem.getCreatetime());
-
-                                    banners.add(recommendList);
-                                    city_recommend_count++;
-                                }
-
-
-                            }
-                        }
-
-                    }
-                }
-
-                List<TRecommendItemArea> itemAreaList = recommendService.selectItemAreaByCityId(Constant.RECOMMEND_GLOBAL);
-                if (itemAreaList != null) {
-                    int global_count = 0;
-                    for (int i = 0; i < itemAreaList.size(); i++) {
-                        if (itemAreaList != null && itemAreaList.get(i) != null) {
-                            TRecommenditem tRecommendItem = recommenditemHashMap.get(itemAreaList.get(i).getItemid());
-
-
-                            if (tRecommendItem != null && global_count <= Constant.RECOMMEND_ITEM_LIMT - city_recommend_count) {
-
-                                if (Constant.WEIXIN_CALLMETHOD.equals(callmethod) && tRecommendItem.getViewtype() == Constant.TONIGHT_PROMO_VIEWTYPE) {
-                                    continue;
-                                }
-
-                                if (StringUtils.isNotBlank(cityid)){
-                                    if (Constant.PROMO_BANNER_PROMO.equals(tRecommendItem.getViewtype()) || Constant.PROMO_BANNER_ONE_PROMO.equals(tRecommendItem.getViewtype())){
-                                        continue;
-                                    }
-                                }
-
-
-                                if (global_count <= Constant.RECOMMEND_ITEM_LIMT - city_recommend_count) {
-
-                                    RecommendList recommendList = new RecommendList();
-                                    recommendList.setName(tRecommendItem.getTitle());
-                                    recommendList.setDescription(tRecommendItem.getDescription());
-                                    recommendList.setImgurl(tRecommendItem.getImageurl());
-                                    recommendList.setUrl(tRecommendItem.getLink());
-                                    recommendList.setDetailid(tRecommendItem.getDetailid());
-                                    recommendList.setQuerytype(tRecommendItem.getViewtype());
-                                    recommendList.setCreatetime(tRecommendItem.getCreatetime());
-
-
-                                    banners.add(recommendList);
-                                    global_count++;
-                                }
-
-                            }
-
-                        }
-                    }
-                }
-
+                globleLimit = Constant.RECOMMEND_ITEM_LIMT - cityBanners.size();
             } else {
-                list = recommendService.queryRecommendItem(position, platformValue);
-
-                for (TRecommenditem recommenditem : list) {
-                    recommenditemHashMap.put(recommenditem.getId().intValue(), recommenditem);
-                }
-
-                if (StringUtils.isNotBlank(cityid)) {
-                    for (TRecommendItemArea tRecommendItemArea : cityItemAreaList) {
-                        TRecommenditem tRecommendItem = recommenditemHashMap.get(tRecommendItemArea.getItemid());
-
-
-                        if (tRecommendItem != null) {
-                            if (Constant.WEIXIN_CALLMETHOD.equals(callmethod) && tRecommendItem.getViewtype() == Constant.TONIGHT_PROMO_VIEWTYPE) {
-                                continue;
-                            }
-
-                            RecommendList recommendList = new RecommendList();
-                            recommendList.setName(tRecommendItem.getTitle());
-                            recommendList.setDescription(tRecommendItem.getDescription());
-                            recommendList.setImgurl(tRecommendItem.getImageurl());
-                            recommendList.setUrl(tRecommendItem.getLink());
-                            recommendList.setDetailid(tRecommendItem.getDetailid());
-                            recommendList.setQuerytype(tRecommendItem.getViewtype());
-                            recommendList.setCreatetime(tRecommendItem.getCreatetime());
-                            banners.add(recommendList);
-
-                        }
-
-                    }
-                }
-
-
-                List<TRecommendItemArea> itemAreaList = recommendService.selectItemAreaByCityId(Constant.RECOMMEND_GLOBAL);
-
-                for (TRecommendItemArea tRecommendItemArea : itemAreaList) {
-                    TRecommenditem tRecommendItem = recommenditemHashMap.get(tRecommendItemArea.getItemid());
-
-
-                    if (tRecommendItem != null) {
-
-                        if (Constant.WEIXIN_CALLMETHOD.equals(callmethod) && tRecommendItem.getViewtype() == Constant.TONIGHT_PROMO_VIEWTYPE) {
-                            continue;
-                        }
-
-                        RecommendList recommendList = new RecommendList();
-                        recommendList.setName(tRecommendItem.getTitle());
-                        recommendList.setDescription(tRecommendItem.getDescription());
-                        recommendList.setImgurl(tRecommendItem.getImageurl());
-                        recommendList.setUrl(tRecommendItem.getLink());
-                        recommendList.setDetailid(tRecommendItem.getDetailid());
-                        recommendList.setQuerytype(tRecommendItem.getViewtype());
-                        recommendList.setCreatetime(tRecommendItem.getCreatetime());
-                        banners.add(recommendList);
-                    }
-
-                }
-
+                cityBanners = genCityRecommendLists(recommenditemHashMap, cityid, callmethod, cityLimit);
             }
+
+
+            banners.addAll(cityBanners);
+
+            List<RecommendList> globleBanners = genGlobleRecommendLists(recommenditemHashMap, cityid, callmethod, globleLimit);
+            banners.addAll(globleBanners);
 
             rtnMap.put("banners", banners);
             rtnMap.put("success", true);
@@ -368,5 +148,204 @@ public class RecommendController {
         return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
     }
 
+
+
+    /**
+     * 根据位置查询banner或者列表
+     * http://127.0.0.1:8080/ots/recommend/query
+     *
+     * @param position
+     * @return
+     */
+    @RequestMapping("/queryloading")
+    public ResponseEntity<Map<String, Object>> queryloading( String platform, String cityid, String callmethod) {
+        Map<String, Object> rtnMap = Maps.newHashMap();
+        String position = Constant.RECOMMEND_LOADDING_POSITION;
+
+        Integer platformValue = getplatformValue(callmethod, platform);
+
+        try {
+            Integer cityLimit =  Constant.CITY_RECOMMEND_ITEM_LIMT;
+            Integer globleLimit = null;
+            List<RecommendList> banners = new ArrayList<>();
+            List<RecommendList> cityBanners;
+            HashMap<Integer, TRecommenditem> recommenditemHashMap = genRecommenditemHashMap(position, platformValue);
+
+            cityBanners = genCityRecommendLists(recommenditemHashMap, cityid, callmethod, cityLimit);
+
+            globleLimit = Constant.RECOMMEND_ITEM_LIMT - cityBanners.size();
+
+            banners.addAll(cityBanners);
+            List<RecommendList> globleBanners = genGlobleRecommendLists(recommenditemHashMap, cityid, callmethod, globleLimit);
+            banners.addAll(globleBanners);
+
+            rtnMap.put("loading", banners);
+            rtnMap.put("success", true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+            rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+            rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
+            logger.error("【/recommend/query】 is error: {} ", e.getMessage());
+        }
+        return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+    }
+
+
+
+    private static Integer getplatformValue(String callmethod, String platform) {
+        Integer platformValue = null;
+        if (StringUtils.isNotBlank(platform)) {
+            platformValue = Integer.valueOf(platform);
+        } else if (StringUtils.isNotBlank(callmethod)) {
+            if (Constant.WEIXIN_CALLMETHOD.equals(callmethod)) {
+                platformValue = Constant.WEIXIN_PLATFORM;
+            } else if (Constant.ANDROID_CALLMETHOD.equals(callmethod)) {
+                platformValue = Constant.ANDROID_PLATFORM;
+            } else if (Constant.IOS_CALLMETHOD.equals(callmethod)) {
+                platformValue = Constant.IOS_PLATFORM;
+            }
+        }
+
+        return platformValue;
+    }
+
+    private HashMap<Integer, TRecommenditem> genRecommenditemHashMap(String position, Integer platformValue) {
+        HashMap<Integer, TRecommenditem> recommenditemHashMap = new HashMap<>();
+
+        List<TRecommenditem> list = recommendService.queryRecommendItem(position, platformValue);
+
+        for (TRecommenditem recommenditem : list) {
+            recommenditemHashMap.put(recommenditem.getId().intValue(), recommenditem);
+        }
+
+        return recommenditemHashMap;
+    }
+
+    private List<RecommendList> genCityRecommendLists(HashMap<Integer, TRecommenditem> recommenditemHashMap,
+                                                      String cityid,
+                                                      String callmethod,
+                                                      Integer limit) {
+
+
+        List<RecommendList> banners = new ArrayList<>();
+
+
+        Integer cityId = StringUtils.isNoneBlank(cityid)
+                ? Integer.valueOf(cityid)
+                : Constant.RECOMMEND_GLOBAL;
+
+        List<TRecommendItemArea> cityItemAreaList = recommendService.selectItemAreaByCityId(cityId);
+
+
+        if (StringUtils.isNotBlank(cityid) && cityItemAreaList != null) {
+            banners = buildBanners(cityItemAreaList,
+                    recommenditemHashMap,
+                    callmethod,
+                    limit);
+        }
+
+        return banners;
+    }
+
+
+    private List<RecommendList> genGlobleRecommendLists(HashMap<Integer, TRecommenditem> recommenditemHashMap,
+                                                        String cityid,
+                                                        String callmethod,
+                                                        Integer limit) {
+
+        List<RecommendList> banners = new ArrayList<>();
+
+        List<TRecommendItemArea> itemAreaList = recommendService.selectItemAreaByCityId(Constant.RECOMMEND_GLOBAL);
+
+        if (itemAreaList != null) {
+            int global_count = 0;
+            for (int i = 0; i < itemAreaList.size(); i++) {
+                if (itemAreaList != null && itemAreaList.get(i) != null) {
+                    TRecommenditem tRecommendItem = recommenditemHashMap.get(itemAreaList.get(i).getItemid());
+
+
+                    if (tRecommendItem != null && global_count <= limit) {
+
+                        if (Constant.WEIXIN_CALLMETHOD.equals(callmethod)
+                                && tRecommendItem.getViewtype() == Constant.TONIGHT_PROMO_VIEWTYPE) {
+                            continue;
+                        }
+
+                        if (StringUtils.isNotBlank(cityid)) {
+                            if (Constant.PROMO_BANNER_PROMO.equals(tRecommendItem.getViewtype())
+                                    || Constant.PROMO_BANNER_ONE_PROMO.equals(tRecommendItem.getViewtype())) {
+                                continue;
+                            }
+                        }
+
+
+                        if (global_count <= limit) {
+
+                            RecommendList recommendList = new RecommendList();
+                            recommendList.setName(tRecommendItem.getTitle());
+                            recommendList.setDescription(tRecommendItem.getDescription());
+                            recommendList.setImgurl(tRecommendItem.getImageurl());
+                            recommendList.setUrl(tRecommendItem.getLink());
+                            recommendList.setDetailid(tRecommendItem.getDetailid());
+                            recommendList.setQuerytype(tRecommendItem.getViewtype());
+                            recommendList.setCreatetime(tRecommendItem.getCreatetime());
+
+
+                            banners.add(recommendList);
+                            global_count++;
+                        }
+
+                    }
+
+                }
+            }
+        }
+
+        return banners;
+    }
+
+
+    private List<RecommendList> buildBanners(List<TRecommendItemArea> areaList,
+                                             HashMap<Integer, TRecommenditem> recommenditemHashMap,
+                                             String callmethod,
+                                             Integer limit) {
+
+        List<RecommendList> banners = new ArrayList<>();
+        Integer city_recommend_count = 0;
+        for (int i = 0; i < areaList.size(); i++) {
+            if (areaList.get(i) != null && (limit == null || city_recommend_count <= limit)) {
+                TRecommenditem tRecommendItem = recommenditemHashMap.get(areaList.get(i).getItemid());
+
+                if (tRecommendItem != null) {
+
+                    if (Constant.WEIXIN_CALLMETHOD.equals(callmethod)
+                            && tRecommendItem.getViewtype() == Constant.TONIGHT_PROMO_VIEWTYPE) {
+                        continue;
+                    }
+
+                    if (limit == null || city_recommend_count <= limit) {
+                        RecommendList recommendList = new RecommendList();
+                        recommendList.setName(tRecommendItem.getTitle());
+                        recommendList.setDescription(tRecommendItem.getDescription());
+                        recommendList.setImgurl(tRecommendItem.getImageurl());
+                        recommendList.setUrl(tRecommendItem.getLink());
+                        recommendList.setDetailid(tRecommendItem.getDetailid());
+                        recommendList.setQuerytype(tRecommendItem.getViewtype());
+                        recommendList.setCreatetime(tRecommendItem.getCreatetime());
+
+                        banners.add(recommendList);
+                        city_recommend_count++;
+                    }
+
+
+                }
+            }
+
+        }
+
+        return banners;
+    }
 
 }
