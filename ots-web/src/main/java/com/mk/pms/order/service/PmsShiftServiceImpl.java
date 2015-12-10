@@ -304,6 +304,11 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 				orderParameters.put("pmsroomorderno", pmsRoomOrderNo);
 
 				List<Map<String, Object>> orderResponse = roomMapper.selectOtaRoomOrder(orderParameters);
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("succeed in selectOtaRoomOrder with pmsroomorderno:%s; orderResponse:%s",
+							pmsRoomOrderNo, orderResponse != null ? orderResponse.size() : 0));
+				}
+
 				if (orderResponse != null && orderResponse.size() > 0) {
 					isNotFromOta = false;
 				}
