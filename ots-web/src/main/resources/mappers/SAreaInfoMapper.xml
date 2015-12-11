@@ -18,9 +18,11 @@
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
-    <include refid="Base_Column_List" />
-    from s_areainfo
-    where id = #{id,jdbcType=BIGINT}
+    a.*, b.id as disid
+    from s_areainfo a
+    RIGHT JOIN t_district b
+    ON  a.discode = b.Code
+    where a.id = #{id,jdbcType=BIGINT}
   </select>
   <select id="findAll" resultMap="BaseResultMap" >
     select 

@@ -27,9 +27,9 @@ public class TongSmsMessage extends AbstractMessage {
 	private String pwd = "";
 
 	/** 短信内容签名,与sn是一一对应的 */
-	private final String content_sign = "【眯客iMike】";
+	private final String content_sign = "【眯客】";
 
-    private final String subcode="28001" ;
+    private final String subcode="" ;
 
 	//private final String content_sign_end = "（眯客弹指间有房间，保证低价、快速入住)";
 

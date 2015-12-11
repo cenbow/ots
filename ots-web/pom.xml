@@ -38,14 +38,14 @@
             </snapshots>
             <id>public</id>
             <name>Public Repositories</name>
-            <url>http://10.4.4.228:8081/nexus/content/repositories/releases/</url>
+            <url>http://10.10.144.74:8081/nexus/content/repositories/releases/</url>
         </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
             <id>public</id>
             <name>Public Repositories</name>
-            <url>http://10.4.4.228:8081/nexus/content/repositories/releases/</url>
+            <url>http://10.10.144.74:8081/nexus/content/repositories/releases/</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -1495,22 +1495,22 @@
                 <synserver.ip>10.10.124.247</synserver.ip>
                 <synserver.port>8000</synserver.port>
                 <elasticsearch.clusterhosts>10.10.118.60:9300</elasticsearch.clusterhosts>
-                <elasticsearch.clustername>ots-smlt-bj-elastic-1</elasticsearch.clustername>
+                <elasticsearch.clustername>smlt-elasticsearch</elasticsearch.clustername>
                 <elasticsearch.index>ots</elasticsearch.index>
                 <elasticsearch.type>hotel</elasticsearch.type>
-                <hessian_soap>http://10.10.131.104:8085/soap/hessian</hessian_soap>
-                <hessian_bms>http://bj-smlt-sms.imike.cn/</hessian_bms>
-                <newpms.url>https://bj-smlt-otai.imike.cn/otai/ots2pms</newpms.url>
+                <hessian_soap>http://10.10.126.121:8080/soap/hessian</hessian_soap>
+                <hessian_bms>http://sms.imike.cn/</hessian_bms>
+                <newpms.url>https://smlt-otai.imike.cn/otai/ots2pms</newpms.url>
                 <jedis.pool.maxidl>20</jedis.pool.maxidl>
                 <jedis.pool.minidl>8</jedis.pool.minidl>
                 <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
-                <addpay>https://bj-smlt-otai.imike.cn/otai/ots2pms/addpay</addpay>
-                <cancelpay>https://bj-smlt-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
-                <selectCustomerpay>https://bj-smlt-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
-                <cancelpaybyerror>https://bj-smlt-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+                <addpay>https://smlt-otai.imike.cn/otai/ots2pms/addpay</addpay>
+                <cancelpay>https://smlt-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>https://smlt-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>https://smlt-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
                 <!-- 1：开发状态 2：生产状态 -->
                 <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-                <inform_sale_url><![CDATA[http://bj-smlt-sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
                 <wx_type>test_wechat</wx_type>
                 <!-- 1：开发状态 2：生产状态 -->
                 <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
@@ -1522,7 +1522,7 @@
                 <!-- kafka end -->
 
                 <!-- BMS黑名单验证接口 -->
-                <blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
+                <blacklist.url>http://bypass.imike.cn/check</blacklist.url>
                 <!-- 推送消息配置 0：测试环境 1：生产环境 -->
                 <sendmess.testorformal>0</sendmess.testorformal>
                 <black_Switch>1</black_Switch>
@@ -1550,16 +1550,27 @@
                 <elasticsearch.type>hotel</elasticsearch.type>
                 <hessian_soap>http://10.10.108.139:8080/soap/hessian</hessian_soap>
                 <hessian_bms>http://sale.imike.com</hessian_bms>
+                <!-- 线上 -->
                 <newpms.url>https://otai.imike.com/otai/ots2pms</newpms.url>
+
+                <!-- 预迁移线上 -->
+                <!--<newpms.url>http://hoteldev.congqipms.com/ots2pms</newpms.url>-->
 
                 <jedis.pool.maxidl>20</jedis.pool.maxidl>
                 <jedis.pool.minidl>8</jedis.pool.minidl>
                 <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
 
-                <addpay>http://hotel.imike.com/ots2pms/addpay</addpay>
-                <cancelpay>http://hotel.imike.com/ots2pms/cancelpay</cancelpay>
-                <selectCustomerpay>http://hotel.imike.com/ots2pms/selectcustomerpay</selectCustomerpay>
-                <cancelpaybyerror>http://hotel.imike.com/ots2pms/cancelpaybyerror</cancelpaybyerror>
+                <!-- 线上 -->
+                <addpay>http://otai.imike.com/otai/ots2pms/addpay</addpay>
+                <cancelpay>http://otai.imike.com/otai/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>http://otai.imike.com/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>http://otai.imike.com/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+
+                <!--&lt;!&ndash; 预迁移线上 &ndash;&gt;-->
+                <!--<addpay>http://hoteldev.congqipms.com/ots2pms/addpay</addpay>-->
+                <!--<cancelpay>http://hoteldev.congqipms.com/ots2pms/cancelpay</cancelpay>-->
+                <!--<selectCustomerpay>http://hoteldev.congqipms.com/ots2pms/selectcustomerpay</selectCustomerpay>-->
+                <!--<cancelpaybyerror>http://hoteldev.congqipms.com/ots2pms/cancelpaybyerror</cancelpaybyerror>-->
 
                 <inform_sale_url><![CDATA[http://sale.imike.com/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
                 <wx_type>wechat</wx_type>

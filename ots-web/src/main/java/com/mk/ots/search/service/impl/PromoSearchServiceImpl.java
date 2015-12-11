@@ -10,14 +10,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.mk.ots.common.enums.*;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -56,6 +57,11 @@ import com.mk.framework.AppUtils;
 import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
+import com.mk.ots.common.enums.FrontPageEnum;
+import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.enums.HotelSearchEnum;
+import com.mk.ots.common.enums.HotelSortEnum;
+import com.mk.ots.common.enums.ShowAreaEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.common.utils.SearchConst;
@@ -477,6 +483,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
 
+			if (HotelSearchEnum.AREA.getId().equals(searchType)) {
+				makeAreaFilter(reqentity, filterBuilders);
+			}
+
+			makeHotelTypeFilter(reqentity, filterBuilders);
+			makeBedTypeFilter(reqentity, filterBuilders);
+			
 			makeQueryFilter(reqentity, filterBuilders);
 
 			FilterBuilder[] builders = new FilterBuilder[] {};
@@ -577,12 +590,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						SearchConst.SEARCH_RANGE_MAX);
 			}
 
-			if (HotelSearchEnum.AREA.getId().equals(searchType)) {
-				makeAreaFilter(reqentity, filterBuilders);
-			}
-
-			makeHotelTypeFilter(reqentity, filterBuilders);
-			makeBedTypeFilter(reqentity, filterBuilders);
 
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
 					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
@@ -789,7 +796,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		List<Queue<Map<String, Object>>> roomTypeQueueList = new ArrayList<Queue<Map<String, Object>>>();
 		while (roomTypeQueues.hasNext()) {
 			Queue<Map<String, Object>> roomTypeQueue = roomTypeQueues.next();
-			if (roomTypeQueue != null) {
+			if (roomTypeQueue != null && !roomTypeQueue.isEmpty()) {
 				roomTypeQueueList.add(roomTypeQueue);
 			}
 		}
@@ -797,7 +804,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		AtomicInteger curPos = new AtomicInteger(0);
 
 		for (int i = 0; i < counter; i++) {
-			Map<String, Object> roomtype = pollRoomtype(roomTypeQueueList, curPos);
+			Map<String, Object> roomtype = pollRoomtypes(roomTypeQueueList, curPos);
 
 			if (roomtype != null) {
 				themeGrouped.add(roomtype);
@@ -816,30 +823,21 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return themeGrouped;
 	}
 
-	private Map<String, Object> pollRoomtype(List<Queue<Map<String, Object>>> roomTypeQueue, AtomicInteger curPos) {
+	private Map<String, Object> pollRoomtypes(List<Queue<Map<String, Object>>> roomTypeQueue, AtomicInteger curPosy) {
 		Map<String, Object> roomtype = null;
 
-		for (int i = curPos.get(); i < roomTypeQueue.size(); i++) {
-			if (!roomTypeQueue.get(i).isEmpty()) {
-				roomtype = roomTypeQueue.get(i).poll();
+		Integer lastPosy = curPosy.get();
+		int y = lastPosy;
+		for (int i = 0; i < roomTypeQueue.size(); i++) {
+			if (!roomTypeQueue.get(y).isEmpty()) {
+				roomtype = roomTypeQueue.get(y).poll();
 			}
+
+			y = (y + 1) % roomTypeQueue.size();
 
 			if (roomtype != null) {
-				curPos.set(i);
+				curPosy.set(y);
 				break;
-			}
-		}
-
-		if (roomtype == null) {
-			for (int i = 0; i < roomTypeQueue.size(); i++) {
-				if (!roomTypeQueue.get(i).isEmpty()) {
-					roomtype = roomTypeQueue.get(i).poll();
-				}
-
-				if (roomtype != null) {
-					curPos.set(i);
-					break;
-				}
 			}
 		}
 
@@ -1019,17 +1017,39 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Integer normalId = showConfig.getNormalId();
 
 		Map<String, Object> rtnMap = null;
+		final Integer maxThemes = 15;
 		if (promoId == HotelPromoEnum.Theme.getCode()) {
 			Integer promotype = this.queryByPromoId(promoId);
 			params.setPromotype(String.valueOf(promotype));
-			params.setLimit(15);
+			params.setLimit(maxThemes);
 
 			rtnMap = this.searchThemes(params);
 			List<Map<String, Object>> allHotels = (List<Map<String, Object>>) rtnMap.get("hotel");
 			List<Map<String, Object>> limitHotels = new ArrayList<>();
+			List<String> hotelIds = new ArrayList<String>();
 			if (allHotels != null && allHotels.size() > FrontPageEnum.limit.getId()) {
-				for (int i = 0; i < FrontPageEnum.limit.getId(); i++) {
-					limitHotels.add(allHotels.get(i));
+				int validCount = 0;
+				int tryCounts = 0;
+				List<Map<String, Object>> diffRoomtypes = new ArrayList<Map<String, Object>>();
+				while (validCount < FrontPageEnum.limit.getId() && tryCounts < allHotels.size()) {
+					String hotelId = (String) allHotels.get(tryCounts).get("hotelid");
+					if (!hotelIds.contains(hotelId)) {
+						limitHotels.add(allHotels.get(tryCounts));
+						hotelIds.add(hotelId);
+						validCount++;
+					} else {
+						diffRoomtypes.add(allHotels.get(tryCounts));
+					}
+					tryCounts++;
+				}
+
+				if (limitHotels != null && limitHotels.size() < FrontPageEnum.limit.getId()
+						&& diffRoomtypes.size() > 0) {
+					limitHotels
+							.addAll(diffRoomtypes.subList(0,
+									(FrontPageEnum.limit.getId() - limitHotels.size()) > diffRoomtypes.size()
+											? diffRoomtypes.size()
+											: (FrontPageEnum.limit.getId() - limitHotels.size())));
 				}
 
 				rtnMap.put("hotel", limitHotels);
@@ -1883,14 +1903,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				if (hotelId != null) {
 					Map<String, Object> hotel = (Map<String, Object>) hotelIdMap.get(String.valueOf(hotelId));
+					Map<String, Object> newHotel = new HashMap<String, Object>();
+					newHotel.putAll(hotel);
+
 					List<Map<String, Object>> singleRoomType = new ArrayList<Map<String, Object>>();
 					singleRoomType.add(roomtype);
 
-					hotel.put("roomtype", singleRoomType);
+					newHotel.put("roomtype", singleRoomType);
 
-					updateHotelPicWithRoomtype(roomtype, hotel);
+					updateHotelPicWithRoomtype(roomtype, newHotel);
 
-					hotelIds.add(hotel);
+					hotelIds.add(newHotel);
 				}
 			}
 		}
@@ -1909,6 +1932,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 
 		List<Map<String, Object>> hotelpics = (List<Map<String, Object>>) hotel.get("hotelpic");
+		List<Map<String, Object>> newHotelPics = new ArrayList<Map<String, Object>>();
+		newHotelPics.addAll(hotelpics);
+		hotel.put("hotelpic", newHotelPics);
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		List<Object> roomtypeList = (List<Object>) objectMapper.readValue(picsJson, List.class);
@@ -1916,8 +1942,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		if (roomtypeList != null && roomtypeList.size() > 0) {
 			Map<String, Object> roomtypePic = (Map<String, Object>) roomtypeList.get(0);
 
-			if (hotelpics != null && hotelpics.size() > 0) {
-				hotelpics.set(0, roomtypePic);
+			if (newHotelPics != null && newHotelPics.size() > 0) {
+				newHotelPics.set(0, roomtypePic);
 			} else {
 				List<Map<String, Object>> newhotelpics = new ArrayList<Map<String, Object>>();
 				hotel.put("hotelpic", newhotelpics);
@@ -2230,49 +2256,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				result.put("$sortScore", hit.getScore());
 
-				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype())
-						? Integer.valueOf(reqentity.getPromotype()) : null;
-
-				if (promoType == null) {
-					if (result.get("promoinfo") != null
-							&& ((List<Map<String, Object>>) result.get("promoinfo")).size() > 0) {
-						promoType = findMinPromoType((List<Map<String, Object>>) result.get("promoinfo"));
-					} else {
-						promoType = 0;
-					}
-				}
-
-				if (promoType != null) {
-					List<Map<String, Integer>> promoList = (List<Map<String, Integer>>) result.get("promoinfo");
-					if (promoList != null) {
-						for (Map<String, Integer> promoinfo : promoList) {
-							Integer hotelPromoType = promoinfo.get("promotype");
-							if (hotelPromoType == promoType) {
-								result.put("promoprice", promoinfo.get("promoprice"));
-							}
-						}
-					}
-
-					if (!result.containsKey("promoids")) {
-						List<Integer> promoIds = new ArrayList<Integer>();
-						for (Map<String, Integer> promo : promoList) {
-							Integer tmppromoType = promo.get("promotype");
-
-							List<TRoomSaleConfigInfo> configInfos = roomSaleConfigInfoService
-									.querybyPromoType(tmppromoType);
-
-							if (configInfos != null && configInfos.size() > 0) {
-								Integer promoId = configInfos.get(0).getId();
-								if (!promoIds.contains(promoId)) {
-									promoIds.add(promoId);
-								}
-							}
-						}
-
-						result.put("promoids", promoIds);
-					}
-				}
-
 				// 根据用户经纬度来计算两个经纬度坐标距离（单位：米）
 				Map<String, Object> pin = (Map<String, Object>) result.get("pin");
 				// hotel latitude and longitude
@@ -2460,6 +2443,52 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 				result.put("minprice", minPrice);
 
+				Integer promoType = StringUtils.isNotBlank(reqentity.getPromotype())
+						? Integer.valueOf(reqentity.getPromotype()) : null;
+
+				if (promoType == null) {
+					if (result.get("promoinfo") != null
+							&& ((List<Map<String, Object>>) result.get("promoinfo")).size() > 0) {
+						promoType = findMinPromoType((List<Map<String, Object>>) result.get("promoinfo"));
+					} else {
+						promoType = 0;
+					}
+				}
+
+				if (promoType != null) {
+					List<Map<String, Integer>> promoList = (List<Map<String, Integer>>) result.get("promoinfo");
+					if (promoList != null) {
+						for (Map<String, Integer> promoinfo : promoList) {
+							Integer hotelPromoType = promoinfo.get("promotype");
+							Integer hotelpromoId = promoinfo.get("promoid");
+							if (hotelpromoId != null && hotelpromoId == HotelPromoEnum.Theme.getCode()) {
+								result.put("promoprice", minPrice);
+							} else if (hotelPromoType == promoType) {
+								result.put("promoprice", promoinfo.get("promoprice"));
+							}
+						}
+					}
+
+					if (!result.containsKey("promoids")) {
+						List<Integer> promoIds = new ArrayList<Integer>();
+						for (Map<String, Integer> promo : promoList) {
+							Integer tmppromoType = promo.get("promotype");
+
+							List<TRoomSaleConfigInfo> configInfos = roomSaleConfigInfoService
+									.querybyPromoType(tmppromoType);
+
+							if (configInfos != null && configInfos.size() > 0) {
+								Integer promoId = configInfos.get(0).getId();
+								if (!promoIds.contains(promoId)) {
+									promoIds.add(promoId);
+								}
+							}
+						}
+
+						result.put("promoids", promoIds);
+					}
+				}
+
 				Long maxPrice = roomstateService.findHotelMaxPrice(Long.parseLong(es_hotelid));
 				result.put("minpmsprice", new BigDecimal(maxPrice));
 
@@ -2622,10 +2651,23 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private Integer findMinPromoType(List<Map<String, Object>> promoInfoList) {
 		Integer minTypeId = 0;
 		Integer minPrice = 0;
+		Integer themeType = HotelPromoEnum.Theme.getCode();
+		Integer tmpPromoType = -1;
+
+		Set<Integer> promoTypeLists = new HashSet<>();
+		Boolean existThemeType = false;
+
 		for (int i = 0; (promoInfoList != null && i < promoInfoList.size()); i++) {
 			Map<String, Object> promoInfo = promoInfoList.get(i);
 
 			Integer promoType = (Integer) promoInfo.get("promotype");
+			Integer promoId = (Integer) promoInfo.get("promoid");
+			promoTypeLists.add(promoId);
+			if (themeType == promoId) {
+				existThemeType = true;
+				tmpPromoType = promoType;
+			}
+
 			String promoPriceTxt = (String) promoInfo.get("promoprice");
 
 			Integer promoPrice = 0;
@@ -2633,12 +2675,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				promoPrice = Integer.valueOf(promoPriceTxt);
 			} catch (Exception ex) {
 				logger.warn(String.format("promotype is invalid %s", promoPriceTxt), ex);
+				continue;
 			}
 
 			if (minPrice == 0 || (promoPrice < minPrice)) {
 				minPrice = promoPrice;
 				minTypeId = promoType;
 			}
+		}
+
+		if (existThemeType && promoTypeLists.size() == 1 && promoTypeLists.contains(themeType)) {
+			minTypeId = tmpPromoType;
 		}
 
 		if (minTypeId == 0) {
@@ -2796,13 +2843,16 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		try {
 			Long id = posid == null ? 0l : Long.valueOf(posid);
 			SAreaInfo areainfo = sareaInfoMapper.selectByPrimaryKey(id);
-			String discode = areainfo.getDiscode();
-			if (discode == null) {
-				discode = "";
+
+			Integer disid = -1;
+			if (areainfo != null) {
+				disid = areainfo.getDisid();
 			}
-			filterBuilders.add(FilterBuilders.termFilter("discode", discode));
+
+			filterBuilders.add(FilterBuilders.termFilter("hoteldis", disid.toString()));
 		} catch (Exception e) {
-			logger.error("failed to makeAreaFilter", e);
+			logger.error("failed to sareaInfoMapper.selectByPrimaryKey", e);
+			e.printStackTrace();
 		}
 	}
 
