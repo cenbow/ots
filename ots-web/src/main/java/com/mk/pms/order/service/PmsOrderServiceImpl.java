@@ -116,7 +116,7 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 	private TRoomMapper roomMapper;
 	@Autowired
 	private PmsShiftService pmsShiftService;
-	
+
 	@Autowired
 	private IPayService payService;
 	@Autowired
@@ -307,7 +307,7 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
-	@Transactional(readOnly = false, propagation = Propagation.SUPPORTS) 		
+	@Transactional(readOnly = false, propagation = Propagation.SUPPORTS)
 	@Override
 	public Map saveCustomerNo(Map param) {
 		PmsOrderServiceImpl.logger.info("OTSMessage::PmsOrderServiceImpl::saveCustomerNo::参数::" + param);
@@ -404,7 +404,7 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 					this.saveHotelRoomStatusTest(uuid, hotelId, customNo, order, 1);
 
 					try {
-						pmsShiftService.shiftRoomForPromo(order, true);
+						pmsShiftService.shiftRoomForPromo(order, (String) param.get("type"), true);
 					} catch (Exception ex) {
 						logger.warn(String.format("failed to makeUpForPromo on hotelId:%s; customNo:%s...", hotelId,
 								customNo), ex);
@@ -572,8 +572,8 @@ public class PmsOrderServiceImpl implements PmsOrderService {
 		order.saveOrUpdate();
 		return order;
 	}
-	
-	@Transactional(readOnly = false, propagation = Propagation.SUPPORTS) 	
+
+	@Transactional(readOnly = false, propagation = Propagation.SUPPORTS)
 	public void ChangeOtaOrder(List<PmsRoomOrder> pmsRoomOrderList, Map unlockParam) {
 		PmsOrderServiceImpl.logger.info("OTSMessage::roomOrderList::换房::{}", pmsRoomOrderList);
 		if (pmsRoomOrderList == null) {

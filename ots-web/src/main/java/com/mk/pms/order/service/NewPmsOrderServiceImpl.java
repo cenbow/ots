@@ -195,7 +195,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 							this.pmsRoomService.saveRoomLock(roomLockPo);
 
 							try {
-								pmsShiftService.shiftRoomForPromo(order, roomLockPo != null);
+								pmsShiftService.shiftRoomForPromo(order, param.getString("type"), roomLockPo != null);
 							} catch (Exception ex) {
 								logger.warn(String.format("failed to makeUpForPromo on hotelId:%s; customNo:%s...",
 										hotelId, customNo), ex);
@@ -454,7 +454,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 			}
 
 			try {
-				pmsShiftService.shiftRoomForPromo(pmsRoomOrder, true);
+				pmsShiftService.shiftRoomForPromo(pmsRoomOrder, "1", true);
 			} catch (Exception ex) {
 				logger.error("failed to shiftRoomForPromo in ChangeOtaOrder...", ex);
 			}

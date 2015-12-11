@@ -119,7 +119,7 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 				if (roomtype != null && roomtype.getRooms() != null && roomtype.getRooms().size() > 0) {
 					vcRooms = roomtype.getRooms();
 
-					for (Room room : vcRooms) { 	
+					for (Room room : vcRooms) {
 						logger.info(String.format("checking roomvc...roomid:%s; roomstatus:%s", room.getRoomid(),
 								room.getRoomstatus()));
 					}
@@ -224,10 +224,10 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 		pmsRoomOrder.set("BeginTime", roomRepairPo.getBegintime());
 		pmsRoomOrder.set("EndTime", roomRepairPo.getEndtime());
 
-		shiftRoomForPromo(pmsRoomOrder, false);
+		shiftRoomForPromo(pmsRoomOrder, "1", false);
 	}
 
-	public void shiftRoomForPromo(PmsRoomOrder pmsRoomOrder, boolean isChanged) throws Exception {
+	public void shiftRoomForPromo(PmsRoomOrder pmsRoomOrder, String type, boolean isChanged) throws Exception {
 		Long oldroomtypeid = pmsRoomOrder.getLong("OldRoomTypeId");
 		Long newroomtypeid = pmsRoomOrder.getLong("RoomTypeId");
 		Long newroomid = pmsRoomOrder.getLong("RoomId");
@@ -241,8 +241,13 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format(
-					"about to shiftRoomForPromo... hotelid:%s; status:%s; oldroomtypeid:%s; newroomtypeid:%s; newroomid:%s; pmsRoomOrderNo:%s",
-					hotelid, status, oldroomtypeid, newroomtypeid, newroomid, pmsRoomOrderNo));
+					"about to shiftRoomForPromo... hotelid:%s; status:%s; oldroomtypeid:%s; newroomtypeid:%s; newroomid:%s; pmsRoomOrderNo:%s; type:%s",
+					hotelid, status, oldroomtypeid, newroomtypeid, newroomid, pmsRoomOrderNo, type));
+		}
+
+		if (StringUtils.isNotBlank(type) && "2".equals(type)) {
+			logger.info("order directly sent from ots, ignore...");
+			return;
 		}
 
 		TRoomSaleConfig newRoomsaleConfig = new TRoomSaleConfig();
