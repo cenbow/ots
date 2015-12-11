@@ -1,11 +1,14 @@
 package com.mk.ots.view.controller;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.exception.MyException;
 import com.mk.framework.model.Page;
 import com.mk.framework.util.MyTokenUtils;
+import com.mk.framework.util.UrlUtils;
 import com.mk.ots.card.model.BCard;
 import com.mk.ots.card.service.IBCardService;
 import com.mk.ots.common.bean.ParamBaseBean;
@@ -56,14 +59,21 @@ public class SyViewLogController {
 
     @RequestMapping("/viewevent")
     public ResponseEntity<Map<String, Object>> addviewevent(HttpServletRequest request,String tourl, String actiontype) {
-        logger.info("【sys/addviewevent】 params is : {tourl,actiontype}", tourl + " , " + actiontype );
 
+        logger.info("【sys/addviewevent】 params is : {tourl,actiontype}", tourl + " , " + actiontype );
+        Map<String, Object> resultrtnMap = Maps.newHashMap();
         if (StringUtils.isEmpty(tourl)) {
-            throw MyErrorEnum.errorParm.getMyException("获取目标url失败.");
+            logger.error("获取目标url失败.");
+            resultrtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
+            resultrtnMap.put("errmsg", "日志添加失败");
+            return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
         }
 
         if (StringUtils.isEmpty(actiontype)) {
-            throw MyErrorEnum.errorParm.getMyException("获取事件类型失败.");
+            logger.error("获取目标url失败.");
+            resultrtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
+            resultrtnMap.put("errmsg", "日志添加失败");
+            return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
         }
 
         boolean result = false;
@@ -89,7 +99,7 @@ public class SyViewLogController {
 
         result = syViewLogService.saveSyViewLog(dateMap);
         //组织数据响应
-        Map<String, Object> resultrtnMap = Maps.newHashMap();
+
         resultrtnMap.put("success", result);
 
         if (result) {

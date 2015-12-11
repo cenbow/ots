@@ -1,5 +1,11 @@
 package com.mk.ots.view.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
+import com.mk.framework.util.CommonUtils;
+import com.mk.framework.util.UrlUtils;
 import com.mk.ots.promo.dao.IBPromotionDao;
 import com.mk.ots.view.dao.ISyViewLogDao;
 import com.mk.ots.view.model.SyViewLog;
@@ -58,17 +64,20 @@ public class SyViewLogServiceImpl implements ISyViewLogService {
         syViewLog.setImei(null == map.get("imei") ? null : map.get("imei").toString());
         syViewLog.setCreateTime(new Date());
         Boolean bl = false;
+        Transaction t = Cat.newTransaction("saveSyViewLogPost", map.get("toUrl").toString() );
         try{
             syViewLogDao.save(syViewLog);
+            Cat.logEvent("Sy/saveSyViewLog", map.get("toUrl").toString() , Event.SUCCESS, JSONObject.toJSON(syViewLog).toString());
+            t.setStatus(Transaction.SUCCESS);
             bl = true;
         }catch (Exception e){
             logger.error("添加日志失败");
+            t.setStatus(e);
             bl = false;
         }finally {
+            t.complete();
             return  bl;
         }
 
     }
-
-
 }
