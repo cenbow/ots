@@ -286,6 +286,9 @@
             <if test="valid != null">
                 AND b.valid = #{valid}
             </if>
+            <if test="tag != null">
+                AND b.tag = #{tag}
+            </if>            
         </where>
     </select>    
     <select id="getRoomSaleByParams" resultMap="roomSaleConfig" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfig">

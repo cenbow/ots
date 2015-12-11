@@ -40,8 +40,17 @@ public class TRoomSaleConfig {
     private String promoId;
     private Integer dealCount;
     private String pms;
+    private Integer tag;
+    
+    public Integer getTag() {
+		return tag;
+	}
 
-    public Integer getId() {
+	public void setTag(Integer tag) {
+		this.tag = tag;
+	}
+
+	public Integer getId() {
         return id;
     }
 
