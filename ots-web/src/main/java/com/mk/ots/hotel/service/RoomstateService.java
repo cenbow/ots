@@ -443,6 +443,14 @@ public class RoomstateService {
 				// 处理超过中午12点，应离未离(status='IN')的预定数据
 				String etime = DateUtils.formatTime(troomRepair.getEndtime());
 				int stime = DateUtils.strTimeToSeconds(etime);
+
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format(
+							"checking repair locks...roomid:%s; roomtypeid:%s etime:%s;btime:%s;endtime:%s;enddate:%s; queryBeginTime:%s queryEndTime:%s",
+							troomRepair.getRoomid(), troomRepair.getRoomtypeid(), etime, btime,
+							troomRepair.getEndtime(), enddate, queryBeginTime, queryEndTime));
+				}
+
 				if ("12:00:00".equals(etime) && (troomRepair.getEndtime().getTime() <= DateUtils
 						.getDateFromString(enddate.concat(" 12:00:00")).getTime())) {
 					// 超过中午12点、应离未离处理，锁下一天房.
