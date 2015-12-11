@@ -3,8 +3,10 @@ package com.mk.ots.roomsale.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.mk.ots.common.bean.ParamBaseBean;
 import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.roomsale.model.TPriceScopeDto;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
+import com.mk.ots.roomsale.service.TPriceScopeService;
 import com.mk.ots.web.ServiceOutput;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,6 +36,9 @@ public class HotelPromoController {
 
 	@Autowired
 	private RoomSaleConfigInfoService roomSaleConfigInfoService;
+
+	@Autowired
+	private TPriceScopeService tpriceScopeService;
 
 	/**
 	 * 活动查询
