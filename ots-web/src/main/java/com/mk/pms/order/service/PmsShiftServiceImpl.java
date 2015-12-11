@@ -119,9 +119,9 @@ public class PmsShiftServiceImpl implements PmsShiftService {
 				if (roomtype != null && roomtype.getRooms() != null && roomtype.getRooms().size() > 0) {
 					vcRooms = roomtype.getRooms();
 
-					for (Room room : vcRooms) {
-						logger.info("checking roomvc...roomid:%s; roomstatus:%s", room.getRoomid(),
-								room.getRoomstatus());
+					for (Room room : vcRooms) { 	
+						logger.info(String.format("checking roomvc...roomid:%s; roomstatus:%s", room.getRoomid(),
+								room.getRoomstatus()));
 					}
 				} else {
 					logger.info(String.format("no available rooms found for roomtypeid%s", roomtypeId));
