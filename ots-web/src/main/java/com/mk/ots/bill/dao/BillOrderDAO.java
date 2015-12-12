@@ -18,6 +18,8 @@ package com.mk.ots.bill.dao;
  toPayDiscount //到付贴现金额--qiekeIncome //切客收益10
  */
 import com.google.common.collect.ImmutableMap;
+import com.mk.ots.bill.enums.ServiceQiekeTypeEnum;
+import com.mk.ots.bill.service.ServiceCostRuleService;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.home.util.HomeConst;
 import com.mk.ots.mapper.BillOrderMapper;
@@ -38,6 +40,8 @@ public class BillOrderDAO {
     NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Autowired
     private BillOrderMapper billOrderMapper;
+    @Autowired
+    private ServiceCostRuleService serviceCostRuleService;
 
     private static final long TIME_FOR_FIFTEEN = 15 * 60 * 1000L;
 
@@ -73,7 +77,7 @@ public class BillOrderDAO {
     /**
      * 根据酒店id生成周账单数据
      * @param nowTime
-     * @param HotelId
+     * @param hotelId
      * @return
      */
     public List<Map<String, Object>> getWeekClearingByHotelId(Date nowTime,long hotelId){
@@ -175,7 +179,8 @@ public class BillOrderDAO {
                 + "ro.RoomTypeName roomtypename, "
                 + "ro.RoomNo roomno, "
                 + "ox.checkintime checkintime, "
-                + "o.rulecode rulecode "
+                + "o.rulecode rulecode, "
+                + "o.cityCode cityCode "
                 + "FROM "
                 + "b_otaorder o "
                 + "LEFT JOIN b_otaroomorder ro ON o.id = ro.OtaOrderId "
@@ -225,7 +230,8 @@ public class BillOrderDAO {
                 + "ro.RoomTypeName roomtypename, "
                 + "ro.RoomNo roomno, "
                 + "ox.checkintime checkintime, "
-                + "o.rulecode rulecode "
+                + "o.rulecode rulecode, "
+                + "o.cityCode cityCode "
                 + "FROM "
                 + "b_otaorder o "
                 + "LEFT JOIN b_otaroomorder ro ON o.id = ro.OtaOrderId "
@@ -278,7 +284,8 @@ public class BillOrderDAO {
                 + "ro.RoomTypeName roomtypename, "
                 + "ro.RoomNo roomno, "
                 + "ox.checkintime checkintime, "
-                + "o.rulecode rulecode "
+                + "o.rulecode rulecode, "
+                + "o.cityCode cityCode "
                 + "FROM "
                 + "b_otaorder o "
                 + "LEFT JOIN b_otaroomorder ro ON o.id = ro.OtaOrderId "
@@ -404,8 +411,6 @@ public class BillOrderDAO {
                     invalidreason = 0;
                 }
                 Long isPromotion = (Long)map.get("isPromotion");//4=旧的切客 其他则无关
-                BigDecimal allcost = (BigDecimal)datas2.get("allcost");
-                BigDecimal hotelgive = (BigDecimal)datas2.get("hotelgive");
                 BigDecimal otagive = (BigDecimal) datas2.get("realotagive");
                 Integer rulecode = (Integer)map.get("rulecode");
                 BigDecimal qiekeIncome = (BigDecimal) datas2.get("qiekeIncome");
@@ -458,24 +463,8 @@ public class BillOrderDAO {
 				"        WHEN isPromotion = 2 THEN (o.allcost - o.hotelgive) * 0.1\n" +
 				"        ELSE 0\n" +
 				"    END servicecost,\n" +*/
-                BigDecimal servicecost = new BigDecimal(0);
-                Date createTime = (Date) map.get("orderCreatetime");
-                Date checkintime = (Date) map.get("checkintime");
                 //noshow状态的订单收取服务费(只预付)
-                if(null == checkintime){
-                    servicecost = allcost.subtract(hotelgive).multiply(new BigDecimal(0.1));
-                } else {
-                    long temp = checkintime.getTime() - createTime.getTime(); // 相差毫秒数 > 15分钟，直单到付预付收取服务费
-                    if(spreaduser == 1L){//判断不是切客
-                        if(temp > BillOrderDAO.TIME_FOR_FIFTEEN){//判断下单时间大于15分钟的 //new BigDecimal(0) == qiekeIncome &&
-                            servicecost = allcost.subtract(hotelgive).multiply(new BigDecimal(0.1));
-                        } else{
-                            servicecost = new BigDecimal(0);
-                        }
-                    }else if(spreaduser == 3L){
-                        servicecost = new BigDecimal(0);
-                    }
-                }
+                BigDecimal servicecost = getServiceCost(map, datas2);
                 map.put("servicecost", servicecost);
 
                 //明细表中创建时间
@@ -1113,4 +1102,21 @@ public class BillOrderDAO {
         return billOrderMapper.findFinanceOrder(params);
     }
 
+    public BigDecimal getServiceCost( Map<String, Object> map, Map<String, Object> priceMap) {
+        Date createTime = (Date) map.get("orderCreatetime");
+        String cityCode = (String) map.get("cityCode");
+        Long spreaduser = (Long)map.get("spreaduser");//1=非切克 2,3=切客
+
+        BigDecimal allcost = (BigDecimal)priceMap.get("allcost");
+        BigDecimal hotelgive = (BigDecimal)priceMap.get("hotelgive");
+        BigDecimal price = allcost.subtract(hotelgive);
+        Boolean qiekeFlag = false;
+        if(spreaduser == 2L){//判断不是切客
+            qiekeFlag = true;
+        }else if(spreaduser == 3L){
+            qiekeFlag = true;
+        }
+        BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(createTime, qiekeFlag, price, cityCode);
+        return serviceCost;
+    }
 }
