@@ -1,11 +1,10 @@
 package com.mk.ots.search.service;
 
-import java.util.List;
-import java.util.Map;
-
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
-import com.mk.ots.web.ServiceOutput;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 搜索服务接口类.
@@ -27,6 +26,13 @@ public interface ISearchService {
      * @param ptype
      */
     public Map<String, Object> readonlyPositions(String citycode, String ptype);
+
+    /**
+     * 查询用户附件的位置区域
+     * @param citycode
+     * @param ptype
+     */
+    public Map<String, Object> readonlyNearPositions(String citycode, String ptype, Double userlatitude, Double userlongitude);
 
     /**
      * 模糊查询位置区域

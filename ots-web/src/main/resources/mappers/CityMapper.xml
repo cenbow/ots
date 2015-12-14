@@ -34,6 +34,22 @@
 	WHERE
 		c.isSelect = 'T'
   </select>
+
+  <select id="getAllCity" resultMap="TCityMap">
+    SELECT
+    c.querycityname,
+    c. CODE,
+    c.CityName,
+    c.simplename,
+    c.ishotcity,
+    c.latitude,
+    c.longitude,
+    c.RANGE,
+    c.level
+    FROM
+    t_city c
+
+  </select>
  
  
 </mapper>

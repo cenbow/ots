@@ -4172,6 +4172,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 {
     "errcode": 0,
     "errmsg": "",
+
     "promotext": "情侣酒店 约TA激情",
     "promonote": "冰岛之夜,地中海风情...更多主题风情,等你来挑战",
     "promoicon": "http://xxx.jpg",
@@ -4331,6 +4332,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
     "errmsg":,//错误信息
     "count":,//酒店数量
     "promotext": "栏目大标题",
+
     "promonote": "栏目小标题",
     "promoicon": "栏目图标",
     "hotel":
@@ -4373,6 +4375,13 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
                      }
                 ],  //酒店特点
             "isonpromo":	// 是否特价，是否特价, 0非，>=1特价
+
+            "promoinfo":[{ // 特价活动信息
+                        "promoid":// 特价活动 id （1：今夜特价 2.今日特价 3 主题酒店 6.一元秒杀）
+                        "promotype": //特价活动类型 id
+                        "promoprice": // 特价活动价格
+                        }]
+
             "isrecommend"://是否推荐（T/F）
             "hotelpic":[{//酒店图片
                             "name":,//图片名称
@@ -4388,6 +4397,26 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
             "businesszone":[{//商圈
                             "businesszonename"://商圈名称
                             }],
+            "roomtype":[{//房型
+                            "roomtypeid":,//房型id
+                            "roomtypename":,//房型名称
+                            "roomtypeprice":,//房型价格
+                            "roomtypepmsprice":,//门市价格
+                            "roomtypevc":,//是否有可售房（T/F）该字段根据入参入住时间和离店时间获取该房型是否有可入住房间，并根据结果返回T、F
+                            "maxarea":,//最大面积
+                            "minarea":,//最小面积
+                            "bednum":,//床数量（1：单床房，2：双床房，大于2：其他房）
+                            "roomnum":,//房间数量
+                            "count":0, //房间内床数             "beds":[{//床型信息
+                        "bedtypename":,//床型(双人床，单人床)
+                        "bedlength": //尺寸(1.5米，1.8米)
+                    ]},
+            "roomtypepic":[{//房型图片信息
+		                      "name":'',//图片名称
+                            "pic":[{//图片集合
+                                    "url"://图片地址
+                                 }]
+                          }]
             "roomtypefacility":[{//房间设施
                                 "roomtypefacid"://设施id
                                 "roomtypefacname"://设施名称
@@ -4483,26 +4512,105 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
                             ]
                         }
                     ],
+                    "businesszone": [],
+                    "avlblroomnum": 49,
+                    "hotelcity": "500000",
+                    "numroomtype1": 1,
+                    "provcode": "500000",
+                    "numroomtype2": 1,
+                    "promoprice": "90",
+                    "modifytime": 1450044239609,
+                    "discode": "500107",
                     "hotelfacility": [
                         {
-                            "facid": 10,
-                            "facname": "叫醒服务"
+                            "facid": 44,
+                            "facname": "公共区域wifi"
                         },
                         {
                             "facid": 9,
                             "facname": "棋牌室"
                         }
                     ],
+
                     "businesszone": [                        
                     ]
+                    "service": [],
+                    "isnewpms": "T",
+                    "$mike_price_20151227": 168,
+                    "minprice": 90,
+                    "$mike_price_20151226": 168,
+                    "$mike_price_20151225": 168,
+                    "$mike_price_20151224": 168,
+                    "$mike_price_20151229": 168,
+                    "hoteltype": 1,
+                    "$mike_price_20151228": 168
                 }
 	]
 }
 
 ```
 
-###『增』  首页特色推荐
 
+## 搜索
+### 『增』获取用户附近车站
+***
+**业务说明：**
+根据用户坐标获取距离用户附近的车站信息。
+
+
+**接口url：**
+>http://ip:port/ots/search/nearstation
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿citycode|城市编码|是|
+|userlongitude 	| 用户坐标(经度) | 否 | 用户的经度 
+|userlatitude 	| 用户坐标(纬度) | 否 | 用户的纬度 
+|ptype| 位置类型| 是|  0附近；1商圈；2机场车站；3地铁路线；4行政区；5景点；6医院；7高校；8酒店；9地址；(本接口请传2)
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+
+
+> API返回json数据说明：
+
+```js
+{
+    "datas": [
+        {
+            "id": 684, //位置 id
+            "type": "2",//位置类型
+            "tname": "机场车站",//位置类型名称
+            "name": "上海南站",//位置名称
+            "coordinates": "[[121.429489,31.153303]]"//位置坐标
+        }
+    ],
+    "$times$": "4299ms",
+    "success": true
+}
+```
+
+> API返回json数据示例：
+
+```js
+{
+    "datas": [
+        {
+            "id": 684,
+            "type": "2",
+            "tname": "机场车站",
+            "name": "上海南站",
+            "coordinates": "[[121.429489,31.153303]]"
+        }
+    ],
+    "$times$": "4299ms",
+    "success": true
+}
+```
 
 </article>
 

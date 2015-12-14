@@ -276,4 +276,7 @@ public class Constant {
 	public static final String HOTEL_HIGHLIGHT_SHOWS_IDS ="44";
 	public static final String RECOMMEND_LOADDING_POSITION = "APP-LOADING";
 	public static final String RECOMMEND_HOMEPAGE_SHORTCUT_POSITION = "HOMEPAGE-SHORTCUT";
+
+	public static final Double NANJI_POINT_LAT = -140.976563;
+	public static final Double NANJI_POINT_LON = -88.075329;
 }

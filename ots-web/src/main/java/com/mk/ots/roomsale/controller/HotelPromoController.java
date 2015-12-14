@@ -5,6 +5,7 @@ import com.mk.ots.common.bean.ParamBaseBean;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
+import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.web.ServiceOutput;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,6 +35,8 @@ public class HotelPromoController {
 
 	@Autowired
 	private RoomSaleConfigInfoService roomSaleConfigInfoService;
+	@Autowired
+	private RoomSaleService roomSaleService;
 
 	/**
 	 * 活动查询
@@ -112,8 +115,16 @@ public class HotelPromoController {
 		}
 		return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
 	}
-
-
+	@RequestMapping(value = "/promo/ispromocity", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> ispromocity(ParamBaseBean pbb, String cityid) {
+		logger.info("HotelPromoController::ispromocity::params{}  begin",
+				pbb + "," + cityid);
+		Map<String, Object> result = new HashMap<String, Object>();
+		Boolean isPromoCity = roomSaleService.checkPromoCity(cityid);
+		result.put("result",isPromoCity);
+		return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
+	}
 
 	@RequestMapping(value = "/promo/queryrange", method = RequestMethod.POST)
 	@ResponseBody
