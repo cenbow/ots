@@ -4084,6 +4084,9 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 {
     "errcode": 0,
     "errmsg": "",
+    "promoname": "栏目大标题",
+    "promonote": "栏目小标题",
+    "promoicon": "栏目图标",
     "hotels": [
         {
     "hotel":
@@ -4161,10 +4164,17 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
         }
     ]
 }
-```js示例
+```
+
+> API 数据返回示例
+
+```js
 {
     "errcode": 0,
     "errmsg": "",
+    "promoname": "情侣酒店 约TA激情",
+    "promonote": "冰岛之夜,地中海风情...更多主题风情,等你来挑战",
+    "promoicon": "http://xxx.jpg",
     "hotels": [
         {
             "hotel": [
@@ -4319,6 +4329,9 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
     "errcode":,//错误码
     "errmsg":,//错误信息
     "count":,//酒店数量
+    "promoname": "栏目大标题",
+    "promonote": "栏目小标题",
+    "promoicon": "栏目图标",
     "hotel":
         [{
             "hotelid":,//酒店id
@@ -4412,6 +4425,143 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 	   }]
 
 }
+
+```
+
+> API 数据返回示例
+
+
+```js
+
+       {
+            "promonote": "每天20:00-02:00,订房30元起",
+            "promoid": 1,
+            "promoicon": "http://7xip11.com2.z0.glb.qiniucdn.com/frontpage_icon_jinyetejia.png",
+            "normalid": -1,
+            "hotel": [
+                {
+                    "$mike_price_20151219": 168,
+                    "$mike_price_20151217": 168,
+                    "$mike_price_20151218": 168,
+                    "visible": "T",
+                    "areaname": "无",
+                    "$mike_price_20151215": 168,
+                    "$mike_price_20151216": 168,
+                    "$mike_price_20151214": 168,
+                    "descolor": "32ab18",
+                    "citycode": "500000",
+                    "$sortScore": "NaN",
+                    "hotelid": "2231",
+                    "priority": 3,
+                    "hotelvc": "T",
+                    "$mike_price_20151223": 168,
+                    "promoids": [
+                        3
+                    ],
+                    "$mike_price_20151222": 168,
+                    "longitude": 106.480255,
+                    "$mike_price_20151221": 168,
+                    "$mike_price_20151220": 168,
+                    "hoteldisc": "外观整体呈橘红色七层楼高的独栋商务酒店，1楼有服装珠宝购物、2楼是主题网咖，3-6楼是酒店客房、7楼是棋牌娱乐为一体商业运营模式，为大众提供高品位、高性价比的一家商务酒店。",
+                    "minpmsprice": 428,
+                    "ispms": "T",
+                    "hotelname": "重庆美加丽商务酒店",
+                    "$mike_price_20160111": 168,
+                    "$mike_price_20160110": 168,
+                    "hotelprovince": "Z 重庆市",
+                    "avlblroomdes": "",
+                    "maxprice": 168,
+                    "isfull": "F",
+                    "hoteldis": "J 九龙坡区",
+                    "ordernummon": "",
+                    "roomvacancy": 0,
+                    "$mike_price_20160109": 168,
+                    "hotelrulecode": 1002,
+                    "$mike_price_20160105": 168,
+                    "$mike_price_20160106": 168,
+                    "$mike_price_20160107": 168,
+                    "latitude": 29.527918,
+                    "$mike_price_20160108": 168,
+                    "userdistance": 2178263.953699644,
+                    "$mike_price_20160101": 168,
+                    "$mike_price_20160102": 168,
+                    "iscashback": "F",
+                    "$mike_price_20160103": 168,
+                    "$mike_price_20160104": 168,
+                    "bedtype1": 1,
+                    "scorecount": 19,
+                    "bedtype2": 1,
+                    "areacode": "-1",
+                    "roomnum": 60,
+                    "isnear": "F",
+                    "online": "T",
+                    "createtime": 1450044239609,
+                    "distance": 7253.922178898137,
+                    "rcntordertimedes": "最近预订1天前",
+                    "$mike_price_20160114": 168,
+                    "$mike_price_20160115": 168,
+                    "grade": 4.8,
+                    "$mike_price_20160112": 168,
+                    "collectionstate": "",
+                    "$mike_price_20160113": 168,
+                    "detailaddr": "重庆市九龙坡区石新路13号",
+                    "hotelpicnum": 16,
+                    "promoinfo": [
+                        {
+                            "promoprice": "90",
+                            "promoid": 1,
+                            "promotype": 3
+                        }
+                    ],
+                    "hotelphone": "18716676371",
+                    "numroomtype3": 1,
+                    "$mike_price_20151230": 168,
+                    "isrecommend": "F",
+                    "isonpromo": "1",
+                    "$mike_price_20151231": 168,
+                    "hotelpic": [
+                        {
+                            "name": "主力房源",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/Fk20kUeGEBP75J6TYZTtjurEtEUY"
+                                }
+                            ]
+                        }
+                    ],
+                    "businesszone": [],
+                    "avlblroomnum": 49,
+                    "hotelcity": "500000",
+                    "numroomtype1": 1,
+                    "provcode": "500000",
+                    "numroomtype2": 1,
+                    "promoprice": "90",
+                    "modifytime": 1450044239609,
+                    "discode": "500107",
+                    "hotelfacility": [
+                        {
+                            "facid": 44,
+                            "facname": "公共区域wifi"
+                        },
+                        {
+                            "facid": 9,
+                            "facname": "棋牌室"
+                        }
+                    ],
+                    "service": [],
+                    "isnewpms": "T",
+                    "$mike_price_20151227": 168,
+                    "minprice": 90,
+                    "$mike_price_20151226": 168,
+                    "$mike_price_20151225": 168,
+                    "$mike_price_20151224": 168,
+                    "$mike_price_20151229": 168,
+                    "hoteltype": 1,
+                    "$mike_price_20151228": 168
+                }
+	]
+}
+
 ```
 
 ###『增』  首页特色推荐
