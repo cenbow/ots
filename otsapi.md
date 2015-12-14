@@ -2660,10 +2660,6 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 				"hotelid":,//酒店id
 				"hotelgrade":,//酒店总分
 				"scorecount":,//评价次数
-		*『增』	"hotelmark":[{//酒店评价标签
-						"id":1 , //mark主键
-						"mark":非常好 ,//mark变签内容
-				}],
 				"hotelscoresubject":[{//酒店单项总分
 							"subjectid":,//评价项目
 							"subjectname":,//评价名称
@@ -2690,29 +2686,35 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 								"grade"://单项总分
 							}]
 				}],
-				"scoremxcount":,//评价明细条数
-				"scoremx":[{ //评价明细
-								"orderid":,//订单号
-								"phone":,//评价人手机号
-								"roomtypeid"://房型id
-								"roomid":,//房间id
-								"score":,//评价内容
-								"allgrade":,//综合评分
-								"createtime":,//评价时间
-								"hotelreply":,//客服回复
-								"hotelreplytime":,//客服回复时间
-								"hotelgeireply":,//酒店回复
-								"hotelgeireplytime":,//客服回复时间
-								"scorepic":[{//评价图片信息
-									"url"://图片地址
-								}],
+			
 				"roomscoresubject":[{//评价项目
 						"subjectid":,//评价项目
 						"subjectname":,//评价名称
 						"grade"://分值
 				}]
-		}]
-	}]
+		}]，
+	 "scoremxcount":,//评价明细条数
+	 "scoremx":[{ //评价明细
+					"orderid":,//订单号
+					"phone":,//评价人手机号
+					"roomtypeid"://房型id
+					"roomid":,//房间id
+					"score":,//评价内容
+					"allgrade":,//综合评分
+					"createtime":,//评价时间
+					"hotelreply":,//客服回复
+					"hotelreplytime":,//客服回复时间
+					"hotelgeireply":,//酒店回复
+					"hotelgeireplytime":,//客服回复时间
+			*『增』  "roominfo":,//房间信息
+			*『增』	"hotelmark":[{//酒店评价标签
+						"id":1 , //mark主键
+						"mark":非常好 ,//mark变签内容
+					}],
+					"scorepic":[{//评价图片信息
+						"url"://图片地址
+					}],
+	 }]
 }
 ```
 
