@@ -1382,7 +1382,7 @@ public class RoomstateService {
 
 					// 兼容老版本
 					if (isPromo != null && isPromo) {
-
+						if ()
 						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
 								&& !"3".equals(callMethod)) {
 

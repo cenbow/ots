@@ -1624,6 +1624,37 @@ otsversion 	| OTS版本 	| 否 	|
 	
 }
 ``` 
+### 『增』判断是否特价城市
+***
+**业务说明：**
+根据 cityid 获取该城市是否参与特价活动
+
+
+**接口url：**
+>http://ip:port/ots//promo/ispromocity
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿ cityid|城市编码|是|
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+
+> API返回json数据示例：
+
+```js
+{
+	"result":true//该城市参与特价活动
+}
+或
+{
+	"result":false//该城市未参与特价活动
+}
+```
 
 ### `「增」` 特价房提醒----**业务说明：**> 记录用户提醒特价房要求。**接口url：**> http://ip:port/ots/remind/create**请求参数：**|    字段        |         名称         | 是否必须  | 说明||--------------- | ------------------- | ----------| -----------||token 	| 用户令牌 	| 是 	|  
 |hotelid 	| 酒店id 	| 是 	| 	|roomtypeid 	| 房型id 	| 是 	| 	|callmethod 	| 调用来源 	| 否 	| 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) ||callversion 	| 调用版本 	| 否 | 	|ip 	| IP地址 	| 否 	|  		|hardwarecode 	| 硬件编码 	| 否 |  |otsversion 	| OTS版本 	| 否 	|  > API返回json数据说明：```js{    "success":true,    "errcode":,//错误码    "errmsg"://错误信息}```
@@ -3984,7 +4015,6 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 
 }
 ```
-
 
 
 ### 『增』首页快捷入口
