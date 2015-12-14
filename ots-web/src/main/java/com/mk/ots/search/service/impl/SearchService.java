@@ -231,6 +231,24 @@ public class SearchService implements ISearchService {
 		return rtnMap;
 	}
 
+
+	/**
+	 * 查询位置区域
+	 *
+	 * @param citycode
+	 * @param ptype
+	 */
+	@Override
+	public Map<String, Object> readonlyNearPositions(String citycode, String ptype, Double userlatitude, Double userlongitude) {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		// 从ES中读取区域位置信息
+		List<SearchPositionsCoordinateRespEntity> datas = readonlyNearPositionsFromES(citycode, ptype,userlatitude,userlongitude);
+		rtnMap.put("datas", datas);
+
+		return rtnMap;
+	}
+
+
 	/**
 	 * 校验酒店搜索日期
 	 * 
@@ -2400,6 +2418,84 @@ public class SearchService implements ISearchService {
 		return datas;
 	}
 
+
+	/**
+	 * 从ES中读取用户附近位置信息
+	 *
+	 * @param citycode
+	 * @param ptype
+	 * @return
+	 */
+	public List<SearchPositionsCoordinateRespEntity> readonlyNearPositionsFromES(String citycode, String ptype, Double userlatitude,Double userlongitude) {
+		SearchRequestBuilder searchBuilder = esProxy.prepareSearch(esProxy.OTS_INDEX_DEFAULT,
+				esProxy.POSITION_TYPE_DEFAULT);
+		searchBuilder.setQuery(QueryBuilders.matchQuery("citycode", citycode));
+		if (StringUtils.isNotBlank(ptype)) {
+			searchBuilder.setQuery(QueryBuilders.matchQuery("ptype", ptype));
+		}
+
+		this.sortByDistance(searchBuilder, new GeoPoint(userlatitude, userlongitude));
+		//searchBuilder.addSort("ptype", SortOrder.ASC).addSort("id", SortOrder.ASC);
+		searchBuilder.setFrom(0).setSize(10000).setExplain(true);// ES默认10条记录，设置10000，能返回citycode下所有。
+
+		SearchResponse searchResponse = searchBuilder.execute().actionGet();
+		SearchHits searchHits = searchResponse.getHits();
+		long totalHits = searchResponse.getHits().totalHits();
+		logger.info("search positions by citycode:{}, success: total {} found.", citycode, totalHits);
+		SearchHit[] hits = searchHits.getHits();
+		List<SearchPositionsCoordinateRespEntity> datas = Lists.newArrayList();
+		for (int i = 0; i < hits.length; i++) {
+			SearchHit hit = hits[i];
+			Map<String, Object> result = hit.getSource();
+			SearchPositionsCoordinateRespEntity ds = new SearchPositionsCoordinateRespEntity();
+			ds.setId(Long.valueOf(result.get("id").toString()));
+			ds.setName(result.get("name").toString());
+			String typeid = result.get("ptype").toString();
+			ds.setType(typeid);
+			int tid = Integer.parseInt(typeid);
+			ds.setTname(PositionTypeEnum.getById(tid).getTypeName());
+			if (result.get("lat") == null || result.get("lng") == null) {
+				ds.setCoordinates("[[]]");
+			} else {
+				Double lat = (double) result.get("lat");
+				Double lng = (double) result.get("lng");
+				ds.setCoordinates("[[" + lng + "," + lat + "]]");
+			}
+			if (tid == PositionTypeEnum.METRO.getId()) {
+				List stResult = new ArrayList();
+				List stations = (List) result.get("stations");
+				for (int j = 0; j < stations.size(); j++) {
+					Map<String, Object> cm = (Map) stations.get(j);
+					Child dsc = ds.new Child();
+					dsc.setId(Long.parseLong(cm.get("id").toString()));
+					dsc.setPid(Long.parseLong(cm.get("lineid").toString()));
+					dsc.setCid(Long.parseLong(cm.get("stationid").toString()));
+					dsc.setcName(cm.get("stationname").toString());
+					if (cm.get("lat") == null || cm.get("lng") == null) {
+						dsc.setcCoordinates("[[]]");
+					} else {
+						Double lat = (double) cm.get("lat");
+						Double lng = (double) cm.get("lng");
+						dsc.setcCoordinates("[[" + lng + "," + lat + "]]");
+					}
+					stResult.add(dsc);
+				}
+				// 地铁站排序
+				Collections.sort(stResult, new Comparator<Child>() {
+					@Override
+					public int compare(Child b1, Child b2) {
+						return b1.getCid().compareTo(b2.getCid());
+					}
+				});
+				ds.setChild(stResult);
+			}
+			datas.add(ds);
+		}
+		return datas;
+	}
+
+
+
 	/**
 	 * 
 	 * @param citycode
@@ -2608,6 +2704,10 @@ public class SearchService implements ISearchService {
 				data.put("citycode", landmark.getCitycode());
 				data.put("discode", landmark.getDiscode());
 				data.put("status", landmark.getStatus());
+				HashMap<String, Object> pin = new HashMap<>();
+				pin.put("lat",landmark.getLat().doubleValue());
+				pin.put("lon",landmark.getLng().doubleValue());
+				data.put("pin",pin);
 				esdatas.add(data);
 			}
 			if (esdatas.size() > 0) {
@@ -2720,6 +2820,7 @@ public class SearchService implements ISearchService {
 				data.put("citycode", subway.getCitycode());
 				data.put("discode", "");
 				data.put("status", subway.getStatus());
+
 
 				// 查询地铁站点
 				String lineid = subway.getLineid() == null ? "" : String.valueOf(subway.getLineid());

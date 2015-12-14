@@ -7,6 +7,9 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import com.mk.ots.hotel.bean.TCity;
+import com.mk.ots.hotel.service.CityService;
+import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +50,9 @@ public class SearchController {
     
     @Autowired
     private ISearchService searchService;
+
+    @Autowired
+    private CityService cityService;
     
     /**
      * 联想搜索接口API.
@@ -69,6 +75,9 @@ public class SearchController {
             rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, bfErrors.toString());
             return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
         }
+
+
+
         // service业务处理开始
         // service业务处理结束
         long finishTime = new Date().getTime();
@@ -110,7 +119,48 @@ public class SearchController {
         }
         return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
     }
-    
+
+
+    /**
+     * 城市位置区域接口API.
+     * @param params
+     * @param errors
+     * @return
+     */
+    @RequestMapping(value = {"/search/nearstation"})
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getNeartation(@Valid SearchPositionsReqEntity params,Double userlongitude, Double userlatitude, Errors errors) {
+        long startTime = new Date().getTime();
+        Map<String, Object> rtnMap = Maps.newHashMap();
+        StringBuffer bfErrors = new StringBuffer();
+        for (ObjectError error : errors.getAllErrors()) {
+            bfErrors.append(error.getDefaultMessage()).append("; ");
+        }
+        if (bfErrors.length() > 0) {
+            rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+            rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+            rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, bfErrors.toString());
+            return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
+        }
+
+        if (userlatitude == null || userlongitude ==null) {
+            rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+            rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+            rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "参数userlatitude 或userlongitude 不能为空！ ");
+            return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
+        }
+
+        // service业务处理开始
+        rtnMap= searchService.readonlyNearPositions(params.getCitycode(), params.getPtype(), userlatitude, userlongitude);
+        rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
+
+        // service业务处理结束
+        long finishTime = new Date().getTime();
+        if (AppUtils.DEBUG_MODE) {
+            rtnMap.put(ServiceOutput.STR_MSG_TIMES, finishTime - startTime + "ms");
+        }
+        return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
+    }
     
     /**
      * 城市位置区域模糊搜索.
@@ -185,4 +235,17 @@ public class SearchController {
         boolean forceUpdate = Constant.STR_TRUE.equals(isforce);
         return new ResponseEntity<Map<String, Object>>(searchService.readonlySyncCityPOI(citycode, typeid, forceUpdate), HttpStatus.OK);
     }
+
+    @RequestMapping(value = {"/indexer/positioninit"})
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> initAllPosition(String typeid, String isforce) {
+        boolean forceUpdate = Constant.STR_TRUE.equals(isforce);
+        List<TCity> allSelectCitys = cityService.findSelectCity();
+
+        for (TCity city: allSelectCitys){
+            searchService.readonlySyncCityPOI(city.getCode(), typeid, forceUpdate);
+        }
+        return new ResponseEntity<Map<String, Object>>(, HttpStatus.OK);
+    }
+
 }
