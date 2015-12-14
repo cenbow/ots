@@ -717,6 +717,8 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 |    字段        |         名称        | 是否必须 | 说明|
 --------------- | ------------------- | -------| ----------
 |﻿cityid|城市编码|是|
+|﻿page|第几页|否|
+|﻿limit|每页显示几条记录|否|
 | userlatitude |用户坐标(纬度)|是|
 | userlongitude |用户坐标(经度)|是|
 |pillowlongitude 	| 查询坐标(经度) | 否 |
@@ -731,11 +733,218 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 
 ```js
 {
-	success:true,
-	errcode:,//错误码
-	errmsg:,//错误信息
-}
+    "success":true,
+    "errcode":,//错误码
+    "errmsg":,//错误信息
+    "count":,//酒店数量
+     "promonote": "每天20:00-02:00,订房30元起",
+     "promoid": 1,
+      "promoicon": "http://7xip11.com2.z0.glb.qiniucdn.com/frontpage_icon_jinyetejia.png",
+     "normalid": -1,
+    "promosec":0,             //距离特价活动开始的秒数
+    "promosecend":25235， //距离特价活动结束的秒数
+    "nextpromosec":71975，      //距离下一次特价活动开始的秒数
+    "hotel":
+        [{
+            "hotelid":,//酒店id
+            "hotelname":,//酒店名称
+            "hotelrulecode":,//酒店切客规则类型码（1001规则A；1002规则B）
+            "online":,//是否在线(T/F)
+            "hotelvc":,//是否有可售房（T/F）该字段根据入参入住时间和离店时间获取该酒店是否有可入住房间，并根据结果返回T、F
+            "detailaddr":,//酒店地址
+            "hoteldis":,//酒店所属区县
+            "hotelcity":,//酒店所属城市
+            "hotelprovince":,//酒店所属省份
+            "hotelphone":,//联系电话
+            "hoteldisc":,//酒店简介
+            "longitude":, //酒店坐标(经度)
+            "latitude":,//酒店坐标(纬度)
+            "distance":,//酒店距离xxx米，该距离表示屏幕坐标到酒店坐标的距离
+            "userdistance":,//距您xxx米，该距离表示用户坐标到屏幕坐标的距离
+            "isnear":,//是否最近酒店，distance值最小的酒店为T,其他为F
+            "grade":, //酒店评分
+            "scorecount":, //评价次数
+            "minprice":,//最低价格
+            "minpmsprice",//最低价格对应房型的门市价
+            "ispms":,//是否签约（T/F）
+            "hotelpicnum":,//酒店图片总数
+            "avlblroomnum":,//可订房间数
+            "avlblroomdes":,//可订房描述
+            "descolor":,   //描述字体颜色  （状态: ">3间房间"    绿色   32ab18 状态："<=仅剩3间"   红色   fb4b40 状态：满房   灰色    989898）
+            "ordernummon":,//月订单数
+            "rcntordertimedes":, //最近订单时间描述
+            "distancestr": //距离描述
+            "isteambuying":,//是否团购（T/F）
+	   *「增」"greetscore":1080,//受欢迎指数
+	   *「增」 "repairinfo":"2014年装修",//装修信息
+	   *「增」 "highlights":[{ 
+                        "name": "wifi",//特点描述
+                        "icon":"http://7xip11.com2.z0.glb.qiniucdn.com/view_theme_roomtype_detail_icon_zhuozi.png",
+                         "id":44
+                     }
+                ],  //酒店特点
+            "isonpromo":	// 是否特价，是否特价, 0非，>=1特价
+            "promoinfo":[{ // 特价活动信息
+                        "promoid":// 特价活动 id （1：今夜特价 2.今日特价 3 主题酒店 6.一元秒杀）
+                        "promotype": //特价活动类型 id
+                        "promoprice": // 特价活动价格
+            
+                        }]
+            "teambuying":[{//团购信息
+                            "teambuyingname":,//团购名称
+                            "url"://团购地址
+                         }],
+            "isrecommend"://是否推荐（T/F）
+            "hotelpic":[{//酒店图片
+                            "name":,//图片名称
+                            "pic":[{//图片集合
+                                    "url"://图片地址
+                                  }],
+			     "width": //图片宽度,
+			     "height": //图片高度
+                       }],
+            "hotelfacility":[{//酒店设施
+                                "facid":,//设施id
+                                "facname"://设施名称
+                            }],
+            //交通
+            "businesszone":[{//商圈
+                            "businesszonename"://商圈名称
+                            }],
+            "roomtype":[{//房型
+                            "roomtypeid":,//房型id
+                            "roomtypename":,//房型名称
+                            "roomtypeprice":,//房型价格
+                            "roomtypepmsprice":,//门市价格
+                            "roomtypevc":,//是否有可售房（T/F）该字段根据入参入住时间和离店时间获取该房型是否有可入住房间，并根据结果返回T、F
+                            "maxarea":,//最大面积
+                            "minarea":,//最小面积
+                            "bednum":,//床数量（1：单床房，2：双床房，大于2：其他房）
+                            "roomnum":,//房间数量
+                            "count":0, //房间内床数             "beds":[{//床型信息
+                        "bedtypename":,//床型(双人床，单人床)
+                        "bedlength": //尺寸(1.5米，1.8米)
+                    ]},
+            "roomtypepic":[{//房型图片信息
+		                      "name":'',//图片名称
+                            "pic":[{//图片集合
+                                    "url"://图片地址
+                                 }],
+			     "width": //图片宽度,
+			     "height": //图片高度
+                          }]
+            "roomtypefacility":[{//房间设施
+                                "roomtypefacid"://设施id
+                                "roomtypefacname"://设施名称
+                                }]
+        
+            "service":[{//酒店服务
+                                "serviceid":,//服务id
+                                "servicename":,//服务名称
+                     }]
+            "iscashback":  //是否返现（T/F）
+	   }],
+	   "supplementhotel":[{
+	         "hotelid":,//酒店id
+            "hotelname":,//酒店名称
+            "hotelrulecode":,//酒店切客规则类型码（1001规则A；1002规则B）
+            "online":,//是否在线(T/F)
+            "hotelvc":,//是否有可售房（T/F）该字段根据入参入住时间和离店时间获取该酒店是否有可入住房间，并根据结果返回T、F
+            "detailaddr":,//酒店地址
+            "hoteldis":,//酒店所属区县
+            "hotelcity":,//酒店所属城市
+            "hotelprovince":,//酒店所属省份
+            "hotelphone":,//联系电话
+            "hoteldisc":,//酒店简介
+            "longitude":, //酒店坐标(经度)
+            "latitude":,//酒店坐标(纬度)
+            "distance":,//酒店距离xxx米，该距离表示屏幕坐标到酒店坐标的距离
+            "userdistance":,//距您xxx米，该距离表示用户坐标到屏幕坐标的距离
+            "isnear":,//是否最近酒店，distance值最小的酒店为T,其他为F
+            "grade":, //酒店评分
+            "scorecount":, //评价次数
+            "minprice":,//最低价格
+            "minpmsprice",//最低价格对应房型的门市价
+            "ispms":,//是否签约（T/F）
+            "hotelpicnum":,//酒店图片总数
+            "avlblroomnum":,//可订房间数
+            "avlblroomdes":,//可订房描述
+            "descolor":,   //描述字体颜色  （状态: ">3间房间"    绿色   32ab18 状态："<=仅剩3间"   红色   fb4b40 状态：满房   灰色    989898）
+            "ordernummon":,//月订单数
+            "rcntordertimedes":, //最近订单时间描述
+            "distancestr": //距离描述
+            "isteambuying":,//是否团购（T/F）
+	   *「增」"greetscore":1080,//受欢迎指数
+	   *「增」 "repairinfo":"2014年装修",//装修信息
+	    *「增」 "highlights":[
+                  	{ 
+                        "name": "wifi",//特点描述
+                        "icon":"http://7xip11.com2.z0.glb.qiniucdn.com/view_theme_roomtype_detail_icon_zhuozi.png",
+                         "id":44
+                     }
+                ],  //酒店特点
+            "isonpromo":	// 是否特价，是否特价, 0非，>=1特价
+            "promoinfo":[{ // 特价活动信息
+                        "promoid":// 特价活动 id （1：今夜特价 2.今日特价 3 主题酒店 6.一元秒杀）
+                        "promotype": //特价活动类型 id
+                        "promoprice": // 特价活动价格
+            
+                        }]
+            "teambuying":[{//团购信息
+                            "teambuyingname":,//团购名称
+                            "url"://团购地址
+                         }],
+            "isrecommend"://是否推荐（T/F）
+            "hotelpic":[{//酒店图片
+                            "name":,//图片名称
+                            "pic":[{//图片集合
+                                    "url"://图片地址
+                                  }]
+                       }],
+            "hotelfacility":[{//酒店设施
+                                "facid":,//设施id
+                                "facname"://设施名称
+                            }],
+            //交通
+            "businesszone":[{//商圈
+                            "businesszonename"://商圈名称
+                            }],
+            "roomtype":[{//房型
+                            "roomtypeid":,//房型id
+                            "roomtypename":,//房型名称
+                            "roomtypeprice":,//房型价格
+                            "roomtypepmsprice":,//门市价格
+                            "roomtypevc":,//是否有可售房（T/F）该字段根据入参入住时间和离店时间获取该房型是否有可入住房间，并根据结果返回T、F
+                            "maxarea":,//最大面积
+                            "minarea":,//最小面积
+                            "bednum":,//床数量（1：单床房，2：双床房，大于2：其他房）
+                            "roomnum":,//房间数量
+                            "count":0, //房间内床数             "beds":[{//床型信息
+                        "bedtypename":,//床型(双人床，单人床)
+                        "bedlength": //尺寸(1.5米，1.8米)
+                    ]},
+            "roomtypepic":[{//房型图片信息
+		                      "name":'',//图片名称
+                            "pic":[{//图片集合
+                                    "url"://图片地址
+                                 }],
+			     "width": //图片宽度,
+			     "height": //图片高度
+                          }]
+            "roomtypefacility":[{//房间设施
+                                "roomtypefacid"://设施id
+                                "roomtypefacname"://设施名称
+                                }]
+        
+            "service":[{//酒店服务
+                                "serviceid":,//服务id
+                                "servicename":,//服务名称
+                     }]
+            "iscashback":  //是否返现（T/F）
+	   
+	   }]
 
+}
 ```
 
 ###『增』 首页主题房
