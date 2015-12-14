@@ -1504,17 +1504,17 @@ public class DateUtils extends Object {
 
     }
 
-    public static Date getMonthFirstDay(Calendar cal){
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-        Date firstDate = cal.getTime();
-        return firstDate;
-    }
-
     public static Date getMonthLastDay(Calendar cal){
         cal.set(Calendar.DAY_OF_MONTH, 1);
-        cal.add(Calendar.DAY_OF_MONTH, -1);
         Date lastDate = cal.getTime();
         return lastDate;
+    }
+
+    public static Date getMonthFirstDay(Calendar cal){
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.add(Calendar.DAY_OF_MONTH, -1);
+        Date firstDate = cal.getTime();
+        return firstDate;
     }
 
     

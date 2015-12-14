@@ -814,6 +814,8 @@ public class BillOrderDAO {
             cal.set(Calendar.DAY_OF_MONTH, -1);
             fstarttime = DateUtils.getStringFromDate(DateUtils.getMonthFirstDay(cal), DateUtils.FORMAT_DATE);
             fendtime = DateUtils.getStringFromDate(DateUtils.getMonthLastDay(cal), DateUtils.FORMAT_DATE);
+            logger.info(String.format("BillOrderDAO::genBillConfirmChecks,fstarttime[%s]，fendtime[%s]", fstarttime, fendtime));
+
             theMonth = fstarttime.split("-")[0]+fstarttime.split("-")[1];
             List<Map<String,Object>> datasAllHotel;
             Map<String, Object> paramMapAllHotel = new HashMap<String, Object>();
