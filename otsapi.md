@@ -637,6 +637,7 @@ otsversion 	| OTS版本 	| 否 	|
 |orderby 	| 排序项目 	| 否 	| 暂时只有roomno| 
 |roomno 	| 房间号	| 否 |  |	
 |isShowAllRoom 	| 是否显示所有的房间 	| 否 | 默认为F. T：显示所有 F:不显示所有（默认只显示5间）|
+|showblacktype 	| 显示黑名单类型的房态 	| 否 |1-一元秒杀|
 |callmethod 	| 调用来源 	| 否 	| 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) |
 |callversion 	| 调用版本 	| 否 |  |
 |callentry 	| 调用入口 	| 否 	| 1-摇一摇 <br>2-房态搜索入口<br> 3-切客 |
