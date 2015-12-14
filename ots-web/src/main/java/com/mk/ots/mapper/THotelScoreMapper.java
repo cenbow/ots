@@ -1,5 +1,7 @@
 package com.mk.ots.mapper;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,4 +28,14 @@ public interface THotelScoreMapper {
     int updateByPrimaryKey(THotelScore record);
     
     List<Map<String, String>> findHotelScoresByHotelid(Long hotelid);
+
+   public  Long  findHotelScoreNumByHotelId(Long hotelId);
+
+    public  Long  findHotelScoreNumByMid(HashMap hm);
+
+    public BigDecimal findHotelScoreMoneyByMid(HashMap hm);
+
+
+
+
 }

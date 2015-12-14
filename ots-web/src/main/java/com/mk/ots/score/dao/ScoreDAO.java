@@ -431,7 +431,7 @@ public class ScoreDAO {
 				params.add(enddate);
 			}
 			//20151012  4:通过审核,未回复，5:未通过审核,已回复，7:通过审核,已回复
-			sqlBuffer.append(" and ((a.status=4 or a.status=7) or a.mid=?)");
+			sqlBuffer.append(" and ((status=4 or status=7) or mid=?)");
 			params.add(mid);
 			//20150923 产品讨论，只展示状态为4的记录
 			//sqlBuffer.append(" and status=4 ");//4:待回复

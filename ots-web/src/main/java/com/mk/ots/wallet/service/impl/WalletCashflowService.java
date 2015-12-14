@@ -3,10 +3,14 @@ package com.mk.ots.wallet.service.impl;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.model.Page;
+import com.mk.ots.city.model.TCityCommentConfig;
 import com.mk.ots.city.service.ITCityCommentConfigService;
+import com.mk.ots.common.enums.BackMoneyTypeEnum;
 import com.mk.ots.common.enums.OtaOrderFlagEnum;
+import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.hotel.model.THotelModel;
 import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.mapper.THotelScoreMapper;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.service.OrderBusinessLogService;
 import com.mk.ots.order.service.OrderService;
@@ -25,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -56,6 +61,9 @@ public class WalletCashflowService implements IWalletCashflowService {
 
     @Autowired
     private ITCityCommentConfigService itCityCommentConfigService;
+
+    @Autowired
+    private THotelScoreMapper tHotelScoreMapper;
 
     @Override
     public Page<UWalletCashFlow> findPage(Long mid, Long sourceid, int pageindex, int datesize) {
@@ -153,6 +161,11 @@ public class WalletCashflowService implements IWalletCashflowService {
                 orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.ORDER_CASHBACK.getId(), "", "¥" + price + "红包已放入您的账户", "");
             } else if (CashflowTypeEnum.CASHBACK_HOTEL_IN.equals(cashflowtype)) {
                 //2.2 酒店点评返现
+
+                TCityCommentConfig  tcityCommentConfig = this.canBackMoney(sourceid);
+                if(null==tcityCommentConfig){
+                    throw MyErrorEnum.customError.getMyException("酒店点评返现失败.失败原因，不符合规则，超过最大次数或者最大金额");
+                }
                 //2.2.1 从配置表查询城市返现金额
                 price = queryCashBackHotel(sourceid);
                 //2.2.2 保存返现记录并同步用户帐户
@@ -174,6 +187,46 @@ public class WalletCashflowService implements IWalletCashflowService {
         }
         return price;
     }
+
+    private  TCityCommentConfig  canBackMoney(Long  scoreid){
+        THotelScore hotelScore = scoreService.findScoreByScoreid(scoreid);
+        if (hotelScore != null) {
+            THotelModel tHotelModel = hotelService.readonlyHotelModel(hotelScore.getHotelid());
+            Long citycode = Long.parseLong(tHotelModel.getCitycode());
+            TCityCommentConfig tcityCommentConfig = itCityCommentConfigService.findCashbackEntityByCitycode(citycode);
+            if(null==tcityCommentConfig){
+                return  null;
+            }
+            //无限制
+            if(BackMoneyTypeEnum.defineNot.getId()==(tcityCommentConfig.getType())){
+                return   tcityCommentConfig;
+            }
+            //最大数量限制
+           else if (BackMoneyTypeEnum.defineMaxNum.getId()==(tcityCommentConfig.getType())) {
+                int  maxCountDef = tcityCommentConfig.getMaxCount();
+                HashMap hm = new HashMap();
+                hm.put("createTime", DateUtils.formatDatetime(hotelScore.getCreatetime()));
+                hm.put("mid", hotelScore.getMid());
+               if(maxCountDef<=tHotelScoreMapper.findHotelScoreNumByMid(hm)){
+                   logger.info("酒店点评返现已超过最大次数");
+                   return  null;
+               }
+                return   tcityCommentConfig;
+            }else  if (BackMoneyTypeEnum.defineMaxMoney.getId()==(tcityCommentConfig.getType())){
+                BigDecimal  maxMoney = tcityCommentConfig.getMaxPrice();
+                HashMap hm = new HashMap();
+                hm.put("createTime", hotelScore.getCreatetime());
+                hm.put("mid", hotelScore.getMid());
+//                if(maxMoney.compareTo(tHotelScoreMapper.findHotelScoreMoneyByMid(hm))>0){
+//
+//                }
+                return  null;
+            }
+        }
+        return  null;
+    }
+
+
 
 
     @Override
@@ -346,8 +399,24 @@ public class WalletCashflowService implements IWalletCashflowService {
         if (hotelScore != null) {
             THotelModel tHotelModel = hotelService.readonlyHotelModel(hotelScore.getHotelid());
             Long citycode = Long.parseLong(tHotelModel.getCitycode());
-            return itCityCommentConfigService.findCashbackByCitycode(citycode);
+            TCityCommentConfig tcityCommentConfig = itCityCommentConfigService.findCashbackEntityByCitycode(citycode);
+            //判断当前评论是否改酒店的第一次评论
+            if(isHotelFirstScoreUserFull(tHotelModel.getId())){
+                    if (tcityCommentConfig.getFirstValue().compareTo(BigDecimal.ZERO)>0){
+                        return  tcityCommentConfig.getFirstValue();
+                    }
+            }
+            return   tcityCommentConfig.getValue();
         }
-        return BigDecimal.ZERO;
+        return  BigDecimal.ZERO;
+    }
+
+
+    private  Boolean   isHotelFirstScoreUserFull(Long  hotelId){
+        Long  count = tHotelScoreMapper.findHotelScoreNumByHotelId(hotelId);
+        if(count>0){
+            return false;
+        }
+        return true;
     }
 }

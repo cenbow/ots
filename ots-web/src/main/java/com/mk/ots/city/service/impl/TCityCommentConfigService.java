@@ -24,4 +24,13 @@ public class TCityCommentConfigService implements ITCityCommentConfigService {
         }
         return BigDecimal.ZERO;
     }
+
+    @Override
+    public TCityCommentConfig findCashbackEntityByCitycode(Long citycode) {
+        TCityCommentConfig tCityCommentConfig = itCityCommentConfigDAO.findCityConfigByCitycode(citycode);
+        if (tCityCommentConfig != null && tCityCommentConfig.getValue().compareTo(BigDecimal.ZERO) > 0) {
+            return tCityCommentConfig;
+        }
+        return null;
+    }
 }
