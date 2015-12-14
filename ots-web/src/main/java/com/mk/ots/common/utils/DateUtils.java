@@ -4,6 +4,8 @@
  */
 package com.mk.ots.common.utils;
 
+import com.mk.framework.AppUtils;
+import com.mk.ots.bill.dao.BillOrderDAO;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Seconds;
@@ -1494,9 +1496,25 @@ public class DateUtils extends Object {
      * @param args 参数
      */
     public static void main(String[] args) throws ParseException {
-        Calendar c = Calendar.getInstance();
-        c.setTime(DateUtils.addDays(DateUtils.parseDate("2015-11-09", DateUtils.FORMAT_DATE), -2));
-        Date[]  d = DateUtils.getWeekStartAndEndDate(c);
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(DateUtils.getDateFromString("2016-01-01"));
+        cal.set(Calendar.DAY_OF_MONTH, -1);
+
+
+    }
+
+    public static Date getMonthFirstDay(Calendar cal){
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        Date firstDate = cal.getTime();
+        return firstDate;
+    }
+
+    public static Date getMonthLastDay(Calendar cal){
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.add(Calendar.DAY_OF_MONTH, -1);
+        Date lastDate = cal.getTime();
+        return lastDate;
     }
 
     

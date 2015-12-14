@@ -809,8 +809,11 @@ public class BillOrderDAO {
         } else {//执行所有酒店的
             //查询出所有酒店 循环 查询每个酒店的账期 执行查询 插入表中 并且写入每个酒店的账期表 更新 明细表和天表 中的PID字段
             //从每天表中查询所有酒店 1号-31号的
-            fstarttime = DateUtils.getMonthFirstDay(DateUtils.getDateAdded(-1, DateUtils.getStringFromDate(begintime, DateUtils.FORMATDATETIME)));
-            fendtime = DateUtils.getDateAdded(0, DateUtils.getStringFromDate(begintime, DateUtils.FORMAT_DATE));
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(begintime);
+            cal.set(Calendar.DAY_OF_MONTH, -1);
+            fstarttime = DateUtils.getStringFromDate(DateUtils.getMonthFirstDay(cal), DateUtils.FORMAT_DATE);
+            fendtime = DateUtils.getStringFromDate(DateUtils.getMonthLastDay(cal), DateUtils.FORMAT_DATE);
             theMonth = fstarttime.split("-")[0]+fstarttime.split("-")[1];
             List<Map<String,Object>> datasAllHotel;
             Map<String, Object> paramMapAllHotel = new HashMap<String, Object>();
