@@ -488,7 +488,8 @@ public class DateUtils extends Object {
      * @return 与某日期相差addNum天的日期
      */
     public static String getDateAdded(int addNum, String getDate) {
-        return getCertainDate(getDate, addNum);
+        Date addDays = addDays(DateUtils.getDateFromString(getDate), addNum);
+        return DateUtils.formatDate(addDays);
     }
 
     /**
@@ -1496,15 +1497,10 @@ public class DateUtils extends Object {
      * @param args 参数
      */
     public static void main(String[] args) throws ParseException {
-
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(DateUtils.getDateFromString("2016-01-01"));
-        cal.add(Calendar.MONTH, -1);
-        String fstarttime = DateUtils.getStringFromDate(DateUtils.getMonthFirstDay(cal), DateUtils.FORMAT_DATE);
-
-        String fendtime = DateUtils.getStringFromDate(DateUtils.getMonthLastDay(cal), DateUtils.FORMAT_DATE);
-        System.out.print(fstarttime);
-        System.out.print(fendtime);
+        String startTime = DateUtils.getStringFromDate(DateUtils.getDateFromString("2015-12-31"), DateUtils.FORMAT_DATE);
+        String endTime = DateUtils.getStringFromDate(DateUtils.addDays(DateUtils.getDateFromString("2015-12-31"), 1), DateUtils.FORMAT_DATE);
+        System.out.print(startTime);
+        System.out.print(endTime);
     }
 
     public static Date getMonthLastDay(Calendar cal){

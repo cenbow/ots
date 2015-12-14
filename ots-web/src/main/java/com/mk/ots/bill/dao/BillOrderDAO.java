@@ -147,9 +147,7 @@ public class BillOrderDAO {
 //		endTime = DateUtils.getDateAdded(1, endTime); //下个月1号的时间
         //设置每天订单执行范围 当天00:00  小于第二天的时间
         String startTime = DateUtils.getStringFromDate(beginTime, DateUtils.FORMAT_DATE);
-        String endTime = DateUtils.getDateAdded(1, startTime);
-        String theMonthFirstDay = DateUtils.getMonthFirstDay(DateUtils.getDatetime(beginTime));
-        String theLastMonthFirstDay = DateUtils.getMonthFirstDay(DateUtils.getDateAdded(-1, theMonthFirstDay)); //下个月1号的时间
+        String endTime = DateUtils.getStringFromDate(DateUtils.addDays(beginTime, 1), DateUtils.FORMAT_DATE);
 
         //每天查询订单信息 sql
         StringBuffer sql = new StringBuffer();
@@ -725,8 +723,8 @@ public class BillOrderDAO {
                 } else {
                     Map<String, Object> mapPriod = datasPriod.get(0);
                     Date endtime = (Date)mapPriod.get("endtime");
-                    fstarttime = DateUtils.getDateAdded(1, DateUtils.getStringFromDate(endtime, DateUtils.FORMAT_DATE));
-                    fendtime = DateUtils.getDateAdded(0, DateUtils.getStringFromDate(begintime, DateUtils.FORMAT_DATE));
+                    fstarttime = DateUtils.getStringFromDate(DateUtils.addDays(endtime, 1), DateUtils.FORMAT_DATE);
+                    fendtime = DateUtils.getStringFromDate(begintime, DateUtils.FORMAT_DATE);
                 }
                 paramMap.put("fstarttime", fstarttime);
                 paramMap.put("fendtime", fendtime);

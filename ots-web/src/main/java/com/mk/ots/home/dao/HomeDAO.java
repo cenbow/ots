@@ -44,7 +44,7 @@ public class HomeDAO {
 	
 	public List<Map<String, Object>> getHomeDatas(Long hotelId, String date, int addDays) {
 		Date begintime = DateUtils.addDays(DateUtils.getDateFromString(date + " 00:00:00"), addDays);
-		Date endtime = DateUtils.addDays(DateUtils.getDateFromString(DateUtils.getDateAdded(1, date) + " 00:00:00"), addDays);
+		Date endtime = DateUtils.addDays(DateUtils.getDateFromString(date) , addDays+1);
 		
 		String sql = "SELECT \n" +
 				"    a.Hotelid,\n" +

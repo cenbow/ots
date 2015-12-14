@@ -1,5 +1,6 @@
 package com.mk.ots.job;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,7 +28,7 @@ public class BillOrdersJob  extends QuartzJobBean {
 	protected void executeInternal(JobExecutionContext arg0) throws JobExecutionException {
 		// 获取上个月
 		BillOrderDAO billOrderDAO = AppUtils.getBean(BillOrderDAO.class);
-		String beginTime = DateUtils.getDateAdded(-1, DateUtils.getDate());
+		String beginTime = DateUtils.formatDate(DateUtils.addDays(new Date(), -1));
 		Set<String> times = new HashSet<>();
 		times.add(beginTime);
 		for (String time : times) {
