@@ -12,9 +12,11 @@ import com.mk.care.kafka.common.CopywriterTypeEnum;
 import com.mk.care.kafka.common.MessageTypeEnum;
 import com.mk.care.kafka.model.Message;
 import com.mk.ots.kafka.message.OtsCareProducer;
+import com.mk.ots.order.dao.RoomOrderDAO;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +70,9 @@ public class ScoreService {
 
 	@Autowired
 	private OtsCareProducer careProducer;
+
+	@Autowired
+	private RoomOrderDAO roomOrderDAO;
 
 	private Gson gson = new Gson();
 
@@ -588,9 +593,41 @@ public class ScoreService {
 			
 			m.put("scorepic", picResult);
 			m.put("roomscoresubject", rlist);
+
+			//获取评价标签
+			m.put("hotelmark",getHotelMarkByOrderId(bb.get("orderid").toString()));
+
+			//获取评价房间信息
+			m.put("roominfo",getRoomInfo(bb.getLong("orderId")));
+
 			resultList.add(m);
 		}
 		return resultList;
+	}
+
+	private  String  getRoomInfo(Long  orderId){
+		OtaRoomOrder  otaRoomOrder = roomOrderDAO.findOtadRoomOrderByOtaOrderId(orderId);
+		if(null!=otaRoomOrder){
+			return otaRoomOrder.getRoomTypeName()+otaRoomOrder.getRoomNo();
+		}
+		return  null;
+	}
+
+	private  List<HashMap>   getHotelMarkByOrderId(String orderId){
+		List<HashMap>  list  = new  ArrayList<HashMap>();
+		List<Bean>  scoreMarkMemberList = scoreDAO.findScoreMarkMemberOrder(orderId);
+		if(!CollectionUtils.isEmpty(scoreMarkMemberList)){
+			for(Bean  markBean:scoreMarkMemberList){
+				List<Bean>  scoreMarkList = scoreDAO.findScoreMarkByMarkId(markBean.getLong("mark_id"));
+				if(!CollectionUtils.isEmpty(scoreMarkList)){
+					HashMap    hotelMark = new HashMap();
+					hotelMark.put("id",scoreMarkList.get(0).get("id"));
+					hotelMark.put("mark",scoreMarkList.get(0).get("mark"));
+					list.add(hotelMark);
+				}
+			}
+		}
+		return  list;
 	}
 
 	private Map<Long, Bean> listToMap(List<Bean> list, String keyStr){

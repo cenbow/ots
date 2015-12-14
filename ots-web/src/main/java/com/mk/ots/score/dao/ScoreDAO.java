@@ -157,6 +157,29 @@ public class ScoreDAO {
 	}
 
 	/**
+	 * 查询所有评价标签
+	 * @return
+	 */
+	public List<Bean> findScoreMarkByMarkId(Long markId) {
+		String sql = "select * from t_hotel_score_mark where  isdelete = 'F' and  id = ? order  by  ord";
+		List<Bean> list = new ArrayList();
+		list = Db.find(sql,markId);
+		return list;
+	}
+
+
+	/**
+	 * 查询所有评价标签
+	 * @return
+	 */
+	public List<Bean> findScoreMarkMemberOrder(String  orderId) {
+		String sql = "select  *  from  t_hotel_score_mark_member  where  order_id = ? order  by  id desc ";
+		List<Bean> list = new ArrayList();
+		list = Db.find(sql,orderId);
+		return list;
+	}
+
+	/**
 	 * 查询酒店总评分
 	 * @param hotelid
 	 * @return
