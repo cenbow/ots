@@ -637,7 +637,6 @@ otsversion 	| OTS版本 	| 否 	|
 |orderby 	| 排序项目 	| 否 	| 暂时只有roomno| 
 |roomno 	| 房间号	| 否 |  |	
 |isShowAllRoom 	| 是否显示所有的房间 	| 否 | 默认为F. T：显示所有 F:不显示所有（默认只显示5间）|
-|*「增」showblacktype 	| 显示黑名单类型房态	| 否 | 0或空-不显示任何黑名单， 1-显示一元秒杀|
 |callmethod 	| 调用来源 	| 否 	| 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) |
 |callversion 	| 调用版本 	| 否 |  |
 |callentry 	| 调用入口 	| 否 	| 1-摇一摇 <br>2-房态搜索入口<br> 3-切客 |
@@ -2661,10 +2660,6 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 				"hotelid":,//酒店id
 				"hotelgrade":,//酒店总分
 				"scorecount":,//评价次数
-		*『增』	"hotelmark":[{//酒店评价标签
-						"id":1 , //mark主键
-						"mark":非常好 ,//mark变签内容
-				}],
 				"hotelscoresubject":[{//酒店单项总分
 							"subjectid":,//评价项目
 							"subjectname":,//评价名称
@@ -2691,29 +2686,35 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 								"grade"://单项总分
 							}]
 				}],
-				"scoremxcount":,//评价明细条数
-				"scoremx":[{ //评价明细
-								"orderid":,//订单号
-								"phone":,//评价人手机号
-								"roomtypeid"://房型id
-								"roomid":,//房间id
-								"score":,//评价内容
-								"allgrade":,//综合评分
-								"createtime":,//评价时间
-								"hotelreply":,//客服回复
-								"hotelreplytime":,//客服回复时间
-								"hotelgeireply":,//酒店回复
-								"hotelgeireplytime":,//客服回复时间
-								"scorepic":[{//评价图片信息
-									"url"://图片地址
-								}],
+			
 				"roomscoresubject":[{//评价项目
 						"subjectid":,//评价项目
 						"subjectname":,//评价名称
 						"grade"://分值
 				}]
-		}]
-	}]
+		}]，
+	 "scoremxcount":,//评价明细条数
+	 "scoremx":[{ //评价明细
+					"orderid":,//订单号
+					"phone":,//评价人手机号
+					"roomtypeid"://房型id
+					"roomid":,//房间id
+					"score":,//评价内容
+					"allgrade":,//综合评分
+					"createtime":,//评价时间
+					"hotelreply":,//客服回复
+					"hotelreplytime":,//客服回复时间
+					"hotelgeireply":,//酒店回复
+					"hotelgeireplytime":,//客服回复时间
+			*『增』  "roominfo":,//房间信息
+			*『增』	"hotelmark":[{//酒店评价标签
+						"id":1 , //mark主键
+						"mark":非常好 ,//mark变签内容
+					}],
+					"scorepic":[{//评价图片信息
+						"url"://图片地址
+					}],
+	 }]
 }
 ```
 
@@ -4057,9 +4058,8 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
     "errcode": 0
 }
 
-```
-###『增』 获取首页主题房推荐
-
+## 推荐资源配置
+### 获取首页主题房推荐
 **业务说明：**
 > 根据 cityid 获取 主题房推荐信息
 
@@ -4084,6 +4084,9 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 {
     "errcode": 0,
     "errmsg": "",
+    "promoname": "栏目大标题",
+    "promonote": "栏目小标题",
+    "promoicon": "栏目图标",
     "hotels": [
         {
     "hotel":
@@ -4105,7 +4108,6 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
             "userdistance":,//距您xxx米，该距离表示用户坐标到屏幕坐标的距离
             "isnear":,//是否最近酒店，distance值最小的酒店为T,其他为F
             "grade":, //酒店评分
-            "scorecount":, //评价次数
             "minprice":,//最低价格
             "minpmsprice",//最低价格对应房型的门市价
             "ispms":,//是否签约（T/F）
@@ -4116,7 +4118,6 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
             "ordernummon":,//月订单数
             "rcntordertimedes":, //最近订单时间描述
             "distancestr": //距离描述
-            "isteambuying":,//是否团购（T/F）
 	   *「增」"greetscore":1080,//受欢迎指数
 	   *「增」 "repairinfo":"2014年装修",//装修信息
 	     *「增」 "highlights":[
@@ -4129,7 +4130,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 	     *「增」 "themetexts":[
                   	{ 
                         "text": "主题tag",//特点描述
-                        "color":"", // 如果颜色设定,则C端使用,否则C端自己控制
+                        "color":"" // 如果颜色设定,则C端使用,否则C端自己控制
                      }
                 ],  //酒店特点
             "isonpromo":	// 是否特价，是否特价, 0非，>=1特价
@@ -4139,10 +4140,6 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
                         "promoprice": // 特价活动价格
             
                         }]
-            "teambuying":[{//团购信息
-                            "teambuyingname":,//团购名称
-                            "url"://团购地址
-                         }],
             "isrecommend"://是否推荐（T/F）
             "hotelpic":[{//酒店图片
                             "name":,//图片名称
@@ -4169,12 +4166,15 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 }
 ```
 
-> API json 数据示例
+> API 数据返回示例
 
 ```js
 {
     "errcode": 0,
     "errmsg": "",
+    "promoname": "情侣酒店 约TA激情",
+    "promonote": "冰岛之夜,地中海风情...更多主题风情,等你来挑战",
+    "promoicon": "http://xxx.jpg",
     "hotels": [
         {
             "hotel": [
@@ -4301,7 +4301,336 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
     ]
    }
 ```
+## 酒店信息接口
+### `「修」` 最受欢迎查询 
+***
+**业务说明：**
+> 
+
+**接口url：**	
+> http://ip:port/ots/search/popular
+
+**请求参数：**
+
+    字段        |         名称         | 是否必须 | 说明
+--------------- | ------------------- | -------| -----------                                                 
+| cityid     	| 城市编码   | 是    |                                                    
+| callmethod   	| 调用来源   | 是   | 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) 
+| callversion  	| 调用版本   | 是   |
+| ip           	| IP地址  | 否     |                                                    
+| hardwarecode 	| 硬件编码   | 否       |                                                    
+| otsversion   	| OTS版本    | 否       |   
+
+>API返回json数据示例：
+
+```js
+{
+    "success":true,
+    "errcode":,//错误码
+    "errmsg":,//错误信息
+    "count":,//酒店数量
+    "promoname": "栏目大标题",
+    "promonote": "栏目小标题",
+    "promoicon": "栏目图标",
+    "hotel":
+        [{
+            "hotelid":,//酒店id
+            "hotelname":,//酒店名称
+            "hotelrulecode":,//酒店切客规则类型码（1001规则A；1002规则B）
+            "online":,//是否在线(T/F)
+            "hotelvc":,//是否有可售房（T/F）该字段根据入参入住时间和离店时间获取该酒店是否有可入住房间，并根据结果返回T、F
+            "detailaddr":,//酒店地址
+            "hoteldis":,//酒店所属区县
+            "hotelcity":,//酒店所属城市
+            "hotelprovince":,//酒店所属省份
+            "hotelphone":,//联系电话
+            "hoteldisc":,//酒店简介
+            "longitude":, //酒店坐标(经度)
+            "latitude":,//酒店坐标(纬度)
+            "distance":,//酒店距离xxx米，该距离表示屏幕坐标到酒店坐标的距离
+            "userdistance":,//距您xxx米，该距离表示用户坐标到屏幕坐标的距离
+            "isnear":,//是否最近酒店，distance值最小的酒店为T,其他为F
+            "grade":, //酒店评分
+            "minprice":,//最低价格
+            "minpmsprice",//最低价格对应房型的门市价
+            "ispms":,//是否签约（T/F）
+            "hotelpicnum":,//酒店图片总数
+            "avlblroomnum":,//可订房间数
+            "avlblroomdes":,//可订房描述
+            "descolor":,   //描述字体颜色  （状态: ">3间房间"    绿色   32ab18 状态："<=仅剩3间"   红色   fb4b40 状态：满房   灰色    989898）
+            "ordernummon":,//月订单数
+            "rcntordertimedes":, //最近订单时间描述
+            "distancestr": //距离描述
+            "isteambuying":,//是否团购（T/F）
+      *「增」"greetscore":1080,//受欢迎指数
+      *「增」"repairinfo":"2014年装修",//装修信息
+      *「增」"highlights":[
+                  	{ 
+                        "name": "wifi",//特点描述
+                        "icon":"http://7xip11.com2.z0.glb.qiniucdn.com/view_theme_roomtype_detail_icon_zhuozi.png",
+                         "id":44
+                     }
+                ],  //酒店特点
+            "isonpromo":	// 是否特价，是否特价, 0非，>=1特价
+            "promoinfo":[{ // 特价活动信息
+                        "promoid":// 特价活动 id （1：今夜特价 2.今日特价 3 主题酒店 6.一元秒杀）
+                        "promotype": //特价活动类型 id
+                        "promoprice": // 特价活动价格
+                        }]
+            "isrecommend"://是否推荐（T/F）
+            "hotelpic":[{//酒店图片
+                            "name":,//图片名称
+                            "pic":[{//图片集合
+                                    "url"://图片地址
+                                  }]
+                       }],
+            "hotelfacility":[{//酒店设施
+                                "facid":,//设施id
+                                "facname"://设施名称
+                            }],
+            //交通
+            "businesszone":[{//商圈
+                            "businesszonename"://商圈名称
+                            }],
+            "roomtype":[{//房型
+                            "roomtypeid":,//房型id
+                            "roomtypename":,//房型名称
+                            "roomtypeprice":,//房型价格
+                            "roomtypepmsprice":,//门市价格
+                            "roomtypevc":,//是否有可售房（T/F）该字段根据入参入住时间和离店时间获取该房型是否有可入住房间，并根据结果返回T、F
+                            "maxarea":,//最大面积
+                            "minarea":,//最小面积
+                            "bednum":,//床数量（1：单床房，2：双床房，大于2：其他房）
+                            "roomnum":,//房间数量
+                            "count":0, //房间内床数             "beds":[{//床型信息
+                        "bedtypename":,//床型(双人床，单人床)
+                        "bedlength": //尺寸(1.5米，1.8米)
+                    ]},
+            "roomtypepic":[{//房型图片信息
+		                      "name":'',//图片名称
+                            "pic":[{//图片集合
+                                    "url"://图片地址
+                                 }]
+                          }]
+            "roomtypefacility":[{//房间设施
+                                "roomtypefacid"://设施id
+                                "roomtypefacname"://设施名称
+                                }]
+        
+            "service":[{//酒店服务
+                                "serviceid":,//服务id
+                                "servicename":,//服务名称
+                     }]
+            "iscashback":  //是否返现（T/F）
+	   }]
+
+}
+
+```
+
+> API 数据返回示例
+
+
+```js
+
+       {
+            "promonote": "每天20:00-02:00,订房30元起",
+            "promoid": 1,
+            "promoicon": "http://7xip11.com2.z0.glb.qiniucdn.com/frontpage_icon_jinyetejia.png",
+            "normalid": -1,
+            "hotel": [
+                {
+                    "$mike_price_20151219": 168,
+                    "$mike_price_20151217": 168,
+                    "$mike_price_20151218": 168,
+                    "visible": "T",
+                    "areaname": "无",
+                    "$mike_price_20151215": 168,
+                    "$mike_price_20151216": 168,
+                    "$mike_price_20151214": 168,
+                    "descolor": "32ab18",
+                    "citycode": "500000",
+                    "$sortScore": "NaN",
+                    "hotelid": "2231",
+                    "priority": 3,
+                    "hotelvc": "T",
+                    "$mike_price_20151223": 168,
+                    "promoids": [
+                        3
+                    ],
+                    "$mike_price_20151222": 168,
+                    "longitude": 106.480255,
+                    "$mike_price_20151221": 168,
+                    "$mike_price_20151220": 168,
+                    "hoteldisc": "外观整体呈橘红色七层楼高的独栋商务酒店，1楼有服装珠宝购物、2楼是主题网咖，3-6楼是酒店客房、7楼是棋牌娱乐为一体商业运营模式，为大众提供高品位、高性价比的一家商务酒店。",
+                    "minpmsprice": 428,
+                    "ispms": "T",
+                    "hotelname": "重庆美加丽商务酒店",
+                    "$mike_price_20160111": 168,
+                    "$mike_price_20160110": 168,
+                    "hotelprovince": "Z 重庆市",
+                    "avlblroomdes": "",
+                    "maxprice": 168,
+                    "isfull": "F",
+                    "hoteldis": "J 九龙坡区",
+                    "ordernummon": "",
+                    "roomvacancy": 0,
+                    "$mike_price_20160109": 168,
+                    "hotelrulecode": 1002,
+                    "$mike_price_20160105": 168,
+                    "$mike_price_20160106": 168,
+                    "$mike_price_20160107": 168,
+                    "latitude": 29.527918,
+                    "$mike_price_20160108": 168,
+                    "userdistance": 2178263.953699644,
+                    "$mike_price_20160101": 168,
+                    "$mike_price_20160102": 168,
+                    "iscashback": "F",
+                    "$mike_price_20160103": 168,
+                    "$mike_price_20160104": 168,
+                    "bedtype1": 1,
+                    "scorecount": 19,
+                    "bedtype2": 1,
+                    "areacode": "-1",
+                    "roomnum": 60,
+                    "isnear": "F",
+                    "online": "T",
+                    "createtime": 1450044239609,
+                    "distance": 7253.922178898137,
+                    "rcntordertimedes": "最近预订1天前",
+                    "$mike_price_20160114": 168,
+                    "$mike_price_20160115": 168,
+                    "grade": 4.8,
+                    "$mike_price_20160112": 168,
+                    "collectionstate": "",
+                    "$mike_price_20160113": 168,
+                    "detailaddr": "重庆市九龙坡区石新路13号",
+                    "hotelpicnum": 16,
+                    "promoinfo": [
+                        {
+                            "promoprice": "90",
+                            "promoid": 1,
+                            "promotype": 3
+                        }
+                    ],
+                    "hotelphone": "18716676371",
+                    "numroomtype3": 1,
+                    "$mike_price_20151230": 168,
+                    "isrecommend": "F",
+                    "isonpromo": "1",
+                    "$mike_price_20151231": 168,
+                    "hotelpic": [
+                        {
+                            "name": "主力房源",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/Fk20kUeGEBP75J6TYZTtjurEtEUY"
+                                }
+                            ]
+                        }
+                    ],
+                    "businesszone": [],
+                    "avlblroomnum": 49,
+                    "hotelcity": "500000",
+                    "numroomtype1": 1,
+                    "provcode": "500000",
+                    "numroomtype2": 1,
+                    "promoprice": "90",
+                    "modifytime": 1450044239609,
+                    "discode": "500107",
+                    "hotelfacility": [
+                        {
+                            "facid": 44,
+                            "facname": "公共区域wifi"
+                        },
+                        {
+                            "facid": 9,
+                            "facname": "棋牌室"
+                        }
+                    ],
+                    "service": [],
+                    "isnewpms": "T",
+                    "$mike_price_20151227": 168,
+                    "minprice": 90,
+                    "$mike_price_20151226": 168,
+                    "$mike_price_20151225": 168,
+                    "$mike_price_20151224": 168,
+                    "$mike_price_20151229": 168,
+                    "hoteltype": 1,
+                    "$mike_price_20151228": 168
+                }
+	]
+}
+
+```
+
 ###『增』  首页特色推荐
+
+
+## 搜索
+### 『增』获取用户附近车站
+***
+**业务说明：**
+根据用户坐标获取距离用户附近的车站信息。
+
+
+**接口url：**
+>http://ip:port/ots/search/nearstation
+
+**请求参数：**
+
+|    字段        |         名称        | 是否必须 | 说明|
+--------------- | ------------------- | -------| ----------
+|﻿citycode|城市编码|是|
+|userlongitude 	| 用户坐标(经度) | 否 | 用户的经度 
+|userlatitude 	| 用户坐标(纬度) | 否 | 用户的纬度 
+|ptype| 位置类型| 是|  0附近；1商圈；2机场车站；3地铁路线；4行政区；5景点；6医院；7高校；8酒店；9地址；(本接口请传2)
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callversion|调用版本|否|
+|ip|IP地址|否|
+|hardwarecode|硬件编码|否|
+|otsversion|OTS版本|否|
+
+
+> API返回json数据说明：
+
+```js
+{
+    "datas": [
+        {
+            "id": 684, //位置 id
+            "type": "2",//位置类型
+            "tname": "机场车站",//位置类型名称
+            "name": "上海南站",//位置名称
+            "coordinates": "[[121.429489,31.153303]]"//位置坐标
+        }
+    ],
+    "$times$": "4299ms",
+    "success": true
+}
+```
+
+> API返回json数据示例：
+
+```js
+{
+    "datas": [
+        {
+            "id": 684,
+            "type": "2",
+            "tname": "机场车站",
+            "name": "上海南站",
+            "coordinates": "[[121.429489,31.153303]]"
+        }
+    ],
+    "$times$": "4299ms",
+    "success": true
+}
+```
+
+
+
+
 </article>
 
 <link href="asset/css/zTreeStyle.css" media="all" rel="stylesheet" type="text/css"/>
