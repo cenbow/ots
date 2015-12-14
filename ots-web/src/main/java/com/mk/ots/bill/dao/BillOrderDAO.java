@@ -1111,7 +1111,8 @@ public class BillOrderDAO {
         BigDecimal hotelgive = (BigDecimal)priceMap.get("hotelgive");
         BigDecimal price = allcost.subtract(hotelgive);
         Boolean qiekeFlag = false;
-        if(spreaduser == 2L){//判断不是切客
+        //判断是不是切客
+        if(spreaduser == 2L){
             qiekeFlag = true;
         }else if(spreaduser == 3L){
             qiekeFlag = true;

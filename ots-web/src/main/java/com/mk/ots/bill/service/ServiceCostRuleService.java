@@ -6,6 +6,8 @@ import com.mk.ots.bill.enums.ServiceCostRuleTypeEnum;
 import com.mk.ots.bill.enums.ServiceCostTypeEnum;
 import com.mk.ots.bill.enums.ServiceQiekeTypeEnum;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ import java.util.Date;
  */
 @Service
 public class ServiceCostRuleService {
+    private static final Logger logger = LoggerFactory.getLogger(ServiceCostRuleService.class);
+
     @Autowired
     private ServiceCostRuleDao serviceCostRuleDao;
 
@@ -32,16 +36,15 @@ public class ServiceCostRuleService {
             return new BigDecimal("0");
         }
         Bean queryServiceCostRule = serviceCostRuleDao.getServiceCostRule(hotelCityCode, businessType.getType());
-        if(queryServiceCostRule != null){
-            queryServiceCostRule.getDate("");
-            return new BigDecimal("0");
+        if(queryServiceCostRule == null){
+            //如果没有找到对应的城市佣金规则，则用设置为默认的规则
+            queryServiceCostRule = serviceCostRuleDao.getServiceCostRuleByDefault(businessType.getType());
         }
-        queryServiceCostRule = serviceCostRuleDao.getServiceCostRuleByDefault(businessType.getType());
         if(!checkTime(orderCreateTime, queryServiceCostRule)){
             return new BigDecimal("0");
         }
         Integer resultQiekeFlag = queryServiceCostRule.getInt("qieke_flag");
-        if(ServiceQiekeTypeEnum.NO.getType().equals(resultQiekeFlag) && qiekeFlag){
+        if(ServiceQiekeTypeEnum.NO.getType() == resultQiekeFlag && qiekeFlag){
             return new BigDecimal("0");
         }
         if(ServiceCostRuleTypeEnum.RATIO.getType() == queryServiceCostRule.getInt("rule_type")){
@@ -50,7 +53,7 @@ public class ServiceCostRuleService {
             }
             BigDecimal ratio = queryServiceCostRule.getBigDecimal("ratio");
             if(ratio != null){
-                return price.multiply(ratio);
+                return price.multiply(ratio).setScale(2, BigDecimal.ROUND_HALF_UP);
             }
 
         }else if(ServiceCostRuleTypeEnum.FIX.getType() == queryServiceCostRule.getInt("rule_type")){
@@ -58,16 +61,25 @@ public class ServiceCostRuleService {
             BigDecimal maxServiceCost = queryServiceCostRule.getBigDecimal("max_service_cost");
             if(serviceCost != null){
                 if(maxServiceCost != null && serviceCost.compareTo(maxServiceCost) >0){
-                    return maxServiceCost;
+                    return maxServiceCost.setScale(2, BigDecimal.ROUND_HALF_UP);
                 }else{
-                    return serviceCost;
+                    return serviceCost.setScale(2, BigDecimal.ROUND_HALF_UP);
                 }
             }
         }
         return new BigDecimal("0");
     }
 
-    private boolean checkTime(Date orderCreateTime, Bean queryServiceCostRule){
+
+    public Bean getServiceCostRule(String hotelCityCode, Integer businessType){
+        return serviceCostRuleDao.getServiceCostRule(hotelCityCode, businessType);
+    }
+
+    public Bean getServiceCostRuleByDefault(Integer businessType){
+        return serviceCostRuleDao.getServiceCostRuleByDefault(businessType);
+    }
+
+    public boolean checkTime(Date orderCreateTime, Bean queryServiceCostRule){
         Date beginTime = queryServiceCostRule.getDate("begin_time");
         Date endTime = queryServiceCostRule.getDate("end_time");
         if(beginTime == null){
