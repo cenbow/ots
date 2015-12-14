@@ -2104,16 +2104,25 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
             "rcntordertimedes":, //最近订单时间描述
             "distancestr": //距离描述
             "isteambuying":,//是否团购（T/F）
-	   *「增」"greetscore":1080,//受欢迎指数
+	  *「增」"greetscore":1080,//受欢迎指数
 	   *「增」 "repairinfo":"2014年装修",//装修信息
-	    *「增」 "highlights":[
-	   			
+	     *「增」 "highlights":[
                   	{ 
                         "name": "wifi",//特点描述
                         "icon":"http://7xip11.com2.z0.glb.qiniucdn.com/view_theme_roomtype_detail_icon_zhuozi.png",
                          "id":44
                      }
                 ],  //酒店特点
+	     *「增」 "themetexts":[
+                  	{ 
+                        "text": "主题tag",//特点描述
+                        "color":"66FFBB", // 如果颜色设定,则C端使用,否则C端自己控制
+                       },
+		       { 
+                        "text": "主题tag",//特点描述
+                        "color":"66FFBB", // 如果颜色设定,则C端使用,否则C端自己控制
+                      }
+                ],  //主题酒店特点
             "isonpromo":	// 是否特价，是否特价, 0非，>=1特价
             "promoinfo":[{ // 特价活动信息
                         "promoid":// 特价活动 id （1：今夜特价 2.今日特价 3 主题酒店 6.一元秒杀）
@@ -2178,9 +2187,137 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 }
 ```
 
-
-
-
+> API 返回数据示例
+```js
+{
+    "errcode": 0,
+    "errmsg": "",
+    "hotels": [
+        {
+            "hotel": [
+                {
+                    "hotelid": "4705",
+                    "hotelname": "重庆帝临酒店",
+                    "hotelrulecode": 1002,
+                    "online": "T",
+                    "hotelvc": "T",
+                    "detailaddr": "重庆市沙坪坝区双巷子街6号附11号",
+                    "hoteldis": "S 沙坪坝区",
+                    "hotelcity": "500000",
+                    "hotelprovince": "Z 重庆市",
+                    "hotelphone": "023-65348952",
+                    "hoteldisc": "酒店地理位置优越，交通方便，经济实惠，期待您的入驻。",
+                    "longitude": 106.461941,
+                    "latitude": 29.558707,
+                    "distance": 2179413.1303076735,
+                    "userdistance": 2179413.1303076735,
+                    "isnear": "F",
+                    "grade": 0,
+                    "minprice": 158,
+                    "minpmsprice": 488,
+                    "ispms": "T",
+                    "hotelpicnum": 40,
+                    "avlblroomnum": 18,
+                    "avlblroomdes": "",
+                    "descolor": "32ab18",
+                    "ordernummon": "0",
+                    "rcntordertimedes": "最近预订1天前",
+                    "greetscore": 1080,
+                    "repairinfo": "2014年装修",
+                    "highlights": [
+                        {
+                            "name": "wifi",
+                            "icon": "http://7xip11.com2.z0.glb.qiniucdn.com/view_theme_roomtype_detail_icon_zhuozi.png",
+                            "id": 44
+                        }
+                    ],
+                    "themetexts": [
+                        {
+                            "text": "主题tag",
+                            "color": "66FFBB"
+                        },
+                        {
+                            "text": "主题tag",
+                            "color": "66FFBB"
+                        }
+                    ],
+                    "promoinfo": [
+                        {
+                            "promoprice": "60",
+                            "promoid": 1,
+                            "promotype": 2
+                        },
+                        {
+                            "promoprice": "90",
+                            "promoid": 1,
+                            "promotype": 3
+                        },
+                        {
+                            "promoid": 3,
+                            "promotype": 21
+                        }
+                    ],
+                    "teambuying": [
+                        {
+                           "teambuyingname": "",
+                            "url": ""
+                        }
+                    ],
+                    "isrecommend": "F",
+                    "hotelpic": [
+                        {
+                            "name": "def",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/FlXbAU1AZ_rFNYtdiT6j4N37BylS"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "lobby",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/FgKBX2nbglK2U0cpMXUVGBKVFXTV"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "mainHousing",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/FootNlBX0VNiFABYSdE7mTg-T0oq"
+                                }
+                            ]
+                        }
+                    ],
+                    "themepic": [
+                        {
+                            "name": "sb",
+			    "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/FlXbAU1AZ_rFNYtdiT6j4N37BylS"
+                                }
+                            ]
+                        }
+                    ],
+                    "hotelfacility": [
+                        {
+                            "facid": 10,
+                            "facname": "叫醒服务"
+                        },
+                        {
+                            "facid": 9,
+                            "facname": "棋牌室"
+                        }
+                    ],
+                    "businesszone": [                        
+                    ]
+                }
+            ]
+        }
+    ]
+   }
+```
 
 
 ## 推荐资源配置
@@ -3666,7 +3803,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
             "id": 1,
             "imgurl": "http://7xip11.com2.z0.glb.qiniucdn.com/frontpage_btn_jinyetejia.png",
             "name": "一元秒杀",
-            "description": "一元秒杀",
+            "description": "HOT",
             "url": "http://www.baidu.com",
             "detailid": 8,
             "querytype": 800,
@@ -3711,6 +3848,248 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 
 ```
 ###『增』 首页主题房
+### 获取首页主题房推荐
+**业务说明：**
+> 根据 cityid 获取 主题房推荐信息
+
+**接口 url：**
+> http://ip:port/ots/homepage/themes
+
+**请求参数：**
+
+    字段        |         名称         | 是否必须 | 说明
+--------------- | ------------------- | -------| -----------                                                 
+| cityid     	| 城市编码   | 是    |                                                    
+| callmethod   	| 调用来源   | 是   | 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) 
+| callversion  	| 调用版本   | 是   |
+| ip           	| IP地址  | 否     |                                                    
+| hardwarecode 	| 硬件编码   | 否       |                                                    
+| otsversion   	| OTS版本    | 否       |   
+
+
+> API返回json返回说明：
+
+```js
+{
+    "errcode": 0,
+    "errmsg": "",
+    "hotels": [
+        {
+    "hotel":
+        [{
+            "hotelid":,//酒店id
+            "hotelname":,//酒店名称
+            "hotelrulecode":,//酒店切客规则类型码（1001规则A；1002规则B）
+            "online":,//是否在线(T/F)
+            "hotelvc":,//是否有可售房（T/F）该字段根据入参入住时间和离店时间获取该酒店是否有可入住房间，并根据结果返回T、F
+            "detailaddr":,//酒店地址
+            "hoteldis":,//酒店所属区县
+            "hotelcity":,//酒店所属城市
+            "hotelprovince":,//酒店所属省份
+            "hotelphone":,//联系电话
+            "hoteldisc":,//酒店简介
+            "longitude":, //酒店坐标(经度)
+            "latitude":,//酒店坐标(纬度)
+            "distance":,//酒店距离xxx米，该距离表示屏幕坐标到酒店坐标的距离
+            "userdistance":,//距您xxx米，该距离表示用户坐标到屏幕坐标的距离
+            "isnear":,//是否最近酒店，distance值最小的酒店为T,其他为F
+            "grade":, //酒店评分
+            "scorecount":, //评价次数
+            "minprice":,//最低价格
+            "minpmsprice",//最低价格对应房型的门市价
+            "ispms":,//是否签约（T/F）
+            "hotelpicnum":,//酒店图片总数
+            "avlblroomnum":,//可订房间数
+            "avlblroomdes":,//可订房描述
+            "descolor":,   //描述字体颜色  （状态: ">3间房间"    绿色   32ab18 状态："<=仅剩3间"   红色   fb4b40 状态：满房   灰色    989898）
+            "ordernummon":,//月订单数
+            "rcntordertimedes":, //最近订单时间描述
+            "distancestr": //距离描述
+            "isteambuying":,//是否团购（T/F）
+	   *「增」"greetscore":1080,//受欢迎指数
+	   *「增」 "repairinfo":"2014年装修",//装修信息
+	     *「增」 "highlights":[
+                  	{ 
+                        "name": "wifi",//特点描述
+                        "icon":"http://7xip11.com2.z0.glb.qiniucdn.com/view_theme_roomtype_detail_icon_zhuozi.png",
+                         "id":44
+                     }
+                ],  //酒店特点
+	     *「增」 "themetexts":[
+                  	{ 
+                        "text": "主题tag",//特点描述
+                        "color":"", // 如果颜色设定,则C端使用,否则C端自己控制
+                     }
+                ],  //酒店特点
+            "isonpromo":	// 是否特价，是否特价, 0非，>=1特价
+            "promoinfo":[{ // 特价活动信息
+                        "promoid":// 特价活动 id （1：今夜特价 2.今日特价 3 主题酒店 6.一元秒杀）
+                        "promotype": //特价活动类型 id
+                        "promoprice": // 特价活动价格
+            
+                        }]
+            "teambuying":[{//团购信息
+                            "teambuyingname":,//团购名称
+                            "url"://团购地址
+                         }],
+            "isrecommend"://是否推荐（T/F）
+            "hotelpic":[{//酒店图片
+                            "name":,//图片名称
+                            "pic":[{//图片集合
+                                    "url"://图片地址
+                                  }]
+                       }],
+            "themepic":[{//主题酒店图片
+                            "name":,//图片名称
+                            "pic":[{//图片集合
+                                    "url"://图片地址
+                                  }]
+                       }],
+	    "hotelfacility":[{//酒店设施
+                                "facid":,//设施id
+                                "facname"://设施名称
+                            }],
+            //交通
+            "businesszone":[{//商圈
+                            "businesszonename"://商圈名称
+                            }]
+        }
+    ]
+}
+```
+
+> API json 数据示例
+
+```js
+{
+    "errcode": 0,
+    "errmsg": "",
+    "hotels": [
+        {
+            "hotel": [
+                {
+                    "hotelid": "4705",
+                    "hotelname": "重庆帝临酒店",
+                    "hotelrulecode": 1002,
+                    "online": "T",
+                    "hotelvc": "T",
+                    "detailaddr": "重庆市沙坪坝区双巷子街6号附11号",
+                    "hoteldis": "S 沙坪坝区",
+                    "hotelcity": "500000",
+                    "hotelprovince": "Z 重庆市",
+                    "hotelphone": "023-65348952",
+                    "hoteldisc": "酒店地理位置优越，交通方便，经济实惠，期待您的入驻。",
+                    "longitude": 106.461941,
+                    "latitude": 29.558707,
+                    "distance": 2179413.1303076735,
+                    "userdistance": 2179413.1303076735,
+                    "isnear": "F",
+                    "grade": 0,
+                    "minprice": 158,
+                    "minpmsprice": 488,
+                    "ispms": "T",
+                    "hotelpicnum": 40,
+                    "avlblroomnum": 18,
+                    "avlblroomdes": "",
+                    "descolor": "32ab18",
+                    "ordernummon": "0",
+                    "rcntordertimedes": "最近预订1天前",
+                    "greetscore": 1080,
+                    "repairinfo": "2014年装修",
+                    "highlights": [
+                        {
+                            "name": "wifi",
+                            "icon": "http://7xip11.com2.z0.glb.qiniucdn.com/view_theme_roomtype_detail_icon_zhuozi.png",
+                            "id": 44
+                        }
+                    ],
+                    "themetexts": [
+                        {
+                            "text": "主题tag",
+                            "color": "66FFBB"
+                        },
+                        {
+                            "text": "主题tag",
+                            "color": "66FFBB"
+                        }
+                    ],
+                    "promoinfo": [
+                        {
+                            "promoprice": "60",
+                            "promoid": 1,
+                            "promotype": 2
+                        },
+                        {
+                            "promoprice": "90",
+                            "promoid": 1,
+                            "promotype": 3
+                        },
+                        {
+                            "promoid": 3,
+                            "promotype": 21
+                        }
+                    ],
+                    "teambuying": [
+                        {
+                           "teambuyingname": "",
+                            "url": ""
+                        }
+                    ],
+                    "isrecommend": "F",
+                    "hotelpic": [
+                        {
+                            "name": "def",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/FlXbAU1AZ_rFNYtdiT6j4N37BylS"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "lobby",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/FgKBX2nbglK2U0cpMXUVGBKVFXTV"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "mainHousing",
+                            "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/FootNlBX0VNiFABYSdE7mTg-T0oq"
+                                }
+                            ]
+                        }
+                    ],
+                    "themepic": [
+                        {
+                            "name": "sb",
+			    "pic": [
+                                {
+                                    "url": "https://dn-imke-pro.qbox.me/FlXbAU1AZ_rFNYtdiT6j4N37BylS"
+                                }
+                            ]
+                        }
+                    ],
+                    "hotelfacility": [
+                        {
+                            "facid": 10,
+                            "facname": "叫醒服务"
+                        },
+                        {
+                            "facid": 9,
+                            "facname": "棋牌室"
+                        }
+                    ],
+                    "businesszone": [                        
+                    ]
+                }
+            ]
+        }
+    ]
+   }
+```
 ###『增』  首页特色推荐
 </article>
 
