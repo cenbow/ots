@@ -249,13 +249,11 @@ public class OtsAdminController {
 	}
 
 	@RequestMapping(value = "/report/genBillConfirmChecks", method = RequestMethod.POST)
-	public ResponseEntity<Map<String, Object>> genBillConfirmChecks() {
+	public ResponseEntity<Map<String, Object>> genBillConfirmChecks(String startdateday) {
 		Map<String, Object> datas = new HashMap<String, Object>();
 		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
-		String theMonth = DateUtils.getYearMonth(0);
-		logger.info("genBillConfirmChecks::{}", theMonth);
-		String begintime = DateUtils.getMonthFirstDay(theMonth);
-		billService.genBillConfirmChecks(DateUtils.getDateFromString(begintime), null, null);
+		logger.info("genBillConfirmChecks::{}", startdateday);
+		billService.genBillConfirmChecks(DateUtils.getDateFromString(startdateday), null, null);
 		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 	}
 
