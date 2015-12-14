@@ -443,6 +443,14 @@ public class RoomstateService {
 				// 处理超过中午12点，应离未离(status='IN')的预定数据
 				String etime = DateUtils.formatTime(troomRepair.getEndtime());
 				int stime = DateUtils.strTimeToSeconds(etime);
+
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format(
+							"checking repair locks...roomid:%s; roomtypeid:%s etime:%s;btime:%s;endtime:%s;enddate:%s; queryBeginTime:%s queryEndTime:%s",
+							troomRepair.getRoomid(), troomRepair.getRoomtypeid(), etime, btime,
+							troomRepair.getEndtime(), enddate, queryBeginTime, queryEndTime));
+				}
+
 				if ("12:00:00".equals(etime) && (troomRepair.getEndtime().getTime() <= DateUtils
 						.getDateFromString(enddate.concat(" 12:00:00")).getTime())) {
 					// 超过中午12点、应离未离处理，锁下一天房.
@@ -1037,15 +1045,14 @@ public class RoomstateService {
 								&& !"3".equals(callMethod)) {
 
 							String isonpromo = "0";
-							if (isThemePromo && "3.2".compareTo(callVersionStr) > 0){
+							if (isThemePromo && "3.2".compareTo(callVersionStr) > 0) {
 								isonpromo = "0";
-							}else{
+							} else {
 								TRoomSaleConfig hotelRoomSaleConfig = new TRoomSaleConfig();
 								Integer thotelId = hotelid != null ? hotelid.intValue() : null;
 								hotelRoomSaleConfig.setHotelId(thotelId);
 								hotelRoomSaleConfig.setRoomTypeId(roomTypeId);
 								List<RoomPromoDto> list = roomSaleService.queryRoomPromoByHotelNew(hotelRoomSaleConfig);
-
 
 								if (logger.isInfoEnabled()) {
 									logger.info(String.format("isPromo:%s; callVersionStr:%s; rooms:%s", isPromo,
@@ -1067,7 +1074,8 @@ public class RoomstateService {
 
 										if (logger.isInfoEnabled()) {
 											logger.info(String.format("promostatus:%s; promotext:%s; promotype:%s",
-													promostaus, roomPromoDto.getTypeDesc(), roomPromoDto.getPromoType()));
+													promostaus, roomPromoDto.getTypeDesc(),
+													roomPromoDto.getPromoType()));
 										}
 
 										String promoStartTime = roomPromoDto.getStartTime().toString();
@@ -1096,10 +1104,8 @@ public class RoomstateService {
 								}
 							}
 
-
-
 							roomtype.setIsonpromo(isonpromo);
-						}else if (isThemePromo){
+						} else if (isThemePromo) {
 							roomtype.setIsonpromo("0");
 						}
 					}
@@ -1381,7 +1387,7 @@ public class RoomstateService {
 								&& !"3".equals(callMethod)) {
 
 							roomtypes.add(roomtype);
-						}else if (isThemePromo){
+						} else if (isThemePromo) {
 							roomtypes.add(roomtype);
 						}
 					} else {
@@ -1559,6 +1565,10 @@ public class RoomstateService {
 	 */
 	public RoomstateQuerylistRespEntity.Room findVCHotelRoom(Long hotelid, Long roomtypeid, String begindate,
 			String enddate) {
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("about to findVCHotelRoom...hotelid:%s; roomtypeid:%s; begindate:%s; enddate:%s",
+					hotelid, roomtypeid, begindate, enddate));
+		}
 		// 房型下的房间
 		try {
 			// 从redis缓存中查询已锁的房态
@@ -1668,8 +1678,8 @@ public class RoomstateService {
 
 		try {
 			Map<String, Object> maxPrices = tRoomTypeMapper.findHotelMaxPrice(hotelid);
-			if (null != maxPrices.get("maxprice")){
-				maxPrice = (BigDecimal)maxPrices.get("maxprice");
+			if (null != maxPrices.get("maxprice")) {
+				maxPrice = (BigDecimal) maxPrices.get("maxprice");
 			}
 		} catch (Exception ex) {
 			logger.error(String.format("failed to findHotelMaxPrice by hotelid:%s ", hotelid), ex);

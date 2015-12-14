@@ -16,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -47,7 +49,6 @@ import com.mk.ots.order.bean.PmsOrder;
 import com.mk.ots.order.bean.PmsRoomOrder;
 import com.mk.ots.order.service.OrderLogService;
 import com.mk.ots.order.service.OrderServiceImpl;
-import com.mk.ots.pay.service.IPayService;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.bean.PmsCost;
 import com.mk.pms.bean.PmsLog;
@@ -84,13 +85,13 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 	private OrderServiceImpl orderService;
 
 	@Autowired
-	private IPayService payService;
-	@Autowired
 	private OrderLogService orderLogService;
 	@Autowired
 	private PmsRoomService pmsRoomService;
 	@Autowired
 	private RoomstateService roomstateService;
+	@Autowired
+	private PmsShiftService pmsShiftService;
 
 	/**
 	 * 创建/修改客单 saveCustomerNo
@@ -100,6 +101,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
+	@Transactional(readOnly = false, propagation = Propagation.SUPPORTS) 	
 	@Override
 	public JSONObject saveCustomerNo(JSONObject param) {
 		NewPmsOrderServiceImpl.logger.info("OTSMessage::NewPmsOrderServiceImpl::saveCustomerNo::参数::" + param);
@@ -147,7 +149,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 						checkinUser.set("cardid", user.getString("idno"));
 						checkinUser.set("pmsRoomOrderNo", customNo.get("customeno"));
 						checkinUser.set("freqtrv", user.getString("ispermanent"));
-						if(user.get("isscan") != null) {
+						if (user.get("isscan") != null) {
 							checkinUser.set("isscan", StringUtils.defaultIfBlank(user.getString("isscan"), null));
 						}
 						// 补上酒店id
@@ -164,8 +166,8 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 				 */
 				logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:day:{}", order.get("id"),
 						customNo.getJSONArray("day"));
-					logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:bolean:{}", order.get("id"),
-							(customNo.getJSONArray("day") != null) && (customNo.getJSONArray("day").size() > 0));
+				logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:bolean:{}", order.get("id"),
+						(customNo.getJSONArray("day") != null) && (customNo.getJSONArray("day").size() > 0));
 				if ((customNo.getJSONArray("day") != null) && (customNo.getJSONArray("day").size() > 0)) {
 					JSONArray days = customNo.getJSONArray("day");
 					long pmsorderid = order.get("id");
@@ -191,6 +193,13 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 							logger.info("OTSMessage::PmsOrderServiceImpl:id：{}:roomLockPo:{}", order.get("id"),
 									JsonKit.toJson(roomLockPo));
 							this.pmsRoomService.saveRoomLock(roomLockPo);
+
+							try {
+								pmsShiftService.shiftRoomForPromo(order, param.getString("type"), roomLockPo != null);
+							} catch (Exception ex) {
+								logger.warn(String.format("failed to makeUpForPromo on hotelId:%s; customNo:%s...",
+										hotelId, customNo), ex);
+							}
 						} else {
 							try {
 								// 释放原来的房态 add jianghe
@@ -359,6 +368,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		return order;
 	}
 
+	@Transactional(readOnly = false, propagation = Propagation.SUPPORTS) 
 	public void ChangeOtaOrder(List<PmsRoomOrder> pmsRoomOrderList, Map unlockParam) {
 		NewPmsOrderServiceImpl.logger.info("OTSMessage::roomOrderList::换房::{}", pmsRoomOrderList);
 		if (pmsRoomOrderList == null) {
@@ -405,7 +415,9 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 				this.orderLogService.findOrderLog(roomOrder.getLong("otaorderid"))
 						.set("checkinTime", changeRoomOrderBean.getBeginTime())
 						.set("checkoutTime", changeRoomOrderBean.getEndTime()).saveOrUpdate();
+				boolean isChanged = false;
 				if (!roomOrder.get("Id").equals(changeRoomOrderBean.getRoomId())) {
+					isChanged = true;
 					roomOrder.set("RoomId", changeRoomOrderBean.getRoomId().toString());
 					NewPmsOrderServiceImpl.logger.info("OTSMessage::changePmsRoomOrder-换房otaorderid::{},ota客单-{}",
 							roomOrder.get("otaorderid"), roomOrder);
@@ -441,6 +453,12 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 						pmsRoomOrder.getStr("freqtrv"));
 			}
 
+			try {
+				pmsShiftService.shiftRoomForPromo(pmsRoomOrder, "1", true);
+			} catch (Exception ex) {
+				logger.error("failed to shiftRoomForPromo in ChangeOtaOrder...", ex);
+			}
+			
 			// 2,记录 酒店ID和对应的房型IDs,提供下面计算缓存
 			Set<Long> tempset = map.get(changeRoomOrderBean.getHotelId());
 			if (tempset == null) {
