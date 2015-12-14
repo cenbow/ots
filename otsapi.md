@@ -4087,8 +4087,6 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
     "promotext": "栏目大标题",
     "promonote": "栏目小标题",
     "promoicon": "栏目图标",
-    "hotels": [
-        {
     "hotel":
         [{
             "hotelid":,//酒店id
@@ -4175,8 +4173,6 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
     "promotext": "情侣酒店 约TA激情",
     "promonote": "冰岛之夜,地中海风情...更多主题风情,等你来挑战",
     "promoicon": "http://xxx.jpg",
-    "hotels": [
-        {
             "hotel": [
                 {
                     "hotelid": "4705",
@@ -4296,9 +4292,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
                     "businesszone": [                        
                     ]
                 }
-            ]
-        }
-    ]
+	]
    }
 
 ```
@@ -4326,7 +4320,6 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 
 ```js
 {
-    "success":true,
     "errcode":,//错误码
     "errmsg":,//错误信息
     "count":,//酒店数量
@@ -4410,6 +4403,8 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 ```js
 
        {
+	"errcode": "0", 
+	"errmsg": "", 
 	    "promotext": "人气之星,为你而选",
 	    "promonote": "最受欢迎风向标,为你一网打尽",
             "promoicon": "http://7xip11.com2.z0.glb.qiniucdn.com/frontpage_icon_jinyetejia.png",
