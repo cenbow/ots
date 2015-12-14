@@ -1499,21 +1499,28 @@ public class DateUtils extends Object {
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(DateUtils.getDateFromString("2016-01-01"));
-        cal.set(Calendar.DAY_OF_MONTH, -1);
+        cal.add(Calendar.MONTH, -1);
+        String fstarttime = DateUtils.getStringFromDate(DateUtils.getMonthFirstDay(cal), DateUtils.FORMAT_DATE);
 
-
+        String fendtime = DateUtils.getStringFromDate(DateUtils.getMonthLastDay(cal), DateUtils.FORMAT_DATE);
+        System.out.print(fstarttime);
+        System.out.print(fendtime);
     }
 
     public static Date getMonthLastDay(Calendar cal){
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-        Date lastDate = cal.getTime();
-        return lastDate;
+        Calendar   setCal  =  Calendar.getInstance();
+        setCal.setTime(cal.getTime());
+        final   int   lastDay   =   setCal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        setCal.set(Calendar.DATE, lastDay);
+        Date   lastDate   =  setCal.getTime();
+        return   lastDate;
     }
 
     public static Date getMonthFirstDay(Calendar cal){
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-        cal.add(Calendar.DAY_OF_MONTH, -1);
-        Date firstDate = cal.getTime();
+        Calendar   setCal  =  Calendar.getInstance();
+        setCal.setTime(cal.getTime());
+        setCal.set(Calendar.DAY_OF_MONTH, 1);
+        Date firstDate = setCal.getTime();
         return firstDate;
     }
 

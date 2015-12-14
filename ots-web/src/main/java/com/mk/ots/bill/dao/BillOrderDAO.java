@@ -811,7 +811,7 @@ public class BillOrderDAO {
             //从每天表中查询所有酒店 1号-31号的
             Calendar cal = Calendar.getInstance();
             cal.setTime(begintime);
-            cal.set(Calendar.DAY_OF_MONTH, -1);
+            cal.add(Calendar.MONTH, -1);
             fstarttime = DateUtils.getStringFromDate(DateUtils.getMonthFirstDay(cal), DateUtils.FORMAT_DATE);
             fendtime = DateUtils.getStringFromDate(DateUtils.getMonthLastDay(cal), DateUtils.FORMAT_DATE);
             logger.info(String.format("BillOrderDAO::genBillConfirmChecks,fstarttime[%s]，fendtime[%s]", fstarttime, fendtime));
