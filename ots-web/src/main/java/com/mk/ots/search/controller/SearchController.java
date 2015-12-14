@@ -1,9 +1,6 @@
 package com.mk.ots.search.controller;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.validation.Valid;
 
@@ -241,11 +238,18 @@ public class SearchController {
     public ResponseEntity<Map<String, Object>> initAllPosition(String typeid, String isforce) {
         boolean forceUpdate = Constant.STR_TRUE.equals(isforce);
         List<TCity> allSelectCitys = cityService.findSelectCity();
-
+        HashMap<String, Object> resultMap = new HashMap<>();
+        List cityPositions = new ArrayList();
         for (TCity city: allSelectCitys){
-            searchService.readonlySyncCityPOI(city.getCode(), typeid, forceUpdate);
+
+            HashMap<String, Object> cityMap = new HashMap<>();
+            cityMap.put("citycode", city.getCode());
+            cityMap.put("cityname", city.getCityname());
+            cityMap.put("result",searchService.readonlySyncCityPOI(city.getCode(), typeid, forceUpdate));
+            cityPositions.add(cityMap);
         }
-        return new ResponseEntity<Map<String, Object>>(, HttpStatus.OK);
+        resultMap.put("list",cityPositions);
+        return new ResponseEntity<Map<String, Object>>(resultMap, HttpStatus.OK);
     }
 
 }
