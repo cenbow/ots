@@ -122,7 +122,7 @@ public class HotelPromoController {
 
 	@RequestMapping(value = "/promo/queryrange", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> queryrange(ParamBaseBean pbb, String promoid) {
+	public ResponseEntity<Map<String, Object>> queryrange(ParamBaseBean pbb, String promoid,String cityid) {
 		logger.info("HotelPromoController::queryrange::params{}  begin",
 				pbb + "," + promoid);
 		Map<String, Object> result = new HashMap<String, Object>();
@@ -163,12 +163,19 @@ public class HotelPromoController {
 								saleConfigInfo.getId(), saleConfigInfo.getSaleLabel(), saleConfigInfo.getSaleValue()));
 					}
 
-					ptype1.put("promotypeid", saleConfigInfo.getId());
+					ptype1.put("promoid", saleConfigInfo.getId());
 					ptype1.put("promotypetext", saleConfigInfo.getSaleLabel());
 					ptype1.put("promotypeprice", saleConfigInfo.getSaleValue());
 					ptype1.put("promosec", sec / 1000); // 秒
 					ptype1.put("promosecend", endSec / 1000); // 距离结束时间（s）
 					ptype1.put("nextpromosec", nextsec / 1000); // 距离下一段结束时间（s）
+					List<TPriceScopeDto>  tpriceScopeDtoList = tpriceScopeService.queryTPriceScopeDto(saleConfigInfo.getId() + "", cityid);
+					if(!CollectionUtils.isEmpty(tpriceScopeDtoList)){
+						ptype1.put("minprice",tpriceScopeDtoList.get(0).getMinprice());
+						ptype1.put("maxprice",tpriceScopeDtoList.get(0).getMaxprice());
+						ptype1.put("step",tpriceScopeDtoList.get(0).getStep());
+					}
+
 					list.add(ptype1);
 				}
 			}
