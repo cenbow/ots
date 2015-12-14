@@ -2427,15 +2427,24 @@ public class SearchService implements ISearchService {
 	 * @return
 	 */
 	public List<SearchPositionsCoordinateRespEntity> readonlyNearPositionsFromES(String citycode, String ptype, Double userlatitude,Double userlongitude) {
-		SearchRequestBuilder searchBuilder = esProxy.prepareSearch(esProxy.OTS_INDEX_DEFAULT,
+		List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
+		SearchRequestBuilder searchBuilder = esProxy.prepareSearch(esProxy.OTS_INDEX_LANDMARK,
 				esProxy.POSITION_TYPE_DEFAULT);
 		searchBuilder.setQuery(QueryBuilders.matchQuery("citycode", citycode));
 		if (StringUtils.isNotBlank(ptype)) {
 			searchBuilder.setQuery(QueryBuilders.matchQuery("ptype", ptype));
 		}
 
+		GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
+		geoFilter.point(userlatitude, userlongitude).distance(SearchConst.SEARCH_RANGE_DEFAULT, DistanceUnit.METERS).optimizeBbox("memory")
+				.geoDistance(GeoDistance.ARC);
+		filterBuilders.add(geoFilter);
+		FilterBuilder[] builders = new FilterBuilder[] {};
+		BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
+
 		this.sortByDistance(searchBuilder, new GeoPoint(userlatitude, userlongitude));
 		//searchBuilder.addSort("ptype", SortOrder.ASC).addSort("id", SortOrder.ASC);
+		searchBuilder.setPostFilter(boolFilter);
 		searchBuilder.setFrom(0).setSize(10000).setExplain(true);// ES默认10条记录，设置10000，能返回citycode下所有。
 
 		SearchResponse searchResponse = searchBuilder.execute().actionGet();
@@ -2619,6 +2628,8 @@ public class SearchService implements ISearchService {
 				data.put("pinyin", areainfo.getPinyin());
 				data.put("lat", areainfo.getLat());
 				data.put("lng", areainfo.getLng());
+
+				data.put("pin", new GeoPoint(areainfo.getLat().doubleValue(), areainfo.getLng().doubleValue()));
 				data.put("ptype", areainfo.getLtype());
 				data.put("citycode", areainfo.getCitycode());
 				data.put("discode", areainfo.getDiscode());
@@ -2626,7 +2637,7 @@ public class SearchService implements ISearchService {
 				esdatas.add(data);
 			}
 			if (esdatas.size() > 0) {
-				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
+				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
 						esdatas);
 				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
 				result.put("message", "城市: " + citycode + "添加" + esdatas.size() + "条行政区。");
@@ -2704,14 +2715,12 @@ public class SearchService implements ISearchService {
 				data.put("citycode", landmark.getCitycode());
 				data.put("discode", landmark.getDiscode());
 				data.put("status", landmark.getStatus());
-				HashMap<String, Object> pin = new HashMap<>();
-				pin.put("lat",landmark.getLat().doubleValue());
-				pin.put("lon",landmark.getLng().doubleValue());
-				data.put("pin",pin);
+
+				data.put("pin",new GeoPoint(landmark.getLat().doubleValue(), landmark.getLng().doubleValue()));
 				esdatas.add(data);
 			}
 			if (esdatas.size() > 0) {
-				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
+				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
 						esdatas);
 				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
 				result.put("message", "城市: " + citycode + "添加" + esdatas.size() + "条地标。");
@@ -2821,6 +2830,8 @@ public class SearchService implements ISearchService {
 				data.put("discode", "");
 				data.put("status", subway.getStatus());
 
+				data.put("pin",new GeoPoint(Constant.NANJI_POINT_LAT, Constant.NANJI_POINT_LON));
+
 
 				// 查询地铁站点
 				String lineid = subway.getLineid() == null ? "" : String.valueOf(subway.getLineid());
@@ -2831,7 +2842,7 @@ public class SearchService implements ISearchService {
 				esdatas.add(data);
 			}
 			if (esdatas.size() > 0) {
-				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
+				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
 						esdatas);
 				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
 				result.put("message", "城市: " + citycode + "添加" + esdatas.size() + "条地铁线路。");

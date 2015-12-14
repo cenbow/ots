@@ -1,12 +1,18 @@
 package com.mk.ots.search.controller;
 
-import java.util.*;
-
-import javax.validation.Valid;
-
+import com.google.common.collect.Maps;
+import com.mk.framework.AppUtils;
+import com.mk.framework.exception.MyErrorEnum;
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.utils.Constant;
 import com.mk.ots.hotel.bean.TCity;
 import com.mk.ots.hotel.service.CityService;
-import com.mk.ots.roomsale.model.TRoomSaleConfig;
+import com.mk.ots.restful.input.SearchPositionsFuzzyReqEntity;
+import com.mk.ots.restful.input.SearchPositionsReqEntity;
+import com.mk.ots.restful.input.SearchReqEntity;
+import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
+import com.mk.ots.search.service.ISearchService;
+import com.mk.ots.web.ServiceOutput;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,18 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.common.collect.Maps;
-import com.mk.framework.AppUtils;
-import com.mk.framework.exception.MyErrorEnum;
-import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.common.utils.Constant;
-import com.mk.ots.restful.input.SearchPositionsFuzzyReqEntity;
-import com.mk.ots.restful.input.SearchPositionsReqEntity;
-import com.mk.ots.restful.input.SearchReqEntity;
-import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
-import com.mk.ots.search.service.IPromoSearchService;
-import com.mk.ots.search.service.ISearchService;
-import com.mk.ots.web.ServiceOutput;
+import javax.validation.Valid;
+import java.util.*;
 
 /**
  * 搜索API接口类.
@@ -237,11 +233,11 @@ public class SearchController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> initAllPosition(String typeid, String isforce) {
         boolean forceUpdate = Constant.STR_TRUE.equals(isforce);
-        List<TCity> allSelectCitys = cityService.findSelectCity();
+        List<TCity> allCitys = cityService.findAllCity();
         HashMap<String, Object> resultMap = new HashMap<>();
         List cityPositions = new ArrayList();
-        for (TCity city: allSelectCitys){
-
+        for (TCity city: allCitys){
+            System.out.println("开始初始化:"+ city.getCode() + " " + city.getCityname());
             HashMap<String, Object> cityMap = new HashMap<>();
             cityMap.put("citycode", city.getCode());
             cityMap.put("cityname", city.getCityname());
