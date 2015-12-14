@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class ServiceCostRuleServiceTest extends BaseTest {
+public class ServiceCostRuleServiceTestConfig extends BaseTest {
 
     @Autowired
     private ServiceCostRuleService serviceCostRuleService;

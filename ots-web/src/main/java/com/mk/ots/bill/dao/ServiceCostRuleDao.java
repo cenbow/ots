@@ -2,7 +2,7 @@ package com.mk.ots.bill.dao;
 
 import com.mk.framework.datasource.dao.mybatis.MyBatisDaoImpl;
 import com.mk.orm.plugin.bean.Db;
-import com.mk.ots.bill.model.ServiceCostRule;
+import com.mk.ots.bill.model.ServiceCostRuleConfig;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Repository;
 import com.mk.orm.plugin.bean.Bean;
@@ -13,7 +13,7 @@ import java.util.List;
  * Created by Thinkpad on 2015/12/11.
  */
 @Repository
-public class ServiceCostRuleDao extends MyBatisDaoImpl<ServiceCostRule, Long>{
+public class ServiceCostRuleDao extends MyBatisDaoImpl<ServiceCostRuleConfig, Long>{
 
     public Bean getServiceCostRule(String hotelCityCode, Integer businessType){
         String sql = "select  *  from  t_service_cost_rule  where bussiness_type = ? and hotel_city_code =?  and  valid =1 order by id desc limit 1";

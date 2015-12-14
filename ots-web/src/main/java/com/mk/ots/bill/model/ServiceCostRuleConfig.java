@@ -3,7 +3,7 @@ package com.mk.ots.bill.model;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class ServiceCostRule {
+public class ServiceCostRuleConfig {
     private Long id;
 
     private Integer bussinessType;
