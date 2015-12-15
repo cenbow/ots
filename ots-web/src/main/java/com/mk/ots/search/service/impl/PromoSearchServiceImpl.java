@@ -489,7 +489,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			makeHotelTypeFilter(reqentity, filterBuilders);
 			makeBedTypeFilter(reqentity, filterBuilders);
-			
+
 			makeQueryFilter(reqentity, filterBuilders);
 
 			FilterBuilder[] builders = new FilterBuilder[] {};
@@ -589,7 +589,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				logger.info("keyword or hotelname or hoteladdress search, set search range {}",
 						SearchConst.SEARCH_RANGE_MAX);
 			}
-
 
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
 					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
@@ -663,7 +662,21 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		return rtnMap;
 	}
-	
+
+	public List<Map<String, Object>> queryThemeRoomtypes(Map<String, Object> hotel) throws Exception {
+		String hotelid = (String) hotel.get("hotelid");
+
+		List<Map<String, Object>> roomtypes = readonlyRoomtypeList(hotel, null);
+		List<Map<String, Object>> newroomtypes = new ArrayList<Map<String, Object>>();
+		for (Map<String, Object> roomtype : roomtypes) {
+			if (isThemed(Integer.parseInt(hotelid), roomtype)) {
+				newroomtypes.add(roomtype);
+			}
+		}
+		
+		return newroomtypes;
+	}
+
 	@Override
 	public Map<String, Object> searchThemes(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
@@ -709,7 +722,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			makeHotelTypeFilter(reqentity, filterBuilders);
 			makeBedTypeFilter(reqentity, filterBuilders);
-			
+
 			makeQueryFilter(reqentity, filterBuilders);
 
 			FilterBuilder[] builders = new FilterBuilder[] {};
@@ -809,7 +822,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				logger.info("keyword or hotelname or hoteladdress search, set search range {}",
 						SearchConst.SEARCH_RANGE_MAX);
 			}
-
 
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
 					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))

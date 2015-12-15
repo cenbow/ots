@@ -56,7 +56,7 @@ public class HomePageController {
 	private final Integer maxAllowedPopular = 5;
 
 	@RequestMapping("/popular")
-	@SuppressWarnings("unchecked")	
+	@SuppressWarnings("unchecked")
 	public ResponseEntity<Map<String, Object>> listPopular(HttpServletRequest request,
 			@Valid HotelHomePageReqEntity homepageReqEntity, Errors errors) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -213,11 +213,19 @@ public class HomePageController {
 
 			hotel.put("themepic", themepics);
 
-			Map<String, Object> hotelDetails = promoService.readonlySearchHotels(reqEntity);
-			List<Map<String, Object>> detailHotels = (List<Map<String, Object>>) hotelDetails.get("hotel");
-			if (detailHotels != null && detailHotels.size() > 0) {
-				List<Map<String, Object>> roomtypes = (List<Map<String, Object>>) detailHotels.get(0).get("roomtype");
+			List<Map<String, Object>> roomtypes = null;
+			List<Map<String, Object>> newroomtypes = new ArrayList<Map<String, Object>>();
+			hotel.put("roomtype", newroomtypes);
+			try {
+				roomtypes = promoService.queryThemeRoomtypes(hotel);
+			} catch (Exception ex) {
+				logger.warn(String.format("unable to queryThemeRoomtypes %s", hotelid), ex);
+				continue;
+			}
 
+			
+			
+			if (roomtypes != null && roomtypes.size() > 0) {
 				for (int i = 0; roomtypes != null && i < ((roomtypes.size() > maxAllowedRoomtypes) ? maxAllowedRoomtypes
 						: roomtypes.size()); i++) {
 					Map<String, Object> themeText = new HashMap<String, Object>();
@@ -227,6 +235,8 @@ public class HomePageController {
 
 					themeText.put("text", roomtypename);
 					themeText.put("color", "");
+
+					newroomtypes.add(roomtypes.get(i));
 				}
 			}
 		}
@@ -245,6 +255,7 @@ public class HomePageController {
 		reqEntity.setIshotelpic("T");
 		reqEntity.setLimit(maxAllowedPopular);
 		reqEntity.setIspromoonly(null);
+		reqEntity.setOrderby(5);
 
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
