@@ -1007,9 +1007,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private Map<String, Object> createPromoItem(HotelQuerylistReqEntity params, RoomSaleShowConfigDto showConfig)
 			throws Exception {
 		Map<String, Object> promoItem = new HashMap<String, Object>();
-
+		if (params.getLimit() == null){
+			params.setLimit(FrontPageEnum.limit.getId());
+		}
 		params.setIspromoonly(Boolean.TRUE);
-		params.setLimit(FrontPageEnum.limit.getId());
+
 		params.setCallentry(null);
 		params.setPromoid(String.valueOf(showConfig.getPromoid()));
 
@@ -1089,6 +1091,28 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Map<String, Object>> searchHomePromos(HotelQuerylistReqEntity params) throws Exception {
+
+		List<Map<String, Object>> promolist;
+		try {
+			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
+			showConfig.setIsSpecial("T");
+
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
+			promolist = this.searchHomePromoBase(params, showConfigs);
+
+			if (promolist == null){
+				promolist = new ArrayList<Map<String, Object>>();
+			}
+			return promolist;
+		} catch (Exception e) {
+			throw new Exception("failed to searchHomePromos", e);
+		}
+	}
+
+
+
+	@SuppressWarnings("unchecked")
+	public List<Map<String, Object>> searchHomePromoBase(HotelQuerylistReqEntity params, List<RoomSaleShowConfigDto> showConfigs) throws Exception {
 		// 酒店搜索校验: 开始
 		String validateStr = this.validateSearchHome(params);
 		if (StringUtils.isNotBlank(validateStr)) {
@@ -1099,10 +1123,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		List<Map<String, Object>> promolist = new ArrayList<Map<String, Object>>();
 		try {
-			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
-			showConfig.setIsSpecial("T");
 
-			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
 			for (RoomSaleShowConfigDto showConfigDto : showConfigs) {
 				Map<String, Object> promoItem = createPromoItem(params, showConfigDto);
 				if (promoItem != null && promoItem.get("hotel") != null
@@ -1115,7 +1136,32 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		} catch (Exception e) {
 			throw new Exception("failed to searchHomePromos", e);
 		}
+
 	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> searchHomePromoRecommend(HotelQuerylistReqEntity params) throws Exception {
+		List<Map<String, Object>> promolist;
+		Map<String, Object> promoItem = null;
+		try {
+			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
+			showConfig.setIsSpecial("T");
+			showConfig.setPromoid(HotelPromoEnum.Night.getCode());
+			showConfig.setShowArea(ShowAreaEnum.HomePagePromoRecommend.getCode());
+
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
+			promolist = this.searchHomePromoBase(params, showConfigs);
+
+			 if (promolist!=null && promolist.size() > 0 ){
+				 promoItem = promolist.get(0);
+			 }
+			return promoItem;
+		} catch (Exception e) {
+			throw new Exception("failed to searchHomePromos", e);
+		}
+	}
+
 
 	/**
 	 * 酒店搜索
