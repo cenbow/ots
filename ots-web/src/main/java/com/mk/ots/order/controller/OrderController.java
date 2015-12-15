@@ -87,7 +87,8 @@ public class OrderController {
 	
 	// 全部、进行中、已完成
 	private ImmutableMap<String, String> statetypeMap = ImmutableMap.of("all", 	"110,120,140,160,180,190,200,510,514,512,513,520", 
-																		"doing","110,120,140,160,180,510", 
+																		"doing","110,120,140,160,180,510",
+																		"commenting","180,190,200",
 																		"done",	"200,190");
 
 	/**
