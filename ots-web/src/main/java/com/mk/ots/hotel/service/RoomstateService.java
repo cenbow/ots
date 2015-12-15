@@ -16,6 +16,7 @@ import com.dianping.cat.message.Event;
 import com.mk.es.Hotel;
 import com.mk.framework.util.CommonUtils;
 import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.enums.SearchBlackTypeEnum;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -1382,8 +1383,11 @@ public class RoomstateService {
 
 					// 兼容老版本
 					if (isPromo != null && isPromo) {
-						if ()
-						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
+						if (isPromo && roomtype.getPromoid().equals(HotelPromoEnum.OneDollar.getCode().toString())){
+							if (params.getShowblacktype() == SearchBlackTypeEnum.ONESECKILL.getCode()){
+								roomtypes.add(roomtype);
+							}
+						}else if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
 								&& !"3".equals(callMethod)) {
 
 							roomtypes.add(roomtype);
