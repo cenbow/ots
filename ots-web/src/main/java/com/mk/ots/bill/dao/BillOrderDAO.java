@@ -1121,7 +1121,7 @@ public class BillOrderDAO {
         }else if(spreaduser == 3L){
             qiekeFlag = true;
         }
-        logger.info("getServiceCost params orderid[%s],createTime[%s],qiekeFlag[%s],price[%s],cityCode[%s]",orderid,createTime, qiekeFlag,price,cityCode);
+        logger.info(String.format("getServiceCost params orderid[%s],createTime[%s],qiekeFlag[%s],price[%s],cityCode[%s]",orderid,createTime, qiekeFlag,price,cityCode));
         BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(createTime, qiekeFlag, price, cityCode);
         return serviceCost;
     }
