@@ -49,6 +49,31 @@ public class HomePageController {
 
 	private final Integer maxAllowedRoomtypes = 3;
 
+	@RequestMapping("/popular")
+	public ResponseEntity<Map<String, Object>> listPopular(HttpServletRequest request,
+			@Valid HotelHomePageReqEntity homepageReqEntity, Errors errors) throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		String params = objectMapper.writeValueAsString(request.getParameterMap());
+		String errorMessage = "";
+
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("listThemes begings with parameters:%s...", params));
+		}
+
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+
+		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(String.format("parameters validation failed with error %s", errorMessage));
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+		
+		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+	}	
+	
 	@RequestMapping("/themes")
 	@SuppressWarnings("unchecked")
 	public ResponseEntity<Map<String, Object>> listThemes(HttpServletRequest request,
@@ -141,16 +166,19 @@ public class HomePageController {
 
 			List<Map<String, Object>> hotelpics = (List<Map<String, Object>>) hotel.get("hotelpic");
 			List<Map<String, Object>> themepics = new ArrayList<Map<String, Object>>();
-			themepics.addAll(hotelpics);
+			if (hotelpics != null) {
+				themepics.addAll(hotelpics);
+			}
+
 			hotel.put("themepic", themepics);
-			
+
 			Map<String, Object> hotelDetails = promoService.readonlySearchHotels(reqEntity);
 			List<Map<String, Object>> detailHotels = (List<Map<String, Object>>) hotelDetails.get("hotel");
 			if (detailHotels != null && detailHotels.size() > 0) {
 				List<Map<String, Object>> roomtypes = (List<Map<String, Object>>) detailHotels.get(0).get("roomtype");
 
 				for (int i = 0; roomtypes != null
-						&& i < ((roomtypes.size() > maxAllowedRoomtypes) ? maxAllowedRoomtypes : 0); i++) {
+						&& i < ((roomtypes.size() > maxAllowedRoomtypes) ? maxAllowedRoomtypes : roomtypes.size()); i++) {
 					Map<String, Object> themeText = new HashMap<String, Object>();
 					themeTexts.add(themeText);
 
@@ -174,6 +202,7 @@ public class HomePageController {
 		reqEntity.setCallentry(null);
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
+		reqEntity.setIshotelpic("T");
 
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
