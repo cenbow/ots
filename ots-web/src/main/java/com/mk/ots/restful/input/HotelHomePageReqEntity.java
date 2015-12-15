@@ -18,6 +18,10 @@ public class HotelHomePageReqEntity extends ParamBaseBean implements Serializabl
 	@NotEmpty(message = "接口参数cityid不能为空.")
 	private String cityid;
 
+	private Double userlatitude;
+
+	private Double userlongitude;
+
 	private String callmethod;
 
 	@NotNull(message = "缺少参数-接口版本: callversion.")
@@ -29,6 +33,22 @@ public class HotelHomePageReqEntity extends ParamBaseBean implements Serializabl
 	private String hardwarecode;
 
 	private String otsversion;
+
+	public Double getUserlatitude() {
+		return userlatitude;
+	}
+
+	public void setUserlatitude(Double userlatitude) {
+		this.userlatitude = userlatitude;
+	}
+
+	public Double getUserlongitude() {
+		return userlongitude;
+	}
+
+	public void setUserlongitude(Double userlongitude) {
+		this.userlongitude = userlongitude;
+	}
 
 	public String getCityid() {
 		return cityid;

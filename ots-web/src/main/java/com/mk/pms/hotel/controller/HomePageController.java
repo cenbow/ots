@@ -72,10 +72,18 @@ public class HomePageController {
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
 
-		String callVersion = (String) rtnMap.get("callversion");
-		if ("3.3".compareTo(callVersion) <= 0) {
+		String callVersion = (String) homepageReqEntity.getCallversion();
+		if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion) > 0) {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			errorMessage = "callversion is lower than 3.3, not accessible in this function... ";
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(errorMessage);
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		} else if (StringUtils.isBlank(callVersion)) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			errorMessage = "callversion is a must... ";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
 			logger.error(errorMessage);
@@ -89,11 +97,11 @@ public class HomePageController {
 			Map<String, Object> themeResponse = promoService.readonlySearchHotels(reqEntity);
 
 			List<Map<String, Object>> hotels = (List<Map<String, Object>>) themeResponse.get("hotel");
-			rtnMap.put("hotel", filterHotels(hotels));
+			rtnMap.put("hotel", filterHotels(hotels, reqEntity));
 
 			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
 			showConfig.setPromoid(Integer.parseInt(reqEntity.getPromoid()));
-			showConfig.setIsSpecial(Constant.STR_FALSE);
+			showConfig.setIsSpecial(Constant.STR_TRUE);
 			showConfig.setShowArea(ShowAreaEnum.FrontPageBottom.getCode());
 
 			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
@@ -115,7 +123,8 @@ public class HomePageController {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<Map<String, Object>> filterHotels(List<Map<String, Object>> hotels) {
+	private List<Map<String, Object>> filterHotels(List<Map<String, Object>> hotels,
+			HotelQuerylistReqEntity reqEntity) {
 		List<Map<String, Object>> hotelFiltered = new ArrayList<Map<String, Object>>();
 
 		if (hotels != null && hotels.size() > maxAllowedThemes) {
@@ -123,19 +132,33 @@ public class HomePageController {
 		}
 
 		for (Map<String, Object> hotel : hotels) {
-			List<Map<String, Object>> roomtypes = (List<Map<String, Object>>) hotel.get("roomtype");
+			String hotelid = String.valueOf(hotel.get("hotelid"));
+			reqEntity.setHotelid(hotelid);
+			reqEntity.setIsroomtype("T");
+
 			List<Map<String, Object>> themeTexts = new ArrayList<Map<String, Object>>();
 			hotel.put("themetexts", themeTexts);
+
+			List<Map<String, Object>> hotelpics = (List<Map<String, Object>>) hotel.get("hotelpic");
+			List<Map<String, Object>> themepics = new ArrayList<Map<String, Object>>();
+			themepics.addAll(hotelpics);
+			hotel.put("themepic", themepics);
 			
-			for (int i = 0; roomtypes != null
-					&& i < ((roomtypes.size() > maxAllowedRoomtypes) ? maxAllowedRoomtypes : 0); i++) {
-				Map<String, Object> themeText = new HashMap<String, Object>();
-				themeTexts.add(themeText);
-				
-				String roomtypename = (String)roomtypes.get(i).get("roomtypename");
-				
-				themeText.put("text", roomtypename);
-				themeText.put("color", "");
+			Map<String, Object> hotelDetails = promoService.readonlySearchHotels(reqEntity);
+			List<Map<String, Object>> detailHotels = (List<Map<String, Object>>) hotelDetails.get("hotel");
+			if (detailHotels != null && detailHotels.size() > 0) {
+				List<Map<String, Object>> roomtypes = (List<Map<String, Object>>) detailHotels.get(0).get("roomtype");
+
+				for (int i = 0; roomtypes != null
+						&& i < ((roomtypes.size() > maxAllowedRoomtypes) ? maxAllowedRoomtypes : 0); i++) {
+					Map<String, Object> themeText = new HashMap<String, Object>();
+					themeTexts.add(themeText);
+
+					String roomtypename = (String) roomtypes.get(i).get("roomtypename");
+
+					themeText.put("text", roomtypename);
+					themeText.put("color", "");
+				}
 			}
 		}
 
@@ -149,13 +172,15 @@ public class HomePageController {
 		reqEntity.setCityid(homepageReqEntity.getCityid());
 		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 		reqEntity.setCallentry(null);
+		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
+		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
 		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
 
 		reqEntity.setStartdateday(strCurDay);
-		reqEntity.setStartdateday(strNextDay);
+		reqEntity.setEnddateday(strNextDay);
 
 		return reqEntity;
 	}
