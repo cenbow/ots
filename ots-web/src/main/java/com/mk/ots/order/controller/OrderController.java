@@ -500,6 +500,9 @@ public class OrderController {
 		String userLongitude = request.getParameter("userlongitude");
 		String userLatitude = request.getParameter("userlatitude");
 
+		String  showBlackType =  request.getParameter("showblacktype");// 非必填，除去常住人之外的入住人信息，格式为json
+
+
 		/*************** 移动设备信息 ************/
 		// 系统号
 		String sysno = request.getParameter("sysno");
@@ -616,6 +619,7 @@ public class OrderController {
 			if (StringUtils.isNotBlank(blmacaddr)) {
 				otaOrderMac.setBlmacaddr(DESUtils.decryptDES(blmacaddr));
 			}
+
 			order.setOtaOrderMac(otaOrderMac);
 			/*************** 移动设备信息 ************/
 		} catch (NumberFormatException e1) {
@@ -634,6 +638,10 @@ public class OrderController {
 		if (StringUtils.isNotBlank(couponNo)) {
 			order.put("couponno", couponNo);
 			order.set("coupon", "T");
+		}
+
+		if (StringUtils.isNotBlank(showBlackType)) {
+			order.setShowBlackType(showBlackType);
 		}
 		String token = request.getParameter("token");
 		order.setToken(token);

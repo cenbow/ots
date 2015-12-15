@@ -1579,7 +1579,7 @@ public class OrderServiceImpl implements OrderService {
 		Date createtime = (Date) order.getDate("createtime").clone();
 		Date begintime = (Date) order.getDate("begintime").clone();
 		Date endtime = (Date) order.getDate("endtime").clone();
-		this.logger.info("begintime：{}，endtime：{}",begintime, endtime);
+		this.logger.info("begintime：{}，endtime：{}", begintime, endtime);
 		if (DateUtils.getDiffHoure(DateUtils.getDatetime(createtime), DateUtils.getDatetime(begintime)) <= 2 
 		    || DateUtils.getStringFromDate(createtime, "yyyyMMdd").equals(DateUtils.getStringFromDate(begintime, "yyyyMMdd"))) {
 			this.logger.info("减2小时了");
@@ -2201,6 +2201,9 @@ public class OrderServiceImpl implements OrderService {
         order.setPromoType(getPromoType(roomId));
        //检查订单promo type是否符合支付规则
         checkPayByPromoType(order, order.getPromoType());
+
+        checkOrdeByPromoType(order);
+
         Long cashBigDecimal = 0L;
         if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
             cashBigDecimal = tBackMoneyRuleService.getBackMoneyByOrder(order).longValue();
@@ -3083,7 +3086,7 @@ public class OrderServiceImpl implements OrderService {
           addOrders.setCheckin(this.getPmsCheckinPerson(otaRoomOrder));
           logger.info("pms接口调用：修改pms订单：updateOrder：orderid = "+order.getId()+" , 请求参数 = {}",gson.toJson(addOrders));
           ReturnObject<Object> returnObject = HotelPMSManager.getInstance().getService().updateOrder(otaRoomOrder.getLong("HotelId"), addOrders);
-          orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.MODIFY_CHECKINUSERBYUSER.getId(), "", "PMS1.0用户修改入住人为："+addOrders.getCheckin().getCpname(), "");
+          orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.MODIFY_CHECKINUSERBYUSER.getId(), "", "PMS1.0用户修改入住人为：" + addOrders.getCheckin().getCpname(), "");
           if (HotelPMSManager.getInstance().returnError(returnObject)) {
               throw MyErrorEnum.updateOrder.getMyException("PMS－" + returnObject.getErrorMessage());
           }
@@ -3304,6 +3307,31 @@ public class OrderServiceImpl implements OrderService {
     private void checkPayByPromoType(OtaOrder order, String promoType) {
         if(PromoTypeEnum.TJ.getCode().equals(promoType)){
             //如果选择了今夜特价房则只能使用在线支付或房券支付 其他都不能使用
+            if("T".equals(order.getPromotion())){
+                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能与其他促销一起使用");
+            }
+            if("T".equals(order.getCoupon())){
+                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能使用优惠券");
+            }
+            try {
+                Date begin = DateUtils.parseDate(DateUtils.formatDateTime(order.getBeginTime()), DateUtils.FORMATDATETIME);
+                Date end = DateUtils.parseDate(DateUtils.formatDateTime(order.getEndTime()), DateUtils.FORMATDATETIME);
+                if(DateUtils.diffDay(begin,end) >= 2){
+                    throw MyErrorEnum.customError.getMyException("很抱歉，特价房只能入住一天");
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //判断当前房间类型
+    private void checkOrderByPromoType(OtaOrder order) {
+        if(StringUtils.isEmpty(order.getShowBlackType())){
+            return ;
+        }
+        if(PromoIdTypeEnum.YYF.getCode().equals(order.getShowBlackType())){
+            //如果是1元房，只允许新用户下单
             if("T".equals(order.getPromotion())){
                 throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能与其他促销一起使用");
             }
