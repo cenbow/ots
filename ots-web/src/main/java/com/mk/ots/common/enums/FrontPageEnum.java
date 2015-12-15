@@ -5,7 +5,8 @@ package com.mk.ots.common.enums;
  */
 public enum FrontPageEnum {
 	page(1,"首页分页"),
-	 limit(3,"首页显示酒店条数")
+	 limit(3,"首页显示酒店条数"),
+	recommendLimit(9, "首页特价活动酒店条数")
 	;
 
 	private final Integer id;
