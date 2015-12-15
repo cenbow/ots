@@ -27,6 +27,7 @@ import com.google.common.collect.Maps;
 import com.mk.framework.AppUtils;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.enums.HotelPromoEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.hotel.bean.TCity;
 import com.mk.ots.hotel.service.CityService;
@@ -258,13 +259,38 @@ public class SearchController {
 		rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
 		rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
 
+		String errorMessage = "";
+		String callVersion = (String) queryReqEntity.getCallversion();
+		if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion) > 0) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			errorMessage = "callversion is lower than 3.3, not accessible in this function... ";
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(errorMessage);
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		} else if (StringUtils.isBlank(callVersion)) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			errorMessage = "callversion is a must... ";
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(errorMessage);
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+
 		try {
-			Map<String, Object> response = promoSearchService.readonlySearchHotels(queryReqEntity);
-			
-			response.get("hotel");
+			String promoId = queryReqEntity.getPromoid();
+
+			if (StringUtils.isNotBlank(promoId) && HotelPromoEnum.OneDollar.equals(promoId)) {
+				rtnMap.put("hotel", new ArrayList<Map<String, Object>>());
+			} else {
+				Map<String, Object> response = promoSearchService.readonlySearchHotels(queryReqEntity);
+				return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+			}
 		} catch (Exception ex) {
 			logger.error("failed to readonlySearchHotels...", ex);
-			
+
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "failed to readonlySearchHotels...");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 		}
