@@ -667,14 +667,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		String hotelid = (String) hotel.get("hotelid");
 
 		List<Map<String, Object>> roomtypes = readonlyRoomtypeList(hotel, null);
-		List<Map<String, Object>> newroomtypes = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> themeRoomtypes = new ArrayList<Map<String, Object>>();
 		for (Map<String, Object> roomtype : roomtypes) {
 			if (isThemed(Integer.parseInt(hotelid), roomtype)) {
-				newroomtypes.add(roomtype);
+				themeRoomtypes.add(roomtype);
 			}
 		}
 		
-		return newroomtypes;
+		return themeRoomtypes;
 	}
 
 	@Override

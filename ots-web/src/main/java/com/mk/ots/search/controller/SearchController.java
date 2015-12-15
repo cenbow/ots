@@ -283,7 +283,12 @@ public class SearchController {
 			String promoId = queryReqEntity.getPromoid();
 
 			if (StringUtils.isNotBlank(promoId) && HotelPromoEnum.OneDollar.equals(promoId)) {
+				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+				rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
+				rtnMap.put("count", "0");
 				rtnMap.put("hotel", new ArrayList<Map<String, Object>>());
+
+				return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 			} else {
 				Map<String, Object> response = promoSearchService.readonlySearchHotels(queryReqEntity);
 				return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);

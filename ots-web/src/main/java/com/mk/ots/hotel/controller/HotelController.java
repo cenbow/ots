@@ -1,5 +1,29 @@
 package com.mk.ots.hotel.controller;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
@@ -26,26 +50,7 @@ import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.search.service.ISearchService;
-import com.mk.ots.search.service.impl.IndexerService;
 import com.mk.ots.web.ServiceOutput;
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.util.*;
 
 /**
  * 酒店前端控制类 发布接口
@@ -302,16 +307,6 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "not allowed to access");
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
-		}
-
-		if (StringUtils.isNotBlank(reqentity.getPromoid())
-				&& HotelPromoEnum.OneDollar.getCode().equals(reqentity.getPromoid())) {
-			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
-			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
-			rtnMap.put("count", "0");
-			rtnMap.put("hotel", new ArrayList<Map<String, Object>>());
-			
-			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);			
 		}
 
 		try {
