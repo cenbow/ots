@@ -90,6 +90,10 @@ public class HomePageController {
 				rtnMap.put("promoicon", showConfigs.get(0).getPromoicon());
 				rtnMap.put("promotext", showConfigs.get(0).getPromotext());
 				rtnMap.put("promonote", showConfigs.get(0).getPromonote());
+				rtnMap.put("promoid", showConfigs.get(0).getPromoid());
+				rtnMap.put("normalid", showConfigs.get(0).getNormalId());
+			} else {
+				logger.warn("no show configs has been loaded...");
 			}
 
 			Map<String, Object> responseHotels = searchService.readonlySearchHotels(reqEntity);
@@ -175,6 +179,10 @@ public class HomePageController {
 				rtnMap.put("promoicon", showConfigs.get(0).getPromoicon());
 				rtnMap.put("promotext", showConfigs.get(0).getPromotext());
 				rtnMap.put("promonote", showConfigs.get(0).getPromonote());
+				rtnMap.put("promoid", showConfigs.get(0).getPromoid());
+				rtnMap.put("normalid", showConfigs.get(0).getNormalId());
+			} else {
+				logger.warn("no show configs has been loaded...");
 			}
 		} catch (Exception ex) {
 			logger.error("failed to searchHomePageThemes...", ex);
