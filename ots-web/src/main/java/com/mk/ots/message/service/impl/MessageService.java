@@ -136,8 +136,8 @@ public class MessageService implements IMessageService {
 				} else if (messageTypeEnum == MessageTypeEnum.audioMessage) {
 					if (providerClasStrings[j].toLowerCase().contains("voice")) {
                         //yunvoice语音
-                        message= new YunVoiceMessage();
-//						message=(ITips)Class.forName(providerClasStrings[j]).newInstance();
+//                        message= new YunVoiceMessage();
+						message=(ITips)Class.forName(providerClasStrings[j]).newInstance();
 						break;
 					}
 				} 
