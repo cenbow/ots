@@ -222,7 +222,7 @@ public class HomePageController {
 				logger.warn(String.format("unable to queryThemeRoomtypes %s", hotelid), ex);
 				continue;
 			}
-			
+
 			if (roomtypes != null && roomtypes.size() > 0) {
 				for (int i = 0; roomtypes != null && i < ((roomtypes.size() > maxAllowedRoomtypes) ? maxAllowedRoomtypes
 						: roomtypes.size()); i++) {
@@ -230,6 +230,10 @@ public class HomePageController {
 					themeTexts.add(themeText);
 
 					String roomtypename = (String) roomtypes.get(i).get("roomtypename");
+
+					if (roomtypes.get(i).containsKey("greetscore")) {
+						roomtypes.get(i).remove("greetscore");
+					}
 
 					themeText.put("text", roomtypename);
 					themeText.put("color", "");
