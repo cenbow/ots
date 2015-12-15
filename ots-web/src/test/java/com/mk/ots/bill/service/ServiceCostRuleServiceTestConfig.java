@@ -74,7 +74,7 @@ public class ServiceCostRuleServiceTestConfig extends BaseTest {
         BigDecimal price = new BigDecimal(1);
         String hotelCityCode = "430100";
         BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(orderCreateTime, qiekeFlag, price, hotelCityCode);
-        BigDecimal expected = new BigDecimal("0.1");
+        BigDecimal expected = new BigDecimal("0.10");
         Assert.assertEquals(expected, serviceCost);
     }
 
