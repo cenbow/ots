@@ -3755,7 +3755,9 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 |﻿limit|每页显示几条记录|否|
 | userlatitude |用户坐标(纬度)|是|
 | userlongitude |用户坐标(经度)|是|
+
 |pillowlongitude 	| 查询坐标(经度) | 否 |
+
 |pillowlatitude 	| 查询坐标(纬度) | 否 | 
 |callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
 |callversion|调用版本|否|
@@ -4061,6 +4063,10 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 | cityid     	| 城市编码   | 是    |                                                    
 | callmethod   	| 调用来源   | 是   | 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) 
 | callversion  	| 调用版本   | 是   |
+| userlatitude |用户坐标(纬度)|是|
+| userlongitude |用户坐标(经度)|是|
+|pillowlongitude 	| 查询坐标(经度) | 否 |
+|pillowlatitude 	| 查询坐标(纬度) | 否 | 
 | ip           	| IP地址  | 否     |                                                    
 | hardwarecode 	| 硬件编码   | 否       |                                                    
 | otsversion   	| OTS版本    | 否       |   
@@ -4303,6 +4309,10 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 | cityid     	| 城市编码   | 是    |                                                    
 | callmethod   	| 调用来源   | 是   | 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) 
 | callversion  	| 调用版本   | 是   |
+| userlatitude |用户坐标(纬度)|是|
+| userlongitude |用户坐标(经度)|是|
+|pillowlongitude 	| 查询坐标(经度) | 否 |
+|pillowlatitude 	| 查询坐标(纬度) | 否 | 
 | ip           	| IP地址  | 否     |                                                    
 | hardwarecode 	| 硬件编码   | 否       |                                                    
 | otsversion   	| OTS版本    | 否       |   
