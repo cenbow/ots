@@ -76,8 +76,13 @@ public class SyViewLogController {
             return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
         }
 
-        boolean result = false;
         HashMap<String, Object> dateMap = Maps.newHashMap();
+        String accesstoken = request.getParameter("token");
+        if(!StringUtils.isEmpty(accesstoken)){
+            Long mid = MyTokenUtils.getMidByToken(accesstoken);
+            dateMap.put("mid",mid);
+        }
+        boolean result = false;
         dateMap.put("toUrl",tourl);
         dateMap.put("actionType",actiontype);
         dateMap.put("fromUrl",request.getParameter("fromurl"));
@@ -91,7 +96,6 @@ public class SyViewLogController {
         dateMap.put("wifiMacaddr",request.getParameter("wifimacaddr"));
         dateMap.put("biMacaddr",request.getParameter("bimacaddr"));
         dateMap.put("simsn",request.getParameter("simsn"));
-        dateMap.put("mid",request.getParameter("mid"));
         dateMap.put("bussinessType",request.getParameter("bussinesstype"));
         dateMap.put("bussinessId",request.getParameter("bussinessid"));
         dateMap.put("hardwarecode",request.getParameter("hardwarecode"));
