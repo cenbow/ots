@@ -100,4 +100,14 @@
         ORDER  BY ord ASC
     </select>
 
+    <select id="queryRoomtypeGreetScore" resultType="map"  parameterType="java.util.Map">
+		select roomorder.hotelid, roomorder.roomtypeid, count(roomorder.id) as greetscore from b_pmsroomorder roomorder 
+		join t_room_sale_config config on roomorder.roomtypeid = config.saleroomtypeid 
+		where config.valid = 'T' and roomorder.status in ('OK', 'IN', 'PM')  
+		and DATE_FORMAT(roomorder.Begintime, '%Y%m%d%H%i%s') BETWEEN ${beforetime} AND ${yestertime}
+		and roomorder.roomtypeid = ${roomtypeid} 
+		group by roomorder.hotelid, roomorder.roomtypeid
+    </select>
+
+
 </mapper>
