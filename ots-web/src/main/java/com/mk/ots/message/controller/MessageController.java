@@ -64,7 +64,7 @@ public class MessageController {
 					Long msgid = Long.parseLong(itemFieldList.get(3));
 					boolean flag = "0".equals(itemFieldList.get(4)) || "DELIVRD".equals(itemFieldList.get(4)); //状态:（0或DELIVRD为成功，其它均为失败）
 					String reporttime = itemFieldList.get(5);
-					this.iMessageService.rewriteReport(msgid, flag, reporttime,null);
+					this.iMessageService.rewriteReport(msgid, flag, reporttime,null,itemFieldList.get(4).toString());
 					/*//如果发送失败则需重发
 					if (!flag) {
 						LMessageLog log = iMessageService.findMsgById(msgid);

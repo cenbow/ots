@@ -103,7 +103,7 @@ public interface IMessageService {
 	 * @param reportstatus 回执状态
 	 * @param reporttime   回执时间
 	 */
-	void rewriteReport(Long msgid, boolean reportstatus, String reporttime,String provider);
+	void rewriteReport(Long msgid, boolean reportstatus, String reporttime,String provider,String errMsg);
 
 	/**
 	 * 根据以下参数条件查询记录数

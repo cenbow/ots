@@ -99,7 +99,7 @@ public class MessageService implements IMessageService {
 		    }
 
             //更新数据库发送状态
-            rewriteReport(msgid, rtnstatus, sendDate.toString(), message.getClass().getSimpleName());
+            rewriteReport(msgid, rtnstatus, sendDate.toString(), message.getClass().getSimpleName(),null);
 			
 			if(!rtnstatus){
 				logger.error("send message occur error. info: {}, {}, {}. ", phone, msgContent, messageTypeEnum);
@@ -136,8 +136,8 @@ public class MessageService implements IMessageService {
 				} else if (messageTypeEnum == MessageTypeEnum.audioMessage) {
 					if (providerClasStrings[j].toLowerCase().contains("voice")) {
                         //yunvoice语音
-                        message= new YunVoiceMessage();
-//						message=(ITips)Class.forName(providerClasStrings[j]).newInstance();
+//                        message= new YunVoiceMessage();
+						message=(ITips)Class.forName(providerClasStrings[j]).newInstance();
 						break;
 					}
 				} 
@@ -570,13 +570,18 @@ public class MessageService implements IMessageService {
 
 	
 	@Override
-	public void rewriteReport(Long msgid, boolean reportstatus, String reporttime,String provider) {
+	public void rewriteReport(Long msgid, boolean reportstatus, String reporttime,String provider,String errMsg) {
 		logger.info("RewriteReport(回执信息) msgid:{}, reportstatus:{}, reporttime:{}", msgid, reportstatus, reporttime);
 		LMessageLog message = new LMessageLog();
 		message.setId(msgid);
 		message.setSuccess(reportstatus);
-		message.setProvidername(provider);
+        if (StringUtils.isNotEmpty(provider))  {
+            message.setProvidername(provider);
+        }
 		message.setReporttime(reporttime);
+        if (StringUtils.isNotEmpty(errMsg))  {
+            message.setErrMsg(errMsg);
+        }
 		this.iLMessageLogDao.update(message);
 	}
 
@@ -748,7 +753,7 @@ public class MessageService implements IMessageService {
                 }
 
                 //更新数据库发送状态
-                rewriteReport(msgid, rtnstatus, sendDate.toString(), message.getClass().getSimpleName());
+                rewriteReport(msgid, rtnstatus, sendDate.toString(), message.getClass().getSimpleName(),null);
 			}
 		} catch (Exception e1) {
 			logger.error("send message occur error. info: {}, {}, {}.", phone, msgContent, messageTypeEnum);

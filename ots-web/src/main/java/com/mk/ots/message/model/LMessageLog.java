@@ -2,8 +2,6 @@ package com.mk.ots.message.model;
 
 import java.util.Date;
 
-import org.stringtemplate.v4.compiler.CodeGenerator.primary_return;
-
 public class LMessageLog {
 	
 	private Long id;
@@ -25,6 +23,8 @@ public class LMessageLog {
 	private String reporttime;
 	
 	private String providername;
+
+    private String errMsg;
 	    
 	public String getReporttime() {
 		return reporttime;
@@ -105,5 +105,12 @@ public class LMessageLog {
 	public void setSuccess(Boolean success) {
 		this.success = success;
 	}
- 
+
+    public String getErrMsg() {
+        return errMsg;
+    }
+
+    public void setErrMsg(String errMsg) {
+        this.errMsg = errMsg;
+    }
 }
