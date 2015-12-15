@@ -27,7 +27,7 @@ public class ServiceCostRuleServiceTestConfig extends BaseTest {
         BigDecimal price = new BigDecimal(100);
         String hotelCityCode = "310000";
         BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(orderCreateTime, qiekeFlag, price, hotelCityCode);
-        BigDecimal expected = new BigDecimal("0");
+        BigDecimal expected = new BigDecimal("10.00");
         Assert.assertEquals(true, expected.compareTo(serviceCost) == 0);
     }
 
@@ -51,7 +51,7 @@ public class ServiceCostRuleServiceTestConfig extends BaseTest {
         BigDecimal price = new BigDecimal(100);
         String hotelCityCode = "310001";
         BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(orderCreateTime, qiekeFlag, price, hotelCityCode);
-        BigDecimal expected = new BigDecimal("1.00");
+        BigDecimal expected = new BigDecimal("0");
         Assert.assertEquals(true, expected.compareTo(serviceCost) == 0);
     }
 
@@ -62,25 +62,25 @@ public class ServiceCostRuleServiceTestConfig extends BaseTest {
         BigDecimal price = new BigDecimal(100);
         String hotelCityCode = "310001";
         BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(orderCreateTime, qiekeFlag, price, hotelCityCode);
-        BigDecimal expected = new BigDecimal("1.00");
+        BigDecimal expected = new BigDecimal("0");
         Assert.assertEquals(true, expected.compareTo(serviceCost) == 0);
     }
 
 
     @Test
     public void getServiceCostByOrderTypeByIsDefaultOverTime1Test() throws Exception {
-        Date orderCreateTime = DateUtils.parseDate("2016-01-01", "YYYY-MM-DD");
+        Date orderCreateTime = DateUtils.parseDate("2016-01-01", DateUtils.FORMAT_DATE);
         Boolean qiekeFlag = true;
         BigDecimal price = new BigDecimal(1);
         String hotelCityCode = "430100";
         BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(orderCreateTime, qiekeFlag, price, hotelCityCode);
         BigDecimal expected = new BigDecimal("0.1");
-        Assert.assertEquals(true, expected.compareTo(serviceCost) == 0);
+        Assert.assertEquals(expected, serviceCost);
     }
 
     @Test
     public void getServiceCostByOrderTypeByIsDefaultOverTime2Test() throws Exception {
-        Date orderCreateTime = DateUtils.parseDate("2016-01-01","YYYY-MM-DD");
+        Date orderCreateTime = DateUtils.parseDate("2016-01-01", DateUtils.FORMAT_DATE);
         Boolean qiekeFlag = false;
         BigDecimal price = new BigDecimal(1);
         String hotelCityCode = "430100";
@@ -91,7 +91,7 @@ public class ServiceCostRuleServiceTestConfig extends BaseTest {
 
     @Test
     public void getServiceCostByOrderTypeByIsDefaultOverTime3Test() throws Exception {
-        Date orderCreateTime = DateUtils.parseDate("2015-12-29","YYYY-MM-DD");
+        Date orderCreateTime = DateUtils.parseDate("2015-12-29",DateUtils.FORMAT_DATE);
         Boolean qiekeFlag = false;
         BigDecimal price = new BigDecimal(1);
         String hotelCityCode = "310000";
@@ -136,7 +136,7 @@ public class ServiceCostRuleServiceTestConfig extends BaseTest {
     public void checkTimeByOverTimeTest() throws Exception {
         Bean queryServiceCostRule = serviceCostRuleService.getServiceCostRuleByDefault(ServiceCostTypeEnum.ORDER_SERVICE_COST.getType());
         Assert.assertNotNull(queryServiceCostRule);
-        Date time = DateUtils.parseDate("2016-01-01","YYYY-MM-DD");
+        Date time = DateUtils.parseDate("2016-01-01", DateUtils.FORMAT_DATE);
         boolean checkTimeFlag = serviceCostRuleService.checkTime(time, queryServiceCostRule);
         Assert.assertEquals(false , checkTimeFlag);
     }
