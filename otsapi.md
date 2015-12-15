@@ -2776,7 +2776,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 |wifimacaddr|wifi mac地址|否|
 |bimacaddr|蓝牙 mac地址|否|
 |simsn|msn卡|否|
-|mid|会员id|否|
+|token|用户token|否|能获取用户token则必填，新用户非必填
 |bussinesstype|业务类型|否|类型：<br>1酒店；<br>2：订单<br>3：其它
 |bussinessid|业务id|否|
 |hardwarecode|硬件编码|否|
