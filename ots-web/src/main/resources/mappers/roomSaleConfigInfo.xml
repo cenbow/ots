@@ -196,4 +196,9 @@
             </if>
         </where>
     </select>
+    
+    <select id="queryAllPromoIds" resultType="map" parameterType="java.util.Map">
+		select distinct saletypeid from t_room_sale_config_info where valid = 'T'
+    </select>
+    
 </mapper>

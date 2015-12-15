@@ -85,6 +85,15 @@ public interface IPromoSearchService {
 	public Map<String, Object> searchThemes(HotelQuerylistReqEntity params) throws Exception;
 	
 	/**
+	 * search homepage thems
+	 * 
+	 * @param reqentity
+	 * @return
+	 * @throws Exception
+	 */
+	public Map<String, Object> searchHomePageThemes(HotelQuerylistReqEntity reqentity) throws Exception;
+	
+	/**
 	 * 
 	 * @param cityId
 	 * @param promoId
