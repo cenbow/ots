@@ -63,7 +63,6 @@ public class HotelController {
 	@Autowired
 	private HotelService hotelService;
 
-
 	@Autowired
 	private RoomstateService roomstateService;
 
@@ -150,10 +149,6 @@ public class HotelController {
 
 		return bfErrors.toString();
 	}
-
-
-
-
 
 	/**
 	 * 
@@ -292,7 +287,8 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
 			logger.error(String.format("parameters validation failed with error %s", errorMessage));
-			Cat.logEvent("querypromolistException", reqentity.getCallmethod(), Event.SUCCESS, String.format("parameters validation failed with error %s", errorMessage));
+			Cat.logEvent("querypromolistException", reqentity.getCallmethod(), Event.SUCCESS,
+					String.format("parameters validation failed with error %s", errorMessage));
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
@@ -306,6 +302,16 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "not allowed to access");
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+
+		if (StringUtils.isNotBlank(reqentity.getPromoid())
+				&& HotelPromoEnum.OneDollar.getCode().equals(reqentity.getPromoid())) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
+			rtnMap.put("count", "0");
+			rtnMap.put("hotel", new ArrayList<Map<String, Object>>());
+			
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);			
 		}
 
 		try {
@@ -586,7 +592,8 @@ public class HotelController {
 		// params.toString(),"ots");
 		logger.info("【/roomstate/querylist】 params is : {}", pbb.toString());
 
-		Cat.logEvent("/roomstate/querylist", pbb == null ? "" : pbb.getCallmethod(), Event.SUCCESS, CommonUtils.toStr(pbb));
+		Cat.logEvent("/roomstate/querylist", pbb == null ? "" : pbb.getCallmethod(), Event.SUCCESS,
+				CommonUtils.toStr(pbb));
 
 		// 办理再次入住传 roomno
 		// 调用service方法
@@ -628,7 +635,8 @@ public class HotelController {
 				 */
 				if (freeRoomCount == 0) {
 					logger.info("记录埋点:{}", params.getHotelid());
-					Cat.logEvent("ROOMSTATE-FullRoomNum", CommonUtils.toStr(params.getHotelid()),  Event.SUCCESS, CommonUtils.toStr(params));
+					Cat.logEvent("ROOMSTATE-FullRoomNum", CommonUtils.toStr(params.getHotelid()), Event.SUCCESS,
+							CommonUtils.toStr(params));
 				}
 			}
 			// 埋点真实用户进入酒店后满房的次数end
