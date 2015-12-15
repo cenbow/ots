@@ -1109,6 +1109,7 @@ public class BillOrderDAO {
         Date createTime = (Date) map.get("orderCreatetime");
         String cityCode = (String) map.get("cityCode");
         Long spreaduser = (Long)map.get("spreaduser");//1=非切克 2,3=切客
+        Long orderid = (Long) map.get("orderid");
 
         BigDecimal allcost = (BigDecimal)priceMap.get("allcost");
         BigDecimal hotelgive = (BigDecimal)priceMap.get("hotelgive");
@@ -1120,6 +1121,7 @@ public class BillOrderDAO {
         }else if(spreaduser == 3L){
             qiekeFlag = true;
         }
+        logger.info("getServiceCost params orderid[%s],createTime[%s],qiekeFlag[%s],price[%s],cityCode[%s]",orderid,createTime, qiekeFlag,price,cityCode);
         BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(createTime, qiekeFlag, price, cityCode);
         return serviceCost;
     }
