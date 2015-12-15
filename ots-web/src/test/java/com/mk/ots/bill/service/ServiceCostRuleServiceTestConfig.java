@@ -5,6 +5,7 @@ import com.mk.orm.plugin.bean.Bean;
 import com.mk.ots.bill.dao.ServiceCostRuleDao;
 import com.mk.ots.bill.enums.ServiceCostRuleTypeEnum;
 import com.mk.ots.bill.enums.ServiceCostTypeEnum;
+import com.mk.ots.common.utils.DateUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +68,39 @@ public class ServiceCostRuleServiceTestConfig extends BaseTest {
 
 
     @Test
+    public void getServiceCostByOrderTypeByIsDefaultOverTime1Test() throws Exception {
+        Date orderCreateTime = DateUtils.parseDate("2016-01-01", "YYYY-MM-DD");
+        Boolean qiekeFlag = true;
+        BigDecimal price = new BigDecimal(1);
+        String hotelCityCode = "430100";
+        BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(orderCreateTime, qiekeFlag, price, hotelCityCode);
+        BigDecimal expected = new BigDecimal("0.1");
+        Assert.assertEquals(true, expected.compareTo(serviceCost) == 0);
+    }
+
+    @Test
+    public void getServiceCostByOrderTypeByIsDefaultOverTime2Test() throws Exception {
+        Date orderCreateTime = DateUtils.parseDate("2016-01-01","YYYY-MM-DD");
+        Boolean qiekeFlag = false;
+        BigDecimal price = new BigDecimal(1);
+        String hotelCityCode = "430100";
+        BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(orderCreateTime, qiekeFlag, price, hotelCityCode);
+        BigDecimal expected = new BigDecimal("0.1");
+        Assert.assertEquals(true, expected.compareTo(serviceCost) == 0);
+    }
+
+    @Test
+    public void getServiceCostByOrderTypeByIsDefaultOverTime3Test() throws Exception {
+        Date orderCreateTime = DateUtils.parseDate("2015-12-29","YYYY-MM-DD");
+        Boolean qiekeFlag = false;
+        BigDecimal price = new BigDecimal(1);
+        String hotelCityCode = "310000";
+        BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(orderCreateTime, qiekeFlag, price, hotelCityCode);
+        BigDecimal expected = new BigDecimal("0.1");
+        Assert.assertEquals(true, expected.compareTo(serviceCost) == 0);
+    }
+
+    @Test
      public void checkTimeTest() throws Exception {
         Bean queryServiceCostRule = serviceCostRuleService.getServiceCostRuleByDefault(ServiceCostTypeEnum.ORDER_SERVICE_COST.getType());
         Assert.assertNotNull(queryServiceCostRule);
@@ -82,7 +116,7 @@ public class ServiceCostRuleServiceTestConfig extends BaseTest {
     }
 
     @Test
-    public void checkTim2eTest() throws Exception {
+    public void checkTime2Test() throws Exception {
         String hotelCityCode = "310000";
         Bean queryServiceCostRule = serviceCostRuleService.getServiceCostRule(hotelCityCode, ServiceCostTypeEnum.ORDER_SERVICE_COST.getType());
         Assert.assertNotNull(queryServiceCostRule);
@@ -96,4 +130,15 @@ public class ServiceCostRuleServiceTestConfig extends BaseTest {
         BigDecimal ratio = queryServiceCostRule.getBigDecimal("ratio");
         Assert.assertEquals(new BigDecimal("0.10") , ratio);
     }
+
+
+    @Test
+    public void checkTimeByOverTimeTest() throws Exception {
+        Bean queryServiceCostRule = serviceCostRuleService.getServiceCostRuleByDefault(ServiceCostTypeEnum.ORDER_SERVICE_COST.getType());
+        Assert.assertNotNull(queryServiceCostRule);
+        Date time = DateUtils.parseDate("2016-01-01","YYYY-MM-DD");
+        boolean checkTimeFlag = serviceCostRuleService.checkTime(time, queryServiceCostRule);
+        Assert.assertEquals(false , checkTimeFlag);
+    }
+
 }
