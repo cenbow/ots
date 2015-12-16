@@ -343,7 +343,6 @@ public class HomePageController {
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
-		reqEntity.setOrderby(HotelSortEnum.ORDERNUMS.getId());
 		reqEntity.setLimit(maxAllowedPopular * 2);
 
 		Date day = new Date();

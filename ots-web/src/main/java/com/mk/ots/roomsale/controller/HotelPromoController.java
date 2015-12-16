@@ -1,6 +1,7 @@
 package com.mk.ots.roomsale.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,11 +26,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.enums.HotelPromoEnum;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.restful.input.HotelHomePageReqEntity;
+import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
+import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.web.ServiceOutput;
 
 /**
@@ -45,6 +49,8 @@ public class HotelPromoController {
 	private RoomSaleConfigInfoService roomSaleConfigInfoService;
 	@Autowired
 	private RoomSaleService roomSaleService;
+	@Autowired
+	private IPromoSearchService promoSearchService;
 
 	/**
 	 * 活动查询
@@ -138,7 +144,6 @@ public class HotelPromoController {
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> onedollarlist(HttpServletRequest request,
 			@Valid HotelHomePageReqEntity homepageReqEntity, Errors errors) throws Exception {
-		ResponseEntity<Map<String, Object>> responseEntity = null;
 		ObjectMapper objectMapper = new ObjectMapper();
 		String params = objectMapper.writeValueAsString(request.getParameterMap());
 		String errorMessage = "";
@@ -180,7 +185,54 @@ public class HotelPromoController {
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
 
-		return responseEntity;
+		if (latitude == null || longitude == null) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			errorMessage = "latitude/longitude is a must... ";
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(errorMessage);
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+
+		HotelQuerylistReqEntity queryReq = buildOnedollarQueryEntity(homepageReqEntity);
+
+		try {
+			Map<String, Object> hotels = promoSearchService.readonlySearchHotels(queryReq);
+
+			hotels.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+			hotels.put(ServiceOutput.STR_MSG_ERRMSG, "");
+
+			return new ResponseEntity<Map<String, Object>>(hotels, HttpStatus.OK);
+		} catch (Exception ex) {
+			logger.error("failed to do onedollarlist query...", ex);
+
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "failed to do onedollarlist query...");
+		}
+
+		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+	}
+
+	private HotelQuerylistReqEntity buildOnedollarQueryEntity(HotelHomePageReqEntity homepageReqEntity) {
+		HotelQuerylistReqEntity reqEntity = new HotelQuerylistReqEntity();
+		reqEntity.setCallversion(homepageReqEntity.getCallversion());
+		reqEntity.setCallmethod(homepageReqEntity.getCallmethod());
+		reqEntity.setCityid(homepageReqEntity.getCityid());
+		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.OneDollar.getCode()));
+		reqEntity.setCallentry(null);
+		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
+		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
+		reqEntity.setIshotelpic("T");
+
+		Date day = new Date();
+		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
+		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
+
+		reqEntity.setStartdateday(strCurDay);
+		reqEntity.setEnddateday(strNextDay);
+
+		return reqEntity;
 	}
 
 	private String countErrors(Errors errors) {
