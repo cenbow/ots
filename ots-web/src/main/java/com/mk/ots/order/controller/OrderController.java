@@ -500,7 +500,7 @@ public class OrderController {
 		String userLongitude = request.getParameter("userlongitude");
 		String userLatitude = request.getParameter("userlatitude");
 
-		String  showBlackType =  request.getParameter("showblacktype");// 非必填，除去常住人之外的入住人信息，格式为json
+		String  showBlackType =  request.getParameter("showblacktype");// 非必填，是否是一元房
 
 
 		/*************** 移动设备信息 ************/

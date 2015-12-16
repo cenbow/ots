@@ -2202,7 +2202,7 @@ public class OrderServiceImpl implements OrderService {
        //检查订单promo type是否符合支付规则
         checkPayByPromoType(order, order.getPromoType());
 
-        checkOrdeByPromoType(order);
+        checkOrderByPromoType(order);
 
         Long cashBigDecimal = 0L;
         if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
@@ -3144,6 +3144,8 @@ public class OrderServiceImpl implements OrderService {
       String couponNo = request.getParameter("couponno");// 优惠券代码
       String quickUserId = request.getParameter("quickuserid");// 常住人主键ID，非必填，可多个，多个使用过
                                                                   // 英文逗号分隔
+      String  showBlackType =  request.getParameter("showblacktype");// 非必填，是否一元房
+
       String checkInUser = request.getParameter("checkinuser");// 非必填，除去常住人之外的入住人信息，格式为json
       SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
       Date checkBegintime = order.getBeginTime();
@@ -3178,6 +3180,12 @@ public class OrderServiceImpl implements OrderService {
           if (StringUtils.isNotBlank(breakfastNum)) {
               order.set("breakfastnum", Integer.parseInt(breakfastNum));
           }
+          if (!StringUtils.isNotBlank(showBlackType)) {
+              order.setShowBlackType(showBlackType);
+          }else{
+              order.setShowBlackType(null);
+          }
+
           if (StringUtils.isNotBlank(orderType)) {
               // 支付支付的单子不能修改paystatus
               if(OrderTypeEnum.YF.getId().equals(order.getOrderType()) && order.getPayStatus() >= PayStatusEnum.alreadyPay.getId().intValue()){
@@ -3325,28 +3333,23 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    //判断当前房间类型
+    //判断当前订单是否允许用户创建
     private void checkOrderByPromoType(OtaOrder order) {
         if(StringUtils.isEmpty(order.getShowBlackType())){
             return ;
         }
         if(PromoIdTypeEnum.YYF.getCode().equals(order.getShowBlackType())){
             //如果是1元房，只允许新用户下单
-            if("T".equals(order.getPromotion())){
-                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能与其他促销一起使用");
+            FirstOrderModel fom = new FirstOrderModel();
+            fom.setMid(order.getMid());
+            boolean isFirstOrder = this.isFirstOrder(fom);
+            if(!isFirstOrder){
+                throw MyErrorEnum.customError.getMyException("很抱歉"+PromoIdTypeEnum.YYF.getText()+"只允许新用户使用");
             }
-            if("T".equals(order.getCoupon())){
-                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能使用优惠券");
-            }
-            try {
-                Date begin = DateUtils.parseDate(DateUtils.formatDateTime(order.getBeginTime()), DateUtils.FORMATDATETIME);
-                Date end = DateUtils.parseDate(DateUtils.formatDateTime(order.getEndTime()), DateUtils.FORMATDATETIME);
-                if(DateUtils.diffDay(begin,end) >= 2){
-                    throw MyErrorEnum.customError.getMyException("很抱歉，特价房只能入住一天");
-                }
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+            //1元房只允许预付
+          if(!OrderTypeEnum.YF.getId().equals(order.getOrderType())){
+              throw MyErrorEnum.customError.getMyException("很抱歉"+PromoIdTypeEnum.YYF.getText()+"只允许"+OrderTypeEnum.YF.getName());
+          }
         }
     }
 
@@ -4290,7 +4293,7 @@ public class OrderServiceImpl implements OrderService {
 //				this.unLockCashFlow(order);
 			} else {
 				this.orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.ORDER_BACKCASH.getId(), "", "¥" + order.getAvailableMoney()
-						+ "红包已退回您的账户", "");
+                        + "红包已退回您的账户", "");
 //				BigDecimal availableMoney = new BigDecimal(0);
 //				order.setAvailableMoney(availableMoney);
 //				order.update();
@@ -4605,7 +4608,7 @@ public class OrderServiceImpl implements OrderService {
     
     private void changeOrderSpuAndInv(OtaOrder otaorder) {
         PmsRoomOrder pmsRoomOrder = pmsRoomOrderDao.getCheckInTime(otaorder.getId());
-        logger.info("转换订单,orderid = "+otaorder.getId());
+        logger.info("转换订单,orderid = " + otaorder.getId());
         if (pmsRoomOrder != null) {
             // 判断入住时间减创建时间是否小于15分钟
             Date checkintime = pmsRoomOrder.getDate("CheckInTime");
