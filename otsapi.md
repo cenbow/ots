@@ -2843,7 +2843,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 
 ##订单接口
 
-### 「修」 查询订单详情
+###查询订单详情
 ***
 **业务说明：**
 
@@ -2874,7 +2874,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 |ip|IP地址|否|
 |hardwarecode|硬件编码|否|
 |otsversion|OTS版本|否|
-|`「修」 `statetype|取值范围|否|[all、doing、commenting（待评价）、done]
+|statetype|取值范围|否|[all、doing、done]
 
 > API返回json数据示例：
 
@@ -3613,8 +3613,8 @@ errmsg:,//错误信息
 |ip|IP地址|否|
 |hardwarecode|硬件编码|否|
 |otsversion|OTS版本|否|
-|`「修」 `statetype|取值范围|否|[all、doing、commenting（待评价）、done]
-
+|statetype|取值范围|否|[all、doing、done]
+|`「增」 `isscore|是否评价|否|T/F
 > API返回json数据示例：
 
 ```js
