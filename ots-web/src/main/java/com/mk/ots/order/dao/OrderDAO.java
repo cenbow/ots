@@ -502,7 +502,7 @@ public class OrderDAO extends BaseDAO {
 	 * @param token
 	 * @param orderStatus
 	 */
-	public Long selectCountByOrderStatus(List<String> statusList, String token) {
+	public Long selectCountByOrderStatus(List<String> statusList, String token, String isscore) {
 		List<String> paraList = new ArrayList<String>();
 		paraList.add(token);
 		paraList.addAll(statusList);
@@ -517,6 +517,15 @@ public class OrderDAO extends BaseDAO {
 			}
 			sql.setLength(sql.length() - 1);
 			sql.append(" ) ");
+		}
+		if (isscore != null) {
+			if (isscore.equals("T")) {
+				sql.append(" and isscore = ? ");
+				paraList.add(isscore);
+			} else {
+				sql.append(" and (isscore = ? or isscore is null) ");
+				paraList.add(isscore);
+			}
 		}
 		return Db.queryLong(sql.toString(), paraList.toArray());
 	}
