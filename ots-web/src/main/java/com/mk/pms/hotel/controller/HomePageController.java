@@ -53,7 +53,7 @@ public class HomePageController {
 
 	private final Integer maxAllowedRoomtypes = 3;
 
-	private final Integer maxAllowedPopular = 5;
+	private final Integer maxAllowedPopular = 6;
 
 	@RequestMapping("/popular")
 	@SuppressWarnings("unchecked")
@@ -64,7 +64,7 @@ public class HomePageController {
 		String errorMessage = "";
 
 		if (logger.isInfoEnabled()) {
-			logger.info(String.format("listThemes begings with parameters:%s...", params));
+			logger.info(String.format("listPopular begings with parameters:%s...", params));
 		}
 
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
@@ -105,6 +105,9 @@ public class HomePageController {
 			if (responseHotel != null && responseHotel.size() > 0) {
 				popularHotels.addAll(responseHotel);
 			}
+
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
 		} catch (Exception ex) {
 			errorMessage = "failed to listpopular...";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
@@ -167,7 +170,11 @@ public class HomePageController {
 			Map<String, Object> themeResponse = promoService.readonlySearchHotels(reqEntity);
 
 			List<Map<String, Object>> hotels = (List<Map<String, Object>>) themeResponse.get("hotel");
-			rtnMap.put("hotel", filterHotels(hotels, reqEntity));
+			if (hotels == null) {
+				rtnMap.put("hotel", new ArrayList<Map<String, Object>>());
+			} else {
+				rtnMap.put("hotel", filterHotels(hotels, reqEntity));
+			}
 
 			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
 			showConfig.setPromoid(Integer.parseInt(reqEntity.getPromoid()));
@@ -184,6 +191,9 @@ public class HomePageController {
 			} else {
 				logger.warn("no show configs has been loaded...");
 			}
+
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
 		} catch (Exception ex) {
 			logger.error("failed to searchHomePageThemes...", ex);
 
@@ -206,7 +216,19 @@ public class HomePageController {
 		}
 
 		for (Map<String, Object> hotel : hotels) {
-			String hotelid = String.valueOf(hotel.get("hotelid"));
+			if (hotel.get("hotelid") == null) {
+				continue;
+			}
+
+			String hotelid = "";
+
+			try {
+				hotelid = String.valueOf(hotel.get("hotelid"));
+			} catch (Exception ex) {
+				logger.warn(String.format("invalid hotelid:%s, skip...", hotel.get("hotelid")));
+				continue;
+			}
+
 			reqEntity.setHotelid(hotelid);
 			reqEntity.setIsroomtype("T");
 
