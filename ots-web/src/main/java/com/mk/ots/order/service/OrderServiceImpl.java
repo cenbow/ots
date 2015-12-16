@@ -3633,9 +3633,9 @@ public class OrderServiceImpl implements OrderService {
    * @param orderStatus
    * @param token
    */
-  public JSONObject selectCountByOrderStatus(String sqnum, List<String> orderStatus, String token) {
+  public JSONObject selectCountByOrderStatus(String sqnum, List<String> orderStatus, String token, String isscore) {
       logger.info("OTSMessage::OrderService::selectCountByOrderStatus:{}::begin", orderStatus);
-      Long count = orderDAO.selectCountByOrderStatus(orderStatus, token);
+      Long count = orderDAO.selectCountByOrderStatus(orderStatus, token, isscore);
       JSONObject statuscount = new JSONObject();
       statuscount.put("sqnum", sqnum);
       statuscount.put("ordercount", count);
