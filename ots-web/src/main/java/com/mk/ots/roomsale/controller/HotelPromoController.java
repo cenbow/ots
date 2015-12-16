@@ -6,9 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -18,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -55,7 +50,6 @@ public class HotelPromoController {
 	/**
 	 * 活动查询
 	 **/
-
 	@RequestMapping(value = "/hotel/querytypelist", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<Map<String, Object>> querytypelist(ParamBaseBean pbb, String cityid, String saletypeid,
@@ -142,26 +136,16 @@ public class HotelPromoController {
 
 	@RequestMapping(value = "/promo/onedollarlist", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> onedollarlist(HttpServletRequest request,
-			@Valid HotelHomePageReqEntity homepageReqEntity, Errors errors) throws Exception {
+	public ResponseEntity<Map<String, Object>> onedollarlist(HotelHomePageReqEntity homepageReqEntity) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
-		String params = objectMapper.writeValueAsString(request.getParameterMap());
+		String params = objectMapper.writeValueAsString(homepageReqEntity);
 		String errorMessage = "";
-
+		
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format("onedollarlist begins with parameters:%s...", params));
 		}
 
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-
-		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
-			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
-
-			logger.error(String.format("parameters validation failed with error %s", errorMessage));
-
-			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
-		}
 
 		String callVersion = (String) homepageReqEntity.getCallversion();
 		Double latitude = (Double) homepageReqEntity.getUserlatitude();
@@ -197,13 +181,45 @@ public class HotelPromoController {
 
 		HotelQuerylistReqEntity queryReq = buildOnedollarQueryEntity(homepageReqEntity);
 
+		Long promosec = 0L;
+		Long promosecond = 0L;
+		Long nextpromosec = 0L;
+
 		try {
-			Map<String, Object> hotels = promoSearchService.readonlySearchHotels(queryReq);
+			List<TRoomSaleConfigInfo> roomSales = roomSaleConfigInfoService
+					.queryListBySaleTypeId(HotelPromoEnum.OneDollar.getCode(), 0, 1);
 
-			hotels.put(ServiceOutput.STR_MSG_ERRCODE, "0");
-			hotels.put(ServiceOutput.STR_MSG_ERRMSG, "");
+			if (roomSales != null && roomSales.size() > 0) {
+				TRoomSaleConfigInfo saleConfigInfo = roomSales.get(0);
 
-			return new ResponseEntity<Map<String, Object>>(hotels, HttpStatus.OK);
+				promosec = DateUtils.calDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
+						saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
+
+				nextpromosec = DateUtils.calNextDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
+						saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
+
+				promosecond = DateUtils.calEndDiffTime(saleConfigInfo.getStartDate(), saleConfigInfo.getEndDate(),
+						saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
+				if (promosec < 0) {
+					promosec = 0L;
+				}
+
+				rtnMap.put("promosec", promosec / 1000);
+				rtnMap.put("promosecend", promosecond / 1000);
+				rtnMap.put("nextpromosec", nextpromosec / 1000);
+				rtnMap.put("promonote", "");
+
+				Map<String, Object> hotels = promoSearchService.readonlySearchHotels(queryReq);
+				rtnMap.putAll(hotels);
+				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+				rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
+				rtnMap.remove("success");
+			} else {
+				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+				rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "failed to do onedollarlist query...");
+			}
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		} catch (Exception ex) {
 			logger.error("failed to do onedollarlist query...", ex);
 
@@ -233,15 +249,6 @@ public class HotelPromoController {
 		reqEntity.setEnddateday(strNextDay);
 
 		return reqEntity;
-	}
-
-	private String countErrors(Errors errors) {
-		StringBuffer bfErrors = new StringBuffer();
-		for (ObjectError error : errors.getAllErrors()) {
-			bfErrors.append(error.getDefaultMessage()).append("; ");
-		}
-
-		return bfErrors.toString();
 	}
 
 	@RequestMapping(value = "/promo/queryrange", method = RequestMethod.POST)
