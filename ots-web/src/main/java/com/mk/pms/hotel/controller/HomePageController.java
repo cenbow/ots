@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.enums.HotelSortEnum;
 import com.mk.ots.common.enums.ShowAreaEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
@@ -49,7 +50,7 @@ public class HomePageController {
 	@Autowired
 	private TRoomSaleShowConfigService roomSaleShowConfigService;
 
-	private final Integer maxAllowedThemes = 3;
+	private final Integer maxAllowedThemes = 6;
 
 	private final Integer maxAllowedRoomtypes = 3;
 
@@ -135,7 +136,8 @@ public class HomePageController {
 			rtnMap.put("hotel", popularHotels);
 
 			if (responseHotel != null && responseHotel.size() > 0) {
-				popularHotels.addAll(responseHotel);
+				popularHotels.addAll(responseHotel.size() > maxAllowedPopular
+						? responseHotel.subList(0, maxAllowedPopular) : responseHotel);
 			}
 
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
@@ -205,7 +207,7 @@ public class HomePageController {
 			if (hotels == null) {
 				rtnMap.put("hotel", new ArrayList<Map<String, Object>>());
 			} else {
-				rtnMap.put("hotel", filterHotels(hotels, reqEntity));
+				rtnMap.put("hotel", filterThemeHotels(hotels, reqEntity));
 			}
 
 			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
@@ -239,7 +241,7 @@ public class HomePageController {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<Map<String, Object>> filterHotels(List<Map<String, Object>> hotels,
+	private List<Map<String, Object>> filterThemeHotels(List<Map<String, Object>> hotels,
 			HotelQuerylistReqEntity reqEntity) {
 		List<Map<String, Object>> hotelFiltered = new ArrayList<Map<String, Object>>();
 
@@ -317,9 +319,9 @@ public class HomePageController {
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
-		reqEntity.setLimit(maxAllowedPopular);
+		reqEntity.setLimit(maxAllowedPopular * 2);
 		reqEntity.setIspromoonly(null);
-		reqEntity.setOrderby(5);
+		reqEntity.setOrderby(HotelSortEnum.ORDERNUMS.getId());
 
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
@@ -341,6 +343,8 @@ public class HomePageController {
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
+		reqEntity.setOrderby(HotelSortEnum.ORDERNUMS.getId());
+		reqEntity.setLimit(maxAllowedPopular * 2);
 
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
