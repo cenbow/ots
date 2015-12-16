@@ -91,12 +91,14 @@ import com.mk.ots.order.dao.OrderDAO;
 import com.mk.ots.order.service.OrderService;
 import com.mk.ots.price.dao.BasePriceDAO;
 import com.mk.ots.price.dao.PriceDAO;
+import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.roomsale.model.TRoomSale;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.score.dao.ScoreDAO;
+import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.ticket.dao.BHotelStatDao;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.ots.web.ServiceOutput;
@@ -201,6 +203,9 @@ public class HotelService {
 
 	@Autowired
 	private RoomSaleService roomSaleService;
+
+	@Autowired
+	private ISearchService searchService;
 
 	/**
 	 * es filter builders
@@ -414,23 +419,21 @@ public class HotelService {
 					Date hotelRepairTime = bean.getRepairtime();
 
 					String repairInfo = getRepairInfo(hotelRepairTime);
-					if (StringUtils.isNotBlank(repairInfo)){
+					if (StringUtils.isNotBlank(repairInfo)) {
 						hotel.setRepairinfo(repairInfo);
 					}
-					if (StringUtils.isNotBlank(hotelid)){
+					if (StringUtils.isNotBlank(hotelid)) {
 
-						List<Map<String, Object>> highLighs =  getHighlights(Long.valueOf(hotelid));
+						List<Map<String, Object>> highLighs = getHighlights(Long.valueOf(hotelid));
 
-					/*
-						if (StringUtils.isNotBlank(repairInfo)){
-							Map<String, Object> repairTip = new HashMap<>();
-							repairTip.put("id",-1);
-							repairTip.put("name", repairInfo);
-							highLighs.add(0,repairTip);
-						}
-
-						*/
-						if (highLighs == null){
+						/*
+						 * if (StringUtils.isNotBlank(repairInfo)){ Map<String,
+						 * Object> repairTip = new HashMap<>();
+						 * repairTip.put("id",-1); repairTip.put("name",
+						 * repairInfo); highLighs.add(0,repairTip); }
+						 * 
+						 */
+						if (highLighs == null) {
 							highLighs = new ArrayList<Map<String, Object>>();
 						}
 						hotel.setHighlights(highLighs);
@@ -471,8 +474,7 @@ public class HotelService {
 					 */
 					List<Map<String, Object>> bedtypes = new ArrayList<Map<String, Object>>();
 					try {
-						List<Map<String, Object>> bedtypeList = readonlyRoomtypeList(
-								bean.getId().toString(), "");
+						List<Map<String, Object>> bedtypeList = readonlyRoomtypeList(bean.getId().toString(), "");
 						for (Map<String, Object> bedtype : bedtypeList) {
 							Map<String, Object> bed = new HashMap<String, Object>();
 							bed.put("bedtype", bedtype.get("bedtype"));
@@ -556,31 +558,31 @@ public class HotelService {
 		return output;
 	}
 
-	public static String getRepairInfo(Date hotelRepairTime ){
+	public static String getRepairInfo(Date hotelRepairTime) {
 		Date now = new Date();
 		int diffYears = DateUtils.diffYears(now, hotelRepairTime);
 
-		if (diffYears <= Constant.SHOW_HOTEL_REPAIRINFO_YEARS_LIMIT){
+		if (diffYears <= Constant.SHOW_HOTEL_REPAIRINFO_YEARS_LIMIT) {
 			String repairInfo = DateUtils.getDateYear(hotelRepairTime) + "年装修";
-			return  repairInfo;
-		}else {
+			return repairInfo;
+		} else {
 			return null;
 		}
 	}
 
-	public  List<Map<String, Object>> getHighlights(Long hotelid){
+	public List<Map<String, Object>> getHighlights(Long hotelid) {
 		List<TFacilityModel> facilitys = tFacilityMapper.findByHotelid(hotelid);
 		String[] showIds = Constant.HOTEL_HIGHLIGHT_SHOWS_IDS.split(",");
 		List<Map<String, Object>> highLights = new ArrayList();
 
 		for (TFacilityModel fac : facilitys) {
 
-			for (String showId: showIds) {
-				if (fac.getId() == Long.valueOf(showId)){
+			for (String showId : showIds) {
+				if (fac.getId() == Long.valueOf(showId)) {
 					Map<String, Object> highLight = new HashMap<>();
-					highLight.put("name",fac.getFacname());
-					highLight.put("id",fac.getId());
-					if (StringUtils.isNotBlank(fac.getIconurl())){
+					highLight.put("name", fac.getFacname());
+					highLight.put("id", fac.getId());
+					if (StringUtils.isNotBlank(fac.getIconurl())) {
 						highLight.put("icon", fac.getIconurl());
 					}
 					highLights.add(highLight);
@@ -591,6 +593,7 @@ public class HotelService {
 
 		return highLights;
 	}
+
 	/**
 	 * query promo data
 	 * 
@@ -1573,10 +1576,10 @@ public class HotelService {
 	 * @return
 	 */
 	public Long getGreetScore(long hotelId) {
-		//最受欢迎指数  pms 月销* 1000 / hotelromnums”
+		// 最受欢迎指数 pms 月销* 1000 / hotelromnums”
 		Long pmsSales = orderService.findPMSMonthlySales(hotelId);
-		//Long otaSales = orderService.findMonthlySales(hotelId);
-		logger.info("getPMSOrderNumMon hotelId: {}, getPMS月销量：{}", hotelId,pmsSales);
+		// Long otaSales = orderService.findMonthlySales(hotelId);
+		logger.info("getPMSOrderNumMon hotelId: {}, getPMS月销量：{}", hotelId, pmsSales);
 		return pmsSales;
 	}
 
@@ -2681,6 +2684,7 @@ public class HotelService {
 	 * @param hotel
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")	
 	public Map<String, Object> readonlyHotelDetail(Long hotelId) {
 		THotelModel hotelModel = hotelMapper.findHotelInfoById(hotelId);
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -2815,6 +2819,27 @@ public class HotelService {
 			resultMap.put("ambituslifedec", "");
 		}
 
+		if (hotelId != null) {
+			try {
+				HotelQuerylistReqEntity reqEntity = new HotelQuerylistReqEntity();
+				reqEntity.setCallversion("3.3");
+				reqEntity.setCityid("0");
+				reqEntity.setPage(1);
+				reqEntity.setLimit(1);
+				reqEntity.setHotelid(String.valueOf(hotelId));
+
+				Map<String, Object> response = searchService.readonlySearchHotels(reqEntity);
+				List<Map<String, Object>> hotel = (List<Map<String, Object>>) response.get("hotel");
+				if (hotel != null && hotel.size() > 0) {
+					resultMap.put("repairinfo", hotel.get(0).get("repairinfo"));
+					resultMap.put("latitude", hotel.get(0).get("latitude"));
+					resultMap.put("longitude", hotel.get(0).get("longitude"));
+				}
+			} catch (Exception ex) {
+				logger.warn("repairinfo, latitude, longitude are failed to found...", ex);
+			}
+		}
+
 		return resultMap;
 	}
 
@@ -2904,8 +2929,6 @@ public class HotelService {
 			logger.error(e.getMessage(), e);
 		}
 	}
-
-
 
 	/**
 	 * 更新ES中酒店眯客价。
