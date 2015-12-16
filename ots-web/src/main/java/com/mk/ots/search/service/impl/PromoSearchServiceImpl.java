@@ -1632,30 +1632,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public Map<String, Object> searchHomePromoRecommend(HotelQuerylistReqEntity params) throws Exception {
-		List<Map<String, Object>> promolist;
-		Map<String, Object> promoItem = null;
-		try {
-			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
-			showConfig.setIsSpecial("T");
-			showConfig.setPromoid(HotelPromoEnum.Night.getCode());
-			showConfig.setShowArea(ShowAreaEnum.HomePagePromoRecommend.getCode());
-
-			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
-			promolist = this.searchHomePromoBase(params, showConfigs);
-
-			 if (promolist!=null && promolist.size() > 0 ){
-				 promoItem = promolist.get(0);
-			 }
-			return promoItem;
-		} catch (Exception e) {
-			throw new Exception("failed to searchHomePromos", e);
-		}
-	}
-
-
 	/**
 	 * 酒店搜索
 	 */
