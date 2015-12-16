@@ -1531,7 +1531,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Map<String, Object>> searchHomePromos(HotelQuerylistReqEntity params) throws Exception {
 
 		List<Map<String, Object>> promolist;
@@ -1582,7 +1581,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<String, Object> searchHomePromoRecommend(HotelQuerylistReqEntity params) throws Exception {
 		List<Map<String, Object>> promolist;
 		Map<String, Object> promoItem = null;
@@ -2105,16 +2103,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		boolean isBefore = LocalDateTime.now().isBefore(promoEndTime);
 
 		return isAfter && isBefore;
-	}
-
-	/**
-	 * 
-	 * @param searchBuilder
-	 */
-	private void sortByPromo(SearchRequestBuilder searchBuilder, String version) {
-		if (StringUtils.isNotEmpty(version) && ("3.1".compareTo(version) <= 0)) {
-			searchBuilder.addSort("isonpromo", SortOrder.DESC);
-		}
 	}
 
 	/**

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -134,13 +136,81 @@ public class HotelPromoController {
 		return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/promo/onedollarlist", method = RequestMethod.POST)
+	@RequestMapping(value = "/search/querythemes", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> onedollarlist(HotelHomePageReqEntity homepageReqEntity) throws Exception {
+	public ResponseEntity<Map<String, Object>> queryThemes(@Valid HotelHomePageReqEntity homepageReqEntity)
+			throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String params = objectMapper.writeValueAsString(homepageReqEntity);
 		String errorMessage = "";
-		
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("queryThemes begins with parameters:%s...", params));
+		}
+
+		String callVersion = (String) homepageReqEntity.getCallversion();
+		Double latitude = (Double) homepageReqEntity.getUserlatitude();
+		Double longitude = (Double) homepageReqEntity.getUserlongitude();
+
+		if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion) > 0) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			errorMessage = "callversion is lower than 3.3, not accessible in this function... ";
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(errorMessage);
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		} else if (StringUtils.isBlank(callVersion)) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			errorMessage = "callversion is a must... ";
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(errorMessage);
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+
+		if (latitude == null || longitude == null) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			errorMessage = "latitude/longitude is a must... ";
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(errorMessage);
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+
+		HotelQuerylistReqEntity queryReq = buildThemeQueryEntity(homepageReqEntity);
+
+		try {
+			Map<String, Object> response = promoSearchService.readonlySearchHotels(queryReq);
+			if (response != null) {
+				rtnMap.putAll(response);
+			}
+
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
+			if (rtnMap.containsKey("success")) {
+				rtnMap.remove("success");
+			}
+		} catch (Exception ex) {
+			logger.error("failed to queryThemes...", ex);
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "failed to do onedollarlist query...");
+		}
+
+		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/promo/onedollarlist", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> onedollarlist(@Valid HotelHomePageReqEntity homepageReqEntity)
+			throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		String params = objectMapper.writeValueAsString(homepageReqEntity);
+		String errorMessage = "";
+
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format("onedollarlist begins with parameters:%s...", params));
 		}
@@ -210,10 +280,15 @@ public class HotelPromoController {
 				rtnMap.put("promonote", "");
 
 				Map<String, Object> hotels = promoSearchService.readonlySearchHotels(queryReq);
-				rtnMap.putAll(hotels);
+				if (hotels != null) {
+					rtnMap.putAll(hotels);
+				}
+
 				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
 				rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
-				rtnMap.remove("success");
+				if (rtnMap.containsKey("success")) {
+					rtnMap.remove("success");
+				}
 			} else {
 				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 				rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "failed to do onedollarlist query...");
@@ -228,6 +303,27 @@ public class HotelPromoController {
 		}
 
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+	}
+
+	private HotelQuerylistReqEntity buildThemeQueryEntity(HotelHomePageReqEntity homepageReqEntity) {
+		HotelQuerylistReqEntity reqEntity = new HotelQuerylistReqEntity();
+		reqEntity.setCallversion(homepageReqEntity.getCallversion());
+		reqEntity.setCallmethod(homepageReqEntity.getCallmethod());
+		reqEntity.setCallentry(null);		
+		reqEntity.setCityid(homepageReqEntity.getCityid());
+		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
+		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
+		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
+		reqEntity.setIshotelpic("T");
+
+		Date day = new Date();
+		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
+		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
+
+		reqEntity.setStartdateday(strCurDay);
+		reqEntity.setEnddateday(strNextDay);
+
+		return reqEntity;
 	}
 
 	private HotelQuerylistReqEntity buildOnedollarQueryEntity(HotelHomePageReqEntity homepageReqEntity) {
