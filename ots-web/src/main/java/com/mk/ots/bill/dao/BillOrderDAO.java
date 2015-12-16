@@ -448,10 +448,12 @@ public class BillOrderDAO {
                 //prepaymentDiscount toPayDiscount
                 BigDecimal prepaymentDiscount = null;
                 BigDecimal toPayDiscount = null;
-                if((int)map.get("ordertype") == 1){
-                    prepaymentDiscount = qiekeIncome;
-                } else if((int)map.get("ordertype") == 2){
-                    toPayDiscount = qiekeIncome;
+                if(bSpreadFlag){
+                    if((int)map.get("ordertype") == 1){
+                        prepaymentDiscount = qiekeIncome;
+                    } else if((int)map.get("ordertype") == 2){
+                        toPayDiscount = qiekeIncome;
+                    }
                 }
                 map.put("prepaymentDiscount", prepaymentDiscount);
                 map.put("toPayDiscount", toPayDiscount);
