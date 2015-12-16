@@ -18,8 +18,12 @@ public class HotelHomePageReqEntity extends ParamBaseBean implements Serializabl
 	@NotEmpty(message = "接口参数cityid不能为空.")
 	private String cityid;
 
+	@NotNull(message = "缺少参数-userlatitude: userlatitude.")
+	@NotEmpty(message = "接口参数userlatitude不能为空.")
 	private Double userlatitude;
-
+	
+	@NotNull(message = "缺少参数-userlongitude: userlongitude.")
+	@NotEmpty(message = "接口参数userlongitude不能为空.")
 	private Double userlongitude;
 
 	private String callmethod;
