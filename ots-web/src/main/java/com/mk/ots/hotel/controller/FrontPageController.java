@@ -46,7 +46,7 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping(method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-public class HomePageController {
+public class FrontPageController {
 	final Logger logger = LoggerFactory.getLogger(this.getClass());
 	/**
 	 * 注入酒店业务类
