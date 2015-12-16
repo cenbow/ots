@@ -165,7 +165,6 @@ public class FrontPageController {
 					sec = 0;
 				}
 
-
 				Map<String, Object> promoItem = promoSearchService.searchHomePromoRecommend(hotelEntity);
 				if (promoItem == null){
 					promoItem = new HashMap<>();
