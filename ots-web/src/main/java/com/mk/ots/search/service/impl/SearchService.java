@@ -2436,7 +2436,7 @@ public class SearchService implements ISearchService {
 		}
 
 		GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
-		geoFilter.point(userlatitude, userlongitude).distance(SearchConst.SEARCH_RANGE_DEFAULT, DistanceUnit.METERS).optimizeBbox("memory")
+		geoFilter.point(userlatitude, userlongitude).distance(SearchConst.SEARCH_RANGE_MAX, DistanceUnit.METERS).optimizeBbox("memory")
 				.geoDistance(GeoDistance.ARC);
 		filterBuilders.add(geoFilter);
 		FilterBuilder[] builders = new FilterBuilder[] {};
@@ -2458,6 +2458,10 @@ public class SearchService implements ISearchService {
 			Map<String, Object> result = hit.getSource();
 			SearchPositionsCoordinateRespEntity ds = new SearchPositionsCoordinateRespEntity();
 			ds.setId(Long.valueOf(result.get("id").toString()));
+
+			if (!citycode.equals(result.get("citycode"))){
+				continue;
+			}
 			ds.setName(result.get("name").toString());
 			String typeid = result.get("ptype").toString();
 			ds.setType(typeid);
@@ -2498,6 +2502,7 @@ public class SearchService implements ISearchService {
 				});
 				ds.setChild(stResult);
 			}
+
 			datas.add(ds);
 		}
 		return datas;
