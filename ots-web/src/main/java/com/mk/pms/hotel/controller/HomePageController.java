@@ -32,6 +32,7 @@ import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
 import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import com.mk.ots.search.service.IPromoSearchService;
+import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
 
 @Controller
@@ -43,13 +44,19 @@ public class HomePageController {
 	private IPromoSearchService promoService;
 
 	@Autowired
+	private ISearchService searchService;
+
+	@Autowired
 	private TRoomSaleShowConfigService roomSaleShowConfigService;
 
 	private final Integer maxAllowedThemes = 3;
 
 	private final Integer maxAllowedRoomtypes = 3;
 
+	private final Integer maxAllowedPopular = 5;
+
 	@RequestMapping("/popular")
+	@SuppressWarnings("unchecked")
 	public ResponseEntity<Map<String, Object>> listPopular(HttpServletRequest request,
 			@Valid HotelHomePageReqEntity homepageReqEntity, Errors errors) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -70,10 +77,47 @@ public class HomePageController {
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
-		
+
+		HotelQuerylistReqEntity reqEntity = buildPopularQueryEntity(homepageReqEntity);
+		try {
+			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
+			showConfig.setNormalId(5);
+			showConfig.setIsSpecial(Constant.STR_FALSE);
+			showConfig.setShowArea(ShowAreaEnum.FrontPageBottom.getCode());
+
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
+			if (showConfigs != null && showConfigs.size() > 0) {
+				rtnMap.put("promoicon", showConfigs.get(0).getPromoicon());
+				rtnMap.put("promotext", showConfigs.get(0).getPromotext());
+				rtnMap.put("promonote", showConfigs.get(0).getPromonote());
+				rtnMap.put("promoid", showConfigs.get(0).getPromoid());
+				rtnMap.put("normalid", showConfigs.get(0).getNormalId());
+			} else {
+				logger.warn("no show configs has been loaded...");
+			}
+
+			Map<String, Object> responseHotels = searchService.readonlySearchHotels(reqEntity);
+
+			List<Map<String, Object>> responseHotel = (List<Map<String, Object>>) responseHotels.get("hotel");
+			List<Map<String, Object>> popularHotels = new ArrayList<Map<String, Object>>();
+			rtnMap.put("hotel", popularHotels);
+
+			if (responseHotel != null && responseHotel.size() > 0) {
+				popularHotels.addAll(responseHotel);
+			}
+		} catch (Exception ex) {
+			errorMessage = "failed to listpopular...";
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(errorMessage, ex);
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
+
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
-	}	
-	
+	}
+
 	@RequestMapping("/themes")
 	@SuppressWarnings("unchecked")
 	public ResponseEntity<Map<String, Object>> listThemes(HttpServletRequest request,
@@ -90,9 +134,10 @@ public class HomePageController {
 
 		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			errorMessage = "parameters validation failed with error";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
-			logger.error(String.format("parameters validation failed with error %s", errorMessage));
+			logger.error(errorMessage);
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
@@ -134,6 +179,10 @@ public class HomePageController {
 				rtnMap.put("promoicon", showConfigs.get(0).getPromoicon());
 				rtnMap.put("promotext", showConfigs.get(0).getPromotext());
 				rtnMap.put("promonote", showConfigs.get(0).getPromonote());
+				rtnMap.put("promoid", showConfigs.get(0).getPromoid());
+				rtnMap.put("normalid", showConfigs.get(0).getNormalId());
+			} else {
+				logger.warn("no show configs has been loaded...");
 			}
 		} catch (Exception ex) {
 			logger.error("failed to searchHomePageThemes...", ex);
@@ -172,25 +221,60 @@ public class HomePageController {
 
 			hotel.put("themepic", themepics);
 
-			Map<String, Object> hotelDetails = promoService.readonlySearchHotels(reqEntity);
-			List<Map<String, Object>> detailHotels = (List<Map<String, Object>>) hotelDetails.get("hotel");
-			if (detailHotels != null && detailHotels.size() > 0) {
-				List<Map<String, Object>> roomtypes = (List<Map<String, Object>>) detailHotels.get(0).get("roomtype");
+			List<Map<String, Object>> roomtypes = null;
+			List<Map<String, Object>> newroomtypes = new ArrayList<Map<String, Object>>();
+			hotel.put("roomtype", newroomtypes);
+			try {
+				roomtypes = promoService.queryThemeRoomtypes(hotel);
+			} catch (Exception ex) {
+				logger.warn(String.format("unable to queryThemeRoomtypes %s", hotelid), ex);
+				continue;
+			}
 
-				for (int i = 0; roomtypes != null
-						&& i < ((roomtypes.size() > maxAllowedRoomtypes) ? maxAllowedRoomtypes : roomtypes.size()); i++) {
+			if (roomtypes != null && roomtypes.size() > 0) {
+				for (int i = 0; roomtypes != null && i < ((roomtypes.size() > maxAllowedRoomtypes) ? maxAllowedRoomtypes
+						: roomtypes.size()); i++) {
 					Map<String, Object> themeText = new HashMap<String, Object>();
 					themeTexts.add(themeText);
 
 					String roomtypename = (String) roomtypes.get(i).get("roomtypename");
 
+					if (roomtypes.get(i).containsKey("greetscore")) {
+						roomtypes.get(i).remove("greetscore");
+					}
+
 					themeText.put("text", roomtypename);
 					themeText.put("color", "");
+
+					newroomtypes.add(roomtypes.get(i));
 				}
 			}
 		}
 
 		return hotelFiltered;
+	}
+
+	private HotelQuerylistReqEntity buildPopularQueryEntity(HotelHomePageReqEntity homepageReqEntity) {
+		HotelQuerylistReqEntity reqEntity = new HotelQuerylistReqEntity();
+		reqEntity.setCallversion(homepageReqEntity.getCallversion());
+		reqEntity.setCallmethod(homepageReqEntity.getCallmethod());
+		reqEntity.setCityid(homepageReqEntity.getCityid());
+		reqEntity.setCallentry(null);
+		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
+		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
+		reqEntity.setIshotelpic("T");
+		reqEntity.setLimit(maxAllowedPopular);
+		reqEntity.setIspromoonly(null);
+		reqEntity.setOrderby(5);
+
+		Date day = new Date();
+		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
+		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
+
+		reqEntity.setStartdateday(strCurDay);
+		reqEntity.setEnddateday(strNextDay);
+
+		return reqEntity;
 	}
 
 	private HotelQuerylistReqEntity buildThemeQueryEntity(HotelHomePageReqEntity homepageReqEntity) {
