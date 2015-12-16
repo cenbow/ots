@@ -72,7 +72,6 @@ import com.mk.ots.ticket.service.ITicketService;
 import com.mk.ots.ticket.service.parse.ITicketParse;
 import com.mk.ots.wallet.service.IWalletCashflowService;
 import com.mk.ots.wallet.service.IWalletService;
-import com.mk.ots.wallet.service.impl.TBackMoneyRuleServiceImpl;
 import com.mk.ots.web.ServiceOutput;
 import com.mk.ots.wordcenser.job.TextFilterService;
 import com.mk.pms.bean.PmsCheckinUser;
@@ -203,8 +202,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     TextFilterService textFilterService;
-    @Autowired
-    TBackMoneyRuleServiceImpl tBackMoneyRuleService;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
 
@@ -2035,14 +2032,6 @@ public class OrderServiceImpl implements OrderService {
           otaorder.setUpdateTime(DateUtils.createDate());
           if (tempOrderStatus != otaorder.getOrderStatus()) {
               otaorder.saveOrUpdate();
-              /**************************特价订单返现***************************/
-              if( OtaOrderStatusEnum.CheckIn.getId() == otaorder.getOrderStatus()){
-                  BigDecimal returnWallCash =  tBackMoneyRuleService.getBackMoneyByOrder(otaorder);
-                  if(returnWallCash != null && returnWallCash.compareTo(new BigDecimal("0")) != 0){
-                      walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), returnWallCash);
-                  }
-
-              }
           }
           orderStatusBuf.append(",更新后OTA订单状态:" + otaorder.getOrderStatus());
           this.orderBusinessLogService.saveLog(otaorder, OtaOrderFlagEnum.UPDATEORDERSTATUS.getId(), orderStatusBuf.toString(), "", "");
@@ -2201,18 +2190,11 @@ public class OrderServiceImpl implements OrderService {
         order.setPromoType(getPromoType(roomId));
        //检查订单promo type是否符合支付规则
         checkPayByPromoType(order, order.getPromoType());
-        Long cashBigDecimal = 0L;
-        if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
-            cashBigDecimal = tBackMoneyRuleService.getBackMoneyByOrder(order).longValue();
-            order.setCashBack(new BigDecimal(cashBigDecimal));
-        }else{
-            Map<String, Object> cash = cashBackService.getCashBackByRoomtypeId(roomTypeId, DateUtils.formatDate(order.getBeginTime()),
-                    DateUtils.formatDate(order.getEndTime()));
-            this.logger.info("getCashBackByRoomtypeId:返现详细:{}", gson.toJson(cash));
-            cashBigDecimal = (Long) cash.get("cashbackcost");
-            order.setCashBack(new BigDecimal(cashBigDecimal));
-        }
-
+		Map<String, Object> cash = cashBackService.getCashBackByRoomtypeId(roomTypeId, DateUtils.formatDate(order.getBeginTime()),
+				DateUtils.formatDate(order.getEndTime()));
+		this.logger.info("getCashBackByRoomtypeId:返现详细:{}", gson.toJson(cash));
+		Long cashBigDecimal = (Long) cash.get("cashbackcost");
+		order.setCashBack(new BigDecimal(cashBigDecimal));
 		if (cashBigDecimal.longValue() > 0) {
 			order.setIsReceiveCashBack(ReceiveCashBackEnum.notReceiveCashBack.getId());
 		}
@@ -3310,6 +3292,9 @@ public class OrderServiceImpl implements OrderService {
             if("T".equals(order.getCoupon())){
                 throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能使用优惠券");
             }
+            if(OrderTypeEnum.YF.getId() != order.getOrderType()){
+                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房只能使用在线支付");
+            }
             try {
                 Date begin = DateUtils.parseDate(DateUtils.formatDateTime(order.getBeginTime()), DateUtils.FORMATDATETIME);
                 Date end = DateUtils.parseDate(DateUtils.formatDateTime(order.getEndTime()), DateUtils.FORMATDATETIME);
@@ -3634,7 +3619,7 @@ public class OrderServiceImpl implements OrderService {
    * @param token
    */
   public JSONObject selectCountByOrderStatus(String sqnum, List<String> orderStatus, String token, String isscore) {
-      logger.info("OTSMessage::OrderService::selectCountByOrderStatus:{}::begin", orderStatus);
+      logger.info("OTSMessage::OrderService::selectCountByOrderStatus:{},isscore:{}::begin", orderStatus, isscore);
       Long count = orderDAO.selectCountByOrderStatus(orderStatus, token, isscore);
       JSONObject statuscount = new JSONObject();
       statuscount.put("sqnum", sqnum);
@@ -4710,7 +4695,8 @@ public class OrderServiceImpl implements OrderService {
 		return currentSales;
 	}
 
-
+    
+    
     @Override
     public Long findPMSMonthlySales(Long hotelId) {
         OtsCacheManager manager = AppUtils.getBean(OtsCacheManager.class);
@@ -4730,7 +4716,6 @@ public class OrderServiceImpl implements OrderService {
         Calendar yesterCalendar = Calendar.getInstance();
         yesterCalendar.add(Calendar.DATE, -1);
         String yestertime = sdf1.format(yesterCalendar.getTime());
-
 
         try {
             if(hotelId == null || hotelId <= 0)  {

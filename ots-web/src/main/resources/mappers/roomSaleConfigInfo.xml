@@ -20,6 +20,18 @@
         <result property="updateBy" column="updateBy" />
 	</resultMap>
 
+
+    <resultMap id="BaseTPriceScopeDtoResultMap" type="com.mk.ots.roomsale.model.TPriceScopeDto">
+        <result property="id" column="id" />
+        <result property="promoId" column="promo_id" />
+        <result property="step" column="step" />
+        <result property="minprice" column="minprice" />
+        <result property="maxprice" column="maxprice" />
+        <result property="cityCode" column="city_code" />
+        <result property="startTime" column="start_time" />
+        <result property="endTime" column="end_time" />
+        <result property="createTime" column="create_time" />
+    </resultMap>
     <sql id="Base_Query_List" >
         <where>
             <if test="id != null">
@@ -169,4 +181,24 @@
         limit 1
     </select>
 
+
+    <select id="queryTPriceScopeDtoByPromoId" resultMap="BaseTPriceScopeDtoResultMap" parameterType="java.util.Map">
+        SELECT
+          *
+        FROM  t_price_scope
+        <where>
+            valid ='1'
+            <if test="promoId != null">
+                AND promo_id = #{promoId}
+            </if>
+            <if test="cityCode != null">
+                AND city_code = #{cityCode}
+            </if>
+        </where>
+    </select>
+    
+    <select id="queryAllPromoIds" resultType="map" parameterType="java.util.Map">
+		select distinct saletypeid from t_room_sale_config_info where valid = 'T'
+    </select>
+    
 </mapper>

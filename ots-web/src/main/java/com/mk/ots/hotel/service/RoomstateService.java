@@ -13,8 +13,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.dianping.cat.message.Event;
+import com.mk.es.Hotel;
 import com.mk.framework.util.CommonUtils;
 import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.enums.SearchBlackTypeEnum;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -983,7 +985,12 @@ public class RoomstateService {
 				respEntity.setHotelid(hotelid);
 				respEntity.setHotelname(thotelModel.getHotelname());
 				respEntity.setHotelrulecode(thotelModel.getRulecode()); // 20150810
-																		// add
+
+				String repairInfo = HotelService.getRepairInfo(thotelModel.getRepairtime());	// add hotel repair info in mike3.2+
+				if (StringUtils.isNotBlank(repairInfo)){
+					respEntity.setRepairinfo(repairInfo);
+				}
+
 				respEntity.setOnline(thotelModel.getOnline());
 				respEntity.setVisible(thotelModel.getVisible());
 				// 查询t_roomtype表数据
@@ -1382,8 +1389,11 @@ public class RoomstateService {
 
 					// 兼容老版本
 					if (isPromo != null && isPromo) {
-
-						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
+						if (isPromo && roomtype.getPromoid().equals(HotelPromoEnum.OneDollar.getCode().toString())){
+							if (params.getShowblacktype() == SearchBlackTypeEnum.ONESECKILL.getCode()){
+								roomtypes.add(roomtype);
+							}
+						}else if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
 								&& !"3".equals(callMethod)) {
 
 							roomtypes.add(roomtype);

@@ -1559,6 +1559,18 @@ public class DateUtils extends Object {
 	}
 
     /**
+     * 计算两个时间的时间差 单位年
+     * @param day1
+     * @param day2
+     * @return
+     */
+    public static int diffYears(Date day1, Date day2) {
+        long diff = day2.getTime() - day1.getTime();
+        Long days = diff / ( 1000 * 60 * 60 * 24 * 365 );
+        return days.intValue();
+    }
+
+    /**
      * 计算两个时间的时间差多少秒
      * @param day1
      * @param day2
@@ -2025,5 +2037,12 @@ public class DateUtils extends Object {
         dates[0] = firstDateOfWeek;
         dates[1] = lastDateOfWeek;
         return dates;
+    }
+
+
+    public static Integer getDateYear(Date start){
+        Calendar cl = Calendar.getInstance();
+        cl.setTime(start);
+        return cl.get(Calendar.YEAR);
     }
 }

@@ -13,7 +13,7 @@ public interface RoomSaleConfigInfoService {
      * @param limit
      * @return
      */
-    List<TRoomSaleConfigInfo> queryListBySaleTypeId(String cityid,int saleTypeId,int start,int limit);
+    List<TRoomSaleConfigInfo> queryListBySaleTypeId(int saleTypeId,int start,int limit);
     
     public List<TRoomSaleConfigInfo> querybyPromoType(Integer promotype);
 }
