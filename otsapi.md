@@ -1656,10 +1656,46 @@ otsversion 	| OTS版本 	| 否 	|
 }
 ```
 
-### `「增」` 特价房提醒----**业务说明：**> 记录用户提醒特价房要求。**接口url：**> http://ip:port/ots/remind/create**请求参数：**|    字段        |         名称         | 是否必须  | 说明||--------------- | ------------------- | ----------| -----------||token 	| 用户令牌 	| 是 	|  
-|hotelid 	| 酒店id 	| 是 	| 	|roomtypeid 	| 房型id 	| 是 	| 	|callmethod 	| 调用来源 	| 否 	| 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) ||callversion 	| 调用版本 	| 否 | 	|ip 	| IP地址 	| 否 	|  		|hardwarecode 	| 硬件编码 	| 否 |  |otsversion 	| OTS版本 	| 否 	|  > API返回json数据说明：```js{    "success":true,    "errcode":,//错误码    "errmsg"://错误信息}```
+### `「增」` 特价房提醒
+----
+**业务说明：**
+> 记录用户提醒特价房要求。
 
-> API返回json数据示例：```js{    "success":true,    "errcode":0,    "errmsg":""}```
+**接口url：**
+> http://ip:port/ots/remind/create
+
+**请求参数：**
+
+|    字段        |         名称         | 是否必须  | 说明|
+|--------------- | ------------------- | ----------| -----------|
+|token 	| 用户令牌 	| 是 	|  
+|hotelid 	| 酒店id 	| 是 	| 	
+|roomtypeid 	| 房型id 	| 是 	| 	
+|callmethod 	| 调用来源 	| 否 	| 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) |
+|callversion 	| 调用版本 	| 否 | 	
+|ip 	| IP地址 	| 否 	|  		
+|hardwarecode 	| 硬件编码 	| 否 |  
+|otsversion 	| OTS版本 	| 否 	|  
+
+> API返回json数据说明：
+
+```js
+{
+    "success":true,
+    "errcode":,//错误码
+    "errmsg"://错误信息
+}
+```
+
+> API返回json数据示例：
+
+```js
+{
+    "success":true,
+    "errcode":0,
+    "errmsg":""
+}
+```
 
 ### `「增」` 特价房信息查询
 ***
@@ -2804,7 +2840,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 
 ##订单接口
 
-### `「修」` 查询订单详情
+### 「修」 查询订单详情
 ***
 **业务说明：**
 
@@ -2830,35 +2866,36 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 |page|页数|是|第一页为1
 |limit|每页显示记录条数|是|必须为正数
 |hotelid|酒店id|否|只查询该酒店订单
-|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
 |callversion|调用版本|否|
 |ip|IP地址|否|
 |hardwarecode|硬件编码|否|
 |otsversion|OTS版本|否|
-|statetype|取值范围|否|[all、doing、done]                                          
+|`「修」 `statetype|取值范围|否|[all、doing、commenting（待评价）、done]
 
 > API返回json数据示例：
 
 ```js
 {
 	success:true,
-	errcode:,//错误码
-	errmsg:,//错误信息
+errcode:,//错误码
+errmsg:,//错误信息
 	count:10, //总数
-	order:[{//所有订单
+	order:
+[{//所有订单
 		orderid:1,//订单id
 		hotelid:1,//酒店id
 		hotelname:,//酒店名称
 		hotelphone:,//联系电话
-		hoteladdress:,//酒店地址
-		hoteldis:,//酒店所属区县
+hoteladdress:,//酒店地址
+hoteldis:,//酒店所属区县
 		hotelcity:,//酒店所属城市
-		longitude:, //酒店坐标(经度)
+longitude:, //酒店坐标(经度)
 		latitude:,//酒店坐标(纬度)
-		retentiontime:, //最晚保留时间 6位字符串 hhmmss,
-		defaultleavetime:, //默认离店时间  6位字符串 hhmmss,
-		ordermethod:1, //预订方式 1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
-		ordertype:1, //预订方式  1、预付 2、普通        
+retentiontime:, //最晚保留时间 6位字符串 hhmmss,
+defaultleavetime:, //默认离店时间  6位字符串 hhmmss,
+		ordermethod:1, //预订方式 1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
+		ordertype:1, //预订方式  1、预付 2、普通
 		pricetype:1, //价格类型 1、时租  2、日租
 		begintime:‘20141225171400’, //预抵时间
 		endtime:‘20141225171400’,  //预离时间
@@ -2866,22 +2903,23 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 		timeouttime:,//订单失效时间（创建订单时，默认是预付，订单失效时间为订单创建后15分钟）
 		promotion:F, //是否促销(T/F)
 		coupon:F, //是否使用了优惠券(T/F)
-		isonpromo:// 是否特价, 0非，1特价
-		promotype:	// 是否特价, 0非，1特价
-		roomticket：房券代码
+isonpromo:// 是否特价, 0非，1特价
+promotype:	// 是否特价, 0非，1特价
+roomticket：房券代码
 		checkcnt:,//可使用优惠券张数
-*「增」 paytip:支付提示(当有值的时候需要在支付的时候进行提示，没有或者值为""则不提示)
-		tickets:[{//优惠券信息，按照线上优惠额倒序排序，金额最大的为默认选中
-			id:1,//优惠券唯一id
-			name:’优惠券名’,
-			select:T, //选中,
-			check:T, //可以使用
-			subprice:12, //线上优惠多少钱
-			offlinesubprice:12, //线下优惠多少钱
-			type:1, //优惠券类型 1、普通立减 2、切客优惠码 3、议价优惠码
-			isticket:T,//  是否是优惠券（T优惠券，F优惠码）
-			uselimit://使用限制(1—线上；2—线下；空—全部)
-		}],
+		*「增」 paytip:支付提示(当有值的时候需要在支付的时候进行提示，没有或者值为""则不提示)
+		tickets:
+[{//优惠券信息，按照线上优惠额倒序排序，金额最大的为默认选中
+	id:1,//优惠券唯一id
+	name:’优惠券名’,
+	select:T, //选中,
+	check:T, //可以使用
+	subprice:12, //线上优惠多少钱
+	offlinesubprice:12, //线下优惠多少钱
+	type:1, //优惠券类型 1、普通立减 2、切客优惠码 3、议价优惠码
+	isticket:T,//  是否是优惠券（T优惠券，F优惠码）
+	uselimit://使用限制(1—线上；2—线下；空—全部)
+}],
 		totalprice:150.00, //总房价
 		price:50,  //房价
 		breakfastnum:1,   //早餐数
@@ -2892,41 +2930,44 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 		note:’备注’,
 		orderstatus:100,  //订单状态
 		pay:F,  //是否需要支付(T/F)
-		payid:1, //需要支付的订单id
-		orderretentiontime:’’  订单保留时间  14位
-		onlinepay:100.00, //线上客单价
-		offlinepay:100.00// 线下客单价
+payid:1, //需要支付的订单id
+orderretentiontime:’’  订单保留时间  14位
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
 		receipt:F,   //是否需要发票(T/F)
 		spreaduser:1,  //切客用户id
-		roomorder:[{//订单下客单
-			orderroomid:1,  //客单id
-			hotelid:1   //酒店id
-			hotelname:’酒店名称’,
-			roomtypeid:1, //房型id
-			roomtypename:’房型名称’,
-			roomid:1,
-			roomno:’房间号’,
-			ordermethod:1,  //预订方式 1、微信、web3、app
-			ordertype:1,  //预订方式  1、预付 2、普通
-			pricetype:1,  //价格类型 1、时租  2、日租
-			begintime:‘20141225171400’,  //预抵时间
-			endtime:‘20141225171400’,  //预离时间
-			orderday:1, //1天
-			createtime:‘20141225171400’, //订单创建时间
-			promotion:F, //是否促销(T/F)
-			coupon:F, //是否使用了优惠券(T/F)
-			totalprice:150.00, //总房价
-		payprice:[{房费应支付金额
-			actiondate:,// 日期
-			price:,//房价金额
-		}] 	
+		roomorder:
+[{//订单下客单
+		orderroomid:1,  //客单id
+		hotelid:1   //酒店id
+		hotelname:’酒店名称’,
+		roomtypeid:1, //房型id
+		roomtypename:’房型名称’,
+		roomid:1,
+		roomno:’房间号’,
+		ordermethod:1,  //预订方式 1、微信、web3、app
+		ordertype:1,  //预订方式  1、预付 2、普通
+		pricetype:1,  //价格类型 1、时租  2、日租
+		begintime:‘20141225171400’,  //预抵时间
+		endtime:‘20141225171400’,  //预离时间
+		orderday:1, //1天
+		createtime:‘20141225171400’, //订单创建时间
+		promotion:F, //是否促销(T/F)
+		coupon:F, //是否使用了优惠券(T/F)
+		totalprice:150.00, //总房价
+payprice:
+[{房费应支付金额
+	actiondate:,// 日期
+	price:,//房价金额
+}]
 		breakfastnum:1,   //早餐数
 		contacts:’联系人姓名’,
 		contactsphone:’联系人电话’,
 		contactsemail:’联系人email’,
 		contactsweixin:’联系人微信’,
-		checkinuser:[{//入住人信息
-			cpname:,//入住人姓名
+		checkinuser:
+[{//入住人信息
+				cpname:,//入住人姓名
 			cpsex:,//入住人性别
 			birthday:,//生日
 			cardtype:,//证件类型
@@ -2935,35 +2976,35 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 			fromaddress:,//户籍地址
 			address://联系地址
 			phone:‘’手机号
-		}]
+}]
 		note:’备注’,
 		orderstatus:100,  //订单状态
 		pay:F,  //是否需要支付(T/F)
 		receipt:F,   //是否需要发票(T/F)
-		promotionno:’促销代码’,
-		reeceipttitle:’发票抬头’,续住时需要第三方支付金额
-		onlinepay:100.00, //线上客单价
-		offlinepay:100.00// 线下客单价
-		showtitle:’已取消’, //显示状态
+promotionno:’促销代码’,
+reeceipttitle:’发票抬头’,续住时需要第三方支付金额
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+showtitle:’已取消’, //显示状态
 
-		citycode：城市编码
-		walletcost ： //钱包金额
-		cashbackcost ： //返还金额
-		orderpaydetail: [
-			{name:房款 ，cost ： 100},
-			{name:优惠券 ，cost ： -10},
-			{name:乐住币 ，cost ：-20},
-			{name:房券 ，cost ：-20}
-		],//订单明细费用
-		orderstatusname：订单状态的汉字描述
-		orderstatusid：订单显示状态id
-		receivecashback: 1, //（0:无需领取；1:还未领取;  2:已经领取) 是否返现
+citycode：城市编码
+walletcost ： //钱包金额
+cashbackcost ： //返还金额
+orderpaydetail: [
+{name:房款 ，cost ： 100},
+{name:优惠券 ，cost ： -10},
+{name:乐住币 ，cost ：-20},
+{name:房券 ，cost ：-20}
+],//订单明细费用
+orderstatusname：订单状态的汉字描述
+orderstatusid：订单显示状态id
+receivecashback: 1, //（0:无需领取；1:还未领取;  2:已经领取) 是否返现
 
 确认状态显示规则和前端按钮id
-		button:[{
-			name:’’, //按钮名称
-			action:’’, //动作意义    cancel 取消、pay 付款、edit 修改、checkin快速入住、meet约会、refund退款、			evaluation评价、continuedtolive 续住、delete删除
-		}]
+button:[{
+name:’’, //按钮名称
+action:’’, //动作意义    cancel 取消、pay 付款、edit 修改、checkin快速入住、meet约会、refund退款、evaluation评价、continuedtolive 续住、delete删除
+}]
 }]
 }
 
@@ -3003,7 +3044,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 |contactsweixin|联系微信|否|
 |note|备注|否|
 |spreaduser|切客用户id|否|
-|ordermethod|订单方式|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|ordermethod|订单方式|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
 |promotion|促销代码|否|
 |couponno|优惠券代码|否|
 |quickuserid|常住人主键id|否|可多个，多个使用过 英文逗号分隔
@@ -3014,59 +3055,99 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 |simsn|sim卡串号|否|
 |wifimacaddr|wifi的mac地址|否|
 |blmacaddr|蓝牙的mac地址|否|
-|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
 |callversion|调用版本|否|
 |ip|IP地址|否|
 |hardwarecode|硬件编码|否|
 |otsversion|OTS版本|否|
-|cashbackcost|返现金额              |否|                                                
+|cashbackcost|返现金额              |否|
+|`「增」`showblacktype 	| 显示黑名单类型的房态 	| 否 |1-一元秒杀|
 
 > API返回json数据示例：
 
 ```js
 {
-		success:true,
-		errcode:,//错误码
-		errmsg:,//错误信息
-		orderid:1,//订单id
-		hotelid:1,//酒店id
-		hotelname:,//酒店名称
-		hotelphone:,//联系电话
-		hoteladdress:,//酒店地址
-		hoteldis:,//酒店所属区县
-		hotelcity:,//酒店所属城市
-		longitude:, //酒店坐标(经度)
-		latitude:,//酒店坐标(纬度)
-		retentiontime:, //最晚保留时间 6位字符串 hhmmss,
-		defaultleavetime:, //默认离店时间  6位字符串 hhmmss,
-		ordermethod:1, //预订方式 1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
-		ordertype:1, //预订方式  1、预付 2、普通
-		pricetype:1, //价格类型 1、时租  2、日租
-		begintime:‘20141225180000’, //预抵时间
-		endtime:‘20141226120000’,  //预离时间
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+	orderid:1,//订单id
+	hotelid:1,//酒店id
+	hotelname:,//酒店名称
+	hotelphone:,//联系电话
+hoteladdress:,//酒店地址
+hoteldis:,//酒店所属区县
+	hotelcity:,//酒店所属城市
+longitude:, //酒店坐标(经度)
+	latitude:,//酒店坐标(纬度)
+retentiontime:, //最晚保留时间 6位字符串 hhmmss,
+defaultleavetime:, //默认离店时间  6位字符串 hhmmss,
+	ordermethod:1, //预订方式 1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
+	ordertype:1, //预订方式  1、预付 2、普通
+	pricetype:1, //价格类型 1、时租  2、日租
+	begintime:‘20141225180000’, //预抵时间
+	endtime:‘20141226120000’,  //预离时间
+	createtime:‘20141225171400’, //订单创建时间
+	timeouttime:,//订单失效时间（创建订单时，默认是预付，订单失效时间为订单创建后15分钟）
+	promotion:F, //是否促销(T/F)
+	coupon:F, //是否使用了优惠券(T/F)
+isonpromo:// 是否特价, 0非，1特价
+promotype:	// 是否特价, 0非，1特价
+roomticket：房券代码
+	checkcnt:,//可使用优惠券张数
+uselimit://选定的优惠券的使用限制(1—线上；2—线下；空—全部)
+*「增」paytip:支付提示(当有值的时候需要在支付的时候进行提示，没有或者值为""则不提示)
+	tickets:
+[{//优惠券信息，按照线上优惠额倒序排序，金额最大的为默认选中
+	id:1,//优惠券唯一id
+	name:’优惠券名’,
+	select:T, //选中,
+	check:T, //可以使用
+	subprice:12, //线上优惠多少钱
+	offlinesubprice:12, //线下优惠多少钱
+	type:1, //优惠券类型 1、普通立减 2、切客优惠码 3、议价优惠码
+	isticket:T,//  是否是优惠券（T优惠券，F优惠码）
+	uselimit://使用限制(1—线上；2—线下；空—全部)
+}],
+	totalprice:150.00, //总房价
+	price:50,  //房价
+	breakfastnum:1,   //早餐数
+	contacts:’联系人姓名’,
+	contactsphone:’联系人电话’,
+	contactsemail:’联系人email’,
+	contactsweixin:’联系人微信’,
+	note:’备注’,
+	orderstatus:100,  //订单状态
+	pay:F,  //是否需要支付(T/F)
+payid:1, //需要支付的订单id
+orderretentiontime:’’  订单保留时间  14位
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+	receipt:F,   //是否需要发票(T/F)
+	spreaduser:1,  //切客用户id
+	roomorder:
+[{//订单下客单
+	orderroomid:1,  //客单id
+		hotelid:1   //酒店id
+		hotelname:’酒店名称’,
+		roomtypeid:1, //房型id
+		roomtypename:’房型名称’,
+		roomid:1,
+		roomno:’房间号’,
+		ordermethod:1,  //预订方式 1、微信、web3、app
+		ordertype:1,  //预订方式  1、预付 2、普通
+		pricetype:1,  //价格类型 1、时租  2、日租
+		begintime:‘20141225171400’,  //预抵时间
+		endtime:‘20141225171400’,  //预离时间
+		orderday:1, //1天
 		createtime:‘20141225171400’, //订单创建时间
-		timeouttime:,//订单失效时间（创建订单时，默认是预付，订单失效时间为订单创建后15分钟）
 		promotion:F, //是否促销(T/F)
 		coupon:F, //是否使用了优惠券(T/F)
-		isonpromo:// 是否特价, 0非，1特价
-		promotype:	// 是否特价, 0非，1特价
-		roomticket：房券代码
-		checkcnt:,//可使用优惠券张数
-		uselimit://选定的优惠券的使用限制(1—线上；2—线下；空—全部)
- *「增」paytip:支付提示(当有值的时候需要在支付的时候进行提示，没有或者值为""则不提示)
-		tickets:[{//优惠券信息，按照线上优惠额倒序排序，金额最大的为默认选中
-			id:1,//优惠券唯一id
-			name:’优惠券名’,
-			select:T, //选中,
-			check:T, //可以使用
-			subprice:12, //线上优惠多少钱
-			offlinesubprice:12, //线下优惠多少钱
-			type:1, //优惠券类型 1、普通立减 2、切客优惠码 3、议价优惠码
-			isticket:T,//  是否是优惠券（T优惠券，F优惠码）
-			uselimit://使用限制(1—线上；2—线下；空—全部)
-		}],
 		totalprice:150.00, //总房价
-		price:50,  //房价
+payprice:
+[{房费应支付金额
+	actiondate:,// 日期
+	price:,//房价金额
+}]
 		breakfastnum:1,   //早餐数
 		contacts:’联系人姓名’,
 		contactsphone:’联系人电话’,
@@ -3075,61 +3156,25 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 		note:’备注’,
 		orderstatus:100,  //订单状态
 		pay:F,  //是否需要支付(T/F)
-		payid:1, //需要支付的订单id
-		orderretentiontime:’’  订单保留时间  14位
-		onlinepay:100.00, //线上客单价
-		offlinepay:100.00// 线下客单价
 		receipt:F,   //是否需要发票(T/F)
-		spreaduser:1,  //切客用户id
-		roomorder:[{//订单下客单
-			orderroomid:1,  //客单id
-			hotelid:1   //酒店id
-			hotelname:’酒店名称’,
-			roomtypeid:1, //房型id
-			roomtypename:’房型名称’,
-			roomid:1,
-			roomno:’房间号’,
-			ordermethod:1,  //预订方式 1、微信、web3、app
-			ordertype:1,  //预订方式  1、预付 2、普通
-			pricetype:1,  //价格类型 1、时租  2、日租
-			begintime:‘20141225171400’,  //预抵时间
-			endtime:‘20141225171400’,  //预离时间
-			orderday:1, //1天
-			createtime:‘20141225171400’, //订单创建时间
-			promotion:F, //是否促销(T/F)
-			coupon:F, //是否使用了优惠券(T/F)
-			totalprice:150.00, //总房价
-			payprice:[{房费应支付金额
-				actiondate:,// 日期
-				price:,//房价金额
-			}] 	
-			breakfastnum:1,   //早餐数
-			contacts:’联系人姓名’,
-			contactsphone:’联系人电话’,
-			contactsemail:’联系人email’,
-			contactsweixin:’联系人微信’,
-			note:’备注’,
-			orderstatus:100,  //订单状态
-			pay:F,  //是否需要支付(T/F)
-			receipt:F,   //是否需要发票(T/F)
-			promotionno:’促销代码’,
-			reeceipttitle:’发票抬头’,续住时需要第三方支付金额
-			onlinepay:100.00, //线上客单价
-			offlinepay:100.00// 线下客单价
-		}]
-		walletcost ： //钱包金额
-		citycode：城市编码
-		cashbackcost:  //返现金额
-		orderpaydetail: [
-			{name:房款 ，cost ： 100},
-			{name:优惠券 ，cost ： -10},
-			{name:乐住币 ，cost ：-20},
-			{name:房券 ，cost ：-20}
-		],
-		orderstatusname：订单状态的汉字描述
-		orderstatusid：订单显示状态id
+promotionno:’促销代码’,
+reeceipttitle:’发票抬头’,续住时需要第三方支付金额
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+}]
+walletcost ： //钱包金额
+citycode：城市编码
+cashbackcost:  //返现金额
+，orderpaydetail: [
+{name:房款 ，cost ： 100},
+{name:优惠券 ，cost ： -10},
+{name:乐住币 ，cost ：-20},
+{name:房券 ，cost ：-20}
+],
+orderstatusname：订单状态的汉字描述
+orderstatusid：订单显示状态id
 
-		usermessage：提示信息
+usermessage：提示信息
 内容要求：
 （1）您预订的酒店，在入住日期前一天18:00前可进行退款操作；预订今日酒店，付款完成后就不可以修改订单或退款咯
 （2）凌晨23:56-2:00下单，可当天办理入住，提示“您最晚可在xxxx年xx月xx日12：00办理退房哦”；
@@ -3169,7 +3214,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 |contactsweixin|联系微信|否|
 |note|备注|否|
 |spreaduser|切客用户id|否|
-|ordermethod|订单方式|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|ordermethod|订单方式|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
 |promotion|促销代码|否|
 |couponno|优惠券代码|否|
 |quickuserid|常住人主键id|否|可多个，多个使用过 英文逗号分隔
@@ -3181,59 +3226,99 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 |wifimacaddr|wifi的mac地址|否|
 |blmacaddr|蓝牙的mac地址|否|
 |walletcost|钱包费用|否|
-|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
 |callversion|调用版本|否|
 |ip|IP地址|否|
 |hardwarecode|硬件编码|否|
 |otsversion|OTS版本|否|
 |isuselewallet|是否使用钱包|否|T/F
-|roomticket|房卷代码|否|                                 
+|roomticket|房卷代码|否|
+|`「增」`showblacktype 	| 显示黑名单类型的房态 	| 否 |1-一元秒杀|
 
 > API返回json数据示例：
 
 ```js
 {
-		success:true,
-		errcode:,//错误码
-		errmsg:,//错误信息
-		orderid:1,//订单id
-		hotelid:1,//酒店id
-		hotelname:,//酒店名称
-		hotelphone:,//联系电话
-		hoteladdress:,//酒店地址
-		hoteldis:,//酒店所属区县
-		hotelcity:,//酒店所属城市
-		longitude:, //酒店坐标(经度)
-		latitude:,//酒店坐标(纬度)
-		retentiontime:, //最晚保留时间 6位字符串 hhmmss,
-		defaultleavetime:, //默认离店时间  6位字符串 hhmmss,
-		ordermethod:1, //预订方式 1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
-		ordertype:1, //预订方式  1、预付 2、普通		pricetype:1, //价格类型 1、时租  2、日租
-		begintime:‘20141225171400’, //预抵时间
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+	orderid:1,//订单id
+	hotelid:1,//酒店id
+	hotelname:,//酒店名称
+	hotelphone:,//联系电话
+hoteladdress:,//酒店地址
+hoteldis:,//酒店所属区县
+	hotelcity:,//酒店所属城市
+longitude:, //酒店坐标(经度)
+	latitude:,//酒店坐标(纬度)
+retentiontime:, //最晚保留时间 6位字符串 hhmmss,
+defaultleavetime:, //默认离店时间  6位字符串 hhmmss,
+	ordermethod:1, //预订方式 1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
+	ordertype:1, //预订方式  1、预付 2、普通	pricetype:1, //价格类型 1、时租  2、日租
+	begintime:‘20141225171400’, //预抵时间
+	endtime:‘20141225171400’,  //预离时间
+	createtime:‘20141225171400’, //订单创建时间
+	timeouttime:,//订单失效时间（创建订单时，默认是预付，订单失效时间为订单创建后15分钟）
+	promotion:F, //是否促销(T/F)
+	coupon:F, //是否使用了优惠券(T/F)
+isonpromo:// 是否特价, 0非，1特价
+promotype:	// 是否特价, 0非，1特价
+roomticket：房券代码
+	checkcnt:,//可使用优惠券张数
+uselimit:// 选定的优惠券的使用限制(1—线上；2—线下；空—全部)
+*「增」 paytip:支付提示(当有值的时候需要在支付的时候进行提示，没有或者值为""则不提示)
+	tickets:
+[{//优惠券信息，按照线上优惠额倒序排序，金额最大的为默认选中
+	id:1,//优惠券唯一id
+	name:’优惠券名’,
+	select:T, //选中,
+	check:T, //可以使用
+	subprice:12, //线上优惠多少钱
+	offlinesubprice:12, //线下优惠多少钱
+	type:1, //优惠券类型 1、普通立减 2、切客优惠码 3、议价优惠码
+	isticket:T,//  是否是优惠券（T优惠券，F优惠码）
+	uselimit://使用限制(1—线上；2—线下；空—全部)
+}],
+	totalprice:150.00, //总房价
+	price:50,  //房价
+	breakfastnum:1,   //早餐数
+	contacts:’联系人姓名’,
+	contactsphone:’联系人电话’,
+	contactsemail:’联系人email’,
+	contactsweixin:’联系人微信’,
+	note:’备注’,
+	orderstatus:100,  //订单状态
+	pay:F,  //是否需要支付(T/F)
+payid:1, //需要支付的订单id
+orderretentiontime:’’  订单保留时间  14位
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+	receipt:F,   //是否需要发票(T/F)
+	spreaduser:1,  //切客用户id
+	roomorder:
+[{//订单下客单
+	orderroomid:1,  //客单id
+		hotelid:1   //酒店id
+		hotelname:’酒店名称’,
+		roomtypeid:1, //房型id
+		roomtypename:’房型名称’,
+		roomid:1,
+		roomno:’房间号’,
+		ordermethod:1,  //预订方式 1、微信、web3、app
+		ordertype:1,  //预订方式  1、预付 2、普通3、房券支付
+		pricetype:1,  //价格类型 1、时租  2、日租
+		begintime:‘20141225171400’,  //预抵时间
 		endtime:‘20141225171400’,  //预离时间
+		orderday:1, //1天
 		createtime:‘20141225171400’, //订单创建时间
-		timeouttime:,//订单失效时间（创建订单时，默认是预付，订单失效时间为订单创建后15分钟）
 		promotion:F, //是否促销(T/F)
 		coupon:F, //是否使用了优惠券(T/F)
-		isonpromo:// 是否特价, 0非，1特价
-		promotype:	// 是否特价, 0非，1特价
-		roomticket：房券代码
-		checkcnt:,//可使用优惠券张数
-		uselimit:// 选定的优惠券的使用限制(1—线上；2—线下；空—全部)
-*「增」 paytip:支付提示(当有值的时候需要在支付的时候进行提示，没有或者值为""则不提示)
-		tickets:[{//优惠券信息，按照线上优惠额倒序排序，金额最大的为默认选中
-			id:1,//优惠券唯一id
-			name:’优惠券名’,
-			select:T, //选中,
-			check:T, //可以使用
-			subprice:12, //线上优惠多少钱
-			offlinesubprice:12, //线下优惠多少钱
-			type:1, //优惠券类型 1、普通立减 2、切客优惠码 3、议价优惠码
-			isticket:T,//  是否是优惠券（T优惠券，F优惠码）
-			uselimit://使用限制(1—线上；2—线下；空—全部)
-		}],
 		totalprice:150.00, //总房价
-		price:50,  //房价
+payprice:
+[{房费应支付金额
+	actiondate:,// 日期
+	price:,//房价金额
+}]
 		breakfastnum:1,   //早餐数
 		contacts:’联系人姓名’,
 		contactsphone:’联系人电话’,
@@ -3242,61 +3327,25 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 		note:’备注’,
 		orderstatus:100,  //订单状态
 		pay:F,  //是否需要支付(T/F)
-		payid:1, //需要支付的订单id
-		orderretentiontime:’’  订单保留时间  14位
-		onlinepay:100.00, //线上客单价
-		offlinepay:100.00// 线下客单价
 		receipt:F,   //是否需要发票(T/F)
-		spreaduser:1,  //切客用户id
-		roomorder:[{//订单下客单
-			orderroomid:1,  //客单id
-			hotelid:1   //酒店id
-			hotelname:’酒店名称’,
-			roomtypeid:1, //房型id
-			roomtypename:’房型名称’,
-			roomid:1,
-			roomno:’房间号’,
-			ordermethod:1,  //预订方式 1、微信、web3、app
-			ordertype:1,  //预订方式  1、预付 2、普通3、房券支付
-			pricetype:1,  //价格类型 1、时租  2、日租
-			begintime:‘20141225171400’,  //预抵时间
-			endtime:‘20141225171400’,  //预离时间
-			orderday:1, //1天
-			createtime:‘20141225171400’, //订单创建时间
-			promotion:F, //是否促销(T/F)
-			coupon:F, //是否使用了优惠券(T/F)
-			totalprice:150.00, //总房价
-			payprice:[{房费应支付金额
-				actiondate:,// 日期
-				price:,//房价金额
-			}] 	
-			breakfastnum:1,   //早餐数
-			contacts:’联系人姓名’,
-			contactsphone:’联系人电话’,
-			contactsemail:’联系人email’,
-			contactsweixin:’联系人微信’,
-			note:’备注’,
-			orderstatus:100,  //订单状态
-			pay:F,  //是否需要支付(T/F)
-			receipt:F,   //是否需要发票(T/F)
-			promotionno:’促销代码’,
-			reeceipttitle:’发票抬头’,续住时需要第三方支付金额
-			onlinepay:100.00, //线上客单价
-			offlinepay:100.00// 线下客单价
-		}]
-		walletcost ： //钱包金额
-		citycode：城市编码
-		cashbackcost: ， //返现金额
-		orderpaydetail: [
-			{name:房款 ，cost ： 100},
-			{name:优惠券 ，cost ： -10},
-			{name:乐住币 ，cost ：-20},
-			{name:房券 ，cost ：-20}
-		],
+promotionno:’促销代码’,
+reeceipttitle:’发票抬头’,续住时需要第三方支付金额
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+}]
+walletcost ： //钱包金额
+citycode：城市编码
+cashbackcost:  //返现金额
+，orderpaydetail: [
+{name:房款 ，cost ： 100},
+{name:优惠券 ，cost ： -10},
+{name:乐住币 ，cost ：-20},
+{name:房券 ，cost ：-20}
+],
 
-		orderstatusname：订单状态的汉字描述
-		orderstatusid：订单显示状态id
-		usermessage：提示信息
+orderstatusname：订单状态的汉字描述
+orderstatusid：订单显示状态id
+usermessage：提示信息
 内容要求：
 （1）您预订的酒店，在入住日期前一天18:00前可进行退款操作；预订今日酒店，付款完成后就不可以修改订单或退款咯
 （2）凌晨23:56-2:00下单，可当天办理入住，提示“您最晚可在xxxx年xx月xx日12：00办理退房哦”；
@@ -3338,7 +3387,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 |contactsweixin|联系微信|否|
 |note|备注|否|
 |spreaduser|切客用户id|否|
-|ordermethod|订单方式|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|ordermethod|订单方式|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
 |promotion|促销代码|否|
 |couponno|优惠券代码|否|
 |quickuserid|常住人主键id|否|可多个，多个使用过 英文逗号分隔
@@ -3349,58 +3398,100 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 |simsn|sim卡串号|否|
 |wifimacaddr|wifi的mac地址|否|
 |blmacaddr|蓝牙的mac地址|否|
-|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
 |callversion|调用版本|否|
 |ip|IP地址|否|
 |hardwarecode|硬件编码|否|
 |otsversion|OTS版本|否|
-|cashbackcost|返现金额|否|                           
+|cashbackcost|返现金额|否|
+|`「增」`showblacktype 	| 显示黑名单类型的房态 	| 否 |1-一元秒杀|
 
 > API返回json数据示例：
 
 ```js
 {
-		success:true,
-		errcode:,//错误码
-		errmsg:,//错误信息
-		orderid:1,//订单id
-		hotelid:1,//酒店id
-		hotelname:,//酒店名称
-		hotelphone:,//联系电话
-		hoteladdress:,//酒店地址
-		hoteldis:,//酒店所属区县
-		hotelcity:,//酒店所属城市
-		longitude:, //酒店坐标(经度)
-		latitude:,//酒店坐标(纬度)
-		retentiontime:, //最晚保留时间 6位字符串 hhmmss,
-		defaultleavetime:, //默认离店时间  6位字符串 hhmmss,
-		ordermethod:1, //预订方式 1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
-		ordertype:1, //预订方式  1、预付 2、普通
-		pricetype:1, //价格类型 1、时租  2、日租
-		begintime:‘20141225171400’, //预抵时间
+	success:true,
+errcode:,//错误码
+errmsg:,//错误信息
+	orderid:1,//订单id
+	hotelid:1,//酒店id
+	hotelname:,//酒店名称
+	hotelphone:,//联系电话
+hoteladdress:,//酒店地址
+hoteldis:,//酒店所属区县
+	hotelcity:,//酒店所属城市
+longitude:, //酒店坐标(经度)
+	latitude:,//酒店坐标(纬度)
+retentiontime:, //最晚保留时间 6位字符串 hhmmss,
+defaultleavetime:, //默认离店时间  6位字符串 hhmmss,
+	ordermethod:1, //预订方式 1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
+	ordertype:1, //预订方式  1、预付 2、普通
+	pricetype:1, //价格类型 1、时租  2、日租
+	begintime:‘20141225171400’, //预抵时间
+	endtime:‘20141225171400’,  //预离时间
+	createtime:‘20141225171400’, //订单创建时间
+	timeouttime:,//订单失效时间（创建订单时，默认是预付，订单失效时间为订单创建后15分钟）
+	promotion:F, //是否促销(T/F)
+	coupon:F, //是否使用了优惠券(T/F)
+isonpromo:// 是否特价, 0非，1特价
+promotype:	// 是否特价, 0非，1特价
+roomticket：房券代码
+	checkcnt:,//可使用优惠券张数
+	*「增」 paytip,:支付提示(当有值的时候需要在支付的时候进行提示，没有或者值为""则不提示)
+	tickets:
+[{//优惠券信息，按照线上优惠额倒序排序，金额最大的为默认选中
+	id:1,//优惠券唯一id
+	name:’优惠券名’,
+	select:T, //选中,
+	check:T, //可以使用
+	subprice:12, //线上优惠多少钱
+	offlinesubprice:12, //线下优惠多少钱
+	type:1, //优惠券类型 1、普通立减 2、切客优惠码 3、议价优惠码
+	isticket:T,//  是否是优惠券（T优惠券，F优惠码）
+	uselimit://使用限制(1—线上；2—线下；空—全部)
+}],
+	totalprice:150.00, //总房价
+	price:50,  //房价
+	breakfastnum:1,   //早餐数
+	contacts:’联系人姓名’,
+	contactsphone:’联系人电话’,
+	contactsemail:’联系人email’,
+	contactsweixin:’联系人微信’,
+	note:’备注’,
+	orderstatus:100,  //订单状态
+	pay:F,  //是否需要支付(T/F)
+payid:1, //需要支付的订单id
+orderretentiontime:’’  订单保留时间  14位
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+	receipt:F,   //是否需要发票(T/F)
+	spreaduser:1,  //切客用户id
+	roomorder:
+[{//订单下客单
+	orderroomid:1,  //客单id
+		hotelid:1   //酒店id
+		hotelname:’酒店名称’,
+		roomtypeid:1, //房型id
+		roomtypename:’房型名称’,
+		roomid:1,
+		roomno:’房间号’,
+		ordermethod:1,  //预订方式 1、微信、web3、app
+		ordertype:1,  //预订方式  1、预付 2、普通
+		pricetype:1,  //价格类型 1、时租  2、日租
+		begintime:‘20141225171400’,  //预抵时间
 		endtime:‘20141225171400’,  //预离时间
+		orderday:1, //1天
 		createtime:‘20141225171400’, //订单创建时间
-		timeouttime:,//订单失效时间（创建订单时，默认是预付，订单失效时间为订单创建后15分钟）
 		promotion:F, //是否促销(T/F)
 		coupon:F, //是否使用了优惠券(T/F)
-		isonpromo:// 是否特价, 0非，1特价
-		promotype:	// 是否特价, 0非，1特价
-		roomticket：房券代码
-		checkcnt:,//可使用优惠券张数
-*「增」 paytip,:支付提示(当有值的时候需要在支付的时候进行提示，没有或者值为""则不提示)
-		tickets:[{//优惠券信息，按照线上优惠额倒序排序，金额最大的为默认选中
-			id:1,//优惠券唯一id
-			name:’优惠券名’,
-			select:T, //选中,
-			check:T, //可以使用
-			subprice:12, //线上优惠多少钱
-			offlinesubprice:12, //线下优惠多少钱
-			type:1, //优惠券类型 1、普通立减 2、切客优惠码 3、议价优惠码
-			isticket:T,//  是否是优惠券（T优惠券，F优惠码）
-			uselimit://使用限制(1—线上；2—线下；空—全部)
-		}],
+hasroomticket：F, //是否可以使用房券（T/F）
+roomticket：房券代码
 		totalprice:150.00, //总房价
-		price:50,  //房价
+payprice:
+[{房费应支付金额
+	actiondate:,// 日期
+	price:,//房价金额
+}]
 		breakfastnum:1,   //早餐数
 		contacts:’联系人姓名’,
 		contactsphone:’联系人电话’,
@@ -3409,60 +3500,22 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 		note:’备注’,
 		orderstatus:100,  //订单状态
 		pay:F,  //是否需要支付(T/F)
-		payid:1, //需要支付的订单id
-		orderretentiontime:’’  订单保留时间  14位
-		onlinepay:100.00, //线上客单价
-		offlinepay:100.00// 线下客单价
 		receipt:F,   //是否需要发票(T/F)
-		spreaduser:1,  //切客用户id
-		roomorder:[{//订单下客单
-			orderroomid:1,  //客单id
-			hotelid:1   //酒店id
-			hotelname:’酒店名称’,
-			roomtypeid:1, //房型id
-			roomtypename:’房型名称’,
-			roomid:1,
-			roomno:’房间号’,
-			ordermethod:1,  //预订方式 1、微信、web3、app
-			ordertype:1,  //预订方式  1、预付 2、普通
-			pricetype:1,  //价格类型 1、时租  2、日租
-			begintime:‘20141225171400’,  //预抵时间
-			endtime:‘20141225171400’,  //预离时间
-			orderday:1, //1天
-			createtime:‘20141225171400’, //订单创建时间
-			promotion:F, //是否促销(T/F)
-			coupon:F, //是否使用了优惠券(T/F)
-			hasroomticket：F, //是否可以使用房券（T/F）
-			roomticket：房券代码
-			totalprice:150.00, //总房价
-			payprice:[{房费应支付金额
-				actiondate:,// 日期
-				price:,//房价金额
-			}] 	
-			breakfastnum:1,   //早餐数
-			contacts:’联系人姓名’,
-			contactsphone:’联系人电话’,
-			contactsemail:’联系人email’,
-			contactsweixin:’联系人微信’,
-			note:’备注’,
-			orderstatus:100,  //订单状态
-			pay:F,  //是否需要支付(T/F)
-			receipt:F,   //是否需要发票(T/F)
-			promotionno:’促销代码’,
-			reeceipttitle:’发票抬头’,续住时需要第三方支付金额
-			onlinepay:100.00, //线上客单价
-			offlinepay:100.00// 线下客单价
-		}]
-		cashbackcost:，  //返现金额
-		orderpaydetail: [
-			{name:房款 ，cost ： 100},
-			{name:优惠券 ，cost ： -10},
-			{name:乐住币 ，cost ：-20},
-			{name:房券 ，cost ：-20}
-		],
+promotionno:’促销代码’,
+reeceipttitle:’发票抬头’,续住时需要第三方支付金额
+onlinepay:100.00, //线上客单价
+offlinepay:100.00// 线下客单价
+}]
+cashbackcost:  //返现金额
+，orderpaydetail: [
+{name:房款 ，cost ： 100},
+{name:优惠券 ，cost ： -10},
+{name:乐住币 ，cost ：-20},
+{name:房券 ，cost ：-20}
+],
 
-		orderstatusname：订单状态的汉字描述
-		usermessage：提示信息
+orderstatusname：订单状态的汉字描述
+usermessage：提示信息
 内容要求：
 （1）您预订的酒店，在入住日期前一天18:00前可进行退款操作；预订今日酒店，付款完成后就不可以修改订单或退款咯
 （2）凌晨23:56-2:00下单，可当天办理入住，提示“您最晚可在xxxx年xx月xx日12：00办理退房哦”；
@@ -3485,21 +3538,21 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 --------------- | ------------------- | -------| ----------
 |﻿token|授权token|是|
 |orderid|订单ID|是|
-|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
 |callversion|调用版本|否|
 |ip|IP地址|否|
 |hardwarecode|硬件编码|否|
 |otsversion|OTS版本|否|
 |type|取消类型|否|1 用户取消 2 回退取消.为了版本兼容，该参数不传，默认值为1
-                        
+
 
 > API返回json数据示例：
 
 ```js
 {
 	success:true,
-	errcode:,//错误码
-	errmsg:,//错误信息
+errcode:,//错误码
+errmsg:,//错误信息
 	cancelpay://待退款金额
 }
 ```
@@ -3519,7 +3572,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 --------------- | ------------------- | -------| ----------
 |﻿token|授权token|是|
 |orderid|订单ID|是|
-|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
 |callversion|调用版本|否|
 |ip|IP地址|否|
 |hardwarecode|硬件编码|否|
@@ -3530,12 +3583,12 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 ```js
 {
 	success:true,
-	errcode:,//错误码
-	errmsg:,//错误信息
+errcode:,//错误码
+errmsg:,//错误信息
 }
 
 ```
-### 订单数量统计
+### `「修」 `订单数量统计
 ***
 **业务说明：**
 
@@ -3548,29 +3601,29 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 
 |    字段        |         名称        | 是否必须 | 说明|
 --------------- | ------------------- | -------| ----------
-|﻿orderid|订单id|是|必填
-|promotionno|促销代码|否|若多个，则用“，”分割
-|couponno|优惠券代码|否|若多个，则用“，”分割
-|paytype|支付类型|是|1预付；2到付
-|onlinepaytype|预付支付类型|否（若预付，则必填）|1微信；2支付宝3网银4其他；5房卷支付
-|房卷号|否|
-|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
-|callversion|调用版本|否|
+|﻿token|授权token|是|必填
+|﻿集合参数(status)|||
+|sqnum|顺序号|是|用于返回信息排序
+|orderstatus|订单类型|是|若为多个订单状态，则用“，”分隔
+|callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android)
+|callversion|调用版本|否（若预付，则必填）|
 |ip|IP地址|否|
 |hardwarecode|硬件编码|否|
 |otsversion|OTS版本|否|
+|`「修」 `statetype|取值范围|否|[all、doing、commenting（待评价）、done]
 
 > API返回json数据示例：
 
 ```js
 {
 	success:true,
-	errcode:,//错误码
-	errmsg:,//错误信息
-	statuscount:[{
-		sqnum:,//顺序号
-		ordercount:,//订单数量
-	}]
+errcode:,//错误码
+errmsg:,//错误信息
+statuscount:
+[{
+	sqnum:,//顺序号
+	ordercount:,//订单数量
+},]
 }
 
 
