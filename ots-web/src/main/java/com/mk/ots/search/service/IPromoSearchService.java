@@ -103,4 +103,6 @@ public interface IPromoSearchService {
 	public Integer queryByPromoId(Integer promoId) throws Exception;
 
 	public List<Map<String, Object>> queryThemeRoomtypes(Map<String, Object> hotel) throws Exception;
+	
+	public Map<String, Object> searchHomePromoRecommend(HotelQuerylistReqEntity params) throws Exception;	
 }
