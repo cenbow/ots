@@ -7,7 +7,9 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.mk.framework.AppUtils;
 import com.mk.ots.bill.dao.BillOrderDAO;
+import com.mk.ots.common.utils.Constant;
 import com.mk.ots.order.service.QiekeRuleService;
+import com.mk.ots.search.service.impl.IndexerService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,7 @@ import com.mk.ots.common.utils.OtsVersion;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.inner.service.IOtsAdminService;
 import com.mk.ots.web.ServiceOutput;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * OTS Administrator.
@@ -48,6 +51,9 @@ public class OtsAdminController {
 	@Autowired
 	private BillOrderService billService;
 
+	@Autowired
+	private IndexerService indexerService;
+
 	private final SimpleDateFormat defaultDateFormatter = new SimpleDateFormat(DateUtils.FORMATSHORTDATETIME);
 
 	/**
@@ -58,6 +64,36 @@ public class OtsAdminController {
 	public ResponseEntity<Map<String, String>> ping() {
 		return new ResponseEntity<Map<String, String>>(new OtsVersion().getVersionInfo(), HttpStatus.OK);
 	}
+
+	/**
+	 *
+	 * @return
+	 */
+	@RequestMapping("/indexer/init")
+	@ResponseBody
+	public ResponseEntity<ServiceOutput> indexerInit(String token) {
+		ServiceOutput output = new ServiceOutput();
+		if (StringUtils.isBlank(token) || !Constant.STR_INNER_TOKEN.equals(token)) {
+			output.setFault("token is invalidate.");
+			return new ResponseEntity<ServiceOutput>(output, HttpStatus.OK);
+		}
+
+		Date day = new Date();
+		long starttime = day.getTime();
+		try {
+
+			String ret = indexerService.batchUpdateEsIndexer();
+			output.setSuccess(true);
+		} catch (Exception e) {
+			output.setFault(e.getMessage());
+		}
+		if (AppUtils.DEBUG_MODE) {
+			long endtime = new Date().getTime();
+			output.setMsgAttr("$times$", endtime - starttime + " ms");
+		}
+		return new ResponseEntity<ServiceOutput>(output, HttpStatus.OK);
+	}
+
 
 	/**
 	 * 

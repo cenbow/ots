@@ -29,7 +29,7 @@ import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
  * @author kangxiaolong.
  */
 @Controller
-@RequestMapping(value = "/promo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/d", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 public class SaleShowController {
 	final Logger logger = LoggerFactory.getLogger(SaleShowController.class);
 

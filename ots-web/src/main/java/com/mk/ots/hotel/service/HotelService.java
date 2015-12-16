@@ -411,6 +411,31 @@ public class HotelService {
 					hotel.setCreatetime(time);
 					hotel.setModifytime(time);
 
+					Date hotelRepairTime = bean.getRepairtime();
+
+					String repairInfo = getRepairInfo(hotelRepairTime);
+					if (StringUtils.isNotBlank(repairInfo)){
+						hotel.setRepairinfo(repairInfo);
+					}
+					if (StringUtils.isNotBlank(hotelid)){
+
+						List<Map<String, Object>> highLighs =  getHighlights(Long.valueOf(hotelid));
+
+					/*
+						if (StringUtils.isNotBlank(repairInfo)){
+							Map<String, Object> repairTip = new HashMap<>();
+							repairTip.put("id",-1);
+							repairTip.put("name", repairInfo);
+							highLighs.add(0,repairTip);
+						}
+
+						*/
+						if (highLighs == null){
+							highLighs = new ArrayList<Map<String, Object>>();
+						}
+						hotel.setHighlights(highLighs);
+					}
+
 					// 新增 最晚保留时间
 					hotel.setRetentiontime(bean.getRetentiontime() == null ? "" : bean.getRetentiontime());
 					// 新增 默认离店时间
@@ -531,6 +556,41 @@ public class HotelService {
 		return output;
 	}
 
+	public static String getRepairInfo(Date hotelRepairTime ){
+		Date now = new Date();
+		int diffYears = DateUtils.diffYears(now, hotelRepairTime);
+
+		if (diffYears <= Constant.SHOW_HOTEL_REPAIRINFO_YEARS_LIMIT){
+			String repairInfo = DateUtils.getDateYear(hotelRepairTime) + "年装修";
+			return  repairInfo;
+		}else {
+			return null;
+		}
+	}
+
+	public  List<Map<String, Object>> getHighlights(Long hotelid){
+		List<TFacilityModel> facilitys = tFacilityMapper.findByHotelid(hotelid);
+		String[] showIds = Constant.HOTEL_HIGHLIGHT_SHOWS_IDS.split(",");
+		List<Map<String, Object>> highLights = new ArrayList();
+
+		for (TFacilityModel fac : facilitys) {
+
+			for (String showId: showIds) {
+				if (fac.getId() == Long.valueOf(showId)){
+					Map<String, Object> highLight = new HashMap<>();
+					highLight.put("name",fac.getFacname());
+					highLight.put("id",fac.getId());
+					if (StringUtils.isNotBlank(fac.getIconurl())){
+						highLight.put("icon", fac.getIconurl());
+					}
+					highLights.add(highLight);
+				}
+
+			}
+		}
+
+		return highLights;
+	}
 	/**
 	 * query promo data
 	 * 
