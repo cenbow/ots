@@ -4732,7 +4732,7 @@ statuscount:
 
 
 **接口url：**
->http://ip:port/ots/promo/onedollorlist
+>http://ip:port/ots/promo/onedollarlist
 
 **请求参数：**
 
@@ -4752,10 +4752,13 @@ statuscount:
 
 ```js
 {
-    "success":true,
     "errcode":,//错误码
     "errmsg":,//错误信息
     "count":,//酒店数量
+    "promosec":,// 秒
+    "promosecend":,// 距离结束时间（s）
+    "nextpromosec":,// 距离下一段结束时间（s）
+    "promonote":,//促销的文字,已有...人关注
     "hotel":
         [{
             "hotelid":,//酒店id
