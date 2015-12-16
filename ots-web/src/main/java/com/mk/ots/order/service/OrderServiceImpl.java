@@ -4695,7 +4695,8 @@ public class OrderServiceImpl implements OrderService {
 		return currentSales;
 	}
 
-
+    
+    
     @Override
     public Long findPMSMonthlySales(Long hotelId) {
         OtsCacheManager manager = AppUtils.getBean(OtsCacheManager.class);
@@ -4715,7 +4716,6 @@ public class OrderServiceImpl implements OrderService {
         Calendar yesterCalendar = Calendar.getInstance();
         yesterCalendar.add(Calendar.DATE, -1);
         String yestertime = sdf1.format(yesterCalendar.getTime());
-
 
         try {
             if(hotelId == null || hotelId <= 0)  {

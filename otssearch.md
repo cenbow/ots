@@ -632,15 +632,13 @@ hoteladdr 	| 酒店地址 	| 否 	| 支持模糊
 keyword 	| 关键字 	| 否 	| 对于hotelname和hoteladdr做模糊查询用 
 disid 	| 区县id 	| 否 	|  	
 promoid|特价活动 id|是|
-minpromoprice 	| 价格区间-小 	| 否 	| 
-maxpromoprice 	| 价格区间-大 	| 否 	| 
 userlongitude 	| 用户坐标(经度) | 否 | 用户的经度 
 userlatitude 	| 用户坐标(纬度) | 否 | 用户的纬度 
 pillowlongitude 	| 查询坐标(经度) | 否 | 非搜索条件 
 pillowlatitude 	| 查询坐标(纬度) | 否 | 非搜索条件 
 range 	| 附近范围 	| 否 	| 单位米，若查询坐标的值不为空，则取查询坐标方圆XXXX米的酒店 
-minprice 	| 最低价格 	| 否 	|  
-maxprice 	| 最高价格 	| 否 	|  
+minprice 	| 最低价格 	| 否 	|  特别用作3.3版本价格过滤
+maxprice 	| 最高价格 	| 否 	|  特别用作3.3版本价格过滤
 bednum 	| 房间床数量 	| 否 	|  
 startdateday 	| 查询开始日期 	| 否 | yyyyMMdd 
 enddateday 	| 查询结束日期 	| 否 | yyyyMMdd 

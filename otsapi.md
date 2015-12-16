@@ -537,6 +537,9 @@ otsversion 	| OTS版本 	| 否 	|
                             "facid":,//设施id
                             "facname"://设施名称
             }]
+	    "latitude":, //纬度
+	    "longitude":, //经度
+	    "repairinfo":, //装修信息
     "businesszone":[{//商圈
             "businesszonename"://商圈名称
     }],

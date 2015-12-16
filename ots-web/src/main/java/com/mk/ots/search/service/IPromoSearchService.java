@@ -70,15 +70,6 @@ public interface IPromoSearchService {
 	public List<Map<String, Object>> searchHomePromos(HotelQuerylistReqEntity params) throws Exception;
 
 	/**
-	 * search promo recommend entry used in home page
-	 *
-	 * @param params
-	 * @return
-	 * @throws Exception
-	 */
-	public Map<String, Object> searchHomePromoRecommend(HotelQuerylistReqEntity params) throws Exception;
-
-	/**
 	 * search normal entry used in home page
 	 */
 
@@ -92,13 +83,7 @@ public interface IPromoSearchService {
 	 * @throws Exception
 	 */
 	public Map<String, Object> searchThemes(HotelQuerylistReqEntity params) throws Exception;
-	/**
-	 * 
-	 * @param reqentity
-	 * @return
-	 * @throws Exception
-	 */
-	public Map<String, Object> searchHomeThemes(HotelQuerylistReqEntity reqentity) throws Exception;
+
 	/**
 	 * search homepage thems
 	 * 
@@ -107,7 +92,7 @@ public interface IPromoSearchService {
 	 * @throws Exception
 	 */
 	public Map<String, Object> searchHomePageThemes(HotelQuerylistReqEntity reqentity) throws Exception;
-	
+
 	/**
 	 * 
 	 * @param cityId
@@ -115,5 +100,9 @@ public interface IPromoSearchService {
 	 * @return
 	 * @throws Exception
 	 */
-	public Integer queryByPromoId(Integer promoId) throws Exception ;
+	public Integer queryByPromoId(Integer promoId) throws Exception;
+
+	public List<Map<String, Object>> queryThemeRoomtypes(Map<String, Object> hotel) throws Exception;
+	
+	public Map<String, Object> searchHomePromoRecommend(HotelQuerylistReqEntity params) throws Exception;	
 }
