@@ -79,6 +79,7 @@ import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.inner.service.IOtsAdminService;
 import com.mk.ots.mapper.PositionTypeMapper;
 import com.mk.ots.mapper.RoomSaleConfigMapper;
+import com.mk.ots.mapper.RoomSaleShowConfigMapper;
 import com.mk.ots.mapper.SAreaInfoMapper;
 import com.mk.ots.mapper.SLandMarkMapper;
 import com.mk.ots.mapper.SSubwayMapper;
@@ -200,6 +201,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	@Autowired
 	private SSubwayStationMapper subwayStationMapper;
+
+	@Autowired
+	private RoomSaleShowConfigMapper roomsaleShowMapper;
 
 	@Autowired
 	private TRoomSaleShowConfigService roomSaleShowConfigService;
@@ -708,7 +712,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			makeHotelTypeFilter(reqentity, filterBuilders);
 			makeBedTypeFilter(reqentity, filterBuilders);
-			
+
 			makeQueryFilter(reqentity, filterBuilders);
 
 			FilterBuilder[] builders = new FilterBuilder[] {};
@@ -809,7 +813,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						SearchConst.SEARCH_RANGE_MAX);
 			}
 
-
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
 					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
 					.must(QueryBuilders.matchQuery("online", Constant.STR_TRUE));
@@ -882,7 +885,59 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		return rtnMap;
 	}
-	
+
+	private Integer findRoomtypeMonthlySale(Map<String, Object> roomtype) {
+		Long roomtypeid = (Long) roomtype.get("roomtypeid");
+		Map<String, Object> greetParameter = new HashMap<String, Object>();
+		greetParameter.put("roomtypeid", roomtypeid);
+
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMdd000000");
+		Calendar beforeCalendar = Calendar.getInstance();
+		beforeCalendar.add(Calendar.DATE, -30);
+		String beforetime = sdf1.format(beforeCalendar.getTime());
+		Calendar yesterCalendar = Calendar.getInstance();
+		yesterCalendar.add(Calendar.DATE, -1);
+		String yestertime = sdf1.format(yesterCalendar.getTime());
+
+		greetParameter.put("beforetime", beforetime);
+		greetParameter.put("yestertime", yestertime);
+
+		Integer greetscore = 0;
+
+		try {
+			List<Map<String, Object>> greetScores = roomsaleShowMapper.queryRoomtypeGreetScore(greetParameter);
+			if (greetScores != null && greetScores.size() > 0) {
+				greetscore = (Integer) greetScores.get(0).get("greetscore");
+			}
+		} catch (Exception ex) {
+			logger.warn(String.format("failed to queryRoomtypeGreetScore with roomtypeid:%s", roomtypeid), ex);
+		}
+
+		return greetscore;
+	}
+
+	public List<Map<String, Object>> queryThemeRoomtypes(Map<String, Object> hotel) throws Exception {
+		String hotelid = (String) hotel.get("hotelid");
+
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("about to queryThemeRoomtypes for hotelid:%s", hotelid));
+		}
+
+		List<Map<String, Object>> roomtypes = readonlyRoomtypeList(hotel, null);
+		List<Map<String, Object>> themeRoomtypes = new ArrayList<Map<String, Object>>();
+		for (Map<String, Object> roomtype : roomtypes) {
+			if (isThemed(Integer.parseInt(hotelid), roomtype)) {
+				Integer greetScore = findRoomtypeMonthlySale(roomtype);
+				roomtype.put("greetscore", greetScore);
+				themeRoomtypes.add(roomtype);
+			}
+		}
+
+		Collections.sort(themeRoomtypes, new GreetscoreComparator());
+
+		return themeRoomtypes;
+	}
+
 	@Override
 	public Map<String, Object> searchThemes(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
@@ -1576,30 +1631,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 
 	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public Map<String, Object> searchHomePromoRecommend(HotelQuerylistReqEntity params) throws Exception {
-		List<Map<String, Object>> promolist;
-		Map<String, Object> promoItem = null;
-		try {
-			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
-			showConfig.setIsSpecial("T");
-			showConfig.setPromoid(HotelPromoEnum.Night.getCode());
-			showConfig.setShowArea(ShowAreaEnum.HomePagePromoRecommend.getCode());
-
-			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
-			promolist = this.searchHomePromoBase(params, showConfigs);
-
-			 if (promolist!=null && promolist.size() > 0 ){
-				 promoItem = promolist.get(0);
-			 }
-			return promoItem;
-		} catch (Exception e) {
-			throw new Exception("failed to searchHomePromos", e);
-		}
-	}
-
 
 	/**
 	 * 酒店搜索
@@ -4487,6 +4518,44 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			logger.error("readonlySyncCitySubways:: error: {}", e.getLocalizedMessage());
 		}
 		return result;
+	}
+
+	private class GreetscoreComparator implements Comparator<Map<String, Object>> {
+		@Override
+		public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+			if (o1 == null) {
+				return -1;
+			} else if (o2 == null) {
+				return 1;
+			}
+
+			Integer greetscore1 = 0;
+			Integer greetscore2 = 0;
+
+			try {
+				greetscore1 = (Integer) o1.get("greetscore");
+				greetscore2 = (Integer) o2.get("greetscore");
+			} catch (Exception ex) {
+				logger.warn("invalid greetcore type...", ex);
+				return -1;
+			}
+
+			if (greetscore1 != null && greetscore2 != null) {
+				if (greetscore1 > greetscore2) {
+					return 1;
+				} else if (greetscore1 == greetscore2) {
+					return 0;
+				} else {
+					return -1;
+				}
+			} else if (greetscore1 == null) {
+				return -1;
+			} else if (greetscore2 == null) {
+				return 1;
+			} else {
+				return -1;
+			}
+		}
 	}
 
 }
