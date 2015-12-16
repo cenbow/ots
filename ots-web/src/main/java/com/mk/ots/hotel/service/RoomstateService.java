@@ -1383,7 +1383,7 @@ public class RoomstateService {
 
 					// 兼容老版本
 					if (isPromo != null && isPromo) {
-						if (isPromo && roomtype.getPromoid().equals(HotelPromoEnum.OneDollar.getCode().toString())){
+						if (isPromo && HotelPromoEnum.OneDollar.getCode().toString().equals(roomtype.getPromoid())){
 							if (params.getShowblacktype() == SearchBlackTypeEnum.ONESECKILL.getCode()){
 								roomtypes.add(roomtype);
 							}
