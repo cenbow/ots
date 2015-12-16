@@ -2684,7 +2684,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				/**
 				 * added in mike3.1, lift up promo as the top search variable
 				 */
-				sortByPromo(searchBuilder, reqentity.getCallversion());
+				//sortByPromo(searchBuilder, reqentity.getCallversion());
 
 				if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
 					// 距离排序
