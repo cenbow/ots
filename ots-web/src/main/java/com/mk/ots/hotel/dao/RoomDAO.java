@@ -1,17 +1,16 @@
 package com.mk.ots.hotel.dao;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Repository;
-
 import com.mk.orm.kit.JsonKit;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
 import com.mk.ots.order.bean.PmsRoomOrder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 房间DAO数据操作
@@ -415,6 +414,12 @@ public class RoomDAO {
     public Bean findRoomStatus(String hotelid, String roomtypeid, String roomid, String date) {
         String sql = "select * from b_roomtemp_310000 where hotelid=? and roomtypeid=? and roomid=? and time=?";
         return Db.findFirst(sql, hotelid, roomtypeid, roomid, date);
+
+    }
+
+    public Long findHotelRoomNums(String hotelid) {
+        String sql = "select COUNT(1)  from t_roomtype a join t_room b on a.id = b.roomtypeid where a.thotelid = ?";
+        return Db.queryLong(sql, hotelid);
 
     }
 }

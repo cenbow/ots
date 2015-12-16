@@ -1,9 +1,7 @@
 package com.mk.ots.order.service;
 
 import cn.com.winhoo.pms.webout.service.bean.PmsOtaAddOrder;
-import com.mk.care.kafka.common.CopywriterTypeEnum;
 import com.mk.ots.common.bean.PageObject;
-import com.mk.ots.common.enums.OrderTasksTypeEnum;
 import com.mk.ots.common.enums.OrderTypeEnum;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
 import com.mk.ots.common.enums.PayStatusEnum;
@@ -14,12 +12,10 @@ import com.mk.ots.order.bean.OtaRoomPrice;
 import com.mk.ots.order.bean.PmsRoomOrder;
 import com.mk.ots.order.model.BOtaorder;
 import com.mk.ots.order.model.FirstOrderModel;
-import com.mk.ots.order.model.OtaOrderTasts;
 import com.mk.ots.promo.model.BPromotionPrice;
 import com.mk.ots.ticket.model.TicketInfo;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -122,6 +118,14 @@ public interface OrderService {
      * @return
      */
     public Long findMonthlySales(Long hotelId);
+
+    /**
+     * 给房态组调用,月销量纪录  显示近30天内的 PMS 销量数据(不包含current date)
+     *
+     * @param hotelId
+     * @return
+     */
+    public Long findPMSMonthlySales(Long hotelId);
 
     public boolean isFirstOrder(FirstOrderModel fom);
 

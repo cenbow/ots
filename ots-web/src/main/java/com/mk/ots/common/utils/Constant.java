@@ -58,6 +58,7 @@ public class Constant {
 	
 	public static final String RESERVE_DAY_NUM = "reserveDayNum";//酒店预定天数
 	public static final String MONTHLY_SALES_KEY = "ots2_5_monthly30_sales_key_";   //月销量
+	public static final String MONTHLY_PMS_SALES_KEY = "ots3_2_monthly30_pms_sales_key_";   //月销量
 	
 	public static final String orderService="orderService";
 	public static final String userService = "userService";

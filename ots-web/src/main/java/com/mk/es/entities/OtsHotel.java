@@ -111,6 +111,9 @@ public class OtsHotel {
 	/** mike 3.0 月销量 **/
 	private Long ordernummon;
 
+	/** mike 3.2 受欢迎指数 **/
+	private Long greetscore;
+
 	/** 酒店省份编码 */
 	private String provcode;
 	/** 酒店城市编码 */
@@ -578,4 +581,11 @@ public class OtsHotel {
 		this.promoinfo = promoinfo;
 	}
 
+	public Long getGreetscore() {
+		return greetscore;
+	}
+
+	public void setGreetscore(Long greetscore) {
+		this.greetscore = greetscore;
+	}
 }

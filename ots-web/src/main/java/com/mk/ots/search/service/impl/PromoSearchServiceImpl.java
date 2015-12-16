@@ -1587,7 +1587,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 * @param searchBuilder
 	 */
 	private void sortByOrders(SearchRequestBuilder searchBuilder) {
-		searchBuilder.addSort("ordernummon", SortOrder.DESC);
+		searchBuilder.addSort("greetscore", SortOrder.DESC);
 	}
 
 	/**

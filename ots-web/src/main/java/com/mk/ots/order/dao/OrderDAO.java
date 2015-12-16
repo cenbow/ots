@@ -538,6 +538,16 @@ public class OrderDAO extends BaseDAO {
 		String sql = "SELECT count(1) FROM b_otaorder WHERE HotelId = ? AND OrderStatus IN (180, 190, 200) AND DATE_FORMAT(Createtime, '%Y%m%d%H%i%s') BETWEEN ? AND ?";
 		return Db.queryLong(sql, hotelId, beforetime, yestertime);
 	}
+
+	/**
+	 * 月销量记录(根据ID) 显示近30天内的 PMS 销量数据(不包含current date)
+	 * @param hotelId
+	 * @return
+	 */
+	public Long findPMSMonthlySaleByHotelId(Long hotelId, String beforetime, String yestertime) {
+		String sql = "SELECT count(1) FROM b_pmsroomorder WHERE Status IN ('OK', 'IN', 'PM') and hotelid= ? AND DATE_FORMAT(Begintime, '%Y%m%d%H%i%s') BETWEEN ? AND ?";
+		return Db.queryLong(sql, hotelId, beforetime, yestertime);
+	}
 	
 	/**
 	 * 月销量记录   显示近30天内的销量数据(不包含current date)
@@ -545,6 +555,15 @@ public class OrderDAO extends BaseDAO {
 	 */
 	public List<Bean> findAllMonthlySales(String beforetime, String yestertime) {
 		String sql = "SELECT HotelId as hid, count(HotelId) cnt FROM b_otaorder WHERE OrderStatus IN (180, 190, 200) AND DATE_FORMAT(Createtime, '%Y%m%d%H%i%s') BETWEEN ? AND ? GROUP BY HotelId";
+		return Db.find(sql, beforetime, yestertime);
+	}
+
+	/**
+	 * 月销量记录   显示近30天内的 PMS 销量数据(不包含current date)
+	 * @return
+	 */
+	public List<Bean> findAllPMSMonthlySales(String beforetime, String yestertime) {
+		String sql = "SELECT HotelId as hid, count(HotelId) cnt FROM b_pmsroomorder WHERE Status IN ('OK', 'IN', 'PM')  AND DATE_FORMAT(Begintime, '%Y%m%d%H%i%s') BETWEEN ? AND ? GROUP BY HotelId";
 		return Db.find(sql, beforetime, yestertime);
 	}
 	

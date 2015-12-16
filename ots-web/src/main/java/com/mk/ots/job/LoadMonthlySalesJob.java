@@ -24,6 +24,7 @@ public class LoadMonthlySalesJob  extends QuartzJobBean {
 		logger.info("LoadMonthlySalesJob::start");
 		try {
 			orderService.findMonthlySales(null);
+			orderService.findPMSMonthlySales(null);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
