@@ -296,6 +296,12 @@ public class HotelDAO {
 		return Db.findFirst(sql, hotelid);
 	}
 
+	// 查询tHotel
+	public Bean findThotelByHotelid(Long hotelid) {
+		String sql = "select * from t_hotel where id=?";
+		return Db.findFirst(sql, hotelid);
+	}
+
 	/**
 	 * 查询房间
 	 *

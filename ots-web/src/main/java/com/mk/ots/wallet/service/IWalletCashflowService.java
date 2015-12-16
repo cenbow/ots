@@ -74,4 +74,12 @@ public interface IWalletCashflowService {
      * @return
      */
     boolean unLockCashFlow(Long mid, Long orderid);
+
+    /**
+     * 订单返现
+     * @param orderId
+     * @param mid
+     * @param price
+     */
+    public  void orderReturnWalletCash(Long orderId, Long mid, BigDecimal price);
 }
