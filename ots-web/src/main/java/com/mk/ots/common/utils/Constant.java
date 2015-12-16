@@ -1,6 +1,7 @@
 package com.mk.ots.common.utils;
 
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -271,4 +272,6 @@ public class Constant {
 	public static final String DEFAULT_NORMAL_POPULARITY_NOTE = "";
 	public static final String DEFAULT_NORMAL_POPULARITY_ICON = "";
 
+	/**特价订单返红现金金额**/
+	public static final BigDecimal TJ_ORDER_RETURN_CASH = new BigDecimal("5");
 }
