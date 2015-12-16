@@ -2832,6 +2832,8 @@ public class OrderServiceImpl implements OrderService {
         //过保留时间（预抵时间） 未到的 push消息 放入到任务表中
         pushOutCheckInTimeMsg(pOrder);
 
+        //检查用户是否符合下单条件
+        checkOrderByPromoType(order);
         /**
          * 拿到pms客单号
          */
