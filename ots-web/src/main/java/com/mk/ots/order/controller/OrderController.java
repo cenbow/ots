@@ -912,6 +912,12 @@ public class OrderController {
 	public ResponseEntity<OrderPromoPayRuleJson> getOrderPromoPayRule(Integer promoType) {
 		OrderController.logger.info("OrderController::getOrderPromoPayRule params promoType[%s]::begin", promoType);
 		OrderPromoPayRuleJson orderPromoPayRuleJson  = null;
+		if(promoType == null){
+			orderPromoPayRuleJson = new OrderPromoPayRuleJson();
+			orderPromoPayRuleJson.setErrorCode(-1);
+			orderPromoPayRuleJson.setErrorMsg("查询失败，promoType参数必填！");
+			orderPromoPayRuleJson.setSuccess(false);
+		}
 		try {
 			orderPromoPayRuleJson = this.orderService.getOrderPromoPayRule(promoType);
 			if(orderPromoPayRuleJson == null){
