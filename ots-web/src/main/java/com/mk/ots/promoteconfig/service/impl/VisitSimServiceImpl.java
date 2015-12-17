@@ -39,13 +39,13 @@ public class VisitSimServiceImpl implements VisitSimService {
 
 	private final Gson gsonParser = new Gson();
 
-	private AtomicLong lastVisit;
-
 	private AtomicLong accessCounter;
 
 	private AtomicLong currentVisitNumber;
 
-	private AtomicInteger currentGap;
+	private AtomicInteger currentGapMin;
+
+	private AtomicInteger currentGapMax;
 
 	private Lock readLock;
 
@@ -64,16 +64,37 @@ public class VisitSimServiceImpl implements VisitSimService {
 				DateUtils.formatDateTime(new Date(), DateUtils.FORMATSHORTDATETIME));
 	}
 
-	private Data queryData() throws Exception{ 
+	private void updateData(Data data) throws Exception {
 		Jedis jedis = cacheManager.getNewJedis();
-		String jedisVal = jedis.get(getConfCacheKey());
-		Data data = null;
-		if (StringUtils.isNotBlank(jedisVal)) {
-			data = gsonParser.fromJson(jedisVal, new TypeToken<Configuration>() {
+
+		if (data != null) {
+			String dataJson = gsonParser.toJson(data, new TypeToken<Configuration>() {
 			}.getType());
+			jedis.set(getConfCacheKey(), dataJson);
+		}
+	}
+
+	private Data queryData() throws Exception {
+		Jedis jedis = cacheManager.getNewJedis();
+
+		Data data = null;
+		String cacheKey = getDataCacheKey();
+
+		try {
+			readLock.lock();
+
+			String jedisVal = jedis.get(cacheKey);
+			if (StringUtils.isNotBlank(jedisVal)) {
+				data = gsonParser.fromJson(jedisVal, new TypeToken<Configuration>() {
+				}.getType());
+			}
+		} catch (Exception ex) {
+			logger.error(String.format("failed to querydata from cache with key %s", cacheKey), ex);
+		} finally {
+			readLock.unlock();
 		}
 
-		return data;		
+		return data;
 	}
 
 	private Configuration queryConfs() throws Exception {
@@ -102,7 +123,6 @@ public class VisitSimServiceImpl implements VisitSimService {
 				Data data = null;
 				try {
 					conf = queryConfs();
-					data = queryData();
 					isConfLoaded = true;
 				} catch (Exception ex) {
 					logger.warn("failed to queryConfs...", ex);
@@ -111,13 +131,40 @@ public class VisitSimServiceImpl implements VisitSimService {
 				/**
 				 * giving random initial visit
 				 */
-				if (isConfLoaded && conf != null && data != null) {
+				if (isConfLoaded && conf != null) {
+					if (conf.getInitMin() == null) {
+						conf.setInitMin(defaultInitMin);
+					}
+					if (conf.getInitMax() == null) {
+						conf.setInitMax(defaultInitMax);
+					}
+					if (conf.getGapMin() == null) {
+						conf.setGapMin(defaultGapMin);
+					}
+					if (conf.getGapMax() == null) {
+						conf.setGapMax(defaultGapMax);
+					}
+
 					currentVisitNumber = new AtomicLong(RandomUtils.nextInt(conf.getInitMin(), conf.getInitMax()));
-					currentGap = new AtomicInteger(RandomUtils.nextInt(conf.getGapMin(), conf.getGapMax()));
-					
+					currentGapMin = new AtomicInteger(conf.getGapMin());
+					currentGapMax = new AtomicInteger(conf.getGapMax());
+
+					data = new Data();
+					data.setAccessCounter(0L);
+					data.setCurrentVisitNumber(currentVisitNumber.get());
+					data.setLastVisit((new Date()).getTime());
+
+					try {
+						updateData(data);
+					} catch (Exception ex) {
+						logger.warn(String.format(
+								"failed to updateData data.accessCounter:%s; data.currentVisitNumber:%s...",
+								data.getAccessCounter(), data.getCurrentVisitNumber()), ex);
+					}
 				} else {
 					currentVisitNumber = new AtomicLong(RandomUtils.nextInt(defaultInitMin, defaultInitMax));
-					currentGap = new AtomicInteger(RandomUtils.nextInt(defaultGapMin, defaultGapMax));
+					currentGapMin = new AtomicInteger(defaultGapMin);
+					currentGapMax = new AtomicInteger(defaultGapMax);
 				}
 			}
 		}
@@ -128,10 +175,43 @@ public class VisitSimServiceImpl implements VisitSimService {
 		init();
 
 		if (writeLock != null) {
-			writeLock.lock();
+			Data data = new Data();
+
+			try {
+				writeLock.lock();
+
+				Integer gap = RandomUtils.nextInt(currentGapMin.get(), currentGapMax.get());
+
+				long currVisitNumber = currentVisitNumber.addAndGet(gap);
+				long accCounter = accessCounter.incrementAndGet();
+				Date currentTime = new Date();
+
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("simulate currentVisitNumber:%s; accessCounter:%s; currentTime:%s",
+							currVisitNumber, accCounter, currentTime));
+				}
+
+				data.setAccessCounter(accCounter);
+				data.setCurrentVisitNumber(currVisitNumber);
+				data.setLastVisit(currentTime.getTime());
+
+				updateData(data);
+			} catch (Exception ex) {
+				logger.error(String.format(
+						"failed to updateData with data.accessCounter:%s; data.currentVisitNumber:%s; data.lastVisit:%s",
+						data.getAccessCounter(), data.getCurrentVisitNumber(), data.getLastVisit()), ex);
+			} finally {
+				writeLock.unlock();
+			}
 		}
 
-		return null;
+		try {
+			Data data = queryData();
+			return data.getCurrentVisitNumber();
+		} catch (Exception ex) {
+			logger.error("failed to querydata from cache...", ex);
+			return 0L;
+		}
 	}
 
 	private class Configuration {
@@ -174,8 +254,17 @@ public class VisitSimServiceImpl implements VisitSimService {
 	}
 
 	private class Data {
-		private Long currentVisitNumber;
-		private Long accessCounter;
+		private Long currentVisitNumber = 0L;
+		private Long accessCounter = 0L;
+		private Long lastVisit = 0L;
+
+		public Long getLastVisit() {
+			return lastVisit;
+		}
+
+		public void setLastVisit(Long lastVisit) {
+			this.lastVisit = lastVisit;
+		}
 
 		public Long getCurrentVisitNumber() {
 			return currentVisitNumber;
