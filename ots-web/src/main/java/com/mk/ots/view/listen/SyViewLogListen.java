@@ -1,0 +1,26 @@
+package com.mk.ots.view.listen;
+
+import com.alibaba.fastjson.JSONObject;
+import com.mk.ots.view.dao.ISyViewLogDao;
+import com.mk.ots.view.model.SyViewLog;
+import com.mk.ots.view.service.ISyViewLogService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.stereotype.Service;
+import redis.clients.jedis.JedisPubSub;
+
+/**
+ * Created by jeashi on 2015/12/16.
+ */
+@Service
+public class SyViewLogListen  extends JedisPubSub {
+    @Autowired
+    private ISyViewLogDao syViewLogDao;
+
+    public void onMessage(String channel, String message){
+        SyViewLog syViewLog =  (SyViewLog)JSONObject.parse(message);
+        syViewLogDao.save(syViewLog);
+    }
+
+}

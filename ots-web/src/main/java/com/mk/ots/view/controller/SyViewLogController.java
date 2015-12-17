@@ -4,8 +4,11 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.mk.framework.MkJedisConnectionFactory;
 import com.mk.framework.exception.MyErrorEnum;
 import com.mk.framework.exception.MyException;
+import com.mk.framework.jedis.MkJedis;
+import com.mk.framework.jedis.MkJedisFactory;
 import com.mk.framework.model.Page;
 import com.mk.framework.util.MyTokenUtils;
 import com.mk.framework.util.UrlUtils;
@@ -60,7 +63,8 @@ public class SyViewLogController {
     @RequestMapping("/viewevent")
     public ResponseEntity<Map<String, Object>> addviewevent(HttpServletRequest request,String tourl, String actiontype) {
 
-        logger.info("【sys/addviewevent】 params is : {tourl,actiontype}", tourl + " , " + actiontype );
+        logger.info("【sys/addviewevent】 params is : {tourl,actiontype}", tourl + " , " + actiontype);
+
         Map<String, Object> resultrtnMap = Maps.newHashMap();
         if (StringUtils.isEmpty(tourl)) {
             logger.error("获取目标url失败.");
@@ -101,7 +105,8 @@ public class SyViewLogController {
         dateMap.put("hardwarecode",request.getParameter("hardwarecode"));
         dateMap.put("imei",request.getParameter("imei"));
 
-        result = syViewLogService.saveSyViewLog(dateMap);
+   //     result = syViewLogService.saveSyViewLog(dateMap);
+        syViewLogService.pushSyViewLog(dateMap);
         //组织数据响应
 
         resultrtnMap.put("success", result);

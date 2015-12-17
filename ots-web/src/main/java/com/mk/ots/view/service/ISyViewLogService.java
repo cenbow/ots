@@ -9,5 +9,5 @@ public interface ISyViewLogService {
 
     public  Boolean saveSyViewLog(HashMap<String, Object> map);
 
-
+    public void pushSyViewLog(HashMap<String, Object> map);
 }
