@@ -1508,11 +1508,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 
 		List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-		if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
+		if (hotels != null && hotels.size() >= params.getLimit()) {
 			promoItem.put("hotel", hotels);
-		} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
+		} else if (hotels != null && hotels.size() < params.getLimit()) {
 			Map<String, Object> sups = new HashMap<String, Object>();
-			searchAround(sups, params, FrontPageEnum.limit.getId() - hotels.size());
+			searchAround(sups, params, params.getLimit() - hotels.size());
 			List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) sups.get("supplementhotel");
 			promoItem.put("hotel", new ArrayList<Map<String, Object>>());
 			((List<Map<String, Object>>) promoItem.get("hotel"))
