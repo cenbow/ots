@@ -1565,9 +1565,14 @@ public class DateUtils extends Object {
      * @return
      */
     public static int diffYears(Date day1, Date day2) {
-        long diff = day2.getTime() - day1.getTime();
-        Long days = diff / ( 1000 * 60 * 60 * 24 * 365 );
-        return days.intValue();
+        Calendar cal=Calendar.getInstance();
+        cal.setTime(day1);
+        int startYear = cal.getWeekYear();
+        cal.clear();
+        cal.setTime(day2);
+        int endYear = cal.getWeekYear();
+        int diffyears = endYear - startYear;
+        return diffyears;
     }
 
     /**
