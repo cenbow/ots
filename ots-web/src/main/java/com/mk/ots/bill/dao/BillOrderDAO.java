@@ -169,6 +169,7 @@ public class BillOrderDAO {
                 + "WHEN isnull(o.spreadUser) THEN "
                 + "1 " //非切客
                 + "ELSE "
+                + "when spreadUser = -1 then 3 " //新切客
                 + "2 " //切客 有值
                 + "END "
                 + ") AS spreaduser, "
@@ -421,6 +422,8 @@ public class BillOrderDAO {
 //				System.out.println("orderid="+orderid+"; spreaduser="+spreaduser + "; invalidreason="+invalidreason + "; isPromotion="+isPromotion + "; rulecode="+rulecode);
                 //B规则切客
                 boolean bSpreadFlag = (spreaduser == 2 && rulecode == 1002 &&  invalidreason == 0);
+                //拉新切客
+                boolean laxinSpreadFlag = (spreaduser == 3 && invalidreason == 0);
                 //A规则切客
                 boolean aSpreadFlag = false;
                 if(null != isPromotion){
@@ -448,7 +451,7 @@ public class BillOrderDAO {
                 //prepaymentDiscount toPayDiscount
                 BigDecimal prepaymentDiscount = null;
                 BigDecimal toPayDiscount = null;
-                if(bSpreadFlag){
+                if(bSpreadFlag || laxinSpreadFlag){
                     if((int)map.get("ordertype") == 1){
                         prepaymentDiscount = qiekeIncome;
                     } else if((int)map.get("ordertype") == 2){
