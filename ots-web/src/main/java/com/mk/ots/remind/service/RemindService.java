@@ -1,14 +1,27 @@
 package com.mk.ots.remind.service;
 
 import com.dianping.cat.Cat;
+import com.google.common.base.Optional;
+import com.mk.care.kafka.common.PushMessageTypeEnum;
+import com.mk.care.kafka.common.SmsMessageTypeEnum;
+import com.mk.care.kafka.model.AppMessage;
+import com.mk.care.kafka.model.Message;
+import com.mk.care.kafka.model.SmsMessage;
+import com.mk.care.kafka.model.WeixinMessage;
 import com.mk.ots.common.enums.RemindStatusEnum;
 import com.mk.ots.common.enums.RemindTypeEnum;
+import com.mk.ots.common.enums.ValidEnum;
+import com.mk.ots.kafka.message.CareProducer;
+import com.mk.ots.kafka.message.MessageProducer;
 import com.mk.ots.mapper.RemindLogMapper;
 import com.mk.ots.mapper.RemindMapper;
 import com.mk.ots.mapper.RemindTypeMapper;
+import com.mk.ots.member.model.UMember;
+import com.mk.ots.member.service.impl.MemberService;
 import com.mk.ots.remind.model.Remind;
 import com.mk.ots.remind.model.RemindLog;
 import com.mk.ots.remind.model.RemindType;
+import com.mk.ots.remind.runnable.PushMessageRunnable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +29,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class RemindService {
@@ -29,6 +44,14 @@ public class RemindService {
     @Autowired
     private RemindTypeMapper remindTypeMapper;
 
+    @Autowired
+    private MessageProducer messageProducer;
+
+    @Autowired
+    private MemberService memberService;
+
+    @Autowired
+    private CareProducer careProducer;
     /**
      * 检查用户当日是否已设置提醒
      * @param mid
@@ -128,6 +151,94 @@ public class RemindService {
         }catch (Exception e) {
             return new Date();
         }
+    }
+
+    public void pushMessage() {
+        //查询类型
+        List<RemindType> remindTypeList = remindTypeMapper.queryByValid();
+
+        //
+        ExecutorService pool = Executors.newFixedThreadPool(8);
+        for(RemindType type : remindTypeList) {
+            Long typeId = type.getId();
+
+            //查询要发送的消息
+            List<Remind> remindList = this.remindMapper.findPushRemind(typeId);
+            for (Remind remind : remindList) {
+
+                remind.setCount(remind.getCount() + 1);
+                remind.setExecuteTime(new Date());
+                remind.setUpdateTime(new Date());
+                this.remindMapper.update(remind);
+                //发送消息
+                PushMessageRunnable pushMessageRunnable = new PushMessageRunnable(type,remind,this);
+                pool.execute(pushMessageRunnable);
+            }
+        }
+
+    }
+
+    public void pushMessage(RemindType type,Remind remind){
+        String phone = null;
+        String openId = null;
+        Long mid = remind.getMid();
+        Optional<UMember> op = this.memberService.findMemberById(mid);
+        if (op.isPresent()) {
+            UMember uMember = op.get();
+            phone = uMember.getPhone();
+            openId = uMember.getUnionid();
+        } else {
+            return;
+        }
+
+        //
+        int isPush = type.getPush();
+        if (isPush == 1) {
+            AppMessage message = new AppMessage();
+            message.setMid(remind.getMid());
+            message.setPhone(phone);
+            message.setTitle(remind.getTitle());
+            message.setMsgContent(remind.getContent());
+            message.setMsgtype(PushMessageTypeEnum.USER);
+            message.setUrl(remind.getUrl());
+            this.messageProducer.sendAppMsg(message);
+
+        }
+
+        //
+        int isSms = type.getSms();
+        if (isSms == 1) {
+
+            SmsMessage message = new SmsMessage();
+            message.setPhone(phone);
+            message.setMessage(remind.getContent());
+            message.setSmsMessageTypeEnum(SmsMessageTypeEnum.normal);
+            this.messageProducer.sendSmsMsg(message);
+        }
+
+        //
+        int isWeixin = type.getWeixin();
+        if (isWeixin == 1) {
+            WeixinMessage message = new WeixinMessage();
+
+            message.setContent(remind.getContent());
+            message.setUnionid(openId);
+            message.setUrl(remind.getUrl());
+            message.setMid(remind.getMid());
+            this.messageProducer.sendWeixinMsg(message);
+        }
+
+        remind.setStatusCode(RemindStatusEnum.DONE.getCode());
+        remind.setUpdateTime(new Date());
+        this.remindMapper.update(remind);
+
+        //log
+        RemindLog log = new RemindLog();
+        log.setRemindId(remind.getId());
+        log.setContent(remind.getContent());
+        log.setStatusCode(RemindStatusEnum.DONE.getCode());
+        log.setCreateTime(new Date());
+        this.remindLogMapper.save(log);
     }
 }
 

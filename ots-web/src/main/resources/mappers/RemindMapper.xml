@@ -50,4 +50,53 @@
         </where>
     </select>
 
+    <!-- 根据type_id，查询未发送成功，且count 小于3次 ，执行时间小于现在的-->
+    <select id="findPushRemind" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        select
+        <include refid="Base_Column_List" />
+        from T_REMIND
+        where type_id =#{typeId,jdbcType=BIGINT}
+        and status_code = '00'
+        and count &lt; 3   and unix_timestamp(remind_time) &lt; unix_timestamp()
+    </select>
+
+    <update id="update" parameterType="com.mk.ots.remind.model.Remind" >
+        update T_REMIND
+        <set >
+            <if test="mid != null" >
+                mid = #{mid},
+            </if>
+            <if test="content != null" >
+                content = #{content},
+            </if>
+            <if test="title != null" >
+                title = #{title},
+            </if>
+            <if test="url != null" >
+                url = #{url},
+            </if>
+            <if test="typeId != null" >
+                type_id = #{typeId},
+            </if>
+            <if test="remindTime != null" >
+                remind_time = #{remindTime},
+            </if>
+            <if test="count != null" >
+                count = #{count},
+            </if>
+            <if test="executeTime != null" >
+                execute_time = #{executeTime},
+            </if>
+            <if test="statusCode != null" >
+                status_code = #{statusCode},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime},
+            </if>
+            <if test="updateTime != null" >
+                update_time = #{updateTime},
+            </if>
+        </set>
+        WHERE  id= #{id}
+    </update>
 </mapper>

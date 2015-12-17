@@ -9,10 +9,10 @@
         <result column="url" property="url" jdbcType="VARCHAR" />
         <result column="title" property="title" jdbcType="VARCHAR" />
         <result column="remind_time" property="remindTime" jdbcType="TIMESTAMP" />
-        <result column="is_weixin" property="weixin" jdbcType="BOOLEAN" />
-        <result column="is_sms" property="sms" jdbcType="BOOLEAN" />
-        <result column="is_push" property="push" jdbcType="BOOLEAN" />
-        <result column="valid" property="valid" jdbcType="BOOLEAN" />
+        <result column="is_weixin" property="weixin" jdbcType="INTEGER" />
+        <result column="is_sms" property="sms" jdbcType="INTEGER" />
+        <result column="is_push" property="push" jdbcType="INTEGER" />
+        <result column="valid" property="valid" jdbcType="INTEGER" />
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
         <result column="create_by" property="createBy" jdbcType="VARCHAR" />
         <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
@@ -26,5 +26,9 @@
     <select id="queryByCode" resultMap="BaseResultMap" parameterType="java.lang.String">
         select <include refid="Base_Column_List"/> from T_REMIND_TYPE
         where code = #{code}
+    </select>
+
+    <select id="queryByValid" resultMap="BaseResultMap" >
+        select <include refid="Base_Column_List"/> from T_REMIND_TYPE where valid =  1
     </select>
 </mapper>

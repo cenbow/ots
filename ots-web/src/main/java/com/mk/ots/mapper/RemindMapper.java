@@ -6,7 +6,11 @@ import java.util.List;
 
 public interface RemindMapper {
 
-    public void save(Remind remind);
+    public Integer save(Remind remind);
 
     public List<Remind> queryByMid(Remind remind);
+
+    public  List<Remind> findPushRemind(Long typeId);
+
+    public Integer update(Remind remind);
 }

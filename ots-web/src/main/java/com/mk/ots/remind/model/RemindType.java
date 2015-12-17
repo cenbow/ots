@@ -10,10 +10,10 @@ public class RemindType {
    private String url;
    private String title;
    private Date remindTime;
-   private Boolean weixin;
-   private Boolean sms;
-   private Boolean push;
-   private Boolean valid;
+   private Integer weixin;
+   private Integer sms;
+   private Integer push;
+   private Integer valid;
    private Date createTime;
    private String createBy;
    private Date updateTime;
@@ -74,35 +74,35 @@ public class RemindType {
       this.title = title;
    }
 
-   public Boolean getWeixin() {
+   public Integer getWeixin() {
       return weixin;
    }
 
-   public void setWeixin(Boolean weixin) {
+   public void setWeixin(Integer weixin) {
       this.weixin = weixin;
    }
 
-   public Boolean getSms() {
+   public Integer getSms() {
       return sms;
    }
 
-   public void setSms(Boolean sms) {
+   public void setSms(Integer sms) {
       this.sms = sms;
    }
 
-   public Boolean getPush() {
+   public Integer getPush() {
       return push;
    }
 
-   public void setPush(Boolean push) {
+   public void setPush(Integer push) {
       this.push = push;
    }
 
-   public Boolean getValid() {
+   public Integer getValid() {
       return valid;
    }
 
-   public void setValid(Boolean valid) {
+   public void setValid(Integer valid) {
       this.valid = valid;
    }
 

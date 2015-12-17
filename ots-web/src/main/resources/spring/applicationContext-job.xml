@@ -56,6 +56,8 @@
 				<ref bean="qieKeRuleTrigger"/>
                 <!--  暂时停掉  -->
                 <!--<ref bean="SendTicketJobTrigger"/>-->
+				<!-- 每分钟提醒 -->
+				<ref bean="remindMessageTrigger" />
 			</list>
 		</property>
 	</bean>
@@ -322,5 +324,17 @@
 		<property name="name" value="payStatusErrorOrderJob" />
 		<property name="jobClassName" value="com.mk.ots.job.ProcessPayStatusErrorJob" />
 	</bean>
-	
+
+
+	<!-- 提醒消息 -->
+	<bean id="remindMessageTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="remindMessageJobDetail" />
+		<property name="cronExpression" value="0 */1 * * * ?" />
+	</bean>
+
+	<bean id="remindMessageJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="remindMessageJob" />
+		<property name="jobClassName" value="com.mk.ots.job.RemindMessageJob" />
+	</bean>
+
 </beans>
