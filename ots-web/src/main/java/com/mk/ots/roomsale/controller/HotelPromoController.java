@@ -1,13 +1,15 @@
 package com.mk.ots.roomsale.controller;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.alibaba.fastjson.JSONObject;
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.roomsale.model.TPriceScopeDto;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
+import com.mk.ots.roomsale.service.RoomSaleService;
+import com.mk.ots.roomsale.service.TPriceScopeService;
 
-import javax.validation.Valid;
-
+import com.mk.ots.web.ServiceOutput;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -36,6 +38,9 @@ import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.web.ServiceOutput;
 
+import javax.validation.Valid;
+import java.util.*;
+
 /**
  *
  * 特价类型接口
@@ -53,6 +58,9 @@ public class HotelPromoController {
 	private IPromoSearchService promoSearchService;
 	@Autowired
 	private VisitSimService visitSimService;
+
+	@Autowired
+	private TPriceScopeService tpriceScopeService;
 
 	/**
 	 * 活动查询
@@ -511,8 +519,10 @@ public class HotelPromoController {
 
 	@RequestMapping(value = "/promo/queryrange", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> queryrange(ParamBaseBean pbb, String promoid) {
-		logger.info("HotelPromoController::queryrange::params{}  begin", pbb + "," + promoid);
+
+	public ResponseEntity<Map<String, Object>> queryrange(ParamBaseBean pbb, String promoid,String cityid) {
+		logger.info("HotelPromoController::queryrange::params{}  begin",
+				pbb + "," + promoid);
 		Map<String, Object> result = new HashMap<String, Object>();
 		try {
 
@@ -544,20 +554,25 @@ public class HotelPromoController {
 					if (sec < 0) {
 						continue;
 					}
-					JSONObject ptype1 = new JSONObject();
 
 					if (logger.isInfoEnabled()) {
 						logger.info(String.format("promotypeid: %s; promotypetext: %s; promotypeprice:%s",
 								saleConfigInfo.getId(), saleConfigInfo.getSaleLabel(), saleConfigInfo.getSaleValue()));
 					}
 
-					ptype1.put("promotypeid", saleConfigInfo.getId());
-					ptype1.put("promotypetext", saleConfigInfo.getSaleLabel());
-					ptype1.put("promotypeprice", saleConfigInfo.getSaleValue());
-					ptype1.put("promosec", sec / 1000); // 秒
-					ptype1.put("promosecend", endSec / 1000); // 距离结束时间（s）
-					ptype1.put("nextpromosec", nextsec / 1000); // 距离下一段结束时间（s）
-					list.add(ptype1);
+					result.put("promoid", saleConfigInfo.getId());
+					result.put("promotypetext", saleConfigInfo.getSaleLabel());
+					result.put("promotypeprice", saleConfigInfo.getSaleValue());
+					result.put("promosec", sec / 1000); // 秒
+					result.put("promosecend", endSec / 1000); // 距离结束时间（s）
+					result.put("nextpromosec", nextsec / 1000); // 距离下一段结束时间（s）
+					List<TPriceScopeDto>  tpriceScopeDtoList = tpriceScopeService.queryTPriceScopeDto(saleConfigInfo.getId() + "", cityid);
+					if(!CollectionUtils.isEmpty(tpriceScopeDtoList)){
+						result.put("minprice",tpriceScopeDtoList.get(0).getMinprice());
+						result.put("maxprice",tpriceScopeDtoList.get(0).getMaxprice());
+						result.put("step",tpriceScopeDtoList.get(0).getStep());
+					}
+					break;
 				}
 			}
 
