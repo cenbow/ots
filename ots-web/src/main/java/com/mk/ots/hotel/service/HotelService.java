@@ -558,7 +558,7 @@ public class HotelService {
 
 	public static String getRepairInfo(Date hotelRepairTime ){
 		Date now = new Date();
-		int diffYears = DateUtils.diffYears(now, hotelRepairTime);
+		int diffYears = DateUtils.diffYears(hotelRepairTime,now);
 
 		if (diffYears <= Constant.SHOW_HOTEL_REPAIRINFO_YEARS_LIMIT){
 			String repairInfo = DateUtils.getDateYear(hotelRepairTime) + "年装修";
