@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -146,9 +148,18 @@ public class HotelPromoController {
 		return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
 	}
 
+	private String countErrors(Errors errors) {
+		StringBuffer bfErrors = new StringBuffer();
+		for (ObjectError error : errors.getAllErrors()) {
+			bfErrors.append(error.getDefaultMessage()).append("; ");
+		}
+
+		return bfErrors.toString();
+	}
+	
 	@RequestMapping(value = "/search/querypromo", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> queryPromo(@Valid HotelQuerylistReqEntity reqentity) throws Exception {
+	public ResponseEntity<Map<String, Object>> queryPromo(@Valid HotelQuerylistReqEntity reqentity, Errors errors) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String params = objectMapper.writeValueAsString(reqentity);
 		String errorMessage = "";
@@ -156,6 +167,15 @@ public class HotelPromoController {
 
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format("search/querypromo begins with parameters:%s...", params));
+		}
+
+		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(String.format("parameters validation failed with error %s", errorMessage));
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
 
 		String callVersion = (String) reqentity.getCallversion();
