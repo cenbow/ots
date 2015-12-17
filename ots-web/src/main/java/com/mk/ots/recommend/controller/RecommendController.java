@@ -163,6 +163,16 @@ public class RecommendController {
 
         Integer platformValue = getplatformValue(callmethod, platform);
 
+        if (StringUtils.isBlank(cityid)){
+            rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+            rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+            rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "参数cityid 不能为空");
+            return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+        }
+
+
+
+
         try {
             Integer cityLimit =  Constant.CITY_RECOMMEND_ITEM_LIMIT;
             Integer globleLimit = null;
