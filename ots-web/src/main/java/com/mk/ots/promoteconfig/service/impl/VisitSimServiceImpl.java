@@ -1,6 +1,8 @@
 package com.mk.ots.promoteconfig.service.impl;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
@@ -70,25 +72,35 @@ public class VisitSimServiceImpl implements VisitSimService {
 		Jedis jedis = cacheManager.getNewJedis();
 
 		if (data != null) {
-			String dataJson = gsonParser.toJson(data, new TypeToken<Configuration>() {
+			Map<String, String> dataProps = new HashMap<String, String>();
+			dataProps.put("accesscounter", String.valueOf(data.getAccessCounter()));
+			dataProps.put("currentvisitnumber", String.valueOf(data.getCurrentVisitNumber()));
+			dataProps.put("lastvisit", String.valueOf(data.getLastVisit()));
+
+			String dataJson = gsonParser.toJson(dataProps, new TypeToken<Map<String, String>>() {
 			}.getType());
-			jedis.set(getConfCacheKey(), dataJson);
+			jedis.set(getDataCacheKey(), dataJson);
 		}
 	}
 
 	private Data queryData() throws Exception {
 		Jedis jedis = cacheManager.getNewJedis();
 
-		Data data = null;
+		Data data = new Data();
 		String cacheKey = getDataCacheKey();
 
 		try {
 			readLock.lock();
 
 			String jedisVal = jedis.get(cacheKey);
+			Map<String, String> dataProps = null;
 			if (StringUtils.isNotBlank(jedisVal)) {
-				data = gsonParser.fromJson(jedisVal, new TypeToken<Configuration>() {
+				dataProps = gsonParser.fromJson(jedisVal, new TypeToken<Map<String, String>>() {
 				}.getType());
+
+				data.setAccessCounter(Long.parseLong(dataProps.get("accesscounter")));
+				data.setCurrentVisitNumber(Long.parseLong(dataProps.get("currentvisitnumber")));
+				data.setLastVisit(Long.parseLong(dataProps.get("lastvisit")));
 			}
 		} catch (Exception ex) {
 			logger.error(String.format("failed to querydata from cache with key %s", cacheKey), ex);
