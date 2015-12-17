@@ -60,6 +60,7 @@
 	<bean class="com.mk.kafka.client.MkKafkaContext"/>
 	<bean class="com.mk.ots.kafka.message.CareProducer"/>
 	<bean class="com.mk.ots.kafka.message.OtsCareProducer"/>
+
 	
 	
 	<aop:aspectj-autoproxy proxy-target-class="true">
@@ -70,5 +71,7 @@
 	
 	<!-- kafka end -->
 
+
+	<bean id="syLogViewTask" class="com.mk.ots.view.task.SyLogViewTask" ></bean>
 
 </beans>

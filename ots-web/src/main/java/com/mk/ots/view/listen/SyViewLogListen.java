@@ -1,7 +1,9 @@
 package com.mk.ots.view.listen;
 
 import com.alibaba.fastjson.JSONObject;
+import com.mk.ots.utils.SpringContextUtil;
 import com.mk.ots.view.dao.ISyViewLogDao;
+import com.mk.ots.view.dao.impl.SyViewLogDaoImpl;
 import com.mk.ots.view.model.SyViewLog;
 import com.mk.ots.view.service.ISyViewLogService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +17,12 @@ import redis.clients.jedis.JedisPubSub;
  */
 @Service
 public class SyViewLogListen  extends JedisPubSub {
-    @Autowired
-    private ISyViewLogDao syViewLogDao;
+
 
     public void onMessage(String channel, String message){
         SyViewLog syViewLog =  (SyViewLog)JSONObject.parse(message);
-        syViewLogDao.save(syViewLog);
+        ISyViewLogDao  syViewLogDaoImpl = SpringContextUtil.getApplicationContext().getBean(SyViewLogDaoImpl.class);
+        syViewLogDaoImpl.save(syViewLog);
     }
 
 }
