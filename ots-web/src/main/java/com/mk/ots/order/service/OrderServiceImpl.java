@@ -31,6 +31,7 @@ import com.mk.ots.hotel.service.*;
 import com.mk.ots.kafka.message.OtsCareProducer;
 import com.mk.ots.manager.HotelPMSManager;
 import com.mk.ots.manager.OtsCacheManager;
+import com.mk.ots.mapper.OrderPromoPayRuleMapper;
 import com.mk.ots.mapper.OtaOrderMacMapper;
 import com.mk.ots.mapper.OtaOrderTastsMapper;
 import com.mk.ots.mapper.RoomSaleConfigInfoMapper;
@@ -72,13 +73,16 @@ import com.mk.ots.ticket.service.ITicketService;
 import com.mk.ots.ticket.service.parse.ITicketParse;
 import com.mk.ots.wallet.service.IWalletCashflowService;
 import com.mk.ots.wallet.service.IWalletService;
+import com.mk.ots.wallet.service.impl.TBackMoneyRuleServiceImpl;
 import com.mk.ots.web.ServiceOutput;
 import com.mk.ots.wordcenser.job.TextFilterService;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.myenum.PmsErrorEnum;
 import com.mk.sever.ServerChannel;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.BeanProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +92,7 @@ import redis.clients.jedis.Jedis;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.ws.http.HTTPException;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -201,7 +206,11 @@ public class OrderServiceImpl implements OrderService {
     private PropertiesUtils propertiesUtils;
 
     @Autowired
-    TextFilterService textFilterService;
+    private TextFilterService textFilterService;
+    @Autowired
+    private TBackMoneyRuleServiceImpl tBackMoneyRuleService;
+    @Autowired
+    private OrderPromoPayRuleMapper orderPromoPayRuleMapper;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
 
@@ -5168,4 +5177,25 @@ public class OrderServiceImpl implements OrderService {
 		
 		return map;
 	}
+
+
+    public OrderPromoPayRuleJson getOrderPromoPayRule(Integer promoType){
+        OrderPromoPayRuleJson orderPromoPayRuleJson = null;
+        OrderPromoPayRuleExample example = new OrderPromoPayRuleExample();
+        example.createCriteria().andPromoTypeEqualTo(promoType);
+        List<OrderPromoPayRule>  orderPromoPayRuleList = orderPromoPayRuleMapper.selectByExample(example);
+        if(CollectionUtils.isNotEmpty(orderPromoPayRuleList)){
+            orderPromoPayRuleJson = new OrderPromoPayRuleJson();
+            OrderPromoPayRule orderPromoPayRule = orderPromoPayRuleList.get(0);
+            try {
+                BeanUtils.copyProperties(orderPromoPayRuleJson,orderPromoPayRule);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+            return orderPromoPayRuleJson;
+        }
+        return orderPromoPayRuleJson;
+    }
 }
