@@ -119,7 +119,8 @@ public class HomePageController {
 			showConfig.setIsSpecial(Constant.STR_FALSE);
 			showConfig.setShowArea(ShowAreaEnum.FrontPageBottom.getCode());
 
-			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(showConfig);
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService
+					.queryRoomSaleShowConfigByParams(showConfig);
 			if (showConfigs != null && showConfigs.size() > 0) {
 				rtnMap.put("promoicon", showConfigs.get(0).getPromoicon());
 				rtnMap.put("promotext", showConfigs.get(0).getPromotext());
@@ -216,7 +217,8 @@ public class HomePageController {
 			showConfig.setIsSpecial(Constant.STR_TRUE);
 			showConfig.setShowArea(ShowAreaEnum.FrontPageBottom.getCode());
 
-			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService
+					.queryRoomSaleShowConfigByParams(showConfig);
 			if (showConfigs != null && showConfigs.size() > 0) {
 				rtnMap.put("promoicon", showConfigs.get(0).getPromoicon());
 				rtnMap.put("promotext", showConfigs.get(0).getPromotext());
@@ -248,6 +250,8 @@ public class HomePageController {
 
 		if (hotels != null && hotels.size() > maxAllowedThemes) {
 			hotelFiltered.addAll(hotels.subList(0, maxAllowedThemes - 1));
+		} else {
+			hotelFiltered.addAll(hotels);
 		}
 
 		for (Map<String, Object> hotel : hotels) {
