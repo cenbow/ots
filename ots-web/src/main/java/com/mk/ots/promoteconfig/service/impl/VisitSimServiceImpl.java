@@ -64,6 +64,18 @@ public class VisitSimServiceImpl implements VisitSimService {
 				DateUtils.formatDateTime(new Date(), DateUtils.FORMATSHORTDATETIME));
 	}
 
+	private Data queryData() throws Exception{ 
+		Jedis jedis = cacheManager.getNewJedis();
+		String jedisVal = jedis.get(getConfCacheKey());
+		Data data = null;
+		if (StringUtils.isNotBlank(jedisVal)) {
+			data = gsonParser.fromJson(jedisVal, new TypeToken<Configuration>() {
+			}.getType());
+		}
+
+		return data;		
+	}
+
 	private Configuration queryConfs() throws Exception {
 		Jedis jedis = cacheManager.getNewJedis();
 		String jedisVal = jedis.get(getConfCacheKey());
@@ -87,8 +99,10 @@ public class VisitSimServiceImpl implements VisitSimService {
 
 				boolean isConfLoaded = false;
 				Configuration conf = null;
+				Data data = null;
 				try {
 					conf = queryConfs();
+					data = queryData();
 					isConfLoaded = true;
 				} catch (Exception ex) {
 					logger.warn("failed to queryConfs...", ex);
@@ -97,9 +111,10 @@ public class VisitSimServiceImpl implements VisitSimService {
 				/**
 				 * giving random initial visit
 				 */
-				if (isConfLoaded && conf != null) {
+				if (isConfLoaded && conf != null && data != null) {
 					currentVisitNumber = new AtomicLong(RandomUtils.nextInt(conf.getInitMin(), conf.getInitMax()));
 					currentGap = new AtomicInteger(RandomUtils.nextInt(conf.getGapMin(), conf.getGapMax()));
+					
 				} else {
 					currentVisitNumber = new AtomicLong(RandomUtils.nextInt(defaultInitMin, defaultInitMax));
 					currentGap = new AtomicInteger(RandomUtils.nextInt(defaultGapMin, defaultGapMax));

@@ -1,5 +1,6 @@
 package com.mk.ots.roomsale.controller;
 
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -7,6 +8,19 @@ import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
+
+
+import com.alibaba.fastjson.JSONObject;
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.roomsale.model.TPriceScopeDto;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
+
+import com.mk.ots.roomsale.service.RoomSaleService;
+import com.mk.ots.roomsale.service.TPriceScopeService;
+
+import com.mk.ots.web.ServiceOutput;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
