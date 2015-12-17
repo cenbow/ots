@@ -1,15 +1,13 @@
 package com.mk.ots.roomsale.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.roomsale.model.TPriceScopeDto;
-import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
-import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
-import com.mk.ots.roomsale.service.RoomSaleService;
-import com.mk.ots.roomsale.service.TPriceScopeService;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.mk.ots.web.ServiceOutput;
+import javax.validation.Valid;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -32,14 +30,13 @@ import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.promoteconfig.service.VisitSimService;
 import com.mk.ots.restful.input.HotelHomePageReqEntity;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
+import com.mk.ots.roomsale.model.TPriceScopeDto;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
+import com.mk.ots.roomsale.service.TPriceScopeService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.web.ServiceOutput;
-
-import javax.validation.Valid;
-import java.util.*;
 
 /**
  *
