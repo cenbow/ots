@@ -33,10 +33,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 酒店前端控制类 发布接口
@@ -168,6 +165,7 @@ public class FrontPageController {
 				Map<String, Object> promoItem = promoSearchService.searchHomePromoRecommend(hotelEntity);
 				if (promoItem == null){
 					promoItem = new HashMap<>();
+					promoItem.put("hotel", new ArrayList<>());
 				}
 				promoItem.put("promosec", sec / 1000); // 秒
 				promoItem.put("promosecend", endSec / 1000); // 距离结束时间（s）

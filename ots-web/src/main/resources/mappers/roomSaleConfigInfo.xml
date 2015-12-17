@@ -182,8 +182,8 @@
 
     <select id="queryTPriceScopeDtoByPromoId" resultMap="BaseTPriceScopeDtoResultMap" parameterType="java.util.Map">
         SELECT
-        *
 
+          *
         FROM  t_price_scope
         <where>
             valid ='1'
