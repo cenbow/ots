@@ -12,6 +12,7 @@ import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -27,6 +28,7 @@ import redis.clients.jedis.Jedis;
  * @author AaronG
  *
  */
+@Service
 public class VisitSimServiceImpl implements VisitSimService {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -148,6 +150,7 @@ public class VisitSimServiceImpl implements VisitSimService {
 					currentVisitNumber = new AtomicLong(RandomUtils.nextInt(conf.getInitMin(), conf.getInitMax()));
 					currentGapMin = new AtomicInteger(conf.getGapMin());
 					currentGapMax = new AtomicInteger(conf.getGapMax());
+					accessCounter = new AtomicLong(0);
 
 					data = new Data();
 					data.setAccessCounter(0L);
@@ -163,6 +166,7 @@ public class VisitSimServiceImpl implements VisitSimService {
 					}
 				} else {
 					currentVisitNumber = new AtomicLong(RandomUtils.nextInt(defaultInitMin, defaultInitMax));
+					accessCounter = new AtomicLong(0);
 					currentGapMin = new AtomicInteger(defaultGapMin);
 					currentGapMax = new AtomicInteger(defaultGapMax);
 				}
