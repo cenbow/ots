@@ -17,6 +17,8 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.mk.framework.util.CommonUtils;
+import com.mk.ots.order.bean.*;
+import com.mk.ots.order.model.OrderPromoPayRule;
 import com.mk.ots.system.model.UToken;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.base.Strings;
@@ -49,10 +51,6 @@ import com.mk.ots.hotel.model.THotel;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomTypeService;
 import com.mk.ots.hotel.service.RoomstateService;
-import com.mk.ots.order.bean.OtaCheckInUser;
-import com.mk.ots.order.bean.OtaOrder;
-import com.mk.ots.order.bean.OtaRoomOrder;
-import com.mk.ots.order.bean.OtaRoomPrice;
 import com.mk.ots.order.model.OtaOrderMac;
 import com.mk.ots.order.service.OrderServiceImpl;
 import com.mk.ots.order.service.OrderUtil;
@@ -904,5 +902,31 @@ public class OrderController {
 		}
 		OrderController.logger.info("OrderController::selectOrderStatus::end");
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+
+
+	/**
+	 * 订单支付规则
+	 */
+	@RequestMapping(value = "/getOrderPromoPayRule", method = RequestMethod.GET)
+	public ResponseEntity<OrderPromoPayRuleJson> getOrderPromoPayRule(Integer promoType) {
+		OrderController.logger.info("OrderController::getOrderPromoPayRule params promoType[%s]::begin", promoType);
+		OrderPromoPayRuleJson orderPromoPayRuleJson  = null;
+		try {
+			orderPromoPayRuleJson = this.orderService.getOrderPromoPayRule(promoType);
+			if(orderPromoPayRuleJson == null){
+				orderPromoPayRuleJson = new OrderPromoPayRuleJson();
+				orderPromoPayRuleJson.setErrorCode(-1);
+				orderPromoPayRuleJson.setErrorMsg("查询失败，没有查询到数据！");
+				orderPromoPayRuleJson.setSuccess(false);
+			}
+		} catch (Exception e) {
+			logger.info("OrderPromoPayRule 异常了：{}", e);
+			orderPromoPayRuleJson.setErrorCode(-1);
+			orderPromoPayRuleJson.setErrorMsg("查询失败！");
+			orderPromoPayRuleJson.setSuccess(false);
+		}
+		OrderController.logger.info("OrderController::getOrderPromoPayRule::end");
+		return new ResponseEntity<OrderPromoPayRuleJson>(orderPromoPayRuleJson, HttpStatus.OK);
 	}
 }
