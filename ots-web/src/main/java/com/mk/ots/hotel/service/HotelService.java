@@ -1,51 +1,6 @@
 
 package com.mk.ots.hotel.service;
 
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.common.geo.GeoDistance;
-import org.elasticsearch.common.geo.GeoPoint;
-import org.elasticsearch.common.unit.DistanceUnit;
-import org.elasticsearch.index.query.BoolFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.GeoDistanceFilterBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.QueryFilterBuilder;
-import org.elasticsearch.index.query.QueryStringQueryBuilder;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
-import org.joda.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
@@ -65,44 +20,57 @@ import com.mk.ots.hotel.bean.EHotel;
 import com.mk.ots.hotel.comm.enums.HotelPictureEnum;
 import com.mk.ots.hotel.comm.enums.HotelTypeEnum;
 import com.mk.ots.hotel.comm.enums.RoomTypePictureEnum;
-import com.mk.ots.hotel.dao.CityDAO;
-import com.mk.ots.hotel.dao.CostTempDAO;
-import com.mk.ots.hotel.dao.HotelDAO;
-import com.mk.ots.hotel.dao.RoomDAO;
-import com.mk.ots.hotel.dao.RoomRepairDAO;
-import com.mk.ots.hotel.dao.RoomTypeDAO;
+import com.mk.ots.hotel.dao.*;
 import com.mk.ots.hotel.jsonbean.HotelPicJsonBean;
-import com.mk.ots.hotel.model.TBusinesszoneModel;
-import com.mk.ots.hotel.model.TCityModel;
-import com.mk.ots.hotel.model.TDistrictModel;
-import com.mk.ots.hotel.model.TFacilityModel;
-import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.model.THotelModel;
-import com.mk.ots.hotel.model.TRoomModel;
-import com.mk.ots.hotel.model.TRoomTypeInfoModel;
-import com.mk.ots.mapper.BedTypeMapper;
-import com.mk.ots.mapper.TBusinesszoneMapper;
-import com.mk.ots.mapper.TDistrictMapper;
-import com.mk.ots.mapper.TFacilityMapper;
-import com.mk.ots.mapper.THotelMapper;
-import com.mk.ots.mapper.TRoomMapper;
-import com.mk.ots.mapper.TRoomtypeInfoMapper;
+import com.mk.ots.hotel.model.*;
+import com.mk.ots.mapper.*;
 import com.mk.ots.order.dao.OrderDAO;
 import com.mk.ots.order.service.OrderService;
 import com.mk.ots.price.dao.BasePriceDAO;
 import com.mk.ots.price.dao.PriceDAO;
+import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.roomsale.model.TRoomSale;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.score.dao.ScoreDAO;
+import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.ticket.dao.BHotelStatDao;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.ots.web.ServiceOutput;
 import com.mk.pms.order.dao.PmsOrderDAO;
 import com.mk.pms.order.dao.PmsRoomOrderDAO;
 import com.mk.sever.ServerChannel;
+import org.apache.commons.lang.StringUtils;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.common.geo.GeoDistance;
+import org.elasticsearch.common.geo.GeoPoint;
+import org.elasticsearch.common.unit.DistanceUnit;
+import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
+import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 酒店服务类
@@ -201,6 +169,9 @@ public class HotelService {
 
 	@Autowired
 	private RoomSaleService roomSaleService;
+
+	@Autowired
+	private ISearchService searchService;
 
 	/**
 	 * es filter builders
@@ -414,23 +385,21 @@ public class HotelService {
 					Date hotelRepairTime = bean.getRepairtime();
 
 					String repairInfo = getRepairInfo(hotelRepairTime);
-					if (StringUtils.isNotBlank(repairInfo)){
+					if (StringUtils.isNotBlank(repairInfo)) {
 						hotel.setRepairinfo(repairInfo);
 					}
-					if (StringUtils.isNotBlank(hotelid)){
+					if (StringUtils.isNotBlank(hotelid)) {
 
-						List<Map<String, Object>> highLighs =  getHighlights(Long.valueOf(hotelid));
+						List<Map<String, Object>> highLighs = getHighlights(Long.valueOf(hotelid));
 
-					/*
-						if (StringUtils.isNotBlank(repairInfo)){
-							Map<String, Object> repairTip = new HashMap<>();
-							repairTip.put("id",-1);
-							repairTip.put("name", repairInfo);
-							highLighs.add(0,repairTip);
-						}
-
-						*/
-						if (highLighs == null){
+						/*
+						 * if (StringUtils.isNotBlank(repairInfo)){ Map<String,
+						 * Object> repairTip = new HashMap<>();
+						 * repairTip.put("id",-1); repairTip.put("name",
+						 * repairInfo); highLighs.add(0,repairTip); }
+						 * 
+						 */
+						if (highLighs == null) {
 							highLighs = new ArrayList<Map<String, Object>>();
 						}
 						hotel.setHighlights(highLighs);
@@ -471,8 +440,7 @@ public class HotelService {
 					 */
 					List<Map<String, Object>> bedtypes = new ArrayList<Map<String, Object>>();
 					try {
-						List<Map<String, Object>> bedtypeList = readonlyRoomtypeList(
-								bean.getId().toString(), "");
+						List<Map<String, Object>> bedtypeList = readonlyRoomtypeList(bean.getId().toString(), "");
 						for (Map<String, Object> bedtype : bedtypeList) {
 							Map<String, Object> bed = new HashMap<String, Object>();
 							bed.put("bedtype", bedtype.get("bedtype"));
@@ -556,31 +524,31 @@ public class HotelService {
 		return output;
 	}
 
-	public static String getRepairInfo(Date hotelRepairTime ){
+	public static String getRepairInfo(Date hotelRepairTime) {
 		Date now = new Date();
-		int diffYears = DateUtils.diffYears(now, hotelRepairTime);
+		int diffYears = DateUtils.diffYears(hotelRepairTime,now);
 
-		if (diffYears <= Constant.SHOW_HOTEL_REPAIRINFO_YEARS_LIMIT){
+		if (diffYears <= Constant.SHOW_HOTEL_REPAIRINFO_YEARS_LIMIT) {
 			String repairInfo = DateUtils.getDateYear(hotelRepairTime) + "年装修";
-			return  repairInfo;
-		}else {
+			return repairInfo;
+		} else {
 			return null;
 		}
 	}
 
-	public  List<Map<String, Object>> getHighlights(Long hotelid){
+	public List<Map<String, Object>> getHighlights(Long hotelid) {
 		List<TFacilityModel> facilitys = tFacilityMapper.findByHotelid(hotelid);
 		String[] showIds = Constant.HOTEL_HIGHLIGHT_SHOWS_IDS.split(",");
 		List<Map<String, Object>> highLights = new ArrayList();
 
 		for (TFacilityModel fac : facilitys) {
 
-			for (String showId: showIds) {
-				if (fac.getId() == Long.valueOf(showId)){
+			for (String showId : showIds) {
+				if (fac.getId() == Long.valueOf(showId)) {
 					Map<String, Object> highLight = new HashMap<>();
-					highLight.put("name",fac.getFacname());
-					highLight.put("id",fac.getId());
-					if (StringUtils.isNotBlank(fac.getIconurl())){
+					highLight.put("name", fac.getFacname());
+					highLight.put("id", fac.getId());
+					if (StringUtils.isNotBlank(fac.getIconurl())) {
 						highLight.put("icon", fac.getIconurl());
 					}
 					highLights.add(highLight);
@@ -591,6 +559,7 @@ public class HotelService {
 
 		return highLights;
 	}
+
 	/**
 	 * query promo data
 	 * 
@@ -1573,10 +1542,10 @@ public class HotelService {
 	 * @return
 	 */
 	public Long getGreetScore(long hotelId) {
-		//最受欢迎指数  pms 月销* 1000 / hotelromnums”
+		// 最受欢迎指数 pms 月销* 1000 / hotelromnums”
 		Long pmsSales = orderService.findPMSMonthlySales(hotelId);
-		//Long otaSales = orderService.findMonthlySales(hotelId);
-		logger.info("getPMSOrderNumMon hotelId: {}, getPMS月销量：{}", hotelId,pmsSales);
+		// Long otaSales = orderService.findMonthlySales(hotelId);
+		logger.info("getPMSOrderNumMon hotelId: {}, getPMS月销量：{}", hotelId, pmsSales);
 		return pmsSales;
 	}
 
@@ -2681,6 +2650,7 @@ public class HotelService {
 	 * @param hotel
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")	
 	public Map<String, Object> readonlyHotelDetail(Long hotelId) {
 		THotelModel hotelModel = hotelMapper.findHotelInfoById(hotelId);
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -2815,6 +2785,27 @@ public class HotelService {
 			resultMap.put("ambituslifedec", "");
 		}
 
+		if (hotelId != null) {
+			try {
+				HotelQuerylistReqEntity reqEntity = new HotelQuerylistReqEntity();
+				reqEntity.setCallversion("3.3");
+				reqEntity.setCityid("0");
+				reqEntity.setPage(1);
+				reqEntity.setLimit(1);
+				reqEntity.setHotelid(String.valueOf(hotelId));
+
+				Map<String, Object> response = searchService.readonlySearchHotels(reqEntity);
+				List<Map<String, Object>> hotel = (List<Map<String, Object>>) response.get("hotel");
+				if (hotel != null && hotel.size() > 0) {
+					resultMap.put("repairinfo", hotel.get(0).get("repairinfo"));
+					resultMap.put("latitude", hotel.get(0).get("latitude"));
+					resultMap.put("longitude", hotel.get(0).get("longitude"));
+				}
+			} catch (Exception ex) {
+				logger.warn("repairinfo, latitude, longitude are failed to found...", ex);
+			}
+		}
+
 		return resultMap;
 	}
 
@@ -2904,8 +2895,6 @@ public class HotelService {
 			logger.error(e.getMessage(), e);
 		}
 	}
-
-
 
 	/**
 	 * 更新ES中酒店眯客价。

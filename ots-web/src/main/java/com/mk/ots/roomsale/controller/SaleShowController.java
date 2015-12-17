@@ -1,10 +1,10 @@
 package com.mk.ots.roomsale.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.Maps;
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
+import com.mk.ots.roomsale.model.TRoomSaleCity;
+import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import org.elasticsearch.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +17,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.google.common.collect.Maps;
-import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
-import com.mk.ots.roomsale.model.TRoomSaleCity;
-import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * RoomSaleMapper.
@@ -29,7 +28,7 @@ import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
  * @author kangxiaolong.
  */
 @Controller
-@RequestMapping(value = "/d", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/promo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 public class SaleShowController {
 	final Logger logger = LoggerFactory.getLogger(SaleShowController.class);
 

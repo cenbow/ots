@@ -19,7 +19,7 @@ public class HotelHomePageReqEntity extends ParamBaseBean implements Serializabl
 	private String cityid;
 
 	private Double userlatitude;
-
+	
 	private Double userlongitude;
 
 	private String callmethod;

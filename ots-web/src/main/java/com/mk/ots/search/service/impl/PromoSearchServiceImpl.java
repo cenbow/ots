@@ -1508,11 +1508,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 
 		List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-		if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
+		if (hotels != null && hotels.size() >= params.getLimit()) {
 			promoItem.put("hotel", hotels);
-		} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
+		} else if (hotels != null && hotels.size() < params.getLimit()) {
 			Map<String, Object> sups = new HashMap<String, Object>();
-			searchAround(sups, params, FrontPageEnum.limit.getId() - hotels.size());
+			searchAround(sups, params, params.getLimit() - hotels.size());
 			List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) sups.get("supplementhotel");
 			promoItem.put("hotel", new ArrayList<Map<String, Object>>());
 			((List<Map<String, Object>>) promoItem.get("hotel"))
@@ -1531,7 +1531,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Map<String, Object>> searchHomePromos(HotelQuerylistReqEntity params) throws Exception {
 
 		List<Map<String, Object>> promolist;
@@ -1582,7 +1581,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<String, Object> searchHomePromoRecommend(HotelQuerylistReqEntity params) throws Exception {
 		List<Map<String, Object>> promolist;
 		Map<String, Object> promoItem = null;
@@ -2105,16 +2103,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		boolean isBefore = LocalDateTime.now().isBefore(promoEndTime);
 
 		return isAfter && isBefore;
-	}
-
-	/**
-	 * 
-	 * @param searchBuilder
-	 */
-	private void sortByPromo(SearchRequestBuilder searchBuilder, String version) {
-		if (StringUtils.isNotEmpty(version) && ("3.1".compareTo(version) <= 0)) {
-			searchBuilder.addSort("isonpromo", SortOrder.DESC);
-		}
 	}
 
 	/**
@@ -2684,7 +2672,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				/**
 				 * added in mike3.1, lift up promo as the top search variable
 				 */
-				sortByPromo(searchBuilder, reqentity.getCallversion());
+				//sortByPromo(searchBuilder, reqentity.getCallversion());
 
 				if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
 					// 距离排序
