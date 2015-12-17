@@ -211,11 +211,17 @@ public class HotelPromoController {
 
 				if (HotelPromoEnum.Theme.getCode().toString().equals(promoId)) {
 					rtnMap = promoSearchService.searchThemes(reqentity);
+				} else if (HotelPromoEnum.OneDollar.getCode().toString().equals(promoId)) {
+					rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+					rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "onedollar is not allowed to search");
+
+					return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 				} else {
 					rtnMap = promoSearchService.readonlySearchHotels(reqentity);
 				}
 
 				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+				rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
 			}
 			/**
 			 * search with promotype
@@ -239,12 +245,15 @@ public class HotelPromoController {
 					rtnMap = promoSearchService.readonlySearchHotels(reqentity);
 				}
 
-				rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
 				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+				rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
 			} else {
 				logger.info("neither promoid nor promotype has been passed in, go with all search");
 
 				rtnMap = promoSearchService.readonlySearchHotels(reqentity);
+
+				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+				rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
 			}
 
 			ResponseEntity<Map<String, Object>> resultResponse = new ResponseEntity<Map<String, Object>>(rtnMap,
