@@ -3838,7 +3838,7 @@ statuscount:
 |4	|前台支付	|╳	|√	|√|
 
 **接口url：**
->http://ip:port/ots/order/
+>http://ip:port/ots/order/getOrderPromoPayRule
 
 
 
