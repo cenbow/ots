@@ -1,5 +1,6 @@
 package com.mk.ots.mapper;
 
+
 import com.mk.ots.roomsale.model.TPriceScopeDto;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
@@ -23,7 +24,8 @@ public interface RoomSaleConfigInfoMapper {
 
 	public TRoomSaleConfigInfo getRoomSaleConfigInfoByConfigId(TRoomSaleConfig tRoomSaleConfig);
 
-	public List<TPriceScopeDto> queryTPriceScopeDtoByPromoId(Map<String, Object> parameters);
-
 	public List<Map<String, Object>> queryAllPromoIds(Map<String, Object> parameters);
+
+    public  List<TPriceScopeDto>  queryTPriceScopeDtoByPromoId(Map<String, Object> parameters);
+
 }
