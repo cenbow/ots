@@ -114,11 +114,12 @@ public class HomePageController {
 		HotelQuerylistReqEntity reqEntity = buildPopularQueryEntity(homepageReqEntity);
 		try {
 			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
+			showConfig.setPromoid(-1);
 			showConfig.setNormalId(5);
 			showConfig.setIsSpecial(Constant.STR_FALSE);
 			showConfig.setShowArea(ShowAreaEnum.FrontPageBottom.getCode());
 
-			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(showConfig);
 			if (showConfigs != null && showConfigs.size() > 0) {
 				rtnMap.put("promoicon", showConfigs.get(0).getPromoicon());
 				rtnMap.put("promotext", showConfigs.get(0).getPromotext());
