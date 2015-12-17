@@ -439,7 +439,7 @@ public class HotelPromoController {
 				rtnMap.put("promosec", promosec / 1000);
 				rtnMap.put("promosecend", promosecond / 1000);
 				rtnMap.put("nextpromosec", nextpromosec / 1000);
-				rtnMap.put("promonote", visitSimService.sim());
+				rtnMap.put("promonote", String.valueOf(visitSimService.sim()));
 
 				Map<String, Object> hotels = promoSearchService.readonlySearchHotels(queryReq);
 				if (hotels != null) {
