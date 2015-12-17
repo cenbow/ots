@@ -2,13 +2,15 @@ package com.mk.ots.roomsale.service.impl;
 
 import com.mk.ots.mapper.RoomSaleConfigInfoMapper;
 import com.mk.ots.roomsale.model.TPriceScopeDto;
-import com.mk.ots.roomsale.model.TRoomSale;
+
 import com.mk.ots.roomsale.service.TPriceScopeService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import reactor.core.support.Exceptions;
+
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +19,7 @@ import java.util.List;
  * Created by jeashi on 2015/12/11.
  */
 @Service
-public class TPriceScoreSerivceImpl  implements TPriceScopeService {
+public class TPriceScoreSerivceImpl implements TPriceScopeService {
     private Logger logger = org.slf4j.LoggerFactory.getLogger(TPriceScoreSerivceImpl.class);
 
     @Autowired
