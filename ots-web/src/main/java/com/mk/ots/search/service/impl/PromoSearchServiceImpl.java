@@ -4587,12 +4587,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				return 1;
 			}
 
-			Integer greetscore1 = 0;
-			Integer greetscore2 = 0;
+			Long greetscore1 = 0L;
+			Long greetscore2 = 0L;
 
 			try {
-				greetscore1 = (Integer) o1.get("greetscore");
-				greetscore2 = (Integer) o2.get("greetscore");
+				greetscore1 = (Long) o1.get("greetscore");
+				greetscore2 = (Long) o2.get("greetscore");
 			} catch (Exception ex) {
 				logger.warn("invalid greetcore type...", ex);
 				return -1;
