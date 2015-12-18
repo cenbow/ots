@@ -8,6 +8,7 @@ import com.mk.framework.util.Config;
 import com.mk.kafka.client.stereotype.MkTopicProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -19,32 +20,8 @@ public class MessageProducer {
 
 	private static final Logger logger = LoggerFactory.getLogger(MessageProducer.class);
 
-	/**
-	 * 发送微信消息
-	 * @param message
-	 */
-	@MkTopicProducer(topic = "RemindWeixinMsg", serializerClass = "com.mk.kafka.client.serializer.SerializerEncoder",replicationFactor = 1)
-	public void pushWeixinMsg(WeixinMessage message) {
-		logger.info("发送微信消息成功，"+message.toString());
-	}
-
-	/**
-	 * 发送APP消息
-	 * @param appMessage
-	 */
-	@MkTopicProducer(topic = "RemindAppMsg", serializerClass = "com.mk.kafka.client.serializer.SerializerEncoder",replicationFactor = 1)
-	public void pushAppMsg(AppMessage appMessage){
-		logger.info("发送App消息成功，"+appMessage.toString());
-	}
-
-	/**
-	 * 发送短信消息
-	 * @param smsMessage
-	 */
-	@MkTopicProducer(topic = "RemindSmsMsg", serializerClass = "com.mk.kafka.client.serializer.SerializerEncoder",replicationFactor = 1)
-	public void pushSmsMsg(SmsMessage smsMessage) {
-		logger.info("发送sms消息：" + smsMessage.getMessage());
-	}
+	@Autowired
+	private CareProducer careProducer;
 
 	/**
 	 * 发送短信的topic
@@ -53,7 +30,7 @@ public class MessageProducer {
 	public void sendSmsMsg(SmsMessage message) {
 		try {
 			if(isOpen()){
-				this.pushSmsMsg(message);
+				this.careProducer.pushSmsMsg(message);
 			}else{
 				logger.info("kafka消息关闭");
 			}
@@ -68,7 +45,7 @@ public class MessageProducer {
 	public void sendAppMsg(AppMessage message) {
 		try {
 			if(isOpen()){
-				this.pushAppMsg(message);
+				this.careProducer.pushAppMsg(message);
 
 			}else{
 				logger.info("kafka消息关闭");
@@ -86,7 +63,7 @@ public class MessageProducer {
 	public void sendWeixinMsg(WeixinMessage message) {
 		try {
 			if(isOpen()){
-				this.pushWeixinMsg(message);
+				this.careProducer.pushWeixinMsg(message);
 			}else{
 				logger.info("kafka消息关闭");
 			}

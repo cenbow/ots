@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class RemindService {
@@ -174,6 +175,18 @@ public class RemindService {
                 PushMessageRunnable pushMessageRunnable = new PushMessageRunnable(type,remind,this);
                 pool.execute(pushMessageRunnable);
             }
+        }
+
+        final long awaitTime = 5 * 1000;
+        try {
+            pool.shutdown();
+
+            if(!pool.awaitTermination(awaitTime, TimeUnit.MILLISECONDS)){
+                pool.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            System.out.println("awaitTermination interrupted: " + e);
+            pool.shutdownNow();
         }
 
     }
