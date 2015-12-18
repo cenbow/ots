@@ -361,7 +361,7 @@ public class HotelPromoController {
 		HotelQuerylistReqEntity queryReq = buildThemeQueryEntity(homepageReqEntity);
 
 		try {
-			Map<String, Object> response = promoSearchService.readonlySearchHotels(queryReq);
+			Map<String, Object> response = promoSearchService.searchThemes(queryReq);
 			if (response != null) {
 				rtnMap.putAll(response);
 			}
@@ -521,6 +521,7 @@ public class HotelPromoController {
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
+		reqEntity.setIspromoonly(Boolean.TRUE);
 
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
