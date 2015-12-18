@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mk.framework.AppUtils;
 import com.mk.framework.es.ElasticsearchProxy;
+import com.mk.framework.es.EsSearchOption;
 import com.mk.framework.util.CommonUtils;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
@@ -604,6 +605,8 @@ public class SearchService implements ISearchService {
 				// 眯客2.2.1, 根据屏幕坐标计算距离.
 				double hotelDistance = DistanceUtil.distance(lon, lat, hotelLongitude, hotelLatitude);
 				result.put("distance", hotelDistance);
+				System.out.println("distance: "+ hotelDistance);
+
 				Long sales = Long
 						.valueOf(String.valueOf(result.get("ordernummon") == null ? "0" : result.get("ordernummon")));
 				result.put("ordernummon", (sales >= 10 ? "月销" + sales + "单" : ""));
@@ -1077,8 +1080,13 @@ public class SearchService implements ISearchService {
 				/**
 				 * added in mike3.1, lift up promo as the top search variable
 				 */
+				if (reqentity.getOrderby() == null ||
+						reqentity.getOrderby() == 0 ||
+						HotelSortEnum.SCORE.getId() == reqentity.getOrderby() ) {
+					sortByPromo(searchBuilder, reqentity.getCallversion(), reqentity.getIspromoonly(), paramOrderby);
 
-				sortByPromo(searchBuilder, reqentity.getCallversion(), reqentity.getIspromoonly(), paramOrderby);
+				}
+
 
 				if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
 					// 距离排序
@@ -1198,7 +1206,7 @@ public class SearchService implements ISearchService {
 					}
 				}
 				result.put("userdistance", userDistance);
-
+				System.out.println(userDistance);
 				// 眯客3.0: 产品中去掉酒店列表显示最近酒店特性.
 				// 接口新增属性isnear: 是否最近酒店, distance值最小的酒店为T,其他为F.
 				if (page <= 1 && i == 0) {
@@ -1459,7 +1467,13 @@ public class SearchService implements ISearchService {
 			}
 
 			// 重新按照是否可售分组排序
-			this.sortByVcState(hotels);
+
+ 			if (reqentity.getOrderby() == null ||
+					reqentity.getOrderby() == 0 ||
+					HotelSortEnum.SCORE.getId() == reqentity.getOrderby() ) {
+				this.sortByVcState(hotels);
+			}
+
 			//
 			// if (HotelSortEnum.PRICE.getId() == paramOrderby) {
 			// this.sortByPrice(hotels);
@@ -2642,6 +2656,8 @@ public class SearchService implements ISearchService {
 				esdatas.add(data);
 			}
 			if (esdatas.size() > 0) {
+				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
+						esdatas);
 				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
 						esdatas);
 				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
@@ -2670,7 +2686,8 @@ public class SearchService implements ISearchService {
 		try {
 			// 先删除行政区数据，然后再添加
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AREA.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AREA.getId(), ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AREA.getId(), ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				// 删除成功后添加行政区数据
 				result.clear();
@@ -2725,6 +2742,8 @@ public class SearchService implements ISearchService {
 				esdatas.add(data);
 			}
 			if (esdatas.size() > 0) {
+				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
+						esdatas);
 				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
 						esdatas);
 				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
@@ -2753,35 +2772,40 @@ public class SearchService implements ISearchService {
 			// 先删除landmark数据，然后再添加
 			// 删除1商圈
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.BZONE.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.BZONE.getId(), ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.BZONE.getId(), ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
 			}
 
 			// 删除2机场车站
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AIRPORT.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AIRPORT.getId(), ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AIRPORT.getId(), ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
 			}
 
 			// 删除5景点
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SAREA.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SAREA.getId(), ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SAREA.getId(), ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
 			}
 
 			// 删除6医院
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.HOSPITAL.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.HOSPITAL.getId(), ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.HOSPITAL.getId(), ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
 			}
 
 			// 删除7高校
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.COLLEGE.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.COLLEGE.getId() , ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.COLLEGE.getId() , ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
 			}
@@ -2847,6 +2871,8 @@ public class SearchService implements ISearchService {
 				esdatas.add(data);
 			}
 			if (esdatas.size() > 0) {
+				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
+						esdatas);
 				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
 						esdatas);
 				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
@@ -2875,7 +2901,8 @@ public class SearchService implements ISearchService {
 		try {
 			// 先删除地铁线路数据，然后再添加
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SUBWAY.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SUBWAY.getId(), ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SUBWAY.getId(), ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				// 删除成功后添加地铁线路数据
 				result.clear();

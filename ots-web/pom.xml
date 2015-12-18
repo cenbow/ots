@@ -28,7 +28,7 @@
         <commons-configuration.version>1.6</commons-configuration.version>
 
         <kafka.version>1.0.2</kafka.version>
-        <care-kafka.version>1.0.3</care-kafka.version>
+        <care-kafka.version>1.0.4</care-kafka.version>
     </properties>
 
     <repositories>
@@ -1480,6 +1480,7 @@
 
         <profile>
             <id>bgp-simulation</id>
+
             <properties>
                 <label>product</label>
                 <jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>

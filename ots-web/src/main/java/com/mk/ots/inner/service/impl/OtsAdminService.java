@@ -334,11 +334,11 @@ public class OtsAdminService implements IOtsAdminService {
      * @throws Exception
      */
     @Override
-    public Map<String, Object> readonlyDeletePoiDatas(String citycode, Integer typeid) throws Exception {
+    public Map<String, Object> readonlyDeletePoiDatas(String citycode, Integer typeid, String indexName, String indexType) throws Exception {
         Map<String, Object> result = Maps.newHashMap();
         try {
             int limit = 10000;
-            SearchRequestBuilder searchBuilder = esProxy.prepareSearch(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT);
+            SearchRequestBuilder searchBuilder = esProxy.prepareSearch(indexName, indexType);
 
             List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
             QueryFilterBuilder citycodeFilter = FilterBuilders.queryFilter(QueryBuilders.termQuery("citycode",citycode));
@@ -361,7 +361,7 @@ public class OtsAdminService implements IOtsAdminService {
             SearchHit[] hits = searchHits.getHits();
             for (int i = 0; i < hits.length; i++) {
                 SearchHit hit = hits[i];
-                esProxy.deleteDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT, hit.getId());
+                esProxy.deleteDocument(indexName, indexType, hit.getId());
             }
             result.put(ServiceOutput.STR_MSG_SUCCESS, true);
             result.put("citycode:{}, typeid:{}, total delete poidatas count: ", hits.length);
