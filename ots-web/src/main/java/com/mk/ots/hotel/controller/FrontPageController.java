@@ -171,6 +171,9 @@ public class FrontPageController {
 				promoItem.put("promosec", sec / 1000); // 秒
 				promoItem.put("promosecend", endSec / 1000); // 距离结束时间（s）
 				promoItem.put("nextpromosec", nextsec / 1000); // 距离下一段结束时间（s）
+				rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
+				rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+				rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
 				rtnMap.putAll(promoItem);
 			}else {
 				rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
