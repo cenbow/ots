@@ -177,7 +177,7 @@ public class RemindService {
             }
         }
 
-        final long awaitTime = 5 * 1000;
+        final long awaitTime = 30 * 1000;
         try {
             pool.shutdown();
 
