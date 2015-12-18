@@ -1,15 +1,13 @@
 package com.mk.ots.roomsale.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.roomsale.model.TPriceScopeDto;
-import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
-import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
-import com.mk.ots.roomsale.service.RoomSaleService;
-import com.mk.ots.roomsale.service.TPriceScopeService;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.mk.ots.web.ServiceOutput;
+import javax.validation.Valid;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -19,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -32,14 +32,13 @@ import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.promoteconfig.service.VisitSimService;
 import com.mk.ots.restful.input.HotelHomePageReqEntity;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
+import com.mk.ots.roomsale.model.TPriceScopeDto;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
+import com.mk.ots.roomsale.service.TPriceScopeService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.web.ServiceOutput;
-
-import javax.validation.Valid;
-import java.util.*;
 
 /**
  *
@@ -149,9 +148,18 @@ public class HotelPromoController {
 		return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
 	}
 
+	private String countErrors(Errors errors) {
+		StringBuffer bfErrors = new StringBuffer();
+		for (ObjectError error : errors.getAllErrors()) {
+			bfErrors.append(error.getDefaultMessage()).append("; ");
+		}
+
+		return bfErrors.toString();
+	}
+	
 	@RequestMapping(value = "/search/querypromo", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> queryPromo(@Valid HotelQuerylistReqEntity reqentity) throws Exception {
+	public ResponseEntity<Map<String, Object>> queryPromo(@Valid HotelQuerylistReqEntity reqentity, Errors errors) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String params = objectMapper.writeValueAsString(reqentity);
 		String errorMessage = "";
@@ -159,6 +167,15 @@ public class HotelPromoController {
 
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format("search/querypromo begins with parameters:%s...", params));
+		}
+
+		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(String.format("parameters validation failed with error %s", errorMessage));
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
 
 		String callVersion = (String) reqentity.getCallversion();
