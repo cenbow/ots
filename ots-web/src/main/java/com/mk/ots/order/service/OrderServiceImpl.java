@@ -3326,9 +3326,6 @@ public class OrderServiceImpl implements OrderService {
             if("T".equals(order.getCoupon())){
                 throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能使用优惠券");
             }
-            if(OrderTypeEnum.YF.getId() != order.getOrderType()){
-                throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房只能使用在线支付");
-            }
             try {
                 Date begin = DateUtils.parseDate(DateUtils.formatDateTime(order.getBeginTime()), DateUtils.FORMATDATETIME);
                 Date end = DateUtils.parseDate(DateUtils.formatDateTime(order.getEndTime()), DateUtils.FORMATDATETIME);
