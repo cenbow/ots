@@ -42,6 +42,8 @@ public class OtaOrder extends BizModel<OtaOrder> {
 
 	private String token;
 
+	private   String   showBlackType ;
+
 	public OtaOrder() {
 		super();
 		try {
@@ -545,5 +547,13 @@ public class OtaOrder extends BizModel<OtaOrder> {
 
 	public void setToken(String token) {
 		this.token = token;
+	}
+
+	public String getShowBlackType() {
+		return showBlackType;
+	}
+
+	public void setShowBlackType(String showBlackType) {
+		this.showBlackType = showBlackType;
 	}
 }

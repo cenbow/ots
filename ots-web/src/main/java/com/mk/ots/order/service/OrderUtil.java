@@ -172,6 +172,11 @@ public class OrderUtil {
 		if(PromoTypeEnum.TJ.getCode().equals(returnOrder.getPromoType())){
 			BigDecimal returnWalletCashBigDecimal = tBackMoneyRuleService.getBackMoneyByOrder(returnOrder);
 			jsonObj.put("paytip", String.format("预付入住享%s元红包", returnWalletCashBigDecimal));
+			if(!StringUtils.isEmpty(returnOrder.getShowBlackType())){
+				if(PromoIdTypeEnum.YYF.getCode().equals(returnOrder.getShowBlackType())){
+					jsonObj.put("paytip","");
+				}
+			}
 		}
 		jsonObj.put("roomticket", StringUtils.defaultIfEmpty(returnOrder.getRoomTicket(),""));
 		jsonObj.put("orderid", returnOrder.getId());
@@ -198,6 +203,8 @@ public class OrderUtil {
 		jsonObj.put("promotion", returnOrder.getPromotion());
 		jsonObj.put("coupon", returnOrder.getCoupon());
 		jsonObj.put("receivecashback",returnOrder.getReceiveCashBack());
+		jsonObj.put("showblacktype",returnOrder.getShowBlackType());
+
 		jsonObj.put("isscore", returnOrder.get("isscore") == null ? "F" : returnOrder.get("isscore"));// 是否已评价(T/F)
 		ITicketService ticketService = AppUtils.getBean(TicketService.class);
 
