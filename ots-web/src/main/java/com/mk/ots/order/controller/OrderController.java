@@ -498,6 +498,9 @@ public class OrderController {
 		String userLongitude = request.getParameter("userlongitude");
 		String userLatitude = request.getParameter("userlatitude");
 
+		String  showBlackType =  request.getParameter("showblacktype");// 非必填，是否是一元房
+
+
 		/*************** 移动设备信息 ************/
 		// 系统号
 		String sysno = request.getParameter("sysno");
@@ -614,6 +617,7 @@ public class OrderController {
 			if (StringUtils.isNotBlank(blmacaddr)) {
 				otaOrderMac.setBlmacaddr(DESUtils.decryptDES(blmacaddr));
 			}
+
 			order.setOtaOrderMac(otaOrderMac);
 			/*************** 移动设备信息 ************/
 		} catch (NumberFormatException e1) {
@@ -632,6 +636,10 @@ public class OrderController {
 		if (StringUtils.isNotBlank(couponNo)) {
 			order.put("couponno", couponNo);
 			order.set("coupon", "T");
+		}
+
+		if (StringUtils.isNotBlank(showBlackType)) {
+			order.setShowBlackType(showBlackType);
 		}
 		String token = request.getParameter("token");
 		order.setToken(token);
@@ -912,6 +920,12 @@ public class OrderController {
 	public ResponseEntity<OrderPromoPayRuleJson> getOrderPromoPayRule(Integer promoType) {
 		OrderController.logger.info("OrderController::getOrderPromoPayRule params promoType[%s]::begin", promoType);
 		OrderPromoPayRuleJson orderPromoPayRuleJson  = null;
+		if(promoType == null){
+			orderPromoPayRuleJson = new OrderPromoPayRuleJson();
+			orderPromoPayRuleJson.setErrorCode(-1);
+			orderPromoPayRuleJson.setErrorMsg("查询失败，promoType参数必填！");
+			orderPromoPayRuleJson.setSuccess(false);
+		}
 		try {
 			orderPromoPayRuleJson = this.orderService.getOrderPromoPayRule(promoType);
 			if(orderPromoPayRuleJson == null){
