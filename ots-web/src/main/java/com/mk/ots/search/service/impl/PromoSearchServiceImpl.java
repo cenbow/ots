@@ -219,6 +219,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private RoomSaleConfigMapper roomsaleConfigMapper;
 
 
+
 	/**
 	 *
 	 * @param cityId
