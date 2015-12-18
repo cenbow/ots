@@ -19,6 +19,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 import com.mk.ots.common.enums.*;
+import com.mk.ots.order.bean.*;
 import com.mk.ots.wallet.service.impl.TBackMoneyRuleServiceImpl;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
@@ -49,10 +50,6 @@ import com.mk.ots.common.utils.SysConfig;
 import com.mk.ots.hotel.model.THotel;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.manager.SysConfigManager;
-import com.mk.ots.order.bean.OtaCheckInUser;
-import com.mk.ots.order.bean.OtaOrder;
-import com.mk.ots.order.bean.OtaRoomOrder;
-import com.mk.ots.order.bean.OtaRoomPrice;
 import com.mk.ots.order.dao.CheckInUserDAO;
 import com.mk.ots.pay.model.PPay;
 import com.mk.ots.pay.model.PPayInfo;
@@ -178,7 +175,7 @@ public class OrderUtil {
 				}
 			}
 		}
-		jsonObj.put("roomticket", StringUtils.defaultIfEmpty(returnOrder.getRoomTicket(),""));
+		jsonObj.put("roomticket", StringUtils.defaultIfEmpty(returnOrder.getRoomTicket(), ""));
 		jsonObj.put("orderid", returnOrder.getId());
 		jsonObj.put("hotelid", returnOrder.getHotelId());
 		jsonObj.put("hotelname", returnOrder.getHotelName());
@@ -462,8 +459,13 @@ public class OrderUtil {
 		}// end of loop otaroomorders
 		if(roomTypeId == null){
 			jsonObj.put("promoid","0");
+			JSONObject orderPromoPayRuleJson = getOrderPromoPayRuleJson(0);
+			jsonObj.put("orderPromoPayRule", orderPromoPayRuleJson);
 		}else{
-			jsonObj.put("promoid",orderService.getPromoId(roomTypeId));
+			Integer promoId = orderService.getPromoId(roomTypeId);
+			jsonObj.put("promoid", promoId);
+			JSONObject orderPromoPayRuleJson = getOrderPromoPayRuleJson(promoId);
+			jsonObj.put("orderPromoPayRule", orderPromoPayRuleJson);
 		}
 		/*********************钱包业务*****************/
 		if ("modify".equals(returnOrder.getStr("act"))) {
@@ -498,6 +500,22 @@ public class OrderUtil {
 		setOrderPayDetail(jsonObj, returnOrder, tickes);
 //		if (returnOrder.getOrderStatus() >= OtaOrderStatusEnum.Confirm.getId()) {
 //		}
+	}
+
+
+	/**
+	 * 转换订单支付规则成JSONObject
+	 * @param promoId
+	 * @return
+	 */
+	private JSONObject getOrderPromoPayRuleJson(Integer promoId){
+		JSONObject jsonObj = new JSONObject();
+		OrderPromoPayRuleJson orderPromoPayRuleJson = orderService.getOrderPromoPayRule(promoId);
+		jsonObj.put("isOnlinePay", orderPromoPayRuleJson.getIsOnlinePay());
+		jsonObj.put("isRealPay", orderPromoPayRuleJson.getIsRealPay());
+		jsonObj.put("isTicketPay", orderPromoPayRuleJson.getIsTicketPay());
+		jsonObj.put("isWalletPay", orderPromoPayRuleJson.getIsWalletPay());
+		return jsonObj;
 	}
 
 	/**
