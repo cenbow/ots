@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -91,9 +90,6 @@ import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
-import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
-import com.mk.ots.restful.output.SearchPositionsDistanceRespEntity;
-import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
 import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
@@ -101,11 +97,7 @@ import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import com.mk.ots.search.enums.PositionTypeEnum;
-import com.mk.ots.search.model.PositionTypeModel;
 import com.mk.ots.search.model.SAreaInfo;
-import com.mk.ots.search.model.SLandMark;
-import com.mk.ots.search.model.SSubway;
-import com.mk.ots.search.model.SSubwayStation;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.ots.web.ServiceOutput;
@@ -3986,7 +3978,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 
-	private Integer findRoomtypeMonthlySale(Map<String, Object> roomtype) {
+	private Long findRoomtypeMonthlySale(Map<String, Object> roomtype) {
 		Long roomtypeid = (Long) roomtype.get("roomtypeid");
 		Map<String, Object> greetParameter = new HashMap<String, Object>();
 		greetParameter.put("roomtypeid", roomtypeid);
@@ -4002,12 +3994,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		greetParameter.put("beforetime", beforetime);
 		greetParameter.put("yestertime", yestertime);
 
-		Integer greetscore = 0;
+		Long greetscore = 0L;
 
 		try {
 			List<Map<String, Object>> greetScores = roomsaleShowMapper.queryRoomtypeGreetScore(greetParameter);
 			if (greetScores != null && greetScores.size() > 0) {
-				greetscore = (Integer) greetScores.get(0).get("greetscore");
+				greetscore = (Long) greetScores.get(0).get("greetscore");
 			}
 		} catch (Exception ex) {
 			logger.warn(String.format("failed to queryRoomtypeGreetScore with roomtypeid:%s", roomtypeid), ex);
@@ -4027,7 +4019,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		List<Map<String, Object>> themeRoomtypes = new ArrayList<Map<String, Object>>();
 		for (Map<String, Object> roomtype : roomtypes) {
 			if (isThemed(Integer.parseInt(hotelid), roomtype)) {
-				Integer greetScore = findRoomtypeMonthlySale(roomtype);
+				Long greetScore = findRoomtypeMonthlySale(roomtype);
 				roomtype.put("greetscore", greetScore);
 				themeRoomtypes.add(roomtype);
 			}
@@ -4047,12 +4039,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				return 1;
 			}
 
-			Integer greetscore1 = 0;
-			Integer greetscore2 = 0;
+			Long greetscore1 = 0L;
+			Long greetscore2 = 0L;
 
 			try {
-				greetscore1 = (Integer) o1.get("greetscore");
-				greetscore2 = (Integer) o2.get("greetscore");
+				greetscore1 = (Long) o1.get("greetscore");
+				greetscore2 = (Long) o2.get("greetscore");
 			} catch (Exception ex) {
 				logger.warn("invalid greetcore type...", ex);
 				return -1;

@@ -402,7 +402,7 @@ public class HotelPromoController {
 
 	@RequestMapping(value = "/promo/onedollarlist", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> onedollarlist(@Valid HotelHomePageReqEntity homepageReqEntity)
+	public ResponseEntity<Map<String, Object>> onedollarlist(@Valid HotelHomePageReqEntity homepageReqEntity, Errors errors)
 			throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String params = objectMapper.writeValueAsString(homepageReqEntity);
@@ -413,6 +413,15 @@ public class HotelPromoController {
 		}
 
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
+
+		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(String.format("parameters validation failed with error %s", errorMessage));
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
 
 		String callVersion = (String) homepageReqEntity.getCallversion();
 		Double latitude = (Double) homepageReqEntity.getUserlatitude();
@@ -586,14 +595,14 @@ public class HotelPromoController {
 								saleConfigInfo.getId(), saleConfigInfo.getSaleLabel(), saleConfigInfo.getSaleValue()));
 					}
 
-					result.put("promoid", saleConfigInfo.getId());
+					result.put("promoid", saleConfigInfo.getSaleTypeId());
 					result.put("promotypetext", saleConfigInfo.getSaleLabel());
 					result.put("promotypeprice", saleConfigInfo.getSaleValue());
 					result.put("promosec", sec / 1000); // 秒
 					result.put("promosecend", endSec / 1000); // 距离结束时间（s）
 					result.put("nextpromosec", nextsec / 1000); // 距离下一段结束时间（s）
 					List<TPriceScopeDto> tpriceScopeDtoList = tpriceScopeService
-							.queryTPriceScopeDto(saleConfigInfo.getId() + "", cityid);
+							.queryTPriceScopeDto(saleConfigInfo.getSaleTypeId() + "", cityid);
 					if (!CollectionUtils.isEmpty(tpriceScopeDtoList)) {
 						result.put("minprice", tpriceScopeDtoList.get(0).getMinprice());
 						result.put("maxprice", tpriceScopeDtoList.get(0).getMaxprice());
