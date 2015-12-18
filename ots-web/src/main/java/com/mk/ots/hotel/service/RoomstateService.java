@@ -1422,6 +1422,8 @@ public class RoomstateService {
 
 			// 特价房型
 			List<RoomstateQuerylistRespEntity.Roomtype> promoRoomTypes = Lists.newArrayList();
+			// 特价房型
+			List<RoomstateQuerylistRespEntity.Roomtype> promoFullRoomTypes = Lists.newArrayList();
 			// 普通房型
 			List<RoomstateQuerylistRespEntity.Roomtype> normalRoomTypes = Lists.newArrayList();
 
@@ -1429,7 +1431,12 @@ public class RoomstateService {
 				if (roomtypesArr[i] instanceof RoomstateQuerylistRespEntity.Roomtype) {
 					RoomstateQuerylistRespEntity.Roomtype rt = (RoomstateQuerylistRespEntity.Roomtype) roomtypesArr[i];
 					if ("1".equals(rt.getIsonpromo())) {
-						promoRoomTypes.add(rt);
+						if (rt.getVcroomnum() <= 0){
+							promoFullRoomTypes.add(rt);
+						}else {
+							promoRoomTypes.add(rt);
+						}
+
 					} else if (rt.getVcroomnum() <= 0)
 						tempRoomTypes.add(rt);
 					else {
@@ -1442,6 +1449,9 @@ public class RoomstateService {
 			Object[] promoRoomtypesArr = promoRoomTypes.toArray();
 			Arrays.sort(promoRoomtypesArr, this.new RoomTypesComparator());
 
+			Object[] promoFullRoomtypesArr = promoFullRoomTypes.toArray();
+			Arrays.sort(promoFullRoomtypesArr, this.new RoomTypesComparator());
+
 			Object[] normalRoomtypesArr = normalRoomTypes.toArray();
 			Arrays.sort(normalRoomtypesArr, this.new RoomTypesComparator());
 
@@ -1450,6 +1460,14 @@ public class RoomstateService {
 			for (int i = 0; i < promoRoomtypesArr.length; i++) {
 				if (promoRoomtypesArr[i] instanceof RoomstateQuerylistRespEntity.Roomtype) {
 					RoomstateQuerylistRespEntity.Roomtype rt = (RoomstateQuerylistRespEntity.Roomtype) promoRoomtypesArr[i];
+					roomtypes.add(rt);
+
+				}
+			}
+
+			for (int i = 0; i < promoFullRoomtypesArr.length; i++) {
+				if (promoFullRoomtypesArr[i] instanceof RoomstateQuerylistRespEntity.Roomtype) {
+					RoomstateQuerylistRespEntity.Roomtype rt = (RoomstateQuerylistRespEntity.Roomtype) promoFullRoomtypesArr[i];
 					roomtypes.add(rt);
 
 				}
