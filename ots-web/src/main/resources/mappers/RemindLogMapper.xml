@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mk.ots.mapper.RemindLogMapper" >
+    <resultMap id="BaseResultMap" type="com.mk.ots.remind.model.RemindLog" >
+        <result column="id" property="id" jdbcType="BIGINT" />
+        <result column="remind_id" property="remindId" jdbcType="BIGINT" />
+        <result column="content" property="content" jdbcType="VARCHAR" />
+        <result column="status_code" property="statusCode" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="descr" property="descr" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        id,remind_id,content,status_code,create_time,descr
+    </sql>
+
+    <insert id="save"  parameterType="com.mk.ots.remind.model.RemindLog"  useGeneratedKeys="true" keyProperty="id" >
+        INSERT INTO T_REMIND_LOG
+        (<include refid="Base_Column_List"/>)
+        VALUE
+        (
+        #{id}, #{remindId},#{content},#{statusCode},#{createTime},#{descr}
+        )
+    </insert>
+</mapper>
