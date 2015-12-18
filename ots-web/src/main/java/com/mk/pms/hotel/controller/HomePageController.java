@@ -50,11 +50,11 @@ public class HomePageController {
 	@Autowired
 	private TRoomSaleShowConfigService roomSaleShowConfigService;
 
-	private final Integer maxAllowedThemes = 6;
+	private final Integer maxAllowedThemes = 10;
 
 	private final Integer maxAllowedRoomtypes = 3;
 
-	private final Integer maxAllowedPopular = 6;
+	private final Integer maxAllowedPopular = 10;
 
 	@RequestMapping("/popular")
 	@SuppressWarnings("unchecked")
