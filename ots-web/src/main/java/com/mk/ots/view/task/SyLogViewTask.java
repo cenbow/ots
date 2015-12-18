@@ -12,7 +12,7 @@ public class SyLogViewTask implements InitializingBean {
     {
         System.out.println("开始执行|||||||||||||||||||");
         try{
-            SyViewLogThread  slt  = new SyViewLogThread();
+           SyViewLogThread  slt  = new SyViewLogThread();
             slt.start();
 
         }catch(Exception e1){

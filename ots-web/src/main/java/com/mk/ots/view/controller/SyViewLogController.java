@@ -19,6 +19,9 @@ import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.service.OrderService;
 import com.mk.ots.score.model.THotelScore;
 import com.mk.ots.score.service.ScoreService;
+import com.mk.ots.utils.SpringContextUtil;
+import com.mk.ots.view.dao.ISyViewLogDao;
+import com.mk.ots.view.dao.impl.SyViewLogDaoImpl;
 import com.mk.ots.view.service.ISyViewLogService;
 import com.mk.ots.wallet.model.CashflowTypeEnum;
 import com.mk.ots.wallet.model.UWalletCashFlow;
@@ -62,7 +65,6 @@ public class SyViewLogController {
 
     @RequestMapping("/viewevent")
     public ResponseEntity<Map<String, Object>> addviewevent(HttpServletRequest request,String tourl, String actiontype) {
-
         logger.info("【sys/addviewevent】 params is : {tourl,actiontype}", tourl + " , " + actiontype);
 
         Map<String, Object> resultrtnMap = Maps.newHashMap();
