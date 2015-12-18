@@ -282,7 +282,4 @@ public class Constant {
 	public static final Double NANJI_POINT_LAT = -140.976563;
 	public static final Double NANJI_POINT_LON = -88.075329;
 
-	/**特价订单返红现金金额**/
-	public static final BigDecimal TJ_ORDER_RETURN_CASH = new BigDecimal("5");
-
 }
