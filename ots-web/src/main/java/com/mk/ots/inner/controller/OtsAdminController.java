@@ -6,6 +6,7 @@ import java.util.*;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.mk.framework.AppUtils;
+import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.ots.bill.dao.BillOrderDAO;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.order.service.QiekeRuleService;
@@ -173,7 +174,8 @@ public class OtsAdminController {
 			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 		}
 		try {
-			datas = otsAdminService.readonlyDeletePoiDatas(citycode, typeid);
+			datas = otsAdminService.readonlyDeletePoiDatas(citycode, typeid, ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT);
+			otsAdminService.readonlyDeletePoiDatas(citycode, typeid, ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT);
 		} catch (Exception e) {
 			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			datas.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
