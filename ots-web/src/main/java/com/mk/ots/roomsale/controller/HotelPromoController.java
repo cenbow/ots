@@ -156,10 +156,11 @@ public class HotelPromoController {
 
 		return bfErrors.toString();
 	}
-	
+
 	@RequestMapping(value = "/search/querypromo", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> queryPromo(@Valid HotelQuerylistReqEntity reqentity, Errors errors) throws Exception {
+	public ResponseEntity<Map<String, Object>> queryPromo(@Valid HotelQuerylistReqEntity reqentity, Errors errors)
+			throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String params = objectMapper.writeValueAsString(reqentity);
 		String errorMessage = "";
@@ -305,8 +306,8 @@ public class HotelPromoController {
 
 	@RequestMapping(value = "/search/querythemes", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> queryThemes(@Valid HotelHomePageReqEntity homepageReqEntity)
-			throws Exception {
+	public ResponseEntity<Map<String, Object>> queryThemes(@Valid HotelHomePageReqEntity homepageReqEntity,
+			Errors errors) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String params = objectMapper.writeValueAsString(homepageReqEntity);
 		String errorMessage = "";
@@ -316,6 +317,15 @@ public class HotelPromoController {
 			logger.info(String.format("queryThemes begins with parameters:%s...", params));
 		}
 
+		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			errorMessage = "parameters validation failed with error";
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+
+			logger.error(errorMessage);
+
+			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
+		}
 		String callVersion = (String) homepageReqEntity.getCallversion();
 		Double latitude = (Double) homepageReqEntity.getUserlatitude();
 		Double longitude = (Double) homepageReqEntity.getUserlongitude();
@@ -537,9 +547,8 @@ public class HotelPromoController {
 	@RequestMapping(value = "/promo/queryrange", method = RequestMethod.POST)
 	@ResponseBody
 
-	public ResponseEntity<Map<String, Object>> queryrange(ParamBaseBean pbb, String promoid,String cityid) {
-		logger.info("HotelPromoController::queryrange::params{}  begin",
-				pbb + "," + promoid);
+	public ResponseEntity<Map<String, Object>> queryrange(ParamBaseBean pbb, String promoid, String cityid) {
+		logger.info("HotelPromoController::queryrange::params{}  begin", pbb + "," + promoid);
 		Map<String, Object> result = new HashMap<String, Object>();
 		try {
 
@@ -583,11 +592,12 @@ public class HotelPromoController {
 					result.put("promosec", sec / 1000); // 秒
 					result.put("promosecend", endSec / 1000); // 距离结束时间（s）
 					result.put("nextpromosec", nextsec / 1000); // 距离下一段结束时间（s）
-					List<TPriceScopeDto>  tpriceScopeDtoList = tpriceScopeService.queryTPriceScopeDto(saleConfigInfo.getId() + "", cityid);
-					if(!CollectionUtils.isEmpty(tpriceScopeDtoList)){
-						result.put("minprice",tpriceScopeDtoList.get(0).getMinprice());
-						result.put("maxprice",tpriceScopeDtoList.get(0).getMaxprice());
-						result.put("step",tpriceScopeDtoList.get(0).getStep());
+					List<TPriceScopeDto> tpriceScopeDtoList = tpriceScopeService
+							.queryTPriceScopeDto(saleConfigInfo.getId() + "", cityid);
+					if (!CollectionUtils.isEmpty(tpriceScopeDtoList)) {
+						result.put("minprice", tpriceScopeDtoList.get(0).getMinprice());
+						result.put("maxprice", tpriceScopeDtoList.get(0).getMaxprice());
+						result.put("step", tpriceScopeDtoList.get(0).getStep());
 					}
 					break;
 				}
