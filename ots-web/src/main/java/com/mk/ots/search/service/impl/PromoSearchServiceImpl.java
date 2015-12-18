@@ -4526,7 +4526,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return result;
 	}
 
-	private Integer findRoomtypeMonthlySale(Map<String, Object> roomtype) {
+	private Long findRoomtypeMonthlySale(Map<String, Object> roomtype) {
 		Long roomtypeid = (Long) roomtype.get("roomtypeid");
 		Map<String, Object> greetParameter = new HashMap<String, Object>();
 		greetParameter.put("roomtypeid", roomtypeid);
@@ -4542,12 +4542,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		greetParameter.put("beforetime", beforetime);
 		greetParameter.put("yestertime", yestertime);
 
-		Integer greetscore = 0;
+		Long greetscore = 0L;
 
 		try {
 			List<Map<String, Object>> greetScores = roomsaleShowMapper.queryRoomtypeGreetScore(greetParameter);
 			if (greetScores != null && greetScores.size() > 0) {
-				greetscore = (Integer) greetScores.get(0).get("greetscore");
+				greetscore = (Long) greetScores.get(0).get("greetscore");
 			}
 		} catch (Exception ex) {
 			logger.warn(String.format("failed to queryRoomtypeGreetScore with roomtypeid:%s", roomtypeid), ex);
@@ -4567,7 +4567,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		List<Map<String, Object>> themeRoomtypes = new ArrayList<Map<String, Object>>();
 		for (Map<String, Object> roomtype : roomtypes) {
 			if (isThemed(Integer.parseInt(hotelid), roomtype)) {
-				Integer greetScore = findRoomtypeMonthlySale(roomtype);
+				Long greetScore = findRoomtypeMonthlySale(roomtype);
 				roomtype.put("greetscore", greetScore);
 				themeRoomtypes.add(roomtype);
 			}
