@@ -2033,7 +2033,7 @@ public class OrderServiceImpl implements OrderService {
           	changeOrderStatusForPMAndOK(otaorderid, pmsRoomOrder, otaorder);
               OrderServiceImpl.logger.info("OTSMessage::changeOrderStatusByPms调用::Account");
               otaorder.setOrderStatus(OtaOrderStatusEnum.Account.getId());
-              
+
               //挂退也存到历史入住
               ticketService.saveOrUpdateHotelStat(otaorder,pmsRoomOrder);
               needUnLockroom = true;
@@ -2041,6 +2041,14 @@ public class OrderServiceImpl implements OrderService {
           otaorder.setUpdateTime(DateUtils.createDate());
           if (tempOrderStatus != otaorder.getOrderStatus()) {
               otaorder.saveOrUpdate();
+              /**************************特价订单返现***************************/
+              if( OtaOrderStatusEnum.CheckIn.getId() == otaorder.getOrderStatus()){
+                  BigDecimal returnWallCash =  tBackMoneyRuleService.getBackMoneyByOrder(otaorder);
+                  if(returnWallCash != null && returnWallCash.compareTo(new BigDecimal("0")) != 0){
+                      walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), returnWallCash);
+                  }
+
+              }
           }
           orderStatusBuf.append(",更新后OTA订单状态:" + otaorder.getOrderStatus());
           this.orderBusinessLogService.saveLog(otaorder, OtaOrderFlagEnum.UPDATEORDERSTATUS.getId(), orderStatusBuf.toString(), "", "");
