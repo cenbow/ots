@@ -30,5 +30,6 @@ public interface IOtsAdminService {
      * @return
      * @throws Exception
      */
-    Map<String, Object> readonlyDeletePoiDatas(String citycode, Integer typeid) throws Exception;
+    Map<String, Object> readonlyDeletePoiDatas(String citycode, Integer typeid, String indexName, String indexType) throws Exception;
+
 }
