@@ -218,69 +218,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	@Autowired
 	private RoomSaleConfigMapper roomsaleConfigMapper;
 
-	/*
-	 * 获取 区域位置类型
-	 * 
-	 * @param citycode
-	 * 
-	 * @param positiontypeid
-	 */
-	@Override
-	public List<SearchPositiontypesRespEntity> readonlyPositionTypes(String citycode, Long positiontypeid) {
-		List<SearchPositiontypesRespEntity> result = new ArrayList<SearchPositiontypesRespEntity>();
-		List<PositionTypeModel> positionTypes = positionTypeMapper.findByCitycode(citycode);
-		for (PositionTypeModel pm : positionTypes) {
-			SearchPositiontypesRespEntity psr = new SearchPositiontypesRespEntity();
-			psr.setId(pm.getId());
-			psr.setTypename(pm.getTypename());
-			result.add(psr);
-		}
-		return result;
-	}
 
-	/**
-	 * 查询位置区域
-	 *
-	 * @param citycode
-	 * @param ptype
-	 */
-	@Override
-	public Map<String, Object> readonlyPositions(String citycode, String ptype) {
-		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		// 从ES中读取区域位置信息
-		List<SearchPositionsCoordinateRespEntity> datas = readonlyPositionsFromES(citycode, ptype);
-		rtnMap.put("datas", datas);
-
-		List<SearchPositionsDistanceRespEntity> distances = Lists.newArrayList();
-		SearchPositionsDistanceRespEntity ds = new SearchPositionsDistanceRespEntity();
-		ds.setName("附近1km");
-		ds.setValue(1000L);
-		distances.add(ds);
-
-		ds = new SearchPositionsDistanceRespEntity();
-		ds.setName("附近3km");
-		ds.setValue(3000L);
-		distances.add(ds);
-
-		ds = new SearchPositionsDistanceRespEntity();
-		ds.setName("附近5km");
-		ds.setValue(5000L);
-		distances.add(ds);
-
-		ds = new SearchPositionsDistanceRespEntity();
-		ds.setName("附近10km");
-		ds.setValue(10000L);
-		distances.add(ds);
-
-		ds = new SearchPositionsDistanceRespEntity();
-		ds.setName("全城");
-		ds.setValue(0L);
-		distances.add(ds);
-
-		rtnMap.put("distance", distances);
-
-		return rtnMap;
-	}
 
 	/**
 	 *
