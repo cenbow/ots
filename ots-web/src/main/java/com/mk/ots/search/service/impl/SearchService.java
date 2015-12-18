@@ -604,6 +604,8 @@ public class SearchService implements ISearchService {
 				// 眯客2.2.1, 根据屏幕坐标计算距离.
 				double hotelDistance = DistanceUtil.distance(lon, lat, hotelLongitude, hotelLatitude);
 				result.put("distance", hotelDistance);
+				System.out.println("distance: "+ hotelDistance);
+
 				Long sales = Long
 						.valueOf(String.valueOf(result.get("ordernummon") == null ? "0" : result.get("ordernummon")));
 				result.put("ordernummon", (sales >= 10 ? "月销" + sales + "单" : ""));
@@ -1077,8 +1079,13 @@ public class SearchService implements ISearchService {
 				/**
 				 * added in mike3.1, lift up promo as the top search variable
 				 */
+				if (reqentity.getOrderby() == null ||
+						reqentity.getOrderby() == 0 ||
+						HotelSortEnum.SCORE.getId() == reqentity.getOrderby() ) {
+					sortByPromo(searchBuilder, reqentity.getCallversion(), reqentity.getIspromoonly(), paramOrderby);
 
-				sortByPromo(searchBuilder, reqentity.getCallversion(), reqentity.getIspromoonly(), paramOrderby);
+				}
+
 
 				if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
 					// 距离排序
@@ -1198,7 +1205,7 @@ public class SearchService implements ISearchService {
 					}
 				}
 				result.put("userdistance", userDistance);
-
+				System.out.println(userDistance);
 				// 眯客3.0: 产品中去掉酒店列表显示最近酒店特性.
 				// 接口新增属性isnear: 是否最近酒店, distance值最小的酒店为T,其他为F.
 				if (page <= 1 && i == 0) {
@@ -1459,7 +1466,13 @@ public class SearchService implements ISearchService {
 			}
 
 			// 重新按照是否可售分组排序
-			this.sortByVcState(hotels);
+
+ 			if (reqentity.getOrderby() == null ||
+					reqentity.getOrderby() == 0 ||
+					HotelSortEnum.SCORE.getId() == reqentity.getOrderby() ) {
+				this.sortByVcState(hotels);
+			}
+
 			//
 			// if (HotelSortEnum.PRICE.getId() == paramOrderby) {
 			// this.sortByPrice(hotels);
