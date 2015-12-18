@@ -214,7 +214,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	@Autowired
 	private RoomSaleShowConfigMapper roomsaleShowMapper;
-	
+
 	@Autowired
 	private RoomSaleConfigMapper roomsaleConfigMapper;
 
@@ -240,7 +240,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 查询位置区域
-	 * 
+	 *
 	 * @param citycode
 	 * @param ptype
 	 */
@@ -283,7 +283,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param cityId
 	 * @param promoId
 	 * @return
@@ -304,7 +304,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 校验酒店搜索日期
-	 * 
+	 *
 	 * @param startDate
 	 *            参数：查询开始日期
 	 * @param endDate
@@ -403,7 +403,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 酒店搜索校验
-	 * 
+	 *
 	 * @param params
 	 *            参数：接口请求入参对象
 	 * @return String 返回值
@@ -447,6 +447,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		return validateStr;
 	}
+
+
+
 
 	public Map<String, Object> searchHomeThemes(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
@@ -712,7 +715,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			makeHotelTypeFilter(reqentity, filterBuilders);
 			makeBedTypeFilter(reqentity, filterBuilders);
-			
+
 			makeQueryFilter(reqentity, filterBuilders);
 
 			FilterBuilder[] builders = new FilterBuilder[] {};
@@ -812,7 +815,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				logger.info("keyword or hotelname or hoteladdress search, set search range {}",
 						SearchConst.SEARCH_RANGE_MAX);
 			}
-
 
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
 					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
@@ -1122,7 +1124,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	private RoomstateQuerylistReqEntity buildRoomstateQuery(Map<String, Object> roomtype, Integer hotelId,
-			String startdateday, String enddateday) {
+															String startdateday, String enddateday) {
 		RoomstateQuerylistReqEntity roomstateEntity = new RoomstateQuerylistReqEntity();
 
 		Long roomtypeId = (Long) roomtype.get("roomtypeid");
@@ -1135,7 +1137,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	private List<Map<String, Object>> updateRoomtypeThemes(List<Map<String, Object>> roomtypes,
-			Map<String, Object> hotel, String startdateday, String enddateday) {
+														   Map<String, Object> hotel, String startdateday, String enddateday) {
 		List<Map<String, Object>> themedRoomtypes = new ArrayList<>();
 
 		Integer hotelId = Integer.parseInt((String) hotel.get("hotelid"));
@@ -1179,7 +1181,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	@SuppressWarnings("unchecked")
 	private List<Map<String, Object>> groupThemes(List<Map<String, Object>> searchResults, String startdateday,
-			String enddateday) {
+												  String enddateday) {
 		Map<Integer, Queue<Map<String, Object>>> hotelRoomTypes = new HashMap<Integer, Queue<Map<String, Object>>>();
 		List<Map<String, Object>> themeGrouped = new ArrayList<Map<String, Object>>();
 
@@ -1373,7 +1375,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	private Map<String, Object> renderNormalItem(Map<String, Object> resultMap,
-			RoomSaleShowConfigDto roomSaleShowConfigDto, RoomSaleShowConfigDto defaultShowConfig) {
+												 RoomSaleShowConfigDto roomSaleShowConfigDto, RoomSaleShowConfigDto defaultShowConfig) {
 
 		List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService
 				.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
@@ -1530,6 +1532,38 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return promoItem;
 	}
 
+
+	private Map<String, Object> createTonightPromoItem(HotelQuerylistReqEntity params, RoomSaleShowConfigDto showConfig)
+			throws Exception {
+		Map<String, Object> promoItem = new HashMap<String, Object>();
+		if (params.getLimit() == null){
+			params.setLimit(FrontPageEnum.limit.getId());
+		}
+		params.setIspromoonly(Boolean.TRUE);
+
+		params.setCallentry(null);
+		params.setPromoid(String.valueOf(showConfig.getPromoid()));
+
+
+		Map<String, Object> rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+
+
+		List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+
+		if (hotels == null) {
+			hotels = new ArrayList<>();
+		}
+
+		promoItem.put("hotel", hotels);
+		promoItem.put("promoicon", showConfig.getPromoicon());
+		promoItem.put("promotext", showConfig.getPromotext());
+		promoItem.put("promonote", showConfig.getPromonote());
+		promoItem.put("promoid", showConfig.getPromoid());
+		promoItem.put("normalid", showConfig.getNormalId());
+
+		return promoItem;
+	}
+
 	@Override
 	public List<Map<String, Object>> searchHomePromos(HotelQuerylistReqEntity params) throws Exception {
 
@@ -1539,7 +1573,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			showConfig.setIsSpecial("T");
 
 			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
-			promolist = this.searchHomePromoBase(params, showConfigs);
+			promolist = this.searchHomePromoBase(params, showConfigs,false);
 
 			if (promolist == null){
 				promolist = new ArrayList<Map<String, Object>>();
@@ -1553,7 +1587,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 
 	@SuppressWarnings("unchecked")
-	public List<Map<String, Object>> searchHomePromoBase(HotelQuerylistReqEntity params, List<RoomSaleShowConfigDto> showConfigs) throws Exception {
+	public List<Map<String, Object>> searchHomePromoBase(HotelQuerylistReqEntity params, List<RoomSaleShowConfigDto> showConfigs, Boolean isNew) throws Exception {
 		// 酒店搜索校验: 开始
 		String validateStr = this.validateSearchHome(params);
 		if (StringUtils.isNotBlank(validateStr)) {
@@ -1566,7 +1600,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		try {
 
 			for (RoomSaleShowConfigDto showConfigDto : showConfigs) {
-				Map<String, Object> promoItem = createPromoItem(params, showConfigDto);
+				Map<String, Object> promoItem;
+				if (isNew){
+					promoItem = createTonightPromoItem(params,showConfigDto);
+				}else {
+					promoItem= createPromoItem(params, showConfigDto);
+				}
+
 				if (promoItem != null && promoItem.get("hotel") != null
 						&& ((List<Map<String, Object>>) promoItem.get("hotel")).size() > 0) {
 					promolist.add(promoItem);
@@ -1591,11 +1631,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			showConfig.setShowArea(ShowAreaEnum.HomePagePromoRecommend.getCode());
 
 			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
-			promolist = this.searchHomePromoBase(params, showConfigs);
+			promolist = this.searchHomePromoBase(params, showConfigs,true);
 
-			 if (promolist!=null && promolist.size() > 0 ){
-				 promoItem = promolist.get(0);
-			 }
+			if (promolist!=null && promolist.size() > 0 ){
+				promoItem = promolist.get(0);
+			}
 			return promoItem;
 		} catch (Exception e) {
 			throw new Exception("failed to searchHomePromos", e);
@@ -1689,7 +1729,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param points
 	 * @return
 	 */
@@ -1714,7 +1754,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param params
 	 */
 	private void resetSearchPoint(HotelQuerylistReqEntity params) {
@@ -1728,7 +1768,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param params
 	 */
 	private void searchTypeFilter(HotelQuerylistReqEntity params) {
@@ -1772,7 +1812,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 查询指定酒店
-	 * 
+	 *
 	 * @param reqentity
 	 * @return
 	 * @throws Exception
@@ -1974,13 +2014,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param searchBuilder
 	 * @param boolFilter
 	 * @param mkPriceDateList
 	 */
 	private void setMikepriceScriptSort(SearchRequestBuilder searchBuilder, BoolFilterBuilder boolFilter,
-			List<String> mkPriceDateList) {
+										List<String> mkPriceDateList) {
 		// 脚本排序功能开始
 		ScriptScoreFunctionBuilder scriptSortBuilder = new ScriptScoreFunctionBuilder();
 		scriptSortBuilder.script("mikeprice-sort");
@@ -1993,12 +2033,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param searchBuilder
 	 * @param sortType
 	 */
 	private void setScoreScriptSort(SearchRequestBuilder searchBuilder, BoolFilterBuilder boolFilter, GeoPoint geopoint,
-			List<String> mkPriceDateList) {
+									List<String> mkPriceDateList) {
 		// 脚本排序功能开始
 		ScriptScoreFunctionBuilder scriptSortBuilder = new ScriptScoreFunctionBuilder();
 		scriptSortBuilder.script("calculate-score");
@@ -2024,7 +2064,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 距离排序
-	 * 
+	 *
 	 * @param searchBuilder
 	 * @param geopoint
 	 */
@@ -2035,7 +2075,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 是否推荐排序: 是否签约(升序), 推荐值(降序)
-	 * 
+	 *
 	 * @param searchBuilder
 	 */
 	private void sortByRecommend(SearchRequestBuilder searchBuilder) {
@@ -2044,7 +2084,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 价格排序
-	 * 
+	 *
 	 * @param searchBuilder
 	 */
 	// private void sortByPrice(List<Map<String, Object>> hotels) {
@@ -2069,7 +2109,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	// }
 	/**
 	 * 人气排序（月销量由高到低）
-	 * 
+	 *
 	 * @param searchBuilder
 	 */
 	private void sortByOrders(SearchRequestBuilder searchBuilder) {
@@ -2077,7 +2117,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 * @throws Exception
 	 */
@@ -2106,7 +2146,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+
 	 * @param hotels
 	 */
 	private void sortByVcState(List<Map<String, Object>> hotels) {
@@ -2447,7 +2487,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 酒店综合查询返回酒店列表数据
-	 * 
+	 *
 	 * @param reqentity
 	 *            参数: 酒店搜索入参Bean对象
 	 * @return
@@ -2738,8 +2778,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				double hotelLongitude = Double.valueOf(String.valueOf(pin.get("lon")));
 				double hotelLatitude = Double.valueOf(String.valueOf(pin.get("lat")));
 				double hotelDistance = DistanceUtil.distance(lon, lat, hotelLongitude, hotelLatitude); // 根据屏幕经纬度
-																										// yub
-																										// 20150724
+				// yub
+				// 20150724
 				result.put("distance", hotelDistance);
 
 				// 眯客3.0增加userdistance属性：用户坐标与酒店坐标的距离
@@ -3091,12 +3131,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 
 			// 重新按照是否可售分组排序
-			this.sortByVcState(hotels);
+			if (reqentity.getOrderby() == null ||
+					reqentity.getOrderby() == 0 ||
+					HotelSortEnum.SCORE.getId() == reqentity.getOrderby() ) {
+				this.sortByVcState(hotels);
+				/**
+				 * adjust the order by suppress all no vacancy hotels
+				 */
+				this.resortPromo(hotels);
+			}
 
-			/**
-			 * adjust the order by suppress all no vacancy hotels
-			 */
-			this.resortPromo(hotels);
+
 
 			rtnMap.put("supplementhotel", new ArrayList<Map<String, Object>>());
 			/**
@@ -3173,7 +3218,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * search hotels by around when supplement is required
-	 * 
+	 *
 	 * @param hotels
 	 * @param params
 	 * @param hotelAroundCounter
@@ -3181,7 +3226,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 */
 	@SuppressWarnings("unchecked")
 	private Integer searchAround(Map<String, Object> response, HotelQuerylistReqEntity params,
-			Integer hotelAroundCounter) throws Exception {
+								 Integer hotelAroundCounter) throws Exception {
 		params.setCallentry(1);
 		params.setIspromoonly(null);
 		params.setHotelid("");
@@ -3207,7 +3252,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * make es term filter
-	 * 
+	 *
 	 * @param reqentity
 	 * @param filterBuilder
 	 * @return
@@ -3233,7 +3278,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param reqentity
 	 * @return
 	 */
@@ -3253,7 +3298,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param reqentity
 	 * @return
 	 */
@@ -3274,7 +3319,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param reqentity
 	 * @return
 	 */
@@ -3310,7 +3355,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 按行政区搜索
-	 * 
+	 *
 	 * @param reqentity
 	 * @return
 	 */
@@ -3334,7 +3379,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 按行政区搜索
-	 * 
+	 *
 	 * @param reqentity
 	 * @return
 	 */
@@ -3356,7 +3401,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 按指定床型搜搜
-	 * 
+	 *
 	 * @param reqentity
 	 * @param filterBuilders
 	 */
@@ -3374,8 +3419,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * added in mike3.1, promo filter will be added in version 3.1
-	 * 
-	 * 
+	 *
+	 *
 	 * @param reqentity
 	 * @param filterBuilders
 	 */
@@ -3431,7 +3476,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param startdateday
 	 * @param enddateday
 	 * @return
@@ -3464,7 +3509,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 最近预订时间查询
-	 * 
+	 *
 	 * @param createTime
 	 *            yyyyMMddHHmmss
 	 * @return
@@ -3495,7 +3540,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 转换酒店数据
-	 * 
+	 *
 	 * @param data
 	 *            参数：es酒店信息
 	 * @param reqentity
@@ -3824,7 +3869,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param eshotel
 	 * @return
 	 */
@@ -3862,7 +3907,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param roomtypeItem
 	 * @param reqentity
 	 * @return
@@ -3922,7 +3967,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param roomtypeItem
 	 * @return
 	 */
@@ -4032,7 +4077,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 从ES中读取位置信息
-	 * 
+	 *
 	 * @param citycode
 	 * @param ptype
 	 * @return
@@ -4103,7 +4148,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param citycode
 	 * @param keyword
 	 * @return
@@ -4160,7 +4205,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 同步城市位置区域数据到es。
-	 * 
+	 *
 	 * @param citycode
 	 *            参数：城市编码
 	 * @param typeid
@@ -4202,7 +4247,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 添加es行政区文档数据
-	 * 
+	 *
 	 * @param citycode
 	 *            参数：城市编码
 	 * @return
@@ -4249,7 +4294,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 同步城市行政区数据到es。
-	 * 
+	 *
 	 * @param citycode
 	 *            参数：城市编码
 	 * @param forceUpdate
@@ -4283,7 +4328,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 添加es地标文档数据
-	 * 
+	 *
 	 * @param citycode
 	 *            参数：城市编码
 	 * @return
@@ -4329,7 +4374,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param citycode
 	 * @param forceUpdate
 	 * @return
@@ -4397,7 +4442,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param citycode
 	 * @param forceUpdate
 	 * @return
@@ -4449,7 +4494,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 同步城市地铁线路数据到es。
-	 * 
+	 *
 	 * @param citycode
 	 *            参数：城市编码
 	 * @param forceUpdate
@@ -4510,7 +4555,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		return greetscore;
 	}
-	
+
 	public List<Map<String, Object>> queryThemeRoomtypes(Map<String, Object> hotel) throws Exception {
 		String hotelid = (String) hotel.get("hotelid");
 
