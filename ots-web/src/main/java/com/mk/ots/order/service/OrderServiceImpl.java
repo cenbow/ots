@@ -83,6 +83,8 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.BeanProperty;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2195,7 +2197,7 @@ public class OrderServiceImpl implements OrderService {
    * @param order
    * @param jsonObj
    */
-  public void doCreateOrder(OtaOrder order, JSONObject jsonObj) {
+  public void doCreateOrder(HttpServletRequest request, OtaOrder order, JSONObject jsonObj) {
   	  checkMidIsBlack(order.getToken(),"您的账号存在异常，如有疑问请拨打客服电话4001-888-733");
 
       // 提交订单
@@ -2206,8 +2208,12 @@ public class OrderServiceImpl implements OrderService {
         Long roomId = order.getRoomOrderList().get(0).getRoomId();
         order.setPromoType(getPromoType(roomId));
        //检查订单promo type是否符合支付规则
-        checkPayByPromoType(order, order.getPromoType());
-        checkOrderByPromoType(order);
+        String callVersion = request.getParameter("callversion");
+      if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion.trim()) <= 0) {
+            checkOrderByPromoType(order);
+        }
+        checkPayByPromoType(request, order, order.getPromoType());
+
         Long cashBigDecimal = 0L;
         if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
             cashBigDecimal = tBackMoneyRuleService.getBackMoneyByOrder(order).longValue();
@@ -2251,7 +2257,7 @@ public class OrderServiceImpl implements OrderService {
       Transaction t = Cat.newTransaction("Order.doCreateOrder", "getOrderToJson");
       Cat.logMetricForCount("Order.doCreateOrder.Count");
       try {
-          orderUtil.getOrderToJson(jsonObj, ppay, returnOrder, showRoom, showInUser);
+          orderUtil.getOrderToJson(request, jsonObj, ppay, returnOrder, showRoom, showInUser);
             t.setStatus(Transaction.SUCCESS);
       } catch (Exception e) {
             t.setStatus(e);
@@ -2288,7 +2294,7 @@ public class OrderServiceImpl implements OrderService {
         tRoomSale.setRoomId(roomId.intValue());
         TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
         if(resultRoomSale == null || resultRoomSale.getId() == null || resultRoomSale.getConfigId() == null){
-            return PromoTypeEnum.OTHER.getCode().toString();
+            return PromoTypeEnum.TJ.getCode().toString();
         }
         //判断对应的时间
         TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
@@ -2904,7 +2910,7 @@ public class OrderServiceImpl implements OrderService {
         order.put("act", "modify");
         order.put("isuselewallet", request.getParameter("isuselewallet"));
 
-      orderUtil.getOrderToJson(jsonObj, null, order, showRoom, showInUser);
+      orderUtil.getOrderToJson(request, jsonObj, null, order, showRoom, showInUser);
       jsonObj.put("success", true);
   }
 
@@ -3282,11 +3288,11 @@ public class OrderServiceImpl implements OrderService {
                       roomOrder.set("roomno", tempRoom.get("name"));
                       roomOrder.set("roompms", tempRoom.get("pms"));
                   }
-                  checkPayByPromoType(order, newPromoType);
+                  checkPayByPromoType(request, order, newPromoType);
               }else{
                   //如果选择了今夜特价房则只能使用在线支付或房券支付
                   String oldPromoType = getPromoType(Long.parseLong(oldRoomId));
-                  checkPayByPromoType(order, oldPromoType);
+                  checkPayByPromoType(request, order, oldPromoType);
               }
           }
           // 预付 到付 担保
@@ -3317,7 +3323,7 @@ public class OrderServiceImpl implements OrderService {
       return order;
   }
 
-    private void checkPayByPromoType(OtaOrder order, String promoType) {
+    private void checkPayByPromoType(HttpServletRequest request, OtaOrder order, String promoType) {
         if(PromoTypeEnum.TJ.getCode().equals(promoType)){
             //如果选择了今夜特价房则只能使用在线支付或房券支付 其他都不能使用
             if("T".equals(order.getPromotion())){
@@ -3325,6 +3331,12 @@ public class OrderServiceImpl implements OrderService {
             }
             if("T".equals(order.getCoupon())){
                 throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房不能使用优惠券");
+            }
+            String callVersion = request.getParameter("callversion");
+            if (StringUtils.isBlank(callVersion) || "3.3".compareTo(callVersion.trim()) > 0) {
+                if (OrderTypeEnum.YF.getId() != order.getOrderType()) {
+                    throw MyErrorEnum.customError.getMyException("很抱歉，今夜特价房只能使用在线支付");
+                }
             }
             try {
                 Date begin = DateUtils.parseDate(DateUtils.formatDateTime(order.getBeginTime()), DateUtils.FORMATDATETIME);
@@ -3461,7 +3473,7 @@ public class OrderServiceImpl implements OrderService {
    * @param orderid
    * @param jsonObj
    */
-  public void doCancelOrder(String orderid, String type, JSONObject jsonObj) {
+  public void doCancelOrder(HttpServletRequest request, String orderid, String type, JSONObject jsonObj) {
       logger.info("OTSMessage::取消订单cancelOrder:orderid:{}" + orderid);
       Long orderidTemp = null;
       try {
@@ -3476,7 +3488,7 @@ public class OrderServiceImpl implements OrderService {
       boolean showRoom = true;// 显示客单
       boolean showInUser = true;// 显示入住人----显示客单时才能显示入住人
 
-      orderUtil.getOrderToJson(jsonObj, ppay, order, showRoom, showInUser);
+      orderUtil.getOrderToJson(request ,jsonObj, ppay, order, showRoom, showInUser);
       jsonObj.put("success", true);
   }
 
@@ -4171,7 +4183,6 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      *
-     * @param order
      * @param minute  下发红包后延迟发送短信时间
      * @param backcost  红吧发放金额
      */
