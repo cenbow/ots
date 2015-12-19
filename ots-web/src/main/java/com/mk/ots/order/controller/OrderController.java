@@ -106,7 +106,7 @@ public class OrderController {
 			// 订单转换为json
 			jsonObj = new JSONObject();
 			// 创建订单
-			this.orderService.doCreateOrder(order, jsonObj);
+			this.orderService.doCreateOrder(request, order, jsonObj);
 			
 			logger.info("创建订单成功,返回数据 : "+jsonObj.toJSONString());
 			Cat.logEvent("/order/create", CommonUtils.toStr(order.getHotelId()), Event.SUCCESS, jsonObj.toJSONString());
@@ -149,7 +149,7 @@ public class OrderController {
 			// 订单转换为json
 			jsonObj = new JSONObject();
 			// 创建订单
-			this.orderService.doCreateOrder(order, jsonObj);
+			this.orderService.doCreateOrder(request ,order, jsonObj);
 			jsonObj.put("success", true);
 			logger.info("创建订单成功,返回数据 : " + jsonObj.toJSONString());
 			Cat.logEvent("/order/create", CommonUtils.toStr(order.getHotelId()), Event.SUCCESS, jsonObj.toJSONString());
@@ -280,7 +280,7 @@ public class OrderController {
 		// 订单转换为json
 		JSONObject jsonObj = new JSONObject();
 		try {
-			this.orderService.doCancelOrder(orderid, type, jsonObj);
+			this.orderService.doCancelOrder(request, orderid, type, jsonObj);
 		} catch (Exception e) {
 			OrderController.logger.error("取消订单失败 , orderid = " + orderid, e);
 			throw MyErrorEnum.customError.getMyException("取消订单失败");
@@ -423,7 +423,7 @@ public class OrderController {
 			order.put("otaRoomPrices", otaRoomPrices);
 			order.put("act", "query");
 			//封装order json信息
-			this.orderUtil.getOrderToJson(jsonObj1, ppay, order, showRoom, showInUser);
+			this.orderUtil.getOrderToJson(request ,jsonObj1, ppay, order, showRoom, showInUser);
 			orders.add(jsonObj1);
 		}
 		jsonObj.put("success", true);
@@ -841,7 +841,6 @@ public class OrderController {
 	}
 
 	/**
-	 * @param orderid
 	 *            酒店订单重新计算规则
 	 */
 	@RequestMapping(value = "/reModifyHotelRule", method = RequestMethod.POST)
@@ -857,7 +856,6 @@ public class OrderController {
 	
 
 	/**
-	 * @param orderid
 	 * 酒店订单重新计算优惠券规则
 	 */
 	@RequestMapping(value = "/reModifyHotelPromotion", method = RequestMethod.POST)

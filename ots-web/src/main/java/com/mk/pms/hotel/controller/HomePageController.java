@@ -212,6 +212,10 @@ public class HomePageController {
 				rtnMap.put("hotel", filterThemeHotels(hotels, reqEntity));
 			}
 
+			if (themeResponse.containsKey("supplementhotel")) {
+				themeResponse.remove("supplementhotel");
+			}
+
 			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
 			showConfig.setPromoid(Integer.parseInt(reqEntity.getPromoid()));
 			showConfig.setIsSpecial(Constant.STR_TRUE);
