@@ -210,8 +210,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	@Autowired
 	private RoomSaleConfigMapper roomsaleConfigMapper;
 
-
-
 	/**
 	 *
 	 * @param cityId
@@ -377,9 +375,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		return validateStr;
 	}
-
-
-
 
 	public Map<String, Object> searchHomeThemes(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
@@ -818,7 +813,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		return rtnMap;
 	}
-	
+
 	@Override
 	public Map<String, Object> searchThemes(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
@@ -1054,7 +1049,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	private RoomstateQuerylistReqEntity buildRoomstateQuery(Map<String, Object> roomtype, Integer hotelId,
-															String startdateday, String enddateday) {
+			String startdateday, String enddateday) {
 		RoomstateQuerylistReqEntity roomstateEntity = new RoomstateQuerylistReqEntity();
 
 		Long roomtypeId = (Long) roomtype.get("roomtypeid");
@@ -1067,7 +1062,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	private List<Map<String, Object>> updateRoomtypeThemes(List<Map<String, Object>> roomtypes,
-														   Map<String, Object> hotel, String startdateday, String enddateday) {
+			Map<String, Object> hotel, String startdateday, String enddateday) {
 		List<Map<String, Object>> themedRoomtypes = new ArrayList<>();
 
 		Integer hotelId = Integer.parseInt((String) hotel.get("hotelid"));
@@ -1111,7 +1106,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	@SuppressWarnings("unchecked")
 	private List<Map<String, Object>> groupThemes(List<Map<String, Object>> searchResults, String startdateday,
-												  String enddateday) {
+			String enddateday) {
 		Map<Integer, Queue<Map<String, Object>>> hotelRoomTypes = new HashMap<Integer, Queue<Map<String, Object>>>();
 		List<Map<String, Object>> themeGrouped = new ArrayList<Map<String, Object>>();
 
@@ -1305,7 +1300,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	private Map<String, Object> renderNormalItem(Map<String, Object> resultMap,
-												 RoomSaleShowConfigDto roomSaleShowConfigDto, RoomSaleShowConfigDto defaultShowConfig) {
+			RoomSaleShowConfigDto roomSaleShowConfigDto, RoomSaleShowConfigDto defaultShowConfig) {
 
 		List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService
 				.queryRoomSaleShowConfigByParams(roomSaleShowConfigDto);
@@ -1381,7 +1376,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private Map<String, Object> createPromoItem(HotelQuerylistReqEntity params, RoomSaleShowConfigDto showConfig)
 			throws Exception {
 		Map<String, Object> promoItem = new HashMap<String, Object>();
-		if (params.getLimit() == null){
+		if (params.getLimit() == null) {
 			params.setLimit(FrontPageEnum.limit.getId());
 		}
 		params.setIspromoonly(Boolean.TRUE);
@@ -1462,11 +1457,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return promoItem;
 	}
 
-
 	private Map<String, Object> createTonightPromoItem(HotelQuerylistReqEntity params, RoomSaleShowConfigDto showConfig)
 			throws Exception {
 		Map<String, Object> promoItem = new HashMap<String, Object>();
-		if (params.getLimit() == null){
+		if (params.getLimit() == null) {
 			params.setLimit(FrontPageEnum.limit.getId());
 		}
 		params.setIspromoonly(Boolean.TRUE);
@@ -1474,9 +1468,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		params.setCallentry(null);
 		params.setPromoid(String.valueOf(showConfig.getPromoid()));
 
-
 		Map<String, Object> rtnMap = this.readonlyOtsHotelListFromEsStore(params);
-
 
 		List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
 
@@ -1503,9 +1495,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			showConfig.setIsSpecial("T");
 
 			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
-			promolist = this.searchHomePromoBase(params, showConfigs,false);
+			promolist = this.searchHomePromoBase(params, showConfigs, false);
 
-			if (promolist == null){
+			if (promolist == null) {
 				promolist = new ArrayList<Map<String, Object>>();
 			}
 			return promolist;
@@ -1514,10 +1506,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 	}
 
-
-
 	@SuppressWarnings("unchecked")
-	public List<Map<String, Object>> searchHomePromoBase(HotelQuerylistReqEntity params, List<RoomSaleShowConfigDto> showConfigs, Boolean isNew) throws Exception {
+	public List<Map<String, Object>> searchHomePromoBase(HotelQuerylistReqEntity params,
+			List<RoomSaleShowConfigDto> showConfigs, Boolean isNew) throws Exception {
 		// 酒店搜索校验: 开始
 		String validateStr = this.validateSearchHome(params);
 		if (StringUtils.isNotBlank(validateStr)) {
@@ -1531,10 +1522,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			for (RoomSaleShowConfigDto showConfigDto : showConfigs) {
 				Map<String, Object> promoItem;
-				if (isNew){
-					promoItem = createTonightPromoItem(params,showConfigDto);
-				}else {
-					promoItem= createPromoItem(params, showConfigDto);
+				if (isNew) {
+					promoItem = createTonightPromoItem(params, showConfigDto);
+				} else {
+					promoItem = createPromoItem(params, showConfigDto);
 				}
 
 				if (promoItem != null && promoItem.get("hotel") != null
@@ -1561,9 +1552,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			showConfig.setShowArea(ShowAreaEnum.HomePagePromoRecommend.getCode());
 
 			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
-			promolist = this.searchHomePromoBase(params, showConfigs,true);
+			promolist = this.searchHomePromoBase(params, showConfigs, true);
 
-			if (promolist!=null && promolist.size() > 0 ){
+			if (promolist != null && promolist.size() > 0) {
 				promoItem = promolist.get(0);
 			}
 			return promoItem;
@@ -1571,7 +1562,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			throw new Exception("failed to searchHomePromos", e);
 		}
 	}
-
 
 	/**
 	 * 酒店搜索
@@ -1950,7 +1940,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 * @param mkPriceDateList
 	 */
 	private void setMikepriceScriptSort(SearchRequestBuilder searchBuilder, BoolFilterBuilder boolFilter,
-										List<String> mkPriceDateList) {
+			List<String> mkPriceDateList) {
 		// 脚本排序功能开始
 		ScriptScoreFunctionBuilder scriptSortBuilder = new ScriptScoreFunctionBuilder();
 		scriptSortBuilder.script("mikeprice-sort");
@@ -1968,7 +1958,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 * @param sortType
 	 */
 	private void setScoreScriptSort(SearchRequestBuilder searchBuilder, BoolFilterBuilder boolFilter, GeoPoint geopoint,
-									List<String> mkPriceDateList) {
+			List<String> mkPriceDateList) {
 		// 脚本排序功能开始
 		ScriptScoreFunctionBuilder scriptSortBuilder = new ScriptScoreFunctionBuilder();
 		scriptSortBuilder.script("calculate-score");
@@ -2076,7 +2066,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-
+	 * 
 	 * @param hotels
 	 */
 	private void sortByVcState(List<Map<String, Object>> hotels) {
@@ -2357,7 +2347,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 					newHotel.put("roomtype", singleRoomType);
 
-					updateHotelPicWithRoomtype(roomtype, newHotel);
+					try {
+						updateHotelPicWithRoomtype(roomtype, newHotel);
+					} catch (Exception ex) {
+						logger.warn(String.format("failed to updateHotelPicWithRoomtype with hotelid:%s; roomtype:%s",
+								hotelId, roomtype != null ? roomtype.get("roomtypeid") : ""), ex);
+					}
 
 					hotelIds.add(newHotel);
 				}
@@ -2642,7 +2637,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				/**
 				 * added in mike3.1, lift up promo as the top search variable
 				 */
-				//sortByPromo(searchBuilder, reqentity.getCallversion());
+				// sortByPromo(searchBuilder, reqentity.getCallversion());
 
 				if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
 					// 距离排序
@@ -3061,17 +3056,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 
 			// 重新按照是否可售分组排序
-			if (reqentity.getOrderby() == null ||
-					reqentity.getOrderby() == 0 ||
-					HotelSortEnum.SCORE.getId() == reqentity.getOrderby() ) {
+			if (reqentity.getOrderby() == null || reqentity.getOrderby() == 0
+					|| HotelSortEnum.SCORE.getId() == reqentity.getOrderby()) {
 				this.sortByVcState(hotels);
 				/**
 				 * adjust the order by suppress all no vacancy hotels
 				 */
 				this.resortPromo(hotels);
 			}
-
-
 
 			rtnMap.put("supplementhotel", new ArrayList<Map<String, Object>>());
 			/**
@@ -3156,7 +3148,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	 */
 	@SuppressWarnings("unchecked")
 	private Integer searchAround(Map<String, Object> response, HotelQuerylistReqEntity params,
-								 Integer hotelAroundCounter) throws Exception {
+			Integer hotelAroundCounter) throws Exception {
 		params.setCallentry(1);
 		params.setIspromoonly(null);
 		params.setHotelid("");
@@ -3919,8 +3911,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return roomtypefacilist;
 	}
 
-
-
 	/**
 	 *
 	 * @param citycode
@@ -3976,7 +3966,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 		return datas;
 	}
-
 
 	private Long findRoomtypeMonthlySale(Map<String, Object> roomtype) {
 		Long roomtypeid = (Long) roomtype.get("roomtypeid");
