@@ -952,7 +952,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					logger.error("按照{}搜索是没有获取到经纬度, points: {}。", HotelSearchEnum.getById(searchType).getName(), points);
 				}
 			}
-
+			
+			GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
+			geoFilter.point(lat, lon).distance(distance, DistanceUnit.METERS).optimizeBbox("memory")
+					.geoDistance(GeoDistance.ARC);
+			filterBuilders.add(geoFilter);
+			
 			if (StringUtils.isNotBlank(reqentity.getKeyword()) || StringUtils.isNotBlank(reqentity.getHotelname())
 					|| StringUtils.isNotBlank(reqentity.getHoteladdr())) {
 				reqentity.setRange(SearchConst.SEARCH_RANGE_MAX);
