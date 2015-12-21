@@ -530,6 +530,7 @@ public class HotelPromoController {
 		reqEntity.setPosid(entityReqEntity.getPosid());
 		reqEntity.setPosname(entityReqEntity.getPosname());
 		reqEntity.setPoints(entityReqEntity.getPoints());
+		reqEntity.setRange(entityReqEntity.getRange());
 
 		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 		Integer promoId = HotelPromoEnum.Theme.getCode();
