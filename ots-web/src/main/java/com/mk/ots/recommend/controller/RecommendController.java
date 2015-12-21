@@ -18,10 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Controller
@@ -74,7 +71,7 @@ public class RecommendController {
             List<RecommendList> globleBanners = genGlobleRecommendLists(recommenditemHashMap, cityid, callmethod, globleLimit);
             banners.addAll(globleBanners);
 
-            rtnMap.put("banners", banners);
+            rtnMap.put("banners", reSort(banners));
             rtnMap.put("success", true);
 
         } catch (Exception e) {
@@ -188,7 +185,7 @@ public class RecommendController {
             List<RecommendList> globleBanners = genGlobleRecommendLists(recommenditemHashMap, cityid, callmethod, globleLimit);
             banners.addAll(globleBanners);
 
-            rtnMap.put("loading", banners);
+            rtnMap.put("loading", reSort(banners));
             rtnMap.put("success", true);
 
         } catch (Exception e) {
@@ -233,7 +230,7 @@ public class RecommendController {
 //            List<RecommendList> globleBanners = genGlobleRecommendLists(recommenditemHashMap, cityid, callmethod, globleLimit);
 //            banners.addAll(globleBanners);
 
-            rtnMap.put("shortcut", banners);
+            rtnMap.put("shortcut", reSort(banners));
             rtnMap.put("success", true);
 
         } catch (Exception e) {
@@ -388,7 +385,7 @@ public class RecommendController {
                         recommendList.setDetailid(tRecommendItem.getDetailid());
                         recommendList.setQuerytype(tRecommendItem.getViewtype());
                         recommendList.setCreatetime(tRecommendItem.getCreatetime());
-
+                        recommendList.setSort(tRecommendItem.getSort());
                         banners.add(recommendList);
                         city_recommend_count++;
                     }
@@ -400,6 +397,45 @@ public class RecommendController {
         }
 
         return banners;
+    }
+
+    private List<RecommendList> reSort(List<RecommendList> banners){
+
+        if (banners == null || banners.size() == 0){
+            return banners;
+        }
+
+        Object[] bannberArr = banners.toArray();
+        Arrays.sort(bannberArr, this.new RecommentComparator());
+
+        banners.clear();
+
+        for (int i = 0; i < bannberArr.length; i++) {
+            if (bannberArr[i] instanceof RecommendList) {
+                RecommendList  rl = (RecommendList) bannberArr[i];
+                banners.add(rl);
+
+            }
+        }
+
+        return banners;
+
+    }
+    /*
+	 * 价格排序规则
+	 */
+    private class RecommentComparator implements Comparator<Object> {
+        public int compare(Object obj1, Object obj2) {
+            RecommendList banner1 = (RecommendList) obj1;
+            RecommendList banner2 = (RecommendList) obj2;
+
+            if (banner1.getSort().compareTo(banner2.getSort()) > 0) {
+                return -1;
+            } else {
+                return 1;
+            }
+
+        }
     }
 
 }
