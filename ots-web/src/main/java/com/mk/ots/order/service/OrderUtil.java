@@ -514,6 +514,8 @@ public class OrderUtil {
 	private JSONObject getOrderPromoPayRuleJson(Integer promoId){
 		JSONObject jsonObj = new JSONObject();
 		OrderPromoPayRuleJson orderPromoPayRuleJson = orderService.getOrderPromoPayRule(promoId);
+		jsonObj.put("id", orderPromoPayRuleJson.getId());
+		jsonObj.put("promoType", orderPromoPayRuleJson.getPromoType());
 		jsonObj.put("isOnlinePay", orderPromoPayRuleJson.getIsOnlinePay());
 		jsonObj.put("isRealPay", orderPromoPayRuleJson.getIsRealPay());
 		jsonObj.put("isTicketPay", orderPromoPayRuleJson.getIsTicketPay());
