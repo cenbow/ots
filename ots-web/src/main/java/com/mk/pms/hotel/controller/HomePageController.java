@@ -369,6 +369,8 @@ public class HomePageController {
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
+		reqEntity.setIspromoonly(Boolean.TRUE);
+		
 		if (homepageReqEntity.getPage() == null) {
 			reqEntity.setPage(1);
 		} else {

@@ -571,6 +571,7 @@ public class HotelPromoController {
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
+		reqEntity.setIspromoonly(Boolean.TRUE);
 		
 		if (homepageReqEntity.getPage() == null) {
 			reqEntity.setPage(1);
@@ -582,6 +583,16 @@ public class HotelPromoController {
 			reqEntity.setLimit(10);
 		} else {
 			reqEntity.setLimit(homepageReqEntity.getLimit());
+		}
+
+		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
+		Integer promoId = HotelPromoEnum.Theme.getCode();
+
+		try {
+			Integer promotype = promoSearchService.queryByPromoId(promoId);
+			reqEntity.setPromotype(String.valueOf(promotype));
+		} catch (Exception ex) {
+			logger.warn(String.format("failed to query for promotype by promoid %s", promoId), ex);
 		}
 		
 		Date day = new Date();
