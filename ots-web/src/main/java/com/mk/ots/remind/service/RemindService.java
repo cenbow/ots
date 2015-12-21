@@ -181,17 +181,17 @@ public class RemindService {
             }
         }
 
-//        final long awaitTime = 30 * 1000;
-//        try {
-//            pool.shutdown();
-//
-//            if(!pool.awaitTermination(awaitTime, TimeUnit.MILLISECONDS)){
-//                pool.shutdownNow();
-//            }
-//        } catch (InterruptedException e) {
-//            System.out.println("awaitTermination interrupted: " + e);
-//            pool.shutdownNow();
-//        }
+        //超45秒
+        final long awaitTime = 45 * 1000;
+        try {
+
+            if(!pool.awaitTermination(awaitTime, TimeUnit.MILLISECONDS)){
+                pool.shutdown();
+            }
+        } catch (InterruptedException e) {
+            System.out.println("awaitTermination interrupted: " + e);
+            pool.shutdownNow();
+        }
 
     }
 
@@ -256,4 +256,3 @@ public class RemindService {
         this.remindLogMapper.save(log);
     }
 }
-
