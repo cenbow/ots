@@ -862,6 +862,44 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			makeQueryFilter(reqentity, filterBuilders);
 
+
+			double distance = Double.valueOf(reqentity.getRange());
+
+			double cityLat_default = Constant.LAT_SHANGHAI;
+			double cityLon_default = Constant.LON_SHANGHAI;
+
+			double lat = reqentity.getPillowlatitude() == null ? cityLat_default : reqentity.getPillowlatitude();
+			double lon = reqentity.getPillowlongitude() == null ? cityLon_default : reqentity.getPillowlongitude();
+
+			if (HotelSearchEnum.BZONE.getId().equals(searchType) || HotelSearchEnum.AIRPORT.getId().equals(searchType)
+					|| HotelSearchEnum.SUBWAY.getId().equals(searchType)
+					|| HotelSearchEnum.SAREA.getId().equals(searchType)
+					|| HotelSearchEnum.HOSPITAL.getId().equals(searchType)
+					|| HotelSearchEnum.COLLEGE.getId().equals(searchType)) {
+				// 坐标取所选位置的坐标，搜索半径取5000米
+				String points = reqentity.getPoints();
+				if (StringUtils.isEmpty(points)) {
+					logger.error("按照{}搜索时points参数错误{}", HotelSearchEnum.getById(searchType).getName(), points);
+				}
+				GeoPoint point = this.getPoint(points);
+				if (point != null) {
+					lat = point.getLat();
+					lon = point.getLon();
+					// 指定位置区域搜索的话，搜索半径按照默认5000米
+					distance = SearchConst.SEARCH_RANGE_DEFAULT;
+					logger.info("按照{}搜索，经纬度坐标：[{},{}], 搜索范围:{}米", HotelSearchEnum.getById(searchType).getName(), lon,
+							lat, distance);
+				} else {
+					logger.error("按照{}搜索是没有获取到经纬度, points: {}。", HotelSearchEnum.getById(searchType).getName(), points);
+				}
+			}
+			
+			GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
+			geoFilter.point(lat, lon).distance(distance, DistanceUnit.METERS).optimizeBbox("memory")
+					.geoDistance(GeoDistance.ARC);
+			filterBuilders.add(geoFilter);
+						
+			
 			FilterBuilder[] builders = new FilterBuilder[] {};
 			BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
 
@@ -881,9 +919,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				makeKeywordFilter(reqentity, keywordBuilders);
 				Cat.logEvent("HotKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
 			}
-
-			double cityLat_default = Constant.LAT_SHANGHAI;
-			double cityLon_default = Constant.LON_SHANGHAI;
 
 			boolean isZhoubian = StringUtils.isNotBlank(reqentity.getExcludehotelid());
 			if (isZhoubian) {
@@ -925,39 +960,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 			}
 
-			double distance = Double.valueOf(reqentity.getRange());
-
-			double lat = reqentity.getPillowlatitude() == null ? cityLat_default : reqentity.getPillowlatitude();
-			double lon = reqentity.getPillowlongitude() == null ? cityLon_default : reqentity.getPillowlongitude();
-
-			if (HotelSearchEnum.BZONE.getId().equals(searchType) || HotelSearchEnum.AIRPORT.getId().equals(searchType)
-					|| HotelSearchEnum.SUBWAY.getId().equals(searchType)
-					|| HotelSearchEnum.SAREA.getId().equals(searchType)
-					|| HotelSearchEnum.HOSPITAL.getId().equals(searchType)
-					|| HotelSearchEnum.COLLEGE.getId().equals(searchType)) {
-				// 坐标取所选位置的坐标，搜索半径取5000米
-				String points = reqentity.getPoints();
-				if (StringUtils.isEmpty(points)) {
-					logger.error("按照{}搜索时points参数错误{}", HotelSearchEnum.getById(searchType).getName(), points);
-				}
-				GeoPoint point = this.getPoint(points);
-				if (point != null) {
-					lat = point.getLat();
-					lon = point.getLon();
-					// 指定位置区域搜索的话，搜索半径按照默认5000米
-					distance = SearchConst.SEARCH_RANGE_DEFAULT;
-					logger.info("按照{}搜索，经纬度坐标：[{},{}], 搜索范围:{}米", HotelSearchEnum.getById(searchType).getName(), lon,
-							lat, distance);
-				} else {
-					logger.error("按照{}搜索是没有获取到经纬度, points: {}。", HotelSearchEnum.getById(searchType).getName(), points);
-				}
-			}
-			
-			GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
-			geoFilter.point(lat, lon).distance(distance, DistanceUnit.METERS).optimizeBbox("memory")
-					.geoDistance(GeoDistance.ARC);
-			filterBuilders.add(geoFilter);
-			
 			if (StringUtils.isNotBlank(reqentity.getKeyword()) || StringUtils.isNotBlank(reqentity.getHotelname())
 					|| StringUtils.isNotBlank(reqentity.getHoteladdr())) {
 				reqentity.setRange(SearchConst.SEARCH_RANGE_MAX);

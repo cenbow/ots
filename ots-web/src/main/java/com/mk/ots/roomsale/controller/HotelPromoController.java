@@ -488,6 +488,9 @@ public class HotelPromoController {
 
 				Map<String, Object> hotels = promoSearchService.readonlySearchHotels(queryReq);
 				if (hotels != null) {
+					if (hotels.containsKey("supplementhotel")) {
+						hotels.remove("supplementhotel");
+					}
 					rtnMap.putAll(hotels);
 				}
 
@@ -567,7 +570,7 @@ public class HotelPromoController {
 		} catch (Exception ex) {
 			logger.warn(String.format("failed to query for promotype by promoid %s", promoId), ex);
 		}
-		
+
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
 		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
