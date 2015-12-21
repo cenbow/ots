@@ -33,6 +33,19 @@ public class IndexerService {
 
     private final AtomicInteger indexerCounter = new AtomicInteger(0);
 
+    public void updateHotelEsIndexer(String hotelid){
+        hotelService.readonlyInitPmsHotel(Constant.STR_CITYID_SHANGHAI, hotelid);
+
+        try {
+            Thread.currentThread().sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        hotelService.updateEsMikePrice(Long.valueOf(hotelid));
+
+    }
+
     public String batchUpdateEsIndexer(){
         final int coreNum = 10;
         ExecutorService exService = Executors.newFixedThreadPool(10);

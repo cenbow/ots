@@ -1,13 +1,10 @@
 package com.mk.ots.restful.input;
 
-import java.io.Serializable;
+import com.mk.ots.common.bean.ParamBaseBean;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.NotEmpty;
-import org.hibernate.validator.constraints.Range;
-
-import com.mk.ots.common.bean.ParamBaseBean;
+import java.io.Serializable;
 
 public class HotelHomePageReqEntity extends ParamBaseBean implements Serializable {
 	/**
@@ -22,6 +19,12 @@ public class HotelHomePageReqEntity extends ParamBaseBean implements Serializabl
 	private Double userlatitude;
 	
 	private Double userlongitude;
+
+	/** 地图地理位置坐标：根据搜索范围查询周边酒店 */
+	// 经度
+	private Double pillowlongitude;
+	// 纬度
+	private Double pillowlatitude;
 
 	private String callmethod;
 
@@ -72,6 +75,22 @@ public class HotelHomePageReqEntity extends ParamBaseBean implements Serializabl
 
 	public void setUserlongitude(Double userlongitude) {
 		this.userlongitude = userlongitude;
+	}
+
+	public Double getPillowlongitude() {
+		return pillowlongitude;
+	}
+
+	public void setPillowlongitude(Double pillowlongitude) {
+		this.pillowlongitude = pillowlongitude;
+	}
+
+	public Double getPillowlatitude() {
+		return pillowlatitude;
+	}
+
+	public void setPillowlatitude(Double pillowlatitude) {
+		this.pillowlatitude = pillowlatitude;
 	}
 
 	public String getCityid() {

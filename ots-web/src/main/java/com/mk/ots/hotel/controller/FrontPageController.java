@@ -6,6 +6,7 @@ import com.mk.ots.common.enums.FrontPageEnum;
 import com.mk.ots.common.enums.HotelPromoEnum;
 import com.mk.ots.common.enums.HotelSortEnum;
 import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.common.utils.SearchConst;
 import com.mk.ots.hotel.service.HotelPriceService;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomstateService;
@@ -160,6 +161,10 @@ public class FrontPageController {
 						saleConfigInfo.getStartTime(), saleConfigInfo.getEndTime());
 				if (sec < 0){
 					sec = 0;
+				}
+
+				if (reqentity.getPillowlongitude()!= null && reqentity.getPillowlatitude()!= null){
+					hotelEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
 				}
 
 				Map<String, Object> promoItem = promoSearchService.searchHomePromoRecommend(hotelEntity);
