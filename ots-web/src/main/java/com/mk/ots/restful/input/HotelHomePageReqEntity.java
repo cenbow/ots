@@ -36,13 +36,9 @@ public class HotelHomePageReqEntity extends ParamBaseBean implements Serializabl
 	private String otsversion;
 
 	/** 入参: 第几页,必填 */
-	@NotNull(message = "缺少参数-第几页: page.")
-	@Range(min = 1, message = "无效的参数值,page不能小于1.")
 	private Integer page;
 
 	/** 入参: 每页多少条,必填 */
-	@NotNull(message = "缺少参数-每页多少条: limit.")
-	@Range(min = 1, message = "无效的参数值,limit不能小于1.")
 	private Integer limit;
 	
 	
