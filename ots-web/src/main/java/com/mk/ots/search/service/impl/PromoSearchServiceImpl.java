@@ -930,7 +930,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (reqentity.getRange() != null) {
 				distance = Double.valueOf(reqentity.getRange());
 			} else {
-				distance = SearchConst.SEARCH_RANGE_DEFAULT;
+				distance = SearchConst.SEARCH_RANGE_MAX;
 			}
 
 			double lat = reqentity.getPillowlatitude() == null ? cityLat_default : reqentity.getPillowlatitude();

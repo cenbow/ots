@@ -9,16 +9,6 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
-import com.alibaba.fastjson.JSONObject;
-import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.roomsale.model.TPriceScopeDto;
-import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
-import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
-import com.mk.ots.roomsale.service.RoomSaleService;
-import com.mk.ots.roomsale.service.TPriceScopeService;
-import com.mk.ots.web.ServiceOutput;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -531,6 +521,8 @@ public class HotelPromoController {
 		reqEntity.setCityid(entityReqEntity.getCityid());
 		reqEntity.setUserlatitude(entityReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(entityReqEntity.getUserlongitude());
+		reqEntity.setPillowlatitude(entityReqEntity.getPillowlatitude());
+		reqEntity.setPillowlongitude(entityReqEntity.getPillowlongitude());				
 		reqEntity.setIshotelpic("T");
 		reqEntity.setPage(entityReqEntity.getPage());
 		reqEntity.setLimit(entityReqEntity.getLimit());
@@ -568,6 +560,8 @@ public class HotelPromoController {
 		reqEntity.setCallentry(null);
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
+		reqEntity.setPillowlatitude(homepageReqEntity.getPillowlatitude());
+		reqEntity.setPillowlongitude(homepageReqEntity.getPillowlongitude());				
 		reqEntity.setIshotelpic("T");
 
 		Integer promoId = HotelPromoEnum.Theme.getCode();
