@@ -30,12 +30,12 @@ public class RemindController {
     private RemindService remindService;
 
     @RequestMapping("/create")
-    public ResponseEntity<Map<String, Object>> createSpecialRoomRemind(String token, Long hotelId, Long roomTypeId) {
-        if (null == hotelId) {
+    public ResponseEntity<Map<String, Object>> createSpecialRoomRemind(String token, Long hotelid, Long roomtypeid) {
+        if (null == hotelid) {
             Map<String, Object> result = new HashMap<String, Object>();
             result.put("success",false);
             result.put("errcode","");
-            result.put("errmsg","hotelId必填");
+            result.put("errmsg","hotelid必填");
             return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
         }
 
@@ -53,7 +53,7 @@ public class RemindController {
         }
 
         //remind
-        this.remindService.createSpecialRoomRemind(memberByToken, hotelId, roomTypeId);
+        this.remindService.createSpecialRoomRemind(memberByToken, hotelid, roomtypeid);
 
         Map<String, Object> result = new HashMap<String, Object>();
         result.put("success",true);
