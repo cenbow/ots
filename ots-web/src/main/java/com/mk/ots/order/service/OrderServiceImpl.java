@@ -2048,9 +2048,18 @@ public class OrderServiceImpl implements OrderService {
                       if (returnWallCash != null && returnWallCash.compareTo(new BigDecimal("0")) != 0) {
                           walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), returnWallCash);
                           //发送短消息和app消息
-                          /*Message message
-                          careProducer.sendSmsMsg();
-                          careProducer.sendSmsMsg();*/
+                          Message message = new Message();
+                          message.setOrderId(otaorderid);
+                          message.setMid(otaorder.getMid());
+                          message.setPromotionId();
+                          // 缓存获取会员对象 存会员等级
+                          Optional<UMember> opMember = memberService.findMemberById((otaorder.getMid()));
+                          UMember member = opMember.get();
+                          if (member != null) {
+                              message.setPhone(member.getPhone());
+                              careProducer.sendSmsMsg(message);
+                          }
+                          careProducer.sendAppMsg(message);
                       }
 
                   }
