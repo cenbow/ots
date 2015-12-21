@@ -948,21 +948,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			makeQueryFilter(reqentity, filterBuilders);
 
-			FilterBuilder[] builders = new FilterBuilder[] {};
-			BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
-
-			// make range filter builder
-			List<FilterBuilder> mikePriceBuilders = this.makeMikePriceRangeFilter(reqentity);
-
-			if (mikePriceBuilders.size() > 0) {
-				BoolFilterBuilder mikePriceBoolFilter = FilterBuilders.boolFilter();
-				mikePriceBoolFilter.should(mikePriceBuilders.toArray(builders));
-				boolFilter.must(mikePriceBoolFilter);
-			}
-			if (AppUtils.DEBUG_MODE) {
-				logger.info("boolFilter is : \n{}", boolFilter.toString());
-			}
-
 			if (StringUtils.isNotBlank(reqentity.getKeyword())) {
 				makeKeywordFilter(reqentity, keywordBuilders);
 				Cat.logEvent("HotKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
@@ -1006,6 +991,21 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			geoFilter.point(lat, lon).distance(distance, DistanceUnit.METERS).optimizeBbox("memory")
 					.geoDistance(GeoDistance.ARC);
 			filterBuilders.add(geoFilter);
+
+			FilterBuilder[] builders = new FilterBuilder[] {};
+			BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
+			// make range filter builder
+			List<FilterBuilder> mikePriceBuilders = this.makeMikePriceRangeFilter(reqentity);
+
+			if (mikePriceBuilders.size() > 0) {
+				BoolFilterBuilder mikePriceBoolFilter = FilterBuilders.boolFilter();
+				mikePriceBoolFilter.should(mikePriceBuilders.toArray(builders));
+				boolFilter.must(mikePriceBoolFilter);
+			}
+
+			if (AppUtils.DEBUG_MODE) {
+				logger.info("boolFilter is : \n{}", boolFilter.toString());
+			}
 
 			if (StringUtils.isNotBlank(reqentity.getKeyword()) || StringUtils.isNotBlank(reqentity.getHotelname())
 					|| StringUtils.isNotBlank(reqentity.getHoteladdr())) {
