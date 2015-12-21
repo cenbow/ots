@@ -1,43 +1,16 @@
 package com.mk.ots.order.controller;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Event;
-import com.dianping.cat.message.Transaction;
-import com.mk.framework.util.CommonUtils;
-import com.mk.ots.order.bean.*;
-import com.mk.ots.order.model.OrderPromoPayRule;
-import com.mk.ots.system.model.UToken;
-import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.base.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
+import com.mk.framework.util.CommonUtils;
 import com.mk.framework.util.MyTokenUtils;
 import com.mk.framework.util.UrlUtils;
 import com.mk.ots.common.bean.PageObject;
@@ -51,6 +24,7 @@ import com.mk.ots.hotel.model.THotel;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomTypeService;
 import com.mk.ots.hotel.service.RoomstateService;
+import com.mk.ots.order.bean.*;
 import com.mk.ots.order.model.OtaOrderMac;
 import com.mk.ots.order.service.OrderServiceImpl;
 import com.mk.ots.order.service.OrderUtil;
@@ -59,8 +33,24 @@ import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.ots.pay.service.IPayService;
 import com.mk.ots.pay.service.IPriceService;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
+import com.mk.ots.system.model.UToken;
 import com.mk.ots.utils.PayLockKeyUtil;
 import com.mk.ots.web.ServiceOutput;
+import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @RestController
 @RequestMapping("/order")
@@ -500,7 +490,7 @@ public class OrderController {
 
 		String  showBlackType =  request.getParameter("showblacktype");// 非必填，是否是一元房
 
-
+		String callVersion = request.getParameter("callversion");
 		/*************** 移动设备信息 ************/
 		// 系统号
 		String sysno = request.getParameter("sysno");
@@ -590,6 +580,9 @@ public class OrderController {
 			}
 			if (StringUtils.isNotBlank(userLatitude)) {
 				order.set("userlatitude", userLatitude);
+			}
+			if (StringUtils.isNotBlank(callVersion)) {
+				order.set("callVersion", callVersion);
 			}
 			/*************** 移动设备信息 ************/
 			OtaOrderMac otaOrderMac = new OtaOrderMac();

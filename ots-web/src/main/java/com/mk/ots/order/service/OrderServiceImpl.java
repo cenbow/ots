@@ -82,9 +82,6 @@ import com.mk.sever.ServerChannel;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.BeanProperty;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2044,12 +2041,19 @@ public class OrderServiceImpl implements OrderService {
           if (tempOrderStatus != otaorder.getOrderStatus()) {
               otaorder.saveOrUpdate();
               /**************************特价订单返现***************************/
-              if( OtaOrderStatusEnum.CheckIn.getId() == otaorder.getOrderStatus()){
-                  BigDecimal returnWallCash =  tBackMoneyRuleService.getBackMoneyByOrder(otaorder);
-                  if(returnWallCash != null && returnWallCash.compareTo(new BigDecimal("0")) != 0){
-                      walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), returnWallCash);
-                  }
+              String callVersion = otaorder.get("callversion");
+              if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion.trim()) <= 0) {
+                  if (OtaOrderStatusEnum.CheckIn.getId() == otaorder.getOrderStatus()) {
+                      BigDecimal returnWallCash = tBackMoneyRuleService.getBackMoneyByOrder(otaorder);
+                      if (returnWallCash != null && returnWallCash.compareTo(new BigDecimal("0")) != 0) {
+                          walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), returnWallCash);
+                          //发送短消息和app消息
+                          /*Message message
+                          careProducer.sendSmsMsg();
+                          careProducer.sendSmsMsg();*/
+                      }
 
+                  }
               }
           }
           orderStatusBuf.append(",更新后OTA订单状态:" + otaorder.getOrderStatus());
@@ -2294,7 +2298,7 @@ public class OrderServiceImpl implements OrderService {
         tRoomSale.setRoomId(roomId.intValue());
         TRoomSale resultRoomSale = roomSaleService.getOneRoomSale(tRoomSale);
         if(resultRoomSale == null || resultRoomSale.getId() == null || resultRoomSale.getConfigId() == null){
-            return PromoTypeEnum.TJ.getCode().toString();
+            return PromoTypeEnum.OTHER.getCode().toString();
         }
         //判断对应的时间
         TRoomSaleConfig tRoomSaleConfig = new TRoomSaleConfig();
