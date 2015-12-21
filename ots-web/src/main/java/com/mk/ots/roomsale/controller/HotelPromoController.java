@@ -32,6 +32,7 @@ import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.promoteconfig.service.VisitSimService;
 import com.mk.ots.restful.input.HotelHomePageReqEntity;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
+import com.mk.ots.restful.input.HotelThemeReqEntity;
 import com.mk.ots.roomsale.model.TPriceScopeDto;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
@@ -306,10 +307,10 @@ public class HotelPromoController {
 
 	@RequestMapping(value = "/search/querythemes", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> queryThemes(HotelHomePageReqEntity homepageReqEntity,
-			Errors errors) throws Exception {
+	public ResponseEntity<Map<String, Object>> queryThemes(HotelThemeReqEntity themeReqEntity, Errors errors)
+			throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
-		String params = objectMapper.writeValueAsString(homepageReqEntity);
+		String params = objectMapper.writeValueAsString(themeReqEntity);
 		String errorMessage = "";
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
@@ -326,9 +327,9 @@ public class HotelPromoController {
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
-		String callVersion = (String) homepageReqEntity.getCallversion();
-		Double latitude = (Double) homepageReqEntity.getUserlatitude();
-		Double longitude = (Double) homepageReqEntity.getUserlongitude();
+		String callVersion = (String) themeReqEntity.getCallversion();
+		Double latitude = (Double) themeReqEntity.getUserlatitude();
+		Double longitude = (Double) themeReqEntity.getUserlongitude();
 
 		if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion) > 0) {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
@@ -358,7 +359,7 @@ public class HotelPromoController {
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
 
-		HotelQuerylistReqEntity queryReq = buildThemeQueryEntity(homepageReqEntity);
+		HotelQuerylistReqEntity queryReq = buildThemeQueryEntity(themeReqEntity);
 
 		try {
 			Map<String, Object> response = promoSearchService.searchThemes(queryReq);
@@ -511,17 +512,21 @@ public class HotelPromoController {
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 
-	private HotelQuerylistReqEntity buildThemeQueryEntity(HotelHomePageReqEntity homepageReqEntity) {
+	private HotelQuerylistReqEntity buildThemeQueryEntity(HotelThemeReqEntity entityReqEntity) {
 		HotelQuerylistReqEntity reqEntity = new HotelQuerylistReqEntity();
-		reqEntity.setCallversion(homepageReqEntity.getCallversion());
-		reqEntity.setCallmethod(homepageReqEntity.getCallmethod());
+		reqEntity.setCallversion(entityReqEntity.getCallversion());
+		reqEntity.setCallmethod(entityReqEntity.getCallmethod());
 		reqEntity.setCallentry(null);
-		reqEntity.setCityid(homepageReqEntity.getCityid());
-		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
-		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
+		reqEntity.setCityid(entityReqEntity.getCityid());
+		reqEntity.setUserlatitude(entityReqEntity.getUserlatitude());
+		reqEntity.setUserlongitude(entityReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
-		reqEntity.setPage(homepageReqEntity.getPage());
-		reqEntity.setLimit(homepageReqEntity.getLimit());
+		reqEntity.setPage(entityReqEntity.getPage());
+		reqEntity.setLimit(entityReqEntity.getLimit());
+		reqEntity.setSearchtype(entityReqEntity.getSearchtype());
+		reqEntity.setPosid(entityReqEntity.getPosid());
+		reqEntity.setPosname(entityReqEntity.getPosname());
+		reqEntity.setPoints(entityReqEntity.getPoints());
 
 		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 		Integer promoId = HotelPromoEnum.Theme.getCode();
@@ -554,6 +559,15 @@ public class HotelPromoController {
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
 
+		Integer promoId = HotelPromoEnum.Theme.getCode();
+
+		try {
+			Integer promotype = promoSearchService.queryByPromoId(promoId);
+			reqEntity.setPromotype(String.valueOf(promotype));
+		} catch (Exception ex) {
+			logger.warn(String.format("failed to query for promotype by promoid %s", promoId), ex);
+		}
+		
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
 		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
