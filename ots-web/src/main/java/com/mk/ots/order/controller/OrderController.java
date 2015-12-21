@@ -76,6 +76,7 @@ public class OrderController {
 	// 全部、进行中、已完成
 	private ImmutableMap<String, String> statetypeMap = ImmutableMap.of("all", 	"110,120,140,160,180,190,200,510,514,512,513,520", 
 																		"doing","110,120,140,160,180,510",
+																		"commenting","160,180,190,200",
 																		"done",	"200,190");
 
 	/**
@@ -706,7 +707,7 @@ public class OrderController {
 			if (StringUtils.isBlank(status)) {
 				throw MyErrorEnum.errorParm.getMyException("查询订单参数不能为空！");
 			}
-			String isscore = request.getParameter("isscore");// isscore
+
 			JSONArray jsonArray = JSON.parseArray(status);
 			for (int i = 0; i < jsonArray.size(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -714,7 +715,7 @@ public class OrderController {
 				if (StringUtils.isBlank(sqnum)) {
 					throw MyErrorEnum.errorParm.getMyException("sqnum参数不能为空！");
 				}
-
+				String isscore = jsonObject.getString("isscore");// isscore
 				String orderstatus = jsonObject.getString("orderstatus");
 				String statetype = jsonObject.getString("statetype");
 				if (StringUtils.isBlank(statetype) && StringUtils.isBlank(orderstatus)) {
