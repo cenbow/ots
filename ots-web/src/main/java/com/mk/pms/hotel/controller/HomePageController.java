@@ -84,6 +84,7 @@ public class HomePageController {
 		Double longitude = (Double) homepageReqEntity.getUserlongitude();
 
 		if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion) > 0) {
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			errorMessage = "callversion is lower than 3.3, not accessible in this function... ";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
@@ -92,6 +93,7 @@ public class HomePageController {
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		} else if (StringUtils.isBlank(callVersion)) {
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			errorMessage = "callversion is a must... ";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
@@ -105,6 +107,7 @@ public class HomePageController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			errorMessage = "latitude/longitude is a must... ";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");
 
 			logger.error(errorMessage);
 
@@ -142,10 +145,12 @@ public class HomePageController {
 						? responseHotel.subList(0, maxAllowedPopular) : responseHotel);
 			}
 
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "true");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
 		} catch (Exception ex) {
 			errorMessage = "failed to listpopular...";
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
@@ -233,11 +238,13 @@ public class HomePageController {
 				logger.warn("no show configs has been loaded...");
 			}
 
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "true");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
 		} catch (Exception ex) {
-			logger.error("failed to searchHomePageThemes...", ex);
+			logger.error("failed to listThemes...", ex);
 
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "failed to searchHomePageThemes...");
 
@@ -328,10 +335,21 @@ public class HomePageController {
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
-		reqEntity.setLimit(maxAllowedPopular * 2);
 		reqEntity.setIspromoonly(null);
 		reqEntity.setOrderby(HotelSortEnum.ORDERNUMS.getId());
 
+		if (homepageReqEntity.getPage() == null) {
+			reqEntity.setPage(1);
+		} else {
+			reqEntity.setPage(homepageReqEntity.getPage());
+		}
+
+		if (homepageReqEntity.getLimit() == null) {
+			reqEntity.setLimit(maxAllowedPopular * 2);
+		} else {
+			reqEntity.setLimit(homepageReqEntity.getLimit());
+		}
+		
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
 		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
@@ -351,7 +369,17 @@ public class HomePageController {
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
-		reqEntity.setLimit(maxAllowedPopular * 2);
+		if (homepageReqEntity.getPage() == null) {
+			reqEntity.setPage(1);
+		} else {
+			reqEntity.setPage(homepageReqEntity.getPage());
+		}
+
+		if (homepageReqEntity.getLimit() == null) {
+			reqEntity.setLimit(maxAllowedPopular * 2);
+		} else {
+			reqEntity.setLimit(homepageReqEntity.getLimit());
+		}
 
 		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 		Integer promoId = HotelPromoEnum.Theme.getCode();
@@ -361,7 +389,7 @@ public class HomePageController {
 		} catch (Exception ex) {
 			logger.warn(String.format("failed to query for promotype by promoid %s", promoId), ex);
 		}
-		
+
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
 		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
