@@ -223,7 +223,7 @@
         SELECT
         id,<include refid="Base_Column_List"/>
         FROM  t_room_sale_config
-        where   roomTypeId = #{roomTypeId} AND tag = 1
+        where   roomTypeId = #{roomTypeId} AND tag = 1 AND valid = 'T'
         limit 1
     </select>    
     <sql id="Base_view_Column_List" >
