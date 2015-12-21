@@ -40,7 +40,7 @@ public class ServiceCostRuleService {
             //如果没有找到对应的城市佣金规则，则用设置为默认的规则
             queryServiceCostRule = serviceCostRuleDao.getServiceCostRuleByDefault(businessType.getType());
         }
-        if(checkTime(orderCreateTime, queryServiceCostRule)){
+        if(!checkTime(orderCreateTime, queryServiceCostRule)){
             return new BigDecimal("0");
         }
         Integer resultQiekeFlag = queryServiceCostRule.getInt("qieke_flag");

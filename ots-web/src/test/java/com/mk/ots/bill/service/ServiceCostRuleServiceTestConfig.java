@@ -28,7 +28,7 @@ public class ServiceCostRuleServiceTestConfig extends BaseTest {
         String hotelCityCode = "310000";
         BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(orderCreateTime, qiekeFlag, price, hotelCityCode);
         BigDecimal expected = new BigDecimal("10.00");
-        Assert.assertEquals(true, expected.compareTo(serviceCost) == 0);
+        Assert.assertEquals(expected, serviceCost);
     }
 
 
@@ -123,7 +123,7 @@ public class ServiceCostRuleServiceTestConfig extends BaseTest {
         boolean checkTimeFlag = serviceCostRuleService.checkTime(new Date(),queryServiceCostRule);
         Assert.assertEquals(true , checkTimeFlag);
         Integer resultQiekeFlag = queryServiceCostRule.getInt("qieke_flag");
-        Assert.assertEquals(new Integer("0") , resultQiekeFlag);
+        Assert.assertEquals(new Integer("1") , resultQiekeFlag);
         Integer ruleType = queryServiceCostRule.getInt("rule_type");
         Assert.assertEquals(new Integer("1") , ruleType);
         Assert.assertEquals(true , ServiceCostRuleTypeEnum.RATIO.getType() == queryServiceCostRule.getInt("rule_type"));
