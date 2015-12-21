@@ -814,11 +814,55 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return rtnMap;
 	}
 
+	private void processGeos(HotelQuerylistReqEntity params) {
+		if (StringUtils.isBlank(params.getHotelid())) {
+			// 必填参数默认值处理：开始
+			if (StringUtils.isBlank(params.getCityid())) {
+				params.setCityid(Constant.STR_CITYID_SHANGHAI);
+			}
+			// 用户坐标经纬度值没有,先判断屏幕坐标经纬度值，有的话用屏幕坐标经纬度，没有默认上海市中心位置
+			if (params.getUserlongitude() == null) {
+				if (params.getPillowlongitude() == null) {
+					params.setUserlongitude(Constant.LON_SHANGHAI);
+				} else {
+					params.setUserlongitude(params.getPillowlongitude());
+				}
+			}
+			if (params.getUserlatitude() == null) {
+				if (params.getPillowlatitude() == null) {
+					params.setUserlatitude(Constant.LAT_SHANGHAI);
+				} else {
+					params.setUserlatitude(params.getPillowlatitude());
+				}
+			}
+			if (params.getPage() == null || params.getPage() <= 0) {
+				params.setPage(SearchConst.SEARCH_PAGE_DEFAULT);
+			}
+			if (params.getLimit() == null || params.getLimit() <= 0) {
+				params.setLimit(SearchConst.SEARCH_LIMIT_DEFAULT);
+			}
+
+			// 眯客3.0：搜索酒店周边的酒店
+			if (StringUtils.isNotBlank(params.getExcludehotelid())) {
+				// 如果是酒店周边搜索，默认搜索半径为5000米
+				if (params.getRange() == null || params.getRange() <= 0) {
+					params.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
+				}
+			} else {
+				if (params.getRange() == null || params.getRange() <= 0) {
+					params.setRange(SearchConst.SEARCH_RANGE_MAX);
+				}
+			}
+		}
+	}
+
 	@Override
 	public Map<String, Object> searchThemes(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
 		try {
+			processGeos(reqentity);
+
 			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
 			List<FilterBuilder> keywordBuilders = new ArrayList<FilterBuilder>();
 
@@ -878,7 +922,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					}
 				}
 			}
-			
+
 			int page = reqentity.getPage().intValue();
 			int limit = reqentity.getLimit().intValue();
 
@@ -924,7 +968,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Cat.logEvent("HotKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
 			}
 
-
 			double distance = 0;
 
 			if (reqentity.getRange() != null) {
@@ -958,6 +1001,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					logger.error("按照{}搜索是没有获取到经纬度, points: {}。", HotelSearchEnum.getById(searchType).getName(), points);
 				}
 			}
+			
+			GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
+			geoFilter.point(lat, lon).distance(distance, DistanceUnit.METERS).optimizeBbox("memory")
+					.geoDistance(GeoDistance.ARC);
+			filterBuilders.add(geoFilter);
 
 			if (StringUtils.isNotBlank(reqentity.getKeyword()) || StringUtils.isNotBlank(reqentity.getHotelname())
 					|| StringUtils.isNotBlank(reqentity.getHoteladdr())) {
