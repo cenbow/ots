@@ -126,7 +126,7 @@ public class HomePageController {
 				logger.warn("no show configs has been loaded...");
 			}
 
-			if (homepageReqEntity.getPillowlongitude()!= null && homepageReqEntity.getPillowlatitude()!= null){
+			if (homepageReqEntity.getPillowlongitude() != null && homepageReqEntity.getPillowlatitude() != null) {
 				reqEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
 			}
 
@@ -202,7 +202,7 @@ public class HomePageController {
 		try {
 			HotelQuerylistReqEntity reqEntity = buildThemeQueryEntity(homepageReqEntity);
 
-			if (homepageReqEntity.getPillowlongitude()!= null && homepageReqEntity.getPillowlatitude()!= null){
+			if (homepageReqEntity.getPillowlongitude() != null && homepageReqEntity.getPillowlatitude() != null) {
 				reqEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
 			}
 
@@ -330,10 +330,14 @@ public class HomePageController {
 		reqEntity.setCallentry(null);
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
+		reqEntity.setPillowlatitude(homepageReqEntity.getUserlatitude());
+		reqEntity.setPillowlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
 		reqEntity.setLimit(maxAllowedPopular * 2);
 		reqEntity.setIspromoonly(null);
 		reqEntity.setOrderby(HotelSortEnum.ORDERNUMS.getId());
+		reqEntity.setSearchtype(0);
+		reqEntity.setRange(3000);
 
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
@@ -364,7 +368,7 @@ public class HomePageController {
 		} catch (Exception ex) {
 			logger.warn(String.format("failed to query for promotype by promoid %s", promoId), ex);
 		}
-		
+
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
 		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
