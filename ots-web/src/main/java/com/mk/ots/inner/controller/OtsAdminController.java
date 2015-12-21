@@ -248,5 +248,14 @@ public class OtsAdminController {
 		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 	}
 
+	@RequestMapping(value = "/report/genBillConfirmChecks", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> genBillConfirmChecks(String startdateday) {
+		Map<String, Object> datas = new HashMap<String, Object>();
+		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		logger.info("genBillConfirmChecks::{}", startdateday);
+		billService.genBillConfirmChecks(DateUtils.getDateFromString(startdateday), null, null);
+		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+	}
+
 
 }
