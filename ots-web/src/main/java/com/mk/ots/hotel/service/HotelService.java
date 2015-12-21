@@ -2793,7 +2793,13 @@ public class HotelService {
 				reqEntity.setPage(1);
 				reqEntity.setLimit(1);
 				reqEntity.setHotelid(String.valueOf(hotelId));
+				Date day = new Date();
+				String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
+				String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
 
+				reqEntity.setStartdateday(strCurDay);
+				reqEntity.setEnddateday(strNextDay);
+				
 				Map<String, Object> response = searchService.readonlySearchHotels(reqEntity);
 				List<Map<String, Object>> hotel = (List<Map<String, Object>>) response.get("hotel");
 				if (hotel != null && hotel.size() > 0) {
