@@ -879,6 +879,28 @@ public class SearchService implements ISearchService {
 			double cityLat_default = Constant.LAT_SHANGHAI;
 			double cityLon_default = Constant.LON_SHANGHAI;
 
+			logger.info("find city geopoint begin...");
+			TCityModel tcity = null;
+			String citycode = cityid;
+			if (citycode != null) {
+				tcity = cityService.findCityByCode(citycode);
+			}
+
+			if (tcity != null) {
+				BigDecimal cityLat = tcity.getLatitude();
+				if (cityLat != null) {
+					cityLat_default = cityLat.doubleValue();
+					logger.info("city {} lat is {}.", cityid, cityLat_default);
+				}
+
+				BigDecimal cityLon = tcity.getLongitude();
+				if (cityLon != null) {
+					cityLon_default = cityLon.doubleValue();
+					logger.info("city {} lon is {}.", cityid, cityLon_default);
+				}
+			}
+
+
 			// 眯客3.0：是否是当前酒店周边酒店搜索
 			boolean isZhoubian = StringUtils.isNotBlank(reqentity.getExcludehotelid());
 			if (isZhoubian) {
@@ -889,24 +911,8 @@ public class SearchService implements ISearchService {
 			} else {
 				if (!HotelSearchEnum.NEAR.getId().equals(searchType)) {
 					// 不是搜索酒店周边，也不是搜索附近酒店，使用B端配置的搜索半径
-					logger.info("find city geopoint begin...");
-					TCityModel tcity = null;
-					String citycode = cityid;
-					if (citycode != null) {
-						tcity = cityService.findCityByCode(citycode);
-					}
-					if (tcity != null) {
-						BigDecimal cityLat = tcity.getLatitude();
-						if (cityLat != null) {
-							cityLat_default = cityLat.doubleValue();
-							logger.info("city {} lat is {}.", cityid, cityLat_default);
-						}
 
-						BigDecimal cityLon = tcity.getLongitude();
-						if (cityLon != null) {
-							cityLon_default = cityLon.doubleValue();
-							logger.info("city {} lon is {}.", cityid, cityLon_default);
-						}
+					if (tcity != null) {
 
 						Double cityRange = tcity.getRange();
 						if (cityRange != null) {
@@ -916,9 +922,9 @@ public class SearchService implements ISearchService {
 					}
 					logger.info("find city geopoint end...");
 				} else {
-					// 如果搜索附近酒店，并且C端没有传range，默认5000米。
+					// 如果搜索附近酒店，并且C端没有传range，默认全城3000000米。
 					if (reqentity.getRange() == null) {
-						reqentity.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
+						reqentity.setRange(SearchConst.SEARCH_RANGE_MAX);
 					}
 				}
 			}
