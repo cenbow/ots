@@ -837,6 +837,48 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				logger.info(String.format("about to search for cityid: %s; hotelid: %s", cityid, hotelid));
 			}
 
+			double cityLat_default = Constant.LAT_SHANGHAI;
+			double cityLon_default = Constant.LON_SHANGHAI;
+			boolean isZhoubian = StringUtils.isNotBlank(reqentity.getExcludehotelid());
+			if (isZhoubian) {
+				if (reqentity.getRange() == null || reqentity.getRange() <= 0) {
+					reqentity.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
+				}
+			} else {
+				if (!HotelSearchEnum.NEAR.getId().equals(searchType)) {
+					logger.info("find city geopoint begin...");
+					TCityModel tcity = null;
+					String citycode = cityid;
+					if (citycode != null) {
+						tcity = cityService.findCityByCode(citycode);
+					}
+					if (tcity != null) {
+						BigDecimal cityLat = tcity.getLatitude();
+						if (cityLat != null) {
+							cityLat_default = cityLat.doubleValue();
+							logger.info("city {} lat is {}.", cityid, cityLat_default);
+						}
+
+						BigDecimal cityLon = tcity.getLongitude();
+						if (cityLon != null) {
+							cityLon_default = cityLon.doubleValue();
+							logger.info("city {} lon is {}.", cityid, cityLon_default);
+						}
+
+						Double cityRange = tcity.getRange();
+						if (cityRange != null) {
+							reqentity.setRange(cityRange.intValue());
+							logger.info("set city {} search range is {}", cityid, cityRange);
+						}
+					}
+					logger.info("find city geopoint end...");
+				} else {
+					if (reqentity.getRange() == null) {
+						reqentity.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
+					}
+				}
+			}
+			
 			int page = reqentity.getPage().intValue();
 			int limit = reqentity.getLimit().intValue();
 
@@ -882,50 +924,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Cat.logEvent("HotKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
 			}
 
-			double cityLat_default = Constant.LAT_SHANGHAI;
-			double cityLon_default = Constant.LON_SHANGHAI;
 
-			boolean isZhoubian = StringUtils.isNotBlank(reqentity.getExcludehotelid());
-			if (isZhoubian) {
-				if (reqentity.getRange() == null || reqentity.getRange() <= 0) {
-					reqentity.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
-				}
+			double distance = 0;
+
+			if (reqentity.getRange() != null) {
+				distance = Double.valueOf(reqentity.getRange());
 			} else {
-				if (!HotelSearchEnum.NEAR.getId().equals(searchType)) {
-					logger.info("find city geopoint begin...");
-					TCityModel tcity = null;
-					String citycode = cityid;
-					if (citycode != null) {
-						tcity = cityService.findCityByCode(citycode);
-					}
-					if (tcity != null) {
-						BigDecimal cityLat = tcity.getLatitude();
-						if (cityLat != null) {
-							cityLat_default = cityLat.doubleValue();
-							logger.info("city {} lat is {}.", cityid, cityLat_default);
-						}
-
-						BigDecimal cityLon = tcity.getLongitude();
-						if (cityLon != null) {
-							cityLon_default = cityLon.doubleValue();
-							logger.info("city {} lon is {}.", cityid, cityLon_default);
-						}
-
-						Double cityRange = tcity.getRange();
-						if (cityRange != null) {
-							reqentity.setRange(cityRange.intValue());
-							logger.info("set city {} search range is {}", cityid, cityRange);
-						}
-					}
-					logger.info("find city geopoint end...");
-				} else {
-					if (reqentity.getRange() == null) {
-						reqentity.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
-					}
-				}
+				distance = SearchConst.SEARCH_RANGE_MAX;
 			}
-
-			double distance = Double.valueOf(reqentity.getRange());
 
 			double lat = reqentity.getPillowlatitude() == null ? cityLat_default : reqentity.getPillowlatitude();
 			double lon = reqentity.getPillowlongitude() == null ? cityLon_default : reqentity.getPillowlongitude();

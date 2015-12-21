@@ -196,6 +196,15 @@ public class VisitSimServiceImpl implements VisitSimService {
 			try {
 				writeLock.lock();
 
+				Data cacheData = queryData();
+
+				/**
+				 * 
+				 */
+				if (cacheData != null && cacheData.currentVisitNumber > currentVisitNumber.get()) {
+					
+				}
+
 				Integer gap = RandomUtils.nextInt(currentGapMin.get(), currentGapMax.get());
 
 				long currVisitNumber = currentVisitNumber.addAndGet(gap);
@@ -222,8 +231,9 @@ public class VisitSimServiceImpl implements VisitSimService {
 		}
 
 		try {
-			Data data = queryData();
-			return data.getCurrentVisitNumber();
+			Data cacheData = queryData();
+
+			return cacheData.getCurrentVisitNumber();
 		} catch (Exception ex) {
 			logger.error("failed to querydata from cache...", ex);
 			return 0L;
