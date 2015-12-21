@@ -18,7 +18,6 @@ package com.mk.ots.bill.dao;
  toPayDiscount //到付贴现金额--qiekeIncome //切客收益10
  */
 import com.google.common.collect.ImmutableMap;
-import com.mk.ots.bill.enums.ServiceQiekeTypeEnum;
 import com.mk.ots.bill.service.ServiceCostRuleService;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.home.util.HomeConst;
@@ -168,8 +167,8 @@ public class BillOrderDAO {
                 + "CASE "
                 + "WHEN isnull(o.spreadUser) THEN "
                 + "1 " //非切客
-                + "ELSE "
                 + "when spreadUser = -1 then 3 " //新切客
+                + "ELSE "
                 + "2 " //切客 有值
                 + "END "
                 + ") AS spreaduser, "
