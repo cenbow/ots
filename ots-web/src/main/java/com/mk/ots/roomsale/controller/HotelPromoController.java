@@ -1,5 +1,6 @@
 package com.mk.ots.roomsale.controller;
 
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -7,6 +8,16 @@ import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
+
+import com.alibaba.fastjson.JSONObject;
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.roomsale.model.TPriceScopeDto;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
+import com.mk.ots.roomsale.service.RoomSaleService;
+import com.mk.ots.roomsale.service.TPriceScopeService;
+import com.mk.ots.web.ServiceOutput;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -626,17 +637,17 @@ public class HotelPromoController {
 					result.put("promosec", sec / 1000); // 秒
 					result.put("promosecend", endSec / 1000); // 距离结束时间（s）
 					result.put("nextpromosec", nextsec / 1000); // 距离下一段结束时间（s）
-					List<TPriceScopeDto> tpriceScopeDtoList = tpriceScopeService
-							.queryTPriceScopeDto(saleConfigInfo.getSaleTypeId() + "", cityid);
-					if (!CollectionUtils.isEmpty(tpriceScopeDtoList)) {
-						result.put("minprice", tpriceScopeDtoList.get(0).getMinprice());
-						result.put("maxprice", tpriceScopeDtoList.get(0).getMaxprice());
-						result.put("step", tpriceScopeDtoList.get(0).getStep());
-					}
+
 					break;
 				}
 			}
 
+			List<TPriceScopeDto>  tpriceScopeDtoList = tpriceScopeService.queryTPriceScopeDto(promoid + "", cityid);
+			if(!CollectionUtils.isEmpty(tpriceScopeDtoList)){
+				result.put("minprice",tpriceScopeDtoList.get(0).getMinprice());
+				result.put("maxprice",tpriceScopeDtoList.get(0).getMaxprice());
+				result.put("step",tpriceScopeDtoList.get(0).getStep());
+			}
 			result.put("promotypes", list);
 
 			result.put(ServiceOutput.STR_MSG_SUCCESS, true);
