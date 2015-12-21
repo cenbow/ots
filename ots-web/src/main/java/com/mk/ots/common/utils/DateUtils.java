@@ -4,6 +4,8 @@
  */
 package com.mk.ots.common.utils;
 
+import com.mk.framework.AppUtils;
+import com.mk.ots.bill.dao.BillOrderDAO;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Seconds;
@@ -486,7 +488,8 @@ public class DateUtils extends Object {
      * @return 与某日期相差addNum天的日期
      */
     public static String getDateAdded(int addNum, String getDate) {
-        return getCertainDate(getDate, addNum);
+        Date addDays = addDays(DateUtils.getDateFromString(getDate), addNum);
+        return DateUtils.formatDate(addDays);
     }
 
     /**
@@ -1494,9 +1497,27 @@ public class DateUtils extends Object {
      * @param args 参数
      */
     public static void main(String[] args) throws ParseException {
-        Calendar c = Calendar.getInstance();
-        c.setTime(DateUtils.addDays(DateUtils.parseDate("2015-11-09", DateUtils.FORMAT_DATE), -2));
-        Date[]  d = DateUtils.getWeekStartAndEndDate(c);
+        String startTime = DateUtils.getStringFromDate(DateUtils.getDateFromString("2015-12-31"), DateUtils.FORMAT_DATE);
+        String endTime = DateUtils.getStringFromDate(DateUtils.addDays(DateUtils.getDateFromString("2015-12-31"), 1), DateUtils.FORMAT_DATE);
+        System.out.print(startTime);
+        System.out.print(endTime);
+    }
+
+    public static Date getMonthLastDay(Calendar cal){
+        Calendar   setCal  =  Calendar.getInstance();
+        setCal.setTime(cal.getTime());
+        final   int   lastDay   =   setCal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        setCal.set(Calendar.DATE, lastDay);
+        Date   lastDate   =  setCal.getTime();
+        return   lastDate;
+    }
+
+    public static Date getMonthFirstDay(Calendar cal){
+        Calendar   setCal  =  Calendar.getInstance();
+        setCal.setTime(cal.getTime());
+        setCal.set(Calendar.DAY_OF_MONTH, 1);
+        Date firstDate = setCal.getTime();
+        return firstDate;
     }
 
     

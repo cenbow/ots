@@ -74,7 +74,6 @@ public class BillOrderService {
 	 */
 	public void runtWeekClearing(Date nowTime, String hotelid) {
 		List<Map<String, Object>> result = null;
-		;
 		if (nowTime == null) {
 			result = billOrderDAO.getWeekClearing(new Date());
 		} else {

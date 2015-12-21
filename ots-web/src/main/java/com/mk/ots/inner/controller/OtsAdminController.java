@@ -1,5 +1,6 @@
 package com.mk.ots.inner.controller;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -7,6 +8,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.mk.framework.AppUtils;
 import com.mk.ots.bill.dao.BillOrderDAO;
+import com.mk.ots.bill.service.ServiceCostRuleService;
 import com.mk.ots.order.service.QiekeRuleService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -47,6 +49,9 @@ public class OtsAdminController {
 
 	@Autowired
 	private BillOrderService billService;
+
+	@Autowired
+	private ServiceCostRuleService serviceCostRuleService;
 
 	private final SimpleDateFormat defaultDateFormatter = new SimpleDateFormat(DateUtils.FORMATSHORTDATETIME);
 
@@ -245,6 +250,24 @@ public class OtsAdminController {
 		QiekeRuleService qiekeRuleService = AppUtils.getBean(QiekeRuleService.class);
 		Date beginTime = DateUtils.getDateFromString(startdateday, DateUtils.FORMATSHORTDATETIME);
 		qiekeRuleService.updateTopInvalidReason(beginTime);
+		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/report/genBillConfirmChecks", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> genBillConfirmChecks(String startdateday) {
+		Map<String, Object> datas = new HashMap<String, Object>();
+		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		logger.info("genBillConfirmChecks::{}", startdateday);
+		billService.genBillConfirmChecks(DateUtils.getDateFromString(startdateday), null, null);
+		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/report/getServiceCostByOrderType", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> getServiceCostByOrderType(String startdateday,Boolean qiekeFlag, BigDecimal price, String hotelCityCode) {
+		Map<String, Object> datas = new HashMap<String, Object>();
+		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		logger.info("genBillConfirmChecks::{}", startdateday);
+		serviceCostRuleService.getServiceCostByOrderType(DateUtils.getDateFromString(startdateday), qiekeFlag, price, hotelCityCode);
 		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 	}
 

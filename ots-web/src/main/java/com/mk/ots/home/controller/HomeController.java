@@ -64,7 +64,7 @@ public class HomeController {
 			while (beginDate.compareToIgnoreCase(endDate) < 0) {
 				homeService.genHomeDatas(hotelId0, beginDate, 0);
 				m.put("处理" + i, beginDate + "至" + endDate);
-				beginDate = DateUtils.getDateAdded(1, beginDate);
+				beginDate = DateUtils.formatDate(DateUtils.addDays(DateUtils.getDateFromString(beginDate), 2));
 				if (endDate.equals("9999-01-01")) {
 					break;
 				}

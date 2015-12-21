@@ -16,7 +16,7 @@ public final class SearchConst {
     public final static Integer SEARCH_RANGE_DEFAULT = 5000;
     
     /** 酒店搜索最大搜索半径（单位: 米） */
-    public final static Integer SEARCH_RANGE_MAX = 3000000;
+    public final static Integer SEARCH_RANGE_MAX = 300000000;
 
     /** 酒店搜索默认搜索半径（单位: 米） */
     public final static Integer SEARCH_RANGE_1_KM = 1000;
