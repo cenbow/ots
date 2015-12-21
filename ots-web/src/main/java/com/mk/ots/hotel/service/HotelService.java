@@ -2793,11 +2793,19 @@ public class HotelService {
 				reqEntity.setPage(1);
 				reqEntity.setLimit(1);
 				reqEntity.setHotelid(String.valueOf(hotelId));
+				Date day = new Date();
+				String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
+				String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
 
+				reqEntity.setStartdateday(strCurDay);
+				reqEntity.setEnddateday(strNextDay);
+				
 				Map<String, Object> response = searchService.readonlySearchHotels(reqEntity);
 				List<Map<String, Object>> hotel = (List<Map<String, Object>>) response.get("hotel");
 				if (hotel != null && hotel.size() > 0) {
 					resultMap.put("repairinfo", hotel.get(0).get("repairinfo"));
+					resultMap.put("highlights", hotel.get(0).get("highlights"));
+					resultMap.put("greetscore", hotel.get(0).get("greetscore"));
 					resultMap.put("latitude", hotel.get(0).get("latitude"));
 					resultMap.put("longitude", hotel.get(0).get("longitude"));
 				}

@@ -34,8 +34,10 @@ import com.mk.framework.util.CommonUtils;
 import com.mk.ots.common.bean.ParamBaseBean;
 import com.mk.ots.common.enums.FrontPageEnum;
 import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.enums.HotelSearchEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.common.utils.SearchConst;
 import com.mk.ots.hotel.service.HotelPriceService;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomstateService;
@@ -197,6 +199,10 @@ public class HotelController {
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
 
+		if (reqentity.getPillowlongitude() != null && reqentity.getUserlatitude() != null){
+			hotelEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
+		}
+
 		hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
 		hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
 
@@ -227,6 +233,10 @@ public class HotelController {
 		hotelEntity.setCallversion(reqentity.getCallversion());
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
+
+		if (reqentity.getPillowlongitude() != null && reqentity.getUserlatitude() != null){
+			hotelEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
+		}
 
 		hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
 		hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());

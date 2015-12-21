@@ -12,6 +12,7 @@ import com.mk.ots.common.utils.Constant;
 import com.mk.ots.order.service.QiekeRuleService;
 import com.mk.ots.search.service.impl.IndexerService;
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,9 @@ public class OtsAdminController {
 	@Autowired
 	private IndexerService indexerService;
 
+	@Autowired
+	protected ElasticsearchProxy esProxy;
+
 	private final SimpleDateFormat defaultDateFormatter = new SimpleDateFormat(DateUtils.FORMATSHORTDATETIME);
 
 	/**
@@ -84,6 +88,38 @@ public class OtsAdminController {
 		try {
 
 			String ret = indexerService.batchUpdateEsIndexer();
+			output.setSuccess(true);
+		} catch (Exception e) {
+			output.setFault(e.getMessage());
+		}
+		if (AppUtils.DEBUG_MODE) {
+			long endtime = new Date().getTime();
+			output.setMsgAttr("$times$", endtime - starttime + " ms");
+		}
+		return new ResponseEntity<ServiceOutput>(output, HttpStatus.OK);
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	@RequestMapping("/indexer/drop")
+	@ResponseBody
+	public ResponseEntity<ServiceOutput> indexerDrop(String token, String hotelid) {
+		ServiceOutput output = new ServiceOutput();
+		if (StringUtils.isBlank(token) || !Constant.STR_INNER_TOKEN.equals(token)) {
+			output.setFault("token is invalidate.");
+			return new ResponseEntity<ServiceOutput>(output, HttpStatus.OK);
+		}
+
+		Date day = new Date();
+		long starttime = day.getTime();
+		try {
+
+			SearchHit[] searchHits = esProxy.searchHotelByHotelId(hotelid);
+			for (int i = 0; i < searchHits.length; i++) {
+				esProxy.deleteDocument(searchHits[i].getId());
+			}
 			output.setSuccess(true);
 		} catch (Exception e) {
 			output.setFault(e.getMessage());
