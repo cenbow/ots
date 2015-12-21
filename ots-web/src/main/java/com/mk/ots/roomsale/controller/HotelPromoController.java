@@ -32,6 +32,7 @@ import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.promoteconfig.service.VisitSimService;
 import com.mk.ots.restful.input.HotelHomePageReqEntity;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
+import com.mk.ots.restful.input.HotelThemeReqEntity;
 import com.mk.ots.roomsale.model.TPriceScopeDto;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
@@ -306,10 +307,10 @@ public class HotelPromoController {
 
 	@RequestMapping(value = "/search/querythemes", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> queryThemes(HotelHomePageReqEntity homepageReqEntity,
-			Errors errors) throws Exception {
+	public ResponseEntity<Map<String, Object>> queryThemes(HotelThemeReqEntity themeReqEntity, Errors errors)
+			throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
-		String params = objectMapper.writeValueAsString(homepageReqEntity);
+		String params = objectMapper.writeValueAsString(themeReqEntity);
 		String errorMessage = "";
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
@@ -318,7 +319,6 @@ public class HotelPromoController {
 		}
 
 		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			errorMessage = "parameters validation failed with error";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
@@ -327,12 +327,11 @@ public class HotelPromoController {
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
-		String callVersion = (String) homepageReqEntity.getCallversion();
-		Double latitude = (Double) homepageReqEntity.getUserlatitude();
-		Double longitude = (Double) homepageReqEntity.getUserlongitude();
+		String callVersion = (String) themeReqEntity.getCallversion();
+		Double latitude = (Double) themeReqEntity.getUserlatitude();
+		Double longitude = (Double) themeReqEntity.getUserlongitude();
 
 		if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion) > 0) {
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");			
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			errorMessage = "callversion is lower than 3.3, not accessible in this function... ";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
@@ -341,7 +340,6 @@ public class HotelPromoController {
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		} else if (StringUtils.isBlank(callVersion)) {
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");		
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			errorMessage = "callversion is a must... ";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
@@ -352,7 +350,6 @@ public class HotelPromoController {
 		}
 
 		if (latitude == null || longitude == null) {
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			errorMessage = "latitude/longitude is a must... ";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
@@ -362,15 +359,14 @@ public class HotelPromoController {
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
 
-		HotelQuerylistReqEntity queryReq = buildThemeQueryEntity(homepageReqEntity);
+		HotelQuerylistReqEntity queryReq = buildThemeQueryEntity(themeReqEntity);
 
 		try {
 			Map<String, Object> response = promoSearchService.searchThemes(queryReq);
 			if (response != null) {
 				rtnMap.putAll(response);
 			}
-			
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "true");
+
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
 			if (rtnMap.containsKey("success")) {
@@ -378,7 +374,6 @@ public class HotelPromoController {
 			}
 		} catch (Exception ex) {
 			logger.error("failed to queryThemes...", ex);
-			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");			
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "failed to do onedollarlist query...");
 		}
@@ -517,29 +512,21 @@ public class HotelPromoController {
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 
-	private HotelQuerylistReqEntity buildThemeQueryEntity(HotelHomePageReqEntity homepageReqEntity) {
+	private HotelQuerylistReqEntity buildThemeQueryEntity(HotelThemeReqEntity entityReqEntity) {
 		HotelQuerylistReqEntity reqEntity = new HotelQuerylistReqEntity();
-		reqEntity.setCallversion(homepageReqEntity.getCallversion());
-		reqEntity.setCallmethod(homepageReqEntity.getCallmethod());
+		reqEntity.setCallversion(entityReqEntity.getCallversion());
+		reqEntity.setCallmethod(entityReqEntity.getCallmethod());
 		reqEntity.setCallentry(null);
-		reqEntity.setCityid(homepageReqEntity.getCityid());
-		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
-		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
+		reqEntity.setCityid(entityReqEntity.getCityid());
+		reqEntity.setUserlatitude(entityReqEntity.getUserlatitude());
+		reqEntity.setUserlongitude(entityReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
-		reqEntity.setPage(homepageReqEntity.getPage());
-		reqEntity.setLimit(homepageReqEntity.getLimit());
-		
-		if (homepageReqEntity.getPage() == null) {
-			reqEntity.setPage(1);
-		} else {
-			reqEntity.setPage(homepageReqEntity.getPage());
-		}
-
-		if (homepageReqEntity.getLimit() == null) {
-			reqEntity.setLimit(10);
-		} else {
-			reqEntity.setLimit(homepageReqEntity.getLimit());
-		}
+		reqEntity.setPage(entityReqEntity.getPage());
+		reqEntity.setLimit(entityReqEntity.getLimit());
+		reqEntity.setSearchtype(entityReqEntity.getSearchtype());
+		reqEntity.setPosid(entityReqEntity.getPosid());
+		reqEntity.setPosname(entityReqEntity.getPosname());
+		reqEntity.setPoints(entityReqEntity.getPoints());
 
 		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 		Integer promoId = HotelPromoEnum.Theme.getCode();
@@ -571,21 +558,7 @@ public class HotelPromoController {
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
-		reqEntity.setIspromoonly(Boolean.TRUE);
-		
-		if (homepageReqEntity.getPage() == null) {
-			reqEntity.setPage(1);
-		} else {
-			reqEntity.setPage(homepageReqEntity.getPage());
-		}
 
-		if (homepageReqEntity.getLimit() == null) {
-			reqEntity.setLimit(10);
-		} else {
-			reqEntity.setLimit(homepageReqEntity.getLimit());
-		}
-
-		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 		Integer promoId = HotelPromoEnum.Theme.getCode();
 
 		try {
