@@ -5,6 +5,7 @@ import com.mk.ots.common.enums.HotelSortEnum;
 import com.mk.ots.common.enums.ShowAreaEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.common.utils.SearchConst;
 import com.mk.ots.restful.input.HotelHomePageReqEntity;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
@@ -125,6 +126,10 @@ public class HomePageController {
 				logger.warn("no show configs has been loaded...");
 			}
 
+			if (homepageReqEntity.getPillowlongitude()!= null && homepageReqEntity.getPillowlatitude()!= null){
+				reqEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
+			}
+
 			Map<String, Object> responseHotels = searchService.readonlySearchHotels(reqEntity);
 
 			List<Map<String, Object>> responseHotel = (List<Map<String, Object>>) responseHotels.get("hotel");
@@ -198,7 +203,7 @@ public class HomePageController {
 			HotelQuerylistReqEntity reqEntity = buildThemeQueryEntity(homepageReqEntity);
 
 			if (homepageReqEntity.getPillowlongitude()!= null && homepageReqEntity.getPillowlatitude()!= null){
-				reqEntity.setRange(3000);
+				reqEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
 			}
 
 			Map<String, Object> themeResponse = promoService.readonlySearchHotels(reqEntity);
