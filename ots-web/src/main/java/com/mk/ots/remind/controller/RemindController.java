@@ -1,9 +1,12 @@
 package com.mk.ots.remind.controller;
 
+import com.mk.framework.AppUtils;
+import com.mk.framework.MkJedisConnectionFactory;
 import com.mk.framework.util.MyTokenUtils;
 import com.mk.ots.common.enums.RemindTypeEnum;
 import com.mk.ots.member.model.UMember;
 import com.mk.ots.remind.service.RemindService;
+import com.mk.ots.utils.SpringContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,15 @@ public class RemindController {
 
     @RequestMapping("/create")
     public ResponseEntity<Map<String, Object>> createSpecialRoomRemind(String token, Long hotelId, Long roomTypeId) {
+        if (null == hotelId) {
+            Map<String, Object> result = new HashMap<String, Object>();
+            result.put("success",false);
+            result.put("errcode","");
+            result.put("errmsg","hotelId必填");
+            return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
+        }
+
+        //
         UMember memberByToken = MyTokenUtils.getMemberByToken(token);
 
         //check
@@ -41,12 +53,10 @@ public class RemindController {
         }
 
         //remind
-        this.remindService.createSpecialRoomRemind(memberByToken.getMid(), hotelId, roomTypeId);
+        this.remindService.createSpecialRoomRemind(memberByToken, hotelId, roomTypeId);
 
         Map<String, Object> result = new HashMap<String, Object>();
         result.put("success",true);
         return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
     }
-
-
 }
