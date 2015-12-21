@@ -1,5 +1,6 @@
 package com.mk.ots.view.thread;
 
+import com.mk.framework.AppUtils;
 import com.mk.framework.MkJedisConnectionFactory;
 import com.mk.ots.utils.SpringContextUtil;
 import com.mk.ots.view.listen.SyViewLogListen;
@@ -26,19 +27,17 @@ public class SyViewLogThread  extends    Thread{
 //    private static MkJedisConnectionFactory jedisFactory = SpringContextUtil.getBean(MkJedisConnectionFactory.class);
 
     public void run() {
-        System.out.println("aaaaaabbbbbbbbbbb32123");
-        BeanFactory factory = new ClassPathXmlApplicationContext("applicationContext.xml");
-        MkJedisConnectionFactory jedisFactory = factory.getBean(MkJedisConnectionFactory.class);
-        System.out.println("aaaaaaaaaaaaaaaaaaaaa1");
         try{
-//            Jedis jedis = cacheManager.getNewJedis();
-            SyViewLogListen listener = new SyViewLogListen();
-            System.out.println("aaaaaaaaaaaaaaaaaaaaa2");
-//            jedis.subscribe(listener, "SYVIEWwLOG");
+            while(true){
+                System.out.println("aaaaaaaaaaaaaaaaaaaaa222");
+                MkJedisConnectionFactory jedisFactory = AppUtils.getBean(MkJedisConnectionFactory.class);
+                SyViewLogListen listener = new SyViewLogListen();
+                jedisFactory.getJedis().subscribe(listener, "SYVIEWwLOG");
+                System.out.println("aaaaaaaaaaaaaaaaaaaaa2");
+                Thread.sleep(300);
+            }
         }catch(Exception e){
             e.printStackTrace();
         }
-
-//        jedisFactory.getJedis().subscribe(listener, "SYVIEWwLOG");
     }
 }

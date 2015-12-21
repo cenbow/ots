@@ -10,11 +10,10 @@ public class SyLogViewTask implements InitializingBean {
 
     public void afterPropertiesSet()
     {
-        System.out.println("开始执行|||||||||||||||||||");
         try{
-           SyViewLogThread  slt  = new SyViewLogThread();
+            System.out.println("开始执行|||||||||||||||||||");
+            SyViewLogThread slt  = new SyViewLogThread();
             slt.start();
-
         }catch(Exception e1){
             System.out.println("执行进入异常|||||||||||||||||||");
             e1.printStackTrace();

@@ -71,14 +71,14 @@ public class SyViewLogController {
         if (StringUtils.isEmpty(tourl)) {
             logger.error("获取目标url失败.");
             resultrtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
-            resultrtnMap.put("errmsg", "日志添加失败");
+            resultrtnMap.put("errmsg", "日志添加失败!");
             return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
         }
 
         if (StringUtils.isEmpty(actiontype)) {
             logger.error("获取目标url失败.");
             resultrtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
-            resultrtnMap.put("errmsg", "日志添加失败");
+            resultrtnMap.put("errmsg", "日志添加失败.");
             return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
         }
 
@@ -104,21 +104,26 @@ public class SyViewLogController {
         dateMap.put("simsn",request.getParameter("simsn"));
         dateMap.put("bussinessType",request.getParameter("bussinesstype"));
         dateMap.put("bussinessId",request.getParameter("bussinessid"));
-        dateMap.put("hardwarecode",request.getParameter("hardwarecode"));
-        dateMap.put("imei",request.getParameter("imei"));
+        dateMap.put("hardwarecode", request.getParameter("hardwarecode"));
+        dateMap.put("imei", request.getParameter("imei"));
 
    //     result = syViewLogService.saveSyViewLog(dateMap);
-        syViewLogService.pushSyViewLog(dateMap);
-        //组织数据响应
-
-        resultrtnMap.put("success", result);
-
-        if (result) {
-            return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
-        } else {
-            resultrtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
-            resultrtnMap.put("errmsg", "日志添加失败");
-            return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
+        try{
+            //组织数据响应
+            syViewLogService.pushSyViewLog(dateMap);
+            result = true;
+        }catch(Exception   e){
+            result =false;
+        }finally{
+            resultrtnMap.put("success", result);
+            if (result) {
+                return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
+            } else {
+                resultrtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
+                resultrtnMap.put("errmsg", "添加日志失败");
+                return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
+            }
         }
+
     }
 }
