@@ -3876,8 +3876,8 @@ statuscount:
 |﻿limit|每页显示几条记录|否|
 | userlatitude |用户坐标(纬度)|是|
 | userlongitude |用户坐标(经度)|是|
-|pillowlongitude 	| 查询坐标(经度) | 否 |
-|pillowlatitude 	| 查询坐标(纬度) | 否 | 
+|pillowlongitude 	| 查询坐标(经度) | 否 | 定位城市必须传, 非定位城市不能传
+|pillowlatitude 	| 查询坐标(纬度) | 否 | 定位城市必须传, 非定位城市不能传
 |callmethod|调用来源|否|1-crs；2-web；3-wechat；4-app(ios)；5-app(Android) 
 |callversion|调用版本|否|
 |ip|IP地址|否|
@@ -4187,7 +4187,11 @@ statuscount:
 
     字段        |         名称         | 是否必须 | 说明
 --------------- | ------------------- | -------| -----------                                                 
-| cityid     	| 城市编码   | 是    |                                                    
+| cityid     	| 城市编码   | 是    |
+| userlatitude |用户坐标(纬度)|是|
+| userlongitude |用户坐标(经度)|是|   
+|pillowlongitude 	| 查询坐标(经度) | 否 | 定位城市必须传, 非定位城市不能传
+|pillowlatitude 	| 查询坐标(纬度) | 否 | 定位城市必须传, 非定位城市不能传                                                 
 | callmethod   	| 调用来源   | 是   | 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) 
 | callversion  	| 调用版本   | 是   |
 | ip           	| IP地址  | 否     |                                                    
@@ -4427,7 +4431,11 @@ statuscount:
 
     字段        |         名称         | 是否必须 | 说明
 --------------- | ------------------- | -------| -----------                                                 
-| cityid     	| 城市编码   | 是    |                                                    
+| cityid     	| 城市编码   | 是    |  
+| userlatitude |用户坐标(纬度)|是|
+| userlongitude |用户坐标(经度)|是|   
+|pillowlongitude 	| 查询坐标(经度) | 否 | 定位城市必须传, 非定位城市不能传
+|pillowlatitude 	| 查询坐标(纬度) | 否 | 定位城市必须传, 非定位城市不能传                                                    
 | callmethod   	| 调用来源   | 是   | 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) 
 | callversion  	| 调用版本   | 是   |
 | ip           	| IP地址  | 否     |                                                    

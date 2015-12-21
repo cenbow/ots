@@ -10,6 +10,7 @@ public class RecommendList {
     private Long detailid;//：//发现页唯一id
     private Integer querytype;//是否访问url  1:详情 ,2 走Link
     private Date createtime;
+	private Integer sort;
     
 	public Date getCreatetime() {
 		return createtime;
@@ -53,7 +54,12 @@ public class RecommendList {
 	public void setQuerytype(Integer querytype) {
 		this.querytype = querytype;
 	}
-    
-    
-    
+
+	public Integer getSort() {
+		return sort;
+	}
+
+	public void setSort(Integer sort) {
+		this.sort = sort;
+	}
 }
