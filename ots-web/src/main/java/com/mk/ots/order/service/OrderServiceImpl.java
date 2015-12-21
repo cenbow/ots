@@ -2241,6 +2241,18 @@ public class OrderServiceImpl implements OrderService {
       if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion.trim()) <= 0) {
             checkOrderByPromoType(order);
         }
+      //版本号为空或者低于3.3版本，不允许下1元订单
+        if(StringUtils.isEmpty(callVersion)||"3.3".compareTo(callVersion.trim())>0){
+          String  roomtypeid = request.getParameter("roomtypeid");
+          if(StringUtils.isEmpty(roomtypeid)){
+              throw MyErrorEnum.customError.getMyException("很抱歉，请选择房型。");
+          }
+          Integer  saleType =  getPromoId(Long.parseLong(roomtypeid));
+          if(HotelPromoEnum.OneDollar.getCode().equals(saleType)){
+              throw MyErrorEnum.customError.getMyException("很抱歉"+HotelPromoEnum.OneDollar.getText()+"只允许新版本使用");
+          }
+        }
+
         checkPayByPromoType(request, order, order.getPromoType());
 
         Long cashBigDecimal = 0L;
@@ -2870,8 +2882,23 @@ public class OrderServiceImpl implements OrderService {
         //过保留时间（预抵时间） 未到的 push消息 放入到任务表中
         pushOutCheckInTimeMsg(pOrder);
 
+        String callVersion = request.getParameter("callversion");
         //检查用户是否符合下单条件
-        checkOrderByPromoType(order);
+        if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion.trim()) <= 0) {
+            checkOrderByPromoType(order);
+        }
+
+        //版本号为空或者低于3.3版本，不允许下1元订单
+        if(StringUtils.isEmpty(callVersion)||"3.3".compareTo(callVersion.trim())>0){
+            String  roomtypeid = request.getParameter("roomtypeid");
+            if(StringUtils.isEmpty(roomtypeid)){
+                throw MyErrorEnum.customError.getMyException("很抱歉，请选择房型。");
+            }
+            Integer  saleType =  getPromoId(Long.parseLong(roomtypeid));
+            if(HotelPromoEnum.OneDollar.getCode().equals(saleType)){
+                throw MyErrorEnum.customError.getMyException("很抱歉"+HotelPromoEnum.OneDollar.getText()+"只允许新版本使用");
+            }
+        }
         /**
          * 拿到pms客单号
          */
