@@ -1,6 +1,29 @@
 package com.mk.ots.roomsale.controller;
 
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.Valid;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.alibaba.fastjson.JSONObject;
 import com.dianping.cat.Cat;
 import com.mk.framework.AppUtils;
@@ -18,23 +41,6 @@ import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.roomsale.service.TPriceScopeService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.web.ServiceOutput;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.validation.Valid;
-import java.util.*;
 
 /**
  *
@@ -483,9 +489,6 @@ public class HotelPromoController {
 
 				Map<String, Object> hotels = promoSearchService.readonlySearchHotels(queryReq);
 				if (hotels != null) {
-					if (hotels.containsKey("supplementhotel")) {
-						hotels.remove("supplementhotel");
-					}
 					rtnMap.putAll(hotels);
 				}
 
@@ -518,24 +521,16 @@ public class HotelPromoController {
 		reqEntity.setCityid(entityReqEntity.getCityid());
 		reqEntity.setUserlatitude(entityReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(entityReqEntity.getUserlongitude());
+		reqEntity.setPillowlatitude(entityReqEntity.getPillowlatitude());
+		reqEntity.setPillowlongitude(entityReqEntity.getPillowlongitude());				
 		reqEntity.setIshotelpic("T");
+		reqEntity.setPage(entityReqEntity.getPage());
+		reqEntity.setLimit(entityReqEntity.getLimit());
 		reqEntity.setSearchtype(entityReqEntity.getSearchtype());
 		reqEntity.setPosid(entityReqEntity.getPosid());
 		reqEntity.setPosname(entityReqEntity.getPosname());
 		reqEntity.setPoints(entityReqEntity.getPoints());
 
-		if (entityReqEntity.getPage() == null) {
-			reqEntity.setPage(1);
-		} else {
-			reqEntity.setPage(entityReqEntity.getPage());
-		}
-
-		if (entityReqEntity.getLimit() == null) {
-			reqEntity.setLimit(10);
-		} else {
-			reqEntity.setLimit(entityReqEntity.getLimit());
-		}
-		
 		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 		Integer promoId = HotelPromoEnum.Theme.getCode();
 
@@ -565,20 +560,10 @@ public class HotelPromoController {
 		reqEntity.setCallentry(null);
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
+		reqEntity.setPillowlatitude(homepageReqEntity.getPillowlatitude());
+		reqEntity.setPillowlongitude(homepageReqEntity.getPillowlongitude());				
 		reqEntity.setIshotelpic("T");
 
-		if (homepageReqEntity.getPage() == null) {
-			reqEntity.setPage(1);
-		} else {
-			reqEntity.setPage(homepageReqEntity.getPage());
-		}
-
-		if (homepageReqEntity.getLimit() == null) {
-			reqEntity.setLimit(10);
-		} else {
-			reqEntity.setLimit(homepageReqEntity.getLimit());
-		}
-		
 		Integer promoId = HotelPromoEnum.Theme.getCode();
 
 		try {
@@ -587,7 +572,7 @@ public class HotelPromoController {
 		} catch (Exception ex) {
 			logger.warn(String.format("failed to query for promotype by promoid %s", promoId), ex);
 		}
-
+		
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
 		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);

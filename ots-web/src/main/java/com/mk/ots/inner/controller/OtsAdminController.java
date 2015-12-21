@@ -105,7 +105,7 @@ public class OtsAdminController {
 	 */
 	@RequestMapping("/indexer/drop")
 	@ResponseBody
-	public ResponseEntity<ServiceOutput> indexerDrop(String token, String hotelId) {
+	public ResponseEntity<ServiceOutput> indexerDrop(String token, String hotelid) {
 		ServiceOutput output = new ServiceOutput();
 		if (StringUtils.isBlank(token) || !Constant.STR_INNER_TOKEN.equals(token)) {
 			output.setFault("token is invalidate.");
@@ -116,7 +116,7 @@ public class OtsAdminController {
 		long starttime = day.getTime();
 		try {
 
-			SearchHit[] searchHits = esProxy.searchHotelByHotelId(hotelId);
+			SearchHit[] searchHits = esProxy.searchHotelByHotelId(hotelid);
 			for (int i = 0; i < searchHits.length; i++) {
 				esProxy.deleteDocument(searchHits[i].getId());
 			}

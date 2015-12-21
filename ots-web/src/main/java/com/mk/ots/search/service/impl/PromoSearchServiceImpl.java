@@ -814,11 +814,55 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return rtnMap;
 	}
 
+	private void processGeos(HotelQuerylistReqEntity params) {
+		if (StringUtils.isBlank(params.getHotelid())) {
+			// 必填参数默认值处理：开始
+			if (StringUtils.isBlank(params.getCityid())) {
+				params.setCityid(Constant.STR_CITYID_SHANGHAI);
+			}
+			// 用户坐标经纬度值没有,先判断屏幕坐标经纬度值，有的话用屏幕坐标经纬度，没有默认上海市中心位置
+			if (params.getUserlongitude() == null) {
+				if (params.getPillowlongitude() == null) {
+					params.setUserlongitude(Constant.LON_SHANGHAI);
+				} else {
+					params.setUserlongitude(params.getPillowlongitude());
+				}
+			}
+			if (params.getUserlatitude() == null) {
+				if (params.getPillowlatitude() == null) {
+					params.setUserlatitude(Constant.LAT_SHANGHAI);
+				} else {
+					params.setUserlatitude(params.getPillowlatitude());
+				}
+			}
+			if (params.getPage() == null || params.getPage() <= 0) {
+				params.setPage(SearchConst.SEARCH_PAGE_DEFAULT);
+			}
+			if (params.getLimit() == null || params.getLimit() <= 0) {
+				params.setLimit(SearchConst.SEARCH_LIMIT_DEFAULT);
+			}
+
+			// 眯客3.0：搜索酒店周边的酒店
+			if (StringUtils.isNotBlank(params.getExcludehotelid())) {
+				// 如果是酒店周边搜索，默认搜索半径为5000米
+				if (params.getRange() == null || params.getRange() <= 0) {
+					params.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
+				}
+			} else {
+				if (params.getRange() == null || params.getRange() <= 0) {
+					params.setRange(SearchConst.SEARCH_RANGE_MAX);
+				}
+			}
+		}
+	}
+
 	@Override
 	public Map<String, Object> searchThemes(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
 		try {
+			processGeos(reqentity);
+
 			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
 			List<FilterBuilder> keywordBuilders = new ArrayList<FilterBuilder>();
 
@@ -837,88 +881,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				logger.info(String.format("about to search for cityid: %s; hotelid: %s", cityid, hotelid));
 			}
 
-			int page = reqentity.getPage().intValue();
-			int limit = reqentity.getLimit().intValue();
-
-			SearchRequestBuilder searchBuilder = esProxy.prepareSearch();
-			searchBuilder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
-
-			// make term filter builder
-			this.makeTermFilter(reqentity, filterBuilders);
-
-			if (StringUtils.isNotBlank(reqentity.getPromotype())) {
-				filterBuilders.add(FilterBuilders
-						.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", reqentity.getPromotype())));
-			}
-
-			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
-
-			if (HotelSearchEnum.AREA.getId().equals(searchType)) {
-				makeAreaFilter(reqentity, filterBuilders);
-			}
-
-			makeHotelTypeFilter(reqentity, filterBuilders);
-			makeBedTypeFilter(reqentity, filterBuilders);
-
-			makeQueryFilter(reqentity, filterBuilders);
-
-			double distance = SearchConst.SEARCH_RANGE_DEFAULT;
-
 			double cityLat_default = Constant.LAT_SHANGHAI;
 			double cityLon_default = Constant.LON_SHANGHAI;
-
-			double lat = reqentity.getPillowlatitude() == null ? cityLat_default : reqentity.getPillowlatitude();
-			double lon = reqentity.getPillowlongitude() == null ? cityLon_default : reqentity.getPillowlongitude();
-
-			if (HotelSearchEnum.BZONE.getId().equals(searchType) || HotelSearchEnum.AIRPORT.getId().equals(searchType)
-					|| HotelSearchEnum.SUBWAY.getId().equals(searchType)
-					|| HotelSearchEnum.SAREA.getId().equals(searchType)
-					|| HotelSearchEnum.HOSPITAL.getId().equals(searchType)
-					|| HotelSearchEnum.COLLEGE.getId().equals(searchType)) {
-				// 坐标取所选位置的坐标，搜索半径取5000米
-				String points = reqentity.getPoints();
-				if (StringUtils.isEmpty(points)) {
-					logger.error("按照{}搜索时points参数错误{}", HotelSearchEnum.getById(searchType).getName(), points);
-				}
-				GeoPoint point = this.getPoint(points);
-				if (point != null) {
-					lat = point.getLat();
-					lon = point.getLon();
-					// 指定位置区域搜索的话，搜索半径按照默认5000米
-					distance = SearchConst.SEARCH_RANGE_DEFAULT;
-					logger.info("按照{}搜索，经纬度坐标：[{},{}], 搜索范围:{}米", HotelSearchEnum.getById(searchType).getName(), lon,
-							lat, distance);
-				} else {
-					logger.error("按照{}搜索是没有获取到经纬度, points: {}。", HotelSearchEnum.getById(searchType).getName(), points);
-				}
-			}
-			
-			GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
-			geoFilter.point(lat, lon).distance(distance, DistanceUnit.METERS).optimizeBbox("memory")
-					.geoDistance(GeoDistance.ARC);
-			filterBuilders.add(geoFilter);
-						
-			
-			FilterBuilder[] builders = new FilterBuilder[] {};
-			BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
-
-			// make range filter builder
-			List<FilterBuilder> mikePriceBuilders = this.makeMikePriceRangeFilter(reqentity);
-
-			if (mikePriceBuilders.size() > 0) {
-				BoolFilterBuilder mikePriceBoolFilter = FilterBuilders.boolFilter();
-				mikePriceBoolFilter.should(mikePriceBuilders.toArray(builders));
-				boolFilter.must(mikePriceBoolFilter);
-			}
-			if (AppUtils.DEBUG_MODE) {
-				logger.info("boolFilter is : \n{}", boolFilter.toString());
-			}
-
-			if (StringUtils.isNotBlank(reqentity.getKeyword())) {
-				makeKeywordFilter(reqentity, keywordBuilders);
-				Cat.logEvent("HotKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
-			}
-
 			boolean isZhoubian = StringUtils.isNotBlank(reqentity.getExcludehotelid());
 			if (isZhoubian) {
 				if (reqentity.getRange() == null || reqentity.getRange() <= 0) {
@@ -958,6 +922,90 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					}
 				}
 			}
+
+			int page = reqentity.getPage().intValue();
+			int limit = reqentity.getLimit().intValue();
+
+			SearchRequestBuilder searchBuilder = esProxy.prepareSearch();
+			searchBuilder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+
+			// make term filter builder
+			this.makeTermFilter(reqentity, filterBuilders);
+
+			if (StringUtils.isNotBlank(reqentity.getPromotype())) {
+				filterBuilders.add(FilterBuilders
+						.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", reqentity.getPromotype())));
+			}
+
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
+
+			if (HotelSearchEnum.AREA.getId().equals(searchType)) {
+				makeAreaFilter(reqentity, filterBuilders);
+			}
+
+			makeHotelTypeFilter(reqentity, filterBuilders);
+			makeBedTypeFilter(reqentity, filterBuilders);
+
+			makeQueryFilter(reqentity, filterBuilders);
+
+			FilterBuilder[] builders = new FilterBuilder[] {};
+			BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
+
+			// make range filter builder
+			List<FilterBuilder> mikePriceBuilders = this.makeMikePriceRangeFilter(reqentity);
+
+			if (mikePriceBuilders.size() > 0) {
+				BoolFilterBuilder mikePriceBoolFilter = FilterBuilders.boolFilter();
+				mikePriceBoolFilter.should(mikePriceBuilders.toArray(builders));
+				boolFilter.must(mikePriceBoolFilter);
+			}
+			if (AppUtils.DEBUG_MODE) {
+				logger.info("boolFilter is : \n{}", boolFilter.toString());
+			}
+
+			if (StringUtils.isNotBlank(reqentity.getKeyword())) {
+				makeKeywordFilter(reqentity, keywordBuilders);
+				Cat.logEvent("HotKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
+			}
+
+			double distance = 0;
+
+			if (reqentity.getRange() != null) {
+				distance = Double.valueOf(reqentity.getRange());
+			} else {
+				distance = SearchConst.SEARCH_RANGE_MAX;
+			}
+
+			double lat = reqentity.getPillowlatitude() == null ? cityLat_default : reqentity.getPillowlatitude();
+			double lon = reqentity.getPillowlongitude() == null ? cityLon_default : reqentity.getPillowlongitude();
+
+			if (HotelSearchEnum.BZONE.getId().equals(searchType) || HotelSearchEnum.AIRPORT.getId().equals(searchType)
+					|| HotelSearchEnum.SUBWAY.getId().equals(searchType)
+					|| HotelSearchEnum.SAREA.getId().equals(searchType)
+					|| HotelSearchEnum.HOSPITAL.getId().equals(searchType)
+					|| HotelSearchEnum.COLLEGE.getId().equals(searchType)) {
+				// 坐标取所选位置的坐标，搜索半径取5000米
+				String points = reqentity.getPoints();
+				if (StringUtils.isEmpty(points)) {
+					logger.error("按照{}搜索时points参数错误{}", HotelSearchEnum.getById(searchType).getName(), points);
+				}
+				GeoPoint point = this.getPoint(points);
+				if (point != null) {
+					lat = point.getLat();
+					lon = point.getLon();
+					// 指定位置区域搜索的话，搜索半径按照默认5000米
+					distance = SearchConst.SEARCH_RANGE_DEFAULT;
+					logger.info("按照{}搜索，经纬度坐标：[{},{}], 搜索范围:{}米", HotelSearchEnum.getById(searchType).getName(), lon,
+							lat, distance);
+				} else {
+					logger.error("按照{}搜索是没有获取到经纬度, points: {}。", HotelSearchEnum.getById(searchType).getName(), points);
+				}
+			}
+			
+			GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
+			geoFilter.point(lat, lon).distance(distance, DistanceUnit.METERS).optimizeBbox("memory")
+					.geoDistance(GeoDistance.ARC);
+			filterBuilders.add(geoFilter);
 
 			if (StringUtils.isNotBlank(reqentity.getKeyword()) || StringUtils.isNotBlank(reqentity.getHotelname())
 					|| StringUtils.isNotBlank(reqentity.getHoteladdr())) {
