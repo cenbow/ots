@@ -862,8 +862,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			makeQueryFilter(reqentity, filterBuilders);
 
-
-			double distance = Double.valueOf(reqentity.getRange());
+			double distance = SearchConst.SEARCH_RANGE_DEFAULT;
 
 			double cityLat_default = Constant.LAT_SHANGHAI;
 			double cityLon_default = Constant.LON_SHANGHAI;
