@@ -71,7 +71,7 @@ public class RecommendController {
             List<RecommendList> globleBanners = genGlobleRecommendLists(recommenditemHashMap, cityid, callmethod, globleLimit);
             banners.addAll(globleBanners);
 
-            rtnMap.put("banners", banners);
+            rtnMap.put("banners", reSort(banners));
             rtnMap.put("success", true);
 
         } catch (Exception e) {
@@ -185,7 +185,7 @@ public class RecommendController {
             List<RecommendList> globleBanners = genGlobleRecommendLists(recommenditemHashMap, cityid, callmethod, globleLimit);
             banners.addAll(globleBanners);
 
-            rtnMap.put("loading", banners);
+            rtnMap.put("loading", reSort(banners));
             rtnMap.put("success", true);
 
         } catch (Exception e) {
@@ -396,7 +396,7 @@ public class RecommendController {
 
         }
 
-        return reSort(banners);
+        return banners;
     }
 
     private List<RecommendList> reSort(List<RecommendList> banners){
