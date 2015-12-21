@@ -121,7 +121,7 @@ public class SyViewLogServiceImpl implements ISyViewLogService {
         Transaction t = Cat.newTransaction("saveSyViewLogPost", map.get("toUrl").toString() );
         try{
             String syViewLogStr = JSONObject.toJSON(syViewLog).toString();
-            jedisFactory.getJedis().lpush("SYVIEWwLOG",syViewLogStr);
+            jedisFactory.getJedis().publish("SYVIEWwLOG",syViewLogStr);
             Cat.logEvent("Sy/saveSyViewLog", map.get("toUrl").toString(), Event.SUCCESS, JSONObject.toJSON(syViewLog).toString());
             t.setStatus(Transaction.SUCCESS);
         }catch (Exception e) {

@@ -20,7 +20,7 @@ import redis.clients.jedis.JedisPubSub;
 public class SyViewLogListen  extends JedisPubSub {
 
     public void onMessage(String channel, String message){
-        SyViewLog syViewLog =  (SyViewLog)JSONObject.parse(message);
+        SyViewLog syViewLog = JSONObject.parseObject(message,SyViewLog.class);
 
         ISyViewLogDao  syViewLogDaoImpl = AppUtils.getBean(SyViewLogDaoImpl.class);
         syViewLogDaoImpl.save(syViewLog);
