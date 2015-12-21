@@ -528,6 +528,18 @@ public class HotelPromoController {
 		reqEntity.setIshotelpic("T");
 		reqEntity.setPage(homepageReqEntity.getPage());
 		reqEntity.setLimit(homepageReqEntity.getLimit());
+		
+		if (homepageReqEntity.getPage() == null) {
+			reqEntity.setPage(1);
+		} else {
+			reqEntity.setPage(homepageReqEntity.getPage());
+		}
+
+		if (homepageReqEntity.getLimit() == null) {
+			reqEntity.setLimit(10);
+		} else {
+			reqEntity.setLimit(homepageReqEntity.getLimit());
+		}
 
 		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 		Integer promoId = HotelPromoEnum.Theme.getCode();
@@ -559,7 +571,19 @@ public class HotelPromoController {
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
+		
+		if (homepageReqEntity.getPage() == null) {
+			reqEntity.setPage(1);
+		} else {
+			reqEntity.setPage(homepageReqEntity.getPage());
+		}
 
+		if (homepageReqEntity.getLimit() == null) {
+			reqEntity.setLimit(10);
+		} else {
+			reqEntity.setLimit(homepageReqEntity.getLimit());
+		}
+		
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
 		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
