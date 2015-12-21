@@ -39,7 +39,7 @@ public class VisitSimServiceImpl implements VisitSimService {
 	private final static Integer defaultGapMin = 5;
 	private final static Integer defaultGapMax = 50;
 
-	private final ReadWriteLock lock = new ReentrantReadWriteLock();
+	private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
 	private final Gson gsonParser = new Gson();
 
@@ -190,16 +190,19 @@ public class VisitSimServiceImpl implements VisitSimService {
 	public Long sim() {
 		init();
 
+		readLock.lock();
+		Data cacheData = null;
+
+		try {
+			cacheData = queryData();
+		} catch (Exception ex) {
+			logger.warn("failed to querydata from cache...", ex);
+		} finally {
+			readLock.unlock();
+		}
+
 		if (writeLock != null) {
 			Data data = new Data();
-
-			Data cacheData = null;
-
-			try {
-				cacheData = queryData();
-			} catch (Exception ex) {
-				logger.warn("failed to querydata from cache...", ex);
-			}
 
 			try {
 				writeLock.lock();
@@ -242,13 +245,16 @@ public class VisitSimServiceImpl implements VisitSimService {
 			}
 		}
 
+		readLock.lock();
 		try {
-			Data cacheData = queryData();
+			cacheData = queryData();
 
 			return cacheData.getCurrentVisitNumber();
 		} catch (Exception ex) {
 			logger.error("failed to querydata from cache...", ex);
 			return 0L;
+		} finally {
+			readLock.unlock();
 		}
 	}
 
