@@ -5,6 +5,7 @@ import java.util.Date;
 public class Remind {
 	private Long id;
 	private Long mid;
+	private String phone;
 	private String content;
 	private String title;
 	private String url;
@@ -110,6 +111,15 @@ public class Remind {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 
 }

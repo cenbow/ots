@@ -1,14 +1,18 @@
-package com.mk.pms.hotel.controller;
+package com.mk.ots.search.controller;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
+import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.enums.HotelSortEnum;
+import com.mk.ots.common.enums.ShowAreaEnum;
+import com.mk.ots.common.utils.Constant;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.common.utils.SearchConst;
+import com.mk.ots.restful.input.HotelHomePageReqEntity;
+import com.mk.ots.restful.input.HotelQuerylistReqEntity;
+import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
+import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
+import com.mk.ots.search.service.IPromoSearchService;
+import com.mk.ots.search.service.ISearchService;
+import com.mk.ots.web.ServiceOutput;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -23,18 +27,9 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.mk.ots.common.enums.HotelPromoEnum;
-import com.mk.ots.common.enums.HotelSortEnum;
-import com.mk.ots.common.enums.ShowAreaEnum;
-import com.mk.ots.common.utils.Constant;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.restful.input.HotelHomePageReqEntity;
-import com.mk.ots.restful.input.HotelQuerylistReqEntity;
-import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
-import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
-import com.mk.ots.search.service.IPromoSearchService;
-import com.mk.ots.search.service.ISearchService;
-import com.mk.ots.web.ServiceOutput;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.util.*;
 
 @Controller
 @RequestMapping(value = "/homepage", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -134,6 +129,10 @@ public class HomePageController {
 				logger.warn("no show configs has been loaded...");
 			}
 
+			if (homepageReqEntity.getPillowlongitude()!= null && homepageReqEntity.getPillowlatitude()!= null){
+				reqEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
+			}
+
 			Map<String, Object> responseHotels = searchService.readonlySearchHotels(reqEntity);
 
 			List<Map<String, Object>> responseHotel = (List<Map<String, Object>>) responseHotels.get("hotel");
@@ -207,6 +206,10 @@ public class HomePageController {
 
 		try {
 			HotelQuerylistReqEntity reqEntity = buildThemeQueryEntity(homepageReqEntity);
+
+			if (homepageReqEntity.getPillowlongitude()!= null && homepageReqEntity.getPillowlatitude()!= null){
+				reqEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
+			}
 
 			Map<String, Object> themeResponse = promoService.readonlySearchHotels(reqEntity);
 

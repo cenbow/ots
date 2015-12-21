@@ -86,15 +86,19 @@ public class RemindService {
         }
     }
 
-    public void createSpecialRoomRemind(Long mid, Long hotelId, Long roomTypeId) {
+    public void createSpecialRoomRemind(UMember member, Long hotelId, Long roomTypeId) {
+        if (null == member || null == hotelId) {
+            return;
+        }
 
-        Cat.logEvent("CreateSpecialRoomRemind", "mid:" + mid + " hotelId:" + hotelId);
+        Cat.logEvent("CreateSpecialRoomRemind", "mid:" + member.getId() + " hotelId:" + hotelId);
 
         RemindType remindType = remindTypeMapper.queryByCode(RemindTypeEnum.SPECIAL_ROOM.getCode());
 
         //remind
         Remind remind = new Remind();
-        remind.setMid(mid);
+        remind.setMid(member.getMid());
+        remind.setPhone(member.getPhone());
         remind.setContent(remindType.getContent());
         remind.setTitle(remindType.getTitle());
         remind.setUrl(remindType.getUrl() + hotelId);
@@ -172,17 +176,17 @@ public class RemindService {
                 remind.setUpdateTime(new Date());
                 this.remindMapper.update(remind);
                 //发送消息
-                PushMessageRunnable pushMessageRunnable = new PushMessageRunnable(type,remind,this);
-                pool.execute(pushMessageRunnable);
+                PushMessageRunnable pushMessageRunnable = new PushMessageRunnable(type,remind);
+                pool.submit(pushMessageRunnable);
             }
         }
 
-        final long awaitTime = 30 * 1000;
+        //超45秒
+        final long awaitTime = 45 * 1000;
         try {
-            pool.shutdown();
 
             if(!pool.awaitTermination(awaitTime, TimeUnit.MILLISECONDS)){
-                pool.shutdownNow();
+                pool.shutdown();
             }
         } catch (InterruptedException e) {
             System.out.println("awaitTermination interrupted: " + e);
@@ -192,24 +196,12 @@ public class RemindService {
     }
 
     public void pushMessage(RemindType type,Remind remind){
-        String phone = null;
-        String openId = null;
-        Long mid = remind.getMid();
-        Optional<UMember> op = this.memberService.findMemberById(mid);
-        if (op.isPresent()) {
-            UMember uMember = op.get();
-            phone = uMember.getPhone();
-            openId = uMember.getUnionid();
-        } else {
-            return;
-        }
-
         //
         int isPush = type.getPush();
         if (isPush == 1) {
             AppMessage message = new AppMessage();
             message.setMid(remind.getMid());
-            message.setPhone(phone);
+            message.setPhone(remind.getPhone());
             message.setTitle(remind.getTitle());
             message.setMsgContent(remind.getContent());
             message.setMsgtype(PushMessageTypeEnum.USER);
@@ -223,7 +215,7 @@ public class RemindService {
         if (isSms == 1) {
 
             SmsMessage message = new SmsMessage();
-            message.setPhone(phone);
+            message.setPhone(remind.getPhone());
             message.setMessage(remind.getContent());
             message.setSmsMessageTypeEnum(SmsMessageTypeEnum.normal);
             this.messageProducer.sendSmsMsg(message);
@@ -232,6 +224,16 @@ public class RemindService {
         //
         int isWeixin = type.getWeixin();
         if (isWeixin == 1) {
+            String openId = "";
+            Long mid = remind.getMid();
+            Optional<UMember> op = this.memberService.findMemberById(mid);
+            if (op.isPresent()) {
+                UMember uMember = op.get();
+                openId = uMember.getUnionid();
+            } else {
+                return;
+            }
+
             WeixinMessage message = new WeixinMessage();
 
             message.setContent(remind.getContent());
@@ -254,4 +256,3 @@ public class RemindService {
         this.remindLogMapper.save(log);
     }
 }
-
