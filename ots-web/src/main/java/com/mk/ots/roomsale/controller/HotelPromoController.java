@@ -524,13 +524,23 @@ public class HotelPromoController {
 		reqEntity.setUserlatitude(entityReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(entityReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
-		reqEntity.setPage(entityReqEntity.getPage());
-		reqEntity.setLimit(entityReqEntity.getLimit());
 		reqEntity.setSearchtype(entityReqEntity.getSearchtype());
 		reqEntity.setPosid(entityReqEntity.getPosid());
 		reqEntity.setPosname(entityReqEntity.getPosname());
 		reqEntity.setPoints(entityReqEntity.getPoints());
 
+		if (entityReqEntity.getPage() == null) {
+			reqEntity.setPage(1);
+		} else {
+			reqEntity.setPage(entityReqEntity.getPage());
+		}
+
+		if (entityReqEntity.getLimit() == null) {
+			reqEntity.setLimit(10);
+		} else {
+			reqEntity.setLimit(entityReqEntity.getLimit());
+		}
+		
 		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 		Integer promoId = HotelPromoEnum.Theme.getCode();
 
@@ -562,6 +572,18 @@ public class HotelPromoController {
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
 
+		if (homepageReqEntity.getPage() == null) {
+			reqEntity.setPage(1);
+		} else {
+			reqEntity.setPage(homepageReqEntity.getPage());
+		}
+
+		if (homepageReqEntity.getLimit() == null) {
+			reqEntity.setLimit(10);
+		} else {
+			reqEntity.setLimit(homepageReqEntity.getLimit());
+		}
+		
 		Integer promoId = HotelPromoEnum.Theme.getCode();
 
 		try {
