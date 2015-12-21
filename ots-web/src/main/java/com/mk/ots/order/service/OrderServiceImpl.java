@@ -11,7 +11,11 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.mk.care.kafka.common.CopywriterTypeEnum;
+import com.mk.care.kafka.common.PushMessageTypeEnum;
+import com.mk.care.kafka.common.SmsMessageTypeEnum;
+import com.mk.care.kafka.model.AppMessage;
 import com.mk.care.kafka.model.Message;
+import com.mk.care.kafka.model.SmsMessage;
 import com.mk.framework.AppUtils;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
@@ -28,6 +32,7 @@ import com.mk.ots.hotel.dao.RoomDAO;
 import com.mk.ots.hotel.dao.RoomTypeDAO;
 import com.mk.ots.hotel.model.THotel;
 import com.mk.ots.hotel.service.*;
+import com.mk.ots.kafka.message.MessageProducer;
 import com.mk.ots.kafka.message.OtsCareProducer;
 import com.mk.ots.manager.HotelPMSManager;
 import com.mk.ots.manager.OtsCacheManager;
@@ -210,6 +215,9 @@ public class OrderServiceImpl implements OrderService {
     private TBackMoneyRuleServiceImpl tBackMoneyRuleService;
     @Autowired
     private OrderPromoPayRuleMapper orderPromoPayRuleMapper;
+
+    @Autowired
+    private MessageProducer messageProducer;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
 
@@ -2048,9 +2056,26 @@ public class OrderServiceImpl implements OrderService {
                       if (returnWallCash != null && returnWallCash.compareTo(new BigDecimal("0")) != 0) {
                           walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), returnWallCash);
                           //发送短消息和app消息
-                          /*Message message
-                          careProducer.sendSmsMsg();
-                          careProducer.sendSmsMsg();*/
+                          SmsMessage smsMessage = new SmsMessage();
+                          smsMessage.setMessage("你已获得一张眯客特价【" + returnWallCash+"元红包】，快前去体验吧");
+                          smsMessage.setSmsMessageTypeEnum(SmsMessageTypeEnum.normal);
+
+                          AppMessage appMessage = new AppMessage();
+                          appMessage.setMid(otaorder.getMid());
+                          appMessage.setTitle("红包到账");
+                          appMessage.setMsgContent("你已获得一张眯客特价【" + returnWallCash+"元红包】，快前去体验吧");
+                          appMessage.setMsgtype(PushMessageTypeEnum.USER);
+                          appMessage.setUrl(AppUrlEnum.orderList.getUrl());
+                          // 缓存获取会员对象 存会员等级
+                          Optional<UMember> opMember = memberService.findMemberById((otaorder.getMid()));
+                          UMember member = opMember.get();
+                          if (member != null) {
+                              logger.info("send returnWallCash ");
+                              smsMessage.setPhone(member.getPhone());
+                              appMessage.setPhone(member.getPhone());
+                              messageProducer.sendSmsMsg(smsMessage);
+                              messageProducer.sendAppMsg(appMessage);
+                          }
                       }
 
                   }
@@ -2216,6 +2241,18 @@ public class OrderServiceImpl implements OrderService {
       if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion.trim()) <= 0) {
             checkOrderByPromoType(order);
         }
+      //版本号为空或者低于3.3版本，不允许下1元订单
+        if(StringUtils.isEmpty(callVersion)||"3.3".compareTo(callVersion.trim())>0){
+          String  roomtypeid = request.getParameter("roomtypeid");
+          if(StringUtils.isEmpty(roomtypeid)){
+              throw MyErrorEnum.customError.getMyException("很抱歉，请选择房型。");
+          }
+          Integer  saleType =  getPromoId(Long.parseLong(roomtypeid));
+          if(HotelPromoEnum.OneDollar.getCode().equals(saleType)){
+              throw MyErrorEnum.customError.getMyException("很抱歉"+HotelPromoEnum.OneDollar.getText()+"只允许新版本使用");
+          }
+        }
+
         checkPayByPromoType(request, order, order.getPromoType());
 
         Long cashBigDecimal = 0L;
@@ -2845,8 +2882,23 @@ public class OrderServiceImpl implements OrderService {
         //过保留时间（预抵时间） 未到的 push消息 放入到任务表中
         pushOutCheckInTimeMsg(pOrder);
 
+        String callVersion = request.getParameter("callversion");
         //检查用户是否符合下单条件
-        checkOrderByPromoType(order);
+        if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion.trim()) <= 0) {
+            checkOrderByPromoType(order);
+        }
+
+        //版本号为空或者低于3.3版本，不允许下1元订单
+        if(StringUtils.isEmpty(callVersion)||"3.3".compareTo(callVersion.trim())>0){
+            String  roomtypeid = request.getParameter("roomtypeid");
+            if(StringUtils.isEmpty(roomtypeid)){
+                throw MyErrorEnum.customError.getMyException("很抱歉，请选择房型。");
+            }
+            Integer  saleType =  getPromoId(Long.parseLong(roomtypeid));
+            if(HotelPromoEnum.OneDollar.getCode().equals(saleType)){
+                throw MyErrorEnum.customError.getMyException("很抱歉"+HotelPromoEnum.OneDollar.getText()+"只允许新版本使用");
+            }
+        }
         /**
          * 拿到pms客单号
          */

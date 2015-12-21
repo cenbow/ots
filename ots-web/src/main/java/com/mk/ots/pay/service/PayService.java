@@ -1417,9 +1417,13 @@ public class PayService implements IPayService {
             if (StringUtils.isNotEmpty(couponno)) {
                 return wrapFailResult(MyErrorEnum.couponNoError);
             }
-            if (OrderTypeEnum.YF.getId() != order.getOrderType()) {
-                return wrapFailResult(MyErrorEnum.OrderTypeError);
+            String callVersion = request.getParameter("callversion");
+            if (StringUtils.isBlank(callVersion) || "3.3".compareTo(callVersion.trim()) > 0) {
+                if (OrderTypeEnum.YF.getId() != order.getOrderType()) {
+                    return wrapFailResult(MyErrorEnum.OrderTypeError);
+                }
             }
+
         }
         //已经取消的订单不能支付
         if (order.getOrderStatus() >= 510 ) {

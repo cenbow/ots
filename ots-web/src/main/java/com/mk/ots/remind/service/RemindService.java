@@ -76,7 +76,7 @@ public class RemindService {
         Remind paramRemind = new Remind();
         paramRemind.setMid(mid);
         paramRemind.setTypeId(remindType.getId());
-        remindType.setRemindTime(this.getDate(null));
+        paramRemind.setRemindTime(this.getDate(null));
 
         List<Remind> remindList = this.remindMapper.queryByMid(paramRemind);
         if (remindList.isEmpty()) {
