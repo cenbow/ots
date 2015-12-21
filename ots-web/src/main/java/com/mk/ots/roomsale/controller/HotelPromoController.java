@@ -361,7 +361,7 @@ public class HotelPromoController {
 		HotelQuerylistReqEntity queryReq = buildThemeQueryEntity(homepageReqEntity);
 
 		try {
-			Map<String, Object> response = promoSearchService.readonlySearchHotels(queryReq);
+			Map<String, Object> response = promoSearchService.searchThemes(queryReq);
 			if (response != null) {
 				rtnMap.putAll(response);
 			}
@@ -402,8 +402,8 @@ public class HotelPromoController {
 
 	@RequestMapping(value = "/promo/onedollarlist", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> onedollarlist(@Valid HotelHomePageReqEntity homepageReqEntity, Errors errors)
-			throws Exception {
+	public ResponseEntity<Map<String, Object>> onedollarlist(@Valid HotelHomePageReqEntity homepageReqEntity,
+			Errors errors) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String params = objectMapper.writeValueAsString(homepageReqEntity);
 		String errorMessage = "";
@@ -517,10 +517,21 @@ public class HotelPromoController {
 		reqEntity.setCallmethod(homepageReqEntity.getCallmethod());
 		reqEntity.setCallentry(null);
 		reqEntity.setCityid(homepageReqEntity.getCityid());
-		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
+		reqEntity.setPage(homepageReqEntity.getPage());
+		reqEntity.setLimit(homepageReqEntity.getLimit());
+
+		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
+		Integer promoId = HotelPromoEnum.Theme.getCode();
+
+		try {
+			Integer promotype = promoSearchService.queryByPromoId(promoId);
+			reqEntity.setPromotype(String.valueOf(promotype));
+		} catch (Exception ex) {
+			logger.warn(String.format("failed to query for promotype by promoid %s", promoId), ex);
+		}
 
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);

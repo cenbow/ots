@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
+import org.hibernate.validator.constraints.Range;
 
 import com.mk.ots.common.bean.ParamBaseBean;
 
@@ -33,6 +34,33 @@ public class HotelHomePageReqEntity extends ParamBaseBean implements Serializabl
 	private String hardwarecode;
 
 	private String otsversion;
+
+	/** 入参: 第几页,必填 */
+	@NotNull(message = "缺少参数-第几页: page.")
+	@Range(min = 1, message = "无效的参数值,page不能小于1.")
+	private Integer page;
+
+	/** 入参: 每页多少条,必填 */
+	@NotNull(message = "缺少参数-每页多少条: limit.")
+	@Range(min = 1, message = "无效的参数值,limit不能小于1.")
+	private Integer limit;
+	
+	
+	public Integer getPage() {
+		return page;
+	}
+
+	public void setPage(Integer page) {
+		this.page = page;
+	}
+
+	public Integer getLimit() {
+		return limit;
+	}
+
+	public void setLimit(Integer limit) {
+		this.limit = limit;
+	}
 
 	public Double getUserlatitude() {
 		return userlatitude;

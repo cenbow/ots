@@ -347,13 +347,21 @@ public class HomePageController {
 		reqEntity.setCallversion(homepageReqEntity.getCallversion());
 		reqEntity.setCallmethod(homepageReqEntity.getCallmethod());
 		reqEntity.setCityid(homepageReqEntity.getCityid());
-		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 		reqEntity.setCallentry(null);
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
 		reqEntity.setLimit(maxAllowedPopular * 2);
 
+		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
+		Integer promoId = HotelPromoEnum.Theme.getCode();
+		try {
+			Integer promotype = promoService.queryByPromoId(promoId);
+			reqEntity.setPromotype(String.valueOf(promotype));
+		} catch (Exception ex) {
+			logger.warn(String.format("failed to query for promotype by promoid %s", promoId), ex);
+		}
+		
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
 		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
