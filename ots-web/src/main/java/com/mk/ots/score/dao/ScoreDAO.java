@@ -48,6 +48,33 @@ public class ScoreDAO {
 		return succeed;
 	}
 
+	public   boolean  deleteScoreMarkMember(final Long mid,final String orderId){
+		boolean succeed = Db.tx(new IAtom() {
+			public boolean run() throws SQLException {
+				String cSql = "delete from t_hotel_score where orderid=?  and  mid = ?";
+				int c = Db.update(cSql, orderId,mid);
+				return true;
+			}
+		});
+		return  succeed;
+	}
+
+
+
+		public   boolean  insertScoreMarkMember(final List cList,final String scoreMarkIdS){
+		boolean succeed = Db.tx(new IAtom() {
+			public boolean run() throws SQLException {
+				String[] markId = scoreMarkIdS.split(",");
+				for(int i=0;i<markId.length;i++){
+					String cSql = "insert into t_hotel_score_mark_member (mid,hotel_id,room_id,order_id,create_time,mark_id) values(?,?,?,?,NOW()," + markId[i] + ")";
+					int count = Db.update(cSql, cList.toArray());
+				}
+				return true;
+			}
+		});
+		return succeed;
+	}
+
 	/**
 	 * 插入评价信息,
 	 *
@@ -63,8 +90,8 @@ public class ScoreDAO {
 				int cc = 0;
 				int size = sList.size();
 				String sql = "update t_hotel_subject_mx set roomid=?, roomtypeid=?, hotelid=?,grade=?,createtime=now() where subjectid=? and orderid=?";
-				if(!isExists){
-					sql="insert into t_hotel_subject_mx (roomid,roomtypeid,hotelid,grade,createtime,subjectid,orderid)values(?,?,?,?,now(),?,?)";
+				if (!isExists) {
+					sql = "insert into t_hotel_subject_mx (roomid,roomtypeid,hotelid,grade,createtime,subjectid,orderid)values(?,?,?,?,now(),?,?)";
 				}
 				for (int i = 0; i < size; i++) {
 					List ss = (List) sList.get(i);
@@ -80,7 +107,7 @@ public class ScoreDAO {
 
 	public boolean isExistsGrade(String orderid){
 		String sql="select count(*) from t_hotel_subject_mx where orderid=?";
-		long count=Db.queryLong(sql,orderid);
+		long count=Db.queryLong(sql, orderid);
 		return count>0?true:false;
 	}
 	/**
@@ -114,6 +141,41 @@ public class ScoreDAO {
 			sql+=" where subjectid=?";
 			list = Db.find(sql,subjectid);
 		}
+		return list;
+	}
+
+
+	/**
+	 * 查询所有评价标签
+	 * @return
+	 */
+	public List<Bean> findScoreMark() {
+		String sql = "select * from t_hotel_score_mark where  isdelete = 'F' order  by  ord";
+		List<Bean> list = new ArrayList();
+		list = Db.find(sql);
+		return list;
+	}
+
+	/**
+	 * 查询所有评价标签
+	 * @return
+	 */
+	public List<Bean> findScoreMarkByMarkId(Long markId) {
+		String sql = "select * from t_hotel_score_mark where  isdelete = 'F' and  id = ? order  by  ord";
+		List<Bean> list = new ArrayList();
+		list = Db.find(sql,markId);
+		return list;
+	}
+
+
+	/**
+	 * 查询所有评价标签
+	 * @return
+	 */
+	public List<Bean> findScoreMarkMemberOrder(String  orderId) {
+		String sql = "select  *  from  t_hotel_score_mark_member  where  order_id = ? order  by  id desc ";
+		List<Bean> list = new ArrayList();
+		list = Db.find(sql,orderId);
 		return list;
 	}
 

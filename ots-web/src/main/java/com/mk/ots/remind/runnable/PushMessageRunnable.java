@@ -1,5 +1,6 @@
 package com.mk.ots.remind.runnable;
 
+import com.mk.framework.AppUtils;
 import com.mk.ots.remind.model.Remind;
 import com.mk.ots.remind.model.RemindType;
 import com.mk.ots.remind.service.RemindService;
@@ -11,14 +12,15 @@ public class PushMessageRunnable implements Runnable {
 
     private RemindType type;
     private Remind remind;
-    private RemindService service;
-    public PushMessageRunnable(RemindType type, Remind remind , RemindService service) {
+    public PushMessageRunnable(RemindType type, Remind remind) {
         this.type = type;
         this.remind = remind;
-        this.service = service;
     }
     @Override
     public void run() {
+
+        System.out.println(Thread.currentThread().getName() + "正在执行。。。");
+        RemindService service = AppUtils.getBean(RemindService.class);
         if (null != service || null != type || null != remind) {
             service.pushMessage(type,remind);
         }

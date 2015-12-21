@@ -4,6 +4,7 @@
     <resultMap id="BaseResultMap" type="com.mk.ots.remind.model.Remind" >
         <result column="id" property="id" jdbcType="BIGINT" />
         <result column="mid" property="mid" jdbcType="BIGINT" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
         <result column="content" property="content" jdbcType="VARCHAR" />
         <result column="title" property="title" jdbcType="VARCHAR" />
         <result column="url" property="url" jdbcType="VARCHAR" />
@@ -17,7 +18,7 @@
     </resultMap>
 
     <sql id="Base_Column_List" >
-       id,mid,content,title,url,type_id,remind_time,count,execute_time,status_code,
+       id,mid,phone,content,title,url,type_id,remind_time,count,execute_time,status_code,
        create_time,update_time
     </sql>
 
@@ -26,7 +27,7 @@
         (<include refid="Base_Column_List"/>)
         VALUE
         (
-        #{id}, #{mid},#{content},#{title}, #{url},#{typeId},#{remindTime},#{count},#{executeTime},
+        #{id}, #{mid},#{phone},#{content},#{title}, #{url},#{typeId},#{remindTime},#{count},#{executeTime},
         #{statusCode},#{createTime},#{updateTime}
         )
     </insert>
@@ -39,6 +40,9 @@
             </if>
             <if test="mid != null">
                 AND  mid = #{mid}
+            </if>
+            <if test="phone != null">
+                and phone = #{phone}
             </if>
             <if test="typeId != null">
                 AND  type_id = #{typeId}
@@ -65,6 +69,9 @@
         <set >
             <if test="mid != null" >
                 mid = #{mid},
+            </if>
+            <if test="phone != null">
+                phone = #{phone},
             </if>
             <if test="content != null" >
                 content = #{content},

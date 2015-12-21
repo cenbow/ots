@@ -306,7 +306,7 @@ public class HotelPromoController {
 
 	@RequestMapping(value = "/search/querythemes", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> queryThemes(@Valid HotelHomePageReqEntity homepageReqEntity,
+	public ResponseEntity<Map<String, Object>> queryThemes(HotelHomePageReqEntity homepageReqEntity,
 			Errors errors) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String params = objectMapper.writeValueAsString(homepageReqEntity);
@@ -318,6 +318,7 @@ public class HotelPromoController {
 		}
 
 		if (StringUtils.isNotEmpty(errorMessage = countErrors(errors))) {
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			errorMessage = "parameters validation failed with error";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
@@ -331,6 +332,7 @@ public class HotelPromoController {
 		Double longitude = (Double) homepageReqEntity.getUserlongitude();
 
 		if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion) > 0) {
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");			
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			errorMessage = "callversion is lower than 3.3, not accessible in this function... ";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
@@ -339,6 +341,7 @@ public class HotelPromoController {
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		} else if (StringUtils.isBlank(callVersion)) {
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");		
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			errorMessage = "callversion is a must... ";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
@@ -349,6 +352,7 @@ public class HotelPromoController {
 		}
 
 		if (latitude == null || longitude == null) {
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			errorMessage = "latitude/longitude is a must... ";
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
@@ -365,7 +369,8 @@ public class HotelPromoController {
 			if (response != null) {
 				rtnMap.putAll(response);
 			}
-
+			
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "true");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
 			if (rtnMap.containsKey("success")) {
@@ -373,6 +378,7 @@ public class HotelPromoController {
 			}
 		} catch (Exception ex) {
 			logger.error("failed to queryThemes...", ex);
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");			
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "failed to do onedollarlist query...");
 		}
