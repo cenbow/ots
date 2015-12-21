@@ -306,7 +306,7 @@ public class HotelPromoController {
 
 	@RequestMapping(value = "/search/querythemes", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> queryThemes(@Valid HotelHomePageReqEntity homepageReqEntity,
+	public ResponseEntity<Map<String, Object>> queryThemes(HotelHomePageReqEntity homepageReqEntity,
 			Errors errors) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String params = objectMapper.writeValueAsString(homepageReqEntity);
