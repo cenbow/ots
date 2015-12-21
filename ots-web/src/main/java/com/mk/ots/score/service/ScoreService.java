@@ -212,18 +212,21 @@ public class ScoreService {
 		case ("i"):
 			cList.add(otaOrder.getMid());
 			isSuccess = scoreDAO.insert(cList, sList,orderid);
-			String 	scoreMarksInsert = param.get("markIds").toString();
-			if(!StringUtils.isEmpty(scoreMarksInsert)){
-				if(scoreMarksInsert.startsWith(",")){
-					scoreMarksInsert = scoreMarksInsert.substring(1,scoreMarksInsert.length());
-				}
-				if(scoreMarksInsert.endsWith(",")){
-					scoreMarksInsert = scoreMarksInsert.substring(0,scoreMarksInsert.length()-1);
-				}
+			if(null!=param.get("markIds")){
+				String 	scoreMarksInsert = param.get("markIds").toString();
 				if(!StringUtils.isEmpty(scoreMarksInsert)){
-					scoreDAO.insertScoreMarkMember(markList,scoreMarksInsert);
+					if(scoreMarksInsert.startsWith(",")){
+						scoreMarksInsert = scoreMarksInsert.substring(1,scoreMarksInsert.length());
+					}
+					if(scoreMarksInsert.endsWith(",")){
+						scoreMarksInsert = scoreMarksInsert.substring(0,scoreMarksInsert.length()-1);
+					}
+					if(!StringUtils.isEmpty(scoreMarksInsert)){
+						scoreDAO.insertScoreMarkMember(markList,scoreMarksInsert);
+					}
 				}
 			}
+
 			otaOrder.set("isscore","T").saveOrUpdate();
 			break;
 		case ("m"):
