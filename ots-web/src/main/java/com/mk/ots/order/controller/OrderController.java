@@ -105,7 +105,8 @@ public class OrderController {
 			Cat.logError("order create error", e);
 			throw e;
 		}
-
+		String  showblacktype = request.getParameter("showblacktype");
+		jsonObj.put("showblacktype",showblacktype);
 		OrderController.logger.info("OTSMessage::OrderController::createOrder::orderService.putOrderJobIntoManager");
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
@@ -148,7 +149,10 @@ public class OrderController {
 			Cat.logError("order createByRoomType error", e);
 			throw e;
 		}
-		
+
+		String  showblacktype = request.getParameter("showblacktype");
+		jsonObj.put("showblacktype",showblacktype);
+
 		OrderController.logger.info("createOrderByRoomType::ok");
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
@@ -199,6 +203,9 @@ public class OrderController {
 		}
 		Cat.logEvent("/order/modify", CommonUtils.toStr(orderId), Event.SUCCESS, jsonObj.toJSONString());
 		OrderController.logger.info("OTSMessage::OrderController::modifyOrder::ok");
+
+		String  showblacktype = request.getParameter("showblacktype");
+		jsonObj.put("showblacktype",showblacktype);
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
 	
