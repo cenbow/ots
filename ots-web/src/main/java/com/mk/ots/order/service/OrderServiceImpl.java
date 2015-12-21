@@ -11,7 +11,11 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.mk.care.kafka.common.CopywriterTypeEnum;
+import com.mk.care.kafka.common.PushMessageTypeEnum;
+import com.mk.care.kafka.common.SmsMessageTypeEnum;
+import com.mk.care.kafka.model.AppMessage;
 import com.mk.care.kafka.model.Message;
+import com.mk.care.kafka.model.SmsMessage;
 import com.mk.framework.AppUtils;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
@@ -28,6 +32,7 @@ import com.mk.ots.hotel.dao.RoomDAO;
 import com.mk.ots.hotel.dao.RoomTypeDAO;
 import com.mk.ots.hotel.model.THotel;
 import com.mk.ots.hotel.service.*;
+import com.mk.ots.kafka.message.MessageProducer;
 import com.mk.ots.kafka.message.OtsCareProducer;
 import com.mk.ots.manager.HotelPMSManager;
 import com.mk.ots.manager.OtsCacheManager;
@@ -210,6 +215,9 @@ public class OrderServiceImpl implements OrderService {
     private TBackMoneyRuleServiceImpl tBackMoneyRuleService;
     @Autowired
     private OrderPromoPayRuleMapper orderPromoPayRuleMapper;
+
+    @Autowired
+    private MessageProducer messageProducer;
 
     static final long TIME_FOR_FIVEMIN = 5 * 60 * 1000L;
 
@@ -2048,18 +2056,26 @@ public class OrderServiceImpl implements OrderService {
                       if (returnWallCash != null && returnWallCash.compareTo(new BigDecimal("0")) != 0) {
                           walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), returnWallCash);
                           //发送短消息和app消息
-                          Message message = new Message();
-                          message.setOrderId(otaorderid);
-                          message.setMid(otaorder.getMid());
-                          message.setPromotionId();
+                          SmsMessage smsMessage = new SmsMessage();
+                          smsMessage.setMessage("你已获得一张眯客特价【" + returnWallCash+"元红包】，快前去体验吧");
+                          smsMessage.setSmsMessageTypeEnum(SmsMessageTypeEnum.normal);
+
+                          AppMessage appMessage = new AppMessage();
+                          appMessage.setMid(otaorder.getMid());
+                          appMessage.setTitle("红包到账");
+                          appMessage.setMsgContent("你已获得一张眯客特价【" + returnWallCash+"元红包】，快前去体验吧");
+                          appMessage.setMsgtype(PushMessageTypeEnum.USER);
+                          appMessage.setUrl(AppUrlEnum.orderList.getUrl());
                           // 缓存获取会员对象 存会员等级
                           Optional<UMember> opMember = memberService.findMemberById((otaorder.getMid()));
                           UMember member = opMember.get();
                           if (member != null) {
-                              message.setPhone(member.getPhone());
-                              careProducer.sendSmsMsg(message);
+                              logger.info("send returnWallCash ");
+                              smsMessage.setPhone(member.getPhone());
+                              appMessage.setPhone(member.getPhone());
+                              messageProducer.sendSmsMsg(smsMessage);
+                              messageProducer.sendAppMsg(appMessage);
                           }
-                          careProducer.sendAppMsg(message);
                       }
 
                   }
