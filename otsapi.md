@@ -2874,7 +2874,7 @@ bedtype 	| 床型搜索 	| 否 	| 按指定床型搜索酒店:<br>1单床；<br>
 |ip|IP地址|否|
 |hardwarecode|硬件编码|否|
 |otsversion|OTS版本|否|
-|statetype|取值范围|否|[all、doing、done]
+|statetype|取值范围|否|[all、doing、commenting（查询待评价订单的状态需要加该字段且需要加isscore=F）、done]
 
 > API返回json数据示例：
 
@@ -3645,7 +3645,7 @@ errmsg:,//错误信息
 |ip|IP地址|否|
 |hardwarecode|硬件编码|否|
 |otsversion|OTS版本|否|
-|statetype|取值范围|否|[all、doing、done]
+|statetype|取值范围|否|[all、doing、commenting（查询待评价订单的状态需要加该字段且需要加isscore=F）、done]
 |`「增」 `isscore|是否评价|否|T/F
 > API返回json数据示例：
 

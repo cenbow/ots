@@ -56,6 +56,16 @@ public class HotelThemeReqEntity extends ParamBaseBean implements Serializable {
 	private String points;
 
 	private Integer orderby;
+	
+	private Integer range;
+
+	public Integer getRange() {
+		return range;
+	}
+
+	public void setRange(Integer range) {
+		this.range = range;
+	}
 
 	public Integer getSearchtype() {
 		return searchtype;
