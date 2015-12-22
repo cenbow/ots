@@ -1528,8 +1528,9 @@ public class PayService implements IPayService {
                 this.logger.info("订单号：" + longorderId + "创建到店支付，到店支付金额是：" + price);
                 
                 Map<String, Object> returnMap = toPay(order, pay, price);
-                
-                
+
+                //销售短消息提醒
+                this.createJob4SendMsg(order);
                 
                 return returnMap;
             } else {
