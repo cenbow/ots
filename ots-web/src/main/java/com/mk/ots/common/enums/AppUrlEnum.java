@@ -9,6 +9,7 @@ public enum AppUrlEnum {
     coupon("www.imikeshareMessage-url-scheme://coupon","APP跳转到优惠券"),
     redirectUrl("www.imikeshareMessage-url-scheme://innerwap/url","url地址(app跳转到内置网页)"),
     activityUrl("www.imikeshareMessage-url-scheme://inneractivityurl/activityurl","活动url地址（app跳转到活动页面）"),
+    walletCash("www.imikeshareMessage-url-scheme://costdetail","钱包页面"),
     orderDetail("www.imikeshareMessage-url-scheme://orderdetail/orderid/token","订单详情orderid替换成订单id token替换成token");
     private String url;
     private String text;
