@@ -201,6 +201,7 @@ public class HotelController {
 
 		if (reqentity.getPillowlongitude() != null && reqentity.getUserlatitude() != null){
 			hotelEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
+			hotelEntity.setSearchtype(HotelSearchEnum.NEAR.getId());
 		}
 
 		hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
@@ -236,6 +237,7 @@ public class HotelController {
 
 		if (reqentity.getPillowlongitude() != null && reqentity.getUserlatitude() != null){
 			hotelEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
+			hotelEntity.setSearchtype(HotelSearchEnum.NEAR.getId());
 		}
 
 		hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());

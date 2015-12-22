@@ -1,6 +1,7 @@
 package com.mk.ots.search.controller;
 
 import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.enums.HotelSearchEnum;
 import com.mk.ots.common.enums.HotelSortEnum;
 import com.mk.ots.common.enums.ShowAreaEnum;
 import com.mk.ots.common.utils.Constant;
@@ -131,6 +132,7 @@ public class HomePageController {
 
 			if (homepageReqEntity.getPillowlongitude() != null && homepageReqEntity.getPillowlatitude() != null) {
 				reqEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
+				reqEntity.setSearchtype(HotelSearchEnum.NEAR.getId());
 			}
 
 			Map<String, Object> responseHotels = searchService.readonlySearchHotels(reqEntity);
@@ -209,6 +211,7 @@ public class HomePageController {
 
 			if (homepageReqEntity.getPillowlongitude() != null && homepageReqEntity.getPillowlatitude() != null) {
 				reqEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
+				reqEntity.setSearchtype(HotelSearchEnum.NEAR.getId());
 			}
 
 			Map<String, Object> themeResponse = promoService.readonlySearchHotels(reqEntity);
