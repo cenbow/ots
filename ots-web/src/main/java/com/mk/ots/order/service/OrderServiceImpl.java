@@ -2057,13 +2057,13 @@ public class OrderServiceImpl implements OrderService {
                           walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), returnWallCash);
                           //发送短消息和app消息
                           SmsMessage smsMessage = new SmsMessage();
-                          smsMessage.setMessage("你已获得一张眯客特价【" + returnWallCash+"元红包】，快前去体验吧");
+                          smsMessage.setMessage("你已获得一张眯客特价【" + returnWallCash+"元红包】，快前去体验吧。");
                           smsMessage.setSmsMessageTypeEnum(SmsMessageTypeEnum.normal);
 
                           AppMessage appMessage = new AppMessage();
                           appMessage.setMid(otaorder.getMid());
                           appMessage.setTitle("红包到账");
-                          appMessage.setMsgContent("你已获得一张眯客特价【" + returnWallCash+"元红包】，快前去体验吧");
+                          smsMessage.setMessage("你已获得一张眯客特价【" + returnWallCash+"元红包】，快前去体验吧。");
                           appMessage.setMsgtype(PushMessageTypeEnum.USER);
                           appMessage.setUrl(AppUrlEnum.orderList.getUrl());
                           // 缓存获取会员对象 存会员等级
