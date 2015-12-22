@@ -7,7 +7,6 @@ import com.mk.ots.common.enums.OrderTypeEnum;
 import com.mk.ots.hotel.dao.HotelDAO;
 import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.OtaRoomOrder;
-import com.mk.ots.order.service.OrderServiceImpl;
 import com.mk.ots.wallet.dao.ITBackMoneyRuleDao;
 import com.mk.ots.wallet.enums.BackMoneyTypeEnum;
 import com.mk.ots.wallet.service.ITBackMoneyRuleService;
@@ -33,8 +32,6 @@ public class TBackMoneyRuleServiceImpl implements ITBackMoneyRuleService {
 
     @Autowired
     private HotelDAO hotelDAO = null;
-    @Autowired
-    private OrderServiceImpl orderService;
 
 
     public BigDecimal getBackMoneyByOrder(OtaOrder order) {
@@ -42,6 +39,9 @@ public class TBackMoneyRuleServiceImpl implements ITBackMoneyRuleService {
             throw MyErrorEnum.errorParm.getMyException("订单不存在.");
         }
         if(OrderTypeEnum.YF.getId() == order.getOrderType()){
+            return new BigDecimal(0);
+        }
+        if(order.getTotalPrice().compareTo(order.getAvailableMoney()) == 0){
             return new BigDecimal(0);
         }
         Long thotelId = order.getHotelId();
