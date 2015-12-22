@@ -509,12 +509,14 @@ public class HotelService {
 				output.setSuccess(false);
 				output.setErrcode("-1");
 				output.setErrmsg(e.getMessage());
+				e.printStackTrace();
 				logger.error("post es error: {} " + e.getMessage());
 			}
 		} catch (Exception e) {
 			output.setSuccess(false);
 			output.setErrcode("-1");
 			output.setErrmsg(e.getMessage());
+			e.printStackTrace();
 			logger.error("post es error: {} " + e.getMessage());
 		} finally {
 			if (session != null) {
@@ -1707,6 +1709,90 @@ public class HotelService {
 			}
 
 			if (curPromoType != null && promoType == curPromoType) {
+				RoomstateQuerylistRespEntity.Room room = new RoomstateQuerylistRespEntity().new Room();
+				room.setRoomid(roomModel.getId());
+				room.setRoomno(roomModel.getName());
+
+				try {
+					this.processRoomState(room, hotelid, starttime, endtime, lockRoomsCache);
+				} catch (Exception ex) {
+					logger.error(String.format("failed to calculate room vacancy for room %s", roomModel.getId()), ex);
+					continue;
+				}
+
+				if (room.getRoomstatus().equals(roomstateService.ROOM_STATUS_VC)) {
+					vacants++;
+				}
+			}
+
+		}
+
+		return vacants;
+	}
+
+
+
+	/**
+	 * calculate room vacancy for promo rooms
+	 *
+	 * @param roomTypeId
+	 * @param roomModels
+	 * @param hotelid
+	 * @param isonline
+	 * @param starttime
+	 * @param endtime
+	 * @param lockRoomsCache
+	 * @return
+	 */
+	public Integer calNewPromoVacants(Integer promoId, Long hotelid, String starttime, String endtime, String isnewpms)
+			throws Exception {
+		Integer vacants = 0;
+
+		List<TRoomModel> roomModels = tRoomMapper.findRoomsByHotelId(hotelid);
+		Map<String, String> lockRoomsCache = null;
+		if (Constant.STR_TRUE.equals(isnewpms)) {// 新pms
+			try {
+				lockRoomsCache = roomstateService.findBookedRoomsByHotelIdNewPms(hotelid, starttime, endtime);
+			} catch (Exception ex) {
+				throw new Exception(String.format(
+						"failed to load cache from findBookedRoomsByHotelIdNewPms for hotelId %s", hotelid), ex);
+			}
+		} else {
+			try {
+				lockRoomsCache = roomstateService.findBookedRoomsByHotelId(hotelid, starttime, endtime);
+			} catch (Exception ex) {
+				throw new Exception(
+						String.format("failed to load cache from findBookedRoomsByHotelId for hotelId %s", hotelid),
+						ex);
+			}
+		}
+
+		for (TRoomModel roomModel : roomModels) {
+			Long curRoomTypeId = roomModel.getRoomtypeid();
+			Long roomid = roomModel.getId();
+
+			Integer curPromoId = 0;
+			try {
+				List<Map<String, Object>> rooms = roomSaleService.queryRoomByHotelAndRoomType(String.valueOf(hotelid),
+						String.valueOf(curRoomTypeId));
+
+				if (rooms.size() > 0) {
+					curPromoId = (Integer) rooms.get(0).get("promoid");
+				} else {
+					logger.warn(String.format("no roomtype have been found for hotelid:%s; roomtypeid:%s", hotelid,
+							curRoomTypeId));
+				}
+			} catch (Exception ex) {
+				logger.warn(String.format("failed to queryRoomByHotelAndRoomType, hotelid:%s; roomid:%s; roomtypeid:%s",
+						hotelid, roomid, curRoomTypeId), ex);
+			}
+
+			if (logger.isInfoEnabled()) {
+				logger.info(String.format("queried for roomid:%s->curPromoType:%s; promoType:%s; roomtype:%s", roomid,
+						curPromoId, promoId, curRoomTypeId));
+			}
+
+			if (curPromoId != null && curPromoId == promoId) {
 				RoomstateQuerylistRespEntity.Room room = new RoomstateQuerylistRespEntity().new Room();
 				room.setRoomid(roomModel.getId());
 				room.setRoomno(roomModel.getName());
