@@ -2089,7 +2089,9 @@ public class HotelService {
 			List<Bean> list = Db.find(bfSql.toString());
 			logger.info("getRoomtypeList method sql: {}\n", bfSql.toString());
 			for (Bean bean : list) {
-				roomtypelist.add(bean.getColumns());
+				if (!roomtypelist.contains(bean.getColumns())){
+					roomtypelist.add(bean.getColumns());
+				}
 			}
 		} catch (Exception e) {
 			logger.error("getRoomtypeList method error:\n" + e.getMessage());
