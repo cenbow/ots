@@ -546,10 +546,10 @@ public class MessageService implements IMessageService {
 
 
 	@Override
-	public boolean modifyAlreadyRead(Long mid, List<Long> ids, String readstatus) {
+	public boolean modifyAlreadyRead(Long mid, String id, String readstatus) {
 		Map<String, Object> param = Maps.newHashMap();
 		param.put("mid", mid);
-		param.put("ids", ids);
+		param.put("id", id);
 		param.put("readstatus", readstatus);
 		return ilPushLogDao.update("modifyAlreadyRead", param) > 0;
 	}

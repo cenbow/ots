@@ -221,10 +221,7 @@
   </update>
   
   <update id="modifyAlreadyRead" parameterType="java.util.Map">
-  		update l_push_log set readstatus = #{readstatus} where mid = #{mid} and id in
-		<foreach collection="ids" item= "tmpid" index ="index" open="(" close =")" separator=",">
-		  	#{tmpid}
-		</foreach>
+  		update l_push_log set readstatus = #{readstatus} where mid = #{mid} and id =#{id}
   </update>
   
   <update id="modifyAlreadyReadAll" parameterType="java.util.Map">
