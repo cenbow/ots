@@ -1,16 +1,18 @@
 package com.mk.ots.common.enums;
 
 public enum OtaFreqTrvEnum {
-	IN_FREQUSER("1", "FREQUSER"),
+	IN_FREQUSER("1", "常旅客订单"),
 	OK_LESS4("2", "LESS4"),
 	MONTHE_UP4("3", "MONTHE_UP4"), // 一个酒店每月超过4单
 	ONEDAY_UP1("4", "ONEDAY_UP1"),// 每天超过一单
 	MONTHE_UP5("5", "MONTHE_UP5"), // 每月超过4单
+	DEVICE_NUM_OVER("6","设备号对应手机号超过三个手机号码"),
 
 	PHONE_NOT_FIRST("10","电话号码不是第一次使用"),
 
 	DEVICE_NUM_IS_NULL("20","设备号为空"),
 	DEVICE_NUM_NOT_FIRST("30","设备号不是第一次使用"),
+
 
 	CARD_ID_IS_NULL("40","身份证号为空"),
 	CARD_ID_IS_NOT_PMS_SCAN("41","身份证号不为PMS扫描"),

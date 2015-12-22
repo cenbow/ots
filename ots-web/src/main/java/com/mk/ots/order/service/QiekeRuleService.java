@@ -1,10 +1,7 @@
 package com.mk.ots.order.service;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.mk.framework.exception.MyErrorEnum;
 import com.mk.ots.activity.dao.IBActivityDao;
-import com.mk.ots.activity.model.BActivity;
 import com.mk.ots.common.enums.*;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
@@ -28,19 +25,12 @@ import com.mk.ots.pay.dao.impl.PayDAO;
 import com.mk.ots.pay.model.POrderLog;
 import com.mk.ots.pay.model.PPay;
 import com.mk.ots.pay.service.IPayService;
-import com.mk.ots.promoteconfig.service.impl.PromoteConfigService;
-import com.mk.ots.promo.model.BPromotion;
 import com.mk.ots.promo.service.IPromoService;
 import com.mk.ots.promoteconfig.model.TPromoteConfig;
 import com.mk.ots.promoteconfig.service.IPromoteConfigService;
-import com.mk.ots.search.service.impl.SearchService;
-import com.mk.ots.ticket.model.UTicket;
-import com.mk.ots.ticket.service.parse.SimplesubTicket;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.pms.myenum.PmsCheckInTypeEnum;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,7 +129,7 @@ public class QiekeRuleService {
      * @param otaOrder
      * @return
      */
-    public OtaFreqTrvEnum checkSysNo(OtaOrder otaOrder){
+    public OtaFreqTrvEnum checkSysNo(OtaOrder otaOrder, int num, OtaFreqTrvEnum otaFreqTrvEnum){
         logger.info(String.format("----------QiekeRuleService.checkSysNo start"));
         if (null == otaOrder) {
             logger.info(String.format("----------QiekeRuleService.checkSysNo otaOrder is null end"));
@@ -158,7 +148,7 @@ public class QiekeRuleService {
                 UMember member = memberOptional.get();
 
                 String unionid = member.getUnionid();
-                if (null == unionid) {
+                if (null == unionid || "null".equalsIgnoreCase(unionid)) {
                     logger.info(String.format("----------QiekeRuleService.checkMobile do wechat order id:[%s] openId is null end", otaOrder.getId()));
                     return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
                 }
@@ -173,8 +163,8 @@ public class QiekeRuleService {
                 memberIdSet.remove(mid);
 
                 //
-                if (memberIdSet.size() > 0) {
-                    return OtaFreqTrvEnum.DEVICE_NUM_NOT_FIRST;
+                if (memberIdSet.size() > num) {
+                    return otaFreqTrvEnum;
                 } else {
                     return  OtaFreqTrvEnum.L1;
                 }
@@ -193,7 +183,7 @@ public class QiekeRuleService {
                 return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
             }
             String deviceimei = orderMac.getDeviceimei();
-            if (null == deviceimei) {
+            if (null == deviceimei || "null".equalsIgnoreCase(deviceimei)) {
                 logger.info(String.format("----------QiekeRuleService.checkMobile do android order id:[%s] deviceimei is null end", otaOrder.getId()));
                 return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
             }
@@ -222,10 +212,10 @@ public class QiekeRuleService {
             orderIdSet.remove(orderId);
 
             //
-            if (orderIdSet.size() > 0) {
+            if (orderIdSet.size() > num) {
                 logger.info(String.format("----------QiekeRuleService.checkMobile do android orderIdSet size:[%s]", orderIdSet.size()));
                 logger.info(String.format("----------QiekeRuleService.checkMobile do android order id:[%s] not first", otaOrder.getId()));
-                return OtaFreqTrvEnum.DEVICE_NUM_NOT_FIRST;
+                return otaFreqTrvEnum;
             } else {
                 logger.info(String.format("----------QiekeRuleService.checkMobile do android order id:[%s] pass", otaOrder.getId()));
                 return  OtaFreqTrvEnum.L1;
@@ -240,7 +230,7 @@ public class QiekeRuleService {
                 return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
             }
             String uuid = orderMac.getUuid();
-            if (null == uuid) {
+            if (null == uuid || "null".equalsIgnoreCase(uuid)) {
                 logger.info(String.format("----------QiekeRuleService.checkMobile do ios order id:[%s] uuid is null end", otaOrder.getId()));
                 return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
             }
@@ -268,10 +258,10 @@ public class QiekeRuleService {
             orderIdSet.remove(orderId);
 
             //
-            if (orderIdSet.size() > 0) {
+            if (orderIdSet.size() > num) {
                 logger.info(String.format("----------QiekeRuleService.checkMobile do ios orderIdSet size:[%s]", orderIdSet.size()));
                 logger.info(String.format("----------QiekeRuleService.checkMobile do ios order id:[%s] not first end", otaOrder.getId()));
-                return OtaFreqTrvEnum.DEVICE_NUM_NOT_FIRST;
+                return otaFreqTrvEnum;
             } else {
                 logger.info(String.format("----------QiekeRuleService.checkMobile do ios order id:[%s] end pass", otaOrder.getId()));
                 return  OtaFreqTrvEnum.L1;
@@ -420,6 +410,8 @@ public class QiekeRuleService {
         }
     }
 
+
+
     public OtaFreqTrvEnum checkUserAdders(boolean checkAddressIsNullSwitchOpen, boolean checkDistanceSwitchOpen,
                                           BigDecimal userLongitude, BigDecimal userLatitude, BigDecimal hotelLongitude, BigDecimal hotelLatitude){
         if(!checkAddressIsNullSwitchOpen){
@@ -545,7 +537,7 @@ public class QiekeRuleService {
             return otaFreqTrvEnum;
         }
 
-        otaFreqTrvEnum = checkSysNo(otaOrder);
+        otaFreqTrvEnum = checkSysNo(otaOrder, 0, OtaFreqTrvEnum.DEVICE_NUM_NOT_FIRST);
         if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
             return otaFreqTrvEnum;
         }
