@@ -13,6 +13,7 @@ import com.mk.framework.AppUtils;
 import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.orm.plugin.bean.Bean;
 import com.mk.orm.plugin.bean.Db;
+import com.mk.ots.common.enums.BedTypeEnum;
 import com.mk.ots.common.utils.CSVFileUtil;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
@@ -446,6 +447,17 @@ public class HotelService {
 							bed.put("bedtype", bedtype.get("bedtype"));
 							bed.put("bedtypename", bedtype.get("bedtypename"));
 							bedtypes.add(bed);
+							if (bedtype.get("bedtypename") == BedTypeEnum.SINGLEBED.getId()){
+								hotel.setBedtype1(BedTypeEnum.SINGLEBED.getId());
+							}
+							if (bedtype.get("bedtypename") == BedTypeEnum.DOUBLEBED.getId()){
+								hotel.setBedtype2(BedTypeEnum.DOUBLEBED.getId());
+							}
+
+							if (bedtype.get("bedtypename") == BedTypeEnum.OTHER.getId()){
+								hotel.setBedtype3(BedTypeEnum.OTHER.getId());
+							}
+
 						}
 					} catch (Exception ex) {
 						logger.warn(String.format("failed to add bedtype for hotelid:%s...", hotelid), ex);

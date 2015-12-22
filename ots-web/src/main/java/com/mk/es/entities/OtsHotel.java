@@ -84,6 +84,9 @@ public class OtsHotel {
 	private String visible = Constant.STR_TRUE;
 	/** 酒店是否在线: T在线，F不在线 */
 	private String online = Constant.STR_TRUE;
+	private Integer bedtype1;
+	private Integer bedtype2;
+	private Integer bedtype3;
 
 	/** 单床房数量 */
 	private long numroomtype1 = 1;
@@ -221,6 +224,30 @@ public class OtsHotel {
 	/** getters and setters */
 	public String getHotelid() {
 		return hotelid;
+	}
+
+	public Integer getBedtype1() {
+		return bedtype1;
+	}
+
+	public void setBedtype1(Integer bedtype1) {
+		this.bedtype1 = bedtype1;
+	}
+
+	public Integer getBedtype2() {
+		return bedtype2;
+	}
+
+	public void setBedtype2(Integer bedtype2) {
+		this.bedtype2 = bedtype2;
+	}
+
+	public Integer getBedtype3() {
+		return bedtype3;
+	}
+
+	public void setBedtype3(Integer bedtype3) {
+		this.bedtype3 = bedtype3;
 	}
 
 	public void setHotelid(String id) {
