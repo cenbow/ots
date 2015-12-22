@@ -130,10 +130,7 @@ public class HomePageController {
 				logger.warn("no show configs has been loaded...");
 			}
 
-			if (homepageReqEntity.getPillowlongitude() != null && homepageReqEntity.getPillowlatitude() != null) {
-				reqEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
-				reqEntity.setSearchtype(HotelSearchEnum.NEAR.getId());
-			}
+
 
 			Map<String, Object> responseHotels = searchService.readonlySearchHotels(reqEntity);
 
@@ -340,13 +337,16 @@ public class HomePageController {
 		reqEntity.setCallentry(null);
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
+		if (homepageReqEntity.getPillowlongitude() != null && homepageReqEntity.getPillowlatitude() != null) {
+			reqEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
+		}
 		reqEntity.setPillowlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setPillowlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setIshotelpic("T");
 		reqEntity.setIspromoonly(null);
 		reqEntity.setOrderby(HotelSortEnum.ORDERNUMS.getId());
 		reqEntity.setSearchtype(0);
-		reqEntity.setRange(3000);
+
 
 		if (homepageReqEntity.getPage() == null) {
 			reqEntity.setPage(1);

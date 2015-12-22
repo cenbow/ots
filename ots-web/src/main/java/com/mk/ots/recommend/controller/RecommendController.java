@@ -111,6 +111,7 @@ public class RecommendController {
                 recommendList.setDetailid(tRecommendItem.getDetailid());
                 recommendList.setQuerytype(tRecommendItem.getViewtype());
                 recommendList.setCreatetime(tRecommendItem.getCreatetime());
+                recommendList.setSort(tRecommendItem.getSort());
                 banners.add(recommendList);
             }
         }
@@ -342,7 +343,7 @@ public class RecommendController {
                             recommendList.setDetailid(tRecommendItem.getDetailid());
                             recommendList.setQuerytype(tRecommendItem.getViewtype());
                             recommendList.setCreatetime(tRecommendItem.getCreatetime());
-
+                            recommendList.setSort(tRecommendItem.getSort());
 
                             banners.add(recommendList);
                             global_count++;
@@ -429,7 +430,7 @@ public class RecommendController {
             RecommendList banner1 = (RecommendList) obj1;
             RecommendList banner2 = (RecommendList) obj2;
 
-            if (banner1.getSort().compareTo(banner2.getSort()) > 0) {
+            if (banner1.getSort() != null && banner2.getSort() != null &&(banner1.getSort().compareTo(banner2.getSort()) > 0)) {
                 return -1;
             } else {
                 return 1;
