@@ -953,11 +953,16 @@ public class OrderServiceImpl implements OrderService {
 	public OtaRoomOrder saveRoomOrder(OtaOrder order, OtaRoomOrder newRoomOrder, boolean isQieKe) {
 		Transaction t = Cat.newTransaction("Order.doCreateOrder", "saveRoomOrder");
 		try {
-			// 这里需要先保存 以保证下面 方法 能获取到OtaRoomOrder的ID
+            // 这里需要先保存 以保证下面 方法 能获取到OtaRoomOrder的ID
 			// 总价格只保存入住的价格 离店那天不计算
 			if ((newRoomOrder == null) || (newRoomOrder.getDate("begintime") == null) || (newRoomOrder.getDate("endtime") == null)) {
 				throw MyErrorEnum.errorParm.getMyException("客单必填项不完整");
 			}
+            //保存特价房间类型
+            if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
+                Integer promoId = getPromoId(newRoomOrder.getRoomTypeId());
+                newRoomOrder.set("promoid", promoId);
+            }
 			Date createtime = (Date) order.getDate("createtime").clone();
 			Date begintime = (Date) order.getDate("begintime").clone();
 			Date endtime = (Date) order.getDate("endtime").clone();
@@ -2058,13 +2063,13 @@ public class OrderServiceImpl implements OrderService {
                           walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), returnWallCash);
                           //发送短消息和app消息
                           SmsMessage smsMessage = new SmsMessage();
-                          smsMessage.setMessage("你已获得一张眯客特价【" + returnWallCash+"元红包】，快前去体验吧。");
+                          smsMessage.setMessage("你已获得一张眯客特价【" + returnWallCash+"元红包】，尽享特价哦！");
                           smsMessage.setSmsMessageTypeEnum(SmsMessageTypeEnum.normal);
 
                           AppMessage appMessage = new AppMessage();
                           appMessage.setMid(otaorder.getMid());
                           appMessage.setTitle("红包到账");
-                          smsMessage.setMessage("你已获得一张眯客特价【" + returnWallCash+"元红包】，快前去体验吧。");
+                          smsMessage.setMessage("你已获得一张眯客特价【" + returnWallCash+"元红包】，尽享特价哦！");
                           appMessage.setMsgtype(PushMessageTypeEnum.USER);
                           appMessage.setUrl(AppUrlEnum.walletCash.getUrl());
                           // 缓存获取会员对象 存会员等级
