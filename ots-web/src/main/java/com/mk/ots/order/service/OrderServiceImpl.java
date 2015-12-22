@@ -2058,7 +2058,7 @@ public class OrderServiceImpl implements OrderService {
               if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion.trim()) <= 0) {
                   if (OtaOrderStatusEnum.CheckIn.getId() == otaorder.getOrderStatus()) {
                       BigDecimal returnWallCash = tBackMoneyRuleService.getBackMoneyByOrder(otaorder);
-                      if (returnWallCash != null && returnWallCash.compareTo(new BigDecimal("0")) != 0) {
+                      if (returnWallCash != null && returnWallCash.compareTo(new BigDecimal("0")) == 1 ) {
                           walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), returnWallCash);
                           //发送短消息和app消息
                           SmsMessage smsMessage = new SmsMessage();
