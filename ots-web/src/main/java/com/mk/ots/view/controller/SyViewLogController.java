@@ -1,5 +1,7 @@
 package com.mk.ots.view.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.google.common.base.Strings;
@@ -22,6 +24,7 @@ import com.mk.ots.score.service.ScoreService;
 import com.mk.ots.utils.SpringContextUtil;
 import com.mk.ots.view.dao.ISyViewLogDao;
 import com.mk.ots.view.dao.impl.SyViewLogDaoImpl;
+import com.mk.ots.view.model.SyViewLog;
 import com.mk.ots.view.service.ISyViewLogService;
 import com.mk.ots.wallet.model.CashflowTypeEnum;
 import com.mk.ots.wallet.model.UWalletCashFlow;
@@ -38,8 +41,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -63,54 +68,22 @@ public class SyViewLogController {
     private ISyViewLogService syViewLogService;
 
 
-    @RequestMapping("/viewevent")
-    public ResponseEntity<Map<String, Object>> addviewevent(HttpServletRequest request,String tourl, String actiontype) {
-        logger.info("【sys/addviewevent】 params is : {tourl,actiontype}", tourl + " , " + actiontype);
-
+    @RequestMapping(value = "/viewevent", method = {RequestMethod.POST })
+    public ResponseEntity<Map<String, Object>> addviewevent(String data) {
+        logger.info("【sys/addviewevent】 data is : {}", data);
+        List<SyViewLog> logList = JSONObject.parseArray(data,SyViewLog.class);
         Map<String, Object> resultrtnMap = Maps.newHashMap();
-        if (StringUtils.isEmpty(tourl)) {
-            logger.error("获取目标url失败.");
+        if (StringUtils.isEmpty(data)) {
+            logger.error("获取目标data失败.");
             resultrtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
-            resultrtnMap.put("errmsg", "日志添加失败!");
+            resultrtnMap.put("errmsg", "获取目标data失败!");
             return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
         }
 
-        if (StringUtils.isEmpty(actiontype)) {
-            logger.error("获取目标url失败.");
-            resultrtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
-            resultrtnMap.put("errmsg", "日志添加失败.");
-            return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
-        }
-
-        HashMap<String, Object> dateMap = Maps.newHashMap();
-        String accesstoken = request.getParameter("token");
-        if(!StringUtils.isEmpty(accesstoken)){
-            Long mid = MyTokenUtils.getMidByToken(accesstoken);
-            dateMap.put("mid",mid);
-        }
         boolean result = false;
-        dateMap.put("toUrl",tourl);
-        dateMap.put("actionType",actiontype);
-        dateMap.put("fromUrl",request.getParameter("fromurl"));
-        dateMap.put("params",request.getParameter("params"));
-        dateMap.put("longitude",request.getParameter("longitude"));
-        dateMap.put("latitude",request.getParameter("latitude"));
-        dateMap.put("cityCode",request.getParameter("cityid"));
-        dateMap.put("ip",request.getParameter("ip"));
-        dateMap.put("callMethod",request.getParameter("callmethod"));
-        dateMap.put("version",request.getParameter("version"));
-        dateMap.put("wifiMacaddr",request.getParameter("wifimacaddr"));
-        dateMap.put("biMacaddr",request.getParameter("bimacaddr"));
-        dateMap.put("simsn",request.getParameter("simsn"));
-        dateMap.put("bussinessType",request.getParameter("bussinesstype"));
-        dateMap.put("bussinessId",request.getParameter("bussinessid"));
-        dateMap.put("hardwarecode", request.getParameter("hardwarecode"));
-        dateMap.put("imei", request.getParameter("imei"));
-
-   //     result = syViewLogService.saveSyViewLog(dateMap);
         try{
             //组织数据响应
-            syViewLogService.pushSyViewLog(dateMap);
+            syViewLogService.pushSyViewLog(logList);
             result = true;
         }catch(Exception   e){
             result =false;

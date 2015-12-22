@@ -21,19 +21,12 @@ import javax.annotation.Resource;
 
 public class SyViewLogThread  extends    Thread{
 
-//    @Autowired
-//    private OtsCacheManager cacheManager;
-//    private volatile OtsCacheManager cacheManager;
-//    private static MkJedisConnectionFactory jedisFactory = SpringContextUtil.getBean(MkJedisConnectionFactory.class);
-
     public void run() {
         try{
             while(true){
-                System.out.println("aaaaaaaaaaaaaaaaaaaaa222");
                 MkJedisConnectionFactory jedisFactory = AppUtils.getBean(MkJedisConnectionFactory.class);
                 SyViewLogListen listener = new SyViewLogListen();
                 jedisFactory.getJedis().subscribe(listener, "SYVIEWwLOG");
-                System.out.println("aaaaaaaaaaaaaaaaaaaaa2");
                 Thread.sleep(300);
             }
         }catch(Exception e){
