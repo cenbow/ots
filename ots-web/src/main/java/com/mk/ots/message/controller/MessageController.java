@@ -347,7 +347,7 @@ public class MessageController {
 	 * @return 返回数据格式
 	 */
 	@RequestMapping("/info/modify")
-	public ResponseEntity<Map<String, Object>> modifyStatus(String token, String msgstatus, String msgids) {
+	public ResponseEntity<Map<String, Object>> modifyStatus(String token, String msgstatus, String msgid) {
 		//1. validate the params.
 		if (Strings.isNullOrEmpty(msgstatus)) {
 			throw MyErrorEnum.customError.getMyException("消息状态不允许为空.");
@@ -355,6 +355,7 @@ public class MessageController {
 		if (!"1".equals(msgstatus) && !"2".equals(msgstatus)) {
 			throw MyErrorEnum.customError.getMyException("消息状态不正确.");
 		}
+
 		String msgboolean = "";
 		if ("1".equals(msgstatus)) {
 			msgboolean = "F";
@@ -363,11 +364,10 @@ public class MessageController {
 		}
 
 		//2. invoke the service to modify the status.
-		logger.info("修改消息状态. info: readstatus:{}, ids:{}.", msgboolean, msgids);
+		logger.info("修改消息状态. info: readstatus:{}, ids:{}.", msgboolean, msgid);
 		Long mid = MyTokenUtils.getMidByToken(token);
-		if (!Strings.isNullOrEmpty(msgids)) {
-			List idsList = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(msgids);
-			this.iMessageService.modifyAlreadyRead(mid, idsList, msgboolean);
+		if (!Strings.isNullOrEmpty(msgid)) {
+			this.iMessageService.modifyAlreadyRead(mid, msgid, msgboolean);
 		} else {
 			this.iMessageService.modifyAlreadyReadAll(mid, msgboolean);
 		}
