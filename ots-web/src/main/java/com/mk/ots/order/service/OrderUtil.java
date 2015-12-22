@@ -1,25 +1,31 @@
 package com.mk.ots.order.service;
 
-import java.io.File;
-import java.math.BigDecimal;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.UUID;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.mk.framework.AppUtils;
+import com.mk.framework.exception.MyErrorEnum;
+import com.mk.framework.util.MyTokenUtils;
+import com.mk.framework.util.ThreadUtil;
+import com.mk.orm.plugin.bean.Bean;
+import com.mk.ots.common.bean.Ethnic;
 import com.mk.ots.common.enums.*;
+import com.mk.ots.common.utils.Constant;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.common.utils.SysConfig;
+import com.mk.ots.hotel.model.THotel;
+import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.manager.SysConfigManager;
 import com.mk.ots.order.bean.*;
+import com.mk.ots.order.dao.CheckInUserDAO;
+import com.mk.ots.pay.model.PPay;
+import com.mk.ots.pay.model.PPayInfo;
+import com.mk.ots.ticket.model.TicketInfo;
+import com.mk.ots.ticket.service.ITicketService;
+import com.mk.ots.ticket.service.impl.TicketService;
+import com.mk.ots.wallet.service.IWalletCashflowService;
 import com.mk.ots.wallet.service.impl.TBackMoneyRuleServiceImpl;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
@@ -33,30 +39,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.mk.framework.AppUtils;
-import com.mk.framework.exception.MyErrorEnum;
-import com.mk.framework.util.MyTokenUtils;
-import com.mk.framework.util.ThreadUtil;
-import com.mk.orm.plugin.bean.Bean;
-import com.mk.ots.common.bean.Ethnic;
-import com.mk.ots.common.utils.Constant;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.common.utils.SysConfig;
-import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.service.HotelService;
-import com.mk.ots.manager.SysConfigManager;
-import com.mk.ots.order.dao.CheckInUserDAO;
-import com.mk.ots.pay.model.PPay;
-import com.mk.ots.pay.model.PPayInfo;
-import com.mk.ots.ticket.model.TicketInfo;
-import com.mk.ots.ticket.service.ITicketService;
-import com.mk.ots.ticket.service.impl.TicketService;
-import com.mk.ots.wallet.service.IWalletCashflowService;
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.math.BigDecimal;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class OrderUtil {
@@ -812,14 +800,20 @@ public class OrderUtil {
 		StringBuffer usermessage = new StringBuffer();
 		if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion.trim()) <= 0) {
 			if(PromoTypeEnum.TJ.getCode().equals(returnOrder.getPromoType())){
-				BigDecimal returnWalletCashBigDecimal = tBackMoneyRuleService.getBackMoneyByOrder(returnOrder);
-				usermessage.append("该房间正在参与眯客今夜特价活动，预付入住享受低价，规则如下：").append("\n");
-				usermessage.append(String.format("1.预付比到付多享受%s元红包优惠；", returnWalletCashBigDecimal)).append("\n");
-				usermessage.append(String.format("2.%s元红包使用规则同评价返现；", returnWalletCashBigDecimal)).append("\n");
-				usermessage.append(String.format("3.预付确认入住即奖励%s元红包；", returnWalletCashBigDecimal)).append("\n");
-				usermessage.append("4.使用账户纯余额入住不再奖励；").append("\n");
-				usermessage.append("\n");
-				usermessage.append("温馨提示：").append("\n");
+				String  showBlackType =  request.getParameter("showblacktype");// 非必填，是否一元房
+				if(!PromoIdTypeEnum.YYF.getCode().equals(showBlackType)){
+					BigDecimal returnWalletCashBigDecimal = tBackMoneyRuleService.getBackMoneyByOrder(returnOrder);
+					usermessage.append("该房间正在参与眯客今夜特价活动，预付入住享受低价，规则如下：").append("\n");
+					usermessage.append(String.format("1.预付比到付多享受%s元红包优惠；", returnWalletCashBigDecimal)).append("\n");
+					usermessage.append(String.format("2.%s元红包使用规则同评价返现；", returnWalletCashBigDecimal)).append("\n");
+					usermessage.append(String.format("3.预付确认入住即奖励%s元红包；", returnWalletCashBigDecimal)).append("\n");
+					usermessage.append("4.使用账户纯余额入住不再奖励；").append("\n");
+					usermessage.append("\n");
+					usermessage.append("温馨提示：").append("\n");
+				}else{
+					jsonObj.put("usermessage", "该订单付款完成后不可以修改或者退款。");
+					return;
+				}
 			}
 		}else{
 			if(PromoTypeEnum.TJ.getCode().toString().equals(returnOrder.getPromoType())){
