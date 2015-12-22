@@ -4,6 +4,7 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.mk.ots.common.enums.FrontPageEnum;
 import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.enums.HotelSearchEnum;
 import com.mk.ots.common.enums.HotelSortEnum;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.common.utils.SearchConst;
@@ -165,6 +166,7 @@ public class FrontPageController {
 
 				if (reqentity.getPillowlongitude()!= null && reqentity.getPillowlatitude()!= null){
 					hotelEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
+					hotelEntity.setSearchtype(HotelSearchEnum.NEAR.getId());
 				}
 
 				Map<String, Object> promoItem = promoSearchService.searchHomePromoRecommend(hotelEntity);
