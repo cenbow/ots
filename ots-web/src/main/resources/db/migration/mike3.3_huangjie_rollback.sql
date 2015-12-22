@@ -1,0 +1,7 @@
+
+DROP table T_REMIND;
+
+DROP table T_REMIND_LOG;
+
+DROP table T_REMIND_TYPE;
+
