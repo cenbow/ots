@@ -2475,7 +2475,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private Map<String, Object> readonlyOtsHotelListFromEsStore(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		try {
-
+			String callVersion = reqentity.getCallversion() == null ? "" : reqentity.getCallversion().trim();
+			String promoidStr = reqentity.getPromoid();
+			Integer promoid = null;
+			if (StringUtils.isNotBlank(promoidStr)){
+				promoid = Integer.valueOf(promoidStr);
+			}
 			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
 			List<FilterBuilder> keywordBuilders = new ArrayList<FilterBuilder>();
 
@@ -3007,8 +3012,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Integer avlblroomnum = hotelService.getAvlblRoomNum(p_hotelid, p_isnewpms, p_visible, p_online,
 						reqentity.getStartdateday(), reqentity.getEnddateday());
 
-				Integer vacants = hotelService.calPromoVacants(promoType, p_hotelid, reqentity.getStartdateday(),
-						reqentity.getEnddateday(), p_isnewpms);
+				Integer vacants;
+				if ("3.3.0".compareTo(callVersion) > 0 || promoid == null){
+					vacants = hotelService.calPromoVacants(promoType, p_hotelid, reqentity.getStartdateday(),
+							reqentity.getEnddateday(), p_isnewpms);
+				}else{
+					vacants = hotelService.calNewPromoVacants(promoid, p_hotelid, reqentity.getStartdateday(),
+							reqentity.getEnddateday(), p_isnewpms);
+				}
+
 				result.put("roomvacancy", vacants);
 
 				endTime = new Date().getTime();

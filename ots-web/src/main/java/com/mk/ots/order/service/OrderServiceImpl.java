@@ -4734,16 +4734,24 @@ public class OrderServiceImpl implements OrderService {
             } else {
                 String arrSales = salesCache.get(Constant.MONTHLY_PMS_SALES_KEY + dateNowStr);
                 Long hotelRoomNums = roomDAO.findHotelRoomNums(hotelId.toString());
+                Long greetScore = 0L;
+
                 if(!StringUtils.isBlank(arrSales)) {
                     JSONObject jSales = JSONObject.parseObject(arrSales);
                     String hotelSales = jSales.getString(hotelId + "");
+
                     if(!StringUtils.isBlank(hotelSales) && Long.parseLong(hotelSales) >= 0)
                         return Long.parseLong(hotelSales);
                     else {
 
 
                         currentSales = orderDAO.findPMSMonthlySaleByHotelId(hotelId, beforetime, yestertime);
-                        Long greetScore =(currentSales * 1000) / hotelRoomNums;
+
+
+                        if (hotelRoomNums != 0){
+                            greetScore  = (currentSales * 1000) / hotelRoomNums;
+                        }
+
                         jSales.put(hotelId + "", greetScore);
                         salesCache.set(Constant.MONTHLY_PMS_SALES_KEY + dateNowStr, jSales.toJSONString());
                         return greetScore;
@@ -4751,7 +4759,10 @@ public class OrderServiceImpl implements OrderService {
                 } else {
 
                     currentSales = orderDAO.findPMSMonthlySaleByHotelId(hotelId, beforetime, yestertime);
-                    Long greetScore =(currentSales * 1000) / hotelRoomNums;
+                    if (hotelRoomNums != 0){
+                        greetScore  = (currentSales * 1000) / hotelRoomNums;
+                    }
+
                     salesObject.put(hotelId + "", greetScore);
                 }
             }
