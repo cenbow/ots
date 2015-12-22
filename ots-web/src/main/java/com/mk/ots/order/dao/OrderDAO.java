@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import com.mk.orm.plugin.bean.Bean;
@@ -518,7 +519,7 @@ public class OrderDAO extends BaseDAO {
 			sql.setLength(sql.length() - 1);
 			sql.append(" ) ");
 		}
-		if (isscore != null) {
+		if (StringUtils.isNotBlank(isscore)) {
 			if (isscore.equals("T")) {
 				sql.append(" and isscore = ? ");
 				paraList.add(isscore);
