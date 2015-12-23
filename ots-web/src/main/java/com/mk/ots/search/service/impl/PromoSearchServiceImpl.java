@@ -4181,9 +4181,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		@Override
 		public int compare(Map<String, Object> o1, Map<String, Object> o2) {
 			if (o1 == null) {
-				return -1;
-			} else if (o2 == null) {
 				return 1;
+			} else if (o2 == null) {
+				return -1;
 			}
 
 			BigDecimal minpmsprice1 = (BigDecimal) o1.get("minpmsprice");
@@ -4191,9 +4191,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			BigDecimal minpmsprice2 = (BigDecimal) o2.get("minpmsprice");
 
 			if (minpmsprice1 == null) {
-				return -1;
-			} else if (minpmsprice2 == null) {
 				return 1;
+			} else if (minpmsprice2 == null) {
+				return -1;
 			}
 
 			return minpmsprice1.compareTo(minpmsprice2);
