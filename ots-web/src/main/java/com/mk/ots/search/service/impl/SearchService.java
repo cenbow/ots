@@ -909,7 +909,7 @@ public class SearchService implements ISearchService {
 			if (searchType == null) {
 				searchType = HotelSearchEnum.ALL.getId();
 			}
-
+			Boolean isLocationCity = false;
 			//
 			List<Map<String, Object>> hotels = new ArrayList<Map<String, Object>>();
 			// 如果城市id 为空则默认设置为上海
@@ -982,6 +982,9 @@ public class SearchService implements ISearchService {
 				}
 			}
 
+			if (reqentity.getPillowlatitude() != null && reqentity.getPillowlongitude() != null){
+				isLocationCity = true;
+			}
 			// 用户经纬度，根据它来计算酒店“距离我”的距离
 			double userlat = reqentity.getUserlatitude() == null ? cityLat_default : reqentity.getUserlatitude();
 			double userlon = reqentity.getUserlongitude() == null ? cityLon_default : reqentity.getUserlongitude();
@@ -1062,9 +1065,14 @@ public class SearchService implements ISearchService {
 					}
 				}
 				// 眯客3.0位置区域搜索：结束
+				if (isLocationCity){
+					geoFilter.point(userlat, userlon).distance(distance, DistanceUnit.METERS).optimizeBbox("memory")
+							.geoDistance(GeoDistance.ARC);
+				}else {
+					geoFilter.point(userlat, userlon).distance(SearchConst.SEARCH_RANGE_MAX, DistanceUnit.METERS).optimizeBbox("memory")
+							.geoDistance(GeoDistance.ARC);
+				}
 
-				geoFilter.point(lat, lon).distance(distance, DistanceUnit.METERS).optimizeBbox("memory")
-						.geoDistance(GeoDistance.ARC);
 				filterBuilders.add(geoFilter);
 
 				// hotelname,hoteladdr模糊查询
