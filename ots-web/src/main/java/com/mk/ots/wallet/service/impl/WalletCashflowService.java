@@ -309,7 +309,7 @@ public class WalletCashflowService implements IWalletCashflowService {
      * @param sourceid         业务对应记录id
      * @return T/F
      */
-    private boolean saveCashflowAndSynWallet(Long mid, BigDecimal price, CashflowTypeEnum cashflowTypeEnum, Long sourceid) {
+    public boolean saveCashflowAndSynWallet(Long mid, BigDecimal price, CashflowTypeEnum cashflowTypeEnum, Long sourceid) {
         logger.info(">>>记录钱包流水并同步钱包总额: mid:{}, cashflowtype:{}, orderid:{}, price:{}", mid, cashflowTypeEnum, sourceid, price);
 
         BigDecimal realprice = BigDecimal.ZERO;
