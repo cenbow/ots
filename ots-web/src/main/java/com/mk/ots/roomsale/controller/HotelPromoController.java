@@ -534,6 +534,7 @@ public class HotelPromoController {
 		reqEntity.setHotelname(entityReqEntity.getHotelname());
 		reqEntity.setHoteladdr(entityReqEntity.getHoteladdr());
 		reqEntity.setKeyword(entityReqEntity.getHoteladdr());
+		reqEntity.setOrderby(entityReqEntity.getOrderby());
 		reqEntity.setIspromoonly(Boolean.TRUE);
 
 		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));

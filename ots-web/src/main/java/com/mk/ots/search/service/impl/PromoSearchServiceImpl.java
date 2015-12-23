@@ -4094,25 +4094,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				return 1;
 			}
 
-			Double minPrice1 = Double.parseDouble((String) o1.get("promoprice"));
 			BigDecimal minpmsprice1 = (BigDecimal) o1.get("minpmsprice");
-			Double minPrice2 = Double.parseDouble((String) o2.get("promoprice"));
+
 			BigDecimal minpmsprice2 = (BigDecimal) o2.get("minpmsprice");
 
-			Double savePrice1 = (minPrice1 != null && minpmsprice1 != null) ? minpmsprice1.doubleValue() - minPrice1
-					: 0;
-			Double savePrice2 = (minPrice2 != null && minpmsprice2 != null) ? minpmsprice2.doubleValue() - minPrice2
-					: 0;
-
-			if (savePrice1 > savePrice2) {
+			if (minpmsprice1 == null) {
 				return -1;
-			} else if (savePrice1 == savePrice2) {
-				return 0;
-			} else if (savePrice1 < savePrice2) {
+			} else if (minpmsprice2 == null) {
 				return 1;
-			} else {
-				return -1;
 			}
+
+			return minpmsprice1.compareTo(minpmsprice2);
 		}
 	}
 
