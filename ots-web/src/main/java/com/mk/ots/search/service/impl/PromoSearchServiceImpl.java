@@ -1504,7 +1504,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			throws Exception {
 		Map<String, Object> promoItem = new HashMap<String, Object>();
 		if (params.getLimit() == null) {
-			params.setLimit(FrontPageEnum.limit.getId());
+			params.setLimit(FrontPageEnum.recommendLimit.getId());
 		}
 		params.setIspromoonly(Boolean.TRUE);
 
@@ -1539,6 +1539,38 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		promoItem.put("normalid", showConfig.getNormalId());
 
 		return promoItem;
+	}
+
+	private class userDistanceComparator implements Comparator<Object> {
+
+		public int compare(Object obj1, Object obj2) {
+
+			Map<String, Object> hotel1 = (Map<String, Object>) obj1;
+
+			Map<String, Object> hotel2 = (Map<String, Object>) obj2;
+
+			Double userDistance1 = (Double) hotel1.get("userdistance");
+
+			Double userDistance2 = (Double) hotel2.get("userdistance");
+
+			if (userDistance1 > userDistance2) {
+
+				return 1;
+
+			} else if (userDistance1 < userDistance2) {
+
+				return -1;
+
+			} else {
+
+
+				return 0;
+
+			}
+
+
+		}
+
 	}
 
 	@Override
@@ -2441,7 +2473,18 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		hotel.put("hotelpic", newHotelPics);
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		List<Object> roomtypePicList = (List<Object>) objectMapper.readValue(picsJson, List.class);
+		List<Object> roomtypePicList = null;
+
+		try {
+
+			roomtypePicList = (List<Object>) objectMapper.readValue(picsJson, List.class);
+
+		} catch (Exception ex) {
+
+			throw new Exception(String.format("failed to parse roomtypepic %s", picsJson), ex);
+
+		}
+
 
 		if (roomtypePicList != null && roomtypePicList.size() > 0) {
 			roomtype.put("roomtypepic", roomtypePicList);
@@ -2486,6 +2529,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private Map<String, Object> readonlyOtsHotelListFromEsStore(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		try {
+			String callVersion = reqentity.getCallversion() == null ? "" : reqentity.getCallversion().trim();
+
+			String promoidStr = reqentity.getPromoid();
+
+			Integer promoid = null;
+
+			if (StringUtils.isNotBlank(promoidStr)) {
+
+				promoid = Integer.valueOf(promoidStr);
+
+			}
 
 			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
 			List<FilterBuilder> keywordBuilders = new ArrayList<FilterBuilder>();
@@ -2946,6 +3000,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					if (minPrice.compareTo(minPromoPrice) > 0) {
 						minPrice = minPromoPrice;
 					}
+					if (promoid == HotelPromoEnum.Night.getCode() && result.get("mintonitepromoprice") != null) {
+
+						result.put("promoprice", result.get("mintonitepromoprice"));
+
+					} else {
+
+						result.put("promoprice", tempMinPromoPrice);
+
+					}
 				}
 				result.put("minprice", minPrice);
 
@@ -2963,7 +3026,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				if (promoType != null) {
 					List<Map<String, Integer>> promoList = (List<Map<String, Integer>>) result.get("promoinfo");
-					if (promoList != null) {
+					if (promoList != null && "3.3".compareTo(callVersion) > 0){
 						for (Map<String, Integer> promoinfo : promoList) {
 							Integer hotelPromoType = promoinfo.get("promotype");
 							Integer hotelpromoId = promoinfo.get("promoid");
@@ -3017,9 +3080,22 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				Integer avlblroomnum = hotelService.getAvlblRoomNum(p_hotelid, p_isnewpms, p_visible, p_online,
 						reqentity.getStartdateday(), reqentity.getEnddateday());
+				Integer vacants;
 
-				Integer vacants = hotelService.calPromoVacants(promoType, p_hotelid, reqentity.getStartdateday(),
-						reqentity.getEnddateday(), p_isnewpms);
+				if ("3.3.0".compareTo(callVersion) > 0 || promoid == null) {
+
+					vacants = hotelService.calPromoVacants(promoType, p_hotelid, reqentity.getStartdateday(),
+
+							reqentity.getEnddateday(), p_isnewpms);
+
+				} else {
+
+					vacants = hotelService.calNewPromoVacants(promoid, p_hotelid, reqentity.getStartdateday(),
+
+							reqentity.getEnddateday(), p_isnewpms);
+
+				}
+
 				result.put("roomvacancy", vacants);
 
 				endTime = new Date().getTime();
@@ -3457,7 +3533,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 		}
 
-		if (StringUtils.isNotBlank(promoId)) {
+		if (StringUtils.isNotBlank(promoId) && !HotelPromoEnum.SAVING.getCode().toString().equals(promoId)) {
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promoid", promoId)));
 		} else if (StringUtils.isNotBlank(promoType)) {
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", promoType)));
