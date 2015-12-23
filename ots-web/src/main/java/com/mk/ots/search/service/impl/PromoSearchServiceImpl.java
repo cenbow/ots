@@ -1511,6 +1511,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return promoItem;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Map<String, Object> createTonightPromoItem(HotelQuerylistReqEntity params, RoomSaleShowConfigDto showConfig)
 			throws Exception {
 		Map<String, Object> promoItem = new HashMap<String, Object>();
