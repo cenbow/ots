@@ -2964,7 +2964,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						minPrice = minPromoPrice;
 					}
 
-					result.put("promoprice", tempMinPromoPrice);
+					if (promoid == HotelPromoEnum.Night.getCode()&& result.get("mintonitepromoprice") != null){
+						result.put("promoprice", result.get("mintonitepromoprice"));
+					}else {
+						result.put("promoprice", tempMinPromoPrice);
+					}
+
+
 
 				}
 				result.put("minprice", minPrice);
@@ -2983,7 +2989,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				if (promoType != null) {
 					List<Map<String, Integer>> promoList = (List<Map<String, Integer>>) result.get("promoinfo");
-					if (promoList != null) {
+					if (promoList != null && "3.3".compareTo(callVersion) > 0) {
 						for (Map<String, Integer> promoinfo : promoList) {
 							Integer hotelPromoType = promoinfo.get("promotype");
 							Integer hotelpromoId = promoinfo.get("promoid");
