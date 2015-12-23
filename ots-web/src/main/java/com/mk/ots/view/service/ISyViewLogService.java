@@ -1,5 +1,6 @@
 package com.mk.ots.view.service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.mk.ots.view.model.SyViewLog;
 
 import java.util.HashMap;
@@ -12,5 +13,5 @@ public interface ISyViewLogService {
 
     public  Boolean saveSyViewLog(HashMap<String, Object> map);
 
-    public void pushSyViewLog(List<SyViewLog> logList);
+    public void pushSyViewLog(JSONArray ja);
 }

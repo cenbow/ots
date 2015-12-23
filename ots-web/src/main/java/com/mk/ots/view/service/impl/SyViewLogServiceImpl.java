@@ -1,14 +1,11 @@
 package com.mk.ots.view.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.mk.framework.MkJedisConnectionFactory;
-import com.mk.framework.util.CommonUtils;
-import com.mk.framework.util.UrlUtils;
-import com.mk.ots.promo.dao.IBPromotionDao;
-import com.mk.ots.view.dao.ISyViewLogDao;
 import com.mk.ots.view.model.SyViewLog;
 import com.mk.ots.view.service.ISyViewLogService;
 import org.slf4j.Logger;
@@ -19,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by jeashi on 2015/12/9.
@@ -28,8 +24,6 @@ import java.util.List;
 public class SyViewLogServiceImpl implements ISyViewLogService {
     final Logger logger = LoggerFactory.getLogger(SyViewLogServiceImpl.class);
 
-    @Autowired
-    private ISyViewLogDao syViewLogDao;
 
     @Autowired
     private MkJedisConnectionFactory jedisFactory = null;
@@ -56,10 +50,7 @@ public class SyViewLogServiceImpl implements ISyViewLogService {
         syViewLog.setWifiMacaddr(null == map.get("wifiMacaddr") ? null : map.get("wifiMacaddr").toString());
         syViewLog.setBiMacaddr(null == map.get("biMacaddr") ? null : map.get("biMacaddr").toString());
         syViewLog.setSimsn(null == map.get("simsn") ? null : map.get("simsn").toString());
-        if(null!=map.get("mid")){
-            String mideStr = map.get("mid").toString();
-            syViewLog.setMid(Long.parseLong(mideStr));
-        }
+
         if(null!=map.get("bussinessType")){
             String bussinessTypeStr = map.get("bussinessType").toString();
             syViewLog.setBussinessType(Integer.parseInt(bussinessTypeStr));
@@ -71,7 +62,7 @@ public class SyViewLogServiceImpl implements ISyViewLogService {
         Boolean bl = false;
         Transaction t = Cat.newTransaction("saveSyViewLogPost", map.get("toUrl").toString() );
         try{
-            syViewLogDao.save(syViewLog);
+
             Cat.logEvent("Sy/saveSyViewLog", map.get("toUrl").toString() , Event.SUCCESS, JSONObject.toJSON(syViewLog).toString());
             t.setStatus(Transaction.SUCCESS);
             bl = true;
@@ -85,27 +76,22 @@ public class SyViewLogServiceImpl implements ISyViewLogService {
         }
 
     }
-    public void pushSyViewLog(List<SyViewLog> logList){
+    public void pushSyViewLog(JSONArray ja){
 
-        if(null == logList) {
+        if(null == ja) {
             return;
         }
-        for (SyViewLog log : logList) {
-            log.setCreateTime(new Date());
 
-            //
-            Transaction t = Cat.newTransaction("saveSyViewLogPost", log.getToUrl() );
-            try{
-                String syViewLogStr = JSONObject.toJSONString(log);
-                jedisFactory.getJedis().publish("SYVIEWwLOG",syViewLogStr);
-                Cat.logEvent("Sy/saveSyViewLog", log.getToUrl(), Event.SUCCESS, syViewLogStr);
-                t.setStatus(Transaction.SUCCESS);
-            }catch (Exception e) {
-                logger.error("添加日志失败");
-                t.setStatus(e);
-            }finally {
-                t.complete();
-            }
+        Transaction t = Cat.newTransaction("saveSyViewLogPost", ja.toString());
+        try {
+            jedisFactory.getJedis().publish("SYVIEWWLOG", ja.toString());
+            Cat.logEvent("Sy/saveSyViewLog", "请求埋点", Event.SUCCESS, ja.toString());
+            t.setStatus(Transaction.SUCCESS);
+        } catch (Exception e) {
+            logger.error("添加日志失败");
+            t.setStatus(e);
+        } finally {
+            t.complete();
         }
     }
 

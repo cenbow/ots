@@ -26,7 +26,7 @@ public class SyViewLogThread  extends    Thread{
             while(true){
                 MkJedisConnectionFactory jedisFactory = AppUtils.getBean(MkJedisConnectionFactory.class);
                 SyViewLogListen listener = new SyViewLogListen();
-                jedisFactory.getJedis().subscribe(listener, "SYVIEWwLOG");
+                jedisFactory.getJedis().subscribe(listener, "SYVIEWWLOG");
                 Thread.sleep(300);
             }
         }catch(Exception e){

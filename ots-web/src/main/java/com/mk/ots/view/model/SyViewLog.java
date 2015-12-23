@@ -21,14 +21,19 @@ public class SyViewLog {
     private  String   simsn;
     private  String   fromUrl;
     private  String   toUrl;
-    private  Long   mid;
+    private  String   phone;
     private  String   params;
     private  String   bussinessId;
     private  Integer   bussinessType;
     private  String   actionType;
-    private  String   viewCode;
-    private  String   imei;
     private  String  hardwarecode;
+    private  String   imei;
+    private  Date    callTime;
+    private  String  model;
+    private  String  packageName;
+    private  String  dtName;
+    private  String  channel;
+    private  String  cityName;
 
     public Long getId() {
         return id;
@@ -134,12 +139,12 @@ public class SyViewLog {
         this.toUrl = toUrl;
     }
 
-    public Long getMid() {
-        return mid;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setMid(Long mid) {
-        this.mid = mid;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getParams() {
@@ -174,13 +179,6 @@ public class SyViewLog {
         this.actionType = actionType;
     }
 
-    public String getViewCode() {
-        return viewCode;
-    }
-
-    public void setViewCode(String viewCode) {
-        this.viewCode = viewCode;
-    }
 
     public String getImei() {
         return imei;
@@ -196,5 +194,53 @@ public class SyViewLog {
 
     public void setHardwarecode(String hardwarecode) {
         this.hardwarecode = hardwarecode;
+    }
+
+    public Date getCallTime() {
+        return callTime;
+    }
+
+    public void setCallTime(Date callTime) {
+        this.callTime = callTime;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+
+    public String getDtName() {
+        return dtName;
+    }
+
+    public void setDtName(String dtName) {
+        this.dtName = dtName;
+    }
+
+    public String getChannel() {
+        return channel;
+    }
+
+    public void setChannel(String channel) {
+        this.channel = channel;
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
     }
 }
