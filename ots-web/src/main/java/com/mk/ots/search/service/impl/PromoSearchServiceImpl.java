@@ -3,7 +3,19 @@ package com.mk.ots.search.service.impl;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -1525,7 +1537,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		for (int i = 0; i < promoHotelArr.length; i++) {
 			if (promoHotelArr[i] instanceof Map) {
-				Map<String , Object> rt = (Map<String , Object>) promoHotelArr[i];
+				Map<String, Object> rt = (Map<String, Object>) promoHotelArr[i];
 				hotels.add(rt);
 
 			}
@@ -1563,11 +1575,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			} else {
 
-
 				return 0;
 
 			}
-
 
 		}
 
@@ -2007,7 +2017,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		String promoid = reqentity.getPromoid();
 
 		if (StringUtils.isNotBlank(promoid) && HotelPromoEnum.OneDollar.getCode().toString().equals(promoid)) {
-			Collections.sort(hotels, new PriceComparator());
+			Collections.sort(hotels, new PriceSavingComparator());
 		}
 	}
 
@@ -2454,6 +2464,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 		}
 
+		if (HotelSortEnum.DISTANCE.getId().equals(reqEntity.getOrderby())) {
+			Collections.sort(hotelIds, new userDistanceComparator());
+		} else if (HotelSortEnum.ORDERNUMS.getId().equals(reqEntity.getOrderby())) {
+			Collections.sort(hotelIds, new GreetscoreComparator());
+		}
+		
 		return hotelIds;
 	}
 
@@ -2484,7 +2500,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			throw new Exception(String.format("failed to parse roomtypepic %s", picsJson), ex);
 
 		}
-
 
 		if (roomtypePicList != null && roomtypePicList.size() > 0) {
 			roomtype.put("roomtypepic", roomtypePicList);
@@ -3026,7 +3041,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				if (promoType != null) {
 					List<Map<String, Integer>> promoList = (List<Map<String, Integer>>) result.get("promoinfo");
-					if (promoList != null && "3.3".compareTo(callVersion) > 0){
+					if (promoList != null && "3.3".compareTo(callVersion) > 0) {
 						for (Map<String, Integer> promoinfo : promoList) {
 							Integer hotelPromoType = promoinfo.get("promotype");
 							Integer hotelpromoId = promoinfo.get("promoid");
@@ -4162,7 +4177,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return themeRoomtypes;
 	}
 
-	private class PriceComparator implements Comparator<Map<String, Object>> {
+	private class PriceSavingComparator implements Comparator<Map<String, Object>> {
 		@Override
 		public int compare(Map<String, Object> o1, Map<String, Object> o2) {
 			if (o1 == null) {
@@ -4185,13 +4200,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 	}
 
+	
+	
 	private class GreetscoreComparator implements Comparator<Map<String, Object>> {
 		@Override
 		public int compare(Map<String, Object> o1, Map<String, Object> o2) {
 			if (o1 == null) {
-				return -1;
-			} else if (o2 == null) {
 				return 1;
+			} else if (o2 == null) {
+				return -1;
 			}
 
 			Long greetscore1 = 0L;
@@ -4207,18 +4224,18 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			if (greetscore1 != null && greetscore2 != null) {
 				if (greetscore1 > greetscore2) {
-					return 1;
+					return -1;
 				} else if (greetscore1 == greetscore2) {
 					return 0;
 				} else {
-					return -1;
+					return 1;
 				}
 			} else if (greetscore1 == null) {
-				return -1;
-			} else if (greetscore2 == null) {
 				return 1;
-			} else {
+			} else if (greetscore2 == null) {
 				return -1;
+			} else {
+				return 1;
 			}
 		}
 	}
