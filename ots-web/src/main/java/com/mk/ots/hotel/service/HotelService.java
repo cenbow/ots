@@ -447,15 +447,20 @@ public class HotelService {
 							bed.put("bedtype", bedtype.get("bedtype"));
 							bed.put("bedtypename", bedtype.get("bedtypename"));
 							bedtypes.add(bed);
-							if (bedtype.get("bedtypename") == BedTypeEnum.SINGLEBED.getId()){
-								hotel.setBedtype1(BedTypeEnum.SINGLEBED.getId());
+							Long bedtypeValue = (Long)bedtype.get("bedtype");
+							if (bedtypeValue == null){
+								bedtypeValue = -1l;
 							}
-							if (bedtype.get("bedtypename") == BedTypeEnum.DOUBLEBED.getId()){
-								hotel.setBedtype2(BedTypeEnum.DOUBLEBED.getId());
+							if (bedtypeValue.intValue() == BedTypeEnum.SINGLEBED.getId()){
+								hotel.setBedtype1(1);
 							}
 
-							if (bedtype.get("bedtypename") == BedTypeEnum.OTHER.getId()){
-								hotel.setBedtype3(BedTypeEnum.OTHER.getId());
+							if (bedtypeValue.intValue() == BedTypeEnum.DOUBLEBED.getId()){
+								hotel.setBedtype2(1);
+							}
+
+							if (bedtypeValue.intValue() == BedTypeEnum.OTHER.getId()){
+								hotel.setBedtype3(1);
 							}
 
 						}
@@ -486,6 +491,12 @@ public class HotelService {
 					promoinfo = roomSaleService.queryRoomPromoInfoByHotel(hotelid);
 					if (promoinfo == null) {
 						promoinfo = new ArrayList<>();
+					}
+
+					Double tempMinPromoPrice = roomSaleService.getHotelMinPromoPrice(hotelId);
+
+					if (tempMinPromoPrice != null && isPromo != null && isPromo){
+						hotel.setMintonitepromoprice(tempMinPromoPrice);
 					}
 
 					hotel.setPromoinfo(promoinfo);
@@ -2904,6 +2915,8 @@ public class HotelService {
 				List<Map<String, Object>> hotel = (List<Map<String, Object>>) response.get("hotel");
 				if (hotel != null && hotel.size() > 0) {
 					resultMap.put("repairinfo", hotel.get(0).get("repairinfo"));
+					resultMap.put("greetscore", hotel.get(0).get("greetscore"));
+					resultMap.put("grade", hotel.get(0).get("grade"));					
 					resultMap.put("highlights", hotel.get(0).get("highlights"));
 					resultMap.put("greetscore", hotel.get(0).get("greetscore"));
 					resultMap.put("latitude", hotel.get(0).get("latitude"));

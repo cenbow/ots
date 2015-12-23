@@ -1,29 +1,6 @@
 package com.mk.ots.roomsale.controller;
 
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.Valid;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.alibaba.fastjson.JSONObject;
 import com.dianping.cat.Cat;
 import com.mk.framework.AppUtils;
@@ -41,6 +18,23 @@ import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.roomsale.service.TPriceScopeService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.web.ServiceOutput;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.validation.Valid;
+import java.util.*;
 
 /**
  *
@@ -531,6 +525,10 @@ public class HotelPromoController {
 		reqEntity.setPosname(entityReqEntity.getPosname());
 		reqEntity.setPoints(entityReqEntity.getPoints());
 		reqEntity.setRange(entityReqEntity.getRange());
+		reqEntity.setHotelname(entityReqEntity.getHotelname());
+		reqEntity.setHoteladdr(entityReqEntity.getHoteladdr());
+		reqEntity.setKeyword(entityReqEntity.getHoteladdr());
+		reqEntity.setIspromoonly(Boolean.TRUE);
 
 		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 		Integer promoId = HotelPromoEnum.Theme.getCode();
@@ -564,8 +562,9 @@ public class HotelPromoController {
 		reqEntity.setPillowlatitude(homepageReqEntity.getPillowlatitude());
 		reqEntity.setPillowlongitude(homepageReqEntity.getPillowlongitude());				
 		reqEntity.setIshotelpic("T");
+		reqEntity.setIspromoonly(Boolean.TRUE);
 
-		Integer promoId = HotelPromoEnum.Theme.getCode();
+		Integer promoId = HotelPromoEnum.OneDollar.getCode();
 
 		try {
 			Integer promotype = promoSearchService.queryByPromoId(promoId);
