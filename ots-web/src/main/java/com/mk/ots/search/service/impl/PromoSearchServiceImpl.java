@@ -4104,11 +4104,26 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				return 1;
 			}
 
-			String minPrice1Str = (String) o1.get("promoprice");
-			BigDecimal minPrice1 = new BigDecimal(Integer.valueOf(minPrice1Str));
+			String minPrice1Str;
+			BigDecimal minPrice1 = null;
+			if (o1.get("promoprice") instanceof String){
+				minPrice1Str = (String) o1.get("promoprice");
+				minPrice1 =  new BigDecimal(Integer.valueOf(minPrice1Str));
+			}else if (o1.get("promoprice") instanceof BigDecimal){
+				minPrice1 =(BigDecimal )o1.get("promoprice");
+			}
+
+			String minPrice2Str;
+			BigDecimal minPrice2 = null;
+			if (o1.get("promoprice") instanceof String){
+				minPrice2Str = (String) o1.get("promoprice");
+				minPrice2 =  new BigDecimal(Integer.valueOf(minPrice2Str));
+			}else if (o1.get("promoprice") instanceof BigDecimal){
+				minPrice2 =(BigDecimal )o1.get("promoprice");
+			}
+
 			BigDecimal minpmsprice1 = (BigDecimal) o1.get("minpmsprice");
-			String minPrice2Str = (String) o2.get("promoprice");
-			BigDecimal minPrice2 = new BigDecimal(Integer.valueOf(minPrice2Str));
+
 			BigDecimal minpmsprice2 = (BigDecimal) o2.get("minpmsprice");
 
 			BigDecimal savePrice1 = (minPrice1 != null && minpmsprice1 != null) ? minpmsprice1.subtract(minPrice1)
