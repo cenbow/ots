@@ -448,14 +448,14 @@ public class HotelService {
 							bed.put("bedtypename", bedtype.get("bedtypename"));
 							bedtypes.add(bed);
 							if (bedtype.get("bedtypename") == BedTypeEnum.SINGLEBED.getId()){
-								hotel.setBedtype1(BedTypeEnum.SINGLEBED.getId());
+								hotel.setBedtype1(1);
 							}
 							if (bedtype.get("bedtypename") == BedTypeEnum.DOUBLEBED.getId()){
-								hotel.setBedtype2(BedTypeEnum.DOUBLEBED.getId());
+								hotel.setBedtype2(1);
 							}
 
 							if (bedtype.get("bedtypename") == BedTypeEnum.OTHER.getId()){
-								hotel.setBedtype3(BedTypeEnum.OTHER.getId());
+								hotel.setBedtype3(1);
 							}
 
 						}
