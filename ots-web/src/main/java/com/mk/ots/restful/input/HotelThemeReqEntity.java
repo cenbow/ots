@@ -56,8 +56,38 @@ public class HotelThemeReqEntity extends ParamBaseBean implements Serializable {
 	private String points;
 
 	private Integer orderby;
-	
+
 	private Integer range;
+
+	private String hotelname;
+	
+	private String hoteladdr;
+	
+	private String keyword;
+	
+	public String getHotelname() {
+		return hotelname;
+	}
+
+	public void setHotelname(String hotelname) {
+		this.hotelname = hotelname;
+	}
+
+	public String getHoteladdr() {
+		return hoteladdr;
+	}
+
+	public void setHoteladdr(String hoteladdr) {
+		this.hoteladdr = hoteladdr;
+	}
+
+	public String getKeyword() {
+		return keyword;
+	}
+
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
+	}
 
 	public Integer getRange() {
 		return range;
