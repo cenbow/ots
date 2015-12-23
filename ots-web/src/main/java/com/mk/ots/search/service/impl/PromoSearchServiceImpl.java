@@ -1607,11 +1607,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				}
 			}
 
-			if (promolist.size() > 0 && promolist.get(0).get("hotel") != null) {
-				List<Map<String, Object>> hotels = (List<Map<String, Object>>) promolist.get(0).get("hotel");
-				Collections.sort(hotels, new DistanceComparator());
-			}
-
 			return promolist;
 		} catch (Exception e) {
 			throw new Exception("failed to searchHomePromos", e);
@@ -4132,28 +4127,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Collections.sort(themeRoomtypes, new GreetscoreComparator());
 
 		return themeRoomtypes;
-	}
-
-	private class DistanceComparator implements Comparator<Map<String, Object>> {
-		@Override
-		public int compare(Map<String, Object> o1, Map<String, Object> o2) {
-			if (o1 == null) {
-				return -1;
-			} else if (o2 == null) {
-				return 1;
-			}
-
-			BigDecimal userdistance1 = (BigDecimal) o1.get("userdistance");
-			BigDecimal userdistance2 = (BigDecimal) o2.get("userdistance");
-
-			if (userdistance1 == null) {
-				return -1;
-			} else if (userdistance2 == null) {
-				return 1;
-			}
-
-			return userdistance1.compareTo(userdistance2);
-		}
 	}
 
 	private class PriceComparator implements Comparator<Map<String, Object>> {
