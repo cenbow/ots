@@ -2060,7 +2060,7 @@ public class OrderServiceImpl implements OrderService {
                   if (OtaOrderStatusEnum.CheckIn.getId() == otaorder.getOrderStatus()) {
                       BigDecimal returnWallCash = tBackMoneyRuleService.getBackMoneyByOrder(otaorder);
                       if (returnWallCash != null && returnWallCash.compareTo(new BigDecimal("0")) == 1 ) {
-                          walletCashflowService.orderReturnWalletCash(otaorder.getId(), otaorder.getMid(), returnWallCash);
+                          walletCashflowService.promoOrderReturnWalletCash(otaorder.getId(), otaorder.getMid(), returnWallCash);
                           //发送短消息和app消息
                           SmsMessage smsMessage = new SmsMessage();
                           smsMessage.setMessage("你已获得一张眯客特价【" + returnWallCash+"元红包】，尽享特价哦！");

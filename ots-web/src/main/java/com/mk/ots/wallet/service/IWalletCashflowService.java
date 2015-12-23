@@ -81,5 +81,5 @@ public interface IWalletCashflowService {
      * @param mid
      * @param price
      */
-    public  void orderReturnWalletCash(Long orderId, Long mid, BigDecimal price);
+    public  void promoOrderReturnWalletCash(Long orderId, Long mid, BigDecimal price);
 }

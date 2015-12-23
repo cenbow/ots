@@ -229,14 +229,12 @@ public class WalletCashflowService implements IWalletCashflowService {
 
 
 
-    public  void orderReturnWalletCash(Long orderId, Long mid, BigDecimal price){
+    public  void promoOrderReturnWalletCash(Long orderId, Long mid, BigDecimal price){
         if (price != null && price.compareTo(BigDecimal.ZERO) > 0) {
-            boolean result = saveCashflowAndSynWallet(mid, price, CashflowTypeEnum.CASHBACK_ORDER_IN, orderId);
+            boolean result = saveCashflowAndSynWallet(mid, price, CashflowTypeEnum.PROMO_ORDER_RETURN, orderId);
             if (!result) {
                 throw MyErrorEnum.customError.getMyException("订单返现失败.");
             }
-            logger.info("设置订单已返现. orderid: {}", orderId);
-            orderService.receiveCashBack(orderId);
         } else {
             throw MyErrorEnum.customError.getMyException("订单返现不允许为零或负值.");
         }
@@ -320,6 +318,8 @@ public class WalletCashflowService implements IWalletCashflowService {
         } else if (CashflowTypeEnum.CONSUME_ORDER_REFUND.equals(cashflowTypeEnum)) {
             realprice = price.abs();
         } else if (CashflowTypeEnum.MIKE_CHARGE_CARD.equals(cashflowTypeEnum)){
+            realprice = price.abs();
+        }else{
             realprice = price.abs();
         }
         logger.info(">>>记录钱包流水并同步钱包总额: 记录钱包流水//开始");
