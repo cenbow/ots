@@ -1394,10 +1394,13 @@ public class SearchService implements ISearchService {
 								CommonUtils.toStr(minPrice));
 						minPrice = minPromoPrice;
 					}
+					result.put("promoprice", minPromoPrice);
+				}else {
+					result.put("promoprice", minPrice);
 				}
 
 				result.put("minprice", minPrice);
-				result.put("promoprice", minPrice);
+
 				result.put("minpmsprice", new BigDecimal(prices[1]));
 
 				logger.info("酒店: {}眯客价: {}", es_hotelid, prices[0]);
