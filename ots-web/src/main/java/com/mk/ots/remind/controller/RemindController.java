@@ -45,8 +45,9 @@ public class RemindController {
         //check
         boolean isRemind = this.remindService.checkRemind(memberByToken.getMid(), RemindTypeEnum.SPECIAL_ROOM);
         if (isRemind) {
+            //已提醒也返回true
             Map<String, Object> result = new HashMap<String, Object>();
-            result.put("success",false);
+            result.put("success",true);
             result.put("errcode","");
             result.put("errmsg","已提醒");
             return new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);

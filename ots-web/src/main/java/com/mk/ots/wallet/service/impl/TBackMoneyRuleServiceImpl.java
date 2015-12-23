@@ -38,7 +38,7 @@ public class TBackMoneyRuleServiceImpl implements ITBackMoneyRuleService {
         if (null == order) {
             throw MyErrorEnum.errorParm.getMyException("订单不存在.");
         }
-        if(OrderTypeEnum.YF.getId() == order.getOrderType()){
+        if(OrderTypeEnum.PT.getId() == order.getOrderType()){
             return new BigDecimal(0);
         }
         if(order.getTotalPrice().compareTo(order.getAvailableMoney()) == 0){
