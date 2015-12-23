@@ -534,7 +534,8 @@ public class HotelPromoController {
 		reqEntity.setHotelname(entityReqEntity.getHotelname());
 		reqEntity.setHoteladdr(entityReqEntity.getHoteladdr());
 		reqEntity.setKeyword(entityReqEntity.getHoteladdr());
-		
+		reqEntity.setIspromoonly(Boolean.TRUE);
+
 		reqEntity.setPromoid(String.valueOf(HotelPromoEnum.Theme.getCode()));
 		Integer promoId = HotelPromoEnum.Theme.getCode();
 
@@ -567,8 +568,9 @@ public class HotelPromoController {
 		reqEntity.setPillowlatitude(homepageReqEntity.getPillowlatitude());
 		reqEntity.setPillowlongitude(homepageReqEntity.getPillowlongitude());				
 		reqEntity.setIshotelpic("T");
+		reqEntity.setIspromoonly(Boolean.TRUE);
 
-		Integer promoId = HotelPromoEnum.Theme.getCode();
+		Integer promoId = HotelPromoEnum.OneDollar.getCode();
 
 		try {
 			Integer promotype = promoSearchService.queryByPromoId(promoId);
