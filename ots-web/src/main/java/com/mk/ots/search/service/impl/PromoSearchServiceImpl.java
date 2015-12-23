@@ -3,18 +3,7 @@ package com.mk.ots.search.service.impl;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -1529,6 +1518,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		if (hotels == null) {
 			hotels = new ArrayList<>();
 		}
+		Object[] promoHotelArr = hotels.toArray();
+		Arrays.sort(promoHotelArr, this.new userDistanceComparator());
+		hotels.clear();
+
+		for (int i = 0; i < promoHotelArr.length; i++) {
+			if (promoHotelArr[i] instanceof Map) {
+				Map<String , Object> rt = (Map<String , Object>) promoHotelArr[i];
+				hotels.add(rt);
+
+			}
+		}
 
 		promoItem.put("hotel", hotels);
 		promoItem.put("promoicon", showConfig.getPromoicon());
@@ -1540,6 +1540,23 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return promoItem;
 	}
 
+	private class userDistanceComparator implements Comparator<Object> {
+		public int compare(Object obj1, Object obj2) {
+			Map<String, Object> hotel1 = (Map<String, Object>) obj1;
+			Map<String, Object> hotel2 = (Map<String, Object>) obj2;
+			Double userDistance1 = (Double)hotel1.get("userdistance");
+			Double userDistance2 = (Double)hotel2.get("userdistance");
+			if ( userDistance1 > userDistance2 ) {
+				return 1;
+			} else if (userDistance1  < userDistance2) {
+				return -1;
+			} else {
+
+				return 0;
+			}
+
+		}
+	}
 	@Override
 	public List<Map<String, Object>> searchHomePromos(HotelQuerylistReqEntity params) throws Exception {
 
