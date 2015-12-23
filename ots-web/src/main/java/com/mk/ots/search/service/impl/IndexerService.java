@@ -68,19 +68,20 @@ public class IndexerService {
                     for (int j = beginIndex; j < ((index == coreNum - 1) ? hotelIdArr.size()
                             : beginIndex + hotelCounter); j++) {
                         System.out.println("@@@@@@@@@@@@"+ beginIndex);
-                        if (hotelIdArr.get(j) != null) {
+                        Long hotelIdStr = hotelIdArr.get(j);
+                        if (hotelIdStr != null) {
 
-                            System.out.println(String.format("%d . init hotel:%d start ====",j,hotelIdArr.get(j)));
-                            hotelService.readonlyInitPmsHotel(Constant.STR_CITYID_SHANGHAI, hotelIdArr.get(j).toString());
-                            System.out.println(String.format("%d . init hotel:%d end ====", j, hotelIdArr.get(j)));
+                            System.out.println(String.format("%d . init hotel:%d start ====",j,hotelIdStr);
+                            hotelService.readonlyInitPmsHotel(Constant.STR_CITYID_SHANGHAI, hotelIdStr.toString());
+                            System.out.println(String.format("%d . init hotel:%d end ====", j, hotelIdStr));
                             try {
                                 Thread.currentThread().sleep(1000);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                            System.out.println(String.format("%d . update hotel:%d 's mikeprice start ====",j,hotelIdArr.get(j)));
-                            hotelService.updateEsMikePrice(hotelIdArr.get(j));
-                            System.out.println(String.format("%d . update hotel:%d 's mikeprice end ====",j,hotelIdArr.get(j)));
+                            System.out.println(String.format("%d . update hotel:%d 's mikeprice start ====",j,hotelIdStr));
+                            hotelService.updateEsMikePrice(hotelIdStr);
+                            System.out.println(String.format("%d . update hotel:%d 's mikeprice end ====",j,hotelIdStr));
                             int hotelIndexerCounterTmp = indexerCounter.incrementAndGet();
                             if (hotelIndexerCounterTmp % 100 == 0 && logger.isInfoEnabled()) {
                                 logger.info("{} indexer and mkprice has been updated", hotelIndexerCounterTmp);
@@ -88,7 +89,7 @@ public class IndexerService {
                         }
 
                         if (logger.isInfoEnabled()) {
-                            logger.info("updating indexer and mkprice  with index {}, hotelId {}", j, hotelIdArr.get(j));
+                            logger.info("updating indexer and mkprice  with index {}, hotelId {}", j, hotelIdStr);
                         }
                     }
                 }
