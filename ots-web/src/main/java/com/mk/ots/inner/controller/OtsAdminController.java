@@ -335,7 +335,7 @@ public class OtsAdminController {
 	public ResponseEntity<Map<String, Object>> addWalletByTest(String phone, BigDecimal cash) {
 		logger.info(String.format("url /test/addWalletByTest"));
 		Map<String, Object> datas = new HashMap<String, Object>();
-		datas.put(ServiceOutput.STR_MSG_SUCCESS, "充值成功");
+		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
 		if(StringUtils.isBlank(phone)){
 			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			datas.put(ServiceOutput.STR_MSG_ERRMSG, "phone参数为空");
