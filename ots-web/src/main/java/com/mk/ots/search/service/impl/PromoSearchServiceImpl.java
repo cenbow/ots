@@ -4196,7 +4196,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				return -1;
 			}
 
-			return minpmsprice1.compareTo(minpmsprice2);
+			return minpmsprice2.compareTo(minpmsprice1);
 		}
 	}
 
