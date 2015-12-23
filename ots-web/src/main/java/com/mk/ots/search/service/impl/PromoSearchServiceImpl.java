@@ -1515,7 +1515,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			throws Exception {
 		Map<String, Object> promoItem = new HashMap<String, Object>();
 		if (params.getLimit() == null) {
-			params.setLimit(FrontPageEnum.limit.getId());
+			params.setLimit(FrontPageEnum.recommendLimit.getId());
 		}
 		params.setIspromoonly(Boolean.TRUE);
 
@@ -2440,7 +2440,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		hotel.put("hotelpic", newHotelPics);
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		List<Object> roomtypePicList = (List<Object>) objectMapper.readValue(picsJson, List.class);
+		List<Object> roomtypePicList = null;
+		try {
+			roomtypePicList = (List<Object>) objectMapper.readValue(picsJson, List.class);
+		} catch (Exception ex) {
+			throw new Exception(String.format("failed to parse roomtypepic %s", picsJson), ex);
+		}
 
 		if (roomtypePicList != null && roomtypePicList.size() > 0) {
 			roomtype.put("roomtypepic", roomtypePicList);
@@ -2488,7 +2493,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			String callVersion = reqentity.getCallversion() == null ? "" : reqentity.getCallversion().trim();
 			String promoidStr = reqentity.getPromoid();
 			Integer promoid = null;
-			if (StringUtils.isNotBlank(promoidStr)){
+			if (StringUtils.isNotBlank(promoidStr)) {
 				promoid = Integer.valueOf(promoidStr);
 			}
 			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
@@ -2676,6 +2681,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					mikePriceBoolFilter.should(mikePriceBuilders.toArray(builders));
 					boolFilter.must(mikePriceBoolFilter);
 				}
+
 				if (AppUtils.DEBUG_MODE) {
 					logger.info("boolFilter is : \n{}", boolFilter.toString());
 				}
@@ -3024,10 +3030,10 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						reqentity.getStartdateday(), reqentity.getEnddateday());
 
 				Integer vacants;
-				if ("3.3.0".compareTo(callVersion) > 0 || promoid == null){
+				if ("3.3.0".compareTo(callVersion) > 0 || promoid == null) {
 					vacants = hotelService.calPromoVacants(promoType, p_hotelid, reqentity.getStartdateday(),
 							reqentity.getEnddateday(), p_isnewpms);
-				}else{
+				} else {
 					vacants = hotelService.calNewPromoVacants(promoid, p_hotelid, reqentity.getStartdateday(),
 							reqentity.getEnddateday(), p_isnewpms);
 				}
@@ -3469,7 +3475,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 		}
 
-		if (StringUtils.isNotBlank(promoId)) {
+		if (StringUtils.isNotBlank(promoId) && !HotelPromoEnum.SAVING.getCode().toString().equals(promoId)) {
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promoid", promoId)));
 		} else if (StringUtils.isNotBlank(promoType)) {
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", promoType)));
@@ -4109,20 +4115,20 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			String minPrice1Str;
 			BigDecimal minPrice1 = null;
-			if (o1.get("promoprice") instanceof String){
+			if (o1.get("promoprice") instanceof String) {
 				minPrice1Str = (String) o1.get("promoprice");
-				minPrice1 =  new BigDecimal(Integer.valueOf(minPrice1Str));
-			}else if (o1.get("promoprice") instanceof BigDecimal){
-				minPrice1 =(BigDecimal )o1.get("promoprice");
+				minPrice1 = new BigDecimal(Integer.valueOf(minPrice1Str));
+			} else if (o1.get("promoprice") instanceof BigDecimal) {
+				minPrice1 = (BigDecimal) o1.get("promoprice");
 			}
 
 			String minPrice2Str;
 			BigDecimal minPrice2 = null;
-			if (o1.get("promoprice") instanceof String){
+			if (o1.get("promoprice") instanceof String) {
 				minPrice2Str = (String) o1.get("promoprice");
-				minPrice2 =  new BigDecimal(Integer.valueOf(minPrice2Str));
-			}else if (o1.get("promoprice") instanceof BigDecimal){
-				minPrice2 =(BigDecimal )o1.get("promoprice");
+				minPrice2 = new BigDecimal(Integer.valueOf(minPrice2Str));
+			} else if (o1.get("promoprice") instanceof BigDecimal) {
+				minPrice2 = (BigDecimal) o1.get("promoprice");
 			}
 
 			BigDecimal minpmsprice1 = (BigDecimal) o1.get("minpmsprice");
@@ -4134,9 +4140,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			BigDecimal savePrice2 = (minPrice2 != null && minpmsprice2 != null) ? minpmsprice2.subtract(minPrice2)
 					: BigDecimal.ZERO;
 
-			if (savePrice1.compareTo(savePrice2) == 1 ) {
+			if (savePrice1.compareTo(savePrice2) == 1) {
 				return -1;
-			} else if (savePrice1.compareTo( savePrice2) == 0) {
+			} else if (savePrice1.compareTo(savePrice2) == 0) {
 				return 0;
 			} else if (savePrice1.compareTo(savePrice2) == -1) {
 				return 1;

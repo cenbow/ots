@@ -2918,7 +2918,6 @@ public class HotelService {
 					resultMap.put("greetscore", hotel.get(0).get("greetscore"));
 					resultMap.put("grade", hotel.get(0).get("grade"));					
 					resultMap.put("highlights", hotel.get(0).get("highlights"));
-					resultMap.put("greetscore", hotel.get(0).get("greetscore"));
 					resultMap.put("latitude", hotel.get(0).get("latitude"));
 					resultMap.put("longitude", hotel.get(0).get("longitude"));
 				}

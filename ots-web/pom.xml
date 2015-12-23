@@ -28,7 +28,7 @@
         <commons-configuration.version>1.6</commons-configuration.version>
 
         <kafka.version>1.0.2</kafka.version>
-        <care-kafka.version>1.0.4</care-kafka.version>
+        <care-kafka.version>1.0.5</care-kafka.version>
     </properties>
 
     <repositories>
