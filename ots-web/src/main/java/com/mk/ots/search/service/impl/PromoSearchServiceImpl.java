@@ -2959,9 +2959,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					}
 
 					if (promoid == HotelPromoEnum.Night.getCode()&& result.get("mintonitepromoprice") != null){
-						result.put("promoprice", result.get("mintonitepromoprice").toString());
+						result.put("promoprice", result.get("mintonitepromoprice"));
 					}else {
-						result.put("promoprice", tempMinPromoPrice.toString());
+						result.put("promoprice", tempMinPromoPrice);
 					}
 
 
