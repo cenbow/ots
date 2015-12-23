@@ -3,7 +3,18 @@ package com.mk.ots.search.service.impl;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -1500,12 +1511,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return promoItem;
 	}
 
-	@SuppressWarnings("unchecked")
 	private Map<String, Object> createTonightPromoItem(HotelQuerylistReqEntity params, RoomSaleShowConfigDto showConfig)
 			throws Exception {
 		Map<String, Object> promoItem = new HashMap<String, Object>();
 		if (params.getLimit() == null) {
-			params.setLimit(FrontPageEnum.recommendLimit.getId());
+			params.setLimit(FrontPageEnum.limit.getId());
 		}
 		params.setIspromoonly(Boolean.TRUE);
 
@@ -1519,17 +1529,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		if (hotels == null) {
 			hotels = new ArrayList<>();
 		}
-		Object[] promoHotelArr = hotels.toArray();
-		Arrays.sort(promoHotelArr, this.new userDistanceComparator());
-		hotels.clear();
-
-		for (int i = 0; i < promoHotelArr.length; i++) {
-			if (promoHotelArr[i] instanceof Map) {
-				Map<String , Object> rt = (Map<String , Object>) promoHotelArr[i];
-				hotels.add(rt);
-
-			}
-		}
 
 		promoItem.put("hotel", hotels);
 		promoItem.put("promoicon", showConfig.getPromoicon());
@@ -1541,23 +1540,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return promoItem;
 	}
 
-	private class userDistanceComparator implements Comparator<Object> {
-		public int compare(Object obj1, Object obj2) {
-			Map<String, Object> hotel1 = (Map<String, Object>) obj1;
-			Map<String, Object> hotel2 = (Map<String, Object>) obj2;
-			Double userDistance1 = (Double)hotel1.get("userdistance");
-			Double userDistance2 = (Double)hotel2.get("userdistance");
-			if ( userDistance1 > userDistance2 ) {
-				return 1;
-			} else if (userDistance1  < userDistance2) {
-				return -1;
-			} else {
-
-				return 0;
-			}
-
-		}
-	}
 	@Override
 	public List<Map<String, Object>> searchHomePromos(HotelQuerylistReqEntity params) throws Exception {
 
@@ -1572,7 +1554,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (promolist == null) {
 				promolist = new ArrayList<Map<String, Object>>();
 			}
-
 			return promolist;
 		} catch (Exception e) {
 			throw new Exception("failed to searchHomePromos", e);
@@ -2459,12 +2440,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		hotel.put("hotelpic", newHotelPics);
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		List<Object> roomtypePicList = null;
-		try {
-			roomtypePicList = (List<Object>) objectMapper.readValue(picsJson, List.class);
-		} catch (Exception ex) {
-			throw new Exception(String.format("failed to parse roomtypepic %s", picsJson), ex);
-		}
+		List<Object> roomtypePicList = (List<Object>) objectMapper.readValue(picsJson, List.class);
 
 		if (roomtypePicList != null && roomtypePicList.size() > 0) {
 			roomtype.put("roomtypepic", roomtypePicList);
@@ -2509,12 +2485,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private Map<String, Object> readonlyOtsHotelListFromEsStore(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		try {
-			String callVersion = reqentity.getCallversion() == null ? "" : reqentity.getCallversion().trim();
-			String promoidStr = reqentity.getPromoid();
-			Integer promoid = null;
-			if (StringUtils.isNotBlank(promoidStr)) {
-				promoid = Integer.valueOf(promoidStr);
-			}
+
 			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
 			List<FilterBuilder> keywordBuilders = new ArrayList<FilterBuilder>();
 
@@ -2700,7 +2671,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					mikePriceBoolFilter.should(mikePriceBuilders.toArray(builders));
 					boolFilter.must(mikePriceBoolFilter);
 				}
-
 				if (AppUtils.DEBUG_MODE) {
 					logger.info("boolFilter is : \n{}", boolFilter.toString());
 				}
@@ -2975,15 +2945,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					if (minPrice.compareTo(minPromoPrice) > 0) {
 						minPrice = minPromoPrice;
 					}
-
-					if (promoid == HotelPromoEnum.Night.getCode()&& result.get("mintonitepromoprice") != null){
-						result.put("promoprice", result.get("mintonitepromoprice"));
-					}else {
-						result.put("promoprice", tempMinPromoPrice);
-					}
-
-
-
 				}
 				result.put("minprice", minPrice);
 
@@ -3001,12 +2962,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				if (promoType != null) {
 					List<Map<String, Integer>> promoList = (List<Map<String, Integer>>) result.get("promoinfo");
-					if (promoList != null && "3.3".compareTo(callVersion) > 0) {
+					if (promoList != null) {
 						for (Map<String, Integer> promoinfo : promoList) {
 							Integer hotelPromoType = promoinfo.get("promotype");
 							Integer hotelpromoId = promoinfo.get("promoid");
 							if (hotelpromoId != null && hotelpromoId == HotelPromoEnum.Theme.getCode()) {
-								result.put("promoprice", new BigDecimal(prices[0]));
+								result.put("promoprice", minPrice);
+							} else if (hotelPromoType == promoType) {
+								result.put("promoprice", promoinfo.get("promoprice"));
 							}
 						}
 					}
@@ -3054,15 +3017,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Integer avlblroomnum = hotelService.getAvlblRoomNum(p_hotelid, p_isnewpms, p_visible, p_online,
 						reqentity.getStartdateday(), reqentity.getEnddateday());
 
-				Integer vacants;
-				if ("3.3.0".compareTo(callVersion) > 0 || promoid == null) {
-					vacants = hotelService.calPromoVacants(promoType, p_hotelid, reqentity.getStartdateday(),
-							reqentity.getEnddateday(), p_isnewpms);
-				} else {
-					vacants = hotelService.calNewPromoVacants(promoid, p_hotelid, reqentity.getStartdateday(),
-							reqentity.getEnddateday(), p_isnewpms);
-				}
-
+				Integer vacants = hotelService.calPromoVacants(promoType, p_hotelid, reqentity.getStartdateday(),
+						reqentity.getEnddateday(), p_isnewpms);
 				result.put("roomvacancy", vacants);
 
 				endTime = new Date().getTime();
@@ -3500,7 +3456,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 		}
 
-		if (StringUtils.isNotBlank(promoId) && !HotelPromoEnum.SAVING.getCode().toString().equals(promoId)) {
+		if (StringUtils.isNotBlank(promoId)) {
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promoid", promoId)));
 		} else if (StringUtils.isNotBlank(promoType)) {
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", promoType)));
@@ -4138,48 +4094,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				return 1;
 			}
 
-			String minPrice1Str;
-			BigDecimal minPrice1 = null;
-			if (o1.get("minprice") instanceof String) {
-				minPrice1Str = (String) o1.get("minprice");
-				minPrice1 = new BigDecimal(Integer.valueOf(minPrice1Str));
-			} else if (o1.get("minprice") instanceof Integer) {
-				Integer minPrice1Int = (Integer) o1.get("minprice");
-				minPrice1 = new BigDecimal(minPrice1Int);
-			} else if (o1.get("minprice") instanceof BigDecimal) {
-				minPrice1 = (BigDecimal) o1.get("minprice");
-			}
-
-			String minPrice2Str;
-			BigDecimal minPrice2 = null;
-			if (o2.get("minprice") instanceof String) {
-				minPrice2Str = (String) o2.get("minprice");
-				minPrice2 = new BigDecimal(Integer.valueOf(minPrice2Str));
-			} else if (o2.get("minprice") instanceof Integer) {
-				Integer minPrice2Int = (Integer) o2.get("minprice");
-				minPrice2 = new BigDecimal(minPrice2Int);
-			} else if (o2.get("minprice") instanceof BigDecimal) {
-				minPrice2 = (BigDecimal) o2.get("minprice");
-			}
-
 			BigDecimal minpmsprice1 = (BigDecimal) o1.get("minpmsprice");
 
 			BigDecimal minpmsprice2 = (BigDecimal) o2.get("minpmsprice");
 
-			BigDecimal savePrice1 = (minPrice1 != null && minpmsprice1 != null) ? minpmsprice1.subtract(minPrice1)
-					: BigDecimal.ZERO;
-			BigDecimal savePrice2 = (minPrice2 != null && minpmsprice2 != null) ? minpmsprice2.subtract(minPrice2)
-					: BigDecimal.ZERO;
-
-			if (savePrice1.compareTo(savePrice2) == 1) {
+			if (minpmsprice1 == null) {
 				return -1;
-			} else if (savePrice1.compareTo(savePrice2) == 0) {
-				return 0;
-			} else if (savePrice1.compareTo(savePrice2) == -1) {
+			} else if (minpmsprice2 == null) {
 				return 1;
-			} else {
-				return -1;
 			}
+
+			return minpmsprice1.compareTo(minpmsprice2);
 		}
 	}
 
