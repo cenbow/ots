@@ -1,16 +1,26 @@
 package com.mk.ots.inner.controller;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
+import com.google.common.base.Optional;
 import com.mk.framework.AppUtils;
 import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.ots.bill.dao.BillOrderDAO;
+import com.mk.ots.bill.service.BillOrderService;
+import com.mk.ots.common.enums.HotelSearchEnum;
 import com.mk.ots.common.utils.Constant;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.common.utils.OtsVersion;
+import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.inner.service.IOtsAdminService;
+import com.mk.ots.member.model.UMember;
+import com.mk.ots.member.service.impl.MemberService;
 import com.mk.ots.order.service.QiekeRuleService;
 import com.mk.ots.search.service.impl.IndexerService;
+import com.mk.ots.wallet.model.CashflowTypeEnum;
+import com.mk.ots.wallet.service.impl.WalletCashflowService;
+import com.mk.ots.wallet.service.impl.WalletService;
+import com.mk.ots.web.ServiceOutput;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,15 +31,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import com.mk.ots.bill.service.BillOrderService;
-import com.mk.ots.common.enums.HotelSearchEnum;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.common.utils.OtsVersion;
-import com.mk.ots.hotel.service.HotelService;
-import com.mk.ots.inner.service.IOtsAdminService;
-import com.mk.ots.web.ServiceOutput;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * OTS Administrator.
@@ -54,8 +61,12 @@ public class OtsAdminController {
 
 	@Autowired
 	private IndexerService indexerService;
-
-	private final SimpleDateFormat defaultDateFormatter = new SimpleDateFormat(DateUtils.FORMATSHORTDATETIME);
+	@Autowired
+	private WalletCashflowService walletCashflowService;
+	@Autowired
+	private WalletService walletService;
+	@Autowired
+	private MemberService memberService;
 
 	/**
 	 * 
@@ -285,6 +296,64 @@ public class OtsAdminController {
 		qiekeRuleService.updateTopInvalidReason(beginTime);
 		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 	}
+
+	@RequestMapping(value = "/test/addWalletByTest", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> addWalletByTest(String phone, BigDecimal cash) {
+		logger.info(String.format("url /test/addWalletByTest"));
+		Map<String, Object> datas = new HashMap<String, Object>();
+		datas.put(ServiceOutput.STR_MSG_SUCCESS, "充值成功");
+		if(StringUtils.isBlank(phone)){
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "phone参数为空");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		if(cash == null){
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "cash参数为空");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		if(cash.compareTo(new BigDecimal("10")) > 0){
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "冲错金额啦，充值金额请少于10元");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		if(StringUtils.isBlank(phone) || !phone.startsWith("1000")){
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "冲错用户信息啦，手机号码不是测试用户");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		Optional<UMember> opMember = null;
+		try {
+			opMember = memberService.findMemberByLoginName(phone);
+		}catch (Throwable e){
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "phone参数错误，没有用户信息");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		UMember member = opMember.get();
+		if (member == null) {
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "phone参数错误，没有用户信息");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		try {
+			BigDecimal balance = walletService.queryBalance(member.getMid());
+			if(balance.compareTo(new BigDecimal("10")) > 0){
+				datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+				datas.put(ServiceOutput.STR_MSG_ERRMSG, "所充值的用户的钱包金额> 10,已够用了");
+				return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+			}
+			walletCashflowService.saveCashflowAndSynWallet(member.getId(), cash, CashflowTypeEnum.MIKE_CHARGE_CARD, member.getId());
+		}catch (Exception e){
+			logger.info("addWalletByTest Exception", e);
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "addWalletByTest Exception");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		logger.info(String.format("url /test/addWalletByTest end"));
+		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+	}
+
 
 
 }
