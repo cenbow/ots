@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -41,8 +42,10 @@ public class TBackMoneyRuleServiceImpl implements ITBackMoneyRuleService {
         if(OrderTypeEnum.PT.getId() == order.getOrderType()){
             return new BigDecimal(0);
         }
-        if(order.getTotalPrice().compareTo(order.getAvailableMoney()) == 0){
-            return new BigDecimal(0);
+        if(order.getAvailableMoney() != null && order.getTotalPrice() != null){
+            if(order.getTotalPrice().compareTo(order.getAvailableMoney()) == 0){
+                return new BigDecimal(0);
+            }
         }
         Long thotelId = order.getHotelId();
         Bean beanHotel = hotelDAO.findThotelByHotelid(thotelId);
@@ -70,9 +73,11 @@ public class TBackMoneyRuleServiceImpl implements ITBackMoneyRuleService {
     public Integer getBusinessType(OtaOrder order) {
         Integer bussinessType = 0;
         Long promoid = null;
-        for (OtaRoomOrder room : order.getRoomOrderList()) {
-            promoid = room.getLong("promoid");
-            break;
+        if(!CollectionUtils.isEmpty(order.getRoomOrderList())){
+            for (OtaRoomOrder room : order.getRoomOrderList()) {
+                promoid = room.getLong("promoid");
+                break;
+            }
         }
         if(promoid == null){
             bussinessType = 0;
