@@ -1515,7 +1515,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			throws Exception {
 		Map<String, Object> promoItem = new HashMap<String, Object>();
 		if (params.getLimit() == null) {
-			params.setLimit(FrontPageEnum.limit.getId());
+			params.setLimit(FrontPageEnum.recommendLimit.getId());
 		}
 		params.setIspromoonly(Boolean.TRUE);
 
