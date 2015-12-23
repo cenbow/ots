@@ -54,7 +54,7 @@ public class ScoreController {
 		}
 		
 		String actiontype= request.getParameter("actiontype");
-		if(StringUtils.isBlank(actiontype) || (!actiontype.equals("i") 
+		if(StringUtils.isBlank(actiontype) || (!actiontype.equals("i")
 				&& !actiontype.equals("m") && !actiontype.equals("d"))){
 			logger.debug("缺少必须参数操作类型i,m,d.");
 			throw MyErrorEnum.errorParm.getMyException("缺少必须参数操作类型i,m,d.");
@@ -87,7 +87,7 @@ public class ScoreController {
 		param.put("pics", picStr);
 		
 		String gradeStr= request.getParameter("grades");//评价价分数
-		if(StringUtils.isBlank(score) && StringUtils.isBlank(gradeStr)){
+		if(!actiontype.equals("d") && StringUtils.isBlank(score) && StringUtils.isBlank(gradeStr)){
 			logger.info("订单:{}评价信息不完整", orderid);
 			throw MyErrorEnum.errorParm.getMyException("订单"+ orderid +"评分信息不完整.");
 		}
