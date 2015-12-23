@@ -986,7 +986,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					logger.error("按照{}搜索是没有获取到经纬度, points: {}。", HotelSearchEnum.getById(searchType).getName(), points);
 				}
 			}
-			
+
 			GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
 			geoFilter.point(lat, lon).distance(distance, DistanceUnit.METERS).optimizeBbox("memory")
 					.geoDistance(GeoDistance.ARC);
@@ -1968,6 +1968,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
 		}
 		return rtnMap;
+	}
+
+	private void resortOneDollar(List<Map<String, Object>> hotels, HotelQuerylistReqEntity reqentity) {
+		String promoid = reqentity.getPromoid();
+
+		if (StringUtils.isNotBlank(promoid) && HotelPromoEnum.OneDollar.getCode().toString().equals(promoid)) {
+			Collections.sort(hotels, new PriceComparator());
+		}
 	}
 
 	private void resortPromo(List<Map<String, Object>> hotels) {
@@ -3131,6 +3139,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				this.resortPromo(hotels);
 			}
 
+			resortOneDollar(hotels, reqentity);
+
 			rtnMap.put("supplementhotel", new ArrayList<Map<String, Object>>());
 			/**
 			 * add hotel supplement to be bottom
@@ -4083,6 +4093,37 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Collections.sort(themeRoomtypes, new GreetscoreComparator());
 
 		return themeRoomtypes;
+	}
+
+	private class PriceComparator implements Comparator<Map<String, Object>> {
+		@Override
+		public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+			if (o1 == null) {
+				return -1;
+			} else if (o2 == null) {
+				return 1;
+			}
+
+			Double minPrice1 = Double.parseDouble((String) o1.get("promoprice"));
+			BigDecimal minpmsprice1 = (BigDecimal) o1.get("minpmsprice");
+			Double minPrice2 = Double.parseDouble((String) o2.get("promoprice"));
+			BigDecimal minpmsprice2 = (BigDecimal) o2.get("minpmsprice");
+
+			Double savePrice1 = (minPrice1 != null && minpmsprice1 != null) ? minpmsprice1.doubleValue() - minPrice1
+					: 0;
+			Double savePrice2 = (minPrice2 != null && minpmsprice2 != null) ? minpmsprice2.doubleValue() - minPrice2
+					: 0;
+
+			if (savePrice1 > savePrice2) {
+				return -1;
+			} else if (savePrice1 == savePrice2) {
+				return 0;
+			} else if (savePrice1 < savePrice2) {
+				return 1;
+			} else {
+				return -1;
+			}
+		}
 	}
 
 	private class GreetscoreComparator implements Comparator<Map<String, Object>> {
