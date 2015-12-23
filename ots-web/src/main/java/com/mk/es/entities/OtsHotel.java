@@ -151,6 +151,9 @@ public class OtsHotel {
 
 	private List<Map<String, Object>> bedtypes;
 
+
+	private Double mintonitepromoprice;
+
 	public OtsHotel() {
 
 	}
@@ -635,5 +638,13 @@ public class OtsHotel {
 
 	public void setHighlights(List<Map<String, Object>> highlights) {
 		this.highlights = highlights;
+	}
+
+	public Double getMintonitepromoprice() {
+		return mintonitepromoprice;
+	}
+
+	public void setMintonitepromoprice(Double mintonitepromoprice) {
+		this.mintonitepromoprice = mintonitepromoprice;
 	}
 }
