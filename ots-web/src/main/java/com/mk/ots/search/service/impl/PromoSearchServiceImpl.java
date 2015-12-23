@@ -2940,6 +2940,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					if (minPrice.compareTo(minPromoPrice) > 0) {
 						minPrice = minPromoPrice;
 					}
+
+					result.put("promoprice", tempMinPromoPrice);
+
 				}
 				result.put("minprice", minPrice);
 
@@ -2963,8 +2966,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 							Integer hotelpromoId = promoinfo.get("promoid");
 							if (hotelpromoId != null && hotelpromoId == HotelPromoEnum.Theme.getCode()) {
 								result.put("promoprice", new BigDecimal(prices[0]));
-							} else if (hotelPromoType == promoType) {
-								result.put("promoprice", minPrice);
 							}
 						}
 					}
