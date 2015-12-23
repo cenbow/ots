@@ -2948,7 +2948,7 @@ public class OrderServiceImpl implements OrderService {
 		}
         //设备号对应手机号超过三个手机号码 刷单校验
         OtaFreqTrvEnum otaFreqTrvEnum = qiekeRuleService.checkSysNo(otaorder, 3, OtaFreqTrvEnum.DEVICE_NUM_OVER);
-        if(otaFreqTrvEnum == null || OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+        if(otaFreqTrvEnum == null || OtaFreqTrvEnum.DEVICE_NUM_OVER.getId().equals(otaFreqTrvEnum.getId())){
             otaorder.setSpreadUser(otaorder.getHotelId());
             otaorder.set("Invalidreason", OtaFreqTrvEnum.DEVICE_NUM_OVER.getId());
         }
