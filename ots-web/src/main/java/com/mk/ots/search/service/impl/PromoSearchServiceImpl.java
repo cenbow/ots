@@ -2440,7 +2440,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		hotel.put("hotelpic", newHotelPics);
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		List<Object> roomtypePicList = (List<Object>) objectMapper.readValue(picsJson, List.class);
+		List<Object> roomtypePicList = null;
+		try {
+			roomtypePicList = (List<Object>) objectMapper.readValue(picsJson, List.class);
+		} catch (Exception ex) {
+			throw new Exception(String.format("failed to parse roomtypepic %s", picsJson), ex);
+		}
 
 		if (roomtypePicList != null && roomtypePicList.size() > 0) {
 			roomtype.put("roomtypepic", roomtypePicList);
