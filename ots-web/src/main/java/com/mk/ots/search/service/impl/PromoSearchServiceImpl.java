@@ -4140,26 +4140,26 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			String minPrice1Str;
 			BigDecimal minPrice1 = null;
-			if (o1.get("promoprice") instanceof String) {
-				minPrice1Str = (String) o1.get("promoprice");
+			if (o1.get("minprice") instanceof String) {
+				minPrice1Str = (String) o1.get("minprice");
 				minPrice1 = new BigDecimal(Integer.valueOf(minPrice1Str));
-			} else if (o1.get("promoprice") instanceof Integer) {
-				Integer minPrice1Int = (Integer) o1.get("promoprice");
+			} else if (o1.get("minprice") instanceof Integer) {
+				Integer minPrice1Int = (Integer) o1.get("minprice");
 				minPrice1 = new BigDecimal(minPrice1Int);
-			} else if (o1.get("promoprice") instanceof BigDecimal) {
-				minPrice1 = (BigDecimal) o1.get("promoprice");
+			} else if (o1.get("minprice") instanceof BigDecimal) {
+				minPrice1 = (BigDecimal) o1.get("minprice");
 			}
 
 			String minPrice2Str;
 			BigDecimal minPrice2 = null;
-			if (o2.get("promoprice") instanceof String) {
-				minPrice2Str = (String) o2.get("promoprice");
+			if (o2.get("minprice") instanceof String) {
+				minPrice2Str = (String) o2.get("minprice");
 				minPrice2 = new BigDecimal(Integer.valueOf(minPrice2Str));
-			} else if (o2.get("promoprice") instanceof Integer) {
-				Integer minPrice2Int = (Integer) o2.get("promoprice");
+			} else if (o2.get("minprice") instanceof Integer) {
+				Integer minPrice2Int = (Integer) o2.get("minprice");
 				minPrice2 = new BigDecimal(minPrice2Int);
-			} else if (o2.get("promoprice") instanceof BigDecimal) {
-				minPrice2 = (BigDecimal) o2.get("promoprice");
+			} else if (o2.get("minprice") instanceof BigDecimal) {
+				minPrice2 = (BigDecimal) o2.get("minprice");
 			}
 
 			BigDecimal minpmsprice1 = (BigDecimal) o1.get("minpmsprice");
