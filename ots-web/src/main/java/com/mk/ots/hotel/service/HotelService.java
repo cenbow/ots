@@ -493,6 +493,12 @@ public class HotelService {
 						promoinfo = new ArrayList<>();
 					}
 
+					Double tempMinPromoPrice = roomSaleService.getHotelMinPromoPrice(hotelId);
+
+					if (tempMinPromoPrice != null && isPromo != null && isPromo){
+						hotel.setMintonitepromoprice(tempMinPromoPrice);
+					}
+
 					hotel.setPromoinfo(promoinfo);
 
 					List<Integer> promoIds = new ArrayList<Integer>();

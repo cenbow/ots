@@ -319,7 +319,7 @@
      SELECT
      <include refid="Base_Column_List"/>
      FROM t_room_sale_config
-     WHERE hotelid=#{hotelid} AND valid = 'T' AND saleTypeId != 6  ORDER BY saleValue ASC limit 1
+     WHERE hotelid=#{hotelid} AND valid = 'T' AND saleTypeId = 1 ORDER BY saleValue ASC limit 1
     </select>
 
     <select id="getThemeRoomSale" resultMap="roomSaleConfig" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfig">
