@@ -3346,21 +3346,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (StringUtils.isNotBlank(reqentity.getMaxprice())) {
 				maxpriceParam = Double.valueOf(reqentity.getMaxprice());
 			}
-
-			// hotel.getStartdateday(), hotel.getEnddateday() yyyyMMdd
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-			Date startDate = sdf.parse(reqentity.getStartdateday());
-			Date endDate = sdf.parse(reqentity.getEnddateday());
-			Calendar startDateCal = Calendar.getInstance();
-			startDateCal.setTime(startDate);
-			Calendar endDateCal = Calendar.getInstance();
-			endDateCal.setTime(endDate);
-			while (startDateCal.compareTo(endDateCal) <= 0) {
-				mikePriceBuilders.add(
-						FilterBuilders.rangeFilter(SearchConst.MIKE_PRICE_PROP + sdf.format(startDateCal.getTime()))
-								.gte(Double.valueOf(minpriceParam)).lte(Double.valueOf(maxpriceParam)));
-				startDateCal.add(Calendar.DATE, 1);
-			}
+			mikePriceBuilders.add(
+					FilterBuilders.rangeFilter("mintonitepromoprice")
+							.gte(Double.valueOf(minpriceParam)).lte(Double.valueOf(maxpriceParam)));
 		}
 		return mikePriceBuilders;
 	}
