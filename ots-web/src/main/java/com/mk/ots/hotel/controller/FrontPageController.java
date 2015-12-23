@@ -192,6 +192,7 @@ public class FrontPageController {
 			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
+			e.printStackTrace();
 			logger.error("【/homepage/promolist】 is error: {} ", e.getMessage());
 		}
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
