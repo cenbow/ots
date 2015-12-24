@@ -795,6 +795,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 
 			List<Map<String, Object>> searchResults = this.reorderSearchResults(searchHits.getHits(), reqentity);
+			searchResults = filterHomeThemes(searchResults);
 
 			logger.info("search hotel success: total {} found. current pagesize:{}", totalHits,
 					searchResults != null ? searchResults.size() : 0);
@@ -813,6 +814,21 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		rtnMap.put("supplementhotel", new ArrayList<Map<String, Object>>());
 
 		return rtnMap;
+	}
+
+	private List<Map<String, Object>> filterHomeThemes(List<Map<String, Object>> searchResults) {
+		List<Map<String, Object>> homeThemes = new ArrayList<Map<String, Object>>();
+		List<String> hotelIds = new ArrayList<String>();
+		for (Map<String, Object> searchResult : searchResults) {
+			String hotelid = (String) searchResult.get("hotelid");
+			if (!hotelIds.contains(hotelid)) {
+				hotelIds.add(hotelid);
+				
+				homeThemes.add(searchResult);
+			}
+		}
+
+		return homeThemes;
 	}
 
 	private void processGeos(HotelQuerylistReqEntity params) {
