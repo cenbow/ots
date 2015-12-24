@@ -211,7 +211,7 @@ public class HomePageController {
 				reqEntity.setSearchtype(HotelSearchEnum.NEAR.getId());
 			}
 
-			Map<String, Object> themeResponse = promoService.readonlySearchHotels(reqEntity);
+			Map<String, Object> themeResponse = promoService.searchHomePageThemes(reqEntity);
 
 			List<Map<String, Object>> hotels = (List<Map<String, Object>>) themeResponse.get("hotel");
 			if (hotels == null) {
@@ -376,8 +376,12 @@ public class HomePageController {
 		reqEntity.setCallmethod(homepageReqEntity.getCallmethod());
 		reqEntity.setCityid(homepageReqEntity.getCityid());
 		reqEntity.setCallentry(null);
+		
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
+		reqEntity.setPillowlatitude(homepageReqEntity.getUserlatitude());
+		reqEntity.setPillowlongitude(homepageReqEntity.getUserlongitude());
+		
 		reqEntity.setIshotelpic("T");
 		reqEntity.setIspromoonly(Boolean.TRUE);
 		

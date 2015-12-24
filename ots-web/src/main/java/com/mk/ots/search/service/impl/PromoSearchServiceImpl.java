@@ -1116,13 +1116,30 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return roomstateEntity;
 	}
 
+	private Integer parsePromoPrice(Object promoprice) {
+		Integer promopriceInt = 0;
+		if (promoprice == null) {
+			return promopriceInt;
+		}
+
+		if (promoprice instanceof Integer) {
+			promopriceInt = (Integer) promoprice;
+		} else if (promoprice instanceof BigDecimal) {
+			promopriceInt = ((BigDecimal) promoprice).intValue();
+		} else if (promoprice instanceof String) {
+			promopriceInt = Integer.parseInt((String) promoprice);
+		}
+
+		return promopriceInt;
+	}
+
 	private List<Map<String, Object>> updateRoomtypeThemes(List<Map<String, Object>> roomtypes,
 			Map<String, Object> hotel, String startdateday, String enddateday) {
 		List<Map<String, Object>> themedRoomtypes = new ArrayList<>();
 
 		Integer hotelId = Integer.parseInt((String) hotel.get("hotelid"));
 		String hotelname = (String) hotel.get("hotelname");
-		Integer promoprice = (Integer) hotel.get("promoprice");
+		Integer promoprice = parsePromoPrice(hotel.get("promoprice"));
 
 		for (Map<String, Object> roomtype : roomtypes) {
 
@@ -1175,7 +1192,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			Integer hotelId = Integer.parseInt((String) hotel.get("hotelid"));
 			String hotelname = (String) hotel.get("hotelname");
-			Integer promoprice = (Integer) hotel.get("promoprice");
+			Integer promoprice = parsePromoPrice(hotel.get("promoprice"));
 
 			if (!hotelRoomTypes.containsKey(hotelId)) {
 				hotelRoomTypes.put(hotelId, new ArrayBlockingQueue<Map<String, Object>>(10));
@@ -2226,7 +2243,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 
 			result.put("$sortScore", hit.getScore());
-			result.put("promoprice", 0);
 
 			Map<String, Object> pin = (Map<String, Object>) result.get("pin");
 			// hotel latitude and longitude
@@ -2295,6 +2311,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			logger.info("查询酒店: {}眯客价耗时: {}ms.", es_hotelid, times);
 			BigDecimal minPrice = new BigDecimal(prices[0]);
 			result.put("minprice", minPrice);
+			result.put("promoprice", minPrice);
 
 			Long maxPrice = roomstateService.findHotelMaxPrice(Long.parseLong(es_hotelid));
 			result.put("minpmsprice", new BigDecimal(maxPrice));
@@ -2469,7 +2486,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		} else if (HotelSortEnum.ORDERNUMS.getId().equals(reqEntity.getOrderby())) {
 			Collections.sort(hotelIds, new GreetscoreComparator());
 		}
-		
+
 		return hotelIds;
 	}
 
@@ -4200,8 +4217,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 	}
 
-	
-	
 	private class GreetscoreComparator implements Comparator<Map<String, Object>> {
 		@Override
 		public int compare(Map<String, Object> o1, Map<String, Object> o2) {
