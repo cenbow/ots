@@ -5,6 +5,8 @@
     <id column="id" property="id" jdbcType="BIGINT" />
     <result column="hotel_id" property="hotelId" jdbcType="BIGINT" />
     <result column="hotel_name" property="hotelName" jdbcType="VARCHAR" />
+    <result column="city_code" property="cityCode" jdbcType="VARCHAR" />
+    <result column="city_name" property="cityName" jdbcType="VARCHAR" />
     <result column="order_id" property="orderId" jdbcType="BIGINT" />
     <result column="order_type" property="orderType" jdbcType="BIGINT" />
     <result column="begin_time" property="beginTime" jdbcType="TIMESTAMP" />
@@ -60,11 +62,11 @@
     </where>
   </sql>
   <sql id="Base_Column_List" >
-    id, hotel_id, hotel_name, order_id, order_type, begin_time, end_time, total_price, 
-    service_cost, rule_code, spread_user, invalid_reason, checkin_time, prepayment_discount, 
-    to_pay_discount, order_create_time, bill_time, settlement_price, user_cost, available_money, 
-    ticket_money, wechat_pay_money, ali_pay_money, promo_id, b_bill_order_week_id, create_time, 
-    update_time
+    id, hotel_id, hotel_name, city_code, city_name, order_id, order_type, begin_time, 
+    end_time, total_price, service_cost, rule_code, spread_user, invalid_reason, checkin_time, 
+    prepayment_discount, to_pay_discount, order_create_time, bill_time, settlement_price, 
+    user_cost, available_money, ticket_money, wechat_pay_money, ali_pay_money, promo_id, 
+    b_bill_order_week_id, create_time, update_time
   </sql>
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.mk.ots.bill.model.BillOrderDetailExample" >
     select
@@ -93,25 +95,25 @@
   </delete>
   <insert id="insert" parameterType="com.mk.ots.bill.model.BillOrderDetail" >
     insert into b_bill_order_detail (id, hotel_id, hotel_name, 
-      order_id, order_type, begin_time, 
-      end_time, total_price, service_cost, 
-      rule_code, spread_user, invalid_reason, 
-      checkin_time, prepayment_discount, to_pay_discount, 
-      order_create_time, bill_time, settlement_price, 
-      user_cost, available_money, ticket_money, 
-      wechat_pay_money, ali_pay_money, promo_id, 
-      b_bill_order_week_id, create_time, update_time
-      )
+      city_code, city_name, order_id, 
+      order_type, begin_time, end_time, 
+      total_price, service_cost, rule_code, 
+      spread_user, invalid_reason, checkin_time, 
+      prepayment_discount, to_pay_discount, order_create_time, 
+      bill_time, settlement_price, user_cost, 
+      available_money, ticket_money, wechat_pay_money, 
+      ali_pay_money, promo_id, b_bill_order_week_id, 
+      create_time, update_time)
     values (#{id,jdbcType=BIGINT}, #{hotelId,jdbcType=BIGINT}, #{hotelName,jdbcType=VARCHAR}, 
-      #{orderId,jdbcType=BIGINT}, #{orderType,jdbcType=BIGINT}, #{beginTime,jdbcType=TIMESTAMP}, 
-      #{endTime,jdbcType=TIMESTAMP}, #{totalPrice,jdbcType=DECIMAL}, #{serviceCost,jdbcType=DECIMAL}, 
-      #{ruleCode,jdbcType=INTEGER}, #{spreadUser,jdbcType=BIGINT}, #{invalidReason,jdbcType=INTEGER}, 
-      #{checkinTime,jdbcType=TIMESTAMP}, #{prepaymentDiscount,jdbcType=DECIMAL}, #{toPayDiscount,jdbcType=DECIMAL}, 
-      #{orderCreateTime,jdbcType=TIMESTAMP}, #{billTime,jdbcType=TIMESTAMP}, #{settlementPrice,jdbcType=DECIMAL}, 
-      #{userCost,jdbcType=DECIMAL}, #{availableMoney,jdbcType=DECIMAL}, #{ticketMoney,jdbcType=DECIMAL}, 
-      #{wechatPayMoney,jdbcType=DECIMAL}, #{aliPayMoney,jdbcType=DECIMAL}, #{promoId,jdbcType=INTEGER}, 
-      #{bBillOrderWeekId,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
-      )
+      #{cityCode,jdbcType=VARCHAR}, #{cityName,jdbcType=VARCHAR}, #{orderId,jdbcType=BIGINT}, 
+      #{orderType,jdbcType=BIGINT}, #{beginTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, 
+      #{totalPrice,jdbcType=DECIMAL}, #{serviceCost,jdbcType=DECIMAL}, #{ruleCode,jdbcType=INTEGER}, 
+      #{spreadUser,jdbcType=BIGINT}, #{invalidReason,jdbcType=INTEGER}, #{checkinTime,jdbcType=TIMESTAMP}, 
+      #{prepaymentDiscount,jdbcType=DECIMAL}, #{toPayDiscount,jdbcType=DECIMAL}, #{orderCreateTime,jdbcType=TIMESTAMP}, 
+      #{billTime,jdbcType=TIMESTAMP}, #{settlementPrice,jdbcType=DECIMAL}, #{userCost,jdbcType=DECIMAL}, 
+      #{availableMoney,jdbcType=DECIMAL}, #{ticketMoney,jdbcType=DECIMAL}, #{wechatPayMoney,jdbcType=DECIMAL}, 
+      #{aliPayMoney,jdbcType=DECIMAL}, #{promoId,jdbcType=INTEGER}, #{bBillOrderWeekId,jdbcType=BIGINT}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="com.mk.ots.bill.model.BillOrderDetail" >
     insert into b_bill_order_detail
@@ -124,6 +126,12 @@
       </if>
       <if test="hotelName != null" >
         hotel_name,
+      </if>
+      <if test="cityCode != null" >
+        city_code,
+      </if>
+      <if test="cityName != null" >
+        city_name,
       </if>
       <if test="orderId != null" >
         order_id,
@@ -207,6 +215,12 @@
       </if>
       <if test="hotelName != null" >
         #{hotelName,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null" >
+        #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cityName != null" >
+        #{cityName,jdbcType=VARCHAR},
       </if>
       <if test="orderId != null" >
         #{orderId,jdbcType=BIGINT},
@@ -297,6 +311,12 @@
       <if test="hotelName != null" >
         hotel_name = #{hotelName,jdbcType=VARCHAR},
       </if>
+      <if test="cityCode != null" >
+        city_code = #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cityName != null" >
+        city_name = #{cityName,jdbcType=VARCHAR},
+      </if>
       <if test="orderId != null" >
         order_id = #{orderId,jdbcType=BIGINT},
       </if>
@@ -376,6 +396,8 @@
     update b_bill_order_detail
     set hotel_id = #{hotelId,jdbcType=BIGINT},
       hotel_name = #{hotelName,jdbcType=VARCHAR},
+      city_code = #{cityCode,jdbcType=VARCHAR},
+      city_name = #{cityName,jdbcType=VARCHAR},
       order_id = #{orderId,jdbcType=BIGINT},
       order_type = #{orderType,jdbcType=BIGINT},
       begin_time = #{beginTime,jdbcType=TIMESTAMP},

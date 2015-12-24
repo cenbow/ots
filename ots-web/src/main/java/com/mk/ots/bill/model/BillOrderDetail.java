@@ -10,6 +10,10 @@ public class BillOrderDetail {
 
     private String hotelName;
 
+    private String cityCode;
+
+    private String cityName;
+
     private Long orderId;
 
     private Long orderType;
@@ -80,6 +84,22 @@ public class BillOrderDetail {
 
     public void setHotelName(String hotelName) {
         this.hotelName = hotelName == null ? null : hotelName.trim();
+    }
+
+    public String getCityCode() {
+        return cityCode;
+    }
+
+    public void setCityCode(String cityCode) {
+        this.cityCode = cityCode == null ? null : cityCode.trim();
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName == null ? null : cityName.trim();
     }
 
     public Long getOrderId() {

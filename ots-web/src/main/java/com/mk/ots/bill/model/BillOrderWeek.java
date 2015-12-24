@@ -10,6 +10,10 @@ public class BillOrderWeek {
 
     private String hotelName;
 
+    private String cityCode;
+
+    private String cityName;
+
     private Integer checkStatus;
 
     private Date beginTime;
@@ -82,6 +86,22 @@ public class BillOrderWeek {
 
     public void setHotelName(String hotelName) {
         this.hotelName = hotelName == null ? null : hotelName.trim();
+    }
+
+    public String getCityCode() {
+        return cityCode;
+    }
+
+    public void setCityCode(String cityCode) {
+        this.cityCode = cityCode == null ? null : cityCode.trim();
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName == null ? null : cityName.trim();
     }
 
     public Integer getCheckStatus() {
