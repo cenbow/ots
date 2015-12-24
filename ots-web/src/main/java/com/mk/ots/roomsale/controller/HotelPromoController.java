@@ -527,7 +527,7 @@ public class HotelPromoController {
 		reqEntity.setRange(entityReqEntity.getRange());
 		reqEntity.setHotelname(entityReqEntity.getHotelname());
 		reqEntity.setHoteladdr(entityReqEntity.getHoteladdr());
-		reqEntity.setKeyword(entityReqEntity.getHoteladdr());
+		reqEntity.setKeyword(entityReqEntity.getKeyword());
 		reqEntity.setOrderby(entityReqEntity.getOrderby());
 		reqEntity.setIspromoonly(Boolean.TRUE);
 
