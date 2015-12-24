@@ -1192,7 +1192,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			Integer hotelId = Integer.parseInt((String) hotel.get("hotelid"));
 			String hotelname = (String) hotel.get("hotelname");
-			Integer promoprice = parsePromoPrice(hotel.get("promoprice"));
 
 			if (!hotelRoomTypes.containsKey(hotelId)) {
 				hotelRoomTypes.put(hotelId, new ArrayBlockingQueue<Map<String, Object>>(10));
@@ -1213,13 +1212,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 								&& roomstatePrices.get(0).getRoomtype().size() > 0) {
 							BigDecimal price = roomstatePrices.get(0).getRoomtype().get(0).getRoomtypeprice();
 
-							if (promoprice == null) {
-								hotel.put("promoprice", price.longValue());
-							} else if (promoprice == 0 && price != null && price.longValue() > 0) {
-								hotel.put("promoprice", price.longValue());
-							} else if (promoprice != null && price != null && (promoprice > price.longValue())) {
-								hotel.put("promoprice", price.longValue());
-							}
+							hotel.put("promoprice", price);
 						}
 					} catch (Exception ex) {
 						logger.warn("failed to findHotelRoomPrice...", ex);
@@ -2448,11 +2441,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 
 		List<Map<String, Object>> roomtypeGrouped = null;
-		if (reqEntity.getOrderby() == null || reqEntity.getOrderby() <= 0) {
-			roomtypeGrouped = groupThemes(searchResults, reqEntity.getStartdateday(), reqEntity.getEnddateday());
-		} else {
-			roomtypeGrouped = singularRoomTypes;
-		}
+		roomtypeGrouped = groupThemes(searchResults, reqEntity.getStartdateday(), reqEntity.getEnddateday());
 
 		List<Map<String, Object>> hotelIds = new ArrayList<Map<String, Object>>();
 		if (roomtypeGrouped != null) {
