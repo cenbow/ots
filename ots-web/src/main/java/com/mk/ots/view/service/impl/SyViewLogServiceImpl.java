@@ -84,7 +84,7 @@ public class SyViewLogServiceImpl implements ISyViewLogService {
 
         Transaction t = Cat.newTransaction("saveSyViewLogPost", ja.toString());
         try {
-            jedisFactory.getJedis().publish("SYVIEWWLOG", ja.toString());
+            jedisFactory.getJedis().lpush("SYVIEWWLOG", ja.toString());
             Cat.logEvent("Sy/saveSyViewLog", "请求埋点", Event.SUCCESS, ja.toString());
             t.setStatus(Transaction.SUCCESS);
         } catch (Exception e) {

@@ -54,6 +54,7 @@ public class SyViewLogController {
                 resultrtnMap.put("errmsg", "获取目标data失败.");
                 return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
             }
+            res = res.replace("\\","");
             JSONObject  jsObject = JSONObject.parseObject(res);
              String  dateStr =  jsObject.getString("data");
             logger.info("【sys/addviewevent】 dataStr is : {}", dateStr);
