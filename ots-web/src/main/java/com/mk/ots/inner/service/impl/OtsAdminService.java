@@ -1,19 +1,15 @@
 package com.mk.ots.inner.service.impl;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.mk.framework.es.ElasticsearchProxy;
+import com.mk.ots.common.enums.HotelSearchEnum;
+import com.mk.ots.inner.service.IOtsAdminService;
+import com.mk.ots.web.ServiceOutput;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.BoolFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.QueryFilterBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
@@ -21,12 +17,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.mk.framework.es.ElasticsearchProxy;
-import com.mk.ots.common.enums.HotelSearchEnum;
-import com.mk.ots.inner.service.IOtsAdminService;
-import com.mk.ots.web.ServiceOutput;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * OTS Administrator服务实现类.
@@ -339,11 +334,12 @@ public class OtsAdminService implements IOtsAdminService {
      * @throws Exception
      */
     @Override
-    public Map<String, Object> readonlyDeletePoiDatas(String citycode, Integer typeid) throws Exception {
+    public Map<String, Object> readonlyDeletePoiDatas(String citycode, Integer typeid, String indexName, String indexType) throws Exception {
         Map<String, Object> result = Maps.newHashMap();
         try {
             int limit = 10000;
-            SearchRequestBuilder searchBuilder = esProxy.prepareSearch(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT);
+            SearchRequestBuilder searchBuilder = esProxy.prepareSearch(indexName, indexType);
+
             List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
             QueryFilterBuilder citycodeFilter = FilterBuilders.queryFilter(QueryBuilders.termQuery("citycode",citycode));
             QueryFilterBuilder typeidFilter = FilterBuilders.queryFilter(QueryBuilders.termQuery("ptype", typeid));
@@ -365,7 +361,7 @@ public class OtsAdminService implements IOtsAdminService {
             SearchHit[] hits = searchHits.getHits();
             for (int i = 0; i < hits.length; i++) {
                 SearchHit hit = hits[i];
-                esProxy.deleteDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT, hit.getId());
+                esProxy.deleteDocument(indexName, indexType, hit.getId());
             }
             result.put(ServiceOutput.STR_MSG_SUCCESS, true);
             result.put("citycode:{}, typeid:{}, total delete poidatas count: ", hits.length);

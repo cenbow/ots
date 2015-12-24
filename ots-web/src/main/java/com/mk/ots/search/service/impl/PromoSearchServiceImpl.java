@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -79,6 +79,7 @@ import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.inner.service.IOtsAdminService;
 import com.mk.ots.mapper.PositionTypeMapper;
 import com.mk.ots.mapper.RoomSaleConfigMapper;
+import com.mk.ots.mapper.RoomSaleShowConfigMapper;
 import com.mk.ots.mapper.SAreaInfoMapper;
 import com.mk.ots.mapper.SLandMarkMapper;
 import com.mk.ots.mapper.SSubwayMapper;
@@ -90,9 +91,6 @@ import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
-import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
-import com.mk.ots.restful.output.SearchPositionsDistanceRespEntity;
-import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
 import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
@@ -100,11 +98,7 @@ import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import com.mk.ots.search.enums.PositionTypeEnum;
-import com.mk.ots.search.model.PositionTypeModel;
 import com.mk.ots.search.model.SAreaInfo;
-import com.mk.ots.search.model.SLandMark;
-import com.mk.ots.search.model.SSubway;
-import com.mk.ots.search.model.SSubwayStation;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.ots.web.ServiceOutput;
@@ -212,81 +206,20 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private final int minItemCount = 5;
 
 	@Autowired
+	private RoomSaleShowConfigMapper roomsaleShowMapper;
+
+	@Autowired
 	private RoomSaleConfigMapper roomsaleConfigMapper;
 
-	/*
-	 * 获取 区域位置类型
-	 * 
-	 * @param citycode
-	 * 
-	 * @param positiontypeid
-	 */
-	@Override
-	public List<SearchPositiontypesRespEntity> readonlyPositionTypes(String citycode, Long positiontypeid) {
-		List<SearchPositiontypesRespEntity> result = new ArrayList<SearchPositiontypesRespEntity>();
-		List<PositionTypeModel> positionTypes = positionTypeMapper.findByCitycode(citycode);
-		for (PositionTypeModel pm : positionTypes) {
-			SearchPositiontypesRespEntity psr = new SearchPositiontypesRespEntity();
-			psr.setId(pm.getId());
-			psr.setTypename(pm.getTypename());
-			result.add(psr);
-		}
-		return result;
-	}
-
 	/**
-	 * 查询位置区域
-	 * 
-	 * @param citycode
-	 * @param ptype
-	 */
-	@Override
-	public Map<String, Object> readonlyPositions(String citycode, String ptype) {
-		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		// 从ES中读取区域位置信息
-		List<SearchPositionsCoordinateRespEntity> datas = readonlyPositionsFromES(citycode, ptype);
-		rtnMap.put("datas", datas);
-
-		List<SearchPositionsDistanceRespEntity> distances = Lists.newArrayList();
-		SearchPositionsDistanceRespEntity ds = new SearchPositionsDistanceRespEntity();
-		ds.setName("附近1km");
-		ds.setValue(1000L);
-		distances.add(ds);
-
-		ds = new SearchPositionsDistanceRespEntity();
-		ds.setName("附近3km");
-		ds.setValue(3000L);
-		distances.add(ds);
-
-		ds = new SearchPositionsDistanceRespEntity();
-		ds.setName("附近5km");
-		ds.setValue(5000L);
-		distances.add(ds);
-
-		ds = new SearchPositionsDistanceRespEntity();
-		ds.setName("附近10km");
-		ds.setValue(10000L);
-		distances.add(ds);
-
-		ds = new SearchPositionsDistanceRespEntity();
-		ds.setName("全城");
-		ds.setValue(0L);
-		distances.add(ds);
-
-		rtnMap.put("distance", distances);
-
-		return rtnMap;
-	}
-
-	/**
-	 * 
+	 *
 	 * @param cityId
 	 * @param promoId
 	 * @return
 	 */
 	public Integer queryByPromoId(Integer promoId) throws Exception {
 		try {
-			List<TRoomSaleConfigInfo> promos = roomSaleConfigInfoService.queryListBySaleTypeId("", promoId, 0, 10);
+			List<TRoomSaleConfigInfo> promos = roomSaleConfigInfoService.queryListBySaleTypeId(promoId, 0, 10);
 
 			if (promos != null && promos.size() > 0) {
 				return promos.get(0).getId();
@@ -300,7 +233,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 校验酒店搜索日期
-	 * 
+	 *
 	 * @param startDate
 	 *            参数：查询开始日期
 	 * @param endDate
@@ -399,7 +332,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 酒店搜索校验
-	 * 
+	 *
 	 * @param params
 	 *            参数：接口请求入参对象
 	 * @return String 返回值
@@ -444,8 +377,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return validateStr;
 	}
 
-	@Override
-	public Map<String, Object> searchThemes(HotelQuerylistReqEntity reqentity) throws Exception {
+	public Map<String, Object> searchHomeThemes(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 
 		try {
@@ -489,7 +421,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			makeHotelTypeFilter(reqentity, filterBuilders);
 			makeBedTypeFilter(reqentity, filterBuilders);
-			
+
 			makeQueryFilter(reqentity, filterBuilders);
 
 			FilterBuilder[] builders = new FilterBuilder[] {};
@@ -590,6 +522,498 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						SearchConst.SEARCH_RANGE_MAX);
 			}
 
+			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
+					.must(QueryBuilders.matchQuery("online", Constant.STR_TRUE));
+			boolFilter.must(FilterBuilders.queryFilter(boolQueryBuilder));
+			searchBuilder.setPostFilter(boolFilter);
+
+			if (keywordBuilders.size() > 0) {
+				FilterBuilder[] arrKeywordBuilders = new FilterBuilder[] {};
+				boolFilter.should(keywordBuilders.toArray(arrKeywordBuilders));
+			}
+
+			Integer paramOrderby = reqentity.getOrderby();
+			if (paramOrderby == null) {
+				paramOrderby = 0;
+			}
+
+			if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
+				this.sortByDistance(searchBuilder, new GeoPoint(lat, lon));
+			} else if (HotelSortEnum.PRICE.getId() == paramOrderby) {
+				String startdateday = reqentity.getStartdateday();
+				String enddateday = reqentity.getEnddateday();
+				List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
+				setMikepriceScriptSort(searchBuilder, boolFilter, mkPriceDateList);
+			} else if (HotelSortEnum.RECOMMEND.getId() == paramOrderby) {
+				this.sortByRecommend(searchBuilder);
+			} else if (HotelSortEnum.ORDERNUMS.getId() == paramOrderby) {
+				this.sortByOrders(searchBuilder);
+			}
+
+			String startdateday = reqentity.getStartdateday();
+			String enddateday = reqentity.getEnddateday();
+			List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
+			this.setScoreScriptSort(searchBuilder, boolFilter,
+					new GeoPoint(reqentity.getUserlatitude(), reqentity.getUserlongitude()), mkPriceDateList);
+
+			searchBuilder.setFrom((page - 1) * limit).setSize(limit).setExplain(true);
+
+			logger.info(searchBuilder.toString());
+
+			SearchResponse searchResponse = searchBuilder.execute().actionGet();
+
+			SearchHits searchHits = searchResponse.getHits();
+			long totalHits = searchHits.totalHits();
+
+			if (StringUtils.isNotBlank(reqentity.getKeyword()) && (totalHits == 0D)) {
+				Cat.logEvent("MismatchKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
+			}
+
+			if (logger.isInfoEnabled()) {
+				logger.info("about to reorderSearchResults");
+			}
+
+			List<Map<String, Object>> searchResults = this.reorderSearchResults(searchHits.getHits(), reqentity);
+
+			logger.info("search hotel success: total {} found. current pagesize:{}", totalHits,
+					searchResults != null ? searchResults.size() : 0);
+
+			rtnMap.put("hotel", searchResults);
+			rtnMap.put("count", searchResults.size());
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "true");
+		} catch (Exception e) {
+			logger.error("failed to readonlyOtsHotelListFromEsStore...", e);
+
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
+		}
+
+		rtnMap.put("supplementhotel", new ArrayList<Map<String, Object>>());
+
+		return rtnMap;
+
+	}
+
+	@Override
+	public Map<String, Object> searchHomePageThemes(HotelQuerylistReqEntity reqentity) throws Exception {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+
+		try {
+			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
+			List<FilterBuilder> keywordBuilders = new ArrayList<FilterBuilder>();
+
+			// C端搜索分类
+			Integer searchType = reqentity.getSearchtype();
+			if (searchType == null) {
+				searchType = HotelSearchEnum.ALL.getId();
+			}
+
+			// 如果城市id 为空则默认设置为上海
+			String cityid = reqentity.getCityid();
+
+			String hotelid = reqentity.getHotelid();
+
+			if (logger.isInfoEnabled()) {
+				logger.info(String.format("about to search for cityid: %s; hotelid: %s", cityid, hotelid));
+			}
+
+			int page = reqentity.getPage().intValue();
+			int limit = reqentity.getLimit().intValue();
+
+			SearchRequestBuilder searchBuilder = esProxy.prepareSearch();
+			searchBuilder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+
+			// make term filter builder
+			this.makeTermFilter(reqentity, filterBuilders);
+
+			if (StringUtils.isNotBlank(reqentity.getPromotype())) {
+				filterBuilders.add(FilterBuilders
+						.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", reqentity.getPromotype())));
+			}
+
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
+
+			if (HotelSearchEnum.AREA.getId().equals(searchType)) {
+				makeAreaFilter(reqentity, filterBuilders);
+			}
+
+			makeHotelTypeFilter(reqentity, filterBuilders);
+			makeBedTypeFilter(reqentity, filterBuilders);
+
+			makeQueryFilter(reqentity, filterBuilders);
+
+			FilterBuilder[] builders = new FilterBuilder[] {};
+			BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
+
+			// make range filter builder
+			List<FilterBuilder> mikePriceBuilders = this.makeMikePriceRangeFilter(reqentity);
+
+			if (mikePriceBuilders.size() > 0) {
+				BoolFilterBuilder mikePriceBoolFilter = FilterBuilders.boolFilter();
+				mikePriceBoolFilter.should(mikePriceBuilders.toArray(builders));
+				boolFilter.must(mikePriceBoolFilter);
+			}
+			if (AppUtils.DEBUG_MODE) {
+				logger.info("boolFilter is : \n{}", boolFilter.toString());
+			}
+
+			if (StringUtils.isNotBlank(reqentity.getKeyword())) {
+				makeKeywordFilter(reqentity, keywordBuilders);
+				Cat.logEvent("HotKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
+			}
+
+			double cityLat_default = Constant.LAT_SHANGHAI;
+			double cityLon_default = Constant.LON_SHANGHAI;
+
+			boolean isZhoubian = StringUtils.isNotBlank(reqentity.getExcludehotelid());
+			if (isZhoubian) {
+				if (reqentity.getRange() == null || reqentity.getRange() <= 0) {
+					reqentity.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
+				}
+			} else {
+				if (!HotelSearchEnum.NEAR.getId().equals(searchType)) {
+					logger.info("find city geopoint begin...");
+					TCityModel tcity = null;
+					String citycode = cityid;
+					if (citycode != null) {
+						tcity = cityService.findCityByCode(citycode);
+					}
+					if (tcity != null) {
+						BigDecimal cityLat = tcity.getLatitude();
+						if (cityLat != null) {
+							cityLat_default = cityLat.doubleValue();
+							logger.info("city {} lat is {}.", cityid, cityLat_default);
+						}
+
+						BigDecimal cityLon = tcity.getLongitude();
+						if (cityLon != null) {
+							cityLon_default = cityLon.doubleValue();
+							logger.info("city {} lon is {}.", cityid, cityLon_default);
+						}
+
+						Double cityRange = tcity.getRange();
+						if (cityRange != null) {
+							reqentity.setRange(cityRange.intValue());
+							logger.info("set city {} search range is {}", cityid, cityRange);
+						}
+					}
+					logger.info("find city geopoint end...");
+				} else {
+					if (reqentity.getRange() == null) {
+						reqentity.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
+					}
+				}
+			}
+
+			double distance = Double.valueOf(reqentity.getRange());
+
+			double lat = reqentity.getPillowlatitude() == null ? cityLat_default : reqentity.getPillowlatitude();
+			double lon = reqentity.getPillowlongitude() == null ? cityLon_default : reqentity.getPillowlongitude();
+
+			if (HotelSearchEnum.BZONE.getId().equals(searchType) || HotelSearchEnum.AIRPORT.getId().equals(searchType)
+					|| HotelSearchEnum.SUBWAY.getId().equals(searchType)
+					|| HotelSearchEnum.SAREA.getId().equals(searchType)
+					|| HotelSearchEnum.HOSPITAL.getId().equals(searchType)
+					|| HotelSearchEnum.COLLEGE.getId().equals(searchType)) {
+				// 坐标取所选位置的坐标，搜索半径取5000米
+				String points = reqentity.getPoints();
+				if (StringUtils.isEmpty(points)) {
+					logger.error("按照{}搜索时points参数错误{}", HotelSearchEnum.getById(searchType).getName(), points);
+				}
+				GeoPoint point = this.getPoint(points);
+				if (point != null) {
+					lat = point.getLat();
+					lon = point.getLon();
+					// 指定位置区域搜索的话，搜索半径按照默认5000米
+					distance = SearchConst.SEARCH_RANGE_DEFAULT;
+					logger.info("按照{}搜索，经纬度坐标：[{},{}], 搜索范围:{}米", HotelSearchEnum.getById(searchType).getName(), lon,
+							lat, distance);
+				} else {
+					logger.error("按照{}搜索是没有获取到经纬度, points: {}。", HotelSearchEnum.getById(searchType).getName(), points);
+				}
+			}
+
+			if (StringUtils.isNotBlank(reqentity.getKeyword()) || StringUtils.isNotBlank(reqentity.getHotelname())
+					|| StringUtils.isNotBlank(reqentity.getHoteladdr())) {
+				reqentity.setRange(SearchConst.SEARCH_RANGE_MAX);
+				logger.info("keyword or hotelname or hoteladdress search, set search range {}",
+						SearchConst.SEARCH_RANGE_MAX);
+			}
+
+			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
+					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
+					.must(QueryBuilders.matchQuery("online", Constant.STR_TRUE));
+			boolFilter.must(FilterBuilders.queryFilter(boolQueryBuilder));
+			searchBuilder.setPostFilter(boolFilter);
+
+			if (keywordBuilders.size() > 0) {
+				FilterBuilder[] arrKeywordBuilders = new FilterBuilder[] {};
+				boolFilter.should(keywordBuilders.toArray(arrKeywordBuilders));
+			}
+
+			Integer paramOrderby = reqentity.getOrderby();
+			if (paramOrderby == null) {
+				paramOrderby = 0;
+			}
+
+			if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
+				this.sortByDistance(searchBuilder, new GeoPoint(lat, lon));
+			} else if (HotelSortEnum.PRICE.getId() == paramOrderby) {
+				String startdateday = reqentity.getStartdateday();
+				String enddateday = reqentity.getEnddateday();
+				List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
+				setMikepriceScriptSort(searchBuilder, boolFilter, mkPriceDateList);
+			} else if (HotelSortEnum.RECOMMEND.getId() == paramOrderby) {
+				this.sortByRecommend(searchBuilder);
+			} else if (HotelSortEnum.ORDERNUMS.getId() == paramOrderby) {
+				this.sortByOrders(searchBuilder);
+			}
+
+			String startdateday = reqentity.getStartdateday();
+			String enddateday = reqentity.getEnddateday();
+			List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
+			this.setScoreScriptSort(searchBuilder, boolFilter,
+					new GeoPoint(reqentity.getUserlatitude(), reqentity.getUserlongitude()), mkPriceDateList);
+
+			searchBuilder.setFrom((page - 1) * limit).setSize(limit).setExplain(true);
+
+			logger.info(searchBuilder.toString());
+
+			SearchResponse searchResponse = searchBuilder.execute().actionGet();
+
+			SearchHits searchHits = searchResponse.getHits();
+			long totalHits = searchHits.totalHits();
+
+			if (StringUtils.isNotBlank(reqentity.getKeyword()) && (totalHits == 0D)) {
+				Cat.logEvent("MismatchKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
+			}
+
+			if (logger.isInfoEnabled()) {
+				logger.info("about to reorderSearchResults");
+			}
+
+			List<Map<String, Object>> searchResults = this.reorderSearchResults(searchHits.getHits(), reqentity);
+
+			logger.info("search hotel success: total {} found. current pagesize:{}", totalHits,
+					searchResults != null ? searchResults.size() : 0);
+
+			rtnMap.put("hotel", searchResults);
+			rtnMap.put("count", searchResults.size());
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "true");
+		} catch (Exception e) {
+			logger.error("failed to readonlyOtsHotelListFromEsStore...", e);
+
+			rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, "false");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, e.getMessage());
+		}
+
+		rtnMap.put("supplementhotel", new ArrayList<Map<String, Object>>());
+
+		return rtnMap;
+	}
+
+	private void processGeos(HotelQuerylistReqEntity params) {
+		if (StringUtils.isBlank(params.getHotelid())) {
+			// 必填参数默认值处理：开始
+			if (StringUtils.isBlank(params.getCityid())) {
+				params.setCityid(Constant.STR_CITYID_SHANGHAI);
+			}
+			// 用户坐标经纬度值没有,先判断屏幕坐标经纬度值，有的话用屏幕坐标经纬度，没有默认上海市中心位置
+			if (params.getUserlongitude() == null) {
+				if (params.getPillowlongitude() == null) {
+					params.setUserlongitude(Constant.LON_SHANGHAI);
+				} else {
+					params.setUserlongitude(params.getPillowlongitude());
+				}
+			}
+			if (params.getUserlatitude() == null) {
+				if (params.getPillowlatitude() == null) {
+					params.setUserlatitude(Constant.LAT_SHANGHAI);
+				} else {
+					params.setUserlatitude(params.getPillowlatitude());
+				}
+			}
+			if (params.getPage() == null || params.getPage() <= 0) {
+				params.setPage(SearchConst.SEARCH_PAGE_DEFAULT);
+			}
+			if (params.getLimit() == null || params.getLimit() <= 0) {
+				params.setLimit(SearchConst.SEARCH_LIMIT_DEFAULT);
+			}
+
+			// 眯客3.0：搜索酒店周边的酒店
+			if (StringUtils.isNotBlank(params.getExcludehotelid())) {
+				// 如果是酒店周边搜索，默认搜索半径为5000米
+				if (params.getRange() == null || params.getRange() <= 0) {
+					params.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
+				}
+			} else {
+				if (params.getRange() == null || params.getRange() <= 0) {
+					params.setRange(SearchConst.SEARCH_RANGE_MAX);
+				}
+			}
+		}
+	}
+
+	@Override
+	public Map<String, Object> searchThemes(HotelQuerylistReqEntity reqentity) throws Exception {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+
+		try {
+			processGeos(reqentity);
+
+			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
+			List<FilterBuilder> keywordBuilders = new ArrayList<FilterBuilder>();
+
+			// C端搜索分类
+			Integer searchType = reqentity.getSearchtype();
+			if (searchType == null) {
+				searchType = HotelSearchEnum.ALL.getId();
+			}
+
+			// 如果城市id 为空则默认设置为上海
+			String cityid = reqentity.getCityid();
+
+			String hotelid = reqentity.getHotelid();
+
+			if (logger.isInfoEnabled()) {
+				logger.info(String.format("about to search for cityid: %s; hotelid: %s", cityid, hotelid));
+			}
+
+			double cityLat_default = Constant.LAT_SHANGHAI;
+			double cityLon_default = Constant.LON_SHANGHAI;
+			boolean isZhoubian = StringUtils.isNotBlank(reqentity.getExcludehotelid());
+			if (isZhoubian) {
+				if (reqentity.getRange() == null || reqentity.getRange() <= 0) {
+					reqentity.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
+				}
+			} else {
+				if (!HotelSearchEnum.NEAR.getId().equals(searchType)) {
+					logger.info("find city geopoint begin...");
+					TCityModel tcity = null;
+					String citycode = cityid;
+					if (citycode != null) {
+						tcity = cityService.findCityByCode(citycode);
+					}
+					if (tcity != null) {
+						BigDecimal cityLat = tcity.getLatitude();
+						if (cityLat != null) {
+							cityLat_default = cityLat.doubleValue();
+							logger.info("city {} lat is {}.", cityid, cityLat_default);
+						}
+
+						BigDecimal cityLon = tcity.getLongitude();
+						if (cityLon != null) {
+							cityLon_default = cityLon.doubleValue();
+							logger.info("city {} lon is {}.", cityid, cityLon_default);
+						}
+
+						Double cityRange = tcity.getRange();
+						if (cityRange != null) {
+							reqentity.setRange(cityRange.intValue());
+							logger.info("set city {} search range is {}", cityid, cityRange);
+						}
+					}
+					logger.info("find city geopoint end...");
+				} else {
+					if (reqentity.getRange() == null) {
+						reqentity.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
+					}
+				}
+			}
+
+			int page = reqentity.getPage().intValue();
+			int limit = reqentity.getLimit().intValue();
+
+			SearchRequestBuilder searchBuilder = esProxy.prepareSearch();
+			searchBuilder.setSearchType(SearchType.DFS_QUERY_THEN_FETCH);
+
+			// make term filter builder
+			this.makeTermFilter(reqentity, filterBuilders);
+
+			if (StringUtils.isNotBlank(reqentity.getPromotype())) {
+				filterBuilders.add(FilterBuilders
+						.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", reqentity.getPromotype())));
+			}
+
+			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("isonpromo", "1")));
+
+			if (HotelSearchEnum.AREA.getId().equals(searchType)) {
+				makeAreaFilter(reqentity, filterBuilders);
+			}
+
+			makeHotelTypeFilter(reqentity, filterBuilders);
+			makeBedTypeFilter(reqentity, filterBuilders);
+
+			makeQueryFilter(reqentity, filterBuilders);
+
+			if (StringUtils.isNotBlank(reqentity.getKeyword())) {
+				makeKeywordFilter(reqentity, keywordBuilders);
+				Cat.logEvent("HotKeywords", reqentity.getKeyword(), Message.SUCCESS, "");
+			}
+
+			double distance = 0;
+
+			if (reqentity.getRange() != null) {
+				distance = Double.valueOf(reqentity.getRange());
+			} else {
+				distance = SearchConst.SEARCH_RANGE_MAX;
+			}
+
+			double lat = reqentity.getPillowlatitude() == null ? cityLat_default : reqentity.getPillowlatitude();
+			double lon = reqentity.getPillowlongitude() == null ? cityLon_default : reqentity.getPillowlongitude();
+
+			if (HotelSearchEnum.BZONE.getId().equals(searchType) || HotelSearchEnum.AIRPORT.getId().equals(searchType)
+					|| HotelSearchEnum.SUBWAY.getId().equals(searchType)
+					|| HotelSearchEnum.SAREA.getId().equals(searchType)
+					|| HotelSearchEnum.HOSPITAL.getId().equals(searchType)
+					|| HotelSearchEnum.COLLEGE.getId().equals(searchType)) {
+				// 坐标取所选位置的坐标，搜索半径取5000米
+				String points = reqentity.getPoints();
+				if (StringUtils.isEmpty(points)) {
+					logger.error("按照{}搜索时points参数错误{}", HotelSearchEnum.getById(searchType).getName(), points);
+				}
+				GeoPoint point = this.getPoint(points);
+				if (point != null) {
+					lat = point.getLat();
+					lon = point.getLon();
+					// 指定位置区域搜索的话，搜索半径按照默认5000米
+					distance = SearchConst.SEARCH_RANGE_DEFAULT;
+					logger.info("按照{}搜索，经纬度坐标：[{},{}], 搜索范围:{}米", HotelSearchEnum.getById(searchType).getName(), lon,
+							lat, distance);
+				} else {
+					logger.error("按照{}搜索是没有获取到经纬度, points: {}。", HotelSearchEnum.getById(searchType).getName(), points);
+				}
+			}
+
+			GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
+			geoFilter.point(lat, lon).distance(distance, DistanceUnit.METERS).optimizeBbox("memory")
+					.geoDistance(GeoDistance.ARC);
+			filterBuilders.add(geoFilter);
+
+			FilterBuilder[] builders = new FilterBuilder[] {};
+			BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
+			// make range filter builder
+			List<FilterBuilder> mikePriceBuilders = this.makeMikePriceRangeFilter(reqentity);
+
+			if (mikePriceBuilders.size() > 0) {
+				BoolFilterBuilder mikePriceBoolFilter = FilterBuilders.boolFilter();
+				mikePriceBoolFilter.should(mikePriceBuilders.toArray(builders));
+				boolFilter.must(mikePriceBoolFilter);
+			}
+
+			if (AppUtils.DEBUG_MODE) {
+				logger.info("boolFilter is : \n{}", boolFilter.toString());
+			}
+
+			if (StringUtils.isNotBlank(reqentity.getKeyword()) || StringUtils.isNotBlank(reqentity.getHotelname())
+					|| StringUtils.isNotBlank(reqentity.getHoteladdr())) {
+				reqentity.setRange(SearchConst.SEARCH_RANGE_MAX);
+				logger.info("keyword or hotelname or hoteladdress search, set search range {}",
+						SearchConst.SEARCH_RANGE_MAX);
+			}
 
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery()
 					.must(QueryBuilders.matchQuery("visible", Constant.STR_TRUE))
@@ -692,13 +1116,30 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return roomstateEntity;
 	}
 
+	private Integer parsePromoPrice(Object promoprice) {
+		Integer promopriceInt = 0;
+		if (promoprice == null) {
+			return promopriceInt;
+		}
+
+		if (promoprice instanceof Integer) {
+			promopriceInt = (Integer) promoprice;
+		} else if (promoprice instanceof BigDecimal) {
+			promopriceInt = ((BigDecimal) promoprice).intValue();
+		} else if (promoprice instanceof String) {
+			promopriceInt = Integer.parseInt((String) promoprice);
+		}
+
+		return promopriceInt;
+	}
+
 	private List<Map<String, Object>> updateRoomtypeThemes(List<Map<String, Object>> roomtypes,
 			Map<String, Object> hotel, String startdateday, String enddateday) {
 		List<Map<String, Object>> themedRoomtypes = new ArrayList<>();
 
 		Integer hotelId = Integer.parseInt((String) hotel.get("hotelid"));
 		String hotelname = (String) hotel.get("hotelname");
-		Integer promoprice = (Integer) hotel.get("promoprice");
+		Integer promoprice = parsePromoPrice(hotel.get("promoprice"));
 
 		for (Map<String, Object> roomtype : roomtypes) {
 
@@ -751,7 +1192,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			Integer hotelId = Integer.parseInt((String) hotel.get("hotelid"));
 			String hotelname = (String) hotel.get("hotelname");
-			Integer promoprice = (Integer) hotel.get("promoprice");
+			Integer promoprice = parsePromoPrice(hotel.get("promoprice"));
 
 			if (!hotelRoomTypes.containsKey(hotelId)) {
 				hotelRoomTypes.put(hotelId, new ArrayBlockingQueue<Map<String, Object>>(10));
@@ -1007,9 +1448,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private Map<String, Object> createPromoItem(HotelQuerylistReqEntity params, RoomSaleShowConfigDto showConfig)
 			throws Exception {
 		Map<String, Object> promoItem = new HashMap<String, Object>();
-
+		if (params.getLimit() == null) {
+			params.setLimit(FrontPageEnum.limit.getId());
+		}
 		params.setIspromoonly(Boolean.TRUE);
-		params.setLimit(FrontPageEnum.limit.getId());
+
 		params.setCallentry(null);
 		params.setPromoid(String.valueOf(showConfig.getPromoid()));
 
@@ -1064,11 +1507,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		}
 
 		List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
-		if (hotels != null && hotels.size() >= FrontPageEnum.limit.getId()) {
+		if (hotels != null && hotels.size() >= params.getLimit()) {
 			promoItem.put("hotel", hotels);
-		} else if (hotels != null && hotels.size() < FrontPageEnum.limit.getId()) {
+		} else if (hotels != null && hotels.size() < params.getLimit()) {
 			Map<String, Object> sups = new HashMap<String, Object>();
-			searchAround(sups, params, FrontPageEnum.limit.getId() - hotels.size());
+			searchAround(sups, params, params.getLimit() - hotels.size());
 			List<Map<String, Object>> supplementHotels = (List<Map<String, Object>>) sups.get("supplementhotel");
 			promoItem.put("hotel", new ArrayList<Map<String, Object>>());
 			((List<Map<String, Object>>) promoItem.get("hotel"))
@@ -1086,9 +1529,100 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return promoItem;
 	}
 
+	private Map<String, Object> createTonightPromoItem(HotelQuerylistReqEntity params, RoomSaleShowConfigDto showConfig)
+			throws Exception {
+		Map<String, Object> promoItem = new HashMap<String, Object>();
+		if (params.getLimit() == null) {
+			params.setLimit(FrontPageEnum.recommendLimit.getId());
+		}
+		params.setIspromoonly(Boolean.TRUE);
+
+		params.setCallentry(null);
+		params.setPromoid(String.valueOf(showConfig.getPromoid()));
+
+		Map<String, Object> rtnMap = this.readonlyOtsHotelListFromEsStore(params);
+
+		List<Map<String, Object>> hotels = (List<Map<String, Object>>) rtnMap.get("hotel");
+
+		if (hotels == null) {
+			hotels = new ArrayList<>();
+		}
+
+		Object[] promoHotelArr = hotels.toArray();
+		Arrays.sort(promoHotelArr, this.new userDistanceComparator());
+		hotels.clear();
+
+		for (int i = 0; i < promoHotelArr.length; i++) {
+			if (promoHotelArr[i] instanceof Map) {
+				Map<String, Object> rt = (Map<String, Object>) promoHotelArr[i];
+				hotels.add(rt);
+
+			}
+		}
+
+		promoItem.put("hotel", hotels);
+		promoItem.put("promoicon", showConfig.getPromoicon());
+		promoItem.put("promotext", showConfig.getPromotext());
+		promoItem.put("promonote", showConfig.getPromonote());
+		promoItem.put("promoid", showConfig.getPromoid());
+		promoItem.put("normalid", showConfig.getNormalId());
+
+		return promoItem;
+	}
+
+	private class userDistanceComparator implements Comparator<Object> {
+
+		public int compare(Object obj1, Object obj2) {
+
+			Map<String, Object> hotel1 = (Map<String, Object>) obj1;
+
+			Map<String, Object> hotel2 = (Map<String, Object>) obj2;
+
+			Double userDistance1 = (Double) hotel1.get("userdistance");
+
+			Double userDistance2 = (Double) hotel2.get("userdistance");
+
+			if (userDistance1 > userDistance2) {
+
+				return 1;
+
+			} else if (userDistance1 < userDistance2) {
+
+				return -1;
+
+			} else {
+
+				return 0;
+
+			}
+
+		}
+
+	}
+
 	@Override
-	@SuppressWarnings("unchecked")
 	public List<Map<String, Object>> searchHomePromos(HotelQuerylistReqEntity params) throws Exception {
+
+		List<Map<String, Object>> promolist;
+		try {
+			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
+			showConfig.setIsSpecial("T");
+
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
+			promolist = this.searchHomePromoBase(params, showConfigs, false);
+
+			if (promolist == null) {
+				promolist = new ArrayList<Map<String, Object>>();
+			}
+			return promolist;
+		} catch (Exception e) {
+			throw new Exception("failed to searchHomePromos", e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Map<String, Object>> searchHomePromoBase(HotelQuerylistReqEntity params,
+			List<RoomSaleShowConfigDto> showConfigs, Boolean isNew) throws Exception {
 		// 酒店搜索校验: 开始
 		String validateStr = this.validateSearchHome(params);
 		if (StringUtils.isNotBlank(validateStr)) {
@@ -1099,12 +1633,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		List<Map<String, Object>> promolist = new ArrayList<Map<String, Object>>();
 		try {
-			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
-			showConfig.setIsSpecial("T");
 
-			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
 			for (RoomSaleShowConfigDto showConfigDto : showConfigs) {
-				Map<String, Object> promoItem = createPromoItem(params, showConfigDto);
+				Map<String, Object> promoItem;
+				if (isNew) {
+					promoItem = createTonightPromoItem(params, showConfigDto);
+				} else {
+					promoItem = createPromoItem(params, showConfigDto);
+				}
+
 				if (promoItem != null && promoItem.get("hotel") != null
 						&& ((List<Map<String, Object>>) promoItem.get("hotel")).size() > 0) {
 					promolist.add(promoItem);
@@ -1112,6 +1649,29 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 
 			return promolist;
+		} catch (Exception e) {
+			throw new Exception("failed to searchHomePromos", e);
+		}
+
+	}
+
+	@Override
+	public Map<String, Object> searchHomePromoRecommend(HotelQuerylistReqEntity params) throws Exception {
+		List<Map<String, Object>> promolist;
+		Map<String, Object> promoItem = null;
+		try {
+			RoomSaleShowConfigDto showConfig = new RoomSaleShowConfigDto();
+			showConfig.setIsSpecial("T");
+			showConfig.setPromoid(HotelPromoEnum.Night.getCode());
+			showConfig.setShowArea(ShowAreaEnum.HomePagePromoRecommend.getCode());
+
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
+			promolist = this.searchHomePromoBase(params, showConfigs, true);
+
+			if (promolist != null && promolist.size() > 0) {
+				promoItem = promolist.get(0);
+			}
+			return promoItem;
 		} catch (Exception e) {
 			throw new Exception("failed to searchHomePromos", e);
 		}
@@ -1203,7 +1763,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param points
 	 * @return
 	 */
@@ -1228,7 +1788,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param params
 	 */
 	private void resetSearchPoint(HotelQuerylistReqEntity params) {
@@ -1242,7 +1802,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param params
 	 */
 	private void searchTypeFilter(HotelQuerylistReqEntity params) {
@@ -1286,7 +1846,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 查询指定酒店
-	 * 
+	 *
 	 * @param reqentity
 	 * @return
 	 * @throws Exception
@@ -1470,6 +2030,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return rtnMap;
 	}
 
+	private void resortOneDollar(List<Map<String, Object>> hotels, HotelQuerylistReqEntity reqentity) {
+		String promoid = reqentity.getPromoid();
+
+		if (StringUtils.isNotBlank(promoid) && HotelPromoEnum.OneDollar.getCode().toString().equals(promoid)) {
+			Collections.sort(hotels, new PriceSavingComparator());
+		}
+	}
+
 	private void resortPromo(List<Map<String, Object>> hotels) {
 		List<Map<String, Object>> datasVC = new ArrayList<Map<String, Object>>();
 		List<Map<String, Object>> datasNVC = new ArrayList<Map<String, Object>>();
@@ -1488,7 +2056,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param searchBuilder
 	 * @param boolFilter
 	 * @param mkPriceDateList
@@ -1507,7 +2075,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param searchBuilder
 	 * @param sortType
 	 */
@@ -1538,7 +2106,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 距离排序
-	 * 
+	 *
 	 * @param searchBuilder
 	 * @param geopoint
 	 */
@@ -1549,7 +2117,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 是否推荐排序: 是否签约(升序), 推荐值(降序)
-	 * 
+	 *
 	 * @param searchBuilder
 	 */
 	private void sortByRecommend(SearchRequestBuilder searchBuilder) {
@@ -1558,7 +2126,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 价格排序
-	 * 
+	 *
 	 * @param searchBuilder
 	 */
 	// private void sortByPrice(List<Map<String, Object>> hotels) {
@@ -1583,15 +2151,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	// }
 	/**
 	 * 人气排序（月销量由高到低）
-	 * 
+	 *
 	 * @param searchBuilder
 	 */
 	private void sortByOrders(SearchRequestBuilder searchBuilder) {
-		searchBuilder.addSort("ordernummon", SortOrder.DESC);
+		searchBuilder.addSort("greetscore", SortOrder.DESC);
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 * @throws Exception
 	 */
@@ -1617,16 +2185,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		boolean isBefore = LocalDateTime.now().isBefore(promoEndTime);
 
 		return isAfter && isBefore;
-	}
-
-	/**
-	 * 
-	 * @param searchBuilder
-	 */
-	private void sortByPromo(SearchRequestBuilder searchBuilder, String version) {
-		if (StringUtils.isNotEmpty(version) && ("3.1".compareTo(version) <= 0)) {
-			searchBuilder.addSort("isonpromo", SortOrder.DESC);
-		}
 	}
 
 	/**
@@ -1685,7 +2243,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 
 			result.put("$sortScore", hit.getScore());
-			result.put("promoprice", 0);
 
 			Map<String, Object> pin = (Map<String, Object>) result.get("pin");
 			// hotel latitude and longitude
@@ -1754,6 +2311,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			logger.info("查询酒店: {}眯客价耗时: {}ms.", es_hotelid, times);
 			BigDecimal minPrice = new BigDecimal(prices[0]);
 			result.put("minprice", minPrice);
+			result.put("promoprice", minPrice);
 
 			Long maxPrice = roomstateService.findHotelMaxPrice(Long.parseLong(es_hotelid));
 			result.put("minpmsprice", new BigDecimal(maxPrice));
@@ -1911,11 +2469,22 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 					newHotel.put("roomtype", singleRoomType);
 
-					updateHotelPicWithRoomtype(roomtype, newHotel);
+					try {
+						updateHotelPicWithRoomtype(roomtype, newHotel);
+					} catch (Exception ex) {
+						logger.warn(String.format("failed to updateHotelPicWithRoomtype with hotelid:%s; roomtype:%s",
+								hotelId, roomtype != null ? roomtype.get("roomtypeid") : ""), ex);
+					}
 
 					hotelIds.add(newHotel);
 				}
 			}
+		}
+
+		if (HotelSortEnum.DISTANCE.getId().equals(reqEntity.getOrderby())) {
+			Collections.sort(hotelIds, new userDistanceComparator());
+		} else if (HotelSortEnum.ORDERNUMS.getId().equals(reqEntity.getOrderby())) {
+			Collections.sort(hotelIds, new GreetscoreComparator());
 		}
 
 		return hotelIds;
@@ -1937,10 +2506,22 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		hotel.put("hotelpic", newHotelPics);
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		List<Object> roomtypeList = (List<Object>) objectMapper.readValue(picsJson, List.class);
+		List<Object> roomtypePicList = null;
 
-		if (roomtypeList != null && roomtypeList.size() > 0) {
-			Map<String, Object> roomtypePic = (Map<String, Object>) roomtypeList.get(0);
+		try {
+
+			roomtypePicList = (List<Object>) objectMapper.readValue(picsJson, List.class);
+
+		} catch (Exception ex) {
+
+			throw new Exception(String.format("failed to parse roomtypepic %s", picsJson), ex);
+
+		}
+
+		if (roomtypePicList != null && roomtypePicList.size() > 0) {
+			roomtype.put("roomtypepic", roomtypePicList);
+
+			Map<String, Object> roomtypePic = (Map<String, Object>) roomtypePicList.get(0);
 
 			if (newHotelPics != null && newHotelPics.size() > 0) {
 				newHotelPics.set(0, roomtypePic);
@@ -1971,7 +2552,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 酒店综合查询返回酒店列表数据
-	 * 
+	 *
 	 * @param reqentity
 	 *            参数: 酒店搜索入参Bean对象
 	 * @return
@@ -1980,6 +2561,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	private Map<String, Object> readonlyOtsHotelListFromEsStore(HotelQuerylistReqEntity reqentity) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		try {
+			String callVersion = reqentity.getCallversion() == null ? "" : reqentity.getCallversion().trim();
+
+			String promoidStr = reqentity.getPromoid();
+
+			Integer promoid = null;
+
+			if (StringUtils.isNotBlank(promoidStr)) {
+
+				promoid = Integer.valueOf(promoidStr);
+
+			}
 
 			List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
 			List<FilterBuilder> keywordBuilders = new ArrayList<FilterBuilder>();
@@ -2196,7 +2788,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				/**
 				 * added in mike3.1, lift up promo as the top search variable
 				 */
-				sortByPromo(searchBuilder, reqentity.getCallversion());
+				// sortByPromo(searchBuilder, reqentity.getCallversion());
 
 				if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
 					// 距离排序
@@ -2262,8 +2854,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				double hotelLongitude = Double.valueOf(String.valueOf(pin.get("lon")));
 				double hotelLatitude = Double.valueOf(String.valueOf(pin.get("lat")));
 				double hotelDistance = DistanceUtil.distance(lon, lat, hotelLongitude, hotelLatitude); // 根据屏幕经纬度
-																										// yub
-																										// 20150724
+				// yub
+				// 20150724
 				result.put("distance", hotelDistance);
 
 				// 眯客3.0增加userdistance属性：用户坐标与酒店坐标的距离
@@ -2440,6 +3032,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					if (minPrice.compareTo(minPromoPrice) > 0) {
 						minPrice = minPromoPrice;
 					}
+					if (promoid == HotelPromoEnum.Night.getCode() && result.get("mintonitepromoprice") != null) {
+
+						result.put("promoprice", result.get("mintonitepromoprice"));
+
+					} else {
+
+						result.put("promoprice", tempMinPromoPrice);
+
+					}
 				}
 				result.put("minprice", minPrice);
 
@@ -2457,7 +3058,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				if (promoType != null) {
 					List<Map<String, Integer>> promoList = (List<Map<String, Integer>>) result.get("promoinfo");
-					if (promoList != null) {
+					if (promoList != null && "3.3".compareTo(callVersion) > 0) {
 						for (Map<String, Integer> promoinfo : promoList) {
 							Integer hotelPromoType = promoinfo.get("promotype");
 							Integer hotelpromoId = promoinfo.get("promoid");
@@ -2511,9 +3112,22 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				Integer avlblroomnum = hotelService.getAvlblRoomNum(p_hotelid, p_isnewpms, p_visible, p_online,
 						reqentity.getStartdateday(), reqentity.getEnddateday());
+				Integer vacants;
 
-				Integer vacants = hotelService.calPromoVacants(promoType, p_hotelid, reqentity.getStartdateday(),
-						reqentity.getEnddateday(), p_isnewpms);
+				if ("3.3.0".compareTo(callVersion) > 0 || promoid == null) {
+
+					vacants = hotelService.calPromoVacants(promoType, p_hotelid, reqentity.getStartdateday(),
+
+							reqentity.getEnddateday(), p_isnewpms);
+
+				} else {
+
+					vacants = hotelService.calNewPromoVacants(promoid, p_hotelid, reqentity.getStartdateday(),
+
+							reqentity.getEnddateday(), p_isnewpms);
+
+				}
+
 				result.put("roomvacancy", vacants);
 
 				endTime = new Date().getTime();
@@ -2615,12 +3229,16 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 
 			// 重新按照是否可售分组排序
-			this.sortByVcState(hotels);
+			if (reqentity.getOrderby() == null || reqentity.getOrderby() == 0
+					|| HotelSortEnum.SCORE.getId() == reqentity.getOrderby()) {
+				this.sortByVcState(hotels);
+				/**
+				 * adjust the order by suppress all no vacancy hotels
+				 */
+				this.resortPromo(hotels);
+			}
 
-			/**
-			 * adjust the order by suppress all no vacancy hotels
-			 */
-			this.resortPromo(hotels);
+			resortOneDollar(hotels, reqentity);
 
 			rtnMap.put("supplementhotel", new ArrayList<Map<String, Object>>());
 			/**
@@ -2697,7 +3315,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * search hotels by around when supplement is required
-	 * 
+	 *
 	 * @param hotels
 	 * @param params
 	 * @param hotelAroundCounter
@@ -2731,7 +3349,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * make es term filter
-	 * 
+	 *
 	 * @param reqentity
 	 * @param filterBuilder
 	 * @return
@@ -2757,7 +3375,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param reqentity
 	 * @return
 	 */
@@ -2777,7 +3395,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param reqentity
 	 * @return
 	 */
@@ -2798,7 +3416,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param reqentity
 	 * @return
 	 */
@@ -2813,28 +3431,16 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (StringUtils.isNotBlank(reqentity.getMaxprice())) {
 				maxpriceParam = Double.valueOf(reqentity.getMaxprice());
 			}
-
-			// hotel.getStartdateday(), hotel.getEnddateday() yyyyMMdd
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-			Date startDate = sdf.parse(reqentity.getStartdateday());
-			Date endDate = sdf.parse(reqentity.getEnddateday());
-			Calendar startDateCal = Calendar.getInstance();
-			startDateCal.setTime(startDate);
-			Calendar endDateCal = Calendar.getInstance();
-			endDateCal.setTime(endDate);
-			while (startDateCal.compareTo(endDateCal) <= 0) {
-				mikePriceBuilders.add(
-						FilterBuilders.rangeFilter(SearchConst.MIKE_PRICE_PROP + sdf.format(startDateCal.getTime()))
-								.gte(Double.valueOf(minpriceParam)).lte(Double.valueOf(maxpriceParam)));
-				startDateCal.add(Calendar.DATE, 1);
-			}
+			mikePriceBuilders.add(
+					FilterBuilders.rangeFilter("mintonitepromoprice")
+							.gte(Double.valueOf(minpriceParam)).lte(Double.valueOf(maxpriceParam)));
 		}
 		return mikePriceBuilders;
 	}
 
 	/**
 	 * 按行政区搜索
-	 * 
+	 *
 	 * @param reqentity
 	 * @return
 	 */
@@ -2858,7 +3464,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 按行政区搜索
-	 * 
+	 *
 	 * @param reqentity
 	 * @return
 	 */
@@ -2880,7 +3486,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 按指定床型搜搜
-	 * 
+	 *
 	 * @param reqentity
 	 * @param filterBuilders
 	 */
@@ -2898,8 +3504,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * added in mike3.1, promo filter will be added in version 3.1
-	 * 
-	 * 
+	 *
+	 *
 	 * @param reqentity
 	 * @param filterBuilders
 	 */
@@ -2947,7 +3553,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 		}
 
-		if (StringUtils.isNotBlank(promoId)) {
+		if (StringUtils.isNotBlank(promoId) && !HotelPromoEnum.SAVING.getCode().toString().equals(promoId)) {
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promoid", promoId)));
 		} else if (StringUtils.isNotBlank(promoType)) {
 			filterBuilders.add(FilterBuilders.queryFilter(QueryBuilders.matchQuery("promoinfo.promotype", promoType)));
@@ -2955,7 +3561,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param startdateday
 	 * @param enddateday
 	 * @return
@@ -2988,7 +3594,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 最近预订时间查询
-	 * 
+	 *
 	 * @param createTime
 	 *            yyyyMMddHHmmss
 	 * @return
@@ -3019,7 +3625,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	/**
 	 * 转换酒店数据
-	 * 
+	 *
 	 * @param data
 	 *            参数：es酒店信息
 	 * @param reqentity
@@ -3348,7 +3954,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param eshotel
 	 * @return
 	 */
@@ -3386,7 +3992,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param roomtypeItem
 	 * @param reqentity
 	 * @return
@@ -3446,7 +4052,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param roomtypeItem
 	 * @return
 	 */
@@ -3468,166 +4074,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return roomtypefacilist;
 	}
 
-	/*
-	 * 模糊查询位置区域
-	 * 
-	 * @param citycode
-	 * 
-	 * @param keyword
-	 */
-	@Override
-	public Map<String, Object> readonlyPositionsFuzzy(String citycode, String keyword) {
-		SearchRequestBuilder searchBuilder = esProxy.prepareSearch(esProxy.OTS_INDEX_DEFAULT,
-				esProxy.POSITION_TYPE_DEFAULT);
-		List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
-		QueryFilterBuilder citycodeFilter = FilterBuilders.queryFilter(QueryBuilders.termQuery("citycode", citycode));
-		filterBuilders.add(citycodeFilter);
-		QueryFilterBuilder keywordFilter = FilterBuilders.queryFilter(
-				QueryBuilders.multiMatchQuery(keyword, "name", "stations.stationname").operator(Operator.AND));
-		filterBuilders.add(keywordFilter);
-
-		FilterBuilder[] builders = new FilterBuilder[] {};
-		BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
-		searchBuilder.setFrom(0).setSize(10000).setExplain(true);// ES默认10条记录，设置10000，能返回citycode下所有。
-		searchBuilder.setPostFilter(boolFilter);
-		searchBuilder.addSort("ptype", SortOrder.ASC);
-		SearchResponse searchResponse = searchBuilder.execute().actionGet();
-		SearchHits searchHits = searchResponse.getHits();
-		long totalHits = searchResponse.getHits().totalHits();
-		logger.info("search positions by citycode:{}, success: total {} found.", citycode, totalHits);
-		SearchHit[] hits = searchHits.getHits();
-		List<SearchPositionsCoordinateRespEntity> datas = Lists.newArrayList();
-		for (int i = 0; i < hits.length; i++) {
-			SearchHit hit = hits[i];
-			Map<String, Object> result = hit.getSource();
-			if (HotelSearchEnum.SUBWAY.getId().equals(Integer.valueOf(String.valueOf(result.get("ptype"))))) {
-				// 地铁线路
-				String linename = String.valueOf(result.get("name"));
-				List<Map<String, Object>> stations = Lists.newArrayList();
-				if (result.containsKey("stations")) {
-					stations = (List<Map<String, Object>>) result.get("stations");
-					for (Map<String, Object> station : stations) {
-						String staname = String.valueOf(station.get("stationname"));
-						if (staname.indexOf(keyword) > -1) {
-							SearchPositionsCoordinateRespEntity ds = new SearchPositionsCoordinateRespEntity();
-							ds.setId(Long.valueOf(String.valueOf(result.get("id"))));
-							ds.setName(linename + staname);
-							ds.setType(String.valueOf(HotelSearchEnum.SUBWAY.getId()));
-							ds.setTname(HotelSearchEnum.SUBWAY.getName());
-							if (station.get("lat") == null || station.get("lng") == null) {
-								ds.setCoordinates("[[]]");
-							} else {
-								Double lat = Double.valueOf(String.valueOf(station.get("lat")));
-								Double lng = Double.valueOf(String.valueOf(station.get("lng")));
-								ds.setCoordinates("[[" + lng + "," + lat + "]]");
-							}
-							//
-							datas.add(ds);
-						}
-					}
-				}
-			} else {
-				// 非地铁线路
-				SearchPositionsCoordinateRespEntity ds = new SearchPositionsCoordinateRespEntity();
-				ds.setId(Long.valueOf(result.get("id").toString()));
-				ds.setName(result.get("name").toString());
-				String typeID = result.get("ptype").toString();
-				ds.setType(typeID);
-				int tid = Integer.parseInt(typeID);
-				ds.setTname(PositionTypeEnum.getById(tid).getTypeName());
-				if (result.get("lat") == null || result.get("lng") == null) {
-					ds.setCoordinates("[[]]");
-				} else {
-					Double lat = Double.valueOf(String.valueOf(result.get("lat")));
-					Double lng = Double.valueOf(String.valueOf(result.get("lng")));
-					ds.setCoordinates("[[" + lng + "," + lat + "]]");
-				}
-				//
-				datas.add(ds);
-			}
-		}
-		List<SearchPositionsCoordinateRespEntity> hotelList = this.readonlyHotelListFromES(citycode, keyword);
-		datas.addAll(hotelList);
-		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		rtnMap.put("datas", datas);
-		rtnMap.put("count", datas.size());
-		return rtnMap;
-	}
-
 	/**
-	 * 从ES中读取位置信息
-	 * 
-	 * @param citycode
-	 * @param ptype
-	 * @return
-	 */
-	public List<SearchPositionsCoordinateRespEntity> readonlyPositionsFromES(String citycode, String ptype) {
-		SearchRequestBuilder searchBuilder = esProxy.prepareSearch(esProxy.OTS_INDEX_DEFAULT,
-				esProxy.POSITION_TYPE_DEFAULT);
-		searchBuilder.setQuery(QueryBuilders.matchQuery("citycode", citycode));
-		if (StringUtils.isNotBlank(ptype)) {
-			searchBuilder.setQuery(QueryBuilders.matchQuery("ptype", ptype));
-		}
-		searchBuilder.addSort("ptype", SortOrder.ASC).addSort("id", SortOrder.ASC);
-		searchBuilder.setFrom(0).setSize(10000).setExplain(true);// ES默认10条记录，设置10000，能返回citycode下所有。
-		SearchResponse searchResponse = searchBuilder.execute().actionGet();
-		SearchHits searchHits = searchResponse.getHits();
-		long totalHits = searchResponse.getHits().totalHits();
-		logger.info("search positions by citycode:{}, success: total {} found.", citycode, totalHits);
-		SearchHit[] hits = searchHits.getHits();
-		List<SearchPositionsCoordinateRespEntity> datas = Lists.newArrayList();
-		for (int i = 0; i < hits.length; i++) {
-			SearchHit hit = hits[i];
-			Map<String, Object> result = hit.getSource();
-			SearchPositionsCoordinateRespEntity ds = new SearchPositionsCoordinateRespEntity();
-			ds.setId(Long.valueOf(result.get("id").toString()));
-			ds.setName(result.get("name").toString());
-			String typeid = result.get("ptype").toString();
-			ds.setType(typeid);
-			int tid = Integer.parseInt(typeid);
-			ds.setTname(PositionTypeEnum.getById(tid).getTypeName());
-			if (result.get("lat") == null || result.get("lng") == null) {
-				ds.setCoordinates("[[]]");
-			} else {
-				Double lat = (double) result.get("lat");
-				Double lng = (double) result.get("lng");
-				ds.setCoordinates("[[" + lng + "," + lat + "]]");
-			}
-			if (tid == PositionTypeEnum.METRO.getId()) {
-				List stResult = new ArrayList();
-				List stations = (List) result.get("stations");
-				for (int j = 0; j < stations.size(); j++) {
-					Map<String, Object> cm = (Map) stations.get(j);
-					Child dsc = ds.new Child();
-					dsc.setId(Long.parseLong(cm.get("id").toString()));
-					dsc.setPid(Long.parseLong(cm.get("lineid").toString()));
-					dsc.setCid(Long.parseLong(cm.get("stationid").toString()));
-					dsc.setcName(cm.get("stationname").toString());
-					if (cm.get("lat") == null || cm.get("lng") == null) {
-						dsc.setcCoordinates("[[]]");
-					} else {
-						Double lat = (double) cm.get("lat");
-						Double lng = (double) cm.get("lng");
-						dsc.setcCoordinates("[[" + lng + "," + lat + "]]");
-					}
-					stResult.add(dsc);
-				}
-				// 地铁站排序
-				Collections.sort(stResult, new Comparator<Child>() {
-					@Override
-					public int compare(Child b1, Child b2) {
-						return b1.getCid().compareTo(b2.getCid());
-					}
-				});
-				ds.setChild(stResult);
-			}
-			datas.add(ds);
-		}
-		return datas;
-	}
-
-	/**
-	 * 
+	 *
 	 * @param citycode
 	 * @param keyword
 	 * @return
@@ -3682,327 +4130,116 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return datas;
 	}
 
-	/**
-	 * 同步城市位置区域数据到es。
-	 * 
-	 * @param citycode
-	 *            参数：城市编码
-	 * @param typeid
-	 *            参数：数据分类id
-	 * @param forceUpdate
-	 *            参数：是否强制更新
-	 */
-	@Override
-	public Map<String, Object> readonlySyncCityPOI(String citycode, String typeid, boolean forceUpdate) {
-		Map<String, Object> data = Maps.newHashMap();
+	private Long findRoomtypeMonthlySale(Map<String, Object> roomtype) {
+		Long roomtypeid = (Long) roomtype.get("roomtypeid");
+		Map<String, Object> greetParameter = new HashMap<String, Object>();
+		greetParameter.put("roomtypeid", roomtypeid);
+
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMdd000000");
+		Calendar beforeCalendar = Calendar.getInstance();
+		beforeCalendar.add(Calendar.DATE, -30);
+		String beforetime = sdf1.format(beforeCalendar.getTime());
+		Calendar yesterCalendar = Calendar.getInstance();
+		yesterCalendar.add(Calendar.DATE, -1);
+		String yestertime = sdf1.format(yesterCalendar.getTime());
+
+		greetParameter.put("beforetime", beforetime);
+		greetParameter.put("yestertime", yestertime);
+
+		Long greetscore = 0L;
+
 		try {
-			Map<String, Object> result = Maps.newHashMap();
-			List<Map<String, Object>> messages = Lists.newArrayList();
-			// 行政区
-			result = Maps.newHashMap();
-			result.putAll(this.readonlySyncCityAreas(citycode, forceUpdate));
-			messages.add(result);
-
-			// 地标
-			result = Maps.newHashMap();
-			result.putAll(this.readonlySyncCityLandmarks(citycode, forceUpdate));
-			messages.add(result);
-
-			// 地铁线路
-			result = Maps.newHashMap();
-			result.putAll(this.readonlySyncCitySubways(citycode, forceUpdate));
-			messages.add(result);
-
-			//
-			data.put(ServiceOutput.STR_MSG_SUCCESS, true);
-			data.put("message", messages);
-		} catch (Exception e) {
-			data.put(ServiceOutput.STR_MSG_SUCCESS, false);
-			data.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			data.put(ServiceOutput.STR_MSG_ERRMSG, e.getLocalizedMessage());
+			List<Map<String, Object>> greetScores = roomsaleShowMapper.queryRoomtypeGreetScore(greetParameter);
+			if (greetScores != null && greetScores.size() > 0) {
+				greetscore = (Long) greetScores.get(0).get("greetscore");
+			}
+		} catch (Exception ex) {
+			logger.warn(String.format("failed to queryRoomtypeGreetScore with roomtypeid:%s", roomtypeid), ex);
 		}
-		return data;
+
+		return greetscore;
 	}
 
-	/**
-	 * 添加es行政区文档数据
-	 * 
-	 * @param citycode
-	 *            参数：城市编码
-	 * @return
-	 */
-	private Map<String, Object> addAreaDocs(String citycode) {
-		Map<String, Object> result = Maps.newHashMap();
-		try {
-			List<SAreaInfo> areainfos = sareaInfoMapper.findAll(citycode);
-			if (areainfos == null || areainfos.size() == 0) {
-				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
-				result.put("message", "未找到城市：" + citycode + "的行政区数据。");
-				return result;
-			}
-			Collection<Object> esdatas = new ArrayList<Object>();
-			for (SAreaInfo areainfo : areainfos) {
-				Map<String, Object> data = Maps.newHashMap();
-				data.put("id", areainfo.getId());
-				data.put("areaid", areainfo.getAreaid());
-				data.put("name", areainfo.getAreaname());
-				data.put("pinyin", areainfo.getPinyin());
-				data.put("lat", areainfo.getLat());
-				data.put("lng", areainfo.getLng());
-				data.put("ptype", areainfo.getLtype());
-				data.put("citycode", areainfo.getCitycode());
-				data.put("discode", areainfo.getDiscode());
-				data.put("status", areainfo.getStatus());
-				esdatas.add(data);
-			}
-			if (esdatas.size() > 0) {
-				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
-						esdatas);
-				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
-				result.put("message", "城市: " + citycode + "添加" + esdatas.size() + "条行政区。");
-			}
-		} catch (Exception e) {
-			result.put(ServiceOutput.STR_MSG_SUCCESS, false);
-			result.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			result.put(ServiceOutput.STR_MSG_ERRMSG,
-					"citycode: " + citycode + ", addAreaDocs:: method error: " + e.getLocalizedMessage());
-			logger.error("citycode: {}, addAreaDocs:: method error: {}", citycode, e.getLocalizedMessage());
+	public List<Map<String, Object>> queryThemeRoomtypes(Map<String, Object> hotel) throws Exception {
+		String hotelid = (String) hotel.get("hotelid");
+
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("about to queryThemeRoomtypes for hotelid:%s", hotelid));
 		}
-		return result;
+
+		List<Map<String, Object>> roomtypes = readonlyRoomtypeList(hotel, null);
+		List<Map<String, Object>> themeRoomtypes = new ArrayList<Map<String, Object>>();
+		for (Map<String, Object> roomtype : roomtypes) {
+			if (isThemed(Integer.parseInt(hotelid), roomtype)) {
+				Long greetScore = findRoomtypeMonthlySale(roomtype);
+				roomtype.put("greetscore", greetScore);
+				themeRoomtypes.add(roomtype);
+			}
+		}
+
+		Collections.sort(themeRoomtypes, new GreetscoreComparator());
+
+		return themeRoomtypes;
 	}
 
-	/**
-	 * 同步城市行政区数据到es。
-	 * 
-	 * @param citycode
-	 *            参数：城市编码
-	 * @param forceUpdate
-	 *            参数：是否强制更新
-	 */
-	private Map<String, Object> readonlySyncCityAreas(String citycode, boolean forceUpdate) {
-		Map<String, Object> result = Maps.newHashMap();
-		try {
-			// 先删除行政区数据，然后再添加
-			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AREA.getId()));
-			if (Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
-				// 删除成功后添加行政区数据
-				result.clear();
-				result.putAll(this.addAreaDocs(citycode));
+	private class PriceSavingComparator implements Comparator<Map<String, Object>> {
+		@Override
+		public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+			if (o1 == null) {
+				return 1;
+			} else if (o2 == null) {
+				return -1;
+			}
+
+			BigDecimal minpmsprice1 = (BigDecimal) o1.get("minpmsprice");
+
+			BigDecimal minpmsprice2 = (BigDecimal) o2.get("minpmsprice");
+
+			if (minpmsprice1 == null) {
+				return 1;
+			} else if (minpmsprice2 == null) {
+				return -1;
+			}
+
+			return minpmsprice2.compareTo(minpmsprice1);
+		}
+	}
+
+	private class GreetscoreComparator implements Comparator<Map<String, Object>> {
+		@Override
+		public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+			if (o1 == null) {
+				return 1;
+			} else if (o2 == null) {
+				return -1;
+			}
+
+			Long greetscore1 = 0L;
+			Long greetscore2 = 0L;
+
+			try {
+				greetscore1 = (Long) o1.get("greetscore");
+				greetscore2 = (Long) o2.get("greetscore");
+			} catch (Exception ex) {
+				logger.warn("invalid greetcore type...", ex);
+				return -1;
+			}
+
+			if (greetscore1 != null && greetscore2 != null) {
+				if (greetscore1 > greetscore2) {
+					return -1;
+				} else if (greetscore1 == greetscore2) {
+					return 0;
+				} else {
+					return 1;
+				}
+			} else if (greetscore1 == null) {
+				return 1;
+			} else if (greetscore2 == null) {
+				return -1;
 			} else {
-				logger.info("删除城市:{}行政区数据失败.", citycode);
-				result.put(ServiceOutput.STR_MSG_SUCCESS, false);
-				result.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-				result.put(ServiceOutput.STR_MSG_ERRMSG, "删除城市:" + citycode + "行政区数据失败.");
+				return 1;
 			}
-			//
-		} catch (Exception e) {
-			result.put(ServiceOutput.STR_MSG_SUCCESS, false);
-			result.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			result.put(ServiceOutput.STR_MSG_ERRMSG, e.getLocalizedMessage());
-			logger.error("readonlySyncCityAreas:: error: {}", e.getLocalizedMessage());
 		}
-		return result;
 	}
-
-	/**
-	 * 添加es地标文档数据
-	 * 
-	 * @param citycode
-	 *            参数：城市编码
-	 * @return
-	 */
-	private Map<String, Object> addLandmarkDocs(String citycode) {
-		Map<String, Object> result = Maps.newHashMap();
-		try {
-			List<SLandMark> landmarks = slandMarkMapper.findAll(citycode);
-			if (landmarks == null || landmarks.size() == 0) {
-				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
-				result.put("message", "未找到城市：" + citycode + "的地标数据。");
-				return result;
-			}
-			Collection<Object> esdatas = new ArrayList<Object>();
-			for (SLandMark landmark : landmarks) {
-				Map<String, Object> data = Maps.newHashMap();
-				data.put("id", landmark.getId());
-				data.put("areaid", landmark.getLandmarkid());
-				data.put("name", landmark.getLandmarkname());
-				data.put("pinyin", landmark.getPinyin());
-				data.put("lat", landmark.getLat());
-				data.put("lng", landmark.getLng());
-				data.put("ptype", landmark.getLtype());
-				data.put("citycode", landmark.getCitycode());
-				data.put("discode", landmark.getDiscode());
-				data.put("status", landmark.getStatus());
-				esdatas.add(data);
-			}
-			if (esdatas.size() > 0) {
-				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
-						esdatas);
-				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
-				result.put("message", "城市: " + citycode + "添加" + esdatas.size() + "条地标。");
-			}
-		} catch (Exception e) {
-			result.put(ServiceOutput.STR_MSG_SUCCESS, false);
-			result.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			result.put(ServiceOutput.STR_MSG_ERRMSG,
-					"citycode: " + citycode + ", addLandmarkDocs:: method error: " + e.getLocalizedMessage());
-			logger.error("citycode: {}, addLandmarkDocs:: method error: {}", citycode, e.getLocalizedMessage());
-		}
-		return result;
-	}
-
-	/**
-	 * 
-	 * @param citycode
-	 * @param forceUpdate
-	 * @return
-	 */
-	private Map<String, Object> readonlySyncCityLandmarks(String citycode, boolean forceUpdate) {
-		Map<String, Object> result = Maps.newHashMap();
-		List<String> errors = Lists.newArrayList();
-		try {
-			// 先删除landmark数据，然后再添加
-			// 删除1商圈
-			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.BZONE.getId()));
-			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
-				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
-			}
-
-			// 删除2机场车站
-			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AIRPORT.getId()));
-			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
-				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
-			}
-
-			// 删除5景点
-			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SAREA.getId()));
-			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
-				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
-			}
-
-			// 删除6医院
-			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.HOSPITAL.getId()));
-			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
-				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
-			}
-
-			// 删除7高校
-			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.COLLEGE.getId()));
-			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
-				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
-			}
-
-			if (errors.size() == 0) {
-				result.clear();
-				result.putAll(this.addLandmarkDocs(citycode));
-			} else {
-				result.clear();
-				result.put(ServiceOutput.STR_MSG_SUCCESS, false);
-				result.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-				result.put(ServiceOutput.STR_MSG_ERRMSG, "同步城市: " + citycode + "地标数据出错.");
-				result.put("message", errors);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put(ServiceOutput.STR_MSG_SUCCESS, false);
-			result.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			result.put(ServiceOutput.STR_MSG_ERRMSG,
-					"citycode: " + citycode + ", readonlySyncCityLandmarks:: method error: " + e.getLocalizedMessage());
-			logger.error("citycode: {}, readonlySyncCityLandmarks:: method error: {}", citycode,
-					e.getLocalizedMessage());
-		}
-		return result;
-	}
-
-	/**
-	 * 
-	 * @param citycode
-	 * @param forceUpdate
-	 * @return
-	 */
-	private Map<String, Object> addSubwayDocs(String citycode) {
-		Map<String, Object> result = Maps.newHashMap();
-		try {
-			List<SSubway> subways = subwayMapper.findAll(citycode);
-			if (subways == null || subways.size() == 0) {
-				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
-				result.put("message", "未找到城市：" + citycode + "的地铁线路数据。");
-				return result;
-			}
-			Collection<Object> esdatas = new ArrayList<Object>();
-			for (SSubway subway : subways) {
-				Map<String, Object> data = Maps.newHashMap();
-				data.put("id", subway.getId());
-				data.put("areaid", subway.getLineid());
-				data.put("name", subway.getLinename());
-				data.put("pinyin", "");
-				data.put("ptype", subway.getLtype());
-				data.put("citycode", subway.getCitycode());
-				data.put("discode", "");
-				data.put("status", subway.getStatus());
-
-				// 查询地铁站点
-				String lineid = subway.getLineid() == null ? "" : String.valueOf(subway.getLineid());
-				List<SSubwayStation> stations = subwayStationMapper.findStations(citycode, lineid);
-				data.put("stations", stations);
-
-				//
-				esdatas.add(data);
-			}
-			if (esdatas.size() > 0) {
-				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
-						esdatas);
-				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
-				result.put("message", "城市: " + citycode + "添加" + esdatas.size() + "条地铁线路。");
-			}
-		} catch (Exception e) {
-			result.put(ServiceOutput.STR_MSG_SUCCESS, false);
-			result.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			result.put(ServiceOutput.STR_MSG_ERRMSG,
-					"citycode: " + citycode + ", addAreaDocs:: method error: " + e.getLocalizedMessage());
-			logger.error("citycode: {}, addAreaDocs:: method error: {}", citycode, e.getLocalizedMessage());
-		}
-		return result;
-	}
-
-	/**
-	 * 同步城市地铁线路数据到es。
-	 * 
-	 * @param citycode
-	 *            参数：城市编码
-	 * @param forceUpdate
-	 *            参数：是否强制更新
-	 */
-	private Map<String, Object> readonlySyncCitySubways(String citycode, boolean forceUpdate) {
-		Map<String, Object> result = Maps.newHashMap();
-		try {
-			// 先删除地铁线路数据，然后再添加
-			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SUBWAY.getId()));
-			if (Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
-				// 删除成功后添加地铁线路数据
-				result.clear();
-				result.putAll(this.addSubwayDocs(citycode));
-			} else {
-				logger.info("删除城市:{}地铁线路数据失败.", citycode);
-				result.put(ServiceOutput.STR_MSG_SUCCESS, false);
-				result.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-				result.put(ServiceOutput.STR_MSG_ERRMSG, "删除城市:" + citycode + "地铁线路数据失败.");
-			}
-			//
-		} catch (Exception e) {
-			result.put(ServiceOutput.STR_MSG_SUCCESS, false);
-			result.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			result.put(ServiceOutput.STR_MSG_ERRMSG, e.getLocalizedMessage());
-			logger.error("readonlySyncCitySubways:: error: {}", e.getLocalizedMessage());
-		}
-		return result;
-	}
-
 }

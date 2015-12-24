@@ -68,11 +68,11 @@ public interface IMessageService {
 	 * 修改阅读状态
 	 *
 	 * @param mid        会员不id
-	 * @param ids        键列表
+	 * @param msgid        键列表
 	 * @param readstatus 状态
 	 * @return 成功与否
 	 */
-	boolean modifyAlreadyRead(Long mid, List<Long> ids, String readstatus);
+	boolean modifyAlreadyRead(Long mid, String msgid, String readstatus);
 
 	/**
 	 * 修改所有消息状态

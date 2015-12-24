@@ -278,17 +278,19 @@ public class PmsUtilController {
 	@RequestMapping(value = "/test12", method = RequestMethod.POST)
 	public ResponseEntity<Map<String, String>> test12() {
 		
-		String s = "[{\"leavetime\":\"20151109120000\",\"status\":\"OK\",\"totlepayment\":0,\"ordertype\":\"R\",\"type\":\"2\",\"totlecost\":0,\"arrivetime\":\"20151108180000\",\"checkintime\":\"20151108150244\",\"checkouttime\":\"\",\"roomno\":\"2t77WiH518S9zCbw9qwJLm\",\"roomtypeid\":\"140ZWr1FF0QaHeHInxQEmtm\",\"day\":[{\"roomid\":\"2t77WiH518S9zCbw9qwJLm\",\"time\":\"20151108\",\"price\":120}],\"orderid\":\"0lTB4C8A0FbdGZs9gHZsGl7\",\"customeno\":\"3z0tNETlxb3GDS1Ch5Qdi2E\",\"customerno\":\"3yBrU0nsVbWqRT9f7ANcmT\",\"otacustomno\":\"\",\"user\":[{\"idtype\":\"13\",\"name\":\"老张\",\"idno\":\"222222222\"}]}]";
+		String s = "[{\"leavetime\":\"20150709120000\",\"status\":\"IN\",\"totlepayment\":0,\"ordertype\":\"R\",\"type\":\"2\",\"totlecost\":0,\"arrivetime\":\"20150708180000\",\"checkintime\":\"20150708150244\",\"checkouttime\":\"\",\"roomno\":\"1Uiiz8cYRa1UyeXDDOMjmH\",\"roomtypeid\":\"11Vi7dd8mdbOU88hdbH01IPD\",\"day\":[{\"roomid\":\"1Uiiz8cYRa1UyeXDDOMjmH\",\"time\":\"20150708\",\"price\":120}],\"orderid\":\"0lTB4C8A0FbdGZs9gHZsGl7\",\"customeno\":\"K1001150605001\",\"otacustomno\":\"\",\"user\":[{\"idtype\":\"13\",\"name\":\"老张\",\"idno\":\"222222222\"}]}]";
 		JSONArray js = JSONArray.parseArray(s);
 		JSONObject param = new JSONObject();
+		param.put("hotelid", 1461L);
 		param.put("customerno", js);
-		param.put("hotelid", 2645L);
 		
 		newPmsOrderService.saveCustomerNo(param);
 
 		Map<String, String> orderMap = new HashMap<>();
 		return new ResponseEntity<Map<String, String>>(orderMap, HttpStatus.OK);
 	}
+	
+	
 	
 	@RequestMapping(value = "/loadallms", method = RequestMethod.POST)
 	public ResponseEntity<ServiceOutput> getMonthlySales(String token) {
@@ -300,7 +302,7 @@ public class PmsUtilController {
 		logger.info("LoadMonthlySalesJob::start");
 		try {
 			Long res = orderService.findMonthlySales(null);
-			if(res <= 0)
+			if (res <= 0)
 				 output.setSuccess(true);
 			else {
                 output.setSuccess(false);

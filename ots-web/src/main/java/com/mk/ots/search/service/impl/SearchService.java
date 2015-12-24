@@ -1,5 +1,48 @@
 package com.mk.ots.search.service.impl;
 
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.common.geo.GeoDistance;
+import org.elasticsearch.common.geo.GeoPoint;
+import org.elasticsearch.common.unit.DistanceUnit;
+import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.GeoDistanceFilterBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryFilterBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.script.ScriptScoreFunctionBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
+import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
@@ -22,9 +65,22 @@ import com.mk.ots.hotel.comm.enums.HotelTypeEnum;
 import com.mk.ots.hotel.model.TCityModel;
 import com.mk.ots.hotel.model.TDistrictModel;
 import com.mk.ots.hotel.model.THotelModel;
-import com.mk.ots.hotel.service.*;
+import com.mk.ots.hotel.service.CashBackService;
+import com.mk.ots.hotel.service.CityService;
+import com.mk.ots.hotel.service.HotelPriceService;
+import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.hotel.service.RoomstateService;
 import com.mk.ots.inner.service.IOtsAdminService;
-import com.mk.ots.mapper.*;
+import com.mk.ots.mapper.PositionMapper;
+import com.mk.ots.mapper.PositionTypeMapper;
+import com.mk.ots.mapper.RoomSaleConfigInfoMapper;
+import com.mk.ots.mapper.SAreaInfoMapper;
+import com.mk.ots.mapper.SLandMarkMapper;
+import com.mk.ots.mapper.SSubwayMapper;
+import com.mk.ots.mapper.SSubwayStationMapper;
+import com.mk.ots.mapper.TDistrictMapper;
+import com.mk.ots.mapper.THotelMapper;
+import com.mk.ots.mapper.THotelScoreMapper;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
@@ -33,36 +89,14 @@ import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
 import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.enums.PositionTypeEnum;
-import com.mk.ots.search.model.*;
+import com.mk.ots.search.model.PositionTypeModel;
+import com.mk.ots.search.model.SAreaInfo;
+import com.mk.ots.search.model.SLandMark;
+import com.mk.ots.search.model.SSubway;
+import com.mk.ots.search.model.SSubwayStation;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.ots.web.ServiceOutput;
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.common.geo.GeoDistance;
-import org.elasticsearch.common.geo.GeoPoint;
-import org.elasticsearch.common.unit.DistanceUnit;
-import org.elasticsearch.index.query.*;
-import org.elasticsearch.index.query.MatchQueryBuilder.Operator;
-import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
-import org.elasticsearch.index.query.functionscore.script.ScriptScoreFunctionBuilder;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
-import org.joda.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 /**
  * 搜索业务
@@ -230,6 +264,24 @@ public class SearchService implements ISearchService {
 
 		return rtnMap;
 	}
+
+
+	/**
+	 * 查询位置区域
+	 *
+	 * @param citycode
+	 * @param ptype
+	 */
+	@Override
+	public Map<String, Object> readonlyNearPositions(String citycode, String ptype, Double userlatitude, Double userlongitude) {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		// 从ES中读取区域位置信息
+		List<SearchPositionsCoordinateRespEntity> datas = readonlyNearPositionsFromES(citycode, ptype,userlatitude,userlongitude);
+		rtnMap.put("datas", datas);
+
+		return rtnMap;
+	}
+
 
 	/**
 	 * 校验酒店搜索日期
@@ -586,6 +638,8 @@ public class SearchService implements ISearchService {
 				// 眯客2.2.1, 根据屏幕坐标计算距离.
 				double hotelDistance = DistanceUtil.distance(lon, lat, hotelLongitude, hotelLatitude);
 				result.put("distance", hotelDistance);
+				System.out.println("distance: "+ hotelDistance);
+
 				Long sales = Long
 						.valueOf(String.valueOf(result.get("ordernummon") == null ? "0" : result.get("ordernummon")));
 				result.put("ordernummon", (sales >= 10 ? "月销" + sales + "单" : ""));
@@ -754,7 +808,7 @@ public class SearchService implements ISearchService {
 	 * @param searchBuilder
 	 */
 	private void sortByOrders(SearchRequestBuilder searchBuilder) {
-		searchBuilder.addSort("ordernummon", SortOrder.DESC);
+		searchBuilder.addSort("greetscore", SortOrder.DESC);
 	}
 
 	/**
@@ -885,7 +939,6 @@ public class SearchService implements ISearchService {
 			if (citycode != null) {
 				tcity = cityService.findCityByCode(citycode);
 			}
-
 			if (tcity != null) {
 				BigDecimal cityLat = tcity.getLatitude();
 				if (cityLat != null) {
@@ -899,8 +952,6 @@ public class SearchService implements ISearchService {
 					logger.info("city {} lon is {}.", cityid, cityLon_default);
 				}
 			}
-
-
 			// 眯客3.0：是否是当前酒店周边酒店搜索
 			boolean isZhoubian = StringUtils.isNotBlank(reqentity.getExcludehotelid());
 			if (isZhoubian) {
@@ -909,15 +960,15 @@ public class SearchService implements ISearchService {
 					reqentity.setRange(SearchConst.SEARCH_RANGE_DEFAULT);
 				}
 			} else {
-				if (!HotelSearchEnum.NEAR.getId().equals(searchType)) {
+					if (!HotelSearchEnum.NEAR.getId().equals(searchType)) {
 					// 不是搜索酒店周边，也不是搜索附近酒店，使用B端配置的搜索半径
-
-					if (tcity != null) {
-
+						if (tcity != null) {
 						Double cityRange = tcity.getRange();
 						if (cityRange != null) {
 							reqentity.setRange(cityRange.intValue());
 							logger.info("set city {} search range is {}", cityid, cityRange);
+						}else {
+							reqentity.setRange(SearchConst.SEARCH_RANGE_MAX);
 						}
 					}
 					logger.info("find city geopoint end...");
@@ -928,6 +979,7 @@ public class SearchService implements ISearchService {
 					}
 				}
 			}
+
 
 			// 用户经纬度，根据它来计算酒店“距离我”的距离
 			double userlat = reqentity.getUserlatitude() == null ? cityLat_default : reqentity.getUserlatitude();
@@ -1011,7 +1063,9 @@ public class SearchService implements ISearchService {
 				// 眯客3.0位置区域搜索：结束
 
 				geoFilter.point(lat, lon).distance(distance, DistanceUnit.METERS).optimizeBbox("memory")
-						.geoDistance(GeoDistance.ARC);
+							.geoDistance(GeoDistance.ARC);
+
+
 				filterBuilders.add(geoFilter);
 
 				// hotelname,hoteladdr模糊查询
@@ -1065,8 +1119,13 @@ public class SearchService implements ISearchService {
 				/**
 				 * added in mike3.1, lift up promo as the top search variable
 				 */
+				if (reqentity.getOrderby() == null ||
+						reqentity.getOrderby() == 0 ||
+						HotelSortEnum.SCORE.getId() == reqentity.getOrderby() ) {
+					sortByPromo(searchBuilder, reqentity.getCallversion(), reqentity.getIspromoonly(), paramOrderby);
 
-				sortByPromo(searchBuilder, reqentity.getCallversion(), reqentity.getIspromoonly(), paramOrderby);
+				}
+
 
 				if (HotelSortEnum.DISTANCE.getId() == paramOrderby) {
 					// 距离排序
@@ -1186,7 +1245,7 @@ public class SearchService implements ISearchService {
 					}
 				}
 				result.put("userdistance", userDistance);
-
+				System.out.println(userDistance);
 				// 眯客3.0: 产品中去掉酒店列表显示最近酒店特性.
 				// 接口新增属性isnear: 是否最近酒店, distance值最小的酒店为T,其他为F.
 				if (page <= 1 && i == 0) {
@@ -1336,10 +1395,13 @@ public class SearchService implements ISearchService {
 								CommonUtils.toStr(minPrice));
 						minPrice = minPromoPrice;
 					}
+					result.put("promoprice", minPromoPrice);
+				}else {
+					result.put("promoprice", minPrice);
 				}
 
 				result.put("minprice", minPrice);
-				result.put("promoprice", minPrice);
+
 				result.put("minpmsprice", new BigDecimal(prices[1]));
 
 				logger.info("酒店: {}眯客价: {}", es_hotelid, prices[0]);
@@ -1447,7 +1509,13 @@ public class SearchService implements ISearchService {
 			}
 
 			// 重新按照是否可售分组排序
-			this.sortByVcState(hotels);
+
+ 			if (reqentity.getOrderby() == null ||
+					reqentity.getOrderby() == 0 ||
+					HotelSortEnum.SCORE.getId() == reqentity.getOrderby() ) {
+				this.sortByVcState(hotels);
+			}
+
 			//
 			// if (HotelSortEnum.PRICE.getId() == paramOrderby) {
 			// this.sortByPrice(hotels);
@@ -2406,6 +2474,98 @@ public class SearchService implements ISearchService {
 		return datas;
 	}
 
+
+	/**
+	 * 从ES中读取用户附近位置信息
+	 *
+	 * @param citycode
+	 * @param ptype
+	 * @return
+	 */
+	public List<SearchPositionsCoordinateRespEntity> readonlyNearPositionsFromES(String citycode, String ptype, Double userlatitude,Double userlongitude) {
+		List<FilterBuilder> filterBuilders = new ArrayList<FilterBuilder>();
+		SearchRequestBuilder searchBuilder = esProxy.prepareSearch(esProxy.OTS_INDEX_LANDMARK,
+				esProxy.POSITION_TYPE_DEFAULT);
+		searchBuilder.setQuery(QueryBuilders.matchQuery("citycode", citycode));
+		if (StringUtils.isNotBlank(ptype)) {
+			searchBuilder.setQuery(QueryBuilders.matchQuery("ptype", ptype));
+		}
+
+		GeoDistanceFilterBuilder geoFilter = FilterBuilders.geoDistanceFilter("pin");
+		geoFilter.point(userlatitude, userlongitude).distance(SearchConst.SEARCH_RANGE_MAX, DistanceUnit.METERS).optimizeBbox("memory")
+				.geoDistance(GeoDistance.ARC);
+		filterBuilders.add(geoFilter);
+		FilterBuilder[] builders = new FilterBuilder[] {};
+		BoolFilterBuilder boolFilter = FilterBuilders.boolFilter().must(filterBuilders.toArray(builders));
+
+		this.sortByDistance(searchBuilder, new GeoPoint(userlatitude, userlongitude));
+		//searchBuilder.addSort("ptype", SortOrder.ASC).addSort("id", SortOrder.ASC);
+		searchBuilder.setPostFilter(boolFilter);
+		searchBuilder.setFrom(0).setSize(10000).setExplain(true);// ES默认10条记录，设置10000，能返回citycode下所有。
+
+		SearchResponse searchResponse = searchBuilder.execute().actionGet();
+		SearchHits searchHits = searchResponse.getHits();
+		long totalHits = searchResponse.getHits().totalHits();
+		logger.info("search positions by citycode:{}, success: total {} found.", citycode, totalHits);
+		SearchHit[] hits = searchHits.getHits();
+		List<SearchPositionsCoordinateRespEntity> datas = Lists.newArrayList();
+		for (int i = 0; i < hits.length; i++) {
+			SearchHit hit = hits[i];
+			Map<String, Object> result = hit.getSource();
+			SearchPositionsCoordinateRespEntity ds = new SearchPositionsCoordinateRespEntity();
+			ds.setId(Long.valueOf(result.get("id").toString()));
+
+			if (!citycode.equals(result.get("citycode"))){
+				continue;
+			}
+			ds.setName(result.get("name").toString());
+			String typeid = result.get("ptype").toString();
+			ds.setType(typeid);
+			int tid = Integer.parseInt(typeid);
+			ds.setTname(PositionTypeEnum.getById(tid).getTypeName());
+			if (result.get("lat") == null || result.get("lng") == null) {
+				ds.setCoordinates("[[]]");
+			} else {
+				Double lat = (double) result.get("lat");
+				Double lng = (double) result.get("lng");
+				ds.setCoordinates("[[" + lng + "," + lat + "]]");
+			}
+			if (tid == PositionTypeEnum.METRO.getId()) {
+				List stResult = new ArrayList();
+				List stations = (List) result.get("stations");
+				for (int j = 0; j < stations.size(); j++) {
+					Map<String, Object> cm = (Map) stations.get(j);
+					Child dsc = ds.new Child();
+					dsc.setId(Long.parseLong(cm.get("id").toString()));
+					dsc.setPid(Long.parseLong(cm.get("lineid").toString()));
+					dsc.setCid(Long.parseLong(cm.get("stationid").toString()));
+					dsc.setcName(cm.get("stationname").toString());
+					if (cm.get("lat") == null || cm.get("lng") == null) {
+						dsc.setcCoordinates("[[]]");
+					} else {
+						Double lat = (double) cm.get("lat");
+						Double lng = (double) cm.get("lng");
+						dsc.setcCoordinates("[[" + lng + "," + lat + "]]");
+					}
+					stResult.add(dsc);
+				}
+				// 地铁站排序
+				Collections.sort(stResult, new Comparator<Child>() {
+					@Override
+					public int compare(Child b1, Child b2) {
+						return b1.getCid().compareTo(b2.getCid());
+					}
+				});
+				ds.setChild(stResult);
+			}
+
+			datas.add(ds);
+		}
+		return datas;
+	}
+
+
+
 	/**
 	 * 
 	 * @param citycode
@@ -2529,6 +2689,8 @@ public class SearchService implements ISearchService {
 				data.put("pinyin", areainfo.getPinyin());
 				data.put("lat", areainfo.getLat());
 				data.put("lng", areainfo.getLng());
+
+				data.put("pin", new GeoPoint(areainfo.getLat().doubleValue(), areainfo.getLng().doubleValue()));
 				data.put("ptype", areainfo.getLtype());
 				data.put("citycode", areainfo.getCitycode());
 				data.put("discode", areainfo.getDiscode());
@@ -2537,6 +2699,8 @@ public class SearchService implements ISearchService {
 			}
 			if (esdatas.size() > 0) {
 				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
+						esdatas);
+				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
 						esdatas);
 				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
 				result.put("message", "城市: " + citycode + "添加" + esdatas.size() + "条行政区。");
@@ -2564,7 +2728,8 @@ public class SearchService implements ISearchService {
 		try {
 			// 先删除行政区数据，然后再添加
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AREA.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AREA.getId(), ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AREA.getId(), ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				// 删除成功后添加行政区数据
 				result.clear();
@@ -2614,10 +2779,14 @@ public class SearchService implements ISearchService {
 				data.put("citycode", landmark.getCitycode());
 				data.put("discode", landmark.getDiscode());
 				data.put("status", landmark.getStatus());
+
+				data.put("pin",new GeoPoint(landmark.getLat().doubleValue(), landmark.getLng().doubleValue()));
 				esdatas.add(data);
 			}
 			if (esdatas.size() > 0) {
 				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
+						esdatas);
+				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
 						esdatas);
 				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
 				result.put("message", "城市: " + citycode + "添加" + esdatas.size() + "条地标。");
@@ -2645,35 +2814,40 @@ public class SearchService implements ISearchService {
 			// 先删除landmark数据，然后再添加
 			// 删除1商圈
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.BZONE.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.BZONE.getId(), ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.BZONE.getId(), ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
 			}
 
 			// 删除2机场车站
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AIRPORT.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AIRPORT.getId(), ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.AIRPORT.getId(), ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
 			}
 
 			// 删除5景点
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SAREA.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SAREA.getId(), ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SAREA.getId(), ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
 			}
 
 			// 删除6医院
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.HOSPITAL.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.HOSPITAL.getId(), ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.HOSPITAL.getId(), ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
 			}
 
 			// 删除7高校
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.COLLEGE.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.COLLEGE.getId() , ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.COLLEGE.getId() , ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (!Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				errors.add(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)));
 			}
@@ -2727,6 +2901,9 @@ public class SearchService implements ISearchService {
 				data.put("discode", "");
 				data.put("status", subway.getStatus());
 
+				data.put("pin",new GeoPoint(Constant.NANJI_POINT_LAT, Constant.NANJI_POINT_LON));
+
+
 				// 查询地铁站点
 				String lineid = subway.getLineid() == null ? "" : String.valueOf(subway.getLineid());
 				List<SSubwayStation> stations = subwayStationMapper.findStations(citycode, lineid);
@@ -2737,6 +2914,8 @@ public class SearchService implements ISearchService {
 			}
 			if (esdatas.size() > 0) {
 				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
+						esdatas);
+				esProxy.batchAddDocument(ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT,
 						esdatas);
 				result.put(ServiceOutput.STR_MSG_SUCCESS, true);
 				result.put("message", "城市: " + citycode + "添加" + esdatas.size() + "条地铁线路。");
@@ -2764,7 +2943,8 @@ public class SearchService implements ISearchService {
 		try {
 			// 先删除地铁线路数据，然后再添加
 			result.clear();
-			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SUBWAY.getId()));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SUBWAY.getId(), ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
+			result.putAll(otsAdminService.readonlyDeletePoiDatas(citycode, HotelSearchEnum.SUBWAY.getId(), ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT));
 			if (Boolean.valueOf(String.valueOf(result.get(ServiceOutput.STR_MSG_SUCCESS)))) {
 				// 删除成功后添加地铁线路数据
 				result.clear();

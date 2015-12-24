@@ -54,7 +54,7 @@ public class ScoreController {
 		}
 		
 		String actiontype= request.getParameter("actiontype");
-		if(StringUtils.isBlank(actiontype) || (!actiontype.equals("i") 
+		if(StringUtils.isBlank(actiontype) || (!actiontype.equals("i")
 				&& !actiontype.equals("m") && !actiontype.equals("d"))){
 			logger.debug("缺少必须参数操作类型i,m,d.");
 			throw MyErrorEnum.errorParm.getMyException("缺少必须参数操作类型i,m,d.");
@@ -81,12 +81,13 @@ public class ScoreController {
 		
 		Map<String,Object> param= new HashMap<String,Object>();
 		param.put("orderid", request.getParameter("orderid"));
+		param.put("markIds", request.getParameter("markids"));
 		param.put("action", actiontype);
 		param.put("score", score);//评价内容 
 		param.put("pics", picStr);
 		
 		String gradeStr= request.getParameter("grades");//评价价分数
-		if(StringUtils.isBlank(score) && StringUtils.isBlank(gradeStr)){
+		if(!actiontype.equals("d") && StringUtils.isBlank(score) && StringUtils.isBlank(gradeStr)){
 			logger.info("订单:{}评价信息不完整", orderid);
 			throw MyErrorEnum.errorParm.getMyException("订单"+ orderid +"评分信息不完整.");
 		}
@@ -227,6 +228,17 @@ public class ScoreController {
 			resultList.add(rm);
 		}
 		resultMap.put("subjects", resultList);
+
+		List<Bean>  scoreMarkList = scoreService.findScoreMark();
+		List<Map<String,Object>> scoreMarkListResult= new ArrayList<Map<String,Object>>();
+		for(Bean b :scoreMarkList){
+			Map<String,Object> rm= new HashMap<String,Object>();
+			rm.put("id", b.get("id"));
+			rm.put("mark", b.get("mark"));
+			scoreMarkListResult.add(rm);
+		}
+		resultMap.put("hotelmark", scoreMarkListResult);
+
 		ResponseEntity<Map<String,Object>> result = new ResponseEntity<Map<String,Object>>(resultMap, HttpStatus.OK);
 		return result;
 	}

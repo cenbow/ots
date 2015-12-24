@@ -12,9 +12,11 @@ import com.mk.care.kafka.common.CopywriterTypeEnum;
 import com.mk.care.kafka.common.MessageTypeEnum;
 import com.mk.care.kafka.model.Message;
 import com.mk.ots.kafka.message.OtsCareProducer;
+import com.mk.ots.order.dao.RoomOrderDAO;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +71,9 @@ public class ScoreService {
 
 	@Autowired
 	private OtsCareProducer careProducer;
+
+	@Autowired
+	private RoomOrderDAO roomOrderDAO;
 
 	private Gson gson = new Gson();
 
@@ -179,6 +184,7 @@ public class ScoreService {
 		
 		// 评价内容 参数
 		List cList = new ArrayList();
+
 		String scoreStr = param.get("score").toString();
 		String picStr = (String)param.get("pics");
 		String isDefault = (String) param.get("isdefault");
@@ -194,20 +200,56 @@ public class ScoreService {
 		}
 		cList.add(isDefault);
 		cList.add(orderid);
-		
+
+		List markList = new ArrayList();
+		markList.add(otaOrder.getMid());
+		markList.add(hotelid);
+		markList.add(roomid);
+		markList.add(orderid);
+
 		boolean isSuccess = true;
 		switch (action) {
 		case ("i"):
 			cList.add(otaOrder.getMid());
 			isSuccess = scoreDAO.insert(cList, sList,orderid);
+			if(null!=param.get("markIds")){
+				String 	scoreMarksInsert = param.get("markIds").toString();
+				if(!StringUtils.isEmpty(scoreMarksInsert)){
+					if(scoreMarksInsert.startsWith(",")){
+						scoreMarksInsert = scoreMarksInsert.substring(1,scoreMarksInsert.length());
+					}
+					if(scoreMarksInsert.endsWith(",")){
+						scoreMarksInsert = scoreMarksInsert.substring(0,scoreMarksInsert.length()-1);
+					}
+					if(!StringUtils.isEmpty(scoreMarksInsert)){
+						scoreDAO.insertScoreMarkMember(markList,scoreMarksInsert);
+					}
+				}
+			}
+
 			otaOrder.set("isscore","T").saveOrUpdate();
 			break;
 		case ("m"):
 			isSuccess = scoreDAO.update(cList, sList,orderid);
+			String 	scoreMarksUpdate = param.get("markIds").toString();
+			scoreDAO.deleteScoreMarkMember(otaOrder.getMid(),orderid);
+
+			if(!StringUtils.isEmpty(scoreMarksUpdate)){
+				if(scoreMarksUpdate.startsWith(",")){
+					scoreMarksUpdate = scoreMarksUpdate.substring(1,scoreMarksUpdate.length());
+				}
+				if(scoreMarksUpdate.endsWith(",")){
+					scoreMarksUpdate = scoreMarksUpdate.substring(0,scoreMarksUpdate.length()-1);
+				}
+				if(!StringUtils.isEmpty(scoreMarksUpdate)){
+					scoreDAO.insertScoreMarkMember(markList,scoreMarksUpdate);
+				}
+			}
 			otaOrder.set("isscore","T").saveOrUpdate();
 			break;
 		case ("d"):
 			isSuccess = scoreDAO.del(orderid);
+			scoreDAO.deleteScoreMarkMember(otaOrder.getMid(),orderid);
 			otaOrder.set("isscore","F").saveOrUpdate();
 			break;
 		}		
@@ -243,6 +285,15 @@ public class ScoreService {
 	 */
 	public List<Bean> findSubject(String subjectid) {
 		return scoreDAO.findSubject(subjectid);
+	}
+
+
+	/**
+	 * 查询所有评价标签
+	 * @return
+	 */
+	public List<Bean> findScoreMark() {
+		return scoreDAO.findScoreMark();
 	}
 
 	/**
@@ -546,9 +597,41 @@ public class ScoreService {
 			
 			m.put("scorepic", picResult);
 			m.put("roomscoresubject", rlist);
+
+			//获取评价标签
+			m.put("hotelmark",getHotelMarkByOrderId(bb.get("orderid").toString()));
+
+			//获取评价房间信息
+			m.put("roominfo",getRoomInfo(bb.getLong("orderId")));
+
 			resultList.add(m);
 		}
 		return resultList;
+	}
+
+	private  String  getRoomInfo(Long  orderId){
+		OtaRoomOrder  otaRoomOrder = roomOrderDAO.findOtadRoomOrderByOtaOrderId(orderId);
+		if(null!=otaRoomOrder){
+			return otaRoomOrder.getRoomTypeName()+otaRoomOrder.getRoomNo();
+		}
+		return  null;
+	}
+
+	private  List<HashMap>   getHotelMarkByOrderId(String orderId){
+		List<HashMap>  list  = new  ArrayList<HashMap>();
+		List<Bean>  scoreMarkMemberList = scoreDAO.findScoreMarkMemberOrder(orderId);
+		if(!CollectionUtils.isEmpty(scoreMarkMemberList)){
+			for(Bean  markBean:scoreMarkMemberList){
+				List<Bean>  scoreMarkList = scoreDAO.findScoreMarkByMarkId(markBean.getLong("mark_id"));
+				if(!CollectionUtils.isEmpty(scoreMarkList)){
+					HashMap    hotelMark = new HashMap();
+					hotelMark.put("id",scoreMarkList.get(0).get("id"));
+					hotelMark.put("mark",scoreMarkList.get(0).get("mark"));
+					list.add(hotelMark);
+				}
+			}
+		}
+		return  list;
 	}
 
 	private Map<Long, Bean> listToMap(List<Bean> list, String keyStr){

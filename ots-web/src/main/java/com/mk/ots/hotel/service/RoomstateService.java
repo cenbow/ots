@@ -13,8 +13,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.dianping.cat.message.Event;
+import com.mk.es.Hotel;
 import com.mk.framework.util.CommonUtils;
 import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.enums.SearchBlackTypeEnum;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -983,7 +985,12 @@ public class RoomstateService {
 				respEntity.setHotelid(hotelid);
 				respEntity.setHotelname(thotelModel.getHotelname());
 				respEntity.setHotelrulecode(thotelModel.getRulecode()); // 20150810
-																		// add
+
+				String repairInfo = HotelService.getRepairInfo(thotelModel.getRepairtime());	// add hotel repair info in mike3.2+
+				if (StringUtils.isNotBlank(repairInfo)){
+					respEntity.setRepairinfo(repairInfo);
+				}
+
 				respEntity.setOnline(thotelModel.getOnline());
 				respEntity.setVisible(thotelModel.getVisible());
 				// 查询t_roomtype表数据
@@ -1382,8 +1389,11 @@ public class RoomstateService {
 
 					// 兼容老版本
 					if (isPromo != null && isPromo) {
-
-						if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
+						if (isPromo && HotelPromoEnum.OneDollar.getCode().toString().equals(roomtype.getPromoid())){
+							if (params.getShowblacktype() == SearchBlackTypeEnum.ONESECKILL.getCode()){
+								roomtypes.add(roomtype);
+							}
+						}else if (callEntry != null && callEntry != 3 && "3.0".compareTo(callVersionStr) < 0
 								&& !"3".equals(callMethod)) {
 
 							roomtypes.add(roomtype);
@@ -1412,6 +1422,8 @@ public class RoomstateService {
 
 			// 特价房型
 			List<RoomstateQuerylistRespEntity.Roomtype> promoRoomTypes = Lists.newArrayList();
+			// 特价房型
+			List<RoomstateQuerylistRespEntity.Roomtype> promoFullRoomTypes = Lists.newArrayList();
 			// 普通房型
 			List<RoomstateQuerylistRespEntity.Roomtype> normalRoomTypes = Lists.newArrayList();
 
@@ -1419,7 +1431,12 @@ public class RoomstateService {
 				if (roomtypesArr[i] instanceof RoomstateQuerylistRespEntity.Roomtype) {
 					RoomstateQuerylistRespEntity.Roomtype rt = (RoomstateQuerylistRespEntity.Roomtype) roomtypesArr[i];
 					if ("1".equals(rt.getIsonpromo())) {
-						promoRoomTypes.add(rt);
+						if (rt.getVcroomnum() <= 0){
+							promoFullRoomTypes.add(rt);
+						}else {
+							promoRoomTypes.add(rt);
+						}
+
 					} else if (rt.getVcroomnum() <= 0)
 						tempRoomTypes.add(rt);
 					else {
@@ -1432,6 +1449,9 @@ public class RoomstateService {
 			Object[] promoRoomtypesArr = promoRoomTypes.toArray();
 			Arrays.sort(promoRoomtypesArr, this.new RoomTypesComparator());
 
+			Object[] promoFullRoomtypesArr = promoFullRoomTypes.toArray();
+			Arrays.sort(promoFullRoomtypesArr, this.new RoomTypesComparator());
+
 			Object[] normalRoomtypesArr = normalRoomTypes.toArray();
 			Arrays.sort(normalRoomtypesArr, this.new RoomTypesComparator());
 
@@ -1440,6 +1460,14 @@ public class RoomstateService {
 			for (int i = 0; i < promoRoomtypesArr.length; i++) {
 				if (promoRoomtypesArr[i] instanceof RoomstateQuerylistRespEntity.Roomtype) {
 					RoomstateQuerylistRespEntity.Roomtype rt = (RoomstateQuerylistRespEntity.Roomtype) promoRoomtypesArr[i];
+					roomtypes.add(rt);
+
+				}
+			}
+
+			for (int i = 0; i < promoFullRoomtypesArr.length; i++) {
+				if (promoFullRoomtypesArr[i] instanceof RoomstateQuerylistRespEntity.Roomtype) {
+					RoomstateQuerylistRespEntity.Roomtype rt = (RoomstateQuerylistRespEntity.Roomtype) promoFullRoomtypesArr[i];
 					roomtypes.add(rt);
 
 				}

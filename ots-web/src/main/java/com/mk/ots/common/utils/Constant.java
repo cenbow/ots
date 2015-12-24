@@ -1,6 +1,7 @@
 package com.mk.ots.common.utils;
 
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,6 +59,7 @@ public class Constant {
 	
 	public static final String RESERVE_DAY_NUM = "reserveDayNum";//酒店预定天数
 	public static final String MONTHLY_SALES_KEY = "ots2_5_monthly30_sales_key_";   //月销量
+	public static final String MONTHLY_PMS_SALES_KEY = "ots3_2_monthly30_pms_sales_key_";   //月销量
 	
 	public static final String orderService="orderService";
 	public static final String userService = "userService";
@@ -223,8 +225,9 @@ public class Constant {
 
 	public static final Integer WEIXIN_PLATFORM = 4;
 
-	public static final Integer CITY_RECOMMEND_ITEM_LIMT = 1;
-	public static final Integer RECOMMEND_ITEM_LIMT = 4;
+	public static final Integer CITY_RECOMMEND_ITEM_LIMIT = 4;
+	public static final Integer CITY_RECOMMEND_HOMEPAGE_SHORTCUT_LIMIT = 3;
+	public static final Integer RECOMMEND_ITEM_LIMIT = 7;
 
 	public static final Integer RECOMMEND_GLOBAL = -1;
 
@@ -269,5 +272,14 @@ public class Constant {
 	public static final String DEFAULT_NORMAL_POPULARITY_TEXT = "最受欢迎";
 	public static final String DEFAULT_NORMAL_POPULARITY_NOTE = "";
 	public static final String DEFAULT_NORMAL_POPULARITY_ICON = "";
+	public static final Integer SHOW_HOTEL_REPAIRINFO_YEARS_LIMIT = 3;
+
+
+	public static final String HOTEL_HIGHLIGHT_SHOWS_IDS ="44";
+	public static final String RECOMMEND_LOADDING_POSITION = "APP-LOADING";
+	public static final String RECOMMEND_HOMEPAGE_SHORTCUT_POSITION = "HOMEPAGE-SHORTCUT";
+
+	public static final Double NANJI_POINT_LAT = -140.976563;
+	public static final Double NANJI_POINT_LON = -88.075329;
 
 }

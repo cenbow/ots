@@ -1,41 +1,16 @@
 package com.mk.ots.order.controller;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Event;
-import com.dianping.cat.message.Transaction;
-import com.mk.framework.util.CommonUtils;
-import com.mk.ots.system.model.UToken;
-import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.common.base.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mk.framework.DistributedLockUtil;
 import com.mk.framework.exception.MyErrorEnum;
+import com.mk.framework.util.CommonUtils;
 import com.mk.framework.util.MyTokenUtils;
 import com.mk.framework.util.UrlUtils;
 import com.mk.ots.common.bean.PageObject;
@@ -49,10 +24,7 @@ import com.mk.ots.hotel.model.THotel;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomTypeService;
 import com.mk.ots.hotel.service.RoomstateService;
-import com.mk.ots.order.bean.OtaCheckInUser;
-import com.mk.ots.order.bean.OtaOrder;
-import com.mk.ots.order.bean.OtaRoomOrder;
-import com.mk.ots.order.bean.OtaRoomPrice;
+import com.mk.ots.order.bean.*;
 import com.mk.ots.order.model.OtaOrderMac;
 import com.mk.ots.order.service.OrderServiceImpl;
 import com.mk.ots.order.service.OrderUtil;
@@ -61,8 +33,24 @@ import com.mk.ots.pay.module.weixin.pay.common.PayTools;
 import com.mk.ots.pay.service.IPayService;
 import com.mk.ots.pay.service.IPriceService;
 import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
+import com.mk.ots.system.model.UToken;
 import com.mk.ots.utils.PayLockKeyUtil;
 import com.mk.ots.web.ServiceOutput;
+import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @RestController
 @RequestMapping("/order")
@@ -87,7 +75,8 @@ public class OrderController {
 	
 	// 全部、进行中、已完成
 	private ImmutableMap<String, String> statetypeMap = ImmutableMap.of("all", 	"110,120,140,160,180,190,200,510,514,512,513,520", 
-																		"doing","110,120,140,160,180,510", 
+																		"doing","110,120,140,160,180,510",
+																		"commenting","160,180,190,200",
 																		"done",	"200,190");
 
 	/**
@@ -108,7 +97,7 @@ public class OrderController {
 			// 订单转换为json
 			jsonObj = new JSONObject();
 			// 创建订单
-			this.orderService.doCreateOrder(order, jsonObj);
+			this.orderService.doCreateOrder(request, order, jsonObj);
 			
 			logger.info("创建订单成功,返回数据 : "+jsonObj.toJSONString());
 			Cat.logEvent("/order/create", CommonUtils.toStr(order.getHotelId()), Event.SUCCESS, jsonObj.toJSONString());
@@ -117,7 +106,8 @@ public class OrderController {
 			Cat.logError("order create error", e);
 			throw e;
 		}
-
+		String  showblacktype = request.getParameter("showblacktype");
+		jsonObj.put("showblacktype",showblacktype);
 		OrderController.logger.info("OTSMessage::OrderController::createOrder::orderService.putOrderJobIntoManager");
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
@@ -151,7 +141,7 @@ public class OrderController {
 			// 订单转换为json
 			jsonObj = new JSONObject();
 			// 创建订单
-			this.orderService.doCreateOrder(order, jsonObj);
+			this.orderService.doCreateOrder(request ,order, jsonObj);
 			jsonObj.put("success", true);
 			logger.info("创建订单成功,返回数据 : " + jsonObj.toJSONString());
 			Cat.logEvent("/order/create", CommonUtils.toStr(order.getHotelId()), Event.SUCCESS, jsonObj.toJSONString());
@@ -160,7 +150,10 @@ public class OrderController {
 			Cat.logError("order createByRoomType error", e);
 			throw e;
 		}
-		
+
+		String  showblacktype = request.getParameter("showblacktype");
+		jsonObj.put("showblacktype",showblacktype);
+
 		OrderController.logger.info("createOrderByRoomType::ok");
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
@@ -211,6 +204,9 @@ public class OrderController {
 		}
 		Cat.logEvent("/order/modify", CommonUtils.toStr(orderId), Event.SUCCESS, jsonObj.toJSONString());
 		OrderController.logger.info("OTSMessage::OrderController::modifyOrder::ok");
+
+		String  showblacktype = request.getParameter("showblacktype");
+		jsonObj.put("showblacktype",showblacktype);
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
 	}
 	
@@ -282,7 +278,7 @@ public class OrderController {
 		// 订单转换为json
 		JSONObject jsonObj = new JSONObject();
 		try {
-			this.orderService.doCancelOrder(orderid, type, jsonObj);
+			this.orderService.doCancelOrder(request, orderid, type, jsonObj);
 		} catch (Exception e) {
 			OrderController.logger.error("取消订单失败 , orderid = " + orderid, e);
 			throw MyErrorEnum.customError.getMyException("取消订单失败");
@@ -425,7 +421,7 @@ public class OrderController {
 			order.put("otaRoomPrices", otaRoomPrices);
 			order.put("act", "query");
 			//封装order json信息
-			this.orderUtil.getOrderToJson(jsonObj1, ppay, order, showRoom, showInUser);
+			this.orderUtil.getOrderToJson(request ,jsonObj1, ppay, order, showRoom, showInUser);
 			orders.add(jsonObj1);
 		}
 		jsonObj.put("success", true);
@@ -500,6 +496,9 @@ public class OrderController {
 		String userLongitude = request.getParameter("userlongitude");
 		String userLatitude = request.getParameter("userlatitude");
 
+		String  showBlackType =  request.getParameter("showblacktype");// 非必填，是否是一元房
+
+		String callVersion = request.getParameter("callversion");
 		/*************** 移动设备信息 ************/
 		// 系统号
 		String sysno = request.getParameter("sysno");
@@ -590,6 +589,9 @@ public class OrderController {
 			if (StringUtils.isNotBlank(userLatitude)) {
 				order.set("userlatitude", userLatitude);
 			}
+			if (StringUtils.isNotBlank(callVersion)) {
+				order.set("callVersion", callVersion);
+			}
 			/*************** 移动设备信息 ************/
 			OtaOrderMac otaOrderMac = new OtaOrderMac();
 			// 系统号
@@ -616,6 +618,7 @@ public class OrderController {
 			if (StringUtils.isNotBlank(blmacaddr)) {
 				otaOrderMac.setBlmacaddr(DESUtils.decryptDES(blmacaddr));
 			}
+
 			order.setOtaOrderMac(otaOrderMac);
 			/*************** 移动设备信息 ************/
 		} catch (NumberFormatException e1) {
@@ -634,6 +637,10 @@ public class OrderController {
 		if (StringUtils.isNotBlank(couponNo)) {
 			order.put("couponno", couponNo);
 			order.set("coupon", "T");
+		}
+
+		if (StringUtils.isNotBlank(showBlackType)) {
+			order.setShowBlackType(showBlackType);
 		}
 		String token = request.getParameter("token");
 		order.setToken(token);
@@ -700,6 +707,7 @@ public class OrderController {
 			if (StringUtils.isBlank(status)) {
 				throw MyErrorEnum.errorParm.getMyException("查询订单参数不能为空！");
 			}
+
 			JSONArray jsonArray = JSON.parseArray(status);
 			for (int i = 0; i < jsonArray.size(); i++) {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -707,7 +715,7 @@ public class OrderController {
 				if (StringUtils.isBlank(sqnum)) {
 					throw MyErrorEnum.errorParm.getMyException("sqnum参数不能为空！");
 				}
-
+				String isscore = jsonObject.getString("isscore");// isscore
 				String orderstatus = jsonObject.getString("orderstatus");
 				String statetype = jsonObject.getString("statetype");
 				if (StringUtils.isBlank(statetype) && StringUtils.isBlank(orderstatus)) {
@@ -722,7 +730,7 @@ public class OrderController {
 				}
 				String[] orderstatus2 = orderstatus.split(",");
 				List<String> orderstatus3 = Arrays.asList(orderstatus2);
-				result = this.orderService.selectCountByOrderStatus(sqnum, orderstatus3, token);
+				result = this.orderService.selectCountByOrderStatus(sqnum, orderstatus3, token, isscore);
 
 				array.add(result);
 			}
@@ -834,7 +842,6 @@ public class OrderController {
 	}
 
 	/**
-	 * @param orderid
 	 *            酒店订单重新计算规则
 	 */
 	@RequestMapping(value = "/reModifyHotelRule", method = RequestMethod.POST)
@@ -850,7 +857,6 @@ public class OrderController {
 	
 
 	/**
-	 * @param orderid
 	 * 酒店订单重新计算优惠券规则
 	 */
 	@RequestMapping(value = "/reModifyHotelPromotion", method = RequestMethod.POST)
@@ -903,5 +909,37 @@ public class OrderController {
 		}
 		OrderController.logger.info("OrderController::selectOrderStatus::end");
 		return new ResponseEntity<JSONObject>(jsonObj, HttpStatus.OK);
+	}
+
+
+	/**
+	 * 订单支付规则
+	 */
+	@RequestMapping(value = "/getOrderPromoPayRule", method = RequestMethod.GET)
+	public ResponseEntity<OrderPromoPayRuleJson> getOrderPromoPayRule(Integer promoType) {
+		OrderController.logger.info("OrderController::getOrderPromoPayRule params promoType[%s]::begin", promoType);
+		OrderPromoPayRuleJson orderPromoPayRuleJson  = null;
+		if(promoType == null){
+			orderPromoPayRuleJson = new OrderPromoPayRuleJson();
+			orderPromoPayRuleJson.setErrorCode(-1);
+			orderPromoPayRuleJson.setErrorMsg("查询失败，promoType参数必填！");
+			orderPromoPayRuleJson.setSuccess(false);
+		}
+		try {
+			orderPromoPayRuleJson = this.orderService.getOrderPromoPayRule(promoType);
+			if(orderPromoPayRuleJson == null){
+				orderPromoPayRuleJson = new OrderPromoPayRuleJson();
+				orderPromoPayRuleJson.setErrorCode(-1);
+				orderPromoPayRuleJson.setErrorMsg("查询失败，没有查询到数据！");
+				orderPromoPayRuleJson.setSuccess(false);
+			}
+		} catch (Exception e) {
+			logger.info("OrderPromoPayRule 异常了：{}", e);
+			orderPromoPayRuleJson.setErrorCode(-1);
+			orderPromoPayRuleJson.setErrorMsg("查询失败！");
+			orderPromoPayRuleJson.setSuccess(false);
+		}
+		OrderController.logger.info("OrderController::getOrderPromoPayRule::end");
+		return new ResponseEntity<OrderPromoPayRuleJson>(orderPromoPayRuleJson, HttpStatus.OK);
 	}
 }

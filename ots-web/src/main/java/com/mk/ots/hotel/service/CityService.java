@@ -1,10 +1,5 @@
 package com.mk.ots.hotel.service;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.mk.ots.hotel.bean.TCity;
 import com.mk.ots.hotel.dao.CityDAO;
 import com.mk.ots.hotel.model.TBusinesszoneModel;
@@ -12,6 +7,10 @@ import com.mk.ots.hotel.model.TCityModel;
 import com.mk.ots.mapper.CityMapper;
 import com.mk.ots.mapper.TBusinesszoneMapper;
 import com.mk.ots.mapper.TCityMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 城市，地区类
@@ -67,7 +66,13 @@ public class CityService {
 	public List<TCity> findSelectCity() {
 		return cityMapper.getSelectCity();
 	}
-	
+	/**
+	 * 获取可查询城市信息
+	 * @return
+	 */
+	public List<TCity> findAllCity() {
+		return cityMapper.getAllCity();
+	}
 	/**
 	 * 查询城市信息
 	 * @param citycode

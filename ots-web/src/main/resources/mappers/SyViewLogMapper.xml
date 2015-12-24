@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper  namespace="com.mk.ots.view.model.SyViewLog">
+    <resultMap id="BaseResultMap" type="com.mk.ots.view.model.SyViewLog">
+    <id column="id" property="id" jdbcType="BIGINT"/>
+    <result column="longitude" property="longitude" jdbcType="DECIMAL"/>
+    <result column="latitude" property="latitude" jdbcType="DECIMAL"/>
+    <result column="city_code" property="cityCode" jdbcType="VARCHAR"/>
+    <result column="ip" property="ip" jdbcType="VARCHAR"/>
+    <result column="call_method" property="callMethod" jdbcType="INTEGER"/>
+    <result column="version" property="version" jdbcType="VARCHAR"/>
+    <result column="wifi_macaddr" property="wifiMacaddr" jdbcType="VARCHAR"/>
+    <result column="bi_macaddr" property="biMacaddr" jdbcType="VARCHAR"/>
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    <result column="simsn" property="simsn" jdbcType="VARCHAR"/>
+    <result column="from_url" property="fromUrl" jdbcType="VARCHAR"/>
+    <result column="to_url" property="toUrl" jdbcType="VARCHAR"/>
+    <result column="phone" property="phone" jdbcType="VARCHAR"/>
+    <result column="params" property="params" jdbcType="VARCHAR"/>
+    <result column="bussiness_id" property="bussinessId" jdbcType="VARCHAR"/>
+    <result column="bussiness_type" property="bussinessType" jdbcType="INTEGER"/>
+    <result column="action_type" property="actionType" jdbcType="VARCHAR"/>
+    <result column="imei" property="imei" jdbcType="VARCHAR"/>
+    <result column="hardwarecode" property="hardwarecode" jdbcType="VARCHAR"/>
+    <result column="call_time" property="callTime" jdbcType="TIMESTAMP"/>
+    <result column="model" property="model" jdbcType="VARCHAR"/>
+    <result column="package_name" property="packageName" jdbcType="VARCHAR"/>
+    <result column="data_name" property="dtName" jdbcType="VARCHAR"/>
+    <result column="channel" property="channel" jdbcType="VARCHAR"/>
+    <result column="city_name" property="cityName" jdbcType="VARCHAR"/>
+    </resultMap>
+<sql id="Example_Where_Clause">
+<where>
+    <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">`
+            <trim prefix="(" suffix=")" prefixOverrides="and">
+                <foreach collection="criteria.criteria" item="criterion">
+                    <choose>
+                        <when test="criterion.noValue">and ${criterion.condition}</when>
+                        <when test="criterion.singleValue">and ${criterion.condition} #{criterion.value}</when>
+                        <when test="criterion.betweenValue">
+                            and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                        </when>
+                        <when test="criterion.listValue">
+                            and ${criterion.condition}
+                            <foreach collection="criterion.value" item="listItem" open="(" close=")" separator=",">#{listItem}</foreach>
+                        </when>
+                    </choose>
+                </foreach>
+            </trim>
+        </if>
+    </foreach>
+</where>
+</sql>
+<sql id="Base_Column_List">
+id, longitude, latitude, city_code, ip, call_method, version, wifi_macaddr, bi_macaddr, create_time, simsn, from_url, to_url, phone, params, bussiness_id, bussiness_type, action_type,  imei, hardwarecode, call_time, model, package_name, data_name, channel, city_name
+</sql>
+<select id="selectByExample" resultMap="BaseResultMap" parameterType="com.mk.ots.view.model.SyViewLog">
+select
+<if test="distinct">distinct</if>
+'true' as QUERYID,
+<include refid="Base_Column_List"/>
+from sy_view_log
+<if test="_parameter != null">
+    <include refid="Example_Where_Clause"/>
+</if>
+<if test="orderByClause != null">order by ${orderByClause}</if>
+</select>
+<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+select
+<include refid="Base_Column_List"/>
+from sy_view_log where id = #{id,jdbcType=BIGINT}
+</select>
+<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+delete from sy_view_log where id = #{id,jdbcType=BIGINT}
+</delete>
+<insert id="insert" parameterType="com.mk.ots.view.model.SyViewLog">
+insert into sy_view_log (id, longitude, latitude, city_code, ip, call_method, version, wifi_macaddr, bi_macaddr, create_time, simsn, from_url, to_url, phone, params, bussiness_id, bussiness_type, action_type, imei, hardwarecode, call_time, model, package_name, data_name, channel, city_name ) values (#{id,jdbcType=BIGINT}, #{longitude,jdbcType=DECIMAL}, #{latitude,jdbcType=DECIMAL}, #{cityCode,jdbcType=VARCHAR}, #{ip,jdbcType=VARCHAR}, #{callMethod,jdbcType=INTEGER}, #{version,jdbcType=VARCHAR}, #{wifiMacaddr,jdbcType=VARCHAR}, #{biMacaddr,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{simsn,jdbcType=VARCHAR}, #{fromUrl,jdbcType=VARCHAR}, #{toUrl,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, #{params,jdbcType=VARCHAR}, #{bussinessId,jdbcType=VARCHAR}, #{bussinessType,jdbcType=INTEGER}, #{actionType,jdbcType=VARCHAR}, #{imei,jdbcType=VARCHAR}, #{hardwarecode,jdbcType=VARCHAR}, #{callTime,jdbcType=TIMESTAMP}, #{model,jdbcType=VARCHAR}, #{packageName,jdbcType=VARCHAR}, #{dtName,jdbcType=VARCHAR}, #{channel,jdbcType=VARCHAR}, #{cityName,jdbcType=VARCHAR} )
+</insert>
+<insert id="insertSelective" parameterType="com.mk.ots.view.model.SyViewLog">
+insert into sy_view_log
+<trim prefix="(" suffix=")" suffixOverrides=",">
+    <if test="id != null">id,</if>
+    <if test="longitude != null">longitude,</if>
+    <if test="latitude != null">latitude,</if>
+    <if test="cityCode != null">city_code,</if>
+    <if test="ip != null">ip,</if>
+    <if test="callMethod != null">call_method,</if>
+    <if test="version != null">version,</if>
+    <if test="wifiMacaddr != null">wifi_macaddr,</if>
+    <if test="biMacaddr != null">bi_macaddr,</if>
+    <if test="createTime != null">create_time,</if>
+    <if test="simsn != null">simsn,</if>
+    <if test="fromUrl != null">from_url,</if>
+    <if test="toUrl != null">to_url,</if>
+    <if test="phone != null">phone,</if>
+    <if test="params != null">params,</if>
+    <if test="bussinessId != null">bussiness_id,</if>
+    <if test="bussinessType != null">bussiness_type,</if>
+    <if test="actionType != null">action_type,</if>
+    <if test="imei != null">imei,</if>
+    <if test="hardwarecode != null">hardwarecode,</if>
+    <if test="callTime != null">call_time,</if>
+    <if test="model != null">model,</if>
+    <if test="packageName != null">package_name,</if>
+    <if test="dtName != null">data_name,</if>
+    <if test="channel != null">channel,</if>
+    <if test="cityName != null">city_name,</if>
+</trim>
+<trim prefix="values (" suffix=")" suffixOverrides=",">
+    <if test="id != null">#{id,jdbcType=BIGINT},</if>
+    <if test="longitude != null">#{longitude,jdbcType=DECIMAL},</if>
+    <if test="latitude != null">#{latitude,jdbcType=DECIMAL},</if>
+    <if test="cityCode != null">#{cityCode,jdbcType=VARCHAR},</if>
+    <if test="ip != null">#{ip,jdbcType=VARCHAR},</if>
+    <if test="callMethod != null">#{callMethod,jdbcType=INTEGER},</if>
+    <if test="version != null">#{version,jdbcType=VARCHAR},</if>
+    <if test="wifiMacaddr != null">#{wifiMacaddr,jdbcType=VARCHAR},</if>
+    <if test="biMacaddr != null">#{biMacaddr,jdbcType=VARCHAR},</if>
+    <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
+    <if test="simsn != null">#{simsn,jdbcType=VARCHAR},</if>
+    <if test="fromUrl != null">#{fromUrl,jdbcType=VARCHAR},</if>
+    <if test="toUrl != null">#{toUrl,jdbcType=VARCHAR},</if>
+    <if test="phone != null">#{phone,jdbcType=VARCHAR},</if>
+    <if test="params != null">#{params,jdbcType=VARCHAR},</if>
+    <if test="bussinessId != null">#{bussinessId,jdbcType=VARCHAR},</if>
+    <if test="bussinessType != null">#{bussinessType,jdbcType=INTEGER},</if>
+    <if test="actionType != null">#{actionType,jdbcType=VARCHAR},</if>
+    <if test="imei != null">#{imei,jdbcType=VARCHAR},</if>
+    <if test="hardwarecode != null">#{hardwarecode,jdbcType=VARCHAR},</if>
+    <if test="callTime != null">#{callTime,jdbcType=TIMESTAMP},</if>
+    <if test="model != null">#{model,jdbcType=VARCHAR},</if>
+    <if test="packageName != null">#{packageName,jdbcType=VARCHAR},</if>
+    <if test="dtName != null">#{dtName,jdbcType=VARCHAR},</if>
+    <if test="channel != null">#{channel,jdbcType=VARCHAR},</if>
+    <if test="cityName != null">#{cityName,jdbcType=VARCHAR},</if>
+</trim>
+</insert>
+<select id="countByExample" parameterType="com.mk.ots.view.model.SyViewLog" resultType="java.lang.Integer">
+select count(*) from sy_view_log
+<if test="_parameter != null">
+    <include refid="Example_Where_Clause"/>
+</if>
+</select>
+<update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.view.model.SyViewLog">
+update sy_view_log
+<set>
+    <if test="longitude != null">longitude = #{longitude,jdbcType=DECIMAL},</if>
+    <if test="latitude != null">latitude = #{latitude,jdbcType=DECIMAL},</if>
+    <if test="cityCode != null">city_code = #{cityCode,jdbcType=VARCHAR},</if>
+    <if test="ip != null">ip = #{ip,jdbcType=VARCHAR},</if>
+    <if test="callMethod != null">call_method = #{callMethod,jdbcType=INTEGER},</if>
+    <if test="version != null">version = #{version,jdbcType=VARCHAR},</if>
+    <if test="wifiMacaddr != null">wifi_macaddr = #{wifiMacaddr,jdbcType=VARCHAR},</if>
+    <if test="biMacaddr != null">bi_macaddr = #{biMacaddr,jdbcType=VARCHAR},</if>
+    <if test="createTime != null">create_time = #{createTime,jdbcType=TIMESTAMP},</if>
+    <if test="simsn != null">simsn = #{simsn,jdbcType=VARCHAR},</if>
+    <if test="fromUrl != null">from_url = #{fromUrl,jdbcType=VARCHAR},</if>
+    <if test="toUrl != null">to_url = #{toUrl,jdbcType=VARCHAR},</if>
+    <if test="phone != null">phone = #{phone,jdbcType=VARCHAR},</if>
+    <if test="params != null">params = #{params,jdbcType=VARCHAR},</if>
+    <if test="bussinessId != null">bussiness_id = #{bussinessId,jdbcType=VARCHAR},</if>
+    <if test="bussinessType != null">
+        bussiness_type = #{bussinessType,jdbcType=INTEGER},
+    </if>
+    <if test="actionType != null">action_type = #{actionType,jdbcType=VARCHAR},</if>
+    <if test="imei != null">imei = #{imei,jdbcType=VARCHAR},</if>
+    <if test="hardwarecode != null">hardwarecode = #{hardwarecode,jdbcType=VARCHAR},</if>
+    <if test="callTime != null">call_time = #{callTime,jdbcType=TIMESTAMP},</if>
+    <if test="model != null">model = #{model,jdbcType=VARCHAR},</if>
+    <if test="packageName != null">package_name = #{packageName,jdbcType=VARCHAR},</if>
+    <if test="dtName != null">data_name = #{dtName,jdbcType=VARCHAR},</if>
+    <if test="channel != null">channel = #{channel,jdbcType=VARCHAR},</if>
+    <if test="cityName != null">city_name = #{cityName,jdbcType=VARCHAR},</if>
+</set>
+where id = #{id,jdbcType=BIGINT}
+</update>
+<update id="updateByPrimaryKey" parameterType="com.mk.ots.view.model.SyViewLog">
+update sy_view_log set longitude = #{longitude,jdbcType=DECIMAL}, latitude = #{latitude,jdbcType=DECIMAL}, city_code = #{cityCode,jdbcType=VARCHAR}, ip = #{ip,jdbcType=VARCHAR}, call_method = #{callMethod,jdbcType=INTEGER}, version = #{version,jdbcType=VARCHAR}, wifi_macaddr = #{wifiMacaddr,jdbcType=VARCHAR}, bi_macaddr = #{biMacaddr,jdbcType=VARCHAR}, create_time = #{createTime,jdbcType=TIMESTAMP}, simsn = #{simsn,jdbcType=VARCHAR}, from_url = #{fromUrl,jdbcType=VARCHAR}, to_url = #{toUrl,jdbcType=VARCHAR}, phone = #{phone,jdbcType=VARCHAR}, params = #{params,jdbcType=VARCHAR}, bussiness_id = #{bussinessId,jdbcType=VARCHAR}, bussiness_type = #{bussinessType,jdbcType=INTEGER}, action_type = #{actionType,jdbcType=VARCHAR},  imei = #{imei,jdbcType=VARCHAR}, hardwarecode = #{hardwarecode,jdbcType=VARCHAR}, call_time = #{callTime,jdbcType=TIMESTAMP}, model = #{model,jdbcType=VARCHAR}, package_name = #{packageName,jdbcType=VARCHAR}, data_name = #{dtName,jdbcType=VARCHAR}, channel = #{channel,jdbcType=VARCHAR}, city_name = #{cityName,jdbcType=VARCHAR} where id = #{id,jdbcType=BIGINT}
+</update>
+</mapper>

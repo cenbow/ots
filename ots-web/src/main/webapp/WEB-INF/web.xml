@@ -36,6 +36,8 @@
 			,/ticket/activeforwardcount,/app/checkupdate,/search/,/recommend,/roomsale,/hotel/updatemikepricecache,/promo,/promo/querytypelist
 			,/admin/report/launchPromo,/admin/report,/ticket/tryluck,/ticket/nologintryluck,/ticket/uuid,/ticket/queryallluck,/ticket/prizebindingphone,/hotel/front/querylist
 
+			,/admin/indexer/init,/indexer/positioninit,/homepage/promolist,/homepage/themes,/homepage/popular,/promo/onedollarlist,/admin/indexer/drop,/sys/viewevent
+
 			</param-value>
 		</init-param>
 	</filter>
@@ -50,7 +52,9 @@
 		<filter-class>com.mk.ots.system.interceptor.CrossDomainFilter</filter-class>
 		<init-param>
 			<param-name>crossDomainPatterns</param-name>
-			<param-value>/recommend/query,/recommend/querydetail,/unionidandphone/binding,/ticket/tryluck,/ticket/nologintryluck,/verifycode/send,/verifycode/verify,/unionidandphone/check,/ticket/uuid,/ticket/queryallluck,/ticket/prizebindingphone </param-value>
+			<param-value>/recommend/query,/recommend/querydetail,/unionidandphone/binding,/ticket/tryluck
+				,/ticket/nologintryluck,/verifycode/send,/verifycode/verify,/unionidandphone/check,/ticket/uuid
+				,/ticket/queryallluck,/ticket/prizebindingphone,/promo/onedollarlist,/hotel/querytypelist </param-value>
 		</init-param>
 	</filter>
 
