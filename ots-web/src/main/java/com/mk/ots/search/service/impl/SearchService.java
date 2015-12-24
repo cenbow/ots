@@ -768,6 +768,19 @@ public class SearchService implements ISearchService {
 	}
 
 	/**
+	 * 当天眯客价排序
+	 *
+	 * @param searchBuilder
+	 * @param geopoint
+	 */
+	private void sortByCurrentDateMikePrice(SearchRequestBuilder searchBuilder,String startDateDay) {
+		String mkPricekey = SearchConst.MIKE_PRICE_PROP.concat(startDateDay);
+
+		searchBuilder.addSort(mkPricekey, SortOrder.ASC);
+
+	}
+
+	/**
 	 * 是否推荐排序: 是否签约(升序), 推荐值(降序)
 	 * 
 	 * @param searchBuilder
@@ -1133,9 +1146,10 @@ public class SearchService implements ISearchService {
 				} else if (HotelSortEnum.PRICE.getId() == paramOrderby) {
 					// 眯客价属性列表
 					String startdateday = reqentity.getStartdateday();
-					String enddateday = reqentity.getEnddateday();
-					List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
-					setMikepriceScriptSort(searchBuilder, boolFilter, mkPriceDateList);
+					//String enddateday = reqentity.getEnddateday();
+					//List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
+					//setMikepriceScriptSort(searchBuilder, boolFilter, mkPriceDateList);
+					this.sortByCurrentDateMikePrice(searchBuilder, startdateday);
 				} else if (HotelSortEnum.RECOMMEND.getId() == paramOrderby) {
 					// 推荐排序(暂未使用)
 					this.sortByRecommend(searchBuilder);
