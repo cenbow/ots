@@ -47,6 +47,7 @@ public class SyViewLogController {
             InputStream is = request.getInputStream();
             byte[] reqBodyBytes = readBytes(is, size);
             String res = new String(reqBodyBytes);
+            logger.info("【sys/addviewevent】 res  is : {}", res);
             if (StringUtils.isEmpty(res)) {
                 logger.error("获取目标data失败.");
                 resultrtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
@@ -55,7 +56,7 @@ public class SyViewLogController {
             }
             JSONObject  jsObject = JSONObject.parseObject(res);
              String  dateStr =  jsObject.getString("data");
-            logger.info("【sys/addviewevent】 data is : {}", dateStr);
+            logger.info("【sys/addviewevent】 dataStr is : {}", dateStr);
             if (StringUtils.isEmpty(dateStr)) {
                 logger.error("获取目标data失败.");
                 resultrtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
