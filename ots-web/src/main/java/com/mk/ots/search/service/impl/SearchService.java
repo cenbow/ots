@@ -638,7 +638,7 @@ public class SearchService implements ISearchService {
 				// 眯客2.2.1, 根据屏幕坐标计算距离.
 				double hotelDistance = DistanceUtil.distance(lon, lat, hotelLongitude, hotelLatitude);
 				result.put("distance", hotelDistance);
-				System.out.println("distance: "+ hotelDistance);
+
 
 				Long sales = Long
 						.valueOf(String.valueOf(result.get("ordernummon") == null ? "0" : result.get("ordernummon")));
@@ -1259,7 +1259,7 @@ public class SearchService implements ISearchService {
 					}
 				}
 				result.put("userdistance", userDistance);
-				System.out.println(userDistance);
+
 				// 眯客3.0: 产品中去掉酒店列表显示最近酒店特性.
 				// 接口新增属性isnear: 是否最近酒店, distance值最小的酒店为T,其他为F.
 				if (page <= 1 && i == 0) {
