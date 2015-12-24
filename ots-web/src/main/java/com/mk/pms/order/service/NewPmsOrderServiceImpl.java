@@ -379,7 +379,7 @@ public class NewPmsOrderServiceImpl implements NewPmsOrderService {
 		}
 
 		List<ChangeRoomOrderBean> roomOrderList = new ArrayList<ChangeRoomOrderBean>();
-		StringBuffer hotelId = new StringBuffer();
+		StringBuffer hotelId = new StringBuffer(); 
 		Map<Long, Set<Long>> map = new HashMap<Long, Set<Long>>();
 		long hotelid = 0;
 		for (PmsRoomOrder pmsRoomOrder : pmsRoomOrderList) {
