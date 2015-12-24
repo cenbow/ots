@@ -106,10 +106,10 @@ VALUE
 update b_message_copywriter set copywriter = '#if($!cityCode==\'500000\')
     #if($!order.promoType==\'0\')
     预订成功
-    恭喜您成功预定$!{order.hotelName}$!{order.roomName}房间，入住时间$!{begintime},离店时间$!{endtime}，共$!{order.daynumber}晚。本次订单支付 ¥$!{order.totalprice}。地址：$!{detailAddr}。电话：$!{hotelPhone}。眯客为您节省$!{roomCostSavePrice}元。查看订单每日20:00点后更多酒店4折起~
+    恭喜您成功预定$!{order.hotelName}$!{order.roomName}房间，入住时间$!{begintime},离店时间$!{endtime}，共$!{order.daynumber}晚。本次订单支付 ¥$!{order.totalprice}。地址：$!{detailAddr}。电话：$!{hotelPhone}。眯客为您节省$!{roomCostSavePrice}元。查看订单每日20:00点后更多酒店4折起，入住后评论还有返现哦~
     #else
     预订成功
-    恭喜您成功预定$!{order.hotelName}$!{order.roomName}房间，入住时间$!{begintime},离店时间$!{endtime}，共$!{order.daynumber}晚。本次订单支付 ¥$!{order.totalprice}。地址：$!{detailAddr}。电话：$!{hotelPhone}。眯客又为您优惠$!{mikeSavePrice}元。查看订单每日20:00点后推出更多超低特价房~
+    恭喜您成功预定$!{order.hotelName}$!{order.roomName}房间，入住时间$!{begintime},离店时间$!{endtime}，共$!{order.daynumber}晚。本次订单支付 ¥$!{order.totalprice}。地址：$!{detailAddr}。电话：$!{hotelPhone}。眯客又为您优惠$!{mikeSavePrice}元。查看订单每日20:00点后推出更多超低特价房，入住后评论还有返现哦~
     #end
 #else
 预订成功
@@ -120,10 +120,10 @@ update b_message_copywriter set copywriter = '#if($!cityCode==\'500000\')
 update b_message_copywriter set copywriter = '#if($!cityCode==\'500000\')
     #if($!order.promoType==\'0\')
     预订成功
-    恭喜您成功预定$!{order.hotelName}$!{order.roomName}房间，入住时间$!{begintime},离店时间$!{endtime}，共$!{order.daynumber}晚。本次订单支付 ¥$!{order.totalprice}。地址：$!{detailAddr}。电话：$!{hotelPhone}。眯客为您节省$!{roomCostSavePrice}元。查看订单每日20:00点后更多酒店4折起~
+    恭喜您成功预定$!{order.hotelName}$!{order.roomName}房间，入住时间$!{begintime},离店时间$!{endtime}，共$!{order.daynumber}晚。本次订单支付 ¥$!{order.totalprice}。地址：$!{detailAddr}。电话：$!{hotelPhone}。眯客为您节省$!{roomCostSavePrice}元。查看订单每日20:00点后更多酒店4折起，入住后评论还有返现哦~
     #else
     预订成功
-    恭喜您成功预定$!{order.hotelName}$!{order.roomName}房间，入住时间$!{begintime},离店时间$!{endtime}，共$!{order.daynumber}晚。本次订单支付 ¥$!{order.totalprice}。地址：$!{detailAddr}。电话：$!{hotelPhone}。眯客又为您优惠$!{mikeSavePrice}元。查看订单每日20:00点后推出更多超低特价房~
+    恭喜您成功预定$!{order.hotelName}$!{order.roomName}房间，入住时间$!{begintime},离店时间$!{endtime}，共$!{order.daynumber}晚。本次订单支付 ¥$!{order.totalprice}。地址：$!{detailAddr}。电话：$!{hotelPhone}。眯客又为您优惠$!{mikeSavePrice}元。查看订单每日20:00点后推出更多超低特价房，入住后评论还有返现哦~
     #end
 #else
 预订成功
