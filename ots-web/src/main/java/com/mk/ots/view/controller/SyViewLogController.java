@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -31,8 +32,9 @@ public class SyViewLogController {
     private ISyViewLogService syViewLogService;
 
 
-    @RequestMapping(value = "/viewevent", method = {RequestMethod.POST })
+    @RequestMapping(value = "/viewevent")
     public ResponseEntity<Map<String, Object>> addviewevent(String data) {
+
         logger.info("【sys/addviewevent】 data is : {}", data);
         JSONArray  ja = JSONArray.parseArray(data);
         Map<String, Object> resultrtnMap = Maps.newHashMap();
