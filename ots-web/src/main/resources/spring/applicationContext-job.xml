@@ -59,6 +59,8 @@
                 <!--<ref bean="SendTicketJobTrigger"/>-->
 				<!-- 每分钟提醒 -->
 				<ref bean="remindMessageTrigger" />
+				<ref bean="weekClearingTrigger" />
+
 			</list>
 		</property>
 	</bean>
