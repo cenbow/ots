@@ -67,6 +67,7 @@ public class TBackMoneyRuleServiceImpl implements ITBackMoneyRuleService {
         if(backMoneyPer == null){
             return new BigDecimal(0);
         }
+        logger.info(String.format("getBackMoneyByOrder return orderid[%s], backMoneyPer [%s]", order.getId(), backMoneyPer));
        return  backMoneyPer;
     }
 
@@ -90,7 +91,7 @@ public class TBackMoneyRuleServiceImpl implements ITBackMoneyRuleService {
         }
 
         String promotyStr = order.getPromoType();
-        if(!StringUtils.isEmpty(promotyStr)){
+        if(StringUtils.isNotBlank(promotyStr)){
             bussinessType = Integer.parseInt(promotyStr);
             return bussinessType;
         }

@@ -2261,20 +2261,14 @@ public class OrderServiceImpl implements OrderService {
 
         checkPayByPromoType(request, order, order.getPromoType());
 
-        Long cashBigDecimal = 0L;
-        if(PromoTypeEnum.TJ.getCode().equals(order.getPromoType())){
-            cashBigDecimal = tBackMoneyRuleService.getBackMoneyByOrder(order).longValue();
-            order.setCashBack(new BigDecimal(cashBigDecimal));
-        }else{
-            Map<String, Object> cash = cashBackService.getCashBackByRoomtypeId(roomTypeId, DateUtils.formatDate(order.getBeginTime()),
-                    DateUtils.formatDate(order.getEndTime()));
-            this.logger.info("getCashBackByRoomtypeId:返现详细:{}", gson.toJson(cash));
-            cashBigDecimal = (Long) cash.get("cashbackcost");
-            order.setCashBack(new BigDecimal(cashBigDecimal));
+        Map<String, Object> cash = cashBackService.getCashBackByRoomtypeId(roomTypeId, DateUtils.formatDate(order.getBeginTime()),
+              DateUtils.formatDate(order.getEndTime()));
+        this.logger.info("getCashBackByRoomtypeId:返现详细:{}", gson.toJson(cash));
+        Long cashBigDecimal = (Long) cash.get("cashbackcost");
+        order.setCashBack(new BigDecimal(cashBigDecimal));
+        if (cashBigDecimal.longValue() > 0) {
+          order.setIsReceiveCashBack(ReceiveCashBackEnum.notReceiveCashBack.getId());
         }
-		if (cashBigDecimal.longValue() > 0) {
-			order.setIsReceiveCashBack(ReceiveCashBackEnum.notReceiveCashBack.getId());
-		}
         /*******************订单返现*************/
 		/*******************直减订单处理******************/
 		//如果是直减订单
