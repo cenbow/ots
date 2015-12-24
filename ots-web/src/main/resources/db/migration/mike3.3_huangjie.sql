@@ -94,7 +94,7 @@ alter table T_REMIND_TYPE comment '提醒记录类型';
 
 
 INSERT INTO T_REMIND_TYPE
-(code,name,content,url,title,is_weixin,is_sms,is_push,
+(code,name,title,url,content,is_weixin,is_sms,is_push,
 valid,create_time,create_by,update_time,update_by,remind_time)
 VALUE
 ('10','特价开抢提醒','特价开抢提醒','www.imikeshareMessage-url-scheme://hoteldetail/','亲，距离您预约抢购的房间时间只剩5分钟，请打开眯客APP开抢哦！',0,0,1,1,SYSDATE(),'',SYSDATE(),'','2015-12-20 19:55:00');
