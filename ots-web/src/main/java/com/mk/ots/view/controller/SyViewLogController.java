@@ -1,6 +1,7 @@
 package com.mk.ots.view.controller;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.mk.ots.view.service.ISyViewLogService;
 import org.apache.commons.lang.StringUtils;
@@ -15,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -33,26 +38,38 @@ public class SyViewLogController {
 
 
     @RequestMapping(value = "/viewevent")
-    public ResponseEntity<Map<String, Object>> addviewevent(String data) {
-
-        logger.info("【sys/addviewevent】 data is : {}", data);
-        JSONArray  ja = JSONArray.parseArray(data);
+    public ResponseEntity<Map<String, Object>> addviewevent(HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> resultrtnMap = Maps.newHashMap();
-        if (StringUtils.isEmpty(data)) {
-            logger.error("获取目标data失败.");
-            resultrtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
-            resultrtnMap.put("errmsg", "获取目标data失败!");
-            return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
-        }
-
         boolean result = false;
-        try{
+        try {
+            request.setCharacterEncoding("UTF-8");
+            int size = request.getContentLength();
+            InputStream is = request.getInputStream();
+            byte[] reqBodyBytes = readBytes(is, size);
+            String res = new String(reqBodyBytes);
+            if (StringUtils.isEmpty(res)) {
+                logger.error("获取目标data失败.");
+                resultrtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
+                resultrtnMap.put("errmsg", "获取目标data失败.");
+                return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
+            }
+            JSONObject  jsObject = JSONObject.parseObject(res);
+             String  dateStr =  jsObject.getString("data");
+            logger.info("【sys/addviewevent】 data is : {}", dateStr);
+            if (StringUtils.isEmpty(dateStr)) {
+                logger.error("获取目标data失败.");
+                resultrtnMap.put("errcode", HttpStatus.BAD_REQUEST.value());
+                resultrtnMap.put("errmsg", "获取目标data失败!");
+                return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
+            }
+            JSONArray ja = JSONArray.parseArray(dateStr);
             //组织数据响应
             syViewLogService.pushSyViewLog(ja);
             result = true;
-        }catch(Exception   e){
-            result =false;
-        }finally{
+
+        } catch (Exception e) {
+            result = false;
+        } finally {
             resultrtnMap.put("success", result);
             if (result) {
                 return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
@@ -63,5 +80,27 @@ public class SyViewLogController {
             }
         }
 
+    }
+
+    public static final byte[] readBytes(InputStream is, int contentLen) {
+        if (contentLen > 0) {
+            int readLen = 0;
+            int readLengthThisTime = 0;
+            byte[] message = new byte[contentLen];
+            try {
+                while (readLen != contentLen) {
+                    readLengthThisTime = is.read(message, readLen, contentLen - readLen);
+                    if (readLengthThisTime == -1) {// Should not happen.
+                        break;
+                    }
+                    readLen += readLengthThisTime;
+                }
+                return message;
+            } catch (IOException e) {
+                // Ignore
+                // e.printStackTrace();
+            }
+        }
+        return new byte[] {};
     }
 }
