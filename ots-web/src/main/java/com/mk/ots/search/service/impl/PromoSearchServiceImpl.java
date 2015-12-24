@@ -2483,6 +2483,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		if (HotelSortEnum.DISTANCE.getId().equals(reqEntity.getOrderby())) {
 			Collections.sort(hotelIds, new userDistanceComparator());
+		} else if (HotelSortEnum.PRICE.getId().equals(reqEntity.getOrderby())) {
+			Collections.sort(hotelIds, new PriceComparator());
 		} else if (HotelSortEnum.ORDERNUMS.getId().equals(reqEntity.getOrderby())) {
 			Collections.sort(hotelIds, new GreetscoreComparator());
 		}
@@ -4192,6 +4194,28 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Collections.sort(themeRoomtypes, new GreetscoreComparator());
 
 		return themeRoomtypes;
+	}
+
+	private class PriceComparator implements Comparator<Map<String, Object>> {
+		@Override
+		public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+			if (o1 == null) {
+				return -1;
+			} else if (o2 == null) {
+				return 1;
+			}
+
+			Integer price1 = parsePromoPrice(o1.get("promoprice"));
+			Integer price2 = parsePromoPrice(o2.get("promoprice"));
+
+			if (price1 == null) {
+				return -1;
+			} else if (price2 == null) {
+				return 1;
+			}
+
+			return price1.compareTo(price2);
+		}
 	}
 
 	private class PriceSavingComparator implements Comparator<Map<String, Object>> {
