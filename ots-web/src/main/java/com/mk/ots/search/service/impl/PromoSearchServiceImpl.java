@@ -823,7 +823,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			String hotelid = (String) searchResult.get("hotelid");
 			if (!hotelIds.contains(hotelid)) {
 				hotelIds.add(hotelid);
-				
+
 				homeThemes.add(searchResult);
 			}
 		}
@@ -1168,7 +1168,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				themedRoomtypes.add(roomtype);
 
 				try {
-					List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
+					/*List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
 							buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
 					if (roomstatePrices != null && roomstatePrices.size() > 0
 							&& roomstatePrices.get(0).getRoomtype() != null
@@ -1182,7 +1182,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						} else if (promoprice != null && price != null && (promoprice > price.intValue())) {
 							hotel.put("promoprice", price.intValue());
 						}
-					}
+					}*/
+					hotel.put("promoprice", 1l);
 				} catch (Exception ex) {
 					logger.warn("failed to findHotelRoomPrice...", ex);
 				}
@@ -1221,6 +1222,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				if (isThemed(hotelId, roomtype)) {
 					try {
+
+						hotel.put("promoprice", 1l);
+						/*
 						List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
 								buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
 						if (roomstatePrices != null && roomstatePrices.size() > 0
@@ -1228,8 +1232,18 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 								&& roomstatePrices.get(0).getRoomtype().size() > 0) {
 							BigDecimal price = roomstatePrices.get(0).getRoomtype().get(0).getRoomtypeprice();
 
-							hotel.put("promoprice", price);
+							if (promoprice == null) {
+								hotel.put("promoprice", price.longValue());
+							} else if (promoprice == 0 && price != null && price.longValue() > 0) {
+								hotel.put("promoprice", price.longValue());
+							} else if (promoprice != null && price != null && (promoprice > price.longValue())) {
+								hotel.put("promoprice", price.longValue());
+							}
 						}
+						*/
+
+
+
 					} catch (Exception ex) {
 						logger.warn("failed to findHotelRoomPrice...", ex);
 					}
@@ -1237,6 +1251,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					if (!hotelRoomTypes.get(hotelId).contains(roomtype)) {
 						hotelRoomTypes.get(hotelId).offer(roomtype);
 						counter++;
+					}
+
+					try {
+						Thread.sleep(300L);
+					} catch (Exception ex) {
+						/**
+						 * intentionally ignore this
+						 */
 					}
 				}
 			}
@@ -2133,19 +2155,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		searchBuilder.addSort("ispms", SortOrder.ASC).addSort("priority", SortOrder.DESC);
 	}
 
-
-	/**
-	 * 当天眯客价排序
-	 *
-	 * @param searchBuilder
-	 * @param geopoint
-	 */
-	private void sortByPromoPrice(SearchRequestBuilder searchBuilder) {
-
-		searchBuilder.addSort("mintonitepromoprice", SortOrder.ASC);
-
-	}
-
 	/**
 	 * 价格排序
 	 *
@@ -2245,7 +2254,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		Map<String, Object> hotelIdMap = new HashMap<String, Object>();
 
-		List<Map<String, Object>> singularRoomTypes = new ArrayList<>();
 		for (int i = 0; i < hits.length; i++) {
 			SearchHit hit = hits[i];
 			Map<String, Object> result = hit.getSource();
@@ -2321,25 +2329,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			logger.info("--================================== 查询酒店眯客价开始： ==================================-- ");
 
 			Long startTime = new Date().getTime();
-			String[] prices = null;
-			Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
-			if (isNewPrice)
-				prices = hotelPriceService.getHotelMikePrices(Long.valueOf(es_hotelid), reqEntity.getStartdateday(),
-						reqEntity.getEnddateday());
-			else
-				prices = roomstateService.getHotelMikePrices(Long.valueOf(es_hotelid), reqEntity.getStartdateday(),
-						reqEntity.getEnddateday());
+
 			Long endTime = new Date().getTime();
 			Long times = endTime - startTime;
 			logger.info("查询酒店: {}眯客价耗时: {}ms.", es_hotelid, times);
-			BigDecimal minPrice = new BigDecimal(prices[0]);
+			BigDecimal minPrice = new BigDecimal(1);
 			result.put("minprice", minPrice);
 			result.put("promoprice", minPrice);
 
 			Long maxPrice = roomstateService.findHotelMaxPrice(Long.parseLong(es_hotelid));
 			result.put("minpmsprice", new BigDecimal(maxPrice));
 
-			logger.info("酒店: {}门市价: {} maxprice{}", es_hotelid, prices[1], maxPrice);
 			logger.info("--================================== 查询酒店眯客价结束： ==================================-- ");
 
 			if (result.get("hotelpicnum") == null) {
@@ -2438,18 +2438,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			result.put("hotelvc", hotelvc);
 
 			List<Map<String, Object>> roomtypeList = this.readonlyRoomtypeList(result, "");
-			if (roomtypeList != null) {
-				List<Map<String, Object>> themedRoomtypes = updateRoomtypeThemes(roomtypeList, result,
-						reqEntity.getStartdateday(), reqEntity.getEnddateday());
-
-				singularRoomTypes.addAll(themedRoomtypes);
-			}
-
 			result.put("roomtype", roomtypeList);
 
 			result.put("collectionstate", "");
 
-			if (StringUtils.isNotBlank(reqEntity.getToken())) {
+			if (StringUtils.isNotBlank(reqEntity.getToken()) && StringUtils.isNotBlank(es_hotelid)) {
 				try {
 					String collectionState = findCollection(reqEntity.getToken(), Long.valueOf(es_hotelid));
 					if (StringUtils.isNotBlank(collectionState)) {
@@ -2815,18 +2808,11 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					// 距离排序
 					this.sortByDistance(searchBuilder, new GeoPoint(lat, lon));
 				} else if (HotelSortEnum.PRICE.getId() == paramOrderby) {
-
-					if (promoid == HotelPromoEnum.Night.getCode()){
-						this.sortByPromoPrice(searchBuilder);
-					}else{
-						// 眯客价属性列表
-						String startdateday = reqentity.getStartdateday();
-						String enddateday = reqentity.getEnddateday();
-						List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
-						setMikepriceScriptSort(searchBuilder, boolFilter, mkPriceDateList);
-					}
-
-
+					// 眯客价属性列表
+					String startdateday = reqentity.getStartdateday();
+					String enddateday = reqentity.getEnddateday();
+					List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
+					setMikepriceScriptSort(searchBuilder, boolFilter, mkPriceDateList);
 				} else if (HotelSortEnum.RECOMMEND.getId() == paramOrderby) {
 					// 推荐排序(暂未使用)
 					this.sortByRecommend(searchBuilder);
@@ -3040,8 +3026,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				// TODO: 酒店最低眯客价对应的房型的门市价,暂时取maxprice.
 				Long startTime = new Date().getTime();
 				String[] prices = null;
-				Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
-				if (isNewPrice)
+				if (hotelPriceService.isUseNewPrice())
 					prices = hotelPriceService.getHotelMikePrices(Long.valueOf(es_hotelid), reqentity.getStartdateday(),
 							reqentity.getEnddateday());
 				else
@@ -3240,7 +3225,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				result.put("collectionstate", "");
 
-				if (StringUtils.isNotBlank(reqentity.getToken())) {
+				if (StringUtils.isNotBlank(reqentity.getToken()) && StringUtils.isNotBlank(hotelid)) {
 					try {
 						String collectionState = findCollection(reqentity.getToken(), Long.valueOf(hotelid));
 						if (StringUtils.isNotBlank(collectionState)) {
@@ -3460,9 +3445,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (StringUtils.isNotBlank(reqentity.getMaxprice())) {
 				maxpriceParam = Double.valueOf(reqentity.getMaxprice());
 			}
-			mikePriceBuilders.add(
-					FilterBuilders.rangeFilter("mintonitepromoprice")
-							.gte(Double.valueOf(minpriceParam)).lte(Double.valueOf(maxpriceParam)));
+			mikePriceBuilders.add(FilterBuilders.rangeFilter("mintonitepromoprice").gte(Double.valueOf(minpriceParam))
+					.lte(Double.valueOf(maxpriceParam)));
 		}
 		return mikePriceBuilders;
 	}

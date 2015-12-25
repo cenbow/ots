@@ -1062,7 +1062,7 @@
                 <newpms.url>http://10.4.17.121:8083/otai/ots2pms/</newpms.url>
                 <jedis.pool.maxidl>20</jedis.pool.maxidl>
                 <jedis.pool.minidl>8</jedis.pool.minidl>
-                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+                <jedis.pool.maxtotal>800</jedis.pool.maxtotal>
                 <addpay>https://otai.imike.com/otai/ots2pms/addpay</addpay>
                 <cancelpay>https://otai.imike.com/otai/ots2pms/cancelpay</cancelpay>
                 <selectCustomerpay>https://otai.imike.com/otai/ots2pms/selectcustomerpay</selectCustomerpay>
@@ -1504,7 +1504,7 @@
                 <newpms.url>https://smlt-otai.imike.cn/otai/ots2pms</newpms.url>
                 <jedis.pool.maxidl>20</jedis.pool.maxidl>
                 <jedis.pool.minidl>8</jedis.pool.minidl>
-                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+                <jedis.pool.maxtotal>1000</jedis.pool.maxtotal>
                 <addpay>https://smlt-otai.imike.cn/otai/ots2pms/addpay</addpay>
                 <cancelpay>https://smlt-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
                 <selectCustomerpay>https://smlt-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
@@ -1559,7 +1559,9 @@
 
                 <jedis.pool.maxidl>20</jedis.pool.maxidl>
                 <jedis.pool.minidl>8</jedis.pool.minidl>
-                <jedis.pool.maxtotal>500</jedis.pool.maxtotal>
+
+                <jedis.pool.maxtotal>1000</jedis.pool.maxtotal>
+
 
                 <!-- 线上 -->
                 <addpay>http://otai.imike.com/otai/ots2pms/addpay</addpay>

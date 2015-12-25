@@ -55,6 +55,9 @@ public class SyViewLogController {
                 return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
             }
             res = res.replace("\\","");
+
+            logger.info("【sys/addviewevent】 res  aftrer  replace  is : {}", res);
+
             JSONObject  jsObject = JSONObject.parseObject(res);
              String  dateStr =  jsObject.getString("data");
             logger.info("【sys/addviewevent】 dataStr is : {}", dateStr);
@@ -105,4 +108,17 @@ public class SyViewLogController {
         }
         return new byte[] {};
     }
+
+    public static void main(String []args){
+            String  str = "\"{\"data\":[{\"os\":\"android\",\"model\":\"HM NOTE 1S\",\"packageName\":\"com.lezhu.mike\",\"timeStamp\":\"1451026487\",\"userId\":\"18018647025\",\"eventType\":\"1\",\"channel\":\"test\",\"deviceId\":\"99000644059292\",\"version\":\"3.3.0_60\",\"dataName\":\"m_hotel_home\"},{\"id\":\"0\",\"os\":\"android\",\"model\":\"HM NOTE 1S\",\"text\":\"一元秒杀\",\"packageName\":\"com.lezhu.mike\",\"timeStamp\":\"1451026501\",\"userId\":\"18018647025\",\"eventType\":\"2\",\"district\":\"上海市\",\"channel\":\"test\",\"deviceId\":\"99000644059292\",\"version\":\"3.3.0_60\",\"dataName\":\"e_hotel_home_tab\"},{\"os\":\"android\",\"model\":\"HM NOTE 1S\",\"packageName\":\"com.lezhu.mike\",\"timeStamp\":\"1451026533\",\"userId\":\"18018647025\",\"eventType\":\"1\",\"district\":\"上海市\",\"channel\":\"test\",\"deviceId\":\"99000644059292\",\"version\":\"3.3.0_60\",\"dataName\":\"m_hotel_home\"}]}\"";
+             str = str.replace("\\\"","\"");
+            if(str.startsWith("\""));
+            str = str.substring(2,str.length()-2);
+             System.out.println(str);
+         JSONObject  jsObject = JSONObject.parseObject(str);
+        String  dateStr =  jsObject.getString("data");
+        System.out.println();
+
+    }
+
 }

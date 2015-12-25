@@ -22,17 +22,21 @@ import javax.annotation.Resource;
 public class SyViewLogThread  extends    Thread{
 
     public void run() {
+        MkJedisConnectionFactory jedisFactory = AppUtils.getBean(MkJedisConnectionFactory.class);
+        Jedis jedis =  jedisFactory.getJedis();
         try{
             while(true){
-                MkJedisConnectionFactory jedisFactory = AppUtils.getBean(MkJedisConnectionFactory.class);
-                SyViewLogListen listener = new SyViewLogListen();
-//                jedisFactory.getJedis().subscribe(listener, "SYVIEWWLOG");
-                 String message =    jedisFactory.getJedis().lpop("SYVIEWWLOG");
-                listener.onMessage(message);
-                Thread.sleep(500);
+
+                SyViewLogListen  sll =  new SyViewLogListen();
+                String message =  jedis.lpop("SYVIEWWLOG");
+                sll.onMessage(message);
+                Thread.sleep(800L);
+
             }
         }catch(Exception e){
             e.printStackTrace();
+        }finally{
+            jedis.close();
         }
     }
 }
