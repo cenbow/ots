@@ -1125,7 +1125,8 @@ public class RoomstateService {
 					String[] prices = null;
 					Transaction priceTransaction = Cat.newTransaction("RoomState", "mikeprice-redis");
 					try {
-						if (hotelPriceService.isUseNewPrice())
+						Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+						if (isNewPrice)
 							prices = hotelPriceService.getRoomtypeMikePrices(hotelid, troomType.getId(), begindate,
 									enddate);
 						else
@@ -1518,7 +1519,8 @@ public class RoomstateService {
 			String[] prices = null;
 			Transaction priceTransaction = Cat.newTransaction("RoomState", "mikeprice-redis");
 			try {
-				if (hotelPriceService.isUseNewPrice())
+				Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+				if (isNewPrice)
 					prices = hotelPriceService.getRoomtypeMikePrices(hotelid, troomType.getId(), begindate, enddate);
 				else
 					prices = this.getRoomtypeMikePrices(hotelid, troomType.getId(), begindate, enddate);

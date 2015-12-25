@@ -1,16 +1,5 @@
 package com.mk.ots.hotel.service.impl;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.google.common.collect.Maps;
 import com.mk.framework.util.MyTokenUtils;
 import com.mk.ots.common.utils.Constant;
@@ -19,12 +8,14 @@ import com.mk.ots.hotel.bean.HotelCollection;
 import com.mk.ots.hotel.bean.HotelCollectionExample;
 import com.mk.ots.hotel.comm.enums.HotelPictureEnum;
 import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.service.CashBackService;
-import com.mk.ots.hotel.service.HotelCollectionService;
-import com.mk.ots.hotel.service.HotelPriceService;
-import com.mk.ots.hotel.service.HotelService;
-import com.mk.ots.hotel.service.RoomstateService;
+import com.mk.ots.hotel.service.*;
 import com.mk.ots.mapper.HotelCollectionMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class HotelCollectionServiceImpl implements HotelCollectionService {
@@ -124,7 +115,8 @@ public class HotelCollectionServiceImpl implements HotelCollectionService {
 				}
 
 				String[] prices = null;
-				if (hotelPriceService.isUseNewPrice())
+				Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+				if (isNewPrice)
 					prices = hotelPriceService.getHotelMikePrices(hotelid, today, tomorrow);
 				else
 					prices = roomstateService.getHotelMikePrices(hotelid, today, tomorrow); // 最低眯客价和最低门市价

@@ -750,7 +750,8 @@ public class HotelController {
 		long startTime = new Date().getTime();
 		try {
 			String[] prices = null;
-			if (hotelPriceService.isUseNewPrice())
+			Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+			if (isNewPrice)
 				prices = hotelPriceService.getHotelMikePrices(hotelid, startdateday, enddateday);
 			else
 				prices = roomstateService.getHotelMikePrices(hotelid, startdateday, enddateday);
