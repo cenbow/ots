@@ -1,11 +1,7 @@
 package com.mk.framework;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
+import com.mk.framework.jedis.MkJedis;
+import com.mk.framework.jedis.MkJedisSentinelPool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -15,11 +11,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.redis.ExceptionTranslationStrategy;
 import org.springframework.data.redis.PassThroughExceptionTranslationStrategy;
 import org.springframework.data.redis.RedisConnectionFailureException;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisNode;
-import org.springframework.data.redis.connection.RedisSentinelConfiguration;
-import org.springframework.data.redis.connection.RedisSentinelConnection;
+import org.springframework.data.redis.connection.*;
 import org.springframework.data.redis.connection.jedis.JedisConnection;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConverters;
@@ -28,17 +20,14 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.JedisSentinelPool;
-import redis.clients.jedis.JedisShardInfo;
-import redis.clients.jedis.Protocol;
+import redis.clients.jedis.*;
 import redis.clients.util.Pool;
 
-import com.mk.framework.jedis.MkJedis;
-import com.mk.framework.jedis.MkJedisSentinelPool;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class MkJedisConnectionFactory implements InitializingBean, DisposableBean, RedisConnectionFactory {
 
@@ -134,12 +123,14 @@ public class MkJedisConnectionFactory implements InitializingBean, DisposableBea
 	 */
 	protected Jedis fetchJedisConnector() {
 		try {
+
 			if (usePool && pool != null) {
 				return pool.getResource();
 			}
 			Jedis jedis = new MkJedis(getShardInfo());
 			// force initialization (see Jedis issue #82)
 			jedis.connect();
+
 			return jedis;
 		} catch (Exception ex) {
 			throw new RedisConnectionFailureException("Cannot get Jedis connection", ex);
