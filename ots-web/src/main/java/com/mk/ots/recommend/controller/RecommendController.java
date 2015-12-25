@@ -319,7 +319,7 @@ public class RecommendController {
                     TRecommenditem tRecommendItem = recommenditemHashMap.get(itemAreaList.get(i).getItemid());
 
 
-                    if (limit == null || (tRecommendItem != null && global_count <= limit)) {
+                    if ( tRecommendItem != null &&(limit == null || global_count <= limit)) {
 
                         if (Constant.WEIXIN_CALLMETHOD.equals(callmethod)
                                 && tRecommendItem.getViewtype() == Constant.TONIGHT_PROMO_VIEWTYPE) {
