@@ -823,7 +823,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			String hotelid = (String) searchResult.get("hotelid");
 			if (!hotelIds.contains(hotelid)) {
 				hotelIds.add(hotelid);
-				
+
 				homeThemes.add(searchResult);
 			}
 		}
@@ -1221,12 +1221,24 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				if (isThemed(hotelId, roomtype)) {
 					try {
-						List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
-								buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
-						if (roomstatePrices != null && roomstatePrices.size() > 0
-								&& roomstatePrices.get(0).getRoomtype() != null
-								&& roomstatePrices.get(0).getRoomtype().size() > 0) {
-							BigDecimal price = roomstatePrices.get(0).getRoomtype().get(0).getRoomtypeprice();
+						Thread.sleep(150L);
+					} catch (Exception ex) {
+						/**
+						 * intentionally ignore interruption
+						 */
+					}
+
+					try {
+						RoomstateQuerylistReqEntity roomstateQuery = buildRoomstateQuery(roomtype, hotelId,
+								startdateday, enddateday);
+
+						String[] roomstatePrices = roomstateService.getRoomtypeMikePrices(Long.valueOf(hotelId),
+								roomstateQuery.getRoomtypeid(), startdateday, enddateday);
+
+						if (roomstatePrices != null && roomstatePrices.length > 0) {
+							String roomstatePrice = roomstatePrices[0];
+
+							BigDecimal price = new BigDecimal(roomstatePrice);
 
 							hotel.put("promoprice", price);
 						}
@@ -2133,7 +2145,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		searchBuilder.addSort("ispms", SortOrder.ASC).addSort("priority", SortOrder.DESC);
 	}
 
-
 	/**
 	 * 当天眯客价排序
 	 *
@@ -2321,7 +2332,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			Long startTime = new Date().getTime();
 			String[] prices = null;
-			Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+			Boolean isNewPrice = false;// hotelPriceService.isUseNewPrice();
 			if (isNewPrice)
 				prices = hotelPriceService.getHotelMikePrices(Long.valueOf(es_hotelid), reqEntity.getStartdateday(),
 						reqEntity.getEnddateday());
@@ -2808,16 +2819,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					this.sortByDistance(searchBuilder, new GeoPoint(lat, lon));
 				} else if (HotelSortEnum.PRICE.getId() == paramOrderby) {
 
-					if (promoid == HotelPromoEnum.Night.getCode()){
+					if (promoid == HotelPromoEnum.Night.getCode()) {
 						this.sortByPromoPrice(searchBuilder);
-					}else{
+					} else {
 						// 眯客价属性列表
 						String startdateday = reqentity.getStartdateday();
 						String enddateday = reqentity.getEnddateday();
 						List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
 						setMikepriceScriptSort(searchBuilder, boolFilter, mkPriceDateList);
 					}
-
 
 				} else if (HotelSortEnum.RECOMMEND.getId() == paramOrderby) {
 					// 推荐排序(暂未使用)
@@ -3032,7 +3042,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				// TODO: 酒店最低眯客价对应的房型的门市价,暂时取maxprice.
 				Long startTime = new Date().getTime();
 				String[] prices = null;
-				Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+				Boolean isNewPrice = false;// hotelPriceService.isUseNewPrice();
 				if (isNewPrice)
 					prices = hotelPriceService.getHotelMikePrices(Long.valueOf(es_hotelid), reqentity.getStartdateday(),
 							reqentity.getEnddateday());
@@ -3452,9 +3462,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (StringUtils.isNotBlank(reqentity.getMaxprice())) {
 				maxpriceParam = Double.valueOf(reqentity.getMaxprice());
 			}
-			mikePriceBuilders.add(
-					FilterBuilders.rangeFilter("mintonitepromoprice")
-							.gte(Double.valueOf(minpriceParam)).lte(Double.valueOf(maxpriceParam)));
+			mikePriceBuilders.add(FilterBuilders.rangeFilter("mintonitepromoprice").gte(Double.valueOf(minpriceParam))
+					.lte(Double.valueOf(maxpriceParam)));
 		}
 		return mikePriceBuilders;
 	}
