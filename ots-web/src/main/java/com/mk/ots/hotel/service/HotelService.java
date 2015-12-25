@@ -3153,7 +3153,8 @@ public class HotelService {
 					String enddateday = startdateday;
 					// 取眯客价
 					String[] prices = null;
-					if (hotelPriceService.isUseNewPrice())
+					Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+					if (isNewPrice)
 						prices = hotelPriceService.getHotelMikePrices(hotelid, startdateday, enddateday);
 					else
 						prices = roomstateService.getHotelMikePrices(hotelid, startdateday, enddateday);
