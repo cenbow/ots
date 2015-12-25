@@ -55,6 +55,9 @@ public class SyViewLogController {
                 return new ResponseEntity<Map<String, Object>>(resultrtnMap, HttpStatus.OK);
             }
             res = res.replace("\\","");
+
+            logger.info("【sys/addviewevent】 res  aftrer  replace  is : {}", res);
+
             JSONObject  jsObject = JSONObject.parseObject(res);
              String  dateStr =  jsObject.getString("data");
             logger.info("【sys/addviewevent】 dataStr is : {}", dateStr);
