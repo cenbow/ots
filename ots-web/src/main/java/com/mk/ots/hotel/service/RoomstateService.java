@@ -2627,18 +2627,21 @@ public class RoomstateService {
 					resultVal[1] = mikeRoompriceMap.get(roomtypeid.toString());
 				}
 			}
+
+			if (resultVal[0].equals("0")){
+				resultVal[0] = Constant.DEFENSE_ZERO_PRICE.toString();
+			}
+
+
+			if (resultVal[1].equals("0")){
+				resultVal[1] = Constant.DEFENSE_ZERO_PRICE.toString();
+			}
+
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		if (resultVal[0].equals("0")){
-			resultVal[0] = Constant.DEFENSE_ZERO_PRICE.toString();
-		}
-
-
-		if (resultVal[1].equals("0")){
-			resultVal[1] = Constant.DEFENSE_ZERO_PRICE.toString();
-		}
 
 		return resultVal;
 	}
