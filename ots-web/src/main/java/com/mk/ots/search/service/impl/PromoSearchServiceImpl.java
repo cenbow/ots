@@ -1223,17 +1223,24 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				if (isThemed(hotelId, roomtype)) {
 					try {
 
-						RoomstateQuerylistReqEntity roomstateQuery = buildRoomstateQuery(roomtype, hotelId,
-								startdateday, enddateday);
+						hotel.put("promoprice", 1l);
+						/*
+						List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
+								buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
+						if (roomstatePrices != null && roomstatePrices.size() > 0
+								&& roomstatePrices.get(0).getRoomtype() != null
+								&& roomstatePrices.get(0).getRoomtype().size() > 0) {
+							BigDecimal price = roomstatePrices.get(0).getRoomtype().get(0).getRoomtypeprice();
 
-						String[] roomstatePrices = roomstateService.getRoomtypeMikePrices(Long.valueOf(hotelId),
-								roomstateQuery.getRoomtypeid(), startdateday, enddateday);
-
-						if (roomstatePrices != null && roomstatePrices.length > 0) {
-							BigDecimal price = new BigDecimal(roomstatePrices[0]);
-
-							hotel.put("promoprice", price);
+							if (promoprice == null) {
+								hotel.put("promoprice", price.longValue());
+							} else if (promoprice == 0 && price != null && price.longValue() > 0) {
+								hotel.put("promoprice", price.longValue());
+							} else if (promoprice != null && price != null && (promoprice > price.longValue())) {
+								hotel.put("promoprice", price.longValue());
+							}
 						}
+						*/
 
 
 
