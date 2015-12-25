@@ -1207,6 +1207,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				if (isThemed(hotelId, roomtype)) {
 					try {
+						hotel.put("promoprice", 1l);
 						/*
 						List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
 								buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
@@ -1224,7 +1225,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 							}
 						}
 						*/
-						hotel.put("promoprice", 1l);
+
 
 					} catch (Exception ex) {
 						logger.warn("failed to findHotelRoomPrice...", ex);
