@@ -2245,7 +2245,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 		Map<String, Object> hotelIdMap = new HashMap<String, Object>();
 
-		List<Map<String, Object>> singularRoomTypes = new ArrayList<>();
 		for (int i = 0; i < hits.length; i++) {
 			SearchHit hit = hits[i];
 			Map<String, Object> result = hit.getSource();
@@ -2438,13 +2437,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			result.put("hotelvc", hotelvc);
 
 			List<Map<String, Object>> roomtypeList = this.readonlyRoomtypeList(result, "");
-			if (roomtypeList != null) {
-				List<Map<String, Object>> themedRoomtypes = updateRoomtypeThemes(roomtypeList, result,
-						reqEntity.getStartdateday(), reqEntity.getEnddateday());
-
-				singularRoomTypes.addAll(themedRoomtypes);
-			}
-
 			result.put("roomtype", roomtypeList);
 
 			result.put("collectionstate", "");
