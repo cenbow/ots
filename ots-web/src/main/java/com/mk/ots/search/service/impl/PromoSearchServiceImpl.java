@@ -1670,7 +1670,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			showConfig.setPromoid(HotelPromoEnum.Night.getCode());
 			showConfig.setShowArea(ShowAreaEnum.HomePagePromoRecommend.getCode());
 
-			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRenderableShows(showConfig);
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(showConfig);
 			promolist = this.searchHomePromoBase(params, showConfigs, true);
 
 			if (promolist != null && promolist.size() > 0) {
