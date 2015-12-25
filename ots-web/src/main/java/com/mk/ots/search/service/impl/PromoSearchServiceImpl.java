@@ -2088,6 +2088,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 	}
 
 	/**
+	 * 当天眯客价排序
+	 *
+	 * @param searchBuilder
+	 * @param geopoint
+	 */
+	private void sortByPromoPrice(SearchRequestBuilder searchBuilder) {
+
+		searchBuilder.addSort("mintonitepromoprice", SortOrder.ASC);
+
+	}
+	/**
 	 *
 	 * @param searchBuilder
 	 * @param sortType
