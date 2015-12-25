@@ -823,7 +823,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			String hotelid = (String) searchResult.get("hotelid");
 			if (!hotelIds.contains(hotelid)) {
 				hotelIds.add(hotelid);
-				
+
 				homeThemes.add(searchResult);
 			}
 		}
@@ -1221,12 +1221,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				if (isThemed(hotelId, roomtype)) {
 					try {
-						List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
-								buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
-						if (roomstatePrices != null && roomstatePrices.size() > 0
-								&& roomstatePrices.get(0).getRoomtype() != null
-								&& roomstatePrices.get(0).getRoomtype().size() > 0) {
-							BigDecimal price = roomstatePrices.get(0).getRoomtype().get(0).getRoomtypeprice();
+						RoomstateQuerylistReqEntity roomstateQuery = buildRoomstateQuery(roomtype, hotelId,
+								startdateday, enddateday);
+
+						String[] roomstatePrices = roomstateService.getRoomtypeMikePrices(Long.valueOf(hotelId),
+								roomstateQuery.getRoomtypeid(), startdateday, enddateday);
+
+						if (roomstatePrices != null && roomstatePrices.length > 0) {
+							BigDecimal price = new BigDecimal(roomstatePrices[0]);
 
 							hotel.put("promoprice", price);
 						}
@@ -1237,6 +1239,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					if (!hotelRoomTypes.get(hotelId).contains(roomtype)) {
 						hotelRoomTypes.get(hotelId).offer(roomtype);
 						counter++;
+					}
+
+					try {
+						Thread.sleep(150L);
+					} catch (Exception ex) {
+						/**
+						 * intentionally ignore this
+						 */
 					}
 				}
 			}
