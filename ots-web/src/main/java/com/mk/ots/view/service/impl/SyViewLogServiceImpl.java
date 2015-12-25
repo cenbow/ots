@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -83,14 +84,19 @@ public class SyViewLogServiceImpl implements ISyViewLogService {
         }
 
         Transaction t = Cat.newTransaction("saveSyViewLogPost", ja.toString());
+      Jedis  jedis = null;
         try {
-            jedisFactory.getJedis().publish("SYVIEWWLOG", ja.toString());
+            jedis =  jedisFactory.getJedis();
+            jedis.lpush("SYVIEWWLOG", ja.toString());
             Cat.logEvent("Sy/saveSyViewLog", "请求埋点", Event.SUCCESS, ja.toString());
             t.setStatus(Transaction.SUCCESS);
         } catch (Exception e) {
             logger.error("添加日志失败");
             t.setStatus(e);
         } finally {
+            if(null!=jedis){
+                jedis.close();
+            }
             t.complete();
         }
     }

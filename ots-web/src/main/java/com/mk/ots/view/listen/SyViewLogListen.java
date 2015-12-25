@@ -16,9 +16,9 @@ import java.util.Date;
  * Created by jeashi on 2015/12/16.
  */
 @Service
-public class SyViewLogListen  extends JedisPubSub {
+public class SyViewLogListen   {
 
-    public void onMessage(String channel, String message){
+    public void onMessage( String message){
       JSONArray jsAry = JSONArray.parseArray(message);
       if(null==jsAry){
        return ;
