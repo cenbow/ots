@@ -2449,7 +2449,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			result.put("collectionstate", "");
 
-			if (StringUtils.isNotBlank(reqEntity.getToken())) {
+			if (StringUtils.isNotBlank(reqEntity.getToken()) && StringUtils.isNotBlank(es_hotelid)) {
 				try {
 					String collectionState = findCollection(reqEntity.getToken(), Long.valueOf(es_hotelid));
 					if (StringUtils.isNotBlank(collectionState)) {
@@ -3240,7 +3240,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				result.put("collectionstate", "");
 
-				if (StringUtils.isNotBlank(reqentity.getToken())) {
+				if (StringUtils.isNotBlank(reqentity.getToken()) && StringUtils.isNotBlank(hotelid)) {
 					try {
 						String collectionState = findCollection(reqentity.getToken(), Long.valueOf(hotelid));
 						if (StringUtils.isNotBlank(collectionState)) {
