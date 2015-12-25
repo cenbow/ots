@@ -1252,7 +1252,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					}
 
 					try {
-						Thread.sleep(150L);
+						Thread.sleep(300L);
 					} catch (Exception ex) {
 						/**
 						 * intentionally ignore this
@@ -2327,24 +2327,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			logger.info("--================================== 查询酒店眯客价开始： ==================================-- ");
 
 			Long startTime = new Date().getTime();
-			String[] prices = null;
-			if (hotelPriceService.isUseNewPrice())
-				prices = hotelPriceService.getHotelMikePrices(Long.valueOf(es_hotelid), reqEntity.getStartdateday(),
-						reqEntity.getEnddateday());
-			else
-				prices = roomstateService.getHotelMikePrices(Long.valueOf(es_hotelid), reqEntity.getStartdateday(),
-						reqEntity.getEnddateday());
+
 			Long endTime = new Date().getTime();
 			Long times = endTime - startTime;
 			logger.info("查询酒店: {}眯客价耗时: {}ms.", es_hotelid, times);
-			BigDecimal minPrice = new BigDecimal(prices[0]);
+			BigDecimal minPrice = new BigDecimal(1);
 			result.put("minprice", minPrice);
 			result.put("promoprice", minPrice);
 
 			Long maxPrice = roomstateService.findHotelMaxPrice(Long.parseLong(es_hotelid));
 			result.put("minpmsprice", new BigDecimal(maxPrice));
 
-			logger.info("酒店: {}门市价: {} maxprice{}", es_hotelid, prices[1], maxPrice);
 			logger.info("--================================== 查询酒店眯客价结束： ==================================-- ");
 
 			if (result.get("hotelpicnum") == null) {
@@ -3450,9 +3443,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			if (StringUtils.isNotBlank(reqentity.getMaxprice())) {
 				maxpriceParam = Double.valueOf(reqentity.getMaxprice());
 			}
-			mikePriceBuilders.add(
-					FilterBuilders.rangeFilter("mintonitepromoprice")
-							.gte(Double.valueOf(minpriceParam)).lte(Double.valueOf(maxpriceParam)));
+			mikePriceBuilders.add(FilterBuilders.rangeFilter("mintonitepromoprice").gte(Double.valueOf(minpriceParam))
+					.lte(Double.valueOf(maxpriceParam)));
 		}
 		return mikePriceBuilders;
 	}

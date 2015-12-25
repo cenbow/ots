@@ -1,12 +1,9 @@
 package com.mk.ots.remind.controller;
 
-import com.mk.framework.AppUtils;
-import com.mk.framework.MkJedisConnectionFactory;
 import com.mk.framework.util.MyTokenUtils;
 import com.mk.ots.common.enums.RemindTypeEnum;
 import com.mk.ots.member.model.UMember;
 import com.mk.ots.remind.service.RemindService;
-import com.mk.ots.utils.SpringContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
