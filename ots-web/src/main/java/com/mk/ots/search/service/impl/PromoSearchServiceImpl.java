@@ -2801,11 +2801,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					// 距离排序
 					this.sortByDistance(searchBuilder, new GeoPoint(lat, lon));
 				} else if (HotelSortEnum.PRICE.getId() == paramOrderby) {
-					// 眯客价属性列表
-					String startdateday = reqentity.getStartdateday();
-					String enddateday = reqentity.getEnddateday();
-					List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
-					setMikepriceScriptSort(searchBuilder, boolFilter, mkPriceDateList);
+					if (promoid == HotelPromoEnum.Night.getCode()){
+						this.sortByPromoPrice(searchBuilder);
+					}else{
+						// 眯客价属性列表
+						String startdateday = reqentity.getStartdateday();
+						String enddateday = reqentity.getEnddateday();
+						List<String> mkPriceDateList = this.getMikepriceDateList(startdateday, enddateday);
+						setMikepriceScriptSort(searchBuilder, boolFilter, mkPriceDateList);
+					}
 				} else if (HotelSortEnum.RECOMMEND.getId() == paramOrderby) {
 					// 推荐排序(暂未使用)
 					this.sortByRecommend(searchBuilder);
