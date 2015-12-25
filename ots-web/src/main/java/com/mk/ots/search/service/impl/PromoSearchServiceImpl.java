@@ -1152,7 +1152,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				themedRoomtypes.add(roomtype);
 
 				try {
-					List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
+					/*List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
 							buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
 					if (roomstatePrices != null && roomstatePrices.size() > 0
 							&& roomstatePrices.get(0).getRoomtype() != null
@@ -1166,7 +1166,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						} else if (promoprice != null && price != null && (promoprice > price.intValue())) {
 							hotel.put("promoprice", price.intValue());
 						}
-					}
+					}*/
+					hotel.put("promoprice", 1l);
 				} catch (Exception ex) {
 					logger.warn("failed to findHotelRoomPrice...", ex);
 				}
@@ -1206,6 +1207,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				if (isThemed(hotelId, roomtype)) {
 					try {
+						/*
 						List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
 								buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
 						if (roomstatePrices != null && roomstatePrices.size() > 0
@@ -1221,6 +1223,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 								hotel.put("promoprice", price.longValue());
 							}
 						}
+						*/
+						hotel.put("promoprice", 1l);
+
 					} catch (Exception ex) {
 						logger.warn("failed to findHotelRoomPrice...", ex);
 					}
