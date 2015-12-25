@@ -1388,7 +1388,8 @@ public class SearchService implements ISearchService {
 				// TODO: 酒店最低眯客价对应的房型的门市价,暂时取maxprice.
 				Long startTime = new Date().getTime();
 				String[] prices = null;
-				if (hotelPriceService.isUseNewPrice())
+				Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice()
+				if (isNewPrice)
 					prices = hotelPriceService.getHotelMikePrices(Long.valueOf(es_hotelid), reqentity.getStartdateday(),
 							reqentity.getEnddateday());
 				else
