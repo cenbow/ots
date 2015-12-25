@@ -63,6 +63,7 @@ public class RecommendController {
                 globleLimit = Constant.RECOMMEND_ITEM_LIMIT - cityBanners.size();
             } else {
                 cityBanners = genCityRecommendLists(recommenditemHashMap, cityid, callmethod, cityLimit);
+
             }
 
 
@@ -318,7 +319,7 @@ public class RecommendController {
                     TRecommenditem tRecommendItem = recommenditemHashMap.get(itemAreaList.get(i).getItemid());
 
 
-                    if (tRecommendItem != null && global_count <= limit) {
+                    if (limit == null || (tRecommendItem != null && global_count <= limit)) {
 
                         if (Constant.WEIXIN_CALLMETHOD.equals(callmethod)
                                 && tRecommendItem.getViewtype() == Constant.TONIGHT_PROMO_VIEWTYPE) {
@@ -333,7 +334,7 @@ public class RecommendController {
                         }
 
 
-                        if (global_count <= limit) {
+                        if (limit == null || global_count <= limit) {
 
                             RecommendList recommendList = new RecommendList();
                             recommendList.setName(tRecommendItem.getTitle());
