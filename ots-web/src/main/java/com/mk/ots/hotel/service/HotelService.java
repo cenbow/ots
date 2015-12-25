@@ -1347,7 +1347,8 @@ public class HotelService {
 				result.remove("flag");
 				// TODO: 酒店最低眯客价对应的房型的门市价,暂时取maxprice.
 				String[] prices = null;
-				if (hotelPriceService.isUseNewPrice())
+				Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+				if (isNewPrice)
 					prices = hotelPriceService.getHotelMikePrices(Long.valueOf(String.valueOf(result.get("hotelid"))),
 							hotel.getStartdateday(), hotel.getEnddateday());
 				else
@@ -2609,7 +2610,8 @@ public class HotelService {
 
 			// 最低眯客价和最低门市价
 			String[] prices = null;
-			if (hotelPriceService.isUseNewPrice())
+			Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+			if (isNewPrice)
 				prices = hotelPriceService.getHotelMikePrices(tHotelModel.getId(), today, tomorrow);
 			else
 				prices = roomstateService.getHotelMikePrices(tHotelModel.getId(), today, tomorrow);

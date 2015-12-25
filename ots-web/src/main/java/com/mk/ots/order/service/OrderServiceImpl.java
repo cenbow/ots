@@ -974,7 +974,8 @@ public class OrderServiceImpl implements OrderService {
 			}
             /****************************************动态提取房价*******************************************/
             // 调用房态接口动态取得房价(目前如果list为空，则按照以前取数据库值计算房价)
-			if (hotelPriceService.isUseNewPrice()) {
+            Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+            if (isNewPrice)
 				this.logger.info("isUseNewPrice:使用动态取得房价");
 				List<RoomTypePriceBean> roomPriceList = hotelPriceService.getRoomtypePrices(newRoomOrder.getLong("hotelid"), newRoomOrder.getLong("roomtypeid"),
 						DateUtils.getStringFromDate(begintime, DateUtils.FORMATSHORTDATETIME), DateUtils.getStringFromDate(endtime, DateUtils.FORMATSHORTDATETIME));
