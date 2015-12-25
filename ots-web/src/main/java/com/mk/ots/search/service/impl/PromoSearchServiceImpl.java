@@ -1242,14 +1242,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						hotelRoomTypes.get(hotelId).offer(roomtype);
 						counter++;
 					}
-
-					try {
-						Thread.sleep(300L);
-					} catch (Exception ex) {
-						/**
-						 * intentionally ignore this
-						 */
-					}
 				}
 			}
 		}
