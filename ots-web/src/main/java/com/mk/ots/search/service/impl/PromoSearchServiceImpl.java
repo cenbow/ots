@@ -1207,8 +1207,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 				if (isThemed(hotelId, roomtype)) {
 					try {
-						hotel.put("promoprice", 1l);
-						/*
+
 						List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
 								buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
 						if (roomstatePrices != null && roomstatePrices.size() > 0
@@ -1224,7 +1223,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 								hotel.put("promoprice", price.longValue());
 							}
 						}
-						*/
+
 
 
 					} catch (Exception ex) {
