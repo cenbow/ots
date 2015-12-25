@@ -2070,7 +2070,7 @@ public class OrderServiceImpl implements OrderService {
                           AppMessage appMessage = new AppMessage();
                           appMessage.setMid(otaorder.getMid());
                           appMessage.setTitle("红包到账");
-                          smsMessage.setMessage("你已获得一张眯客特价【" + returnWallCash+"元红包】，尽享特价哦！");
+                          appMessage.setMsgContent("你已获得一张眯客特价【" + returnWallCash+"元红包】，尽享特价哦！");
                           appMessage.setMsgtype(PushMessageTypeEnum.USER);
                           appMessage.setUrl(AppUrlEnum.walletCash.getUrl());
                           // 缓存获取会员对象 存会员等级
