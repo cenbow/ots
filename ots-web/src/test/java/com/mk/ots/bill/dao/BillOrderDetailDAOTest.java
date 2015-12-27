@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class BillOrderDAOTest extends BaseTest {
+public class BillOrderDetailDAOTest extends BaseTest {
 
     @Autowired
     private  BillOrderDAO billOrderDAO;

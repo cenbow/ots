@@ -1,10 +1,11 @@
-package com.mk.ots.bill.dao;
+package com.mk.ots.mapper;
 
 import com.mk.ots.bill.model.BillOrderWeek;
 import com.mk.ots.bill.model.BillOrderWeekExample;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
+@Repository
 public interface BillOrderWeekMapper {
     int countByExample(BillOrderWeekExample example);
 

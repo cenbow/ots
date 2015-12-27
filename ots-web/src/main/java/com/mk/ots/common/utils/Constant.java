@@ -270,4 +270,6 @@ public class Constant {
 	public static final String DEFAULT_NORMAL_POPULARITY_NOTE = "";
 	public static final String DEFAULT_NORMAL_POPULARITY_ICON = "";
 
+	/**批量插入数量**/
+	public static final int INSERT_BATCH_SIZE = 1000;
 }

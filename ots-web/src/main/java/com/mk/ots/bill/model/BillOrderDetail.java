@@ -62,6 +62,12 @@ public class BillOrderDetail {
 
     private Date updateTime;
 
+    private String roomTypeName;
+
+    private String roomNo;
+
+    private Long dayNumber;
+
     public Long getId() {
         return id;
     }
@@ -292,5 +298,29 @@ public class BillOrderDetail {
 
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getRoomTypeName() {
+        return roomTypeName;
+    }
+
+    public void setRoomTypeName(String roomTypeName) {
+        this.roomTypeName = roomTypeName == null ? null : roomTypeName.trim();
+    }
+
+    public String getRoomNo() {
+        return roomNo;
+    }
+
+    public void setRoomNo(String roomNo) {
+        this.roomNo = roomNo == null ? null : roomNo.trim();
+    }
+
+    public Long getDayNumber() {
+        return dayNumber;
+    }
+
+    public void setDayNumber(Long dayNumber) {
+        this.dayNumber = dayNumber;
     }
 }
