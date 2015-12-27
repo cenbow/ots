@@ -2,8 +2,10 @@ package com.mk.ots.mapper;
 
 import com.mk.ots.bill.model.BillOrderWeek;
 import com.mk.ots.bill.model.BillOrderWeekExample;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 @Repository
 public interface BillOrderWeekMapper {
@@ -22,4 +24,8 @@ public interface BillOrderWeekMapper {
     int updateByPrimaryKeySelective(BillOrderWeek record);
 
     int updateByPrimaryKey(BillOrderWeek record);
+
+    public List<BillOrderWeek> sumBillOrderWeekList(@Param("beginTime")Date beginTime, @Param("endTime")Date endTime);
+
+    void insertBatch(List<BillOrderWeek> billOrderWeekList);
 }

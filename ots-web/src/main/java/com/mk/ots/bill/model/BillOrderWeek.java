@@ -48,18 +48,6 @@ public class BillOrderWeek {
 
     private String isFreeze;
 
-    private Long checkUserId;
-
-    private String checkuSerName;
-
-    private Date checkTime;
-
-    private Date confirmTime;
-
-    private Long confirmUserId;
-
-    private String confirmUserName;
-
     private Date createTime;
 
     private Date updateTime;
@@ -240,54 +228,6 @@ public class BillOrderWeek {
         this.isFreeze = isFreeze == null ? null : isFreeze.trim();
     }
 
-    public Long getCheckUserId() {
-        return checkUserId;
-    }
-
-    public void setCheckUserId(Long checkUserId) {
-        this.checkUserId = checkUserId;
-    }
-
-    public String getCheckuSerName() {
-        return checkuSerName;
-    }
-
-    public void setCheckuSerName(String checkuSerName) {
-        this.checkuSerName = checkuSerName == null ? null : checkuSerName.trim();
-    }
-
-    public Date getCheckTime() {
-        return checkTime;
-    }
-
-    public void setCheckTime(Date checkTime) {
-        this.checkTime = checkTime;
-    }
-
-    public Date getConfirmTime() {
-        return confirmTime;
-    }
-
-    public void setConfirmTime(Date confirmTime) {
-        this.confirmTime = confirmTime;
-    }
-
-    public Long getConfirmUserId() {
-        return confirmUserId;
-    }
-
-    public void setConfirmUserId(Long confirmUserId) {
-        this.confirmUserId = confirmUserId;
-    }
-
-    public String getConfirmUserName() {
-        return confirmUserName;
-    }
-
-    public void setConfirmUserName(String confirmUserName) {
-        this.confirmUserName = confirmUserName == null ? null : confirmUserName.trim();
-    }
-
     public Date getCreateTime() {
         return createTime;
     }
@@ -303,4 +243,6 @@ public class BillOrderWeek {
     public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
     }
+
+
 }

@@ -1,15 +1,19 @@
 package com.mk.ots.inner.controller;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.mk.framework.AppUtils;
 import com.mk.ots.bill.dao.BillOrderDAO;
+import com.mk.ots.bill.service.BillOrderDetailService;
+import com.mk.ots.bill.service.BillOrderService;
 import com.mk.ots.bill.service.ServiceCostRuleService;
+import com.mk.ots.common.enums.HotelSearchEnum;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.common.utils.OtsVersion;
+import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.inner.service.IOtsAdminService;
 import com.mk.ots.order.service.QiekeRuleService;
+import com.mk.ots.web.ServiceOutput;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +25,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.mk.ots.bill.service.BillOrderService;
-import com.mk.ots.common.enums.HotelSearchEnum;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.common.utils.OtsVersion;
-import com.mk.ots.hotel.service.HotelService;
-import com.mk.ots.inner.service.IOtsAdminService;
-import com.mk.ots.web.ServiceOutput;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * OTS Administrator.
@@ -52,6 +54,8 @@ public class OtsAdminController {
 
 	@Autowired
 	private ServiceCostRuleService serviceCostRuleService;
+	@Autowired
+	private BillOrderDetailService billOrderDetailService;
 
 	private final SimpleDateFormat defaultDateFormatter = new SimpleDateFormat(DateUtils.FORMATSHORTDATETIME);
 
@@ -259,6 +263,24 @@ public class OtsAdminController {
 		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
 		logger.info("genBillConfirmChecks::{}", startdateday);
 		billService.genBillConfirmChecks(DateUtils.getDateFromString(startdateday), null, null);
+		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/report/genOrderDetail", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> genOrderDetail(String startdateday) {
+		Map<String, Object> datas = new HashMap<String, Object>();
+		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		logger.info("genOrderDetail::{}", startdateday);
+		billOrderDetailService.genOrderDetail(DateUtils.getDateFromString(startdateday));
+		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/report/genOrderDetailWeek", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> genOrderDetailWeek(String startdateday) {
+		Map<String, Object> datas = new HashMap<String, Object>();
+		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		logger.info("genOrderDetailWeek::{}", startdateday);
+		billOrderDetailService.genOrderDetailWeek(DateUtils.getDateFromString(startdateday));
 		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 	}
 

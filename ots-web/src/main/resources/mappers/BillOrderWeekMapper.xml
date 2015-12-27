@@ -24,12 +24,6 @@
     <result column="wechat_pay_money" jdbcType="DECIMAL" property="wechatPayMoney" />
     <result column="ali_pay_money" jdbcType="DECIMAL" property="aliPayMoney" />
     <result column="is_freeze" jdbcType="VARCHAR" property="isFreeze" />
-    <result column="check_user_id" jdbcType="BIGINT" property="checkUserId" />
-    <result column="checku_ser_name" jdbcType="VARCHAR" property="checkuSerName" />
-    <result column="check_time" jdbcType="TIMESTAMP" property="checkTime" />
-    <result column="confirm_time" jdbcType="TIMESTAMP" property="confirmTime" />
-    <result column="confirm_user_id" jdbcType="BIGINT" property="confirmUserId" />
-    <result column="confirm_user_name" jdbcType="VARCHAR" property="confirmUserName" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
@@ -66,8 +60,7 @@
     id, hotel_id, hotel_name, city_code, city_name, check_status, begin_time, end_time,
     order_num, bill_cost, hotel_cost, change_cost, service_cost, prepayment_discount,
     to_pay_discount, settlement_price, user_cost, available_money, ticket_money, wechat_pay_money,
-    ali_pay_money, is_freeze, check_user_id, checku_ser_name, check_time, confirm_time,
-    confirm_user_id, confirm_user_name, create_time, update_time
+    ali_pay_money, is_freeze, create_time, update_time
   </sql>
   <select id="selectByExample" parameterType="com.mk.ots.bill.model.BillOrderWeekExample" resultMap="BaseResultMap">
     select
@@ -102,9 +95,7 @@
     service_cost, prepayment_discount, to_pay_discount,
     settlement_price, user_cost, available_money,
     ticket_money, wechat_pay_money, ali_pay_money,
-    is_freeze, check_user_id, checku_ser_name,
-    check_time, confirm_time, confirm_user_id,
-    confirm_user_name, create_time, update_time
+    is_freeze, create_time, update_time
     )
     values (#{id,jdbcType=BIGINT}, #{hotelId,jdbcType=BIGINT}, #{hotelName,jdbcType=VARCHAR},
     #{cityCode,jdbcType=VARCHAR}, #{cityName,jdbcType=VARCHAR}, #{checkStatus,jdbcType=INTEGER},
@@ -113,9 +104,7 @@
     #{serviceCost,jdbcType=DECIMAL}, #{prepaymentDiscount,jdbcType=DECIMAL}, #{toPayDiscount,jdbcType=DECIMAL},
     #{settlementPrice,jdbcType=DECIMAL}, #{userCost,jdbcType=DECIMAL}, #{availableMoney,jdbcType=DECIMAL},
     #{ticketMoney,jdbcType=DECIMAL}, #{wechatPayMoney,jdbcType=DECIMAL}, #{aliPayMoney,jdbcType=DECIMAL},
-    #{isFreeze,jdbcType=VARCHAR}, #{checkUserId,jdbcType=BIGINT}, #{checkuSerName,jdbcType=VARCHAR},
-    #{checkTime,jdbcType=TIMESTAMP}, #{confirmTime,jdbcType=TIMESTAMP}, #{confirmUserId,jdbcType=BIGINT},
-    #{confirmUserName,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+    #{isFreeze,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
     )
   </insert>
   <insert id="insertSelective" parameterType="com.mk.ots.bill.model.BillOrderWeek">
@@ -186,24 +175,6 @@
       </if>
       <if test="isFreeze != null">
         is_freeze,
-      </if>
-      <if test="checkUserId != null">
-        check_user_id,
-      </if>
-      <if test="checkuSerName != null">
-        checku_ser_name,
-      </if>
-      <if test="checkTime != null">
-        check_time,
-      </if>
-      <if test="confirmTime != null">
-        confirm_time,
-      </if>
-      <if test="confirmUserId != null">
-        confirm_user_id,
-      </if>
-      <if test="confirmUserName != null">
-        confirm_user_name,
       </if>
       <if test="createTime != null">
         create_time,
@@ -278,24 +249,6 @@
       </if>
       <if test="isFreeze != null">
         #{isFreeze,jdbcType=VARCHAR},
-      </if>
-      <if test="checkUserId != null">
-        #{checkUserId,jdbcType=BIGINT},
-      </if>
-      <if test="checkuSerName != null">
-        #{checkuSerName,jdbcType=VARCHAR},
-      </if>
-      <if test="checkTime != null">
-        #{checkTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="confirmTime != null">
-        #{confirmTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="confirmUserId != null">
-        #{confirmUserId,jdbcType=BIGINT},
-      </if>
-      <if test="confirmUserName != null">
-        #{confirmUserName,jdbcType=VARCHAR},
       </if>
       <if test="createTime != null">
         #{createTime,jdbcType=TIMESTAMP},
@@ -377,24 +330,6 @@
       <if test="isFreeze != null">
         is_freeze = #{isFreeze,jdbcType=VARCHAR},
       </if>
-      <if test="checkUserId != null">
-        check_user_id = #{checkUserId,jdbcType=BIGINT},
-      </if>
-      <if test="checkuSerName != null">
-        checku_ser_name = #{checkuSerName,jdbcType=VARCHAR},
-      </if>
-      <if test="checkTime != null">
-        check_time = #{checkTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="confirmTime != null">
-        confirm_time = #{confirmTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="confirmUserId != null">
-        confirm_user_id = #{confirmUserId,jdbcType=BIGINT},
-      </if>
-      <if test="confirmUserName != null">
-        confirm_user_name = #{confirmUserName,jdbcType=VARCHAR},
-      </if>
       <if test="createTime != null">
         create_time = #{createTime,jdbcType=TIMESTAMP},
       </if>
@@ -427,14 +362,53 @@
       wechat_pay_money = #{wechatPayMoney,jdbcType=DECIMAL},
       ali_pay_money = #{aliPayMoney,jdbcType=DECIMAL},
       is_freeze = #{isFreeze,jdbcType=VARCHAR},
-      check_user_id = #{checkUserId,jdbcType=BIGINT},
-      checku_ser_name = #{checkuSerName,jdbcType=VARCHAR},
-      check_time = #{checkTime,jdbcType=TIMESTAMP},
-      confirm_time = #{confirmTime,jdbcType=TIMESTAMP},
-      confirm_user_id = #{confirmUserId,jdbcType=BIGINT},
-      confirm_user_name = #{confirmUserName,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=BIGINT}
   </update>
+
+  <select id="sumBillOrderWeekList" resultType="com.mk.ots.bill.model.BillOrderWeek" parameterType="java.util.Map">
+    <![CDATA[
+       select
+        hotel_id hotelId,hotel_name hotelName,city_code cityCode,city_name cityName,
+        count(1) orderNum,sum(service_cost) serviceCost,
+        sum(prepayment_discount) prepaymentDiscount,sum(to_pay_discount) toPayDiscount,
+        sum(settlement_price) settlementPrice,sum(user_cost) userCost,
+        sum(available_money) availableMoney,sum(ticket_money) ticketMoney,
+        sum(wechat_pay_money) wechatPayMoney,sum(ali_pay_money) aliayMoney
+        from b_bill_order_detail
+        where bill_time >= #{beginTime}#
+        and bill_time < #{endTime}#
+        group by hotel_id,hotel_name,city_code,city_name
+        order by hotel_Id
+    ]]>
+  </select>
+
+  <insert id="insertBatch" parameterType="com.mk.ots.bill.model.BillOrderWeek">
+    insert into b_bill_order_week (id, hotel_id, hotel_name,
+    city_code, city_name, check_status,
+    begin_time, end_time, order_num,
+    bill_cost, hotel_cost, change_cost,
+    service_cost, prepayment_discount, to_pay_discount,
+    settlement_price, user_cost, available_money,
+    ticket_money, wechat_pay_money, ali_pay_money,
+    is_freeze, create_time, update_time
+    )
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.id,jdbcType=BIGINT}, #{item.hotelId,jdbcType=BIGINT}, #{item.hotelName,jdbcType=VARCHAR},
+      #{item.cityCode,jdbcType=VARCHAR}, #{item.cityName,jdbcType=VARCHAR}, #{item.checkStatus,jdbcType=INTEGER},
+      #{item.beginTime,jdbcType=TIMESTAMP}, #{item.endTime,jdbcType=TIMESTAMP}, #{item.orderNum,jdbcType=INTEGER},
+      #{item.billCost,jdbcType=DECIMAL}, #{item.hotelCost,jdbcType=DECIMAL}, #{item.changeCost,jdbcType=DECIMAL},
+      #{item.serviceCost,jdbcType=DECIMAL}, #{item.prepaymentDiscount,jdbcType=DECIMAL}, #{item.toPayDiscount,jdbcType=DECIMAL},
+      #{item.settlementPrice,jdbcType=DECIMAL}, #{item.userCost,jdbcType=DECIMAL}, #{item.availableMoney,jdbcType=DECIMAL},
+      #{item.ticketMoney,jdbcType=DECIMAL}, #{item.wechatPayMoney,jdbcType=DECIMAL}, #{item.aliPayMoney,jdbcType=DECIMAL},
+      #{item.isFreeze,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP}, #{item.updateTime,jdbcType=TIMESTAMP}
+      )
+    </foreach>
+  </insert>
 </mapper>
+
+
+
+

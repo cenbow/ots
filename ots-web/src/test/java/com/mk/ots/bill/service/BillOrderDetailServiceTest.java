@@ -21,7 +21,6 @@ public class BillOrderDetailServiceTest extends BaseTest {
 
     @Test
     public void testGenOrderDetail1() throws Exception {
-        //查询订单信息
         String billDate1 = "2015-11-01";
         String billDate2 = "2015-12-01";
         Date billBeginDate = null;
@@ -38,17 +37,24 @@ public class BillOrderDetailServiceTest extends BaseTest {
     }
 
     @Test
-    public void testCreateBillOrderDetailList() throws Exception {
-
+    public void testGenOrderDetailWeek1() throws Exception {
+        Date date = DateUtils.getDateFromString("2015-11-01");
+        billOrderDetailService.genOrderDetailWeek(date);
     }
 
     @Test
-    public void testBuildOrderDetail() throws Exception {
-
+    public void testGenOrderDetailWeek2() throws Exception {
+        String billDate1 = "2015-11-01";
+        String billDate2 = "2015-12-01";
+        Date billBeginDate = null;
+        Date billEndDate = null;
+        try {
+            billBeginDate = DateUtils.parseDate(billDate1, DateUtils.FORMAT_DATE) ;
+            billEndDate = DateUtils.parseDate(billDate2, DateUtils.FORMAT_DATE) ;
+        } catch (ParseException e) {
+            logger.error("genOrderDetail get bill date exception" , e);
+        }
+        billOrderDetailService.genOrderDetailWeek(billBeginDate, billEndDate);
     }
 
-    @Test
-    public void testSaveOrderDetailByBatch() throws Exception {
-
-    }
 }

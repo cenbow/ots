@@ -3,6 +3,7 @@ package com.mk.ots.bill.service;
 import com.mk.ots.bill.domain.BillOrder;
 import com.mk.ots.bill.domain.BillOrderPayInfo;
 import com.mk.ots.bill.model.BillOrderDetail;
+import com.mk.ots.bill.model.BillOrderWeek;
 import com.mk.ots.common.enums.OrderTypeEnum;
 import com.mk.ots.common.enums.PPayInfoOtherTypeEnum;
 import com.mk.ots.common.enums.PromoTypeEnum;
@@ -12,6 +13,7 @@ import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.hotel.model.TCityModel;
 import com.mk.ots.hotel.service.CityService;
 import com.mk.ots.mapper.BillOrderDetailMapper;
+import com.mk.ots.mapper.BillOrderWeekMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +36,12 @@ public class BillOrderDetailService {
     @Autowired
     private BillOrderDetailMapper billOrderDetailMapper;
     @Autowired
+    private BillOrderWeekMapper billOrderWeekMapper;
+    @Autowired
     private ServiceCostRuleService serviceCostRuleService;
     @Autowired
     private CityService cityService;
+
 
     public void genOrderDetail(Date billDate){
         if(billDate == null){
@@ -55,6 +60,79 @@ public class BillOrderDetailService {
         int pageSize = 1000;
         int pageIndex = 0;
         genOrderDetail(billBeginDate, billEndDate, pageSize, pageIndex);
+    }
+
+
+    public void genOrderDetailWeek(Date billDate){
+        if(billDate == null){
+            logger.info("genOrderDetail billDate is null");
+            return;
+        }
+        //查询订单信息
+        Date billBeginDate = null;
+        Date billEndDate = null;
+        try {
+            billBeginDate = DateUtils.parseDate(DateUtils.formatDateTime(billDate, DateUtils.FORMAT_DATE), DateUtils.FORMAT_DATE) ;
+            billEndDate = DateUtils.parseDate(DateUtils.formatDateTime(DateUtils.addDays(billDate, 1), DateUtils.FORMAT_DATE), DateUtils.FORMAT_DATE) ;
+        } catch (ParseException e) {
+            logger.error("genOrderDetail get bill date exception" , e);
+        }
+        genOrderDetailWeek(billBeginDate, billEndDate);
+    }
+
+    public void genOrderDetailWeek(Date billBeginDate, Date billEndDate){
+        List<BillOrderWeek> billOrderWeekList = billOrderWeekMapper.sumBillOrderWeekList(billBeginDate, billEndDate);
+        if(CollectionUtils.isEmpty(billOrderWeekList)){
+            logger.info(String.format("genOrderDetailWeek billOrderWeekList is empty,params billBeginDate[%s],billEndDate[%s]",
+                    billBeginDate, billEndDate));
+            return;
+        }
+        createBillOrderWeekList(billOrderWeekList, billBeginDate, billEndDate);
+    }
+
+
+    public void createBillOrderWeekList(List<BillOrderWeek> billOrderWeekList, Date billBeginDate, Date billEndDate){
+        billOrderWeekList = buildOrderWeekList(billOrderWeekList, billBeginDate, billEndDate);
+        if(CollectionUtils.isEmpty(billOrderWeekList)){
+            logger.info(String.format("genOrderDetail createBillOrderWeekList is empty,params billBeginDate[%s],billEndDate[%s]",
+                    billBeginDate, billEndDate));
+            return;
+        }
+        billOrderWeekMapper.insertBatch(billOrderWeekList);
+    }
+
+
+    private List<BillOrderWeek> buildOrderWeekList(List<BillOrderWeek> billOrderWeekList, Date billBeginDate, Date billEndDate) {
+        if(CollectionUtils.isEmpty(billOrderWeekList)){
+            return null;
+        }
+        for(BillOrderWeek billOrderWeek : billOrderWeekList){
+            buildOrderWeek(billOrderWeek, billBeginDate, billEndDate);
+        }
+        return billOrderWeekList;
+    }
+
+    private BillOrderWeek buildOrderWeek(BillOrderWeek billOrderWeek, Date billBeginDate, Date billEndDate) {
+        billOrderWeek.setBeginTime(billBeginDate);
+        billOrderWeek.setEndTime(billEndDate);
+        Date now = new Date();
+        billOrderWeek.setCreateTime(now);
+        billOrderWeek.setUpdateTime(now);
+        //账单金额=（如果是特价订单用酒店结算价格否则是用户实际支付金额+用户券+红包金额+预付贴现金额+到付贴现金额+补差金额-总服务费）
+        BigDecimal billCost = BigDecimal.ZERO;
+        billCost = billCost.add(billOrderWeek.getSettlementPrice() == null ? BigDecimal.ZERO : billOrderWeek.getSettlementPrice());
+        billCost = billCost.add(billOrderWeek.getAvailableMoney() == null ? BigDecimal.ZERO : billOrderWeek.getAvailableMoney());
+        billCost = billCost.add(billOrderWeek.getTicketMoney() == null ? BigDecimal.ZERO : billOrderWeek.getTicketMoney());
+        billCost = billCost.add(billOrderWeek.getPrepaymentDiscount() == null ? BigDecimal.ZERO : billOrderWeek.getPrepaymentDiscount());
+        billCost = billCost.add(billOrderWeek.getToPayDiscount() == null ? BigDecimal.ZERO : billOrderWeek.getToPayDiscount());
+        billCost = billCost.subtract(billOrderWeek.getServiceCost() == null ? BigDecimal.ZERO : billOrderWeek.getServiceCost());
+        billOrderWeek.setBillCost(billCost);
+        //商家收款金额=账单金额+补差金额
+        BigDecimal hotelCost = BigDecimal.ZERO;
+        hotelCost = hotelCost.add(billCost);
+        hotelCost = hotelCost.add(billOrderWeek.getChangeCost() == null ? BigDecimal.ZERO : billOrderWeek.getChangeCost());
+        billOrderWeek.setHotelCost(hotelCost);
+        return billOrderWeek;
     }
 
     public void genOrderDetail(Date billBeginDate, Date billEndDate, int pageSize, int pageIndex){
@@ -127,13 +205,25 @@ public class BillOrderDetailService {
             billOrder.setSettlementPrice(BigDecimal.ZERO);
         }
 
-        billOrder.setUserCost(billOrder.getUserCost());
+        billOrder.setUserCost(billOrderPayInfo.getUsercost());
         if(PPayInfoOtherTypeEnum.alipay.getId() ==  billOrderPayInfo.getOnlinePayType()){
             billOrder.setAliPayMoney(billOrderPayInfo.getUsercost());
         }else if(PPayInfoOtherTypeEnum.wechatpay.getId() ==  billOrderPayInfo.getOnlinePayType() || PPayInfoOtherTypeEnum.wxpay.getId() ==  billOrderPayInfo.getOnlinePayType()){
             billOrder.setWechatPayMoney(billOrderPayInfo.getUsercost());
         }
-        billOrder.setTicketMoney(billOrder.getTicketMoney());
+        //判断优惠券的金额是否大于房间价格 如果优惠券的比房间价格还要大则得到实际用优惠券金额
+        if(billOrder.getTicketMoney()!= null && billOrder.getTicketMoney().compareTo(BigDecimal.ZERO) > 0){
+            BigDecimal checkTicketPrice = billOrder.getTotalPrice() == null ? BigDecimal.ZERO : billOrder.getTotalPrice();
+            checkTicketPrice = checkTicketPrice.subtract(billOrder.getUserCost() == null ? BigDecimal.ZERO : billOrder.getUserCost());
+            checkTicketPrice = checkTicketPrice.subtract(billOrder.getTicketMoney() == null ? BigDecimal.ZERO : billOrder.getTicketMoney());
+            if(checkTicketPrice.compareTo(BigDecimal.ZERO) < 0){
+                BigDecimal ticketMoney = billOrder.getTicketMoney().add(checkTicketPrice);
+                billOrder.setTicketMoney(ticketMoney);
+
+            }else{
+                billOrder.setTicketMoney(billOrder.getTicketMoney());
+            }
+        }
         TCityModel tCityModel = cityService.findCityByCode(billOrder.getCityCode());
         if(tCityModel != null){
             billOrder.setCityName(tCityModel.getCityname());
@@ -145,7 +235,7 @@ public class BillOrderDetailService {
     }
 
     private QieKeTypeEnum getOrderCheckQiekeType(Integer ruleCode,Long spreadUser, Integer invalidReason) {
-        if(spreadUser != null && spreadUser.intValue() == Constant.QIE_KE_SPREAD_USER){
+        if(spreadUser != null && spreadUser.intValue() == Constant.QIE_KE_SPREAD_USER  && invalidReason == null){
             return  QieKeTypeEnum.LAXIN_RULE;
         }
         if(spreadUser!= null && invalidReason == null && ruleCode == 1002){
