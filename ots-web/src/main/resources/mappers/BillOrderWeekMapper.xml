@@ -375,7 +375,7 @@
         sum(prepayment_discount) prepaymentDiscount,sum(to_pay_discount) toPayDiscount,
         sum(settlement_price) settlementPrice,sum(user_cost) userCost,
         sum(available_money) availableMoney,sum(ticket_money) ticketMoney,
-        sum(wechat_pay_money) wechatPayMoney,sum(ali_pay_money) aliayMoney
+        sum(wechat_pay_money) wechatPayMoney,sum(ali_pay_money) aliPayMoney
         from b_bill_order_detail
         where bill_time >= #{beginTime}#
         and bill_time < #{endTime}#

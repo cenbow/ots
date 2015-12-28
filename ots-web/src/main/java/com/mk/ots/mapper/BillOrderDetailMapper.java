@@ -34,4 +34,7 @@ public interface BillOrderDetailMapper {
                                                   @Param("pageSize")int pageSize, @Param("pageIndex")int pageIndex);
 
     public BillOrderPayInfo getOrderPayInfo(@Param("orderId")Long orderId);
+
+    public int updateOrderWeekId(@Param("hotelId")Long hotelId, @Param("cityCode")String cityCode, @Param("beginTime")Date beginTime, @Param("endTime")Date endTime);
+
 }

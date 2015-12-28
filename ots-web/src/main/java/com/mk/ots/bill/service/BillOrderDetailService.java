@@ -88,6 +88,13 @@ public class BillOrderDetailService {
             return;
         }
         createBillOrderWeekList(billOrderWeekList, billBeginDate, billEndDate);
+        updateOrderWeekId(billOrderWeekList, billBeginDate, billEndDate);
+    }
+
+    private void updateOrderWeekId(List<BillOrderWeek> billOrderWeekList, Date billBeginDate, Date billEndDate) {
+        for(BillOrderWeek billOrderWeek : billOrderWeekList){
+            billOrderDetailMapper.updateOrderWeekId(billOrderWeek.getHotelId(), billOrderWeek.getCityCode(), billBeginDate, billEndDate);
+        }
     }
 
 
