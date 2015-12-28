@@ -73,7 +73,7 @@ public class BillOrderDetailService {
         Date billEndDate = null;
         try {
             billBeginDate = DateUtils.parseDate(DateUtils.formatDateTime(billDate, DateUtils.FORMAT_DATE), DateUtils.FORMAT_DATE) ;
-            billEndDate = DateUtils.parseDate(DateUtils.formatDateTime(DateUtils.addDays(billDate, 1), DateUtils.FORMAT_DATE), DateUtils.FORMAT_DATE) ;
+            billEndDate = DateUtils.parseDate(DateUtils.formatDateTime(DateUtils.addDays(billDate, -6), DateUtils.FORMAT_DATE), DateUtils.FORMAT_DATE) ;
         } catch (ParseException e) {
             logger.error("genOrderDetail get bill date exception" , e);
         }
