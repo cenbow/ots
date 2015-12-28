@@ -2303,6 +2303,29 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Long endTime = new Date().getTime();
 				Long times = endTime - startTime;
 
+				// TODO: hotel score
+				logger.info(
+						"--================================== 查询酒店评价信息开始： ==================================-- ");
+				startTime = new Date().getTime();
+				List<Map<String, String>> scores = thotelscoreMapper
+						.findHotelScoresByHotelid(Long.valueOf(es_hotelid));
+				Map<String, String> scoreMap = null;
+				if (scores.size() > 0) {
+					scoreMap = scores.get(0);
+				}
+				if (scoreMap != null) {
+					result.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
+					result.put("grade", scoreMap.get("grade") == null ? 0 : scoreMap.get("grade"));
+				} else {
+					result.put("scorecount", 0);
+					result.put("grade", 0);
+				}
+				endTime = new Date().getTime();
+				times = endTime - startTime;
+				logger.info("查询酒店: {}评价信息耗时: {}ms.", es_hotelid, times);
+				logger.info(
+						"--================================== 查询酒店评价信息结束： ==================================-- ");
+				
 				logger.info("--================================== 查询酒店省份区县信息开始： ==================================-- ");
 				startTime = new Date().getTime();
 				THotelModel hotelInfo = thotelMapper.findHotelInfoById(Long.valueOf(es_hotelid));
