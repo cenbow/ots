@@ -89,7 +89,6 @@ import com.mk.ots.mapper.THotelMapper;
 import com.mk.ots.mapper.THotelScoreMapper;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
@@ -1168,21 +1167,25 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				themedRoomtypes.add(roomtype);
 
 				try {
-					/*List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
-							buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
-					if (roomstatePrices != null && roomstatePrices.size() > 0
-							&& roomstatePrices.get(0).getRoomtype() != null
-							&& roomstatePrices.get(0).getRoomtype().size() > 0) {
-						BigDecimal price = roomstatePrices.get(0).getRoomtype().get(0).getRoomtypeprice();
-
-						if (promoprice == null) {
-							hotel.put("promoprice", price.intValue());
-						} else if (promoprice == 0 && price != null && price.intValue() > 0) {
-							hotel.put("promoprice", price.intValue());
-						} else if (promoprice != null && price != null && (promoprice > price.intValue())) {
-							hotel.put("promoprice", price.intValue());
-						}
-					}*/
+					/*
+					 * List<RoomstateQuerylistRespEntity> roomstatePrices =
+					 * roomstateService.findHotelRoomPrice("",
+					 * buildRoomstateQuery(roomtype, hotelId, startdateday,
+					 * enddateday)); if (roomstatePrices != null &&
+					 * roomstatePrices.size() > 0 &&
+					 * roomstatePrices.get(0).getRoomtype() != null &&
+					 * roomstatePrices.get(0).getRoomtype().size() > 0) {
+					 * BigDecimal price =
+					 * roomstatePrices.get(0).getRoomtype().get(0).
+					 * getRoomtypeprice();
+					 * 
+					 * if (promoprice == null) { hotel.put("promoprice",
+					 * price.intValue()); } else if (promoprice == 0 && price !=
+					 * null && price.intValue() > 0) { hotel.put("promoprice",
+					 * price.intValue()); } else if (promoprice != null && price
+					 * != null && (promoprice > price.intValue())) {
+					 * hotel.put("promoprice", price.intValue()); } }
+					 */
 					hotel.put("promoprice", 1l);
 				} catch (Exception ex) {
 					logger.warn("failed to findHotelRoomPrice...", ex);
@@ -1678,7 +1681,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			showConfig.setPromoid(HotelPromoEnum.Night.getCode());
 			showConfig.setShowArea(ShowAreaEnum.HomePagePromoRecommend.getCode());
 
-			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(showConfig);
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService
+					.queryRoomSaleShowConfigByParams(showConfig);
 			promolist = this.searchHomePromoBase(params, showConfigs, true);
 
 			if (promolist != null && promolist.size() > 0) {
@@ -2098,6 +2102,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		searchBuilder.addSort("mintonitepromoprice", SortOrder.ASC);
 
 	}
+
 	/**
 	 *
 	 * @param searchBuilder
@@ -2232,6 +2237,39 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		hotels.addAll(datasNVC);
 	}
 
+	private void updateScoreAndGrade(Map<String, Object> result) throws Exception {
+		Long startTime = new Date().getTime();
+		Long endTime = new Date().getTime();
+		Long times = endTime - startTime;
+
+		Long hotelid = Long.valueOf((String) result.get("hotelid"));
+
+		logger.info("--================================== 查询酒店评价信息开始： ==================================-- ");
+		List<Map<String, String>> scores = thotelscoreMapper.findHotelScoresByHotelid(hotelid);
+		Map<String, String> scoreMap = null;
+		if (scores.size() > 0) {
+			scoreMap = scores.get(0);
+		}
+
+		if (scoreMap != null) {
+			result.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
+
+			String grade = scoreMap.get("grade") == null ? "0" : scoreMap.get("grade");
+			if ("0".equals(grade)) {
+				grade = "4";
+			}
+
+			result.put("grade", grade);
+		} else {
+			result.put("scorecount", 0);
+			result.put("grade", 0);
+		}
+		times = endTime - startTime;
+		logger.info("查询酒店: {}评价信息耗时: {}ms.", hotelid, times);
+		logger.info("--================================== 查询酒店评价信息结束： ==================================-- ");
+
+	}
+
 	@SuppressWarnings("unchecked")
 	private List<Map<String, Object>> reorderSearchResults(SearchHit[] hits, HotelQuerylistReqEntity reqEntity)
 			throws Exception {
@@ -2296,6 +2334,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Long startTime = new Date().getTime();
 				Long endTime = new Date().getTime();
 				Long times = endTime - startTime;
+
+				try {
+					updateScoreAndGrade(result);
+				} catch (Exception ex) {
+					logger.warn("failed to updateScoreAndGrade...", ex);
+				}
 
 				logger.info("--================================== 查询酒店省份区县信息开始： ==================================-- ");
 				startTime = new Date().getTime();
@@ -2801,9 +2845,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					// 距离排序
 					this.sortByDistance(searchBuilder, new GeoPoint(lat, lon));
 				} else if (HotelSortEnum.PRICE.getId() == paramOrderby) {
-					if (promoid == HotelPromoEnum.Night.getCode()){
+					if (promoid == HotelPromoEnum.Night.getCode()) {
 						this.sortByPromoPrice(searchBuilder);
-					}else{
+					} else {
 						// 眯客价属性列表
 						String startdateday = reqentity.getStartdateday();
 						String enddateday = reqentity.getEnddateday();
@@ -2967,23 +3011,13 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						}
 					}
 
-					// TODO: hotel score
-					logger.info(
-							"--================================== 查询酒店评价信息开始： ==================================-- ");
+					try {
+						updateScoreAndGrade(result);
+					} catch (Exception ex) {
+						logger.warn("failed to updateScoreAndGrade...", ex);
+					}
+
 					Long startTime = new Date().getTime();
-					List<Map<String, String>> scores = thotelscoreMapper
-							.findHotelScoresByHotelid(Long.valueOf(es_hotelid));
-					Map<String, String> scoreMap = null;
-					if (scores.size() > 0) {
-						scoreMap = scores.get(0);
-					}
-					if (scoreMap != null) {
-						result.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
-						result.put("grade", scoreMap.get("grade") == null ? 0 : scoreMap.get("grade"));
-					} else {
-						result.put("scorecount", 0);
-						result.put("grade", 0);
-					}
 					Long endTime = new Date().getTime();
 					Long times = endTime - startTime;
 					logger.info("查询酒店: {}评价信息耗时: {}ms.", es_hotelid, times);
