@@ -1168,21 +1168,25 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				themedRoomtypes.add(roomtype);
 
 				try {
-					/*List<RoomstateQuerylistRespEntity> roomstatePrices = roomstateService.findHotelRoomPrice("",
-							buildRoomstateQuery(roomtype, hotelId, startdateday, enddateday));
-					if (roomstatePrices != null && roomstatePrices.size() > 0
-							&& roomstatePrices.get(0).getRoomtype() != null
-							&& roomstatePrices.get(0).getRoomtype().size() > 0) {
-						BigDecimal price = roomstatePrices.get(0).getRoomtype().get(0).getRoomtypeprice();
-
-						if (promoprice == null) {
-							hotel.put("promoprice", price.intValue());
-						} else if (promoprice == 0 && price != null && price.intValue() > 0) {
-							hotel.put("promoprice", price.intValue());
-						} else if (promoprice != null && price != null && (promoprice > price.intValue())) {
-							hotel.put("promoprice", price.intValue());
-						}
-					}*/
+					/*
+					 * List<RoomstateQuerylistRespEntity> roomstatePrices =
+					 * roomstateService.findHotelRoomPrice("",
+					 * buildRoomstateQuery(roomtype, hotelId, startdateday,
+					 * enddateday)); if (roomstatePrices != null &&
+					 * roomstatePrices.size() > 0 &&
+					 * roomstatePrices.get(0).getRoomtype() != null &&
+					 * roomstatePrices.get(0).getRoomtype().size() > 0) {
+					 * BigDecimal price =
+					 * roomstatePrices.get(0).getRoomtype().get(0).
+					 * getRoomtypeprice();
+					 * 
+					 * if (promoprice == null) { hotel.put("promoprice",
+					 * price.intValue()); } else if (promoprice == 0 && price !=
+					 * null && price.intValue() > 0) { hotel.put("promoprice",
+					 * price.intValue()); } else if (promoprice != null && price
+					 * != null && (promoprice > price.intValue())) {
+					 * hotel.put("promoprice", price.intValue()); } }
+					 */
 					hotel.put("promoprice", 1l);
 				} catch (Exception ex) {
 					logger.warn("failed to findHotelRoomPrice...", ex);
@@ -1678,7 +1682,8 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			showConfig.setPromoid(HotelPromoEnum.Night.getCode());
 			showConfig.setShowArea(ShowAreaEnum.HomePagePromoRecommend.getCode());
 
-			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService.queryRoomSaleShowConfigByParams(showConfig);
+			List<RoomSaleShowConfigDto> showConfigs = roomSaleShowConfigService
+					.queryRoomSaleShowConfigByParams(showConfig);
 			promolist = this.searchHomePromoBase(params, showConfigs, true);
 
 			if (promolist != null && promolist.size() > 0) {
@@ -2098,6 +2103,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		searchBuilder.addSort("mintonitepromoprice", SortOrder.ASC);
 
 	}
+
 	/**
 	 *
 	 * @param searchBuilder
@@ -2801,9 +2807,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					// 距离排序
 					this.sortByDistance(searchBuilder, new GeoPoint(lat, lon));
 				} else if (HotelSortEnum.PRICE.getId() == paramOrderby) {
-					if (promoid == HotelPromoEnum.Night.getCode()){
+					if (promoid == HotelPromoEnum.Night.getCode()) {
 						this.sortByPromoPrice(searchBuilder);
-					}else{
+					} else {
 						// 眯客价属性列表
 						String startdateday = reqentity.getStartdateday();
 						String enddateday = reqentity.getEnddateday();
@@ -3240,7 +3246,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 
 			// 重新按照是否可售分组排序
-			if (reqentity.getOrderby() == null || reqentity.getOrderby() == 0
+			if (reqentity.getOrderby() == null || reqentity.getOrderby() == 0 || reqentity.getOrderby() == -1
 					|| HotelSortEnum.SCORE.getId() == reqentity.getOrderby()) {
 				this.sortByVcState(hotels);
 				/**
