@@ -130,8 +130,6 @@ public class BillOrderDetailService {
         //账单金额=（如果是特价订单用酒店结算价格否则是用户实际支付金额+用户券+红包金额+预付贴现金额+到付贴现金额+补差金额-总服务费）
         BigDecimal billCost = BigDecimal.ZERO;
         billCost = billCost.add(billOrderWeek.getSettlementPrice() == null ? BigDecimal.ZERO : billOrderWeek.getSettlementPrice());
-        billCost = billCost.add(billOrderWeek.getAvailableMoney() == null ? BigDecimal.ZERO : billOrderWeek.getAvailableMoney());
-        billCost = billCost.add(billOrderWeek.getTicketMoney() == null ? BigDecimal.ZERO : billOrderWeek.getTicketMoney());
         billCost = billCost.add(billOrderWeek.getPrepaymentDiscount() == null ? BigDecimal.ZERO : billOrderWeek.getPrepaymentDiscount());
         billCost = billCost.add(billOrderWeek.getToPayDiscount() == null ? BigDecimal.ZERO : billOrderWeek.getToPayDiscount());
         billCost = billCost.subtract(billOrderWeek.getServiceCost() == null ? BigDecimal.ZERO : billOrderWeek.getServiceCost());
@@ -204,17 +202,7 @@ public class BillOrderDetailService {
         BigDecimal price = billOrder.getTotalPrice().subtract(billOrderPayInfo.getHotelgive() == null ? BigDecimal.ZERO : billOrderPayInfo.getHotelgive());
         BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(billOrder.getOrderCreateTime(), qikeFlag, price, billOrder.getCityCode());
         billOrder.setServiceCost(serviceCost);
-        if(OrderTypeEnum.YF.getId() == billOrder.getOrderType().intValue()){
-            billOrder.setPrepaymentDiscount(qiekeIncome);
-            if(PromoTypeEnum.TJ.getCode().equals(billOrder.getPromoType())){
-                billOrder.setSettlementPrice(billOrder.getTotalPrice());
-            }else {
-                billOrder.setSettlementPrice(billOrderPayInfo.getLezhu());
-            }
-        } else if(OrderTypeEnum.PT.getId() == billOrder.getOrderType().intValue()){
-            billOrder.setToPayDiscount(qiekeIncome);
-            billOrder.setSettlementPrice(BigDecimal.ZERO);
-        }
+
 
         billOrder.setUserCost(billOrderPayInfo.getUsercost());
         if(PPayInfoOtherTypeEnum.alipay.getId() ==  billOrderPayInfo.getOnlinePayType()){
@@ -235,6 +223,19 @@ public class BillOrderDetailService {
                 billOrder.setTicketMoney(billOrder.getTicketMoney());
             }
         }
+
+        if(OrderTypeEnum.YF.getId() == billOrder.getOrderType().intValue()){
+            billOrder.setPrepaymentDiscount(qiekeIncome);
+            if(PromoTypeEnum.TJ.getCode().equals(billOrder.getPromoType())){
+                billOrder.setSettlementPrice(billOrderPayInfo.getLezhu());
+            }else {
+                billOrder.setSettlementPrice(billOrder.getTotalPrice());
+            }
+        } else if(OrderTypeEnum.PT.getId() == billOrder.getOrderType().intValue()){
+            billOrder.setToPayDiscount(qiekeIncome);
+            billOrder.setSettlementPrice(billOrder.getTicketMoney());
+        }
+
         TCityModel tCityModel = cityService.findCityByCode(billOrder.getCityCode());
         if(tCityModel != null){
             billOrder.setCityName(tCityModel.getCityname());
