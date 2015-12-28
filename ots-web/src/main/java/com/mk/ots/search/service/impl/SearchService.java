@@ -1349,7 +1349,7 @@ public class SearchService implements ISearchService {
 						}
 						
 						result.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
-						result.put("grade", grade == null ? new BigDecimal(0) : new BigDecimal(grade));
+						result.put("grade", StringUtils.isBlank(grade) ? new BigDecimal(0) : new BigDecimal(grade));
 					} else {
 						result.put("scorecount", 0);
 						result.put("grade", new BigDecimal(0));
@@ -2117,7 +2117,7 @@ public class SearchService implements ISearchService {
 			}
 			
 			data.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
-			data.put("grade", grade == null ? new BigDecimal(0) : new BigDecimal(grade));
+			data.put("grade", StringUtils.isBlank(grade) ? new BigDecimal(0) : new BigDecimal(grade));
 		} else {
 			data.put("scorecount", 0);
 			data.put("grade", new BigDecimal(0));
