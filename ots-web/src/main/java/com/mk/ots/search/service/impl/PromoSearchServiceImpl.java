@@ -2237,7 +2237,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		hotels.addAll(datasNVC);
 	}
 
-	private void updateScoreAndGrade(Map<String, Object> result) throws Exception {
+	private void updateScoreAndGrade(Map<String, Object> result, HotelQuerylistReqEntity reqEntity) throws Exception {
 		Long startTime = new Date().getTime();
 		Long endTime = new Date().getTime();
 		Long times = endTime - startTime;
@@ -2255,7 +2255,12 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			result.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
 
 			String grade = scoreMap.get("grade") == null ? "0" : scoreMap.get("grade");
-			if ("0".equals(grade)) {
+
+			String cityId = reqEntity.getCityid();
+			/**
+			 * this logic only applies in chongqing
+			 */
+			if ("0".equals(grade) && "500000".equals(cityId)) {
 				grade = "4";
 			}
 
