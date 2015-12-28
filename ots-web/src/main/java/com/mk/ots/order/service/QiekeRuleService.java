@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -271,6 +272,183 @@ public class QiekeRuleService {
             logger.info(String.format("----------QiekeRuleService.checkSysNo end do other end"));
             return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
         }
+    }
+
+
+    public OtaFreqTrvEnum checkSysOverNum(OtaOrder otaOrder, int num, OtaFreqTrvEnum otaFreqTrvEnum){
+        logger.info(String.format("----------QiekeRuleService.checkSysOverNum start"));
+        if (null == otaOrder) {
+            logger.info(String.format("----------QiekeRuleService.checkSysOverNum otaOrder is null end"));
+            return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+        }
+        logger.info(String.format("----------QiekeRuleService.checkSysOverNum order id:[%s]" , otaOrder.getId()));
+
+        Integer orderMethod = otaOrder.getOrderMethod();
+        logger.info(String.format("----------QiekeRuleService.checkSysOverNum orderMethod:[%s]" , orderMethod));
+        if (orderMethod ==  OrderMethodEnum.WECHAT.getId()) {
+            logger.info(String.format("----------QiekeRuleService.checkSysOverNum do wechat order id:[%s]", otaOrder.getId()));
+            //微信
+            Long mid = otaOrder.getMid();
+            Optional<UMember> memberOptional = iMemberService.findMemberById(mid, "T");
+            if (memberOptional.isPresent()) {
+                UMember member = memberOptional.get();
+
+                String unionid = member.getUnionid();
+                if (null == unionid || "null".equalsIgnoreCase(unionid)) {
+                    logger.info(String.format("----------QiekeRuleService.checkSysOverNum do wechat order id:[%s] openId is null end", otaOrder.getId()));
+                    return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+                }
+                List<UUnionidLog> unionidLogList = unionidLogService.queryByUnionid(unionid);
+
+                //去除本次账号
+                Set<Long> memberIdSet = new HashSet<>();
+                for (UUnionidLog log : unionidLogList) {
+                    Long dbMid = log.getMid();
+                    memberIdSet.add(dbMid);
+                }
+                memberIdSet.remove(mid);
+
+                //
+                if (memberIdSet.size() > num) {
+                    return otaFreqTrvEnum;
+                } else {
+                    return  OtaFreqTrvEnum.L1;
+                }
+            }
+            logger.info(String.format("----------QiekeRuleService.checkSysOverNum do wechat UMember is null order id:[%s] end", otaOrder.getId()));
+            return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+
+        } else if (orderMethod == OrderMethodEnum.ANDROID.getId()) {
+            logger.info(String.format("----------QiekeRuleService.checkSysOverNum do android order id:[%s]", otaOrder.getId()));
+            //安卓
+            Long orderId = otaOrder.getId();
+
+            OtaOrderMac orderMac = otaOrderMacMapper.selectByOrderId(orderId);
+            if (null == orderMac) {
+                logger.info(String.format("----------QiekeRuleService.checkSysOverNum do android order id:[%s] mac is null end", otaOrder.getId()));
+                return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+            }
+            String deviceimei = orderMac.getDeviceimei();
+            if (null == deviceimei || "null".equalsIgnoreCase(deviceimei)) {
+                logger.info(String.format("----------QiekeRuleService.checkSysOverNum do android order id:[%s] deviceimei is null end", otaOrder.getId()));
+                return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+            }
+
+            //订单状态
+            List<Integer> statusList = new ArrayList<>();
+            statusList.add(OtaOrderStatusEnum.CheckIn.getId());
+            statusList.add(OtaOrderStatusEnum.Account.getId());
+            statusList.add(OtaOrderStatusEnum.CheckOut.getId());
+
+            //
+            Map<String, Object> param = new HashMap<>();
+            Date firstDayOfMonth = getFirstDayOfMonth();
+            Date lastDayOfMonth = getLastDayOfMonth();
+            param.put("createBeginTime", firstDayOfMonth);
+            param.put("createEndTime", lastDayOfMonth);
+            param.put("deviceimei",deviceimei);
+            param.put("statusList",statusList);
+            List<OtaOrderMac> orderMacList = otaOrderMacMapper.selectByDeviceimei(param);
+
+            logger.info(String.format(
+                    "----------QiekeRuleService.checkSysOverNum do android order id:[%s] orderMacList size[%s]",
+                    otaOrder.getId(), orderMacList.size()));
+            //去除本次账号
+            Set<Long> orderIdSet = new HashSet<>();
+            for(OtaOrderMac dbOrderMac : orderMacList) {
+                Long macOrderId = dbOrderMac.getOrderid();
+                orderIdSet.add(macOrderId);
+            }
+            orderIdSet.remove(orderId);
+
+            //
+            if (orderIdSet.size() > num) {
+                logger.info(String.format("----------QiekeRuleService.checkSysOverNum do android orderIdSet size:[%s]", orderIdSet.size()));
+                logger.info(String.format("----------QiekeRuleService.checkSysOverNum do android order id:[%s] not first", otaOrder.getId()));
+                return otaFreqTrvEnum;
+            } else {
+                logger.info(String.format("----------QiekeRuleService.checkSysOverNum do android order id:[%s] pass", otaOrder.getId()));
+                return  OtaFreqTrvEnum.L1;
+            }
+        } else if (orderMethod == OrderMethodEnum.IOS.getId()) {
+            logger.info(String.format("----------QiekeRuleService.checkSysOverNum do ios order id:[%s]", otaOrder.getId()));
+            //IOS
+            Long orderId = otaOrder.getId();
+            OtaOrderMac orderMac = otaOrderMacMapper.selectByOrderId(orderId);
+            if (null == orderMac) {
+                logger.info(String.format("----------QiekeRuleService.checkSysOverNum do ios order id:[%s] orderMac is null end", otaOrder.getId()));
+                return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+            }
+            String uuid = orderMac.getUuid();
+            if (null == uuid || "null".equalsIgnoreCase(uuid)) {
+                logger.info(String.format("----------QiekeRuleService.checkSysOverNum do ios order id:[%s] uuid is null end", otaOrder.getId()));
+                return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+            }
+
+            //订单状态
+            List<Integer> statusList = new ArrayList<>();
+            statusList.add(OtaOrderStatusEnum.CheckIn.getId());
+            statusList.add(OtaOrderStatusEnum.Account.getId());
+            statusList.add(OtaOrderStatusEnum.CheckOut.getId());
+            //
+            Map<String, Object> param = new HashMap<>();
+            param.put("uuid",uuid);
+            param.put("statusList",statusList);
+            List<OtaOrderMac> orderMacList = otaOrderMacMapper.selectByUuid(param);
+            logger.info(String.format(
+                    "----------QiekeRuleService.checkSysOverNum do ios order id:[%s] get orderMacList size:[%s]",
+                    otaOrder.getId(), orderMacList.size()));
+
+            //去除本次账号
+            Set<Long> orderIdSet = new HashSet<>();
+            for(OtaOrderMac dbOrderMac : orderMacList) {
+                Long macOrderId = dbOrderMac.getOrderid();
+                orderIdSet.add(macOrderId);
+            }
+            orderIdSet.remove(orderId);
+
+            //
+            if (orderIdSet.size() > num) {
+                logger.info(String.format("----------QiekeRuleService.checkSysOverNum do ios orderIdSet size:[%s]", orderIdSet.size()));
+                logger.info(String.format("----------QiekeRuleService.checkSysOverNum do ios order id:[%s] not first end", otaOrder.getId()));
+                return otaFreqTrvEnum;
+            } else {
+                logger.info(String.format("----------QiekeRuleService.checkSysOverNum do ios order id:[%s] end pass", otaOrder.getId()));
+                return  OtaFreqTrvEnum.L1;
+            }
+        } else {
+            //其他类型返回系统号为空
+            logger.info(String.format("----------QiekeRuleService.checkSysNo end do other end"));
+            return OtaFreqTrvEnum.DEVICE_NUM_IS_NULL;
+        }
+    }
+
+    private Date getLastDayOfMonth() {
+        Calendar calendar = Calendar.getInstance();
+        //设置日历中月份的第1天
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DATE));
+        //格式化日期
+        Date lastDayOfMonth = null;
+        try {
+            lastDayOfMonth = DateUtils.parseDate(DateUtils.formatDateTime(calendar.getTime(), DateUtils.FORMAT_DATE));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return lastDayOfMonth;
+    }
+
+    public Date getFirstDayOfMonth(){
+        Calendar calendar = Calendar.getInstance();
+        //设置日历中月份的第1天
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        //格式化日期
+        Date firstDayOfMonth = null;
+        try {
+            firstDayOfMonth = DateUtils.parseDate(DateUtils.formatDateTime(calendar.getTime(), DateUtils.FORMAT_DATE));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return firstDayOfMonth;
     }
 
     /**
