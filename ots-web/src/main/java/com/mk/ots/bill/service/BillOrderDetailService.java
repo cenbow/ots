@@ -2,6 +2,8 @@ package com.mk.ots.bill.service;
 
 import com.mk.ots.bill.domain.BillOrder;
 import com.mk.ots.bill.domain.BillOrderPayInfo;
+import com.mk.ots.bill.enums.BillOrderCheckStatusEnum;
+import com.mk.ots.bill.enums.BillOrderFreezeEnum;
 import com.mk.ots.bill.model.BillOrderDetail;
 import com.mk.ots.bill.model.BillOrderWeek;
 import com.mk.ots.common.enums.OrderTypeEnum;
@@ -139,6 +141,8 @@ public class BillOrderDetailService {
         hotelCost = hotelCost.add(billCost);
         hotelCost = hotelCost.add(billOrderWeek.getChangeCost() == null ? BigDecimal.ZERO : billOrderWeek.getChangeCost());
         billOrderWeek.setHotelCost(hotelCost);
+        billOrderWeek.setIsFreeze(BillOrderFreezeEnum.NO.getCode().toString());
+        billOrderWeek.setCheckStatus(BillOrderCheckStatusEnum.INIT.getCode());
         return billOrderWeek;
     }
 
