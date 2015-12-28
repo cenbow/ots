@@ -379,6 +379,7 @@
         from b_bill_order_detail
         where bill_time >= #{beginTime}#
         and bill_time < #{endTime}#
+        and b_bill_order_week_id is null
         group by hotel_id,hotel_name,city_code,city_name
         order by hotel_Id
     ]]>
