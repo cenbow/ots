@@ -345,7 +345,7 @@ public class QiekeRuleService {
             Date firstDayOfMonth = getFirstDayOfMonth();
             Date lastDayOfMonth = getLastDayOfMonth();
             param.put("createBeginTime", firstDayOfMonth);
-            param.put("createEndTime", lastDayOfMonth);
+            param.put("createEndTime", DateUtils.addDays(lastDayOfMonth, 1));
             param.put("deviceimei",deviceimei);
             param.put("statusList",statusList);
             List<OtaOrderMac> orderMacList = otaOrderMacMapper.selectByDeviceimei(param);
@@ -390,8 +390,12 @@ public class QiekeRuleService {
             statusList.add(OtaOrderStatusEnum.CheckIn.getId());
             statusList.add(OtaOrderStatusEnum.Account.getId());
             statusList.add(OtaOrderStatusEnum.CheckOut.getId());
-            //
+
             Map<String, Object> param = new HashMap<>();
+            Date firstDayOfMonth = getFirstDayOfMonth();
+            Date lastDayOfMonth = getLastDayOfMonth();
+            param.put("createBeginTime", firstDayOfMonth);
+            param.put("createEndTime", DateUtils.addDays(lastDayOfMonth, 1));
             param.put("uuid",uuid);
             param.put("statusList",statusList);
             List<OtaOrderMac> orderMacList = otaOrderMacMapper.selectByUuid(param);
@@ -430,7 +434,7 @@ public class QiekeRuleService {
         //格式化日期
         Date lastDayOfMonth = null;
         try {
-            lastDayOfMonth = DateUtils.parseDate(DateUtils.formatDateTime(calendar.getTime(), DateUtils.FORMAT_DATE));
+            lastDayOfMonth = DateUtils.parseDate(DateUtils.formatDateTime(calendar.getTime(), DateUtils.FORMAT_DATE),DateUtils.FORMAT_DATE);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -444,7 +448,7 @@ public class QiekeRuleService {
         //格式化日期
         Date firstDayOfMonth = null;
         try {
-            firstDayOfMonth = DateUtils.parseDate(DateUtils.formatDateTime(calendar.getTime(), DateUtils.FORMAT_DATE));
+            firstDayOfMonth = DateUtils.parseDate(DateUtils.formatDateTime(calendar.getTime(), DateUtils.FORMAT_DATE),DateUtils.FORMAT_DATE);
         } catch (ParseException e) {
             e.printStackTrace();
         }
