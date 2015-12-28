@@ -2275,7 +2275,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			result.put("grade", new BigDecimal(grade));
 		} else {
 			result.put("scorecount", 0);
-			result.put("grade", 0);
+			result.put("grade", new BigDecimal(0));
 		}
 		times = endTime - startTime;
 		logger.info("查询酒店: {}评价信息耗时: {}ms.", hotelid, times);

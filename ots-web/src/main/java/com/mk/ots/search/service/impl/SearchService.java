@@ -1349,10 +1349,10 @@ public class SearchService implements ISearchService {
 						}
 						
 						result.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
-						result.put("grade", grade == null ? 0 : grade);
+						result.put("grade", grade == null ? new BigDecimal(0) : new BigDecimal(grade));
 					} else {
 						result.put("scorecount", 0);
-						result.put("grade", 0);
+						result.put("grade", new BigDecimal(0));
 					}
 
 					/**
@@ -2108,11 +2108,19 @@ public class SearchService implements ISearchService {
 			scoreMap = scores.get(0);
 		}
 		if (scoreMap != null) {
+			Object gradeObject = scoreMap.get("grade");
+			String grade = "";
+			if (gradeObject != null && gradeObject instanceof String) {
+				grade = (String) gradeObject;
+			} else if (gradeObject != null && gradeObject instanceof BigDecimal) {
+				grade = ((BigDecimal) gradeObject).toString();
+			}
+			
 			data.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
-			data.put("grade", scoreMap.get("grade") == null ? 0 : scoreMap.get("grade"));
+			data.put("grade", grade == null ? new BigDecimal(0) : new BigDecimal(grade));
 		} else {
 			data.put("scorecount", 0);
-			data.put("grade", 0);
+			data.put("grade", new BigDecimal(0));
 		}
 		Long endTime = new Date().getTime();
 		Long times = endTime - startTime;
