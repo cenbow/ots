@@ -2259,7 +2259,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				grade = "4";
 			}
 
-			result.put("grade", grade);
+			result.put("grade", new BigDecimal(grade));
 		} else {
 			result.put("scorecount", 0);
 			result.put("grade", 0);
