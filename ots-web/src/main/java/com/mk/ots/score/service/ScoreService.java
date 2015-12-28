@@ -11,7 +11,9 @@ import java.util.Map;
 import com.mk.care.kafka.common.CopywriterTypeEnum;
 import com.mk.care.kafka.common.MessageTypeEnum;
 import com.mk.care.kafka.model.Message;
+import com.mk.ots.hotel.model.THotelModel;
 import com.mk.ots.kafka.message.OtsCareProducer;
+import com.mk.ots.mapper.THotelMapper;
 import com.mk.ots.order.dao.RoomOrderDAO;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -71,6 +73,9 @@ public class ScoreService {
 
 	@Autowired
 	private OtsCareProducer careProducer;
+
+	@Autowired
+	private THotelMapper thotelMapper;
 
 	@Autowired
 	private RoomOrderDAO roomOrderDAO;
@@ -307,10 +312,20 @@ public class ScoreService {
 		Bean scoreS = scoreDAO.findScoreSByHotelid(hotelid, mid);
 		Map<String,Object> hotelMap = new HashMap<String,Object>();
 		hotelMap.put("hotelid", hotelid);
-		BigDecimal s= new BigDecimal(5);//如果没有则设置为5分
+		BigDecimal s= new BigDecimal(0);//如果没有则设置为5分
 		if(scoreS != null && null != scoreS.get("grade")	){
 			s= scoreS.get("grade");
 		}
+		//重庆评分为0，则设置为4分
+		if(s.compareTo(new BigDecimal(0))==0){
+			if(!StringUtils.isEmpty(hotelid)){
+				THotelModel  thotel = thotelMapper.selectById(Long.parseLong(hotelid));
+				if("500000".equals(thotel.getCitycode())){
+					s = new BigDecimal(4);
+				}
+			}
+		}
+
 		hotelMap.put("hotelgrade", s);
 		if(scoreS!= null && scoreS.get("scorecount")!=null){
 			hotelMap.put("scorecount", scoreS.get("scorecount"));
