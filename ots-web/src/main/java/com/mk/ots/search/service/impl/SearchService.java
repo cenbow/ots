@@ -1340,8 +1340,16 @@ public class SearchService implements ISearchService {
 						scoreMap = scores.get(0);
 					}
 					if (scoreMap != null) {
+						String grade = "";
+						Object gradeObject = scoreMap.get("grade");
+						if (gradeObject != null && gradeObject instanceof String) {
+							grade = (String) gradeObject;
+						} else if (gradeObject != null && gradeObject instanceof BigDecimal) {
+							grade = ((BigDecimal) gradeObject).toString();
+						}
+						
 						result.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
-						result.put("grade", scoreMap.get("grade") == null ? 0 : scoreMap.get("grade"));
+						result.put("grade", grade == null ? 0 : grade);
 					} else {
 						result.put("scorecount", 0);
 						result.put("grade", 0);

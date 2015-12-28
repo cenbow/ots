@@ -2254,7 +2254,15 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		if (scoreMap != null) {
 			result.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
 
-			String grade = scoreMap.get("grade") == null ? "0" : scoreMap.get("grade");
+			Object gradeObject = scoreMap.get("grade");
+			String grade = "";
+			if (gradeObject != null && gradeObject instanceof String) {
+				grade = (String) gradeObject;
+			} else if (gradeObject != null && gradeObject instanceof BigDecimal) {
+				grade = ((BigDecimal) gradeObject).toString();
+			}
+
+			grade = grade == null ? "0" : grade;
 
 			String cityId = reqEntity.getCityid();
 			/**
