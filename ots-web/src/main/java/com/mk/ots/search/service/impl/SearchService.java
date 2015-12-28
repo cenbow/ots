@@ -1339,15 +1339,16 @@ public class SearchService implements ISearchService {
 					if (scores.size() > 0) {
 						scoreMap = scores.get(0);
 					}
+
+					String grade = "";
 					if (scoreMap != null) {
-						String grade = "";
 						Object gradeObject = scoreMap.get("grade");
 						if (gradeObject != null && gradeObject instanceof String) {
 							grade = (String) gradeObject;
 						} else if (gradeObject != null && gradeObject instanceof BigDecimal) {
 							grade = ((BigDecimal) gradeObject).toString();
 						}
-						
+
 						result.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
 						result.put("grade", StringUtils.isBlank(grade) ? new BigDecimal(0) : new BigDecimal(grade));
 					} else {
@@ -1358,8 +1359,7 @@ public class SearchService implements ISearchService {
 					/**
 					 * this snippet only applies in chongqing
 					 */
-					if ("500000".equals(reqentity.getCityid())
-							&& (scoreMap.get("grade") == null || "0".equals(scoreMap.get("grade")))) {
+					if ("500000".equals(reqentity.getCityid()) && (StringUtils.isBlank(grade) || "0".equals(grade))) {
 						result.put("grade", 4);
 					}
 
@@ -2107,21 +2107,28 @@ public class SearchService implements ISearchService {
 		if (scores.size() > 0) {
 			scoreMap = scores.get(0);
 		}
+
+		String grade = "";
 		if (scoreMap != null) {
 			Object gradeObject = scoreMap.get("grade");
-			String grade = "";
+
 			if (gradeObject != null && gradeObject instanceof String) {
 				grade = (String) gradeObject;
 			} else if (gradeObject != null && gradeObject instanceof BigDecimal) {
 				grade = ((BigDecimal) gradeObject).toString();
 			}
-			
+
 			data.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
 			data.put("grade", StringUtils.isBlank(grade) ? new BigDecimal(0) : new BigDecimal(grade));
 		} else {
 			data.put("scorecount", 0);
 			data.put("grade", new BigDecimal(0));
 		}
+
+		if ("500000".equals(reqentity.getCityid()) && (StringUtils.isBlank(grade) || "0".equals(grade))) {
+			data.put("grade", new BigDecimal(4));
+		}
+
 		Long endTime = new Date().getTime();
 		Long times = endTime - startTime;
 		logger.info("查询酒店: {}评价信息耗时: {}ms.", hotelid, times);
