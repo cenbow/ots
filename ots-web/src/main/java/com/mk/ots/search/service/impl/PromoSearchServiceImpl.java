@@ -2341,7 +2341,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				Long times = endTime - startTime;
 
 				try {
-					updateScoreAndGrade(result);
+					updateScoreAndGrade(result, reqEntity);
 				} catch (Exception ex) {
 					logger.warn("failed to updateScoreAndGrade...", ex);
 				}
@@ -3017,7 +3017,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					}
 
 					try {
-						updateScoreAndGrade(result);
+						updateScoreAndGrade(result, reqentity);
 					} catch (Exception ex) {
 						logger.warn("failed to updateScoreAndGrade...", ex);
 					}
