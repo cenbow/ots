@@ -530,6 +530,7 @@
     AND o.updatetime < #{endTime}#
     AND o.orderstatus in (180,190,200,520)
     AND o.paystatus = 120
+    AND o.promoType = 0
     AND NOT EXISTS (
       SELECT
       1
