@@ -1574,7 +1574,6 @@ otsversion 	| OTS版本 	| 否 	|
  }
 ```
 
-
 ## 特价活动
 ### `「增」` 获取特价活动价格区间
 **业务说明：**
@@ -4901,6 +4900,62 @@ statuscount:
 
 ```
 ### 1元特价列表
+
+
+
+### `「增」` 获取校园特价酒店列表
+**业务说明：**
+> 获取校园特价酒店列表
+
+**接口 url：**
+> http://ip:port/ots/promo/college
+
+**请求参数：**
+
+    字段        |         名称         | 是否必须 | 说明|
+--------------- | ------------------- | -------| -----------                                                 
+| cityid 	| 城市编码 	| 是 	|                                                    
+| callmethod   	| 调用来源   | 是   | 1-crs；<br>2-web；<br>3-wechat；<br>4-app(ios)；<br>5-app(Android) |
+| callversion  	| 调用版本   | 是   |
+| ip           	| IP地址  | 否     |                                                    
+| hardwarecode 	| 硬件编码   | 否       |                                                    
+| otsversion   	| OTS版本    | 否       |   
+
+
+> API返回json返回说明：
+
+```js
+{
+    "success": true,
+    "errorcode": 0,
+    "errormsg": "",
+
+    "hotel":
+    [{
+	"hotelid":,//酒店id [类型String]
+        "promoprice": ,// 特价活动价格 [类型BigDecimal]
+        "minpmsprice": //最低价格对应房型的门市价 [类型BigDecimal]
+    }]
+}
+``` 
+
+> API返回json返回说明：
+
+```js
+{
+    "success": true,
+    "errorcode": 0,
+    "errormsg": "",
+
+    "hotel":
+    [{
+	"hotelid": "2778",
+        "promoprice": 20,
+        "minpmsprice": 300
+    }]
+}
+```
+
 
 </article>
 

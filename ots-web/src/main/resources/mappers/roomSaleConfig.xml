@@ -322,6 +322,13 @@
      WHERE hotelid=#{hotelid} AND valid = 'T' AND saleTypeId = 1 ORDER BY saleValue ASC limit 1
     </select>
 
+    <select id="queryAllThemeRoomtypes" resultMap="roomSaleConfig" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfig">
+        SELECT
+     	<include refid="Base_Column_List"/>
+        FROM  t_room_sale_config 
+        where tag = '1' and valid = 'T'
+    </select>	
+
     <select id="getThemeRoomSale" resultMap="roomSaleConfig" parameterType="com.mk.ots.roomsale.model.TRoomSaleConfig">
         SELECT
         a.id as promoType,b.hotelId, b.roomId, b.roomTypeId,b.saleValue,b.costPrice,b.num,b.saleName as roomTypeName,
