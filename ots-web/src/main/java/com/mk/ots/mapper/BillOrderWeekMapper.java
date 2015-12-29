@@ -28,4 +28,6 @@ public interface BillOrderWeekMapper {
     public List<BillOrderWeek> sumBillOrderWeekList(@Param("beginTime")Date beginTime, @Param("endTime")Date endTime);
 
     void insertBatch(List<BillOrderWeek> billOrderWeekList);
+
+    void insertInitOprLog(@Param("beginTime")Date beginTime, @Param("endTime")Date endTime);
 }

@@ -408,6 +408,41 @@
       )
     </foreach>
   </insert>
+
+  <insert id="insertInitOprLog" parameterType="java.util.Map">
+    <![CDATA[
+    INSERT INTO b_bill_order_opertor_log (
+        source_id,
+        type,
+        check_time,
+        check_user_id,
+        check_user_name,
+        check_memo,
+        check_status,
+        check_status_text,
+        back_user_id,
+        back_user_name,
+        back_memo,
+        back_time
+    ) SELECT
+        id,
+        1,
+        now(),
+        0,
+        'system',
+        '初始化账单',
+        0,
+        '初始化账单',
+        0,
+        NULL,
+        NULL,
+        NULL
+      FROM
+        b_bill_order_detail wk
+       WHERE
+        wk.begin_time >= #{beginTime} and wk.end_time <= #{endTime}
+      ]]>
+  </insert>
 </mapper>
 
 

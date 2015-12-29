@@ -576,9 +576,8 @@
     and wk.hotel_id = detail.hotel_id and wk.city_code = #{cityCode}
     and wk.hotel_id = #{hotelId} LIMIT 1
     )
-    where detail.bill_time >= #{beginTime} and detail.bill_time <= #{endTime} and  detail.hotel_id = #{hotelId}
+    where detail.bill_time >= #{beginTime} and detail.bill_time <= #{endTime} and  detail.hotel_id = #{hotelId} and detail.city_code = #{cityCode}
     ]]>
   </update>
-
 
 </mapper>

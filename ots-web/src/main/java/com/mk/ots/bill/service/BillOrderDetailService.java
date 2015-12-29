@@ -91,6 +91,7 @@ public class BillOrderDetailService {
         }
         createBillOrderWeekList(billOrderWeekList, billBeginDate, billEndDate);
         updateOrderWeekId(billOrderWeekList, billBeginDate, billEndDate);
+        billOrderWeekMapper.insertInitOprLog(billBeginDate, billEndDate);
     }
 
     private void updateOrderWeekId(List<BillOrderWeek> billOrderWeekList, Date billBeginDate, Date billEndDate) {
