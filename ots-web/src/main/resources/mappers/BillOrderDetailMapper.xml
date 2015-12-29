@@ -572,11 +572,11 @@
    <![CDATA[
     update b_bill_order_detail detail set  detail.b_bill_order_week_id =
     (
-    select id from b_bill_order_week wk where wk.begin_time >=  #{beginTime} and wk.end_time <= #{endTime}
+    select id from b_bill_order_week wk where wk.begin_time >=  #{beginTime} and wk.end_time < #{endTime}
     and wk.hotel_id = detail.hotel_id and wk.city_code = #{cityCode}
     and wk.hotel_id = #{hotelId} LIMIT 1
     )
-    where detail.bill_time >= #{beginTime} and detail.bill_time <= #{endTime} and  detail.hotel_id = #{hotelId} and detail.city_code = #{cityCode}
+    where detail.bill_time >= #{beginTime} and detail.bill_time < #{endTime} and  detail.hotel_id = #{hotelId} and detail.city_code = #{cityCode}
     ]]>
   </update>
 
