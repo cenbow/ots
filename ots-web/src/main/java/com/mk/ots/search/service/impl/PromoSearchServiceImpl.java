@@ -89,7 +89,6 @@ import com.mk.ots.mapper.THotelMapper;
 import com.mk.ots.mapper.THotelScoreMapper;
 import com.mk.ots.restful.input.HotelQuerylistReqEntity;
 import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.roomsale.model.RoomSaleShowConfigDto;
 import com.mk.ots.roomsale.model.TRoomSaleConfig;
@@ -2554,6 +2553,59 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		return isCollected;
 	}
 
+	private void updateScoreAndGrade(Map<String, Object> result, HotelQuerylistReqEntity reqEntity) throws Exception {
+		Long startTime = new Date().getTime();
+		Long endTime = new Date().getTime();
+		Long times = endTime - startTime;
+
+		Long hotelid = Long.valueOf((String) result.get("hotelid"));
+
+		logger.info("--================================== 查询酒店评价信息开始： ==================================-- ");
+		List<Map<String, String>> scores = thotelscoreMapper.findHotelScoresByHotelid(hotelid);
+		Map<String, String> scoreMap = null;
+		if (scores.size() > 0) {
+			scoreMap = scores.get(0);
+		}
+
+		String cityId = reqEntity.getCityid();
+		if (scoreMap != null) {
+			result.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
+
+			Object gradeObject = scoreMap.get("grade");
+			String grade = "";
+			if (gradeObject != null && gradeObject instanceof String) {
+				grade = (String) gradeObject;
+			} else if (gradeObject != null && gradeObject instanceof BigDecimal) {
+				grade = ((BigDecimal) gradeObject).toString();
+			}
+
+			grade = StringUtils.isBlank(grade) ? "0" : grade;
+
+			/**
+			 * this logic only applies in chongqing
+			 */
+			if ("0".equals(grade) && "500000".equals(cityId)) {
+				grade = "4";
+			}
+
+			result.put("grade", StringUtils.isBlank(grade) ? new BigDecimal(0) : new BigDecimal(grade));
+		} else {
+			result.put("scorecount", 0);
+			/**
+			 * this logic only applies in chongqing
+			 */
+			if ("500000".equals(cityId)) {
+				result.put("grade", new BigDecimal(4));
+			} else {
+				result.put("grade", new BigDecimal(0));
+			}
+		}
+		times = endTime - startTime;
+		logger.info("查询酒店: {}评价信息耗时: {}ms.", hotelid, times);
+		logger.info("--================================== 查询酒店评价信息结束： ==================================-- ");
+
+	}
+	
 	/**
 	 * 酒店综合查询返回酒店列表数据
 	 *
@@ -2977,6 +3029,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 						result.put("scorecount", 0);
 						result.put("grade", 0);
 					}
+					
 					Long endTime = new Date().getTime();
 					Long times = endTime - startTime;
 					logger.info("查询酒店: {}评价信息耗时: {}ms.", es_hotelid, times);
