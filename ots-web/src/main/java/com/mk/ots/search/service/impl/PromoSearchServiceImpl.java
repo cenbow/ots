@@ -3294,7 +3294,7 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			}
 
 			// 重新按照是否可售分组排序
-			if (reqentity.getOrderby() == null || reqentity.getOrderby() == 0
+			if (reqentity.getOrderby() == null || reqentity.getOrderby() == 0 || reqentity.getOrderby() == -1
 					|| HotelSortEnum.SCORE.getId() == reqentity.getOrderby()) {
 				this.sortByVcState(hotels);
 				/**
