@@ -2153,15 +2153,34 @@ public class OrderServiceImpl implements OrderService {
                         || OtaFreqTrvEnum.CARD_ID_IS_NOT_PMS_SCAN.getId().equals(String.valueOf(invalidReason))
                         || OtaFreqTrvEnum.CARD_ID_IS_NULL.getId().equals(String.valueOf(invalidReason))) {
 
-                    OrderServiceImpl.logger.info(
-                            String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] start genTicket ",otaorder.getId()));
+                    Long orderId = otaorder.getId();
+                    String lockValue = DistributedLockUtil.tryLock("orderNewUserTicketLock_" + orderId, 40);
+                    try {
+                        if (lockValue == null) {
+                            OrderServiceImpl.logger.info("订单：" + orderId + "正在发放优惠券，不再发放");
+                        } else {
+                            OrderServiceImpl.logger.info(
+                                    String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] start genTicket ",otaorder.getId()));
 
-                    Long mid = otaorder.getMid();
-                    String cityCode = otaorder.getCityCode();
-                    List<Long> ticketIdList = this.qiekeRuleService.genTicketByCityCode(cityCode, mid);
-                    for (Long ticketId : ticketIdList) {
-                        OrderServiceImpl.logger.info(
-                                String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] send genTicket[%s]", otaorder.getId(),ticketId));
+                            Long mid = otaorder.getMid();
+                            List<TicketInfo> ticketInfoList = this.ticketService.queryMyTicket(mid,null);
+
+                            if (ticketInfoList.isEmpty()) {
+                                String cityCode = otaorder.getCityCode();
+                                List<Long> ticketIdList = this.qiekeRuleService.genTicketByCityCode(cityCode, mid);
+                                for (Long ticketId : ticketIdList) {
+                                    OrderServiceImpl.logger.info(
+                                            String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] send genTicket[%s]", otaorder.getId(),ticketId));
+                                }
+                            } else {
+                                OrderServiceImpl.logger.info(
+                                        String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] genTicketed dont genTicket ",otaorder.getId()));
+                            }
+                        }
+                    } finally{
+                        // 释放 redis锁
+                        OrderServiceImpl.logger.info("释放分布锁, orderId= " + orderId);
+                        DistributedLockUtil.releaseLock("orderNewUserTicketLock_" + orderId, lockValue);
                     }
                 } else {
                     OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] dont genTicket",otaorder.getId()));
