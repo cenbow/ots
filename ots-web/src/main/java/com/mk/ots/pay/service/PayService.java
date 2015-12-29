@@ -1530,7 +1530,7 @@ public class PayService implements IPayService {
                 Map<String, Object> returnMap = toPay(order, pay, price);
 
                 //销售短消息提醒
-                this.createJob4SendMsg(order);
+                this.sendMsg2Sale(order);
                 
                 return returnMap;
             } else {

@@ -2251,12 +2251,20 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 			scoreMap = scores.get(0);
 		}
 
+		String cityId = reqEntity.getCityid();
 		if (scoreMap != null) {
 			result.put("scorecount", scoreMap.get("scorecount") == null ? 0 : scoreMap.get("scorecount"));
 
-			String grade = scoreMap.get("grade") == null ? "0" : scoreMap.get("grade");
+			Object gradeObject = scoreMap.get("grade");
+			String grade = "";
+			if (gradeObject != null && gradeObject instanceof String) {
+				grade = (String) gradeObject;
+			} else if (gradeObject != null && gradeObject instanceof BigDecimal) {
+				grade = ((BigDecimal) gradeObject).toString();
+			}
 
-			String cityId = reqEntity.getCityid();
+			grade = StringUtils.isBlank(grade) ? "0" : grade;
+
 			/**
 			 * this logic only applies in chongqing
 			 */
@@ -2264,10 +2272,17 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 				grade = "4";
 			}
 
-			result.put("grade", new BigDecimal(grade));
+			result.put("grade", StringUtils.isBlank(grade) ? new BigDecimal(0) : new BigDecimal(grade));
 		} else {
 			result.put("scorecount", 0);
-			result.put("grade", 0);
+			/**
+			 * this logic only applies in chongqing
+			 */
+			if ("500000".equals(cityId)) {
+				result.put("grade", new BigDecimal(4));
+			} else {
+				result.put("grade", new BigDecimal(0));
+			}
 		}
 		times = endTime - startTime;
 		logger.info("查询酒店: {}评价信息耗时: {}ms.", hotelid, times);
