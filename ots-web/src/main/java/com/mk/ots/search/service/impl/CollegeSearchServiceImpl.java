@@ -13,6 +13,8 @@ public class CollegeSearchServiceImpl implements CollegeSearchService{
 	@Override
 	public Map<String, Object> search(CollegeQueryEntity queryEntity) throws Exception {
 		
+		
+		
 		return null;
 	}
 }
