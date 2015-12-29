@@ -39,7 +39,6 @@ import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.roomsale.service.TPriceScopeService;
-import com.mk.ots.search.service.CollegeSearchService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.web.ServiceOutput;
 
