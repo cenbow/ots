@@ -438,7 +438,7 @@
         NULL,
         NULL
       FROM
-        b_bill_order_detail wk
+        b_bill_order_week wk
        WHERE
         wk.begin_time >= #{beginTime} and wk.end_time <= #{endTime}
       ]]>
