@@ -123,7 +123,7 @@ public class BillOrderDetailService {
 
     private BillOrderWeek buildOrderWeek(BillOrderWeek billOrderWeek, Date billBeginDate, Date billEndDate) {
         billOrderWeek.setBeginTime(billBeginDate);
-        billOrderWeek.setEndTime(billEndDate);
+        billOrderWeek.setEndTime(DateUtils.addDays(billEndDate, -1));
         Date now = new Date();
         billOrderWeek.setCreateTime(now);
         billOrderWeek.setUpdateTime(now);
