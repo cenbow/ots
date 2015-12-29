@@ -63,9 +63,6 @@ public class HotelPromoController {
 
 	@Autowired
 	private TPriceScopeService tpriceScopeService;
-
-	@Autowired
-	private CollegeSearchService collegeSearchService;
 	
 	/**
 	 * 活动查询
