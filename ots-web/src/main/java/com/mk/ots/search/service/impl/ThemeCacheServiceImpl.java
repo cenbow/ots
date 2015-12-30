@@ -1,10 +1,10 @@
 package com.mk.ots.search.service.impl;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -42,7 +42,7 @@ public class ThemeCacheServiceImpl implements ThemeCacheService {
 
 	private final Gson gsonParser = new Gson();
 
-	private Map<Long, List<ThemeRoomtypeModel>> themeRoomtypes;
+	private Map<Long, Map<Long, ThemeRoomtypeModel>> themeRoomtypes;
 
 	private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -50,7 +50,7 @@ public class ThemeCacheServiceImpl implements ThemeCacheService {
 
 	private Lock writeLock;
 
-	private final Integer refreshSec = 100;
+	private final Integer refreshSec = 1;
 
 	private String getLastUpdateName() {
 		return String.format("%s-%s", ThemeCacheServiceImpl.class.getCanonicalName(), lastUpdateName);
@@ -60,14 +60,20 @@ public class ThemeCacheServiceImpl implements ThemeCacheService {
 		return String.format("%s-%s", ThemeCacheServiceImpl.class.getCanonicalName(), hotelId);
 	}
 
-	private List<TRoomSaleConfig> findThemeRoomtypes() {
-		List<TRoomSaleConfig> saleConfigs = saleConfigMapper.queryAllThemeRoomtypes();
+	private List<TRoomSaleConfig> findThemeRoomtypes() throws Exception {
+		List<TRoomSaleConfig> saleConfigs = null;
+
+		try {
+			saleConfigs = saleConfigMapper.queryAllThemeRoomtypes();
+		} catch (Exception ex) {
+			throw new Exception("failed to saleConfigMapper.queryAllThemeRoomtypes", ex);
+		}
 
 		return saleConfigs;
 	}
 
-	private Map<Long, List<ThemeRoomtypeModel>> updateAndQueryRoomtypes() {
-		Map<Long, List<ThemeRoomtypeModel>> roomtypes = new HashMap<Long, List<ThemeRoomtypeModel>>();
+	private Map<Long, Map<Long, ThemeRoomtypeModel>> updateAndQueryRoomtypes() throws Exception {
+		Map<Long, Map<Long, ThemeRoomtypeModel>> roomtypes = new ConcurrentHashMap<Long, Map<Long, ThemeRoomtypeModel>>();
 
 		Jedis jedis = cacheManager.getNewJedis();
 
@@ -76,6 +82,11 @@ public class ThemeCacheServiceImpl implements ThemeCacheService {
 		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
 
 		List<TRoomSaleConfig> saleConfigs = findThemeRoomtypes();
+		if (saleConfigs == null) {
+			logger.warn("no theme-roomtypes have been found...");
+			return roomtypes;
+		}
+
 		for (TRoomSaleConfig saleConfig : saleConfigs) {
 			Integer saleRoomtypeId = saleConfig.getSaleRoomTypeId();
 			Integer hotelId = saleConfig.getHotelId();
@@ -91,25 +102,27 @@ public class ThemeCacheServiceImpl implements ThemeCacheService {
 					themeRoomtype.setPrice(prices[0]);
 
 					if (!roomtypes.containsKey(Long.valueOf(hotelId))) {
-						roomtypes.put(Long.valueOf(hotelId), new ArrayList<ThemeRoomtypeModel>());
+						roomtypes.put(Long.valueOf(hotelId), new HashMap<Long, ThemeRoomtypeModel>());
 					}
-					roomtypes.get(Long.valueOf(hotelId)).add(themeRoomtype);
+					roomtypes.get(Long.valueOf(hotelId)).put(themeRoomtype.getRoomtypeId(), themeRoomtype);
 				}
 			}
 		}
 
 		for (Long hotelId : roomtypes.keySet()) {
-			List<ThemeRoomtypeModel> themes = roomtypes.get(hotelId);
-			String themeJson = gsonParser.toJson(themes);
+			Map<Long, ThemeRoomtypeModel> themes = roomtypes.get(hotelId);
+			if (themes != null) {
+				String themeJson = gsonParser.toJson(themes);
 
-			jedis.set(getHotelName(hotelId), themeJson);
+				jedis.set(getHotelName(hotelId), themeJson);
+			}
 		}
 
 		return roomtypes;
 	}
 
 	@Override
-	public Map<Long, List<ThemeRoomtypeModel>> queryThemePricesWithLocalCache() throws Exception {
+	public Map<Long, Map<Long, ThemeRoomtypeModel>> queryThemePricesWithLocalCache() throws Exception {
 		Jedis jedis = cacheManager.getNewJedis();
 
 		if (readLock == null) {
@@ -120,7 +133,7 @@ public class ThemeCacheServiceImpl implements ThemeCacheService {
 			writeLock = lock.writeLock();
 		}
 
-		Map<Long, List<ThemeRoomtypeModel>> themeRoomtypes = null;
+		Map<Long, Map<Long, ThemeRoomtypeModel>> themeRoomtypes = null;
 
 		String lastUpdate = "";
 
@@ -141,13 +154,16 @@ public class ThemeCacheServiceImpl implements ThemeCacheService {
 
 		int seconds = DateUtils.diffSecond(lastUpdateTime, currentTime);
 		if (seconds > refreshSec || this.themeRoomtypes == null) {
-			themeRoomtypes = updateAndQueryRoomtypes();
-
-			jedis.set(getLastUpdateName(), String.valueOf(currentTime.getTime()));
-
 			writeLock.lock();
+
 			try {
+				themeRoomtypes = updateAndQueryRoomtypes();
+
+				jedis.set(getLastUpdateName(), String.valueOf(currentTime.getTime()));
+
 				this.themeRoomtypes = themeRoomtypes;
+			} catch (Exception ex) {
+				throw new Exception("failed to updateAndQueryRoomtypes...", ex);
 			} finally {
 				writeLock.unlock();
 			}

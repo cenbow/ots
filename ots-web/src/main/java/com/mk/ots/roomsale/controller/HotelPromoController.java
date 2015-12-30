@@ -563,17 +563,19 @@ public class HotelPromoController {
 
 	@RequestMapping(value = "/promo/themecache", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> college(@Valid HotelThemeReqEntity themeEntity) throws Exception {
+	public ResponseEntity<Map<String, Object>> themecache(@Valid HotelThemeReqEntity themeEntity) throws Exception {
 		Map<String, Object> response = new HashMap<>();
 
-		Map<Long, List<ThemeRoomtypeModel>> themes = null;
+		Map<Long, Map<Long, ThemeRoomtypeModel>> themes = null;
 		try {
 			themes = themeCacheService.queryThemePricesWithLocalCache();
 		} catch (Exception ex) {
+			logger.error("failed to querythemepriceswithlocalcache...", ex.getCause());
+			
 			response.put(ServiceOutput.STR_MSG_SUCCESS, "false");
 			response.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			response.put(ServiceOutput.STR_MSG_ERRMSG, "");
-			
+
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 		}
 
