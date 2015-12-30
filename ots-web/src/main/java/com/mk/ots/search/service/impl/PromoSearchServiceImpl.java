@@ -1207,6 +1207,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Map<Integer, Queue<Map<String, Object>>> hotelRoomTypes = new HashMap<Integer, Queue<Map<String, Object>>>();
 		List<Map<String, Object>> themeGrouped = new ArrayList<Map<String, Object>>();
 
+		Map<Long, Map<Long, ThemeRoomtypeModel>> roomtypeModels = null;
+		
+		try {
+			roomtypeModels = themeCacheService.queryThemePricesWithLocalCache();
+		} catch (Exception ex) {
+			logger.warn("failed to retrieve local cache...", ex.getCause());
+		}
+		
 		Integer counter = 0;
 		for (Map<String, Object> hotel : searchResults) {
 			List<Map<String, Object>> roomtypes = (List<Map<String, Object>>) hotel.get("roomtype");
@@ -1220,14 +1228,6 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 			if (!hotelRoomTypes.containsKey(hotelId)) {
 				hotelRoomTypes.put(hotelId, new ArrayBlockingQueue<Map<String, Object>>(10));
-			}
-
-			Map<Long, Map<Long, ThemeRoomtypeModel>> roomtypeModels = null;
-
-			try {
-				roomtypeModels = themeCacheService.queryThemePricesWithLocalCache();
-			} catch (Exception ex) {
-				logger.warn("failed to retrieve local cache...", ex.getCause());
 			}
 
 			for (Map<String, Object> roomtype : roomtypes) {
