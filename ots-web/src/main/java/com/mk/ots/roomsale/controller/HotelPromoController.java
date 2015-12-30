@@ -566,7 +566,7 @@ public class HotelPromoController {
 	public ResponseEntity<Map<String, Object>> college(@Valid HotelThemeReqEntity themeEntity) throws Exception {
 		Map<String, Object> response = new HashMap<>();
 
-		Map<Long, ThemeRoomtypeModel> themes = null;
+		Map<Long, List<ThemeRoomtypeModel>> themes = null;
 		try {
 			themes = themeCacheService.queryThemePricesWithLocalCache();
 		} catch (Exception ex) {
