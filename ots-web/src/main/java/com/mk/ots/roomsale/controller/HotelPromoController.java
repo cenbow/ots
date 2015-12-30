@@ -39,8 +39,10 @@ import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.roomsale.service.TPriceScopeService;
+import com.mk.ots.search.model.ThemeRoomtypeModel;
 import com.mk.ots.search.service.CollegeSearchService;
 import com.mk.ots.search.service.IPromoSearchService;
+import com.mk.ots.search.service.ThemeCacheService;
 import com.mk.ots.web.ServiceOutput;
 
 /**
@@ -66,6 +68,9 @@ public class HotelPromoController {
 
 	@Autowired
 	private CollegeSearchService collegeSearchService;
+
+	@Autowired
+	private ThemeCacheService themeCacheService;
 
 	/**
 	 * 活动查询
@@ -552,6 +557,33 @@ public class HotelPromoController {
 			response.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			response.put(ServiceOutput.STR_MSG_ERRMSG, "");
 		}
+
+		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/promo/themecache", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> college(@Valid HotelThemeReqEntity themeEntity) throws Exception {
+		Map<String, Object> response = new HashMap<>();
+
+		Map<Long, ThemeRoomtypeModel> themes = null;
+		try {
+			themes = themeCacheService.queryThemePricesWithLocalCache();
+		} catch (Exception ex) {
+			response.put(ServiceOutput.STR_MSG_SUCCESS, "false");
+			response.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			response.put(ServiceOutput.STR_MSG_ERRMSG, "");
+			
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+		}
+
+		if (themes != null) {
+			response.put("themes", themes);
+		}
+
+		response.put(ServiceOutput.STR_MSG_SUCCESS, "true");
+		response.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+		response.put(ServiceOutput.STR_MSG_ERRMSG, "");
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
