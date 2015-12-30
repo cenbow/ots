@@ -519,13 +519,20 @@ public class HotelPromoController {
 
 	@RequestMapping(value = "/promo/college", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Map<String, Object>> college(@Valid CollegeQueryEntity params) throws Exception{
+	public ResponseEntity<Map<String, Object>> college(@Valid CollegeQueryEntity params) throws Exception {
 		Map<String, Object> response = new HashMap<>();
 		ObjectMapper objectMapper = new ObjectMapper();
 		String paramsText = objectMapper.writeValueAsString(params);
-		
+
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format("promo.college begins with parameters:%s...", paramsText));
+		}
+
+		if (StringUtils.isBlank(params.getCityid()) || "500000".equals(params.getCityid())) {
+			response.put(ServiceOutput.STR_MSG_SUCCESS, "false");
+			response.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			response.put(ServiceOutput.STR_MSG_ERRMSG, String.format("cityid %s not supported", params.getCityid()));
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 		}
 
 		try {
