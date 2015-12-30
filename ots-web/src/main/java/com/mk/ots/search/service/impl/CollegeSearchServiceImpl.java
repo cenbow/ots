@@ -83,7 +83,11 @@ public class CollegeSearchServiceImpl implements CollegeSearchService {
 					BigDecimal minPromoPrice = null;
 					try {
 						tempMinPromoPrice = roomSaleService.getHotelMinPromoPrice(hotelId.intValue());
-						minPromoPrice = new BigDecimal(tempMinPromoPrice);
+						if (tempMinPromoPrice == null) {
+							minPromoPrice = promoPrice;
+						} else {
+							minPromoPrice = new BigDecimal(tempMinPromoPrice);
+						}
 					} catch (Exception ex) {
 						logger.warn(
 								String.format("failed to roomSaleService.getHotelMinPromoPrice...hotelId:%s", hotelId),

@@ -528,7 +528,7 @@ public class HotelPromoController {
 			logger.info(String.format("promo.college begins with parameters:%s...", paramsText));
 		}
 
-		if (StringUtils.isBlank(params.getCityid()) || "500000".equals(params.getCityid())) {
+		if (StringUtils.isBlank(params.getCityid()) || !("500000".equals(params.getCityid()))) {
 			response.put(ServiceOutput.STR_MSG_SUCCESS, "false");
 			response.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			response.put(ServiceOutput.STR_MSG_ERRMSG, String.format("cityid %s not supported", params.getCityid()));
