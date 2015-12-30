@@ -1,5 +1,6 @@
 package com.mk.ots.search.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +27,7 @@ import com.mk.ots.search.service.ThemeCacheService;
 import redis.clients.jedis.Jedis;
 
 @Service
-public class ThemeCacheServiceImpl implements ThemeCacheService{
+public class ThemeCacheServiceImpl implements ThemeCacheService {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
@@ -41,7 +42,7 @@ public class ThemeCacheServiceImpl implements ThemeCacheService{
 
 	private final Gson gsonParser = new Gson();
 
-	private Map<Long, ThemeRoomtypeModel> themeRoomtypes;
+	private Map<Long, List<ThemeRoomtypeModel>> themeRoomtypes;
 
 	private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -49,7 +50,7 @@ public class ThemeCacheServiceImpl implements ThemeCacheService{
 
 	private Lock writeLock;
 
-	private final Integer refreshSec = 120;
+	private final Integer refreshSec = 100;
 
 	private String getLastUpdateName() {
 		return String.format("%s-%s", ThemeCacheServiceImpl.class.getCanonicalName(), lastUpdateName);
@@ -65,8 +66,8 @@ public class ThemeCacheServiceImpl implements ThemeCacheService{
 		return saleConfigs;
 	}
 
-	private Map<Long, ThemeRoomtypeModel> updateAndQueryRoomtypes() {
-		Map<Long, ThemeRoomtypeModel> roomtypes = new HashMap<Long, ThemeRoomtypeModel>();
+	private Map<Long, List<ThemeRoomtypeModel>> updateAndQueryRoomtypes() {
+		Map<Long, List<ThemeRoomtypeModel>> roomtypes = new HashMap<Long, List<ThemeRoomtypeModel>>();
 
 		Jedis jedis = cacheManager.getNewJedis();
 
@@ -92,7 +93,10 @@ public class ThemeCacheServiceImpl implements ThemeCacheService{
 					String themeJson = gsonParser.toJson(themeRoomtype);
 					jedis.set(getHotelName(Long.valueOf(hotelId)), themeJson);
 
-					roomtypes.put(Long.valueOf(hotelId), themeRoomtype);
+					if (!roomtypes.containsKey(Long.valueOf(hotelId))) {
+						roomtypes.put(Long.valueOf(hotelId), new ArrayList<ThemeRoomtypeModel>());
+					}
+					roomtypes.get(Long.valueOf(hotelId)).add(themeRoomtype);
 				}
 			}
 		}
@@ -101,7 +105,7 @@ public class ThemeCacheServiceImpl implements ThemeCacheService{
 	}
 
 	@Override
-	public Map<Long, ThemeRoomtypeModel> queryThemePricesWithLocalCache() throws Exception {
+	public Map<Long, List<ThemeRoomtypeModel>> queryThemePricesWithLocalCache() throws Exception {
 		Jedis jedis = cacheManager.getNewJedis();
 
 		if (readLock == null) {
@@ -112,7 +116,7 @@ public class ThemeCacheServiceImpl implements ThemeCacheService{
 			writeLock = lock.writeLock();
 		}
 
-		Map<Long, ThemeRoomtypeModel> themeRoomtypes = null;
+		Map<Long, List<ThemeRoomtypeModel>> themeRoomtypes = null;
 
 		String lastUpdate = "";
 
@@ -132,7 +136,7 @@ public class ThemeCacheServiceImpl implements ThemeCacheService{
 		Date lastUpdateTime = new Date(Long.valueOf(lastUpdate));
 
 		int seconds = DateUtils.diffSecond(lastUpdateTime, currentTime);
-		if (seconds > refreshSec) {
+		if (seconds > refreshSec || this.themeRoomtypes == null) {
 			themeRoomtypes = updateAndQueryRoomtypes();
 
 			jedis.set(getLastUpdateName(), String.valueOf(currentTime.getTime()));
