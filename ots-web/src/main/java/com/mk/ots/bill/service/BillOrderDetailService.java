@@ -46,6 +46,7 @@ public class BillOrderDetailService {
 
 
     public void genOrderDetail(Date billDate){
+        logger.info(String.format("genOrderDetail billDate[%s]", billDate));
         if(billDate == null){
             logger.info("genOrderDetail billDate is null");
             return;
@@ -66,18 +67,25 @@ public class BillOrderDetailService {
 
 
     public void genOrderDetailWeek(Date billDate){
+        logger.info(String.format("genOrderDetailWeek billDate[%s]", billDate));
         if(billDate == null){
-            logger.info("genOrderDetail billDate is null");
+            logger.info("genOrderDetailWeek billDate is null");
             return;
         }
         //查询订单信息
         Date billBeginDate = null;
         Date billEndDate = null;
         try {
-            billBeginDate = DateUtils.parseDate(DateUtils.formatDateTime(DateUtils.addDays(billDate, -7), DateUtils.FORMAT_DATE), DateUtils.FORMAT_DATE) ;
-            billEndDate = DateUtils.parseDate(DateUtils.formatDateTime(billDate, DateUtils.FORMAT_DATE), DateUtils.FORMAT_DATE) ;
+            //2016年新年开始 周账单第一次只跑20150101-20150104日的
+            if(billDate.compareTo(DateUtils.parseDate("2016-01-10", DateUtils.FORMAT_DATE)) <1 ){
+                billBeginDate = DateUtils.parseDate("2016-01-01", DateUtils.FORMAT_DATE);
+                billEndDate = DateUtils.parseDate("2016-01-04", DateUtils.FORMAT_DATE);
+            }else {
+                billBeginDate = DateUtils.parseDate(DateUtils.formatDateTime(DateUtils.addDays(billDate, -7), DateUtils.FORMAT_DATE), DateUtils.FORMAT_DATE) ;
+                billEndDate = DateUtils.parseDate(DateUtils.formatDateTime(billDate, DateUtils.FORMAT_DATE), DateUtils.FORMAT_DATE) ;
+            }
         } catch (ParseException e) {
-            logger.error("genOrderDetail get bill date exception" , e);
+            logger.error("genOrderDetailWeek get bill date exception" , e);
         }
         genOrderDetailWeek(billBeginDate, billEndDate);
     }
