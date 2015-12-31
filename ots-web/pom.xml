@@ -1445,13 +1445,13 @@
                 <slave.jdbc.password>j9bcyZ5U5LQp7xxEomsu</slave.jdbc.password>
                 <spring.redis.sentinel.master>ots-dev-redis</spring.redis.sentinel.master>
                 <spring.redis.sentinel.nodes>10.10.154.159:26379</spring.redis.sentinel.nodes>
-                <synserver.ip>192.168.81.45</synserver.ip>
+                <synserver.ip>10.10.171.96</synserver.ip>
                 <synserver.port>8000</synserver.port>
-                <elasticsearch.clusterhosts>192.168.81.45:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clusterhosts>10.10.187.102:9300</elasticsearch.clusterhosts>
                 <elasticsearch.clustername>ota2-test-elastic</elasticsearch.clustername>
                 <elasticsearch.index>ots</elasticsearch.index>
                 <elasticsearch.type>hotel</elasticsearch.type>
-                <hessian_soap>http://10.4.25.248:8082/soap/hessian</hessian_soap>
+                <hessian_soap>http://10.10.171.96:8080/soap/hessian</hessian_soap>
                 <hessian_bms>http://dev-sale.imike.cn</hessian_bms>
                 <newpms.url>http:/dev-otai.imike.cn/otai/ots2pms/</newpms.url>
                 <jedis.pool.maxidl>20</jedis.pool.maxidl>
