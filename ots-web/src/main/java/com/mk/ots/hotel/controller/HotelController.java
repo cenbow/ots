@@ -1,32 +1,14 @@
 package com.mk.ots.hotel.controller;
 
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Event;
-import com.dianping.cat.message.Transaction;
-import com.google.common.collect.Maps;
-import com.mk.framework.AppUtils;
-import com.mk.framework.exception.MyErrorEnum;
-import com.mk.framework.util.CommonUtils;
-import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.common.enums.FrontPageEnum;
-import com.mk.ots.common.enums.HotelPromoEnum;
-import com.mk.ots.common.utils.Constant;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.hotel.service.HotelPriceService;
-import com.mk.ots.hotel.service.HotelService;
-import com.mk.ots.hotel.service.RoomstateService;
-import com.mk.ots.restful.input.HotelFrontPageQueryReqEntity;
-import com.mk.ots.restful.input.HotelQuerylistReqEntity;
-import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
-import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
-import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
-import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
-import com.mk.ots.roomsale.service.RoomSaleService;
-import com.mk.ots.search.service.IPromoSearchService;
-import com.mk.ots.search.service.ISearchService;
-import com.mk.ots.web.ServiceOutput;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -42,9 +24,35 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.util.*;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
+import com.google.common.collect.Maps;
+import com.mk.framework.AppUtils;
+import com.mk.framework.exception.MyErrorEnum;
+import com.mk.framework.util.CommonUtils;
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.enums.FrontPageEnum;
+import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.enums.HotelSearchEnum;
+import com.mk.ots.common.utils.Constant;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.common.utils.SearchConst;
+import com.mk.ots.hotel.service.HotelPriceService;
+import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.hotel.service.RoomstateService;
+import com.mk.ots.restful.input.HotelFrontPageQueryReqEntity;
+import com.mk.ots.restful.input.HotelQuerylistReqEntity;
+import com.mk.ots.restful.input.RoomstateQuerylistReqEntity;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Room;
+import com.mk.ots.restful.output.RoomstateQuerylistRespEntity.Roomtype;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
+import com.mk.ots.roomsale.service.RoomSaleService;
+import com.mk.ots.search.service.IPromoSearchService;
+import com.mk.ots.search.service.ISearchService;
+import com.mk.ots.web.ServiceOutput;
 
 /**
  * 酒店前端控制类 发布接口
@@ -191,6 +199,11 @@ public class HotelController {
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
 
+		if (reqentity.getPillowlongitude() != null && reqentity.getUserlatitude() != null){
+			hotelEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
+			hotelEntity.setSearchtype(HotelSearchEnum.NEAR.getId());
+		}
+
 		hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
 		hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
 
@@ -221,6 +234,11 @@ public class HotelController {
 		hotelEntity.setCallversion(reqentity.getCallversion());
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
+
+		if (reqentity.getPillowlongitude() != null && reqentity.getUserlatitude() != null){
+			hotelEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
+			hotelEntity.setSearchtype(HotelSearchEnum.NEAR.getId());
+		}
 
 		hotelEntity.setPillowlongitude(reqentity.getPillowlongitude());
 		hotelEntity.setPillowlatitude(reqentity.getPillowlatitude());
@@ -286,7 +304,8 @@ public class HotelController {
 			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, errorMessage);
 
 			logger.error(String.format("parameters validation failed with error %s", errorMessage));
-			Cat.logEvent("querypromolistException", reqentity.getCallmethod(), Event.SUCCESS, String.format("parameters validation failed with error %s", errorMessage));
+			Cat.logEvent("querypromolistException", reqentity.getCallmethod(), Event.SUCCESS,
+					String.format("parameters validation failed with error %s", errorMessage));
 
 			return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 		}
@@ -580,7 +599,8 @@ public class HotelController {
 		// params.toString(),"ots");
 		logger.info("【/roomstate/querylist】 params is : {}", pbb.toString());
 
-		Cat.logEvent("/roomstate/querylist", pbb == null ? "" : pbb.getCallmethod(), Event.SUCCESS, CommonUtils.toStr(pbb));
+		Cat.logEvent("/roomstate/querylist", pbb == null ? "" : pbb.getCallmethod(), Event.SUCCESS,
+				CommonUtils.toStr(pbb));
 
 		// 办理再次入住传 roomno
 		// 调用service方法
@@ -622,7 +642,8 @@ public class HotelController {
 				 */
 				if (freeRoomCount == 0) {
 					logger.info("记录埋点:{}", params.getHotelid());
-					Cat.logEvent("ROOMSTATE-FullRoomNum", CommonUtils.toStr(params.getHotelid()),  Event.SUCCESS, CommonUtils.toStr(params));
+					Cat.logEvent("ROOMSTATE-FullRoomNum", CommonUtils.toStr(params.getHotelid()), Event.SUCCESS,
+							CommonUtils.toStr(params));
 				}
 			}
 			// 埋点真实用户进入酒店后满房的次数end
@@ -729,7 +750,8 @@ public class HotelController {
 		long startTime = new Date().getTime();
 		try {
 			String[] prices = null;
-			if (hotelPriceService.isUseNewPrice())
+			Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+			if (isNewPrice)
 				prices = hotelPriceService.getHotelMikePrices(hotelid, startdateday, enddateday);
 			else
 				prices = roomstateService.getHotelMikePrices(hotelid, startdateday, enddateday);

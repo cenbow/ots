@@ -2,19 +2,29 @@ package com.mk.ots.inner.controller;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
+import com.google.common.base.Optional;
 import com.mk.framework.AppUtils;
+import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.ots.bill.dao.BillOrderDAO;
 import com.mk.ots.bill.service.BillOrderDetailService;
 import com.mk.ots.bill.service.BillOrderService;
 import com.mk.ots.bill.service.ServiceCostRuleService;
 import com.mk.ots.common.enums.HotelSearchEnum;
+import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.common.utils.OtsVersion;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.inner.service.IOtsAdminService;
+import com.mk.ots.member.model.UMember;
+import com.mk.ots.member.service.impl.MemberService;
 import com.mk.ots.order.service.QiekeRuleService;
+import com.mk.ots.search.service.impl.IndexerService;
+import com.mk.ots.wallet.model.CashflowTypeEnum;
+import com.mk.ots.wallet.service.impl.WalletCashflowService;
+import com.mk.ots.wallet.service.impl.WalletService;
 import com.mk.ots.web.ServiceOutput;
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +34,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,8 +66,16 @@ public class OtsAdminController {
 	private ServiceCostRuleService serviceCostRuleService;
 	@Autowired
 	private BillOrderDetailService billOrderDetailService;
-
-	private final SimpleDateFormat defaultDateFormatter = new SimpleDateFormat(DateUtils.FORMATSHORTDATETIME);
+	@Autowired
+	private IndexerService indexerService;
+	@Autowired
+	protected ElasticsearchProxy esProxy;
+	@Autowired
+	private WalletCashflowService walletCashflowService;
+	@Autowired
+	private WalletService walletService;
+	@Autowired
+	private MemberService memberService;
 
 	/**
 	 * 
@@ -67,6 +85,68 @@ public class OtsAdminController {
 	public ResponseEntity<Map<String, String>> ping() {
 		return new ResponseEntity<Map<String, String>>(new OtsVersion().getVersionInfo(), HttpStatus.OK);
 	}
+
+	/**
+	 *
+	 * @return
+	 */
+	@RequestMapping("/indexer/init")
+	@ResponseBody
+	public ResponseEntity<ServiceOutput> indexerInit(String token) {
+		ServiceOutput output = new ServiceOutput();
+		if (StringUtils.isBlank(token) || !Constant.STR_INNER_TOKEN.equals(token)) {
+			output.setFault("token is invalidate.");
+			return new ResponseEntity<ServiceOutput>(output, HttpStatus.OK);
+		}
+
+		Date day = new Date();
+		long starttime = day.getTime();
+		try {
+
+			String ret = indexerService.batchUpdateEsIndexer();
+			output.setSuccess(true);
+		} catch (Exception e) {
+			output.setFault(e.getMessage());
+		}
+		if (AppUtils.DEBUG_MODE) {
+			long endtime = new Date().getTime();
+			output.setMsgAttr("$times$", endtime - starttime + " ms");
+		}
+		return new ResponseEntity<ServiceOutput>(output, HttpStatus.OK);
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	@RequestMapping("/indexer/drop")
+	@ResponseBody
+	public ResponseEntity<ServiceOutput> indexerDrop(String token, String hotelid) {
+		ServiceOutput output = new ServiceOutput();
+		if (StringUtils.isBlank(token) || !Constant.STR_INNER_TOKEN.equals(token)) {
+			output.setFault("token is invalidate.");
+			return new ResponseEntity<ServiceOutput>(output, HttpStatus.OK);
+		}
+
+		Date day = new Date();
+		long starttime = day.getTime();
+		try {
+
+			SearchHit[] searchHits = esProxy.searchHotelByHotelId(hotelid);
+			for (int i = 0; i < searchHits.length; i++) {
+				esProxy.deleteDocument(searchHits[i].getId());
+			}
+			output.setSuccess(true);
+		} catch (Exception e) {
+			output.setFault(e.getMessage());
+		}
+		if (AppUtils.DEBUG_MODE) {
+			long endtime = new Date().getTime();
+			output.setMsgAttr("$times$", endtime - starttime + " ms");
+		}
+		return new ResponseEntity<ServiceOutput>(output, HttpStatus.OK);
+	}
+
 
 	/**
 	 * 
@@ -146,7 +226,8 @@ public class OtsAdminController {
 			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 		}
 		try {
-			datas = otsAdminService.readonlyDeletePoiDatas(citycode, typeid);
+			datas = otsAdminService.readonlyDeletePoiDatas(citycode, typeid, ElasticsearchProxy.OTS_INDEX_DEFAULT, ElasticsearchProxy.POSITION_TYPE_DEFAULT);
+			otsAdminService.readonlyDeletePoiDatas(citycode, typeid, ElasticsearchProxy.OTS_INDEX_LANDMARK, ElasticsearchProxy.POSITION_TYPE_DEFAULT);
 		} catch (Exception e) {
 			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
 			datas.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
@@ -158,7 +239,6 @@ public class OtsAdminController {
 	/**
 	 * 
 	 * @param citycode
-	 * @param typeid
 	 * @return
 	 */
 	@RequestMapping(value = "/batchupdate/hotelbedtype", method = RequestMethod.POST)
@@ -177,7 +257,6 @@ public class OtsAdminController {
 	/**
 	 * 
 	 * @param citycode
-	 * @param typeid
 	 * @return
 	 */
 	@RequestMapping(value = "/batchupdate/hoteltype", method = RequestMethod.POST)
@@ -293,5 +372,61 @@ public class OtsAdminController {
 		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 	}
 
+	@RequestMapping(value = "/test/addWalletByTest", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> addWalletByTest(String phone, BigDecimal cash) {
+		logger.info(String.format("url /test/addWalletByTest"));
+		Map<String, Object> datas = new HashMap<String, Object>();
+		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		if(StringUtils.isBlank(phone)){
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "phone参数为空");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		if(cash == null){
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "cash参数为空");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		if(cash.compareTo(new BigDecimal("10")) > 0){
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "冲错金额啦，充值金额请少于10元");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		if(StringUtils.isBlank(phone) || !phone.startsWith("1000")){
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "冲错用户信息啦，手机号码不是测试用户");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		Optional<UMember> opMember = null;
+		try {
+			opMember = memberService.findMemberByLoginName(phone);
+		}catch (Throwable e){
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "phone参数错误，没有用户信息");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		UMember member = opMember.get();
+		if (member == null) {
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "phone参数错误，没有用户信息");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		try {
+			BigDecimal balance = walletService.queryBalance(member.getMid());
+			if(balance.compareTo(new BigDecimal("10")) > 0){
+				datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+				datas.put(ServiceOutput.STR_MSG_ERRMSG, "所充值的用户的钱包金额> 10,已够用了");
+				return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+			}
+			walletCashflowService.saveCashflowAndSynWallet(member.getId(), cash, CashflowTypeEnum.MIKE_CHARGE_CARD, member.getId());
+		}catch (Exception e){
+			logger.info("addWalletByTest Exception", e);
+			datas.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			datas.put(ServiceOutput.STR_MSG_ERRMSG, "addWalletByTest Exception");
+			return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+		}
+		logger.info(String.format("url /test/addWalletByTest end"));
+		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+	}
 
 }

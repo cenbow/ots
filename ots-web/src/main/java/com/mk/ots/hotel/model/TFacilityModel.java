@@ -13,6 +13,8 @@ public class TFacilityModel {
 
     private String visible;
 
+    private String iconurl;
+
     public Long getId() {
         return id;
     }
@@ -59,5 +61,13 @@ public class TFacilityModel {
 
     public void setVisible(String visible) {
         this.visible = visible == null ? null : visible.trim();
+    }
+
+    public String getIconurl() {
+        return iconurl;
+    }
+
+    public void setIconurl(String iconurl) {
+        this.iconurl = iconurl;
     }
 }

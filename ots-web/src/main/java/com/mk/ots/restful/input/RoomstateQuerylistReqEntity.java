@@ -41,6 +41,7 @@ public class RoomstateQuerylistReqEntity implements Serializable {
 
 	private String orderby;
 
+	private Integer showblacktype;
 	/**
 	 * the entry identifier which represents the search entrance
 	 * 
@@ -155,6 +156,14 @@ public class RoomstateQuerylistReqEntity implements Serializable {
 
 	public void setIsShowAllRoom(String isShowAllRoom) {
 		this.isShowAllRoom = isShowAllRoom;
+	}
+
+	public Integer getShowblacktype() {
+		return showblacktype;
+	}
+
+	public void setShowblacktype(Integer showblacktype) {
+		this.showblacktype = showblacktype;
 	}
 
 	@Override

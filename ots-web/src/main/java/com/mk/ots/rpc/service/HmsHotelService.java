@@ -176,7 +176,8 @@ public class HmsHotelService implements IHotelService {
                 String beginDate = strCurDay;
                 String endDate = strCurDay;
                	String[] prices = null;
-            	if(hotelPriceService.isUseNewPrice())
+                Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+                if (isNewPrice)
             		prices = hotelPriceService.getHotelMikePrices(Long.valueOf(hotelid), beginDate, endDate);
             	else
             		prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), beginDate, endDate);
@@ -304,7 +305,8 @@ public class HmsHotelService implements IHotelService {
                 String enddateday = startdateday;
                 // 取眯客价
                	String[] prices = null;
-            	if(hotelPriceService.isUseNewPrice())
+                Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+                if (isNewPrice)
             		prices = hotelPriceService.getHotelMikePrices(Long.valueOf(hotelid), startdateday, enddateday);
             	else
                 	prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), startdateday, enddateday);
@@ -474,7 +476,8 @@ public class HmsHotelService implements IHotelService {
                 String beginDate = strCurDay;
                 String endDate = strCurDay;
                	String[] prices = null;
-            	if(hotelPriceService.isUseNewPrice())
+                Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+                if (isNewPrice)
             		prices = hotelPriceService.getHotelMikePrices(Long.valueOf(hotelid), beginDate, endDate);
             	else
                 	prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), beginDate, endDate);
@@ -614,7 +617,8 @@ public class HmsHotelService implements IHotelService {
                 String enddateday = startdateday;
                 // 取眯客价
                	String[] prices = null;
-            	if(hotelPriceService.isUseNewPrice())
+                Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+                if (isNewPrice)
             		prices = hotelPriceService.getHotelMikePrices(Long.valueOf(hotelid), startdateday, enddateday);
             	else
                 	prices = roomstateService.getHotelMikePrices(Long.valueOf(hotelid), startdateday, enddateday);

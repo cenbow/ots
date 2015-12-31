@@ -1417,9 +1417,13 @@ public class PayService implements IPayService {
             if (StringUtils.isNotEmpty(couponno)) {
                 return wrapFailResult(MyErrorEnum.couponNoError);
             }
-            if (OrderTypeEnum.YF.getId() != order.getOrderType()) {
-                return wrapFailResult(MyErrorEnum.OrderTypeError);
+            String callVersion = request.getParameter("callversion");
+            if (StringUtils.isBlank(callVersion) || "3.3".compareTo(callVersion.trim()) > 0) {
+                if (OrderTypeEnum.YF.getId() != order.getOrderType()) {
+                    return wrapFailResult(MyErrorEnum.OrderTypeError);
+                }
             }
+
         }
         //已经取消的订单不能支付
         if (order.getOrderStatus() >= 510 ) {
@@ -1524,8 +1528,9 @@ public class PayService implements IPayService {
                 this.logger.info("订单号：" + longorderId + "创建到店支付，到店支付金额是：" + price);
                 
                 Map<String, Object> returnMap = toPay(order, pay, price);
-                
-                
+
+                //销售短消息提醒
+                this.createJob4SendMsg(order);
                 
                 return returnMap;
             } else {

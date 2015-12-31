@@ -84,6 +84,9 @@ public class OtsHotel {
 	private String visible = Constant.STR_TRUE;
 	/** 酒店是否在线: T在线，F不在线 */
 	private String online = Constant.STR_TRUE;
+	private Integer bedtype1;
+	private Integer bedtype2;
+	private Integer bedtype3;
 
 	/** 单床房数量 */
 	private long numroomtype1 = 1;
@@ -111,6 +114,9 @@ public class OtsHotel {
 	/** mike 3.0 月销量 **/
 	private Long ordernummon;
 
+	/** mike 3.2 受欢迎指数 **/
+	private Long greetscore;
+
 	/** 酒店省份编码 */
 	private String provcode;
 	/** 酒店城市编码 */
@@ -134,11 +140,19 @@ public class OtsHotel {
 	// mike3.1 添加今夜特价房信息
 	private String isonpromo;
 
+	//mike3.2+ 添加装修信息
+	private String repairinfo;
+
 	private List<Map<String, Object>> promoinfo;
+
+	private List<Map<String, Object>> highlights;
 	
 	private List<Integer> promoids;
 
 	private List<Map<String, Object>> bedtypes;
+
+
+	private Double mintonitepromoprice;
 
 	public OtsHotel() {
 
@@ -213,6 +227,30 @@ public class OtsHotel {
 	/** getters and setters */
 	public String getHotelid() {
 		return hotelid;
+	}
+
+	public Integer getBedtype1() {
+		return bedtype1;
+	}
+
+	public void setBedtype1(Integer bedtype1) {
+		this.bedtype1 = bedtype1;
+	}
+
+	public Integer getBedtype2() {
+		return bedtype2;
+	}
+
+	public void setBedtype2(Integer bedtype2) {
+		this.bedtype2 = bedtype2;
+	}
+
+	public Integer getBedtype3() {
+		return bedtype3;
+	}
+
+	public void setBedtype3(Integer bedtype3) {
+		this.bedtype3 = bedtype3;
 	}
 
 	public void setHotelid(String id) {
@@ -578,4 +616,35 @@ public class OtsHotel {
 		this.promoinfo = promoinfo;
 	}
 
+	public Long getGreetscore() {
+		return greetscore;
+	}
+
+	public void setGreetscore(Long greetscore) {
+		this.greetscore = greetscore;
+	}
+
+	public String getRepairinfo() {
+		return repairinfo;
+	}
+
+	public void setRepairinfo(String repairinfo) {
+		this.repairinfo = repairinfo;
+	}
+
+	public List<Map<String, Object>> getHighlights() {
+		return highlights;
+	}
+
+	public void setHighlights(List<Map<String, Object>> highlights) {
+		this.highlights = highlights;
+	}
+
+	public Double getMintonitepromoprice() {
+		return mintonitepromoprice;
+	}
+
+	public void setMintonitepromoprice(Double mintonitepromoprice) {
+		this.mintonitepromoprice = mintonitepromoprice;
+	}
 }

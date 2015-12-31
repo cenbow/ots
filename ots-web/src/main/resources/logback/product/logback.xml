@@ -8,6 +8,7 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<FileNamePattern>${catalina.base}/logs/ots.%d{yyyy-MM-dd}.log.zip</FileNamePattern>
 			 <maxHistory>30</maxHistory>
+			<MaxFileSize>200MB</MaxFileSize>
 		</rollingPolicy>
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<pattern>%-20(%d{HH:mm:ss.SSS} [%thread]) %-5level %logger{80} - %msg%n</pattern>

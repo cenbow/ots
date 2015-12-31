@@ -48,9 +48,10 @@
 				<!-- B规则：查询创建时间大于15分钟的订单 -->
 				<ref bean="orderCreatetimegt15Trigger"/>
 				<ref bean="paySendMsgTrigger"/>
-				<!-- 每日刷新ES眯客价 -->
-                <ref bean="refreshEsMikePriceTrigger"/>
-                <ref bean="confirmedPayingOrderTrigger"/>
+				<!-- 每日刷新ES 索引和眯客价 -->
+                <ref bean="refreshEsIndexerAndMikePriceTrigger"/>
+
+				<ref bean="confirmedPayingOrderTrigger"/>
                 <ref bean="payStatusErrorOrderTrigger"/>
 				<ref bean="billPromoOrdersTrigger"/>
 				<ref bean="qieKeRuleTrigger"/>
@@ -58,6 +59,10 @@
 				<ref bean="billOrderDetailJobDetailTrigger"/>
                 <!--  暂时停掉  -->
                 <!--<ref bean="SendTicketJobTrigger"/>-->
+				<!-- 每分钟提醒 -->
+				<ref bean="remindMessageTrigger" />
+				<ref bean="weekClearingTrigger" />
+
 			</list>
 		</property>
 	</bean>
@@ -314,13 +319,13 @@
 	
 
 	<!-- 每日凌晨00:01刷新ES眯客价 -->
-	<bean id="refreshEsMikePriceTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-		<property name="jobDetail" ref="refreshEsMikePriceJobDetail" />
+	<bean id="refreshEsIndexerAndMikePriceTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="refreshEsIndexerAndMikePriceJobDetail" />
 		<property name="cronExpression" value="0 1 0 * * ?" />
 	</bean>
-	<bean id="refreshEsMikePriceJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
-		<property name="name" value="refreshEsMikePriceJob" />
-		<property name="jobClassName" value="com.mk.ots.job.RefreshEsMikePriceJob" />
+	<bean id="refreshEsIndexerAndMikePriceJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="refreshEsIndexerAndMikePriceJob" />
+		<property name="jobClassName" value="com.mk.ots.job.RefreshEsIndexerAndMikePriceJob" />
 	</bean>
 	
 	<!-- 处理已确认支付中订单 -->
@@ -344,5 +349,17 @@
 		<property name="name" value="payStatusErrorOrderJob" />
 		<property name="jobClassName" value="com.mk.ots.job.ProcessPayStatusErrorJob" />
 	</bean>
-	
+
+
+	<!-- 提醒消息 -->
+	<bean id="remindMessageTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="remindMessageJobDetail" />
+		<property name="cronExpression" value="0 */1 * * * ?" />
+	</bean>
+
+	<bean id="remindMessageJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="remindMessageJob" />
+		<property name="jobClassName" value="com.mk.ots.job.RemindMessageJob" />
+	</bean>
+
 </beans>

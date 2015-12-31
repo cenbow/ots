@@ -3,11 +3,10 @@
  */
 package com.mk.ots.mapper;
 
-import java.util.List;
-
+import com.mk.ots.hotel.bean.TCity;
 import org.springframework.stereotype.Repository;
 
-import com.mk.ots.hotel.bean.TCity;
+import java.util.List;
 
 /**
  * @author YuB
@@ -21,4 +20,6 @@ public interface CityMapper {
 	 * @return
 	 */
 	public List<TCity> getSelectCity();
+
+	public List<TCity> getAllCity();
 }

@@ -229,6 +229,20 @@ public class WalletCashflowService implements IWalletCashflowService {
 
 
 
+    public  void promoOrderReturnWalletCash(Long orderId, Long mid, BigDecimal price){
+        if (price != null && price.compareTo(BigDecimal.ZERO) > 0) {
+            boolean result = saveCashflowAndSynWallet(mid, price, CashflowTypeEnum.PROMO_ORDER_RETURN, orderId);
+            if (!result) {
+                throw MyErrorEnum.customError.getMyException("订单返现失败.");
+            }
+        } else {
+            throw MyErrorEnum.customError.getMyException("订单返现不允许为零或负值.");
+        }
+        //2.1.3 记录返现日志
+        OtaOrder order = orderService.findOtaOrderById(orderId);
+        orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.ORDER_CASHBACK.getId(), "", "¥" + price + "红包已放入您的账户", "");
+    }
+
     @Override
     public boolean refund(Long mid, Long orderid) {
         logger.info(">>>钱包消费退回: mid:{}, cashflowtype:{}, orderid:{}", mid, CashflowTypeEnum.CONSUME_ORDER_REFUND, orderid);
@@ -293,7 +307,7 @@ public class WalletCashflowService implements IWalletCashflowService {
      * @param sourceid         业务对应记录id
      * @return T/F
      */
-    private boolean saveCashflowAndSynWallet(Long mid, BigDecimal price, CashflowTypeEnum cashflowTypeEnum, Long sourceid) {
+    public boolean saveCashflowAndSynWallet(Long mid, BigDecimal price, CashflowTypeEnum cashflowTypeEnum, Long sourceid) {
         logger.info(">>>记录钱包流水并同步钱包总额: mid:{}, cashflowtype:{}, orderid:{}, price:{}", mid, cashflowTypeEnum, sourceid, price);
 
         BigDecimal realprice = BigDecimal.ZERO;
@@ -304,6 +318,8 @@ public class WalletCashflowService implements IWalletCashflowService {
         } else if (CashflowTypeEnum.CONSUME_ORDER_REFUND.equals(cashflowTypeEnum)) {
             realprice = price.abs();
         } else if (CashflowTypeEnum.MIKE_CHARGE_CARD.equals(cashflowTypeEnum)){
+            realprice = price.abs();
+        }else{
             realprice = price.abs();
         }
         logger.info(">>>记录钱包流水并同步钱包总额: 记录钱包流水//开始");

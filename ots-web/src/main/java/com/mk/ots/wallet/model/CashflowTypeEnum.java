@@ -13,6 +13,7 @@ public enum CashflowTypeEnum {
     CONSUME_ORDER_OUT_LOCK(3,"订单消费冻结"),      //订单消费已冻结
     CONSUME_ORDER_OUT_CONFIRM(4,"订单消费已确认"),   //订单消费已确认
     CONSUME_ORDER_REFUND(5,"订单消费退回"),        //订单消费退回
+    PROMO_ORDER_RETURN(6,"特价订单返现"),        //特价订单返现
     MIKE_CHARGE_CARD(7,"眯客充值卡");
 
     private int id;

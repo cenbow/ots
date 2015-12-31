@@ -1,19 +1,11 @@
 package com.mk.framework.es;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.annotation.PreDestroy;
-
+import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
@@ -26,6 +18,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.Requests;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.settings.ImmutableSettings;
@@ -33,11 +26,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.BoolFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.GeoPolygonFilterBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.script.ScriptScoreFunctionBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -46,7 +35,10 @@ import org.elasticsearch.search.sort.ScriptSortBuilder;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Repository;
 
-import com.google.gson.Gson;
+import javax.annotation.PreDestroy;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * Elasticsearch Proxy ES搜索代理类，2015-07-20增加眯客2.1新需求，支持多城市搜素酒店。
@@ -61,6 +53,7 @@ public class ElasticsearchProxy {
 	/** 默认type */
 	public final static String HOTEL_TYPE_DEFAULT = "hotel";
 
+	public final static String OTS_INDEX_LANDMARK = "landmark";
 	/**
 	 * 默认位置区域
 	 */
@@ -482,9 +475,21 @@ public class ElasticsearchProxy {
 						.prepareCreate(ElasticsearchProxy.OTS_INDEX_DEFAULT);
 				final XContentBuilder mappingBuilder = this.createGeoMappingBuilder();
 				createIndexRequestBuilder.addMapping(ElasticsearchProxy.HOTEL_TYPE_DEFAULT, mappingBuilder);
+				createIndexRequestBuilder.addMapping(ElasticsearchProxy.POSITION_TYPE_DEFAULT, mappingBuilder);
 				createIndexRequestBuilder.execute().actionGet();
 				this.logger.info("auto create the index: {}, type: {}.", ElasticsearchProxy.OTS_INDEX_DEFAULT,
 						ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
+			}
+
+			if (!this.indexExists(ElasticsearchProxy.OTS_INDEX_LANDMARK)) {
+				// auto create the index if it not exists.
+				final CreateIndexRequestBuilder createIndexRequestBuilder = this.client.admin().indices()
+						.prepareCreate(ElasticsearchProxy.OTS_INDEX_LANDMARK);
+				final XContentBuilder mappingBuilder = this.createGeoMappingBuilder();
+				createIndexRequestBuilder.addMapping(ElasticsearchProxy.POSITION_TYPE_DEFAULT, mappingBuilder);
+				createIndexRequestBuilder.execute().actionGet();
+				this.logger.info("auto create the index: {}, type: {}.", ElasticsearchProxy.OTS_INDEX_LANDMARK,
+						ElasticsearchProxy.POSITION_TYPE_DEFAULT);
 			}
 
 			// 其它城市的index
@@ -500,11 +505,14 @@ public class ElasticsearchProxy {
 							.prepareCreate(_index);
 					final XContentBuilder mappingBuilder = this.createGeoMappingBuilder();
 					createIndexRequestBuilder.addMapping(ElasticsearchProxy.HOTEL_TYPE_DEFAULT, mappingBuilder);
+					createIndexRequestBuilder.addMapping(ElasticsearchProxy.POSITION_TYPE_DEFAULT, mappingBuilder);
 					createIndexRequestBuilder.execute().actionGet();
 					this.logger.info("auto create the index: {}, type: {}.", _index,
 							ElasticsearchProxy.HOTEL_TYPE_DEFAULT);
 				}
 			}
+
+
 		} catch (Exception e) {
 			this.logger.error("init elasticsearch client is error:\n" + e.getMessage(), e);
 		}

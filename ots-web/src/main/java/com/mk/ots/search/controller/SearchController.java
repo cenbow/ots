@@ -1,12 +1,18 @@
 package com.mk.ots.search.controller;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.Valid;
-
+import com.google.common.collect.Maps;
+import com.mk.framework.AppUtils;
+import com.mk.framework.exception.MyErrorEnum;
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.utils.Constant;
+import com.mk.ots.hotel.bean.TCity;
+import com.mk.ots.hotel.service.CityService;
+import com.mk.ots.restful.input.SearchPositionsFuzzyReqEntity;
+import com.mk.ots.restful.input.SearchPositionsReqEntity;
+import com.mk.ots.restful.input.SearchReqEntity;
+import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
+import com.mk.ots.search.service.ISearchService;
+import com.mk.ots.web.ServiceOutput;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,18 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.common.collect.Maps;
-import com.mk.framework.AppUtils;
-import com.mk.framework.exception.MyErrorEnum;
-import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.common.utils.Constant;
-import com.mk.ots.restful.input.SearchPositionsFuzzyReqEntity;
-import com.mk.ots.restful.input.SearchPositionsReqEntity;
-import com.mk.ots.restful.input.SearchReqEntity;
-import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
-import com.mk.ots.search.service.IPromoSearchService;
-import com.mk.ots.search.service.ISearchService;
-import com.mk.ots.web.ServiceOutput;
+import javax.validation.Valid;
+import java.util.*;
 
 /**
  * 搜索API接口类.
@@ -47,6 +43,9 @@ public class SearchController {
     
     @Autowired
     private ISearchService searchService;
+
+    @Autowired
+    private CityService cityService;
     
     /**
      * 联想搜索接口API.
@@ -69,6 +68,9 @@ public class SearchController {
             rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, bfErrors.toString());
             return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
         }
+
+
+
         // service业务处理开始
         // service业务处理结束
         long finishTime = new Date().getTime();
@@ -110,7 +112,48 @@ public class SearchController {
         }
         return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
     }
-    
+
+
+    /**
+     * 城市位置区域接口API.
+     * @param params
+     * @param errors
+     * @return
+     */
+    @RequestMapping(value = {"/search/nearstation"})
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getNeartation(@Valid SearchPositionsReqEntity params,Double userlongitude, Double userlatitude, Errors errors) {
+        long startTime = new Date().getTime();
+        Map<String, Object> rtnMap = Maps.newHashMap();
+        StringBuffer bfErrors = new StringBuffer();
+        for (ObjectError error : errors.getAllErrors()) {
+            bfErrors.append(error.getDefaultMessage()).append("; ");
+        }
+        if (bfErrors.length() > 0) {
+            rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+            rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+            rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, bfErrors.toString());
+            return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
+        }
+
+        if (userlatitude == null || userlongitude ==null) {
+            rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+            rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+            rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "参数userlatitude 或userlongitude 不能为空！ ");
+            return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
+        }
+
+        // service业务处理开始
+        rtnMap= searchService.readonlyNearPositions(params.getCitycode(), params.getPtype(), userlatitude, userlongitude);
+        rtnMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
+
+        // service业务处理结束
+        long finishTime = new Date().getTime();
+        if (AppUtils.DEBUG_MODE) {
+            rtnMap.put(ServiceOutput.STR_MSG_TIMES, finishTime - startTime + "ms");
+        }
+        return new ResponseEntity<Map<String,Object>>(rtnMap,HttpStatus.OK);
+    }
     
     /**
      * 城市位置区域模糊搜索.
@@ -185,4 +228,24 @@ public class SearchController {
         boolean forceUpdate = Constant.STR_TRUE.equals(isforce);
         return new ResponseEntity<Map<String, Object>>(searchService.readonlySyncCityPOI(citycode, typeid, forceUpdate), HttpStatus.OK);
     }
+
+    @RequestMapping(value = {"/indexer/positioninit"})
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> initAllPosition(String typeid, String isforce) {
+        boolean forceUpdate = Constant.STR_TRUE.equals(isforce);
+        List<TCity> allCitys = cityService.findAllCity();
+        HashMap<String, Object> resultMap = new HashMap<>();
+        List cityPositions = new ArrayList();
+        for (TCity city: allCitys){
+            System.out.println("开始初始化:"+ city.getCode() + " " + city.getCityname());
+            HashMap<String, Object> cityMap = new HashMap<>();
+            cityMap.put("citycode", city.getCode());
+            cityMap.put("cityname", city.getCityname());
+            cityMap.put("result",searchService.readonlySyncCityPOI(city.getCode(), typeid, forceUpdate));
+            cityPositions.add(cityMap);
+        }
+        resultMap.put("list",cityPositions);
+        return new ResponseEntity<Map<String, Object>>(resultMap, HttpStatus.OK);
+    }
+
 }

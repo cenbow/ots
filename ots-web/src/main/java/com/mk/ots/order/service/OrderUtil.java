@@ -1,24 +1,32 @@
 package com.mk.ots.order.service;
 
-import java.io.File;
-import java.math.BigDecimal;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.UUID;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.mk.framework.AppUtils;
+import com.mk.framework.exception.MyErrorEnum;
+import com.mk.framework.util.MyTokenUtils;
+import com.mk.framework.util.ThreadUtil;
+import com.mk.orm.plugin.bean.Bean;
+import com.mk.ots.common.bean.Ethnic;
 import com.mk.ots.common.enums.*;
+import com.mk.ots.common.utils.Constant;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.common.utils.SysConfig;
+import com.mk.ots.hotel.model.THotel;
+import com.mk.ots.hotel.service.HotelService;
+import com.mk.ots.manager.SysConfigManager;
+import com.mk.ots.order.bean.*;
+import com.mk.ots.order.dao.CheckInUserDAO;
+import com.mk.ots.pay.model.PPay;
+import com.mk.ots.pay.model.PPayInfo;
+import com.mk.ots.ticket.model.TicketInfo;
+import com.mk.ots.ticket.service.ITicketService;
+import com.mk.ots.ticket.service.impl.TicketService;
+import com.mk.ots.wallet.service.IWalletCashflowService;
+import com.mk.ots.wallet.service.impl.TBackMoneyRuleServiceImpl;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
@@ -31,34 +39,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.mk.framework.AppUtils;
-import com.mk.framework.exception.MyErrorEnum;
-import com.mk.framework.util.MyTokenUtils;
-import com.mk.framework.util.ThreadUtil;
-import com.mk.orm.plugin.bean.Bean;
-import com.mk.ots.common.bean.Ethnic;
-import com.mk.ots.common.utils.Constant;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.common.utils.SysConfig;
-import com.mk.ots.hotel.model.THotel;
-import com.mk.ots.hotel.service.HotelService;
-import com.mk.ots.manager.SysConfigManager;
-import com.mk.ots.order.bean.OtaCheckInUser;
-import com.mk.ots.order.bean.OtaOrder;
-import com.mk.ots.order.bean.OtaRoomOrder;
-import com.mk.ots.order.bean.OtaRoomPrice;
-import com.mk.ots.order.dao.CheckInUserDAO;
-import com.mk.ots.pay.model.PPay;
-import com.mk.ots.pay.model.PPayInfo;
-import com.mk.ots.ticket.model.TicketInfo;
-import com.mk.ots.ticket.service.ITicketService;
-import com.mk.ots.ticket.service.impl.TicketService;
-import com.mk.ots.wallet.service.IWalletCashflowService;
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.math.BigDecimal;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class OrderUtil {
@@ -69,6 +55,8 @@ public class OrderUtil {
 	OrderServiceImpl orderService;
     @Autowired
     private IWalletCashflowService walletCashflowService;
+	@Autowired
+	private TBackMoneyRuleServiceImpl tBackMoneyRuleService;
 	
 	public static final int BORDERLINEHOUR = 6;
 
@@ -154,7 +142,8 @@ public class OrderUtil {
 	 * @param showRoom
 	 * @param showInUser
 	 */
-	public void getOrderToJson(JSONObject jsonObj, PPay pay, OtaOrder returnOrder, boolean showRoom, boolean showInUser) {
+	public void getOrderToJson(HttpServletRequest request, JSONObject jsonObj, PPay pay, OtaOrder returnOrder, boolean showRoom, boolean showInUser) {
+		String callVersion = request.getParameter("callversion");
 		THotel hotel = getThotelThreadLocal(returnOrder.getHotelId());
 		String lastrefundtime = SysConfig.getInstance().getSysValueByKey("lastrefundtime");
 		String refundrule = SysConfig.getInstance().getSysValueByKey("refundrule");
@@ -166,7 +155,18 @@ public class OrderUtil {
 		// format.setRoundingMode(RoundingMode.UP);
 		jsonObj.put("promotype", StringUtils.defaultIfEmpty(returnOrder.getPromoType(), PromoTypeEnum.OTHER.getCode().toString()));
 		jsonObj.put("isonpromo", StringUtils.defaultIfEmpty(returnOrder.getPromoType(), PromoTypeEnum.OTHER.getCode().toString()));
-		jsonObj.put("roomticket", StringUtils.defaultIfEmpty(returnOrder.getRoomTicket(),""));
+		if(PromoTypeEnum.TJ.getCode().equals(returnOrder.getPromoType())){
+			BigDecimal returnWalletCashBigDecimal = tBackMoneyRuleService.getBackMoneyByOrder(returnOrder);
+			if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion.trim()) <= 0) {
+				jsonObj.put("paytip", String.format("预付入住享%s元红包", returnWalletCashBigDecimal));
+			}
+			if(!StringUtils.isEmpty(returnOrder.getShowBlackType())){
+				if(PromoIdTypeEnum.YYF.getCode().equals(returnOrder.getShowBlackType())){
+					jsonObj.put("paytip","");
+				}
+			}
+		}
+		jsonObj.put("roomticket", StringUtils.defaultIfEmpty(returnOrder.getRoomTicket(), ""));
 		jsonObj.put("orderid", returnOrder.getId());
 		jsonObj.put("hotelid", returnOrder.getHotelId());
 		jsonObj.put("hotelname", returnOrder.getHotelName());
@@ -191,6 +191,8 @@ public class OrderUtil {
 		jsonObj.put("promotion", returnOrder.getPromotion());
 		jsonObj.put("coupon", returnOrder.getCoupon());
 		jsonObj.put("receivecashback",returnOrder.getReceiveCashBack());
+		jsonObj.put("showblacktype",returnOrder.getShowBlackType());
+
 		jsonObj.put("isscore", returnOrder.get("isscore") == null ? "F" : returnOrder.get("isscore"));// 是否已评价(T/F)
 		ITicketService ticketService = AppUtils.getBean(TicketService.class);
 
@@ -448,8 +450,13 @@ public class OrderUtil {
 		}// end of loop otaroomorders
 		if(roomTypeId == null){
 			jsonObj.put("promoid","0");
+			JSONObject orderPromoPayRuleJson = getOrderPromoPayRuleJson(0);
+			jsonObj.put("orderPromoPayRule", orderPromoPayRuleJson);
 		}else{
-			jsonObj.put("promoid",orderService.getPromoId(roomTypeId));
+			Integer promoId = orderService.getPromoId(roomTypeId);
+			jsonObj.put("promoid", promoId);
+			JSONObject orderPromoPayRuleJson = getOrderPromoPayRuleJson(promoId);
+			jsonObj.put("orderPromoPayRule", orderPromoPayRuleJson);
 		}
 		/*********************钱包业务*****************/
 		if ("modify".equals(returnOrder.getStr("act"))) {
@@ -477,13 +484,31 @@ public class OrderUtil {
 		
 		// 设置用户关怀信息
 		if (returnOrder.getOrderStatus() < OtaOrderStatusEnum.Confirm.getId()) {
-			setUserMessage(jsonObj, returnOrder, hotel);
+			setUserMessage(request ,jsonObj, returnOrder, hotel);
 		}
 		
 		// 计算订单费用明细json数组
 		setOrderPayDetail(jsonObj, returnOrder, tickes);
 //		if (returnOrder.getOrderStatus() >= OtaOrderStatusEnum.Confirm.getId()) {
 //		}
+	}
+
+
+	/**
+	 * 转换订单支付规则成JSONObject
+	 * @param promoId
+	 * @return
+	 */
+	private JSONObject getOrderPromoPayRuleJson(Integer promoId){
+		JSONObject jsonObj = new JSONObject();
+		OrderPromoPayRuleJson orderPromoPayRuleJson = orderService.getOrderPromoPayRule(promoId);
+		jsonObj.put("id", orderPromoPayRuleJson.getId());
+		jsonObj.put("promoType", orderPromoPayRuleJson.getPromoType());
+		jsonObj.put("isOnlinePay", orderPromoPayRuleJson.getIsOnlinePay());
+		jsonObj.put("isRealPay", orderPromoPayRuleJson.getIsRealPay());
+		jsonObj.put("isTicketPay", orderPromoPayRuleJson.getIsTicketPay());
+		jsonObj.put("isWalletPay", orderPromoPayRuleJson.getIsWalletPay());
+		return jsonObj;
 	}
 
 	/**
@@ -756,7 +781,8 @@ public class OrderUtil {
 	 * @param jsonObj
 	 * @param returnOrder
 	 */
-	private void setUserMessage(JSONObject jsonObj, OtaOrder returnOrder, THotel hotel) {
+	private void setUserMessage(HttpServletRequest request, JSONObject jsonObj, OtaOrder returnOrder, THotel hotel) {
+		String callVersion = request.getParameter("callversion");
 		Date createTime = returnOrder.getCreateTime();
 		Date endTime = returnOrder.getEndTime();
 		Calendar calNow = Calendar.getInstance();
@@ -771,20 +797,44 @@ public class OrderUtil {
 		boolean now = diff <= 2 || DateUtils.getStringFromDate(createTime, "yyyyMMdd").equals(DateUtils.getStringFromDate(returnOrder.getBeginTime(), "yyyyMMdd"));
 		this.logger.info("setUserMessage::now:{},createTime:{},endTime:{}", now, createTime, endTime);
 		// 凌晨23:56-2:00下单，可当天办理入住，提示“您最晚可在xxxx年xx月xx日12：00办理退房哦”
-		if(PromoTypeEnum.TJ.getCode().toString().equals(returnOrder.getPromoType())){
-			jsonObj.put("usermessage", "该订单付款完成后不可以修改或者退款。");
-			return;
+		StringBuffer usermessage = new StringBuffer();
+		if (StringUtils.isNotBlank(callVersion) && "3.3".compareTo(callVersion.trim()) <= 0) {
+			if(PromoTypeEnum.TJ.getCode().equals(returnOrder.getPromoType())){
+				String  showBlackType =  request.getParameter("showblacktype");// 非必填，是否一元房
+				if(!PromoIdTypeEnum.YYF.getCode().equals(showBlackType)){
+					BigDecimal returnWalletCashBigDecimal = tBackMoneyRuleService.getBackMoneyByOrder(returnOrder);
+					usermessage.append("该房间正在参与眯客今夜特价活动，预付入住享受低价，规则如下：").append("\n");
+					usermessage.append(String.format("1.预付比到付多享受%s元红包优惠；", returnWalletCashBigDecimal)).append("\n");
+					usermessage.append(String.format("2.%s元红包使用规则同评价返现；", returnWalletCashBigDecimal)).append("\n");
+					usermessage.append(String.format("3.预付确认入住即奖励%s元红包；", returnWalletCashBigDecimal)).append("\n");
+					usermessage.append("4.使用账户纯余额入住不再奖励；").append("\n");
+					usermessage.append("\n");
+					usermessage.append("温馨提示：").append("\n");
+				}else{
+					jsonObj.put("usermessage", "该订单付款完成后不可以修改或者退款。");
+					return;
+				}
+			}
+		}else{
+			if(PromoTypeEnum.TJ.getCode().toString().equals(returnOrder.getPromoType())){
+				jsonObj.put("usermessage", "该订单付款完成后不可以修改或者退款。");
+				return;
+			}
 		}
+
 		if (now && (DateUtils.getStringFromDate(calNow.getTime(), "HH:mm").compareTo("23:56") >= 0
-				 || DateUtils.getStringFromDate(calNow.getTime(), "HH:mm").compareTo("02:00") < 0)) {
+				|| DateUtils.getStringFromDate(calNow.getTime(), "HH:mm").compareTo("02:00") < 0)) {
 			String[] times = DateUtils.getStringFromDate(endTime, "yyyy-MM-dd").split("-");
-			jsonObj.put("usermessage", MessageFormat.format("您最晚可在{0}年{1}月{2}日{3}:00办理退房哦", times[0], times[1], times[2], leavetime));
+			usermessage.append(MessageFormat.format("您最晚可在{0}年{1}月{2}日{3}:00办理退房哦", times[0], times[1], times[2], leavetime));
+			jsonObj.put("usermessage", usermessage.toString());
 		} else if(now && calNow.get(calNow.HOUR_OF_DAY) >= 2 && calNow.get(calNow.HOUR_OF_DAY) < 12){
 			//凌晨2:00后下单，必须在12：00后办理入住，提示“您在xxxx年xx月xx日12:00后可办理入住哦”；
 			String[] times = DateUtils.getStringFromDate(createTime, "yyyy-MM-dd").split("-");
-			jsonObj.put("usermessage", MessageFormat.format("您在{0}年{1}月{2}日{3}:00后可办理入住哦",times[0], times[1], times[2], leavetime));
+			usermessage.append(MessageFormat.format("您在{0}年{1}月{2}日{3}:00后可办理入住哦",times[0], times[1], times[2], leavetime));
+			jsonObj.put("usermessage", usermessage.toString());
 		} else {
-			jsonObj.put("usermessage", MessageFormat.format("您预订的酒店，在入住日期前一天{0}:00前可进行退款操作；预订今日酒店，付款完成后就不可以修改订单或退款咯", retentiontime));
+			usermessage.append(MessageFormat.format("您预订的酒店，在入住日期前一天{0}:00前可进行退款操作；预订今日酒店，付款完成后就不可以修改订单或退款咯", retentiontime));
+			jsonObj.put("usermessage", usermessage.toString());
 		}
 	}
 	
