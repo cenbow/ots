@@ -4,20 +4,17 @@
  */
 package com.mk.ots.common.utils;
 
-import com.mk.framework.AppUtils;
-import com.mk.ots.bill.dao.BillOrderDAO;
-import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDateTime;
 import org.joda.time.Seconds;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.Date;
 
 /***
  * 处理所有和日期相关的处理.
@@ -1418,79 +1415,6 @@ public class DateUtils extends Object {
         return add(date, Calendar.MONTH, amount);
     }
 
-    /**
-     * 为指定日期增加几年
-     * @param date 指定日期
-     * @param amount 增加的数量
-     * @return 增加指定单位之间之后的Date对象
-     */
-    public static Date addYears(Date date, int amount) {
-        return add(date, Calendar.YEAR, amount);
-    }
-
-    /**
-     * 
-     * @param month 月
-     * @param year 年
-     * @return 给定年 对应 月的 天数
-     */
-    public static int getDayOfMonth(int month, int year) {
-        int days = 0;
-
-        if (month == 2) {
-            if (year % 4 != 0) {
-                days = 28;
-            } else {
-                if (year % 100 == 0 && year % 400 != 0) {
-                    days = 28;
-                } else {
-                    days = 29;
-                }
-            }
-
-        } else {
-            switch (month) {
-            case 1:
-                days = 31;
-                break;
-            case 3:
-                days = 31;
-                break;
-            case 4:
-                days = 30;
-                break;
-            case 5:
-                days = 31;
-                break;
-            case 6:
-                days = 30;
-                break;
-            case 7:
-                days = 31;
-                break;
-            case 8:
-                days = 31;
-                break;
-            case 9:
-                days = 30;
-                break;
-            case 10:
-                days = 31;
-                break;
-            case 11:
-                days = 30;
-                break;
-            case 12:
-                days = 31;
-                break;
-            default:
-                break;
-            }
-        }
-
-        return days;
-
-    }
 
     /**
      * 执行测试方法
@@ -1520,15 +1444,7 @@ public class DateUtils extends Object {
         return firstDate;
     }
 
-    
-    private LocalDateTime calcNextSunday(LocalDateTime d) {
-        return d.withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59).withDayOfWeek(DateTimeConstants.SUNDAY);
-    }
 
-    private LocalDateTime calcPreviousMonday(final LocalDateTime d) {
-        return d.withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withDayOfWeek(DateTimeConstants.MONDAY);
-    }
-    
     public static int strTimeToSeconds(String hmsTimes) {
         int seconds = 0;
         String[] arrHMS = hmsTimes.split(":");

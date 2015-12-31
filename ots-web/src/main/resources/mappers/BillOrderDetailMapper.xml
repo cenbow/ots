@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.mapper.BillOrderDetailMapper">
+  <resultMap id="BaseResultMap" type="com.mk.ots.bill.model.BillOrderDetail">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="hotel_id" jdbcType="BIGINT" property="hotelId" />
+    <result column="hotel_name" jdbcType="VARCHAR" property="hotelName" />
+    <result column="city_code" jdbcType="VARCHAR" property="cityCode" />
+    <result column="city_name" jdbcType="VARCHAR" property="cityName" />
+    <result column="order_id" jdbcType="BIGINT" property="orderId" />
+    <result column="order_type" jdbcType="BIGINT" property="orderType" />
+    <result column="begin_time" jdbcType="TIMESTAMP" property="beginTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="total_price" jdbcType="DECIMAL" property="totalPrice" />
+    <result column="service_cost" jdbcType="DECIMAL" property="serviceCost" />
+    <result column="rule_code" jdbcType="INTEGER" property="ruleCode" />
+    <result column="spread_user" jdbcType="BIGINT" property="spreadUser" />
+    <result column="invalid_reason" jdbcType="INTEGER" property="invalidReason" />
+    <result column="checkin_time" jdbcType="TIMESTAMP" property="checkinTime" />
+    <result column="prepayment_discount" jdbcType="DECIMAL" property="prepaymentDiscount" />
+    <result column="to_pay_discount" jdbcType="DECIMAL" property="toPayDiscount" />
+    <result column="order_create_time" jdbcType="TIMESTAMP" property="orderCreateTime" />
+    <result column="bill_time" jdbcType="TIMESTAMP" property="billTime" />
+    <result column="settlement_price" jdbcType="DECIMAL" property="settlementPrice" />
+    <result column="user_cost" jdbcType="DECIMAL" property="userCost" />
+    <result column="available_money" jdbcType="DECIMAL" property="availableMoney" />
+    <result column="ticket_money" jdbcType="DECIMAL" property="ticketMoney" />
+    <result column="wechat_pay_money" jdbcType="DECIMAL" property="wechatPayMoney" />
+    <result column="ali_pay_money" jdbcType="DECIMAL" property="aliPayMoney" />
+    <result column="promo_id" jdbcType="INTEGER" property="promoId" />
+    <result column="b_bill_order_week_id" jdbcType="BIGINT" property="bBillOrderWeekId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="room_type_name" jdbcType="VARCHAR" property="roomTypeName" />
+    <result column="room_no" jdbcType="VARCHAR" property="roomNo" />
+    <result column="day_number" jdbcType="BIGINT" property="dayNumber" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, hotel_id, hotel_name, city_code, city_name, order_id, order_type, begin_time, 
+    end_time, total_price, service_cost, rule_code, spread_user, invalid_reason, checkin_time, 
+    prepayment_discount, to_pay_discount, order_create_time, bill_time, settlement_price, 
+    user_cost, available_money, ticket_money, wechat_pay_money, ali_pay_money, promo_id, 
+    b_bill_order_week_id, create_time, update_time, room_type_name, room_no, day_number
+  </sql>
+  <select id="selectByExample" parameterType="com.mk.ots.bill.model.BillOrderDetailExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    'true' as QUERYID,
+    <include refid="Base_Column_List" />
+    from b_bill_order_detail
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from b_bill_order_detail
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from b_bill_order_detail
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.mk.ots.bill.model.BillOrderDetail">
+    insert into b_bill_order_detail (id, hotel_id, hotel_name, 
+      city_code, city_name, order_id, 
+      order_type, begin_time, end_time, 
+      total_price, service_cost, rule_code, 
+      spread_user, invalid_reason, checkin_time, 
+      prepayment_discount, to_pay_discount, order_create_time, 
+      bill_time, settlement_price, user_cost, 
+      available_money, ticket_money, wechat_pay_money, 
+      ali_pay_money, promo_id, b_bill_order_week_id, 
+      create_time, update_time, room_type_name,
+      room_no, day_number)
+    values (#{id,jdbcType=BIGINT}, #{hotelId,jdbcType=BIGINT}, #{hotelName,jdbcType=VARCHAR}, 
+      #{cityCode,jdbcType=VARCHAR}, #{cityName,jdbcType=VARCHAR}, #{orderId,jdbcType=BIGINT}, 
+      #{orderType,jdbcType=BIGINT}, #{beginTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, 
+      #{totalPrice,jdbcType=DECIMAL}, #{serviceCost,jdbcType=DECIMAL}, #{ruleCode,jdbcType=INTEGER}, 
+      #{spreadUser,jdbcType=BIGINT}, #{invalidReason,jdbcType=INTEGER}, #{checkinTime,jdbcType=TIMESTAMP}, 
+      #{prepaymentDiscount,jdbcType=DECIMAL}, #{toPayDiscount,jdbcType=DECIMAL}, #{orderCreateTime,jdbcType=TIMESTAMP}, 
+      #{billTime,jdbcType=TIMESTAMP}, #{settlementPrice,jdbcType=DECIMAL}, #{userCost,jdbcType=DECIMAL}, 
+      #{availableMoney,jdbcType=DECIMAL}, #{ticketMoney,jdbcType=DECIMAL}, #{wechatPayMoney,jdbcType=DECIMAL}, 
+      #{aliPayMoney,jdbcType=DECIMAL}, #{promoId,jdbcType=INTEGER}, #{bBillOrderWeekId,jdbcType=BIGINT}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{roomTypeName,jdbcType=VARCHAR}, 
+      #{roomNo,jdbcType=VARCHAR}, #{dayNumber,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.mk.ots.bill.model.BillOrderDetail">
+    insert into b_bill_order_detail
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="hotelId != null">
+        hotel_id,
+      </if>
+      <if test="hotelName != null">
+        hotel_name,
+      </if>
+      <if test="cityCode != null">
+        city_code,
+      </if>
+      <if test="cityName != null">
+        city_name,
+      </if>
+      <if test="orderId != null">
+        order_id,
+      </if>
+      <if test="orderType != null">
+        order_type,
+      </if>
+      <if test="beginTime != null">
+        begin_time,
+      </if>
+      <if test="endTime != null">
+        end_time,
+      </if>
+      <if test="totalPrice != null">
+        total_price,
+      </if>
+      <if test="serviceCost != null">
+        service_cost,
+      </if>
+      <if test="ruleCode != null">
+        rule_code,
+      </if>
+      <if test="spreadUser != null">
+        spread_user,
+      </if>
+      <if test="invalidReason != null">
+        invalid_reason,
+      </if>
+      <if test="checkinTime != null">
+        checkin_time,
+      </if>
+      <if test="prepaymentDiscount != null">
+        prepayment_discount,
+      </if>
+      <if test="toPayDiscount != null">
+        to_pay_discount,
+      </if>
+      <if test="orderCreateTime != null">
+        order_create_time,
+      </if>
+      <if test="billTime != null">
+        bill_time,
+      </if>
+      <if test="settlementPrice != null">
+        settlement_price,
+      </if>
+      <if test="userCost != null">
+        user_cost,
+      </if>
+      <if test="availableMoney != null">
+        available_money,
+      </if>
+      <if test="ticketMoney != null">
+        ticket_money,
+      </if>
+      <if test="wechatPayMoney != null">
+        wechat_pay_money,
+      </if>
+      <if test="aliPayMoney != null">
+        ali_pay_money,
+      </if>
+      <if test="promoId != null">
+        promo_id,
+      </if>
+      <if test="bBillOrderWeekId != null">
+        b_bill_order_week_id,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="roomTypeName != null">
+        room_type_name,
+      </if>
+      <if test="roomNo != null">
+        room_no,
+      </if>
+      <if test="dayNumber != null">
+        day_number,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="hotelId != null">
+        #{hotelId,jdbcType=BIGINT},
+      </if>
+      <if test="hotelName != null">
+        #{hotelName,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null">
+        #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cityName != null">
+        #{cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="orderId != null">
+        #{orderId,jdbcType=BIGINT},
+      </if>
+      <if test="orderType != null">
+        #{orderType,jdbcType=BIGINT},
+      </if>
+      <if test="beginTime != null">
+        #{beginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null">
+        #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="totalPrice != null">
+        #{totalPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="serviceCost != null">
+        #{serviceCost,jdbcType=DECIMAL},
+      </if>
+      <if test="ruleCode != null">
+        #{ruleCode,jdbcType=INTEGER},
+      </if>
+      <if test="spreadUser != null">
+        #{spreadUser,jdbcType=BIGINT},
+      </if>
+      <if test="invalidReason != null">
+        #{invalidReason,jdbcType=INTEGER},
+      </if>
+      <if test="checkinTime != null">
+        #{checkinTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="prepaymentDiscount != null">
+        #{prepaymentDiscount,jdbcType=DECIMAL},
+      </if>
+      <if test="toPayDiscount != null">
+        #{toPayDiscount,jdbcType=DECIMAL},
+      </if>
+      <if test="orderCreateTime != null">
+        #{orderCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="billTime != null">
+        #{billTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="settlementPrice != null">
+        #{settlementPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="userCost != null">
+        #{userCost,jdbcType=DECIMAL},
+      </if>
+      <if test="availableMoney != null">
+        #{availableMoney,jdbcType=DECIMAL},
+      </if>
+      <if test="ticketMoney != null">
+        #{ticketMoney,jdbcType=DECIMAL},
+      </if>
+      <if test="wechatPayMoney != null">
+        #{wechatPayMoney,jdbcType=DECIMAL},
+      </if>
+      <if test="aliPayMoney != null">
+        #{aliPayMoney,jdbcType=DECIMAL},
+      </if>
+      <if test="promoId != null">
+        #{promoId,jdbcType=INTEGER},
+      </if>
+      <if test="bBillOrderWeekId != null">
+        #{bBillOrderWeekId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="roomTypeName != null">
+        #{roomTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="roomNo != null">
+        #{roomNo,jdbcType=VARCHAR},
+      </if>
+      <if test="dayNumber != null">
+        #{dayNumber,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.mk.ots.bill.model.BillOrderDetailExample" resultType="java.lang.Integer">
+    select count(*) from b_bill_order_detail
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByPrimaryKeySelective" parameterType="com.mk.ots.bill.model.BillOrderDetail">
+    update b_bill_order_detail
+    <set>
+      <if test="hotelId != null">
+        hotel_id = #{hotelId,jdbcType=BIGINT},
+      </if>
+      <if test="hotelName != null">
+        hotel_name = #{hotelName,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null">
+        city_code = #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cityName != null">
+        city_name = #{cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="orderId != null">
+        order_id = #{orderId,jdbcType=BIGINT},
+      </if>
+      <if test="orderType != null">
+        order_type = #{orderType,jdbcType=BIGINT},
+      </if>
+      <if test="beginTime != null">
+        begin_time = #{beginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null">
+        end_time = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="totalPrice != null">
+        total_price = #{totalPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="serviceCost != null">
+        service_cost = #{serviceCost,jdbcType=DECIMAL},
+      </if>
+      <if test="ruleCode != null">
+        rule_code = #{ruleCode,jdbcType=INTEGER},
+      </if>
+      <if test="spreadUser != null">
+        spread_user = #{spreadUser,jdbcType=BIGINT},
+      </if>
+      <if test="invalidReason != null">
+        invalid_reason = #{invalidReason,jdbcType=INTEGER},
+      </if>
+      <if test="checkinTime != null">
+        checkin_time = #{checkinTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="prepaymentDiscount != null">
+        prepayment_discount = #{prepaymentDiscount,jdbcType=DECIMAL},
+      </if>
+      <if test="toPayDiscount != null">
+        to_pay_discount = #{toPayDiscount,jdbcType=DECIMAL},
+      </if>
+      <if test="orderCreateTime != null">
+        order_create_time = #{orderCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="billTime != null">
+        bill_time = #{billTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="settlementPrice != null">
+        settlement_price = #{settlementPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="userCost != null">
+        user_cost = #{userCost,jdbcType=DECIMAL},
+      </if>
+      <if test="availableMoney != null">
+        available_money = #{availableMoney,jdbcType=DECIMAL},
+      </if>
+      <if test="ticketMoney != null">
+        ticket_money = #{ticketMoney,jdbcType=DECIMAL},
+      </if>
+      <if test="wechatPayMoney != null">
+        wechat_pay_money = #{wechatPayMoney,jdbcType=DECIMAL},
+      </if>
+      <if test="aliPayMoney != null">
+        ali_pay_money = #{aliPayMoney,jdbcType=DECIMAL},
+      </if>
+      <if test="promoId != null">
+        promo_id = #{promoId,jdbcType=INTEGER},
+      </if>
+      <if test="bBillOrderWeekId != null">
+        b_bill_order_week_id = #{bBillOrderWeekId,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="roomTypeName != null">
+        room_type_name = #{roomTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="roomNo != null">
+        room_no = #{roomNo,jdbcType=VARCHAR},
+      </if>
+      <if test="dayNumber != null">
+        day_number = #{dayNumber,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.mk.ots.bill.model.BillOrderDetail">
+    update b_bill_order_detail
+    set hotel_id = #{hotelId,jdbcType=BIGINT},
+      hotel_name = #{hotelName,jdbcType=VARCHAR},
+      city_code = #{cityCode,jdbcType=VARCHAR},
+      city_name = #{cityName,jdbcType=VARCHAR},
+      order_id = #{orderId,jdbcType=BIGINT},
+      order_type = #{orderType,jdbcType=BIGINT},
+      begin_time = #{beginTime,jdbcType=TIMESTAMP},
+      end_time = #{endTime,jdbcType=TIMESTAMP},
+      total_price = #{totalPrice,jdbcType=DECIMAL},
+      service_cost = #{serviceCost,jdbcType=DECIMAL},
+      rule_code = #{ruleCode,jdbcType=INTEGER},
+      spread_user = #{spreadUser,jdbcType=BIGINT},
+      invalid_reason = #{invalidReason,jdbcType=INTEGER},
+      checkin_time = #{checkinTime,jdbcType=TIMESTAMP},
+      prepayment_discount = #{prepaymentDiscount,jdbcType=DECIMAL},
+      to_pay_discount = #{toPayDiscount,jdbcType=DECIMAL},
+      order_create_time = #{orderCreateTime,jdbcType=TIMESTAMP},
+      bill_time = #{billTime,jdbcType=TIMESTAMP},
+      settlement_price = #{settlementPrice,jdbcType=DECIMAL},
+      user_cost = #{userCost,jdbcType=DECIMAL},
+      available_money = #{availableMoney,jdbcType=DECIMAL},
+      ticket_money = #{ticketMoney,jdbcType=DECIMAL},
+      wechat_pay_money = #{wechatPayMoney,jdbcType=DECIMAL},
+      ali_pay_money = #{aliPayMoney,jdbcType=DECIMAL},
+      promo_id = #{promoId,jdbcType=INTEGER},
+      b_bill_order_week_id = #{bBillOrderWeekId,jdbcType=BIGINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      room_type_name = #{roomTypeName,jdbcType=VARCHAR},
+      room_no = #{roomNo,jdbcType=VARCHAR},
+      day_number = #{dayNumber,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+
+
+  <insert id="insertBatch" parameterType="com.mk.ots.bill.model.BillOrderDetail">
+    insert into b_bill_order_detail
+    (id, hotel_id, hotel_name,
+    city_code, city_name, order_id,
+    order_type, begin_time, end_time,
+    total_price, service_cost, rule_code,
+    spread_user, invalid_reason, checkin_time,
+    prepayment_discount, to_pay_discount, order_create_time,
+    bill_time, settlement_price, user_cost,
+    available_money, ticket_money, wechat_pay_money,
+    ali_pay_money, promo_id, b_bill_order_week_id,
+    create_time, update_time, room_type_name,
+    room_no, day_number)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.id,jdbcType=BIGINT}, #{item.hotelId,jdbcType=BIGINT}, #{item.hotelName,jdbcType=VARCHAR},
+      #{item.cityCode,jdbcType=VARCHAR}, #{item.cityName,jdbcType=VARCHAR}, #{item.orderId,jdbcType=BIGINT},
+      #{item.orderType,jdbcType=BIGINT}, #{item.beginTime,jdbcType=TIMESTAMP}, #{item.endTime,jdbcType=TIMESTAMP},
+      #{item.totalPrice,jdbcType=DECIMAL}, #{item.serviceCost,jdbcType=DECIMAL}, #{item.ruleCode,jdbcType=INTEGER},
+      #{item.spreadUser,jdbcType=BIGINT}, #{item.invalidReason,jdbcType=INTEGER}, #{item.checkinTime,jdbcType=TIMESTAMP},
+      #{item.prepaymentDiscount,jdbcType=DECIMAL}, #{item.toPayDiscount,jdbcType=DECIMAL}, #{item.orderCreateTime,jdbcType=TIMESTAMP},
+      #{item.billTime,jdbcType=TIMESTAMP}, #{item.settlementPrice,jdbcType=DECIMAL}, #{item.userCost,jdbcType=DECIMAL},
+      #{item.availableMoney,jdbcType=DECIMAL}, #{item.ticketMoney,jdbcType=DECIMAL}, #{item.wechatPayMoney,jdbcType=DECIMAL},
+      #{item.aliPayMoney,jdbcType=DECIMAL}, #{item.promoId,jdbcType=INTEGER}, #{item.bBillOrderWeekId,jdbcType=BIGINT},
+      #{item.createTime,jdbcType=TIMESTAMP}, #{item.updateTime,jdbcType=TIMESTAMP}, #{item.roomTypeName,jdbcType=VARCHAR},
+      #{item.roomNo,jdbcType=VARCHAR}, #{item.dayNumber,jdbcType=BIGINT})
+    </foreach>
+  </insert>
+
+  <select id="getBillOrderList" resultType="com.mk.ots.bill.domain.BillOrder" parameterType="java.util.Map">
+    <![CDATA[
+    SELECT
+    o.id orderid,
+    o.HotelId hotelid,
+    o.Hotelname hotelname,
+    o.cityCode cityCode,
+    o.daynumber,
+    o.daynumber,
+    o.Updatetime,
+    o.Ordertype,
+    o.Begintime,
+    o.Endtime,
+    o.TotalPrice,
+    o.rulecode,
+    o.spreadUser,
+    o.Invalidreason,
+    o.availablemoney,
+    o.OrderStatus orderstatus,
+    o.Paystatus paystatus,
+    o.Createtime orderCreatetime,
+    o.promotype promotype,
+    ro.RoomTypeName,
+    ro.roomno,
+    ro.RoomTypeName,
+    ro.promoid,
+    bpp.promotion isPromotion,
+    bpp.price ticketMoney,
+    ox.checkintime checkintime
+    FROM
+    b_otaorder o
+    LEFT JOIN b_otaroomorder ro ON o.id = ro.OtaOrderId
+    LEFT JOIN b_pmsroomorder ox ON ro.PMSRoomOrderNo = ox.PmsRoomOrderNo AND ro.Hotelid = ox.Hotelid
+    LEFT JOIN b_promotion_price bpp ON o.id = bpp.otaorderid
+    WHERE
+    o.updatetime >= #{beginTime}#
+    AND o.updatetime < #{endTime}#
+    AND o.orderstatus in (180,190,200,520)
+    AND o.paystatus = 120
+    AND o.promoType = 0
+    AND NOT EXISTS (
+      SELECT
+      1
+      FROM
+      b_bill_order_detail
+      WHERE
+      o.id = b_bill_order_detail.order_id
+    )
+    order by o.id desc LIMIT #{pageIndex},#{pageSize}
+    ]]>
+  </select>
+
+
+  <select id="getOrderPayInfo" resultType="com.mk.ots.bill.domain.BillOrderPayInfo" parameterType="java.lang.Long">
+    <![CDATA[
+      SELECT
+      o.id AS orderid,
+      p.lezhu as lezhu,
+      ol.payid AS payid,
+      ol.realallcost AS allcost,
+      ol.hotelgive AS hotelgive,
+      ol.otagive AS otagive,
+      ol.realcost AS usercost,
+      ol.realotagive AS realotagive,
+      ol.qiekeIncome AS qiekeIncome,
+      pinfo.otherType onlinePayType
+      FROM
+      b_otaorder o
+      LEFT JOIN p_pay p ON o.id = p.orderid
+      LEFT JOIN p_orderlog ol ON p.id = ol.payid
+      LEFT JOIN p_payinfo pinfo on p.id = pinfo.payid and pinfo.otherType in(1,2,3)
+      WHERE
+      o.id = #{orderId}
+    ]]>
+  </select>
+
+
+  <update id="updateOrderWeekId" parameterType="java.util.Map">
+   <![CDATA[
+    update b_bill_order_detail detail set  detail.b_bill_order_week_id =
+    (
+    select id from b_bill_order_week wk where wk.begin_time >=  #{beginTime} and wk.end_time < #{endTime}
+    and wk.hotel_id = detail.hotel_id and wk.city_code = #{cityCode}
+    and wk.hotel_id = #{hotelId} LIMIT 1
+    )
+    where detail.bill_time >= #{beginTime} and detail.bill_time < #{endTime} and  detail.hotel_id = #{hotelId} and detail.city_code = #{cityCode}
+    ]]>
+  </update>
+
+</mapper>
