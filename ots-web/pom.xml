@@ -1038,52 +1038,7 @@
         </pluginManagement>
     </build>
     <profiles>
-        <profile>
-            <id>dev</id>
-            <properties>
-                <label>local</label>
-                <jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
-                <master.jdbc.url><![CDATA[jdbc:mysql://192.168.70.98:3306/hms_new?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
-                <master.jdbc.user>root</master.jdbc.user>
-                <master.jdbc.password>imike@2015</master.jdbc.password>
-                <slave.jdbc.url><![CDATA[jdbc:mysql://192.168.70.98:3306/hms_new?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
-                <slave.jdbc.user>root</slave.jdbc.user>
-                <slave.jdbc.password>imike@2015</slave.jdbc.password>
-                <spring.redis.sentinel.master>ots-redis</spring.redis.sentinel.master>
-                <spring.redis.sentinel.nodes>10.4.1.14:26379,10.4.1.210:26379</spring.redis.sentinel.nodes>
-                <synserver.ip>192.168.81.45</synserver.ip>
-                <synserver.port>8000</synserver.port>
-                <elasticsearch.clusterhosts>192.168.81.45:9300</elasticsearch.clusterhosts>
-                <elasticsearch.clustername>ota2-test-elastic</elasticsearch.clustername>
-                <elasticsearch.index>ots</elasticsearch.index>
-                <elasticsearch.type>hotel</elasticsearch.type>
-                <hessian_soap>http://10.4.25.248:8082/soap/hessian</hessian_soap>
-                <hessian_bms>http://sms.imike.cn</hessian_bms>
-                <newpms.url>http://10.4.17.121:8083/otai/ots2pms/</newpms.url>
-                <jedis.pool.maxidl>20</jedis.pool.maxidl>
-                <jedis.pool.minidl>8</jedis.pool.minidl>
-                <jedis.pool.maxtotal>800</jedis.pool.maxtotal>
-                <addpay>https://otai.imike.com/otai/ots2pms/addpay</addpay>
-                <cancelpay>https://otai.imike.com/otai/ots2pms/cancelpay</cancelpay>
-                <selectCustomerpay>https://otai.imike.com/otai/ots2pms/selectcustomerpay</selectCustomerpay>
-                <cancelpaybyerror>https://otai.imike.com/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
-                <inform_sale_url><![CDATA[http://sms.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
-                <wx_type>test_wechat</wx_type>
-                <!-- 1：开发状态 2：生产状态 -->
-                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
-                <SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
-                <liveHotelNum>3</liveHotelNum>
-                <!-- kafka start -->
-                <zk_connect>10.4.31.46:2181</zk_connect>
-                <!-- kafka end -->
 
-                <!-- BMS黑名单验证接口 -->
-                <blacklist.url>http://10.4.37.251:8080/check</blacklist.url>
-                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
-                <sendmess.testorformal>0</sendmess.testorformal>
-                <black_Switch>1</black_Switch>
-            </properties>
-        </profile>
 
         <profile>
             <id>pro</id>
@@ -1477,7 +1432,52 @@
                 <black_Switch>1</black_Switch>
             </properties>
         </profile>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <label>local</label>
+                <jdbc.driver>com.mysql.jdbc.Driver</jdbc.driver>
+                <master.jdbc.url><![CDATA[jdbc:mysql://10.10.193.12:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></master.jdbc.url>
+                <master.jdbc.user>smlt-writer</master.jdbc.user>
+                <master.jdbc.password>j9bcyZ5U5LQp7xxEomsu</master.jdbc.password>
+                <slave.jdbc.url><![CDATA[jdbc:mysql://10.10.193.12:3306/ots?zeroDateTimeBehavior=convertToNull&characterEncoding=utf8]]></slave.jdbc.url>
+                <slave.jdbc.user>smlt-writer</slave.jdbc.user>
+                <slave.jdbc.password>j9bcyZ5U5LQp7xxEomsu</slave.jdbc.password>
+                <spring.redis.sentinel.master>ots-dev-redis</spring.redis.sentinel.master>
+                <spring.redis.sentinel.nodes>10.10.154.159:26379</spring.redis.sentinel.nodes>
+                <synserver.ip>10.10.171.96</synserver.ip>
+                <synserver.port>8000</synserver.port>
+                <elasticsearch.clusterhosts>10.10.187.102:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>ota2-test-elastic</elasticsearch.clustername>
+                <elasticsearch.index>ots</elasticsearch.index>
+                <elasticsearch.type>hotel</elasticsearch.type>
+                <hessian_soap>http://10.10.171.96:8080/soap/hessian</hessian_soap>
+                <hessian_bms>http://dev-sale.imike.cn</hessian_bms>
+                <newpms.url>http:/dev-otai.imike.cn/otai/ots2pms/</newpms.url>
+                <jedis.pool.maxidl>20</jedis.pool.maxidl>
+                <jedis.pool.minidl>8</jedis.pool.minidl>
+                <jedis.pool.maxtotal>800</jedis.pool.maxtotal>
+                <addpay>https://dev-otai.imike.cn/otai/ots2pms/addpay</addpay>
+                <cancelpay>https://dev-otai.imike.cn/otai/ots2pms/cancelpay</cancelpay>
+                <selectCustomerpay>https://dev-otai.imike.cn/otai/ots2pms/selectcustomerpay</selectCustomerpay>
+                <cancelpaybyerror>https://dev-otai.imike.cn/otai/ots2pms/cancelpaybyerror</cancelpaybyerror>
+                <inform_sale_url><![CDATA[http://dev-sale.imike.cn/BMS_WEIXINMESSAGE_SALESINTERFACE.saveAndSendMessage.do?OTAOrderId=]]></inform_sale_url>
+                <wx_type>test_wechat</wx_type>
+                <!-- 1：开发状态 2：生产状态 -->
+                <baidumessage_DeployStatus>1</baidumessage_DeployStatus>
+                <SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
+                <liveHotelNum>3</liveHotelNum>
+                <!-- kafka start -->
+                <zk_connect>10.10.170.93:2181,10.10.165.176:2181, 10.10.147.218:2181</zk_connect>
+                <!-- kafka end -->
 
+                <!-- BMS黑名单验证接口 -->
+                <blacklist.url>http://dev-bypass.imike.cn/check</blacklist.url>
+                <!-- 推送消息配置 0：测试环境 1：生产环境 -->
+                <sendmess.testorformal>0</sendmess.testorformal>
+                <black_Switch>1</black_Switch>
+            </properties>
+        </profile>
         <profile>
             <id>bgp-simulation</id>
 
@@ -1495,8 +1495,8 @@
                 <spring.redis.sentinel.nodes>10.10.115.57:26379</spring.redis.sentinel.nodes>
                 <synserver.ip>10.10.124.247</synserver.ip>
                 <synserver.port>8000</synserver.port>
-                <elasticsearch.clusterhosts>10.10.118.60:9300</elasticsearch.clusterhosts>
-                <elasticsearch.clustername>smlt-elasticsearch</elasticsearch.clustername>
+                <elasticsearch.clusterhosts>10.10.187.102:9300</elasticsearch.clusterhosts>
+                <elasticsearch.clustername>ots-dev-elasticsearch-1</elasticsearch.clustername>
                 <elasticsearch.index>ots</elasticsearch.index>
                 <elasticsearch.type>hotel</elasticsearch.type>
                 <hessian_soap>http://10.10.126.121:8080/soap/hessian</hessian_soap>
