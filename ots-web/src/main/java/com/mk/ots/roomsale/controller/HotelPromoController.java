@@ -1,23 +1,13 @@
 package com.mk.ots.roomsale.controller;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.alibaba.fastjson.JSONObject;
-import com.dianping.cat.Cat;
-import com.mk.framework.AppUtils;
-import com.mk.ots.common.bean.ParamBaseBean;
-import com.mk.ots.common.enums.HotelPromoEnum;
-import com.mk.ots.common.utils.DateUtils;
-import com.mk.ots.promoteconfig.service.VisitSimService;
-import com.mk.ots.restful.input.HotelHomePageReqEntity;
-import com.mk.ots.restful.input.HotelQuerylistReqEntity;
-import com.mk.ots.restful.input.HotelThemeReqEntity;
-import com.mk.ots.roomsale.model.TPriceScopeDto;
-import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
-import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
-import com.mk.ots.roomsale.service.RoomSaleService;
-import com.mk.ots.roomsale.service.TPriceScopeService;
-import com.mk.ots.search.service.IPromoSearchService;
-import com.mk.ots.web.ServiceOutput;
+import javax.validation.Valid;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -33,8 +23,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.validation.Valid;
-import java.util.*;
+import com.alibaba.fastjson.JSONObject;
+import com.dianping.cat.Cat;
+import com.mk.framework.AppUtils;
+import com.mk.ots.common.bean.ParamBaseBean;
+import com.mk.ots.common.enums.HotelPromoEnum;
+import com.mk.ots.common.utils.DateUtils;
+import com.mk.ots.promoteconfig.service.VisitSimService;
+import com.mk.ots.restful.input.CollegeQueryEntity;
+import com.mk.ots.restful.input.HotelHomePageReqEntity;
+import com.mk.ots.restful.input.HotelQuerylistReqEntity;
+import com.mk.ots.restful.input.HotelThemeReqEntity;
+import com.mk.ots.roomsale.model.TPriceScopeDto;
+import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
+import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
+import com.mk.ots.roomsale.service.RoomSaleService;
+import com.mk.ots.roomsale.service.TPriceScopeService;
+import com.mk.ots.search.service.CollegeSearchService;
+import com.mk.ots.search.service.IPromoSearchService;
+import com.mk.ots.web.ServiceOutput;
 
 /**
  *
@@ -56,6 +63,9 @@ public class HotelPromoController {
 
 	@Autowired
 	private TPriceScopeService tpriceScopeService;
+
+	@Autowired
+	private CollegeSearchService collegeSearchService;
 
 	/**
 	 * 活动查询
@@ -370,7 +380,7 @@ public class HotelPromoController {
 		} catch (Exception ex) {
 			logger.error("failed to queryThemes...", ex);
 			rtnMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
-			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "failed to do onedollarlist query...");
+			rtnMap.put(ServiceOutput.STR_MSG_ERRMSG, "failed to do searchThemes query...");
 		}
 
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
@@ -507,6 +517,45 @@ public class HotelPromoController {
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 
+	@RequestMapping(value = "/promo/college", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> college(@Valid CollegeQueryEntity params) throws Exception {
+		Map<String, Object> response = new HashMap<>();
+		ObjectMapper objectMapper = new ObjectMapper();
+		String paramsText = objectMapper.writeValueAsString(params);
+
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("promo.college begins with parameters:%s...", paramsText));
+		}
+
+		if (StringUtils.isBlank(params.getCityid()) || !("500000".equals(params.getCityid()))) {
+			response.put(ServiceOutput.STR_MSG_SUCCESS, "false");
+			response.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			response.put(ServiceOutput.STR_MSG_ERRMSG, String.format("cityid %s not supported", params.getCityid()));
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+		}
+
+		try {
+			List<Map<String, Object>> hotels = collegeSearchService.search(params);
+
+			response.put("hotel", hotels);
+
+			response.put(ServiceOutput.STR_MSG_SUCCESS, "true");
+			response.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+			response.put(ServiceOutput.STR_MSG_ERRMSG, "");
+		} catch (Exception ex) {
+			logger.error(String.format("failed to collegeSearchService.search with cityId:%s; callversion:%s",
+					params.getCityid(), params.getCallversion()), ex.getCause());
+
+			response.put("hotel", new ArrayList<Map<String, Object>>());
+			response.put(ServiceOutput.STR_MSG_SUCCESS, "false");
+			response.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			response.put(ServiceOutput.STR_MSG_ERRMSG, "");
+		}
+
+		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+	}
+
 	private HotelQuerylistReqEntity buildThemeQueryEntity(HotelThemeReqEntity entityReqEntity) {
 		HotelQuerylistReqEntity reqEntity = new HotelQuerylistReqEntity();
 		reqEntity.setCallversion(entityReqEntity.getCallversion());
@@ -516,7 +565,7 @@ public class HotelPromoController {
 		reqEntity.setUserlatitude(entityReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(entityReqEntity.getUserlongitude());
 		reqEntity.setPillowlatitude(entityReqEntity.getPillowlatitude());
-		reqEntity.setPillowlongitude(entityReqEntity.getPillowlongitude());				
+		reqEntity.setPillowlongitude(entityReqEntity.getPillowlongitude());
 		reqEntity.setIshotelpic("T");
 		reqEntity.setPage(entityReqEntity.getPage());
 		reqEntity.setLimit(entityReqEntity.getLimit());
@@ -561,7 +610,7 @@ public class HotelPromoController {
 		reqEntity.setUserlatitude(homepageReqEntity.getUserlatitude());
 		reqEntity.setUserlongitude(homepageReqEntity.getUserlongitude());
 		reqEntity.setPillowlatitude(homepageReqEntity.getPillowlatitude());
-		reqEntity.setPillowlongitude(homepageReqEntity.getPillowlongitude());				
+		reqEntity.setPillowlongitude(homepageReqEntity.getPillowlongitude());
 		reqEntity.setIshotelpic("T");
 		reqEntity.setIspromoonly(Boolean.TRUE);
 
@@ -573,7 +622,7 @@ public class HotelPromoController {
 		} catch (Exception ex) {
 			logger.warn(String.format("failed to query for promotype by promoid %s", promoId), ex);
 		}
-		
+
 		Date day = new Date();
 		String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
 		String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
@@ -637,11 +686,11 @@ public class HotelPromoController {
 				}
 			}
 
-			List<TPriceScopeDto>  tpriceScopeDtoList = tpriceScopeService.queryTPriceScopeDto(promoid + "", cityid);
-			if(!CollectionUtils.isEmpty(tpriceScopeDtoList)){
-				result.put("minprice",tpriceScopeDtoList.get(0).getMinprice());
-				result.put("maxprice",tpriceScopeDtoList.get(0).getMaxprice());
-				result.put("step",tpriceScopeDtoList.get(0).getStep());
+			List<TPriceScopeDto> tpriceScopeDtoList = tpriceScopeService.queryTPriceScopeDto(promoid + "", cityid);
+			if (!CollectionUtils.isEmpty(tpriceScopeDtoList)) {
+				result.put("minprice", tpriceScopeDtoList.get(0).getMinprice());
+				result.put("maxprice", tpriceScopeDtoList.get(0).getMaxprice());
+				result.put("step", tpriceScopeDtoList.get(0).getStep());
 			}
 			result.put("promotypes", list);
 
