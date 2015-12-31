@@ -1445,7 +1445,7 @@
                 <slave.jdbc.password>j9bcyZ5U5LQp7xxEomsu</slave.jdbc.password>
                 <spring.redis.sentinel.master>ots-dev-redis</spring.redis.sentinel.master>
                 <spring.redis.sentinel.nodes>10.10.154.159:26379</spring.redis.sentinel.nodes>
-                <synserver.ip>10.10.171.96</synserver.ip>
+                <synserver.ip>10.10.184.168</synserver.ip>
                 <synserver.port>8000</synserver.port>
                 <elasticsearch.clusterhosts>10.10.187.102:9300</elasticsearch.clusterhosts>
                 <elasticsearch.clustername>ota2-test-elastic</elasticsearch.clustername>
