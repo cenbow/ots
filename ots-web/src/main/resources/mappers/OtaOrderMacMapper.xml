@@ -138,10 +138,17 @@
     select
     m.id, m.orderID, m.uuid, m.sysno, m.deviceimei, m.simsn, m.wifimacaddr, m.blmacaddr
     from b_otaorder_mac m left JOIN  b_otaorder o on m.orderId = o.id
-    where m.uuid = #{uuid} and o.Createtime >= #{createBeginTime} and o.Createtime < #{createEndTime} and o.OrderStatus  in
+    where m.uuid = #{uuid}
+    and o.OrderStatus  in
     <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
       #{item}
     </foreach>
+    <if test="createBeginTime != null" >
+      and o.Createtime >= #{createBeginTime}
+    </if>
+    <if test="createEndTime != null" >
+      and o.Createtime < #{createEndTime}
+    </if>
     ]]>
   </select>
 
@@ -150,10 +157,16 @@
     select
     m.id, m.orderID, m.uuid, m.sysno, m.deviceimei, m.simsn, m.wifimacaddr, m.blmacaddr
     from b_otaorder_mac m left JOIN  b_otaorder o on m.orderId = o.id
-    where m.deviceimei = #{deviceimei} and o.Createtime >= #{createBeginTime} and o.Createtime < #{createEndTime} and o.OrderStatus in
+    where m.deviceimei = #{deviceimei} and o.OrderStatus in
     <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
       #{item}
     </foreach>
+     <if test="createBeginTime != null" >
+      and o.Createtime >= #{createBeginTime}
+    </if>
+    <if test="createEndTime != null" >
+      and o.Createtime < #{createEndTime}
+    </if>
     ]]>
   </select>
 </mapper>
