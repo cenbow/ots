@@ -1468,7 +1468,7 @@
                 <SendCouponsJob_datelimit>0</SendCouponsJob_datelimit>
                 <liveHotelNum>3</liveHotelNum>
                 <!-- kafka start -->
-                <zk_connect>10.10.170.93:2181,10.10.165.176:2181, 10.10.147.218:2181</zk_connect>
+                <zk_connect>10.10.170.93:2181,10.10.165.176:2181,10.10.147.218:2181</zk_connect>
                 <!-- kafka end -->
 
                 <!-- BMS黑名单验证接口 -->
