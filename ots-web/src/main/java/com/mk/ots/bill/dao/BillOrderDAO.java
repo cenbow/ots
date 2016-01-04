@@ -1111,6 +1111,7 @@ public class BillOrderDAO {
 
     public BigDecimal getServiceCost( Map<String, Object> map, Map<String, Object> priceMap) {
         Date createTime = (Date) map.get("orderCreatetime");
+        Date checkinTime = (Date) map.get("checkintime");
         String cityCode = (String) map.get("cityCode");
         Long spreaduser = (Long)map.get("spreaduser");//1=非切克 2,3=切客
         Long orderid = (Long) map.get("orderid");
@@ -1120,11 +1121,27 @@ public class BillOrderDAO {
         BigDecimal price = allcost.subtract(hotelgive);
         Boolean qiekeFlag = false;
         //判断是不是切客
-        if(spreaduser == 2L){
-            qiekeFlag = true;
-        }else if(spreaduser == 3L){
-            qiekeFlag = true;
+        if("310000".equals(cityCode)){
+            //上海地区
+            if(checkinTime != null && createTime != null){
+                long temp = checkinTime.getTime() - createTime.getTime(); // 相差毫秒数 > 15分钟，直单到付预付收取服务费
+                if(temp >= TIME_FOR_FIFTEEN){//判断下单时间大于15分钟的 //new BigDecimal(0) == qiekeIncome &&
+                    BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(createTime, qiekeFlag, price, cityCode);
+                    return serviceCost;
+                } else{
+                    return BigDecimal.ZERO;
+                }
+            }else {
+                return  BigDecimal.ZERO;
+            }
+        }else{
+            if(spreaduser == 2L){
+                qiekeFlag = true;
+            }else if(spreaduser == 3L){
+                qiekeFlag = true;
+            }
         }
+
         logger.info(String.format("getServiceCost params orderid[%s],createTime[%s],qiekeFlag[%s],price[%s],cityCode[%s]",orderid,createTime, qiekeFlag,price,cityCode));
         BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(createTime, qiekeFlag, price, cityCode);
         return serviceCost;
