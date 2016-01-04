@@ -481,19 +481,19 @@ public class HotelService {
 							bed.put("bedtype", bedtype.get("bedtype"));
 							bed.put("bedtypename", bedtype.get("bedtypename"));
 							bedtypes.add(bed);
-							Long bedtypeValue = (Long)bedtype.get("bedtype");
-							if (bedtypeValue == null){
+							Long bedtypeValue = (Long) bedtype.get("bedtype");
+							if (bedtypeValue == null) {
 								bedtypeValue = -1l;
 							}
-							if (bedtypeValue.intValue() == BedTypeEnum.SINGLEBED.getId()){
+							if (bedtypeValue.intValue() == BedTypeEnum.SINGLEBED.getId()) {
 								hotel.setBedtype1(1);
 							}
 
-							if (bedtypeValue.intValue() == BedTypeEnum.DOUBLEBED.getId()){
+							if (bedtypeValue.intValue() == BedTypeEnum.DOUBLEBED.getId()) {
 								hotel.setBedtype2(1);
 							}
 
-							if (bedtypeValue.intValue() == BedTypeEnum.OTHER.getId()){
+							if (bedtypeValue.intValue() == BedTypeEnum.OTHER.getId()) {
 								hotel.setBedtype3(1);
 							}
 
@@ -529,7 +529,7 @@ public class HotelService {
 
 					Double tempMinPromoPrice = roomSaleService.getHotelMinPromoPrice(hotelId);
 
-					if (tempMinPromoPrice != null && isPromo != null && isPromo){
+					if (tempMinPromoPrice != null && isPromo != null && isPromo) {
 						hotel.setMintonitepromoprice(tempMinPromoPrice);
 					}
 
@@ -585,7 +585,7 @@ public class HotelService {
 
 	public static String getRepairInfo(Date hotelRepairTime) {
 		Date now = new Date();
-		int diffYears = DateUtils.diffYears(hotelRepairTime,now);
+		int diffYears = DateUtils.diffYears(hotelRepairTime, now);
 
 		if (diffYears <= Constant.SHOW_HOTEL_REPAIRINFO_YEARS_LIMIT) {
 			String repairInfo = DateUtils.getDateYear(hotelRepairTime) + "年装修";
@@ -1381,7 +1381,7 @@ public class HotelService {
 				result.remove("flag");
 				// TODO: 酒店最低眯客价对应的房型的门市价,暂时取maxprice.
 				String[] prices = null;
-				Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+				Boolean isNewPrice = false;// hotelPriceService.isUseNewPrice();
 				if (isNewPrice)
 					prices = hotelPriceService.getHotelMikePrices(Long.valueOf(String.valueOf(result.get("hotelid"))),
 							hotel.getStartdateday(), hotel.getEnddateday());
@@ -1788,8 +1788,6 @@ public class HotelService {
 		return vacants;
 	}
 
-
-
 	/**
 	 * calculate room vacancy for promo rooms
 	 *
@@ -2147,7 +2145,7 @@ public class HotelService {
 			List<Bean> list = Db.find(bfSql.toString());
 			logger.info("getRoomtypeList method sql: {}\n", bfSql.toString());
 			for (Bean bean : list) {
-				if (!roomtypelist.contains(bean.getColumns())){
+				if (!roomtypelist.contains(bean.getColumns())) {
 					roomtypelist.add(bean.getColumns());
 				}
 			}
@@ -2644,7 +2642,7 @@ public class HotelService {
 
 			// 最低眯客价和最低门市价
 			String[] prices = null;
-			Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+			Boolean isNewPrice = false;// hotelPriceService.isUseNewPrice();
 			if (isNewPrice)
 				prices = hotelPriceService.getHotelMikePrices(tHotelModel.getId(), today, tomorrow);
 			else
@@ -2797,7 +2795,7 @@ public class HotelService {
 	 * @param hotel
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")	
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> readonlyHotelDetail(Long hotelId) {
 		THotelModel hotelModel = hotelMapper.findHotelInfoById(hotelId);
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -2942,18 +2940,17 @@ public class HotelService {
 				reqEntity.setHotelid(String.valueOf(hotelId));
 				Date day = new Date();
 				String strCurDay = DateUtils.getStringFromDate(day, DateUtils.FORMATSHORTDATETIME);
-				String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1), DateUtils.FORMATSHORTDATETIME);
+				String strNextDay = DateUtils.getStringFromDate(DateUtils.addDays(day, 1),
+						DateUtils.FORMATSHORTDATETIME);
 
 				reqEntity.setStartdateday(strCurDay);
 				reqEntity.setEnddateday(strNextDay);
-				
+
 				Map<String, Object> response = searchService.readonlySearchHotels(reqEntity);
 				List<Map<String, Object>> hotel = (List<Map<String, Object>>) response.get("hotel");
 				if (hotel != null && hotel.size() > 0) {
 					resultMap.put("repairinfo", hotel.get(0).get("repairinfo"));
 					resultMap.put("greetscore", hotel.get(0).get("greetscore"));
-					
-					resultMap.put("grade", hotel.get(0).get("grade"));			
 
 					Object gradeObject = hotel.get(0).get("grade");
 					String grade = "";
@@ -2962,8 +2959,17 @@ public class HotelService {
 					} else if (gradeObject != null && gradeObject instanceof BigDecimal) {
 						grade = ((BigDecimal) gradeObject).toString();
 					}
+					
+					/**
+					 * this logic only applies in chongqing
+					 */
+					if ("0".equals(grade)) {
+						grade = "4";
+					}
+					
+					grade = StringUtils.isBlank(grade) ? "0" : grade;
+					resultMap.put("grade", new BigDecimal(grade));
 
-					grade = StringUtils.isBlank(grade) ? "0" : grade;					
 					resultMap.put("highlights", hotel.get(0).get("highlights"));
 					resultMap.put("latitude", hotel.get(0).get("latitude"));
 					resultMap.put("longitude", hotel.get(0).get("longitude"));
@@ -3198,7 +3204,7 @@ public class HotelService {
 					String enddateday = startdateday;
 					// 取眯客价
 					String[] prices = null;
-					Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+					Boolean isNewPrice = false;// hotelPriceService.isUseNewPrice();
 					if (isNewPrice)
 						prices = hotelPriceService.getHotelMikePrices(hotelid, startdateday, enddateday);
 					else
