@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.ots.mapper.HotelCollegeMapper">
+
+	<resultMap id="hotelCollegeModel" type="com.mk.ots.search.model.HotelCollegeModel">
+	    <result property="id" column="id" />
+	    <result property="hotelId" column="hotelId" />
+	    <result property="cityId" column="cityId" />
+        <result property="valid" column="valid" />
+        <result property="startDate" column="startDate" />
+        <result property="endDate" column="endDate" />
+	</resultMap>
+
+    <sql id="Base_Column_List" >
+        hotelId, cityId, valid, startDate, endDate
+    </sql>
+
+    <select id="queryHotelColleges" resultMap="hotelCollegeModel" parameterType="map">
+        SELECT
+        id,<include refid="Base_Column_List"/>
+        FROM  t_hotel_college
+        WHERE cityId = #{cityId} AND valid = 'T'
+    </select>
+
+</mapper>
