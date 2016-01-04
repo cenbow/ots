@@ -44,6 +44,7 @@ public class BillOrderDetailService {
     @Autowired
     private CityService cityService;
 
+    private static final long TIME_FOR_FIFTEEN = 15 * 60 * 1000L;
 
     public void genOrderDetail(Date billDate){
         logger.info(String.format("genOrderDetail billDate[%s]", billDate));
@@ -201,18 +202,32 @@ public class BillOrderDetailService {
         //商户金额减去商户补贴
         BigDecimal qiekeIncome = null;
         Boolean qikeFlag = false;
+        BigDecimal serviceCost = BigDecimal.ZERO;
         if(qieKeTypeEnum.LAXIN_RULE.getCode().equals(qieKeTypeEnum.getCode())){
             qiekeIncome = billOrderPayInfo.getQiekeIncome();
             qikeFlag = true;
+            BigDecimal price = billOrder.getTotalPrice().subtract(billOrderPayInfo.getHotelgive() == null ? BigDecimal.ZERO : billOrderPayInfo.getHotelgive());
+            serviceCost = serviceCostRuleService.getServiceCostByOrderType(billOrder.getOrderCreateTime(), qikeFlag, price, billOrder.getCityCode());
         }else if(qieKeTypeEnum.B_RULE.getCode().equals(qieKeTypeEnum.getCode())){
             qiekeIncome = billOrderPayInfo.getQiekeIncome();
             qikeFlag = true;
+            if(billOrder.getCheckinTime() != null && billOrder.getOrderCreateTime() != null){
+                long temp = billOrder.getCheckinTime().getTime() - billOrder.getOrderCreateTime().getTime(); // 相差毫秒数 > 15分钟，直单到付预付收取服务费
+                if(temp >= TIME_FOR_FIFTEEN){//判断下单时间大于15分钟的 //new BigDecimal(0) == qiekeIncome &&
+                    BigDecimal price = billOrder.getTotalPrice().subtract(billOrderPayInfo.getHotelgive() == null ? BigDecimal.ZERO : billOrderPayInfo.getHotelgive());
+                    serviceCost = serviceCostRuleService.getServiceCostByOrderType(billOrder.getOrderCreateTime(), qikeFlag, price, billOrder.getCityCode());
+                } else{
+                    serviceCost = BigDecimal.ZERO;
+                }
+            }else {
+                BigDecimal price = billOrder.getTotalPrice().subtract(billOrderPayInfo.getHotelgive() == null ? BigDecimal.ZERO : billOrderPayInfo.getHotelgive());
+                serviceCost = serviceCostRuleService.getServiceCostByOrderType(billOrder.getOrderCreateTime(), qikeFlag, price, billOrder.getCityCode());
+            }
+        }else{
+            BigDecimal price = billOrder.getTotalPrice().subtract(billOrderPayInfo.getHotelgive() == null ? BigDecimal.ZERO : billOrderPayInfo.getHotelgive());
+            serviceCost = serviceCostRuleService.getServiceCostByOrderType(billOrder.getOrderCreateTime(), qikeFlag, price, billOrder.getCityCode());
         }
-        BigDecimal price = billOrder.getTotalPrice().subtract(billOrderPayInfo.getHotelgive() == null ? BigDecimal.ZERO : billOrderPayInfo.getHotelgive());
-        BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(billOrder.getOrderCreateTime(), qikeFlag, price, billOrder.getCityCode());
         billOrder.setServiceCost(serviceCost);
-
-
         billOrder.setUserCost(billOrderPayInfo.getUsercost());
         if(PPayInfoOtherTypeEnum.alipay.getId() ==  billOrderPayInfo.getOnlinePayType()){
             billOrder.setAliPayMoney(billOrderPayInfo.getUsercost());
