@@ -1,5 +1,28 @@
 package com.mk.ots.roomsale.controller;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.Valid;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.alibaba.fastjson.JSONObject;
 import com.dianping.cat.Cat;
 import com.mk.framework.AppUtils;
@@ -16,26 +39,11 @@ import com.mk.ots.roomsale.model.TRoomSaleConfigInfo;
 import com.mk.ots.roomsale.service.RoomSaleConfigInfoService;
 import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.roomsale.service.TPriceScopeService;
+import com.mk.ots.search.model.ThemeRoomtypeModel;
 import com.mk.ots.search.service.CollegeSearchService;
 import com.mk.ots.search.service.IPromoSearchService;
+import com.mk.ots.search.service.ThemeCacheService;
 import com.mk.ots.web.ServiceOutput;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.validation.Valid;
-import java.util.*;
 
 /**
  *
@@ -56,6 +64,10 @@ public class HotelPromoController {
 	private VisitSimService visitSimService;
 	@Autowired
 	private TPriceScopeService tpriceScopeService;
+
+	@Autowired
+	private ThemeCacheService themeCacheService;
+
 	@Autowired
 	private CollegeSearchService collegeSearchService;
 
@@ -544,6 +556,35 @@ public class HotelPromoController {
 			response.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
 			response.put(ServiceOutput.STR_MSG_ERRMSG, "");
 		}
+
+		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/promo/themecache", method = RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<Map<String, Object>> themecache(@Valid HotelThemeReqEntity themeEntity) throws Exception {
+		Map<String, Object> response = new HashMap<>();
+
+		Map<Long, Map<Long, ThemeRoomtypeModel>> themes = null;
+		try {
+			themes = themeCacheService.queryThemePricesWithLocalCache();
+		} catch (Exception ex) {
+			logger.error("failed to querythemepriceswithlocalcache...", ex.getCause());
+			
+			response.put(ServiceOutput.STR_MSG_SUCCESS, "false");
+			response.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			response.put(ServiceOutput.STR_MSG_ERRMSG, "");
+
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+		}
+
+		if (themes != null) {
+			response.put("themes", themes);
+		}
+
+		response.put(ServiceOutput.STR_MSG_SUCCESS, "true");
+		response.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+		response.put(ServiceOutput.STR_MSG_ERRMSG, "");
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}

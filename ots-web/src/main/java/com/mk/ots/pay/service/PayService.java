@@ -1524,14 +1524,17 @@ public class PayService implements IPayService {
                 }
                 // 到付 //改状态
             } else if (paytype.trim().equals("2")) {
-                orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.ORDER_START_PAY.getId(), "", "选择支付类型："+OrderTypeEnum.PT.getName(), "");
+                orderBusinessLogService.saveLog(order, OtaOrderFlagEnum.ORDER_START_PAY.getId(), "", "选择支付类型：" + OrderTypeEnum.PT.getName(), "");
                 this.logger.info("订单号：" + longorderId + "创建到店支付，到店支付金额是：" + price);
                 
                 Map<String, Object> returnMap = toPay(order, pay, price);
 
+                this.logger.info(" sendMessage to  saler :"+"准备给销售发送短消息提醒");
                 //销售短消息提醒
                 this.sendMsg2Sale(order);
-                
+                this.logger.info(" sendMessage to  saler :"+"给销售发送短消息提醒完成");
+
+
                 return returnMap;
             } else {
                 throw MyErrorEnum.errorParm.getMyException("预付/到付类型有误.");

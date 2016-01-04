@@ -98,7 +98,9 @@ import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.roomsale.service.TRoomSaleShowConfigService;
 import com.mk.ots.search.enums.PositionTypeEnum;
 import com.mk.ots.search.model.SAreaInfo;
+import com.mk.ots.search.model.ThemeRoomtypeModel;
 import com.mk.ots.search.service.IPromoSearchService;
+import com.mk.ots.search.service.ThemeCacheService;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.ots.web.ServiceOutput;
 
@@ -209,6 +211,9 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 
 	@Autowired
 	private RoomSaleConfigMapper roomsaleConfigMapper;
+
+	@Autowired
+	private ThemeCacheService themeCacheService;
 
 	/**
 	 *
@@ -1202,6 +1207,14 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 		Map<Integer, Queue<Map<String, Object>>> hotelRoomTypes = new HashMap<Integer, Queue<Map<String, Object>>>();
 		List<Map<String, Object>> themeGrouped = new ArrayList<Map<String, Object>>();
 
+		Map<Long, Map<Long, ThemeRoomtypeModel>> roomtypeModels = null;
+		
+		try {
+			roomtypeModels = themeCacheService.queryThemePricesWithLocalCache();
+		} catch (Exception ex) {
+			logger.warn("failed to retrieve local cache...", ex.getCause());
+		}
+		
 		Integer counter = 0;
 		for (Map<String, Object> hotel : searchResults) {
 			List<Map<String, Object>> roomtypes = (List<Map<String, Object>>) hotel.get("roomtype");
@@ -1227,16 +1240,27 @@ public class PromoSearchServiceImpl implements IPromoSearchService {
 					try {
 						RoomstateQuerylistReqEntity roomstateQuery = buildRoomstateQuery(roomtype, hotelId,
 								startdateday, enddateday);
+						String priceText = "";
 
-						String[] roomstatePrices = roomstateService.getRoomtypeMikePrices(Long.valueOf(hotelId),
-								roomstateQuery.getRoomtypeid(), startdateday, enddateday);
+						if (roomtypeModels != null && roomtypeModels.get(hotelId) != null
+								&& roomtypeModels.get(hotelId).get(roomstateQuery.getRoomtypeid()) != null) {
+							priceText = roomtypeModels.get(hotelId).get(roomstateQuery.getRoomtypeid()).getPrice();
+						}
 
-						if (roomstatePrices != null && roomstatePrices.length > 0) {
-							BigDecimal price = new BigDecimal(roomstatePrices[0]);
+						if (StringUtils.isBlank(priceText)) {
+							String[] roomstatePrices = roomstateService.getRoomtypeMikePrices(Long.valueOf(hotelId),
+									roomstateQuery.getRoomtypeid(), startdateday, enddateday);
+
+							if (roomstatePrices != null && roomstatePrices.length > 0) {
+								BigDecimal price = new BigDecimal(roomstatePrices[0]);
+
+								hotel.put("promoprice", price);
+							}
+						} else {
+							BigDecimal price = new BigDecimal(priceText);
 
 							hotel.put("promoprice", price);
 						}
-
 					} catch (Exception ex) {
 						logger.warn("failed to findHotelRoomPrice...", ex);
 					}

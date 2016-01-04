@@ -1538,7 +1538,6 @@ public class SearchService implements ISearchService {
 			}
 
 			// 重新按照是否可售分组排序
-
 			if (reqentity.getOrderby() == null || reqentity.getOrderby() == 0 || reqentity.getOrderby() == -1
 					|| HotelSortEnum.SCORE.getId() == reqentity.getOrderby()) {
 				this.sortByVcState(hotels);
