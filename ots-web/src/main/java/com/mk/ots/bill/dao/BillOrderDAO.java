@@ -815,7 +815,7 @@ public class BillOrderDAO {
             cal.setTime(begintime);
             cal.add(Calendar.MONTH, -1);
             fstarttime = DateUtils.getStringFromDate(DateUtils.getMonthFirstDay(cal), DateUtils.FORMAT_DATE);
-            fendtime = DateUtils.getStringFromDate(DateUtils.getMonthLastDay(cal), DateUtils.FORMAT_DATE);
+            fendtime = DateUtils.getStringFromDate(DateUtils.addDays(DateUtils.getMonthLastDay(cal), 1), DateUtils.FORMAT_DATE);
             logger.info(String.format("BillOrderDAO::genBillConfirmChecks,fstarttime[%s]，fendtime[%s]", fstarttime, fendtime));
 
             theMonth = fstarttime.split("-")[0]+fstarttime.split("-")[1];

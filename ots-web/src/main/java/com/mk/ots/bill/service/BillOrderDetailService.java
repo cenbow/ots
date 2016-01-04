@@ -140,8 +140,8 @@ public class BillOrderDetailService {
         //账单金额=（如果是特价订单用酒店结算价格否则是用户实际支付金额+用户券+红包金额+预付贴现金额+到付贴现金额+补差金额-总服务费）
         BigDecimal billCost = BigDecimal.ZERO;
         billCost = billCost.add(billOrderWeek.getSettlementPrice() == null ? BigDecimal.ZERO : billOrderWeek.getSettlementPrice());
-        billCost = billCost.add(billOrderWeek.getPrepaymentDiscount() == null ? BigDecimal.ZERO : billOrderWeek.getPrepaymentDiscount());
-        billCost = billCost.add(billOrderWeek.getToPayDiscount() == null ? BigDecimal.ZERO : billOrderWeek.getToPayDiscount());
+        //billCost = billCost.add(billOrderWeek.getPrepaymentDiscount() == null ? BigDecimal.ZERO : billOrderWeek.getPrepaymentDiscount());
+        //billCost = billCost.add(billOrderWeek.getToPayDiscount() == null ? BigDecimal.ZERO : billOrderWeek.getToPayDiscount());
         billCost = billCost.subtract(billOrderWeek.getServiceCost() == null ? BigDecimal.ZERO : billOrderWeek.getServiceCost());
         billOrderWeek.setBillCost(billCost);
         //商家收款金额=账单金额+补差金额
@@ -188,8 +188,15 @@ public class BillOrderDetailService {
             return null;
         }
         for(BillOrder billOrder : billOrderList){
-            BillOrderDetail billOrderDetail = buildOrderDetail(billOrder, billBeginDate);
-            billOrderDetailList.add(billOrderDetail);
+            //排除2016年之前的
+            try {
+                if(billOrder.getBeginTime().compareTo(DateUtils.parseDate("2016-01-01", DateUtils.FORMAT_DATE)) >= 0){
+                    BillOrderDetail billOrderDetail = buildOrderDetail(billOrder, billBeginDate);
+                    billOrderDetailList.add(billOrderDetail);
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
         return billOrderDetailList;
     }
