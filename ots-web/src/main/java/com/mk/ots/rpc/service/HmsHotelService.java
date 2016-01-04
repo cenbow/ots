@@ -682,13 +682,14 @@ public class HmsHotelService implements IHotelService {
         logger.info("HMS hotelid: {} prepare to offline...", hotelid);
         try {
             SearchHit[] searchHits = esProxy.searchHotelByHotelId(hotelid);
-            for (int i = 0; i < searchHits.length; i++) {
-                SearchHit searchHit = searchHits[i];
-                esProxy.deleteDocument(searchHit.getId());
-                logger.info("hotelid: "+ hotelid + " has deleted.");
-            }
-            logger.info("HMS hotelid: {} offline success.", hotelid);
-            
+            if (null != searchHits){
+                for (int i = 0; i < searchHits.length; i++) {
+                    SearchHit searchHit = searchHits[i];
+                    esProxy.deleteDocument(searchHit.getId());
+                    logger.info("hotelid: "+ hotelid + " has deleted.");
+                }
+                logger.info("HMS hotelid: {} offline success.", hotelid);
+
             /*final EHotelModel eHotelModel = eHotelMapper.selectByPrimaryKey(Long.parseLong(hotelid));
             if(eHotelModel!=null){
             	//异步调用通知下线
@@ -704,7 +705,12 @@ public class HmsHotelService implements IHotelService {
             		}
             	});
             }*/
+
+            }else {
+                logger.info("HMS hotelid: {} has not found in es", hotelid);
+            }
             return true;
+
         } catch (Exception e) {
             logger.error("HMS hotelid: {} offline error: {} ", hotelid, e.getMessage());
             throw e;
