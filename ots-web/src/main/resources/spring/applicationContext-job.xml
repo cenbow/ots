@@ -55,6 +55,8 @@
                 <ref bean="payStatusErrorOrderTrigger"/>
 				<ref bean="billPromoOrdersTrigger"/>
 				<ref bean="qieKeRuleTrigger"/>
+				<ref bean="billOrderWeekJob"/>
+				<ref bean="billOrderDetailJobDetailTrigger"/>
                 <!--  暂时停掉  -->
                 <!--<ref bean="SendTicketJobTrigger"/>-->
 				<!-- 每分钟提醒 -->
@@ -162,6 +164,26 @@
 	<bean id="billPromoOrdersJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
 		<property name="name" value="billPromoOrdersJob" />
 		<property name="jobClassName" value="com.mk.ots.job.BillPromoOrdersJob" />
+	</bean>
+
+	<!-- Day-of-Week(每周)：酒店综合订单周账单-->
+	<bean id="billOrderWeekJob" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="billOrderWeekJobDetail" />
+		<property name="cronExpression" value="0 10 4 ? * MON" />
+	</bean>
+	<bean id="billOrderWeekJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="billOrderWeekJob" />
+		<property name="jobClassName" value="com.mk.ots.job.BillOrderWeekJob" />
+	</bean>
+
+	<!-- 每天02:15执行一次，酒店综合订单账单明细 -->
+	<bean id="billOrderDetailJobDetailTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="billOrderDetailJobDetail" />
+		<property name="cronExpression" value="0 15 2 * * ?" />
+	</bean>
+	<bean id="billOrderDetailJobDetail" class="com.mk.ots.schedule.JobDetailWrapper">
+		<property name="name" value="billOrderDetailJob" />
+		<property name="jobClassName" value="com.mk.ots.job.BillOrderDetailJob" />
 	</bean>
 
 	<!-- 每月的1号6点1分执行 酒店结算的审核数据 -->

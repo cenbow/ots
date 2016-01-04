@@ -134,13 +134,22 @@
 
 
   <select id="selectByUuid" resultMap="BaseResultMap" parameterType="java.util.Map" >
+
     select
     m.id, m.orderID, m.uuid, m.sysno, m.deviceimei, m.simsn, m.wifimacaddr, m.blmacaddr
     from b_otaorder_mac m left JOIN  b_otaorder o on m.orderId = o.id
-    where m.uuid = #{uuid} and o.OrderStatus in
+    where m.uuid = #{uuid}
+    and o.OrderStatus  in
     <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
       #{item}
     </foreach>
+    <if test="createBeginTime != null" >
+      and o.Createtime >= #{createBeginTime}
+    </if>
+    <if test="createEndTime != null" >
+    <![CDATA[and o.Createtime < #{createEndTime}  ]]>
+    </if>
+
   </select>
 
   <select id="selectByDeviceimei" resultMap="BaseResultMap" parameterType="java.util.Map" >
@@ -151,5 +160,11 @@
     <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
       #{item}
     </foreach>
+     <if test="createBeginTime != null" >
+      and o.Createtime >= #{createBeginTime}
+    </if>
+    <if test="createEndTime != null" >
+      <![CDATA[and o.Createtime < #{createEndTime} ]]>
+    </if>
   </select>
 </mapper>

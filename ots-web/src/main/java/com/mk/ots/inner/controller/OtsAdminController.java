@@ -1,17 +1,14 @@
 package com.mk.ots.inner.controller;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.google.common.base.Optional;
 import com.mk.framework.AppUtils;
 import com.mk.framework.es.ElasticsearchProxy;
 import com.mk.ots.bill.dao.BillOrderDAO;
-import com.mk.ots.bill.service.ServiceCostRuleService;
+import com.mk.ots.bill.service.BillOrderDetailService;
 import com.mk.ots.bill.service.BillOrderService;
+import com.mk.ots.bill.service.ServiceCostRuleService;
 import com.mk.ots.common.enums.HotelSearchEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
@@ -68,8 +65,9 @@ public class OtsAdminController {
 	@Autowired
 	private ServiceCostRuleService serviceCostRuleService;
 	@Autowired
+	private BillOrderDetailService billOrderDetailService;
+	@Autowired
 	private IndexerService indexerService;
-
 	@Autowired
 	protected ElasticsearchProxy esProxy;
 	@Autowired
@@ -344,6 +342,24 @@ public class OtsAdminController {
 		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
 		logger.info("genBillConfirmChecks::{}", startdateday);
 		billService.genBillConfirmChecks(DateUtils.getDateFromString(startdateday), null, null);
+		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/report/genOrderDetail", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> genOrderDetail(String startdateday) {
+		Map<String, Object> datas = new HashMap<String, Object>();
+		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		logger.info("genOrderDetail::{}", startdateday);
+		billOrderDetailService.genOrderDetail(DateUtils.getDateFromString(startdateday));
+		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/report/genOrderDetailWeek", method = RequestMethod.POST)
+	public ResponseEntity<Map<String, Object>> genOrderDetailWeek(String startdateday) {
+		Map<String, Object> datas = new HashMap<String, Object>();
+		datas.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		logger.info("genOrderDetailWeek::{}", startdateday);
+		billOrderDetailService.genOrderDetailWeek(DateUtils.getDateFromString(startdateday));
 		return new ResponseEntity<Map<String, Object>>(datas, HttpStatus.OK);
 	}
 

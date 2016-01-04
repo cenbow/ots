@@ -282,4 +282,6 @@ public class Constant {
 	public static final Double NANJI_POINT_LAT = -140.976563;
 	public static final Double NANJI_POINT_LON = -88.075329;
 
+	/**批量插入数量**/
+	public static final int INSERT_BATCH_SIZE = 1000;
 }

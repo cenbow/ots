@@ -62,15 +62,14 @@ public class HotelPromoController {
 	private IPromoSearchService promoSearchService;
 	@Autowired
 	private VisitSimService visitSimService;
-
 	@Autowired
 	private TPriceScopeService tpriceScopeService;
 
 	@Autowired
-	private CollegeSearchService collegeSearchService;
+	private ThemeCacheService themeCacheService;
 
 	@Autowired
-	private ThemeCacheService themeCacheService;
+	private CollegeSearchService collegeSearchService;
 
 	/**
 	 * 活动查询
