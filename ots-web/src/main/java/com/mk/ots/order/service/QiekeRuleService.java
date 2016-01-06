@@ -55,7 +55,7 @@ public class QiekeRuleService {
     /**检查用的坐标是否为空开关， true：则检查 false：不检查**/
     private final static boolean IOS_CHECK_USER_ADDRESS_IS_NULL_SWITCH = true;
     /**检查用的坐标距离开关， true：则检查 false：不检查**/
-    private final static boolean IOS_CHECK_USER_ADDRESS_DISTANCE_SWITCH = false;
+    private final static boolean IOS_CHECK_USER_ADDRESS_DISTANCE_SWITCH = true;
     @Autowired
     private OrderService orderService;
     @Autowired
