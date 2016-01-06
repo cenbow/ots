@@ -19,6 +19,7 @@ import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.PmsRoomOrder;
 import com.mk.ots.order.bean.TopPmsRoomOrderQuery;
 import com.mk.ots.order.dao.PmsRoomOrderDao;
+import com.mk.ots.order.dao.TicketOrderDAO;
 import com.mk.ots.order.model.OtaOrderMac;
 import com.mk.ots.pay.dao.impl.POrderLogDAO;
 import com.mk.ots.pay.dao.impl.PayDAO;
@@ -28,6 +29,9 @@ import com.mk.ots.pay.service.IPayService;
 import com.mk.ots.promo.service.IPromoService;
 import com.mk.ots.promoteconfig.model.TPromoteConfig;
 import com.mk.ots.promoteconfig.service.IPromoteConfigService;
+import com.mk.ots.ticket.dao.UTicketDao;
+import com.mk.ots.ticket.model.UTicket;
+import com.mk.ots.ticket.service.impl.TicketService;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.myenum.PmsCheckInTypeEnum;
@@ -80,6 +84,10 @@ public class QiekeRuleService {
 
     @Autowired
     private IPromoteConfigService promoteConfigService;
+
+    @Autowired
+    private UTicketDao uTicketDao;
+
     @Autowired
     private IBActivityDao ibActivityDao;
     /**
@@ -428,6 +436,15 @@ public class QiekeRuleService {
         }
     }
 
+    public OtaFreqTrvEnum checkTicketUse(OtaOrder otaOrder){
+        Long mid = otaOrder.getMid();
+        List<UTicket> list = this.uTicketDao.findUTicket(mid,1);
+        if (list.isEmpty()) {
+            return OtaFreqTrvEnum.L1;
+        } else {
+            return OtaFreqTrvEnum.TICKET_NOT_FIRST;
+        }
+    }
     public OtaFreqTrvEnum checkCheckInLess(OtaOrder otaOrder) {
         PmsRoomOrder pmsRoomOrder = pmsRoomOrderDao.getCheckInTime(otaOrder.getId());
         logger.info("checkCheckOut,orderid = " + otaOrder.getId());
@@ -750,6 +767,12 @@ public class QiekeRuleService {
 
         //身份证
         otaFreqTrvEnum = checkIdentityCard(otaOrder);
+        if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+            return otaFreqTrvEnum;
+        }
+
+        //优惠券
+        otaFreqTrvEnum = checkTicketUse(otaOrder);
         if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
             return otaFreqTrvEnum;
         }
