@@ -539,6 +539,14 @@
       WHERE
       o.id = b_bill_order_detail.order_id
     )
+    AND NOT EXISTS (
+      SELECT
+      1
+      FROM
+      b_bill_orders
+      WHERE
+      o.id = b_bill_orders.orderid  and statusTime < '2016-01-01'
+    )
     order by o.id desc LIMIT #{pageIndex},#{pageSize}
     ]]>
   </select>
