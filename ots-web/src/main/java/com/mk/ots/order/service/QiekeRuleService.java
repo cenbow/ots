@@ -708,7 +708,7 @@ public class QiekeRuleService {
 
             TopPmsRoomOrderQuery topPmsRoomOrderQuery = new TopPmsRoomOrderQuery();
             //洛阳不限，长沙10单
-            if ("410300".equals(cityCode)) {
+            if (STR_CITYID_LUOYANG.equals(cityCode)) {
                 topPmsRoomOrderQuery.setCount(Constant.QIE_KE_MAX_TOP_NUM);
             } else {
                 topPmsRoomOrderQuery.setCount(Constant.QIE_KE_TOP_NUM);
