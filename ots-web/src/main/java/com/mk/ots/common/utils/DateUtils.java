@@ -1018,7 +1018,7 @@ public class DateUtils extends Object {
             double ed = eDatetime.getTime();
             double sd = bDatetime.getTime();
             BigDecimal et = new BigDecimal(ed / 1000 / 3600 - sd / 1000 / 3600);
-            dif = et.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+            dif = et.setScale(6, BigDecimal.ROUND_HALF_UP).doubleValue();
         } catch (Exception e) {
             dif = 0;
         }
