@@ -29,6 +29,7 @@ import com.mk.ots.promo.service.IPromoService;
 import com.mk.ots.promoteconfig.model.TPromoteConfig;
 import com.mk.ots.promoteconfig.service.IPromoteConfigService;
 import com.mk.ots.utils.DistanceUtil;
+import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.myenum.PmsCheckInTypeEnum;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -427,6 +428,27 @@ public class QiekeRuleService {
         }
     }
 
+    public OtaFreqTrvEnum checkCheckInLess(OtaOrder otaOrder) {
+        PmsRoomOrder pmsRoomOrder = pmsRoomOrderDao.getCheckInTime(otaOrder.getId());
+        logger.info("checkCheckOut,orderid = " + otaOrder.getId());
+        if (pmsRoomOrder != null) {
+            // 判断入住时间减创建时间是否小于15分钟
+            Date checkInTime = pmsRoomOrder.getDate("CheckInTime");
+            Date checkOutTime = pmsRoomOrder.getDate("CheckOutTime");
+            double diffHours = DateUtils.getDiffHoure(DateUtils.getDatetime(checkInTime), DateUtils.getDatetime(checkOutTime));
+            if (diffHours < 0.5) {
+                logger.info("checkCheckOut,orderid = " + otaOrder.getId() + "diffHours < 0.5");
+                return OtaFreqTrvEnum.CHECKIN_LESS4;
+            } else {
+                logger.info("checkCheckOut,orderid = " + otaOrder.getId() + "diffHours >= 0.5");
+                return OtaFreqTrvEnum.L1;
+            }
+        }
+        logger.info("checkCheckOut,orderid = " + otaOrder.getId() + "pmsRoomOrder is null");
+        return OtaFreqTrvEnum.CHECKIN_LESS4;
+    }
+
+
     private Date getLastDayOfMonth() {
         Calendar calendar = Calendar.getInstance();
         //设置日历中月份的第1天
@@ -612,7 +634,7 @@ public class QiekeRuleService {
         }
         double distance = DistanceUtil.distance(hotelLongitude.doubleValue(), hotelLatitude.doubleValue(),
                 userLongitude.doubleValue(), userLatitude.doubleValue());
-        if(distance > SearchConst.SEARCH_RANGE_1_KM){
+        if(distance > SearchConst.SEARCH_RANGE_3_KM){
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }
         return OtaFreqTrvEnum.L1;
@@ -714,26 +736,31 @@ public class QiekeRuleService {
 
 
     public OtaFreqTrvEnum getQiekeRuleReason(OtaOrder otaOrder){
+        //手机号
         OtaFreqTrvEnum otaFreqTrvEnum = checkMobile(otaOrder);
         if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
             return otaFreqTrvEnum;
         }
 
+        //设备号
         otaFreqTrvEnum = checkSysNo(otaOrder, 0, OtaFreqTrvEnum.DEVICE_NUM_NOT_FIRST);
         if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
             return otaFreqTrvEnum;
         }
 
+        //身份证
         otaFreqTrvEnum = checkIdentityCard(otaOrder);
         if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
             return otaFreqTrvEnum;
         }
 
+        //支付账号
         otaFreqTrvEnum = checkPayAccount(otaOrder);
         if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
             return otaFreqTrvEnum;
         }
 
+        //下单位置
         otaFreqTrvEnum = checkUserAdders(otaOrder);
         if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
             return otaFreqTrvEnum;

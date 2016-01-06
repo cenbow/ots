@@ -24,6 +24,8 @@ public final class SearchConst {
     /** 酒店搜索默认搜索半径（单位: 米） */
     public final static Integer SEARCH_RANGE_1_KM = 1000;
 
+    /** 酒店搜索默认搜索半径（单位: 米） */
+    public final static Integer SEARCH_RANGE_3_KM = 3000;
     /**
      * 酒店眯客价保存天数
      */
