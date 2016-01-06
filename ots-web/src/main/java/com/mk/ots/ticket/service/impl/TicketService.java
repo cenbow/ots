@@ -240,7 +240,8 @@ public class TicketService implements ITicketService{
 		while (it.hasNext()) {
 			TicketInfo info = it.next();
 
-			if (info.getType() == PromotionTypeEnum.shoudan.getId()) {
+			//首单优惠券 || 110活动优惠券
+			if (info.getType() == PromotionTypeEnum.shoudan.getId() || info.getActivityid().longValue() == 110l) {
 				if(!org.apache.commons.lang3.StringUtils.isEmpty(tHotelModel.getCitycode())){
 					m.put("activityId",info.getActivityid());
 					List<BPromotionCity>   promotionCityList = tPromotionCityMapper.findPromotionCityByCityCode(m);
