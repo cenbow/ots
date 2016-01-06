@@ -205,16 +205,20 @@ public class BillOrderDetailService {
         BigDecimal serviceCost = BigDecimal.ZERO;
         if("310000".equals(billOrder.getCityCode())){
             //上海地区
-            if(billOrder.getCheckinTime() != null && billOrder.getOrderCreateTime() != null){
-                long temp = billOrder.getCheckinTime().getTime() - billOrder.getOrderCreateTime().getTime(); // 相差毫秒数 > 15分钟，直单到付预付收取服务费
-                if(temp >= TIME_FOR_FIFTEEN){//判断下单时间大于15分钟的 //new BigDecimal(0) == qiekeIncome &&
-                    BigDecimal price = billOrder.getTotalPrice().subtract(billOrderPayInfo.getHotelgive() == null ? BigDecimal.ZERO : billOrderPayInfo.getHotelgive());
-                    serviceCost = serviceCostRuleService.getServiceCostByOrderType(billOrder.getOrderCreateTime(), qikeFlag, price, billOrder.getCityCode());
-                } else{
+            if(qieKeTypeEnum.B_RULE.getCode().equals(qieKeTypeEnum.getCode())){
+                serviceCost = BigDecimal.ZERO;
+            }else{
+                if(billOrder.getCheckinTime() != null && billOrder.getOrderCreateTime() != null){
+                    long temp = billOrder.getCheckinTime().getTime() - billOrder.getOrderCreateTime().getTime(); // 相差毫秒数 > 15分钟，直单到付预付收取服务费
+                    if(temp >= TIME_FOR_FIFTEEN){//判断下单时间大于15分钟的 //new BigDecimal(0) == qiekeIncome &&
+                        BigDecimal price = billOrder.getTotalPrice().subtract(billOrderPayInfo.getHotelgive() == null ? BigDecimal.ZERO : billOrderPayInfo.getHotelgive());
+                        serviceCost = serviceCostRuleService.getServiceCostByOrderType(billOrder.getOrderCreateTime(), qikeFlag, price, billOrder.getCityCode());
+                    } else{
+                        serviceCost = BigDecimal.ZERO;
+                    }
+                }else {
                     serviceCost = BigDecimal.ZERO;
                 }
-            }else {
-                serviceCost = BigDecimal.ZERO;
             }
         }else{
             if(qieKeTypeEnum.LAXIN_RULE.getCode().equals(qieKeTypeEnum.getCode())){

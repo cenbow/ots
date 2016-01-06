@@ -1123,13 +1123,17 @@ public class BillOrderDAO {
         //判断是不是切客
         if("310000".equals(cityCode)){
             //上海地区
-            if(checkinTime != null && createTime != null){
-                long temp = checkinTime.getTime() - createTime.getTime(); // 相差毫秒数 > 15分钟，直单到付预付收取服务费
-                if(temp >= TIME_FOR_FIFTEEN){//判断下单时间大于15分钟的 //new BigDecimal(0) == qiekeIncome &&
-                    BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(createTime, qiekeFlag, price, cityCode);
-                    return serviceCost;
-                } else{
-                    return BigDecimal.ZERO;
+            if(spreaduser == 1L){
+                if(checkinTime != null && createTime != null){
+                    long temp = checkinTime.getTime() - createTime.getTime(); // 相差毫秒数 > 15分钟，直单到付预付收取服务费
+                    if(temp >= TIME_FOR_FIFTEEN){//判断下单时间大于15分钟的 //new BigDecimal(0) == qiekeIncome &&
+                        BigDecimal serviceCost = serviceCostRuleService.getServiceCostByOrderType(createTime, qiekeFlag, price, cityCode);
+                        return serviceCost;
+                    } else{
+                        return BigDecimal.ZERO;
+                    }
+                }else {
+                    return  BigDecimal.ZERO;
                 }
             }else {
                 return  BigDecimal.ZERO;
