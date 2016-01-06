@@ -250,6 +250,9 @@ public class Constant {
 	public static final Integer QIE_KE_SPREAD_USER = -1;
 	/**每日多少新人单需要给酒店老板返收益的**/
 	public static final Integer QIE_KE_TOP_NUM = 10;
+	/**每日多少新人单需要给酒店老板返收益的**/
+	public static final Integer QIE_KE_MAX_TOP_NUM = 10000;
+
 	/**B+规则 切客收益覆盖城市**/
 	public static final Map<String,String> QIE_KE_CITY_MAP = new HashMap<>();
 	static {

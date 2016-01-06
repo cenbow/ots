@@ -686,8 +686,17 @@ public class QiekeRuleService {
             if(hotelId == null){
                 continue;
             }
+            THotelModel tHotelModel = this.tHotelMapper.findHotelInfoById(hotelId);
+            String cityCode = tHotelModel.getCitycode();
+
             TopPmsRoomOrderQuery topPmsRoomOrderQuery = new TopPmsRoomOrderQuery();
-            topPmsRoomOrderQuery.setCount(Constant.QIE_KE_TOP_NUM);
+            //洛阳不限，长沙10单
+            if ("410300".equals(cityCode)) {
+                topPmsRoomOrderQuery.setCount(Constant.QIE_KE_MAX_TOP_NUM);
+            } else {
+                topPmsRoomOrderQuery.setCount(Constant.QIE_KE_TOP_NUM);
+            }
+
             topPmsRoomOrderQuery.setLimitBegin(0);
             topPmsRoomOrderQuery.setLimitEen(topPmsRoomOrderQuery.getBasePageSize());
             topPmsRoomOrderQuery.setYesterdayStr(yesterdayStr);
