@@ -188,15 +188,8 @@ public class BillOrderDetailService {
             return null;
         }
         for(BillOrder billOrder : billOrderList){
-            //排除2016年之前的
-            try {
-                if(billOrder.getBeginTime().compareTo(DateUtils.parseDate("2016-01-01", DateUtils.FORMAT_DATE)) >= 0){
-                    BillOrderDetail billOrderDetail = buildOrderDetail(billOrder, billBeginDate);
-                    billOrderDetailList.add(billOrderDetail);
-                }
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+            BillOrderDetail billOrderDetail = buildOrderDetail(billOrder, billBeginDate);
+            billOrderDetailList.add(billOrderDetail);
         }
         return billOrderDetailList;
     }
