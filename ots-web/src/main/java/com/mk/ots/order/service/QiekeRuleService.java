@@ -19,7 +19,6 @@ import com.mk.ots.order.bean.OtaOrder;
 import com.mk.ots.order.bean.PmsRoomOrder;
 import com.mk.ots.order.bean.TopPmsRoomOrderQuery;
 import com.mk.ots.order.dao.PmsRoomOrderDao;
-import com.mk.ots.order.dao.TicketOrderDAO;
 import com.mk.ots.order.model.OtaOrderMac;
 import com.mk.ots.pay.dao.impl.POrderLogDAO;
 import com.mk.ots.pay.dao.impl.PayDAO;
@@ -31,9 +30,7 @@ import com.mk.ots.promoteconfig.model.TPromoteConfig;
 import com.mk.ots.promoteconfig.service.IPromoteConfigService;
 import com.mk.ots.ticket.dao.UTicketDao;
 import com.mk.ots.ticket.model.UTicket;
-import com.mk.ots.ticket.service.impl.TicketService;
 import com.mk.ots.utils.DistanceUtil;
-import com.mk.pms.bean.PmsCheckinUser;
 import com.mk.pms.myenum.PmsCheckInTypeEnum;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -56,6 +53,12 @@ public class QiekeRuleService {
     private final static boolean IOS_CHECK_USER_ADDRESS_IS_NULL_SWITCH = true;
     /**检查用的坐标距离开关， true：则检查 false：不检查**/
     private final static boolean IOS_CHECK_USER_ADDRESS_DISTANCE_SWITCH = false;
+    /** 字符串 长沙的cityid */
+    public static final String STR_CITYID_CHANGSHA = "430100";
+
+    /** 字符串 洛阳的cityid */
+    public static final String STR_CITYID_LUOYANG = "410300";
+
     @Autowired
     private OrderService orderService;
     @Autowired
@@ -438,13 +441,27 @@ public class QiekeRuleService {
 
     public OtaFreqTrvEnum checkTicketUse(OtaOrder otaOrder){
         Long mid = otaOrder.getMid();
-        List<UTicket> list = this.uTicketDao.findUTicket(mid,1);
+        List<UTicket> list = this.uTicketDao.findUTicket(mid, 1);
         if (list.isEmpty()) {
             return OtaFreqTrvEnum.L1;
         } else {
             return OtaFreqTrvEnum.TICKET_NOT_FIRST;
         }
     }
+
+    public OtaFreqTrvEnum checkUseApp(OtaOrder otaOrder){
+        if(STR_CITYID_LUOYANG.equals(otaOrder.getCityCode())){
+            if (OrderMethodEnum.IOS.getId().equals(otaOrder.getOrderMethod()) || OrderMethodEnum.ANDROID.getId().equals(otaOrder.getOrderMethod())) {
+                return OtaFreqTrvEnum.L1;
+            } else {
+                return OtaFreqTrvEnum.NON_USE_APP;
+            }
+        }else{
+            return OtaFreqTrvEnum.L1;
+        }
+    }
+
+
     public OtaFreqTrvEnum checkCheckInLess(OtaOrder otaOrder) {
         PmsRoomOrder pmsRoomOrder = pmsRoomOrderDao.getCheckInTime(otaOrder.getId());
         logger.info("checkCheckOut,orderid = " + otaOrder.getId());
@@ -753,8 +770,14 @@ public class QiekeRuleService {
 
 
     public OtaFreqTrvEnum getQiekeRuleReason(OtaOrder otaOrder){
+        //是否使用app下单
+        OtaFreqTrvEnum otaFreqTrvEnum = checkUseApp(otaOrder);
+        if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+            return otaFreqTrvEnum;
+        }
+
         //手机号
-        OtaFreqTrvEnum otaFreqTrvEnum = checkMobile(otaOrder);
+        otaFreqTrvEnum = checkMobile(otaOrder);
         if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
             return otaFreqTrvEnum;
         }

@@ -8,6 +8,7 @@ public enum OtaFreqTrvEnum {
 	MONTHE_UP5("5", "MONTHE_UP5"), // 每月超过4单
 	DEVICE_NUM_OVER("6","设备号对应手机号超过三个手机号码"),
 
+	NON_USE_APP("9","用户不是通过app进行下单"),
 	PHONE_NOT_FIRST("10","电话号码不是第一次使用"),
 
 	DEVICE_NUM_IS_NULL("20","设备号为空"),
@@ -17,7 +18,7 @@ public enum OtaFreqTrvEnum {
 	CARD_ID_IS_NULL("40","身份证号为空"),
 	CARD_ID_IS_NOT_PMS_SCAN("41","身份证号不为PMS扫描"),
 	CARD_ID_NOT_FIRST("50","身份证号不是第一次使用"),
-	TICKET_NOT_FIRST("60","使用优惠券"),
+	TICKET_NOT_FIRST("60","用户使用过优惠券"),
 	ZHIFU_NOT_FIRST("70","支付账号不是第一次使用"),
 //	LOCATION_NULL("80","用户未允许眯客获取其下单时坐标，无法判断用户位置"),
 	OUT_OF_RANG("90","下单位置不在酒店1公里范围内"),
