@@ -768,7 +768,12 @@ public class TicketService implements ITicketService{
 				//check是否过期
 				if(!checkUsable(bp.getBegintime(), bp.getEndtime())){//过期的单据
 					info.setStatus(TicketStatusEnum.overdue.getId());
-					info.setStatusname(TicketStatusEnum.overdue.getName());
+					//若开始时间晚于当前时间,不显示statusName
+					if (bp.getBegintime().before(new Date())) {
+						info.setStatusname(TicketStatusEnum.overdue.getName());
+					} else {
+						info.setStatusname("");
+					}
 					//如果已经过期，置为不可用
 					info.setIsused(true);
 				}else{//多少天失效
