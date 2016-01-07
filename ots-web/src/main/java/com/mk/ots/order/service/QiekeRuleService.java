@@ -728,7 +728,7 @@ public class QiekeRuleService {
     private void updateQieKeIncome(TopPmsRoomOrderQuery topPmsRoomOrderQuery) {
         //查找每日top订单
         List<PmsRoomOrder> pmsRoomOrderList = getTopPmsRoomOrder(topPmsRoomOrderQuery);
-        logger.info(String.format("updateQieKeIncome top[%s] top pmsRoomOrderList size[%s]", Constant.QIE_KE_TOP_NUM.toString(), pmsRoomOrderList.size()+""));
+        logger.info(String.format("updateQieKeIncome top[%s] top pmsRoomOrderList size[%s]", topPmsRoomOrderQuery.getCount(), pmsRoomOrderList.size()+""));
         for(PmsRoomOrder pmsRoomOrder : pmsRoomOrderList){
             Long orderId =  pmsRoomOrder.getLong("orderId");
             String cityCode =  pmsRoomOrder.getStr("cityCode");
