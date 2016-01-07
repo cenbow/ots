@@ -739,10 +739,12 @@ public class QiekeRuleService {
             PPay pPay = payDAO.getPayByOrderId(orderId);
             if(pPay == null){
                 logger.warn(String.format("updateTopInvalidReason pPay is null orderId[%s]", orderId));
+                continue;
             }
             POrderLog pOrderLog = pOrderLogDAO.findPOrderLogByPay(pPay.getId());
             if(pOrderLog == null){
                 logger.warn(String.format("updateTopInvalidReason pOrderLog is null params pPay id[%s]", pPay.getId()));
+                continue;
             }
             BigDecimal qiekeIncome = new BigDecimal(0);
             if(OrderTypeEnum.YF.getId().equals(orderType)){

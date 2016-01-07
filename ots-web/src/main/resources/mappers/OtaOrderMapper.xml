@@ -18,7 +18,7 @@
               AND bo.id = bor.otaorderid
               AND bor.hotelid = bp.hotelid
               AND bor.pmsroomorderno = bp.pmsroomorderno
-              AND bo.orderstatus IN (180) and bo.spreadUser = -1
+              AND bo.orderstatus IN (180) and bo.spreadUser = -1 and Invalidreason= 100
               AND bp.checkintime < date_sub(now(),INTERVAL 30 MINUTE)
           ) bo ON odr.id = bo.id
           SET odr.InvalidReason = #{invalidReason}
@@ -41,7 +41,7 @@
               AND bo.id = bor.otaorderid
               AND bor.hotelid = bp.hotelid
               AND bor.pmsroomorderno = bp.pmsroomorderno
-              AND bo.orderstatus IN (190, 200) and bo.spreadUser = -1
+              AND bo.orderstatus IN (190, 200) and bo.spreadUser = -1 and Invalidreason= 100
               AND bp.checkintime < date_sub(bp.checkouttime,INTERVAL 30 MINUTE)
           ) bo ON odr.id = bo.id
           SET odr.InvalidReason = #{invalidReason}
