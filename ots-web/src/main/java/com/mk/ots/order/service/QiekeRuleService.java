@@ -28,6 +28,8 @@ import com.mk.ots.pay.service.IPayService;
 import com.mk.ots.promo.service.IPromoService;
 import com.mk.ots.promoteconfig.model.TPromoteConfig;
 import com.mk.ots.promoteconfig.service.IPromoteConfigService;
+import com.mk.ots.ticket.dao.UTicketDao;
+import com.mk.ots.ticket.model.UTicket;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.pms.myenum.PmsCheckInTypeEnum;
 import org.apache.commons.lang.StringUtils;
@@ -50,7 +52,14 @@ public class QiekeRuleService {
     /**检查用的坐标是否为空开关， true：则检查 false：不检查**/
     private final static boolean IOS_CHECK_USER_ADDRESS_IS_NULL_SWITCH = true;
     /**检查用的坐标距离开关， true：则检查 false：不检查**/
-    private final static boolean IOS_CHECK_USER_ADDRESS_DISTANCE_SWITCH = false;
+    private final static boolean IOS_CHECK_USER_ADDRESS_DISTANCE_SWITCH = true;
+
+    /** 字符串 长沙的cityid */
+    public static final String STR_CITYID_CHANGSHA = "430100";
+
+    /** 字符串 洛阳的cityid */
+    public static final String STR_CITYID_LUOYANG = "410300";
+
     @Autowired
     private OrderService orderService;
     @Autowired
@@ -79,6 +88,10 @@ public class QiekeRuleService {
 
     @Autowired
     private IPromoteConfigService promoteConfigService;
+
+    @Autowired
+    private UTicketDao uTicketDao;
+
     @Autowired
     private IBActivityDao ibActivityDao;
     /**
@@ -427,6 +440,50 @@ public class QiekeRuleService {
         }
     }
 
+    public OtaFreqTrvEnum checkTicketUse(OtaOrder otaOrder){
+        Long mid = otaOrder.getMid();
+        List<UTicket> list = this.uTicketDao.findUTicket(mid, 1);
+        if (list.isEmpty()) {
+            return OtaFreqTrvEnum.L1;
+        } else {
+            return OtaFreqTrvEnum.TICKET_NOT_FIRST;
+        }
+    }
+
+    public OtaFreqTrvEnum checkUseApp(OtaOrder otaOrder){
+        if(STR_CITYID_LUOYANG.equals(otaOrder.getCityCode())){
+            if (OrderMethodEnum.IOS.getId().equals(otaOrder.getOrderMethod()) || OrderMethodEnum.ANDROID.getId().equals(otaOrder.getOrderMethod())) {
+                return OtaFreqTrvEnum.L1;
+            } else {
+                return OtaFreqTrvEnum.NON_USE_APP;
+            }
+        }else{
+            return OtaFreqTrvEnum.L1;
+        }
+    }
+
+
+    public OtaFreqTrvEnum checkCheckInLess(OtaOrder otaOrder) {
+        PmsRoomOrder pmsRoomOrder = pmsRoomOrderDao.getCheckInTime(otaOrder.getId());
+        logger.info("checkCheckOut,orderid = " + otaOrder.getId());
+        if (pmsRoomOrder != null) {
+            // 判断入住时间减创建时间是否小于15分钟
+            Date checkInTime = pmsRoomOrder.getDate("CheckInTime");
+            Date checkOutTime = pmsRoomOrder.getDate("CheckOutTime");
+            double diffHours = DateUtils.getDiffHoure(DateUtils.getDatetime(checkInTime), DateUtils.getDatetime(checkOutTime));
+            if (diffHours < 0.5) {
+                logger.info("checkCheckOut,orderid = " + otaOrder.getId() + "diffHours < 0.5");
+                return OtaFreqTrvEnum.CHECKIN_LESS4;
+            } else {
+                logger.info("checkCheckOut,orderid = " + otaOrder.getId() + "diffHours >= 0.5");
+                return OtaFreqTrvEnum.L1;
+            }
+        }
+        logger.info("checkCheckOut,orderid = " + otaOrder.getId() + "pmsRoomOrder is null");
+        return OtaFreqTrvEnum.CHECKIN_LESS4;
+    }
+
+
     private Date getLastDayOfMonth() {
         Calendar calendar = Calendar.getInstance();
         //设置日历中月份的第1天
@@ -612,7 +669,7 @@ public class QiekeRuleService {
         }
         double distance = DistanceUtil.distance(hotelLongitude.doubleValue(), hotelLatitude.doubleValue(),
                 userLongitude.doubleValue(), userLatitude.doubleValue());
-        if(distance > SearchConst.SEARCH_RANGE_1_KM){
+        if(distance > SearchConst.SEARCH_RANGE_3_KM){
             return OtaFreqTrvEnum.OUT_OF_RANG;
         }
         return OtaFreqTrvEnum.L1;
@@ -647,8 +704,17 @@ public class QiekeRuleService {
             if(hotelId == null){
                 continue;
             }
+            THotelModel tHotelModel = this.tHotelMapper.findHotelInfoById(hotelId);
+            String cityCode = tHotelModel.getCitycode();
+
             TopPmsRoomOrderQuery topPmsRoomOrderQuery = new TopPmsRoomOrderQuery();
-            topPmsRoomOrderQuery.setCount(Constant.QIE_KE_TOP_NUM);
+            //洛阳不限，长沙10单
+            if (STR_CITYID_LUOYANG.equals(cityCode)) {
+                topPmsRoomOrderQuery.setCount(Constant.QIE_KE_MAX_TOP_NUM);
+            } else {
+                topPmsRoomOrderQuery.setCount(Constant.QIE_KE_TOP_NUM);
+            }
+
             topPmsRoomOrderQuery.setLimitBegin(0);
             topPmsRoomOrderQuery.setLimitEen(topPmsRoomOrderQuery.getBasePageSize());
             topPmsRoomOrderQuery.setYesterdayStr(yesterdayStr);
@@ -662,7 +728,7 @@ public class QiekeRuleService {
     private void updateQieKeIncome(TopPmsRoomOrderQuery topPmsRoomOrderQuery) {
         //查找每日top订单
         List<PmsRoomOrder> pmsRoomOrderList = getTopPmsRoomOrder(topPmsRoomOrderQuery);
-        logger.info(String.format("updateQieKeIncome top[%s] top pmsRoomOrderList size[%s]", Constant.QIE_KE_TOP_NUM.toString(), pmsRoomOrderList.size()+""));
+        logger.info(String.format("updateQieKeIncome top[%s] top pmsRoomOrderList size[%s]", topPmsRoomOrderQuery.getCount(), pmsRoomOrderList.size()+""));
         for(PmsRoomOrder pmsRoomOrder : pmsRoomOrderList){
             Long orderId =  pmsRoomOrder.getLong("orderId");
             String cityCode =  pmsRoomOrder.getStr("cityCode");
@@ -673,10 +739,12 @@ public class QiekeRuleService {
             PPay pPay = payDAO.getPayByOrderId(orderId);
             if(pPay == null){
                 logger.warn(String.format("updateTopInvalidReason pPay is null orderId[%s]", orderId));
+                continue;
             }
             POrderLog pOrderLog = pOrderLogDAO.findPOrderLogByPay(pPay.getId());
             if(pOrderLog == null){
                 logger.warn(String.format("updateTopInvalidReason pOrderLog is null params pPay id[%s]", pPay.getId()));
+                continue;
             }
             BigDecimal qiekeIncome = new BigDecimal(0);
             if(OrderTypeEnum.YF.getId().equals(orderType)){
@@ -714,26 +782,43 @@ public class QiekeRuleService {
 
 
     public OtaFreqTrvEnum getQiekeRuleReason(OtaOrder otaOrder){
-        OtaFreqTrvEnum otaFreqTrvEnum = checkMobile(otaOrder);
+        //是否使用app下单
+        OtaFreqTrvEnum otaFreqTrvEnum = checkUseApp(otaOrder);
         if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
             return otaFreqTrvEnum;
         }
 
+        //手机号
+        otaFreqTrvEnum = checkMobile(otaOrder);
+        if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+            return otaFreqTrvEnum;
+        }
+
+        //设备号
         otaFreqTrvEnum = checkSysNo(otaOrder, 0, OtaFreqTrvEnum.DEVICE_NUM_NOT_FIRST);
         if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
             return otaFreqTrvEnum;
         }
 
+        //身份证
         otaFreqTrvEnum = checkIdentityCard(otaOrder);
         if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
             return otaFreqTrvEnum;
         }
 
+        //优惠券
+        otaFreqTrvEnum = checkTicketUse(otaOrder);
+        if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
+            return otaFreqTrvEnum;
+        }
+
+        //支付账号
         otaFreqTrvEnum = checkPayAccount(otaOrder);
         if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
             return otaFreqTrvEnum;
         }
 
+        //下单位置
         otaFreqTrvEnum = checkUserAdders(otaOrder);
         if(!OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
             return otaFreqTrvEnum;

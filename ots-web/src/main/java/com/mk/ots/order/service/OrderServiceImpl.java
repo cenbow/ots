@@ -2141,50 +2141,49 @@ public class OrderServiceImpl implements OrderService {
                 //判断 洛阳 长沙 等新用户，发送优惠券
                 Integer invalidReason = otaorder.get("Invalidreason");
                 if (null == invalidReason
-
-                        || OtaFreqTrvEnum.DEVICE_NUM_IS_NULL.getId().equals(String.valueOf(invalidReason))
-                        || OtaFreqTrvEnum.DEVICE_NUM_NOT_FIRST.getId().equals(String.valueOf(invalidReason))
-
+                        //入住时长
                         || OtaFreqTrvEnum.CHECKIN_LESS4.getId().equals(String.valueOf(invalidReason))
-                        || OtaFreqTrvEnum.OVER_RANG.getId().equals(String.valueOf(invalidReason))
-                        || OtaFreqTrvEnum.OUT_OF_RANG.getId().equals(String.valueOf(invalidReason))
-                        || OtaFreqTrvEnum.ZHIFU_NOT_FIRST.getId().equals(String.valueOf(invalidReason))
-                        || OtaFreqTrvEnum.CARD_ID_NOT_FIRST.getId().equals(String.valueOf(invalidReason))
-                        || OtaFreqTrvEnum.CARD_ID_IS_NOT_PMS_SCAN.getId().equals(String.valueOf(invalidReason))
-                        || OtaFreqTrvEnum.CARD_ID_IS_NULL.getId().equals(String.valueOf(invalidReason))) {
+                        //下单位置
+                        || OtaFreqTrvEnum.OUT_OF_RANG.getId().equals(String.valueOf(invalidReason))) {
 
-                    Long orderId = otaorder.getId();
-                    String lockValue = DistributedLockUtil.tryLock("orderNewUserTicketLock_" + orderId, 40);
-                    try {
-                        if (lockValue == null) {
-                            OrderServiceImpl.logger.info("订单：" + orderId + "正在发放优惠券，不再发放");
-                        } else {
-                            OrderServiceImpl.logger.info(
-                                    String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] start genTicket ",otaorder.getId()));
+                    OtaFreqTrvEnum checkInLessEnum = this.qiekeRuleService.checkCheckInLess(otaorder);
+                    if (OtaFreqTrvEnum.CHECKIN_LESS4.getId().equals(checkInLessEnum.getId())) {
+                        OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] CHECKIN_LESS4 dont genTicket",otaorder.getId()));
+                    } else {
 
-                            Long mid = otaorder.getMid();
-                            List<TicketInfo> ticketInfoList = this.ticketService.queryMyTicket(mid,null);
-
-                            if (ticketInfoList.isEmpty()) {
-                                String cityCode = otaorder.getCityCode();
-                                List<Long> ticketIdList = this.qiekeRuleService.genTicketByCityCode(cityCode, mid);
-                                for (Long ticketId : ticketIdList) {
-                                    OrderServiceImpl.logger.info(
-                                            String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] send genTicket[%s]", otaorder.getId(),ticketId));
-                                }
+                        Long orderId = otaorder.getId();
+                        String lockValue = DistributedLockUtil.tryLock("orderNewUserTicketLock_" + orderId, 40);
+                        try {
+                            if (lockValue == null) {
+                                OrderServiceImpl.logger.info(
+                                        String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] 正在发放优惠券，不再发放 ",orderId));
                             } else {
                                 OrderServiceImpl.logger.info(
-                                        String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] genTicketed dont genTicket ",otaorder.getId()));
+                                        String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] start genTicket ",orderId));
+
+                                Long mid = otaorder.getMid();
+                                List<TicketInfo> ticketInfoList = this.ticketService.queryMyTicket(mid,null);
+
+                                if (ticketInfoList.isEmpty()) {
+                                    String cityCode = otaorder.getCityCode();
+                                    List<Long> ticketIdList = this.qiekeRuleService.genTicketByCityCode(cityCode, mid);
+                                    for (Long ticketId : ticketIdList) {
+                                        OrderServiceImpl.logger.info(
+                                                String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] send genTicket[%s]", orderId,ticketId));
+                                    }
+                                } else {
+                                    OrderServiceImpl.logger.info(
+                                            String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] genTicketed dont genTicket ",orderId));
+                                }
                             }
+                        } finally{
+                            // 释放 redis锁
+                            OrderServiceImpl.logger.info("释放分布锁, orderId= " + orderId);
+                            DistributedLockUtil.releaseLock("orderNewUserTicketLock_" + orderId, lockValue);
                         }
-                    } finally{
-                        // 释放 redis锁
-                        OrderServiceImpl.logger.info("释放分布锁, orderId= " + orderId);
-                        DistributedLockUtil.releaseLock("orderNewUserTicketLock_" + orderId, lockValue);
                     }
                 } else {
                     OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] dont genTicket",otaorder.getId()));
-
                 }
                 OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] end",otaorder.getId()));
             }
