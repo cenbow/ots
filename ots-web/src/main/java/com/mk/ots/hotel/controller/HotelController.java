@@ -38,6 +38,7 @@ import com.mk.ots.common.enums.HotelSearchEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.common.utils.SearchConst;
+import com.mk.ots.hotel.model.TRoomTypeModel;
 import com.mk.ots.hotel.service.HotelPriceService;
 import com.mk.ots.hotel.service.HotelService;
 import com.mk.ots.hotel.service.RoomstateService;
@@ -53,6 +54,7 @@ import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.service.IPromoSearchService;
 import com.mk.ots.search.service.ISearchService;
 import com.mk.ots.web.ServiceOutput;
+import com.mk.ots.wechat.roomstate.service.WechatRoomstateService;
 
 /**
  * 酒店前端控制类 发布接口
@@ -72,6 +74,9 @@ public class HotelController {
 
 	@Autowired
 	private RoomstateService roomstateService;
+
+	@Autowired
+	private WechatRoomstateService wechatRoomstateService;
 
 	@Autowired
 	private HotelPriceService hotelPriceService;
@@ -199,7 +204,7 @@ public class HotelController {
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
 
-		if (reqentity.getPillowlongitude() != null && reqentity.getUserlatitude() != null){
+		if (reqentity.getPillowlongitude() != null && reqentity.getUserlatitude() != null) {
 			hotelEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
 			hotelEntity.setSearchtype(HotelSearchEnum.NEAR.getId());
 		}
@@ -235,7 +240,7 @@ public class HotelController {
 		hotelEntity.setUserlatitude(reqentity.getUserlatitude());
 		hotelEntity.setUserlongitude(reqentity.getUserlongitude());
 
-		if (reqentity.getPillowlongitude() != null && reqentity.getUserlatitude() != null){
+		if (reqentity.getPillowlongitude() != null && reqentity.getUserlatitude() != null) {
 			hotelEntity.setRange(SearchConst.SEARCH_HOMEPAGE_RANGE_DEFAULT);
 			hotelEntity.setSearchtype(HotelSearchEnum.NEAR.getId());
 		}
@@ -750,7 +755,7 @@ public class HotelController {
 		long startTime = new Date().getTime();
 		try {
 			String[] prices = null;
-			Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+			Boolean isNewPrice = false;// hotelPriceService.isUseNewPrice();
 			if (isNewPrice)
 				prices = hotelPriceService.getHotelMikePrices(hotelid, startdateday, enddateday);
 			else
@@ -1092,22 +1097,34 @@ public class HotelController {
 		return new ResponseEntity<Map<String, Object>>(rtnMap, HttpStatus.OK);
 	}
 
-	/**
-	 * 清除es中的垃圾酒店数据
-	 * 
-	 * @return
-	 */
-	// @RequestMapping(value="/hotel/cleareshotelnotinthotel")
-	// public ResponseEntity<Map<String, Object>> clearESHotelNotInThotel(String
-	// citycode) {
-	// return new
-	// ResponseEntity<Map<String,Object>>(hotelService.readonlyClearEsHotelNotInTHotel(citycode),HttpStatus.OK);
-	// }
-
 	@RequestMapping(value = "/hotel/test")
 	public ResponseEntity<Map<String, Object>> clearESHotelNotInThotel(Integer hotelid) {
 		HashMap<String, Object> rntMap = new HashMap<>();
 		rntMap.put("minprice", roomSaleService.getHotelMinPromoPrice(hotelid));
+		return new ResponseEntity<Map<String, Object>>(rntMap, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/wechat/roomstate/querypmsprices")
+	public ResponseEntity<Map<String, Object>> wechatPmsPrices(String hotelid) {
+		HashMap<String, Object> rntMap = new HashMap<>();
+
+		try {
+			List<TRoomTypeModel> roomtypeModels = wechatRoomstateService.findPmsPrices(Long.valueOf(hotelid));
+
+			rntMap.put("hotel", roomtypeModels);
+		} catch (Exception ex) {
+			String errMsg = String.format("failed to wechatRoomstateService.findPmsPrices with hotelid %s...", hotelid);
+			logger.error(errMsg, ex.getCause());
+
+			rntMap.put("hotel", new ArrayList<TRoomTypeModel>());
+			rntMap.put(ServiceOutput.STR_MSG_SUCCESS, false);
+			rntMap.put(ServiceOutput.STR_MSG_ERRCODE, "-1");
+			rntMap.put(ServiceOutput.STR_MSG_ERRMSG, errMsg);
+		}
+
+		rntMap.put(ServiceOutput.STR_MSG_SUCCESS, true);
+		rntMap.put(ServiceOutput.STR_MSG_ERRCODE, "0");
+		rntMap.put(ServiceOutput.STR_MSG_ERRMSG, "");
 		return new ResponseEntity<Map<String, Object>>(rntMap, HttpStatus.OK);
 	}
 
