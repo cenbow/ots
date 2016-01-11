@@ -1300,7 +1300,8 @@ public class HotelService {
 						 * 
 						 * Collections.sort(thebeans,new Comparator<Map<String,
 						 * String>>(){
-						 * 
+						 *
+						 *
 						 * @Override public int compare(Map<String, String> b1,
 						 * Map<String, String> b2) { return
 						 * b2.get("name").compareTo(b1.get("name")); } });
