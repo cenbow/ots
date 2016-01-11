@@ -35,7 +35,6 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +78,6 @@ import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity;
 import com.mk.ots.restful.output.SearchPositionsCoordinateRespEntity.Child;
 import com.mk.ots.restful.output.SearchPositionsDistanceRespEntity;
 import com.mk.ots.restful.output.SearchPositiontypesRespEntity;
-import com.mk.ots.roomsale.service.RoomSaleService;
 import com.mk.ots.search.enums.PositionTypeEnum;
 import com.mk.ots.search.model.PositionTypeModel;
 import com.mk.ots.search.model.SAreaInfo;
@@ -168,14 +166,6 @@ public class WechatServiceSearchImpl implements WechatSearchService {
 
 	@Autowired
 	private SSubwayStationMapper subwayStationMapper;
-
-	@Autowired
-	private RoomSaleService roomSaleService;
-
-	private LocalDateTime promoStartTime;
-	private LocalDateTime promoEndTime;
-
-	private final SimpleDateFormat defaultFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 
 	/*
 	 * 获取 区域位置类型
@@ -765,35 +755,6 @@ public class WechatServiceSearchImpl implements WechatSearchService {
 	 */
 	private void sortByOrders(SearchRequestBuilder searchBuilder) {
 		searchBuilder.addSort("greetscore", SortOrder.DESC);
-	}
-
-	/**
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	public boolean isInPromoPeriod() {
-		/**
-		 * hasn't been initialized yet
-		 */
-		if (promoStartTime == null) {
-			List<String> promoTimes = roomSaleService.queryPromoTime();
-			String startTime = promoTimes.get(0);
-			String endTime = promoTimes.get(1);
-
-			try {
-				promoStartTime = LocalDateTime.fromDateFields(defaultFormatter.parse(startTime));
-				promoEndTime = LocalDateTime.fromDateFields(defaultFormatter.parse(endTime));
-			} catch (Exception ex) {
-				logger.error(String.format("failed to parse startTime %s/endTime %s", startTime, endTime), ex);
-				return false;
-			}
-		}
-
-		boolean isAfter = LocalDateTime.now().isAfter(promoStartTime);
-		boolean isBefore = LocalDateTime.now().isBefore(promoEndTime);
-
-		return isAfter && isBefore;
 	}
 
 	/**
