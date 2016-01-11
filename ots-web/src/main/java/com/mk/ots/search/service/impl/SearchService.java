@@ -1729,7 +1729,7 @@ public class SearchService implements ISearchService {
 			endDateCal.setTime(endDate);
 			while (startDateCal.compareTo(endDateCal) <= 0) {
 				mikePriceBuilders.add(
-						FilterBuilders.rangeFilter(SearchConst.MIKE_PRICE_PROP + sdf.format(startDateCal.getTime()))
+						FilterBuilders.rangeFilter("dynamicprice")
 								.gte(Double.valueOf(minpriceParam)).lte(Double.valueOf(maxpriceParam)));
 				startDateCal.add(Calendar.DATE, 1);
 			}

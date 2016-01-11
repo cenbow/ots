@@ -2959,14 +2959,14 @@ public class HotelService {
 					} else if (gradeObject != null && gradeObject instanceof BigDecimal) {
 						grade = ((BigDecimal) gradeObject).toString();
 					}
-					
+
 					/**
 					 * this logic only applies in chongqing
 					 */
 					if ("0".equals(grade)) {
 						grade = "4";
 					}
-					
+
 					grade = StringUtils.isBlank(grade) ? "0" : grade;
 					resultMap.put("grade", new BigDecimal(grade));
 
@@ -3215,6 +3215,11 @@ public class HotelService {
 					doc.put(mikePriceKey, mikePriceValue);
 					logger.info("更新眯客价属性: {}, 值: {}", mikePriceKey, mikePriceValue);
 				}
+
+				String mikePriceKey = MIKE_PRICE_PROP + DateUtils
+						.getStringFromDate(DateUtils.getDateFromString(startdate), DateUtils.FORMATSHORTDATETIME);
+				doc.put("dynamicprice", doc.get(mikePriceKey));
+
 				// mike3.0增加月销量
 				doc.put("ordernummon", getOrderNumMon(hotelid));
 				doc.put("greetscore", getGreetScore(hotelid));
