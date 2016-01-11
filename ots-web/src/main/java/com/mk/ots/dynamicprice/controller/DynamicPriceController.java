@@ -5,8 +5,12 @@ import com.mk.ots.dynamicprice.service.BaseDynamicPriceService;
 import com.mk.ots.dynamicprice.service.MinDynamicPriceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -15,6 +19,8 @@ import java.util.Map;
 /**
  * Created by kirinli on 16/1/11.
  */
+@Controller
+@RequestMapping(method= RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 public class DynamicPriceController {
 
     @Autowired
@@ -29,6 +35,7 @@ public class DynamicPriceController {
 
 
     @RequestMapping("/dynamicprice/base")
+    @ResponseBody
     public ResponseEntity< Map<String, Object>> getBaseDynamicPrice(String hotelid, String roomtypeid, Integer checkinoclock){
         Map<String, Object> rtnMap = new HashMap<>();
         BigDecimal price = baseDynamicPriceService.getRoomTypeDynamicPrice(hotelid, roomtypeid, checkinoclock);
@@ -41,6 +48,7 @@ public class DynamicPriceController {
     }
 
     @RequestMapping("/dynamicprice/average")
+    @ResponseBody
     public ResponseEntity< Map<String, Object>> getAverageDynamicPrice(String hotelid, String roomtypeid, Integer checkinoclock){
         Map<String, Object> rtnMap = new HashMap<>();
         BigDecimal price = averageDynamicPriceService.getRoomTypeAverageDynamicPrice(hotelid, roomtypeid, checkinoclock);
@@ -53,6 +61,7 @@ public class DynamicPriceController {
     }
 
     @RequestMapping("/dynamicprice/min")
+    @ResponseBody
     public ResponseEntity< Map<String, Object>> getMinDynamicPrice(String hotelid, String roomtypeid, Integer checkinoclock){
         Map<String, Object> rtnMap = new HashMap<>();
         BigDecimal price = minDynamicPriceService.getHotelMinDynamicPrice(hotelid, roomtypeid, checkinoclock);
