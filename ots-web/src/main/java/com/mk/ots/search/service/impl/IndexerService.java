@@ -47,8 +47,8 @@ public class IndexerService {
     }
 
     public String batchUpdateEsIndexer(){
-        final int coreNum = 10;
-        ExecutorService exService = Executors.newFixedThreadPool(10);
+        final int coreNum = 20;
+        ExecutorService exService = Executors.newFixedThreadPool(20);
         SqlSession session = sqlSessionFactory.openSession();
         THotelMapper mapper = session.getMapper(THotelMapper.class);
 

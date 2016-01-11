@@ -154,6 +154,13 @@ public class OtsHotel {
 
 	private Double mintonitepromoprice;
 
+
+	/**
+	 * 动态价格需求
+	 */
+
+	private BigDecimal  dynamicprice;
+
 	public OtsHotel() {
 
 	}
@@ -646,5 +653,13 @@ public class OtsHotel {
 
 	public void setMintonitepromoprice(Double mintonitepromoprice) {
 		this.mintonitepromoprice = mintonitepromoprice;
+	}
+
+	public BigDecimal getDynamicprice() {
+		return dynamicprice;
+	}
+
+	public void setDynamicprice(BigDecimal dynamicprice) {
+		this.dynamicprice = dynamicprice;
 	}
 }
