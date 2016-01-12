@@ -87,7 +87,9 @@ import com.mk.ots.search.model.SSubwayStation;
 import com.mk.ots.utils.DistanceUtil;
 import com.mk.ots.web.ServiceOutput;
 import com.mk.ots.wechat.search.service.WechatSearchService;
+import org.springframework.stereotype.Service;
 
+@Service
 public class WechatServiceSearchImpl implements WechatSearchService {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
