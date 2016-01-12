@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.mk.ots.dynamicprice.service.MinDynamicPriceService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -207,6 +208,9 @@ public class HotelService {
 
 	@Autowired
 	private ISearchService searchService;
+
+	@Autowired
+	private MinDynamicPriceService minDynamicPriceService;
 
 	/**
 	 * es filter builders
@@ -469,6 +473,10 @@ public class HotelService {
 
 					// mike3.2 添加受欢迎指数
 					hotel.setGreetscore(getGreetScore(Long.valueOf(hotelid)));
+					Date currentTime = new Date();
+					Integer oClock = DateUtils.getDateHour(currentTime);
+					BigDecimal dynamicPrice = minDynamicPriceService.getHotelMinDynamicPrice(hotelid,oClock);
+					hotel.setDynamicprice(dynamicPrice);
 
 					/**
 					 * add bedtype

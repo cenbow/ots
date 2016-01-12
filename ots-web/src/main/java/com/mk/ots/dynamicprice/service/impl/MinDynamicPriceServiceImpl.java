@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Service
 public class MinDynamicPriceServiceImpl implements MinDynamicPriceService{
     @Override
-    public BigDecimal getHotelMinDynamicPrice(String hotelId, String roomTypeId, Integer checkInOCloc) {
+    public BigDecimal getHotelMinDynamicPrice(String hotelId, Integer checkInOCloc) {
         Integer randomPrice = (int)(Math.random()*10)+ 30;
         return new BigDecimal(randomPrice);
     }

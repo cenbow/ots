@@ -36,7 +36,7 @@
 			,/ticket/activeforwardcount,/app/checkupdate,/search/,/recommend,/roomsale,/hotel/updatemikepricecache,/promo,/promo/querytypelist
 			,/admin/report/launchPromo,/admin/report,/ticket/tryluck,/ticket/nologintryluck,/ticket/uuid,/ticket/queryallluck,/ticket/prizebindingphone,/hotel/front/querylist
 			,/admin/indexer/init,/indexer/positioninit,/homepage/promolist,/homepage/themes,/homepage/popular,/promo/onedollarlist,/admin/indexer/drop
-				,/sys/viewevent,/promo/college,/wechat/roomstate/querypmsprices, /dynamicprice/base, /dynamicprice/average, /dynamicprice/min
+				,/sys/viewevent,/promo/college,/wechat/roomstate/querypmsprices, /dynamicprice/base, /dynamicprice/average, /dynamicprice/min,/dynamicprice/initcode
 
 			</param-value>
 		</init-param>

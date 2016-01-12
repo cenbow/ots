@@ -2,6 +2,7 @@ package com.mk.ots.dynamicprice.controller;
 
 import com.mk.ots.dynamicprice.service.AverageDynamicPriceService;
 import com.mk.ots.dynamicprice.service.BaseDynamicPriceService;
+import com.mk.ots.dynamicprice.service.InitCodeTableService;
 import com.mk.ots.dynamicprice.service.MinDynamicPriceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,9 @@ public class DynamicPriceController {
     @Autowired
     private MinDynamicPriceService minDynamicPriceService;
 
+    @Autowired
+    private InitCodeTableService initCodeTableService;
+
 
     @RequestMapping("/dynamicprice/base")
     @ResponseBody
@@ -62,10 +66,22 @@ public class DynamicPriceController {
 
     @RequestMapping("/dynamicprice/min")
     @ResponseBody
-    public ResponseEntity< Map<String, Object>> getMinDynamicPrice(String hotelid, String roomtypeid, Integer checkinoclock){
+    public ResponseEntity< Map<String, Object>> getMinDynamicPrice(String hotelid,  Integer checkinoclock){
         Map<String, Object> rtnMap = new HashMap<>();
-        BigDecimal price = minDynamicPriceService.getHotelMinDynamicPrice(hotelid, roomtypeid, checkinoclock);
+        BigDecimal price = minDynamicPriceService.getHotelMinDynamicPrice(hotelid, checkinoclock);
         rtnMap.put("price",price);
+        rtnMap.put("success", true);
+        rtnMap.put("errcode", 0);
+        rtnMap.put("errmsg","");
+
+        return new ResponseEntity< Map<String, Object>>(rtnMap, HttpStatus.OK);
+    }
+
+    @RequestMapping("/dynamicprice/initcode")
+    @ResponseBody
+    public ResponseEntity< Map<String, Object>> initCode(){
+        Map<String, Object> rtnMap = new HashMap<>();
+        initCodeTableService.initCriterionPriceCode2Redis();
         rtnMap.put("success", true);
         rtnMap.put("errcode", 0);
         rtnMap.put("errmsg","");

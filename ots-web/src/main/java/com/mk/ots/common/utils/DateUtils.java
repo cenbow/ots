@@ -1987,4 +1987,10 @@ public class DateUtils extends Object {
         cl.setTime(start);
         return cl.get(Calendar.YEAR);
     }
+
+    public static Integer getDateHour(Date start){
+        Calendar cl = Calendar.getInstance();
+        cl.setTime(start);
+        return cl.get(Calendar.HOUR);
+    }
 }

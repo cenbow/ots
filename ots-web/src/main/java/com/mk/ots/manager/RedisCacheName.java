@@ -31,6 +31,8 @@ public class RedisCacheName {
 	 * worker发放优惠券
 	 */
 	public static final String IMIKE_OTS_SEND_COUPONS_JOB = "IMIKE:OTS:LOCKDATA:SENDCOUPONSJOB:";
+
+	public static final String DYNAMIC_PRICE_CRITERION_PRICE_CODE = "DYNAMIC:PRICE:CRITERION:PRICE_CODE:";
 	
 	
 	
