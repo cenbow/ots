@@ -1,9 +1,6 @@
 package com.mk.ots.dynamicprice.controller;
 
-import com.mk.ots.dynamicprice.service.AverageDynamicPriceService;
-import com.mk.ots.dynamicprice.service.BaseDynamicPriceService;
-import com.mk.ots.dynamicprice.service.InitCodeTableService;
-import com.mk.ots.dynamicprice.service.MinDynamicPriceService;
+import com.mk.ots.dynamicprice.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -36,6 +33,9 @@ public class DynamicPriceController {
 
     @Autowired
     private InitCodeTableService initCodeTableService;
+
+    @Autowired
+    private CodeTableService codeTableService;
 
 
     @RequestMapping("/dynamicprice/base")
@@ -82,6 +82,19 @@ public class DynamicPriceController {
     public ResponseEntity< Map<String, Object>> initCode(){
         Map<String, Object> rtnMap = new HashMap<>();
         initCodeTableService.initCriterionPriceCode2Redis();
+        rtnMap.put("success", true);
+        rtnMap.put("errcode", 0);
+        rtnMap.put("errmsg","");
+
+        return new ResponseEntity< Map<String, Object>>(rtnMap, HttpStatus.OK);
+    }
+
+    @RequestMapping("/dynamicprice/getcode")
+    @ResponseBody
+    public ResponseEntity< Map<String, Object>> getCode(Integer oclock){
+        Map<String, Object> rtnMap = new HashMap<>();
+        BigDecimal price = codeTableService.getCriterionPriceCode(oclock);
+        rtnMap.put("price",price);
         rtnMap.put("success", true);
         rtnMap.put("errcode", 0);
         rtnMap.put("errmsg","");
