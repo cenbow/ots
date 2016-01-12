@@ -1,38 +1,20 @@
 
 package com.mk.ots.hotel.service;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import com.dianping.cat.message.Event;
-import com.mk.es.Hotel;
-import com.mk.framework.util.CommonUtils;
-import com.mk.ots.common.enums.HotelPromoEnum;
-import com.mk.ots.common.enums.SearchBlackTypeEnum;
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mk.framework.AppUtils;
+import com.mk.framework.util.CommonUtils;
 import com.mk.framework.util.SerializeUtil;
 import com.mk.orm.kit.JsonKit;
+import com.mk.ots.common.enums.HotelPromoEnum;
 import com.mk.ots.common.enums.OtaOrderStatusEnum;
+import com.mk.ots.common.enums.SearchBlackTypeEnum;
 import com.mk.ots.common.utils.Constant;
 import com.mk.ots.common.utils.DateUtils;
 import com.mk.ots.hotel.model.*;
@@ -52,7 +34,16 @@ import com.mk.pms.myenum.PmsRoomOrderStatusEnum;
 import com.mk.pms.room.bean.RoomLockJsonBean;
 import com.mk.pms.room.bean.RoomLockPo;
 import com.mk.pms.room.service.PmsRoomService;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * 房态服务类(git测试5)
@@ -909,6 +900,149 @@ public class RoomstateService {
 		}
 
 		return rtnMap;
+	}
+
+
+	public  String[] getRoomTypePrice(Long hotelid, Long troomTypeId, String begindate, String enddate){
+		// 加埋点
+		String[] prices = null;
+		Transaction priceTransaction = Cat.newTransaction("RoomState", "mikeprice-redis");
+		try {
+			Boolean isNewPrice = false;//hotelPriceService.isUseNewPrice();
+			if (isNewPrice)
+				prices = hotelPriceService.getRoomtypeMikePrices(hotelid, troomTypeId, begindate,
+						enddate);
+			else
+				prices = this.getRoomtypeMikePrices(hotelid, troomTypeId, begindate, enddate);
+			priceTransaction.setStatus(Transaction.SUCCESS);
+		} catch (Exception e) {
+			priceTransaction.setStatus(e);
+			throw e;
+		} finally {
+			priceTransaction.complete();
+		}
+
+
+		BigDecimal defenseZeroPrice = new BigDecimal(Constant.DEFENSE_ZERO_PRICE);
+		List<TRoomTypeModel> troomTypes = new ArrayList<TRoomTypeModel>();
+		try {
+			troomTypes = troomtypeMapper.findList(troomTypeId, hotelid,null);
+		} catch (Exception e) {
+			logger.error(String.format("failed to troomtypeMapper.findList->roomtypeid:%s, hotelid:%s, bednum:%s",
+					troomTypeId, hotelid, null), e);
+		}
+
+		for (TRoomTypeModel troomType : troomTypes) {
+			if (prices == null || prices.length == 0) {
+				if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
+					// 眯客价
+					prices[0] = defenseZeroPrice.toString();
+					// 门市价
+					prices[1] = defenseZeroPrice.toString();
+				} else {
+					// 眯客价
+					prices[0] = troomType.getCost().toString();
+					// 门市价
+					prices[1] = troomType.getCost().toString();
+				}
+
+			} else {
+				// 眯客价
+				if (prices[0] != null) {
+					if ("0".equals(prices[0]) || Double.valueOf(prices[0]) <= 0) {
+						prices[0] = defenseZeroPrice.toString();
+					}
+				} else {
+					if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
+						prices[0] = defenseZeroPrice.toString();
+					} else {
+						prices[0] = troomType.getCost().toString();
+					}
+				}
+
+				if (troomType.getCost().compareTo(BigDecimal.ZERO) <= 0) {
+					// 门市价
+					prices[0] = defenseZeroPrice.toString();
+				} else {
+					// 门市价
+					prices[1] = troomType.getCost().toString();
+				}
+
+			}
+		}
+
+
+
+		return prices;
+
+	}
+
+	public Double getRoomTypeOccupancyRate(Long hotelid, Long roomTypeId, String begindate, String enddate ){
+		// 房型下的房间
+		Double occupancyRate = 0.0;
+		List<TRoomModel> trooms = null;
+		try {
+			trooms = troomMapper.findList(roomTypeId);
+
+		Map<String, String> lockRoomsCache = new HashMap<String, String>();
+		List<RoomstateQuerylistRespEntity.Room> rooms = Lists.newArrayList();
+		List<RoomstateQuerylistRespEntity.Room> tempRooms = Lists.newArrayList();
+		List<RoomstateQuerylistRespEntity.Room> vcRooms = Lists.newArrayList();
+		THotelModel thotelModel = thotelMapper.selectById(hotelid);
+		String isNewPms = thotelModel.getIsnewpms();
+
+		if (Constant.STR_TRUE.equals(isNewPms)) {// 新pms
+			// 加埋点
+			Transaction t = Cat.newTransaction("RoomState", "findBookedRoomsByHotelIdNewPms-newpms-redis");
+			try {
+				t.setStatus(Transaction.SUCCESS);
+				lockRoomsCache = this.findBookedRoomsByHotelIdNewPms(hotelid, begindate, enddate);
+			} catch (Exception e) {
+				t.setStatus(e);
+				throw e;
+			} finally {
+				t.complete();
+			}
+		} else {
+			// 加埋点
+			Transaction t = Cat.newTransaction("RoomState", "findBookedRoomsByHotelId-oldpms-redis");
+			try {
+				t.setStatus(Transaction.SUCCESS);
+				lockRoomsCache = this.findBookedRoomsByHotelId(hotelid, begindate, enddate);
+			} catch (Exception e) {
+				t.setStatus(e);
+				throw e;
+			} finally {
+				t.complete();
+			}
+		}
+
+		for (TRoomModel troom : trooms) {
+			RoomstateQuerylistRespEntity.Room room = new RoomstateQuerylistRespEntity().new Room();
+			room.setRoomid(troom.getId());
+			room.setRoomno(troom.getName());
+			room.setHaswindow(troom.getIsWindow() == null ? "" : troom.getIsWindow()); // TODO
+
+			// 与redis房态缓存比较：vc可用，nvc不可用
+			this.processRoomState(room, hotelid, begindate, enddate, lockRoomsCache);
+
+			if (room.getRoomstatus().equals(ROOM_STATUS_NVC)) {
+				// 将不可订房间加入临时List中
+				tempRooms.add(room);
+			} else {
+				rooms.add(room);
+
+				vcRooms.add(room);
+
+			}
+		}
+			if (rooms.size()> 0 && trooms.size()>0){
+				occupancyRate = ((rooms.size() / trooms.size()) / 100 ) * 100.00;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return occupancyRate;
 	}
 
 	/**
