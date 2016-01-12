@@ -94,7 +94,7 @@ public class DynamicPriceController {
     public ResponseEntity< Map<String, Object>> getCode(Integer oclock){
         Map<String, Object> rtnMap = new HashMap<>();
         BigDecimal price = codeTableService.getCriterionPriceCode(oclock);
-        rtnMap.put("price",price);
+        rtnMap.put("ratio",price);
         rtnMap.put("success", true);
         rtnMap.put("errcode", 0);
         rtnMap.put("errmsg","");

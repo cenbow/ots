@@ -55,7 +55,8 @@
 			<param-name>crossDomainPatterns</param-name>
 			<param-value>/recommend/query,/recommend/querydetail,/unionidandphone/binding,/ticket/tryluck
 				,/ticket/nologintryluck,/verifycode/send,/verifycode/verify,/unionidandphone/check,/ticket/uuid
-				,/ticket/queryallluck,/ticket/prizebindingphone,/promo/onedollarlist,/hotel/querytypelist,/promo/college </param-value>
+				,/ticket/queryallluck,/ticket/prizebindingphone,/promo/onedollarlist,/hotel/querytypelist,/promo/college,/search/positions
+				,/city/querylist,/search/positionfuzzy,/hoteldetail/queryinfo,/hotel/querylist,/recommend/query,/score/querylist </param-value>
 		</init-param>
 	</filter>
 
