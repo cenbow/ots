@@ -13,8 +13,7 @@ import java.util.Random;
 public class AverageDynmicPriceServiceImpl implements AverageDynamicPriceService {
     @Override
     public BigDecimal getRoomTypeAverageDynamicPrice(String hotelId, String roomTypeId, Integer checkInOClock) {
-        Random random = new Random(47);
-        Integer randomPrice = random.nextInt(180) + 50;
+        Integer randomPrice = (int)(Math.random()*10)+ 40;
         return new BigDecimal(randomPrice);
     }
 }

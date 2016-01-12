@@ -4,7 +4,6 @@ import com.mk.ots.dynamicprice.service.MinDynamicPriceService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Random;
 
 /**
  * Created by kirinli on 16/1/11.
@@ -13,8 +12,7 @@ import java.util.Random;
 public class MinDynamicPriceServiceImpl implements MinDynamicPriceService{
     @Override
     public BigDecimal getHotelMinDynamicPrice(String hotelId, String roomTypeId, Integer checkInOCloc) {
-        Random random = new Random(47);
-        Integer randomPrice = random.nextInt(180) + 50;
+        Integer randomPrice = (int)(Math.random()*10)+ 30;
         return new BigDecimal(randomPrice);
     }
 }
