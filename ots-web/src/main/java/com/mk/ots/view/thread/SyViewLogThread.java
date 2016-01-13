@@ -30,7 +30,7 @@ public class SyViewLogThread  extends    Thread{
                 SyViewLogListen  sll =  new SyViewLogListen();
                 String message =  jedis.lpop("SYVIEWWLOG");
                 sll.onMessage(message);
-                Thread.sleep(800L);
+                Thread.sleep(1000L);
 
             }
         }catch(Exception e){
