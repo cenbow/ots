@@ -61,6 +61,7 @@ import com.mk.pms.myenum.PmsErrorEnum;
 import com.mk.pms.myenum.PmsStatusEnum;
 
 import jodd.util.StringUtil;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * PMS2.0 同步房间
@@ -175,6 +176,7 @@ public class NewPMSHotelServiceImpl implements NewPMSHotelService {
 	 * @param map
 	 * @return
 	 */
+	@Transactional
 	public Map<String, Object> syncHotelInfo(JSONObject jsonOBJ) {
 		logger.info("PMS2.0同步房间 开始params:{}", jsonOBJ);
 
