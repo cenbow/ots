@@ -79,7 +79,7 @@ public enum MyErrorEnum {
 	sessionError("-701","session失效."),
 	sessionErrorByPassword("-702","session因为密码被修改而失效."),
 	sessionErroByStatus("-703","session因账户被禁用而失效."), 
-	accesstokenTimeOut("-704","accesstoken过期."),
+	accesstokenTimeOut("-704","登录信息已过期,请重新登陆."),
 	nullError("-705","系统正忙,请稍后再试."),
 	serviceRefundError("-706","退款失败."),
 	
