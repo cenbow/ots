@@ -2118,7 +2118,7 @@ public class OrderServiceImpl implements OrderService {
 				}
 		    }
 		} else if (otaorder.getInt("rulecode") == 1002) {// 重庆规则
-            if(!qiekeRuleService.isOrderQiekeRuleCity(otaorder)) {
+            if(qiekeRuleService.isOrderQiekeRuleCity(otaorder)) {
                 if (otaorder.getSpreadUser() != null) {// 切客订单
                     Integer invalidReason = otaorder.get("Invalidreason");
                     if (null == invalidReason) {// 非有效切客理由为空
@@ -2135,57 +2135,6 @@ public class OrderServiceImpl implements OrderService {
                         }
                     }
                 }
-            } else {
-                // 4小时 判断拉新返老板逻辑，由job 任务处理，这里不处理
-
-                //判断 洛阳 长沙 等新用户，发送优惠券
-                Integer invalidReason = otaorder.get("Invalidreason");
-                if (null == invalidReason
-                        //入住时长
-                        || OtaFreqTrvEnum.CHECKIN_LESS4.getId().equals(String.valueOf(invalidReason))
-                        //下单位置
-                        || OtaFreqTrvEnum.OUT_OF_RANG.getId().equals(String.valueOf(invalidReason))) {
-
-                    OtaFreqTrvEnum checkInLessEnum = this.qiekeRuleService.checkCheckInLess(otaorder);
-                    if (OtaFreqTrvEnum.CHECKIN_LESS4.getId().equals(checkInLessEnum.getId())) {
-                        OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] CHECKIN_LESS4 dont genTicket",otaorder.getId()));
-                    } else {
-
-                        Long orderId = otaorder.getId();
-                        String lockValue = DistributedLockUtil.tryLock("orderNewUserTicketLock_" + orderId, 40);
-                        try {
-                            if (lockValue == null) {
-                                OrderServiceImpl.logger.info(
-                                        String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] 正在发放优惠券，不再发放 ",orderId));
-                            } else {
-                                OrderServiceImpl.logger.info(
-                                        String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] start genTicket ",orderId));
-
-                                Long mid = otaorder.getMid();
-                                List<TicketInfo> ticketInfoList = this.ticketService.queryMyTicket(mid,null);
-
-                                if (ticketInfoList.isEmpty()) {
-                                    String cityCode = otaorder.getCityCode();
-                                    List<Long> ticketIdList = this.qiekeRuleService.genTicketByCityCode(cityCode, mid);
-                                    for (Long ticketId : ticketIdList) {
-                                        OrderServiceImpl.logger.info(
-                                                String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] send genTicket[%s]", orderId,ticketId));
-                                    }
-                                } else {
-                                    OrderServiceImpl.logger.info(
-                                            String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] genTicketed dont genTicket ",orderId));
-                                }
-                            }
-                        } finally{
-                            // 释放 redis锁
-                            OrderServiceImpl.logger.info("释放分布锁, orderId= " + orderId);
-                            DistributedLockUtil.releaseLock("orderNewUserTicketLock_" + orderId, lockValue);
-                        }
-                    }
-                } else {
-                    OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] dont genTicket",otaorder.getId()));
-                }
-                OrderServiceImpl.logger.info(String.format("------OrderServiceImpl.changeOrderStatusForPMAndOK do order id:[%s] end",otaorder.getId()));
             }
 		}
 		// 住三送一活动，调用促销接口
@@ -2459,10 +2408,6 @@ public class OrderServiceImpl implements OrderService {
       }
       //设置cityCode
       order.setCityCode(hotel.getTCityByDisId().getStr("code"));
-        //符合B+规则的切客订单 在创建订单的时候将切客理由设置为未入住
-      if(qiekeRuleService.isOrderQiekeRuleCity(order)){
-          order.set("Invalidreason", OtaFreqTrvEnum.NOT_CHECKIN.getId());
-      }
       order.set("hotelname", hotel.get("hotelName"));
       order.set("hotelpms", hotel.get("pms"));
       order.put("hotelAddress", hotel.get("detailAddr"));
@@ -2648,10 +2593,6 @@ public class OrderServiceImpl implements OrderService {
       }
       //设置cityCode
       order.setCityCode(hotel.getTCityByDisId().getStr("code"));
-      //符合B+规则的切客订单 在创建订单的时候将切客理由设置为未入住
-      if(qiekeRuleService.isOrderQiekeRuleCity(order)){
-          order.set("Invalidreason", OtaFreqTrvEnum.NOT_CHECKIN.getId());
-      }
       order.set("hotelname", hotel.get("hotelName"));
       order.set("hotelpms", hotel.get("pms"));
       order.put("hotelAddress", hotel.get("detailAddr"));
@@ -2996,14 +2937,6 @@ public class OrderServiceImpl implements OrderService {
 
     private void doQieKeRuleWhenPmsIN(OtaOrder otaorder, PmsRoomOrder pmsRoomOrder, String freqtrv){
         if(qiekeRuleService.isOrderQiekeRuleCity(otaorder)){
-            OtaFreqTrvEnum otaFreqTrvEnum = qiekeRuleService.getQiekeRuleReason(otaorder);
-            if(otaFreqTrvEnum == null || OtaFreqTrvEnum.L1.getId().equals(otaFreqTrvEnum.getId())){
-                otaorder.set("spreadUser", Constant.QIE_KE_SPREAD_USER);
-                otaorder.set("Invalidreason", otaFreqTrvEnum.CHECKIN_LESS4.getId());
-            }else {
-                otaorder.set("Invalidreason", otaFreqTrvEnum.getId());
-            }
-        }else {
             doRuleBWhenPmsIN(otaorder, pmsRoomOrder, freqtrv);
         }
     }

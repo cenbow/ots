@@ -256,8 +256,7 @@ public class Constant {
 	/**B+规则 切客收益覆盖城市**/
 	public static final Map<String,String> QIE_KE_CITY_MAP = new HashMap<>();
 	static {
-		QIE_KE_CITY_MAP.put("410300", "410300");//洛阳
-		QIE_KE_CITY_MAP.put("430100", "430100");//长沙
+		QIE_KE_CITY_MAP.put("500000", "500000");//长沙
 	}
 
 	//非特价城市首页文案默认值
